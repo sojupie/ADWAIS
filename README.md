@@ -45,8 +45,8 @@ Use these steps to clone from SourceTree, our client for using the repository co
 Now that you're more familiar with your Bitbucket repository, go ahead and add a new file locally. You can [push your change back to Bitbucket with SourceTree](https://confluence.atlassian.com/x/iqyBMg), or you can [add, commit,](https://confluence.atlassian.com/x/8QhODQ) and [push from the command line](https://confluence.atlassian.com/x/NQ0zDQ).
 
 ## Set up project 
-run command in projct root:  **npm install**
-run command in apps/api/: **dotnet build**
+1. run command in projct root:  **npm install**
+2. run command in apps/api/: **dotnet build**
 
 ## start nodejs
 run command in apps/web/: **npm run dev**

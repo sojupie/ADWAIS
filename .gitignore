@@ -23,7 +23,6 @@ Thumbs.db
 
 # Maven
 target/
-dist/
 
 # JetBrains IDE
 .idea/

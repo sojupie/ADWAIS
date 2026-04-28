@@ -28,6 +28,18 @@ builder.Services.AddQuartz(q =>
         .WithCronSchedule("0 0 2 * * ?"));
 });
 
+builder.Services.AddQuartz(q =>
+{
+    var ingestionJobKey = new JobKey("TenantIngestionJob");
+    
+    q.AddJob<Infrastructure.Jobs.TenantIngestionJob>(opts => opts.WithIdentity(ingestionJobKey));
+    
+    q.AddTrigger(opts => opts
+        .ForJob(ingestionJobKey)
+        .WithIdentity("TenantIngestionJob-trigger")
+        .WithCronSchedule("0 0/10 * * * ?")); 
+});
+
 builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
 
 var app = builder.Build();

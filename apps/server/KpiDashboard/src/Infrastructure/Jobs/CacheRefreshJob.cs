@@ -17,7 +17,6 @@ public class CacheRefreshJob : IJob
     {
         using var dbContext = await _contextFactory.CreateDbContextAsync();
 
-        // Dependencies mandate sequential execution. Tenant rollup must refresh before Global.
         await dbContext.Database.ExecuteSqlRawAsync("REFRESH MATERIALIZED VIEW CONCURRENTLY v_mat_daily_tenant_rollup;");
         await dbContext.Database.ExecuteSqlRawAsync("REFRESH MATERIALIZED VIEW CONCURRENTLY v_mat_daily_global_rollup;");
     }

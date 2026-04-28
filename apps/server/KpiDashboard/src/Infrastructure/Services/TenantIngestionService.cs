@@ -31,7 +31,7 @@ public class TenantIngestionService : ITenantIngestionService
     public async Task<int> ExecuteIngestionAsync(Tenant tenant, DateTimeOffset startDate, DateTimeOffset endDate, CancellationToken ct = default)
     {
         var client = _httpClientFactory.CreateClient();
-        client.DefaultRequestHeaders.Add("Authorization", tenant.ServiceAccountToken);
+        //client.DefaultRequestHeaders.Add("Authorization", tenant.ServiceAccountToken);
 
         int totalIngested = 0;
         var currentStart = startDate;
@@ -47,7 +47,10 @@ public class TenantIngestionService : ITenantIngestionService
             var untilParam = Uri.EscapeDataString(currentEnd.ToString("O"));
             var requestUrl = $"{tenant.LitiumBaseUrl.TrimEnd('/')}/api/motasticadapter/sync?since={sinceParam}&until={untilParam}";
 
-            var response = await client.GetAsync(requestUrl, ct);
+            var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+            request.Headers.Add("Authorization", tenant.ServiceAccountToken);
+            var response = await client.SendAsync(request, ct);
+            
             if (!response.IsSuccessStatusCode)
             {
                 _logger.LogError("Failed to fetch chunk {Start} to {End} for Tenant {TenantId}. Status: {Status}", currentStart, currentEnd, tenant.Id, response.StatusCode);

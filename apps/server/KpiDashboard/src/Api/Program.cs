@@ -11,10 +11,14 @@ builder.Configuration.AddEnvironmentVariables();
 builder.Services.AddControllers();
 builder.Services.AddHttpClient();
 builder.Services.AddOpenApi();
+builder.Services.AddScoped<Infrastructure.Services.ITenantIngestionService, Infrastructure.Services.TenantIngestionService>();
 
 var connectionString = builder.Configuration.GetConnectionString("AnalyticsDb");
 builder.Services.AddDbContextFactory<AnalyticsDbContext>(options =>
-    options.UseNpgsql(connectionString));
+{
+    options.UseNpgsql(connectionString)
+        .UseSnakeCaseNamingConvention(); 
+});
 
 builder.Services.AddQuartz(q =>
 {
@@ -28,6 +32,7 @@ builder.Services.AddQuartz(q =>
         .WithCronSchedule("0 0 2 * * ?"));
 });
 
+//to do: implement fault handling, exponential back-off either with quartz or MS http polly
 builder.Services.AddQuartz(q =>
 {
     var ingestionJobKey = new JobKey("TenantIngestionJob");

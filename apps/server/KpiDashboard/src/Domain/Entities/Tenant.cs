@@ -16,7 +16,6 @@ public class Tenant
     public DateTimeOffset? LastPolled { get; set; }
     public bool PingReachable { get; set; }
     public bool Enabled { get; set; } = true;
-    public bool IsB2B { get; set; }
     
     public ICollection<Order> Orders { get; set; } = new List<Order>();
 }

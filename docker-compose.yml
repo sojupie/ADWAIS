@@ -1,0 +1,27 @@
+services:
+    api:
+        image: ${DOCKER_HUB_USER}/kpi-dashboard-api:latest
+        container_name: dashboard-api
+        ports:
+            - "127.0.0.1:5003:8080"
+        environment:
+            - ConnectionStrings__DefaultConnection=Host=db;Database=analyticsdb;Username=postgres;Password=${DB_PASSWORD}
+            - AzureAd__Instance=https://login.microsoftonline.com/
+            - AzureAd__TenantId=${AZURE_TENANT_ID}
+            - AzureAd__ClientId=${AZURE_CLIENT_ID}
+        depends_on:
+            - db
+        restart: always
+
+    db:
+        image: postgres:16-alpine
+        container_name: dashboard-db
+        environment:
+            - POSTGRES_DB=analyticsdb
+            - POSTGRES_PASSWORD=${DB_PASSWORD}
+        volumes:
+            - pgdata:/var/lib/postgresql/data
+        restart: always
+
+volumes:
+    pgdata:

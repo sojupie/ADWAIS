@@ -1,0 +1,25 @@
+pipelines:
+  branches:
+    master:
+      - step:
+          name: Build and Push Image
+          services:
+            - docker
+          script:
+            - export IMAGE_NAME=$DOCKER_HUB_USER/kpi-dashboard-api:latest
+            - docker build -t $IMAGE_NAME -f src/Api/Dockerfile .
+            - docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
+            - docker push $IMAGE_NAME
+      - step:
+          name: Deploy to Hetzner
+          script:
+            - pipe: atlassian/ssh-run:0.6.0
+              variables:
+                SSH_USER: 'root'
+                REMOTE_HOST: $SERVER_IP
+                COMMANDS:
+                  - 'mkdir -p /opt/dashboard'
+                  - 'cd /opt/dashboard'
+                  - 'echo "DOCKER_HUB_USER=${DOCKER_HUB_USER}\nDB_PASSWORD=${DB_PASSWORD}\nAZURE_TENANT_ID=${AZURE_TENANT_ID}\nAZURE_CLIENT_ID=${AZURE_CLIENT_ID}" > .env'
+                  - 'docker compose pull'
+                  - 'docker compose up -d'

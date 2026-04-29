@@ -6,9 +6,9 @@ services:
             - "127.0.0.1:5003:8080"
         environment:
             - ConnectionStrings__DefaultConnection=Host=db;Database=analyticsdb;Username=postgres;Password=${DB_PASSWORD}
-            - AzureAd__Instance=https://login.microsoftonline.com/
-            - AzureAd__TenantId=${AZURE_TENANT_ID}
-            - AzureAd__ClientId=${AZURE_CLIENT_ID}
+            #- AzureAd__Instance=https://login.microsoftonline.com/
+            #- AzureAd__TenantId=${AZURE_TENANT_ID}
+            #- AzureAd__ClientId=${AZURE_CLIENT_ID}
         depends_on:
             - db
         restart: always

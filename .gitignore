@@ -38,4 +38,5 @@ TEST*.xml
 *.mov
 *.wmv
 
-*.sln.dotsettings.user
+../*.sln.DotSettings.user
+../.../.../*.sln.DotSettings.user

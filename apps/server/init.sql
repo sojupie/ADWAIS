@@ -19,7 +19,6 @@ CREATE TABLE tenants (
     last_polled timestamp with time zone,
     ping_reachable boolean NOT NULL DEFAULT FALSE,
     enabled boolean NOT NULL DEFAULT TRUE,
-    is_b2b boolean NOT NULL DEFAULT FALSE,
     CONSTRAINT pk_tenants PRIMARY KEY (id)
 );
 

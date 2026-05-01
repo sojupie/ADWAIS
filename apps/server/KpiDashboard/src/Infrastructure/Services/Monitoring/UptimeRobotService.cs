@@ -5,7 +5,7 @@ using Domain.Entities.Monitoring;
 using Microsoft.Extensions.Configuration;
 using Monitor = Domain.Entities.Monitoring.Monitor;
 
-namespace UptimeRobot_Service.Services;
+namespace Infrastructure.Services.Monitoring;
 
 public class UptimeRobotService(HttpClient httpClient, IConfiguration configuration)
 {

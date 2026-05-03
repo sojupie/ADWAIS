@@ -67,8 +67,6 @@ public class UptimeRobotService(HttpClient httpClient, IDbContextFactory<Analyti
             {
                 Name = monitor.GetProperty("friendlyName").GetString() ?? string.Empty,
                 Url = monitor.GetProperty("url").GetString() ?? string.Empty,
-                // Assuming UptimeMonitor might still use UptimeRobotId locally if schema evolved.
-                // It was updated to Id but maybe mapped. If property was removed, we use ID instead.
                 Status = new MonitorStatus
                 {
                     StatusStr = monitor.GetProperty("status").GetString() ?? "Unknown",

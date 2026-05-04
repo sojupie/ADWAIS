@@ -64,6 +64,7 @@ public class TenantIngestionService : ITenantIngestionService
             if (litiumPayload?.Orders != null && litiumPayload.Orders.Any())
             {
                 int count = litiumPayload.Orders.Count;
+                var pIds = new Guid[count];
                 var pTenantIds = new Guid[count];
                 var pOrderIds = new string[count];
                 var pDates = new DateTimeOffset[count];
@@ -74,6 +75,7 @@ public class TenantIngestionService : ITenantIngestionService
                 for (int i = 0; i < count; i++)
                 {
                     var o = litiumPayload.Orders[i];
+                    pIds[i] = Guid.NewGuid();
                     pTenantIds[i] = tenant.Id;
                     pOrderIds[i] = o.Id;
                     pDates[i] = o.CreatedDate.ToUniversalTime();
@@ -83,15 +85,15 @@ public class TenantIngestionService : ITenantIngestionService
                 }
 
                 var sql = @"
-                    INSERT INTO orders (tenant_id, litium_order_id, created_date, total_value_inc_vat, total_value_exc_vat, currency)
-                    SELECT * FROM UNNEST(@p0, @p1, @p2, @p3, @p4, @p5)
+                    INSERT INTO orders (id, tenant_id, litium_order_id, created_date, total_value_inc_vat, total_value_exc_vat, currency)
+                    SELECT * FROM UNNEST(@p0, @p1, @p2, @p3, @p4, @p5, @p6)
                     ON CONFLICT (tenant_id, litium_order_id) 
                     DO UPDATE SET 
                         total_value_inc_vat = EXCLUDED.total_value_inc_vat,
                         total_value_exc_vat = EXCLUDED.total_value_exc_vat,
                         currency = EXCLUDED.currency";
 
-                await context.Database.ExecuteSqlRawAsync(sql, pTenantIds, pOrderIds, pDates, pIncVat, pExcVat, pCurrencies);
+                await context.Database.ExecuteSqlRawAsync(sql, pIds, pTenantIds, pOrderIds, pDates, pIncVat, pExcVat, pCurrencies);
                 totalIngested += count;
             }
 

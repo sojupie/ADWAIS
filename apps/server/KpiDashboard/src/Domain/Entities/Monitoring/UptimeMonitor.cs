@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities.Monitoring {
     public class UptimeMonitor {
@@ -18,7 +19,9 @@ namespace Domain.Entities.Monitoring {
         public bool UptimeMonitorEnabled { get; set; }
         public DateTimeOffset? CreationDate { get; set; }
         
+        [NotMapped]
         public MonitorStatus Status { get; set; } = new MonitorStatus();
+        
         public Tenant Tenant { get; set; } = null!;
         public ICollection<ResponseTime> ResponseTimes { get; set; } = new List<ResponseTime>();
     }

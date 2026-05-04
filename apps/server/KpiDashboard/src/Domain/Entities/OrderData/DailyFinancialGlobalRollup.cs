@@ -1,6 +1,6 @@
 ﻿namespace Domain.Entities.OrderData;
 
-public class DailyGlobalRollup
+public class DailyFinancialGlobalRollup
 {
     public DateTime CreatedDate { get; set; }
     public long GlobalVolume { get; set; }

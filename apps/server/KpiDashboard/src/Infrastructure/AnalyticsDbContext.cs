@@ -13,15 +13,17 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options) : 
     public DbSet<Tenant> Tenants => Set<Tenant>();
     public DbSet<ResponseTime> ResponseTimes => Set<ResponseTime>();
     public DbSet<UptimeMonitor> Monitors => Set<UptimeMonitor>();
-    public DbSet<DailyTenantRollup> DailyTenantRollups => Set<DailyTenantRollup>();
-    public DbSet<DailyGlobalRollup> DailyGlobalRollups => Set<DailyGlobalRollup>();
+    public DbSet<DailyFinancialTenantRollup> DailyTenantRollups => Set<DailyFinancialTenantRollup>();
+    public DbSet<DailyFinancialGlobalRollup> DailyGlobalRollups => Set<DailyFinancialGlobalRollup>();
     public DbSet<DailyLatencyMonitorRollup> DailyLatencyMonitorRollups => Set<DailyLatencyMonitorRollup>();
     public DbSet<DailyLatencyTenantRollup> DailyLatencyTenantRollups => Set<DailyLatencyTenantRollup>();
     public DbSet<DailyLatencyGlobalRollup> DailyLatencyGlobalRollups => Set<DailyLatencyGlobalRollup>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Tenant>().ToTable("tenants");
+        modelBuilder.HasPostgresExtension("uuid-ossp");
+
+        modelBuilder.Entity<Tenant>().ToTable("tenant");
         modelBuilder.Entity<Tenant>()
             .Property(t => t.Id)
             .HasDefaultValueSql("uuid_generate_v4()");
@@ -46,11 +48,17 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options) : 
             .HasDatabaseName("idx_orders_tenant_isolated")
             .IncludeProperties(o => o.TotalValueIncVat);
 
-        modelBuilder.Entity<DailyTenantRollup>()
+        modelBuilder.Entity<Order>()
+            .HasOne(o => o.Tenant)
+            .WithMany(t => t.Orders)
+            .HasForeignKey(o => o.TenantId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<DailyFinancialTenantRollup>()
             .ToView("v_mat_financial_daily_tenant_rollup")
             .HasKey(r => new { r.CreatedDate, r.TenantId });
 
-        modelBuilder.Entity<DailyGlobalRollup>()
+        modelBuilder.Entity<DailyFinancialGlobalRollup>()
             .ToView("v_mat_financial_daily_global_rollup")
             .HasKey(r => r.CreatedDate);
 
@@ -79,21 +87,23 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options) : 
             .HasConversion<string>()
             .HasMaxLength(50);
             
-        modelBuilder.Entity<ResponseTime>().ToTable("response_times");
+        modelBuilder.Entity<ResponseTime>().ToTable("response_time");
         modelBuilder.Entity<ResponseTime>()
             .Property(rt => rt.Id)
             .HasDefaultValueSql("uuid_generate_v4()");
             
-        modelBuilder.Entity<UptimeMonitor>().ToTable("monitors");
+        modelBuilder.Entity<UptimeMonitor>().ToTable("monitor");
         
         modelBuilder.Entity<UptimeMonitor>()
             .HasOne(m => m.Tenant)
             .WithMany(t => t.Monitors)
-            .HasForeignKey(m => m.TenantId);
+            .HasForeignKey(m => m.TenantId)
+            .OnDelete(DeleteBehavior.Cascade);
             
         modelBuilder.Entity<ResponseTime>()
             .HasOne(rt => rt.UptimeMonitor)
             .WithMany(m => m.ResponseTimes)
-            .HasForeignKey(rt => rt.MonitorId);
+            .HasForeignKey(rt => rt.MonitorId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

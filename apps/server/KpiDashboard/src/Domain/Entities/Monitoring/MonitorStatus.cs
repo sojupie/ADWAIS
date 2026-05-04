@@ -1,4 +1,4 @@
-﻿namespace Domain.Entities.Monitoring 
+﻿namespace Domain.Entities.Monitoring
 {
     public class MonitorStatus {
         public string? StatusStr { get; set; }

@@ -16,6 +16,8 @@ builder.Services.AddHttpClient<Infrastructure.Services.Monitoring.IUptimeRobotSe
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<Infrastructure.Services.ITenantIngestionService, Infrastructure.Services.TenantIngestionService>();
+
 
 var connectionString = builder.Configuration.GetConnectionString("AnalyticsDb");
 
@@ -71,4 +73,11 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.MapControllers();
+
+// using (var scope = app.Services.CreateScope())
+// {
+//     var contextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<AnalyticsDbContext>>();
+//     using var context = await contextFactory.CreateDbContextAsync();
+// }
+
 app.Run();

@@ -69,7 +69,7 @@ public class UptimeRobotService(HttpClient httpClient, IDbContextFactory<Analyti
                 Url = monitor.GetProperty("url").GetString() ?? string.Empty,
                 Status = new MonitorStatus
                 {
-                    StatusStr = monitor.GetProperty("status").GetString() ?? "Unknown",
+                    StatusStr = monitor.TryGetProperty("status", out var statusProp) ? statusProp.GetRawText() : "Unknown",
                     Uptime = -1,
                     LastResponseTime = null
                 }

@@ -98,7 +98,7 @@ public class UptimeRobotController(IUptimeRobotService uptimeRobotService) : Con
         public string Url { get; set; } = string.Empty;
     }
 
-    [HttpPost("monitors")]
+    [HttpPost("create-monitor")]
     public async Task<IActionResult> CreateMonitor([FromBody] CreateMonitorRequest request)
     {
         try

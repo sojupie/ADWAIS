@@ -74,10 +74,11 @@ app.UseSwaggerUI();
 
 app.MapControllers();
 
-// using (var scope = app.Services.CreateScope())
-// {
-//     var contextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<AnalyticsDbContext>>();
-//     using var context = await contextFactory.CreateDbContextAsync();
-// }
+using (var scope = app.Services.CreateScope())
+{
+    var contextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<AnalyticsDbContext>>();
+    using var context = await contextFactory.CreateDbContextAsync();
+    context.Database.Migrate();
+}
 
 app.Run();

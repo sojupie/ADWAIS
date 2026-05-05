@@ -65,6 +65,7 @@ public class UptimeRobotService(HttpClient httpClient, IDbContextFactory<Analyti
 
             monitors.Add(new UptimeMonitor
             {
+                Id = monitor.GetProperty("id").GetInt32(),
                 Name = monitor.GetProperty("friendlyName").GetString() ?? string.Empty,
                 Url = monitor.GetProperty("url").GetString() ?? string.Empty,
                 Status = new MonitorStatus
@@ -92,10 +93,11 @@ public class UptimeRobotService(HttpClient httpClient, IDbContextFactory<Analyti
         return response.RootElement.GetProperty("summary").GetProperty("avg").GetInt32();
     }
 
-    public async Task DeleteMonitorAsync(int monitorId)
+    public async Task<Type> DeleteMonitorAsync(int monitorId)
     {
         var request = new HttpRequestMessage(HttpMethod.Delete, $"https://api.uptimerobot.com/v3/monitors/{monitorId}");
-        await GetResponseAsync(request);
+        using var response = await GetResponseAsync(request);
+        return response.GetType();
     }
 
     public async Task PauseMonitorAsync(int monitorId)

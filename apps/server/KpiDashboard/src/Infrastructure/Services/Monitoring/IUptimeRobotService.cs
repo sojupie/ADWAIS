@@ -9,7 +9,7 @@ public interface IUptimeRobotService
     Task<List<UptimeMonitor>> GetAllMonitorsAsync();
     Task<double> GetUptimeAsync(int monitorId);
     Task<int?> GetResponseTimeAsync(int monitorId);
-    Task DeleteMonitorAsync(int monitorId);
+    Task<Type> DeleteMonitorAsync(int monitorId);
     Task PauseMonitorAsync(int monitorId);
     Task StartMonitorAsync(int monitorId);
     Task<JsonDocument> GetAccountDetailsAsync();

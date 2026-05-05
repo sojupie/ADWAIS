@@ -13,7 +13,7 @@ public class Tenant
     public string Name { get; set; } = string.Empty;
     public string LitiumBaseUrl { get; set; } = string.Empty;
     public string ServiceAccountToken { get; set; } = string.Empty;
-    public int OrderCount { get; set; }
+    public int OrderCount { get; set; } = 0;
     public bool CurrentlyFetching { get; set; }
     public DateTimeOffset? FetchedFrom { get; set; }
     public DateTimeOffset? FetchedUntil { get; set; }

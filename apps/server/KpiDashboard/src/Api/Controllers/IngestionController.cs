@@ -6,7 +6,7 @@ using Infrastructure.Services;
 namespace Api.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")]
 public class IngestionController : ControllerBase
 {
     private readonly IDbContextFactory<AnalyticsDbContext> _contextFactory;

@@ -67,7 +67,7 @@ public class TenantIngestionService : ITenantIngestionService
                 var pIds = new Guid[count];
                 var pTenantIds = new Guid[count];
                 var pOrderIds = new string[count];
-                var pDates = new DateTimeOffset[count];
+                var pDatesCreated = new DateTimeOffset[count];
                 var pIncVat = new int[count];
                 var pExcVat = new int[count];
                 var pCurrencies = new string[count];
@@ -78,7 +78,7 @@ public class TenantIngestionService : ITenantIngestionService
                     pIds[i] = Guid.NewGuid();
                     pTenantIds[i] = tenant.Id;
                     pOrderIds[i] = o.Id;
-                    pDates[i] = o.CreatedDate.ToUniversalTime();
+                    pDatesCreated[i] = o.CreatedDate.ToUniversalTime();
                     pIncVat[i] = (int)o.TotalValueIncludingVat;
                     pExcVat[i] = (int)o.TotalValueExcludingVat;
                     pCurrencies[i] = o.Currency ?? "UNK";
@@ -93,7 +93,7 @@ public class TenantIngestionService : ITenantIngestionService
                         total_value_exc_vat = EXCLUDED.total_value_exc_vat,
                         currency = EXCLUDED.currency";
 
-                await context.Database.ExecuteSqlRawAsync(sql, pIds, pTenantIds, pOrderIds, pDates, pIncVat, pExcVat, pCurrencies);
+                await context.Database.ExecuteSqlRawAsync(sql, pIds, pTenantIds, pOrderIds, pDatesCreated, pIncVat, pExcVat, pCurrencies);
                 totalIngested += count;
             }
 

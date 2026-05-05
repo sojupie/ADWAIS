@@ -66,6 +66,7 @@ public class TenantIngestionService : ITenantIngestionService
                 int count = litiumPayload.Orders.Count;
                 var pIds = new Guid[count];
                 var pTenantIds = new Guid[count];
+                var pOrderStatus = new string[count];
                 var pOrderIds = new string[count];
                 var pDatesCreated = new DateTimeOffset[count];
                 var pIncVat = new int[count];
@@ -75,9 +76,10 @@ public class TenantIngestionService : ITenantIngestionService
                 for (int i = 0; i < count; i++)
                 {
                     var o = litiumPayload.Orders[i];
-                    pIds[i] = Guid.NewGuid();
+                    pIds[i] = o.Id;
                     pTenantIds[i] = tenant.Id;
-                    pOrderIds[i] = o.Id;
+                    pOrderStatus[i] = o.OrderStatus;
+                    pOrderIds[i] = o.OrderNumber;
                     pDatesCreated[i] = o.CreatedDate.ToUniversalTime();
                     pIncVat[i] = (int)o.TotalValueIncludingVat;
                     pExcVat[i] = (int)o.TotalValueExcludingVat;
@@ -85,15 +87,15 @@ public class TenantIngestionService : ITenantIngestionService
                 }
 
                 var sql = @"
-                    INSERT INTO orders (id, tenant_id, litium_order_id, created_date, total_value_inc_vat, total_value_exc_vat, currency)
-                    SELECT * FROM UNNEST(@p0, @p1, @p2, @p3, @p4, @p5, @p6)
+                    INSERT INTO orders (id, tenant_id, order_state, litium_order_id, created_date, total_value_inc_vat, total_value_exc_vat, currency)
+                    SELECT * FROM UNNEST(@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7)
                     ON CONFLICT (tenant_id, litium_order_id) 
                     DO UPDATE SET 
                         total_value_inc_vat = EXCLUDED.total_value_inc_vat,
                         total_value_exc_vat = EXCLUDED.total_value_exc_vat,
-                        currency = EXCLUDED.currency";
+                        order_state = EXCLUDED.order_state";
 
-                await context.Database.ExecuteSqlRawAsync(sql, pIds, pTenantIds, pOrderIds, pDatesCreated, pIncVat, pExcVat, pCurrencies);
+                await context.Database.ExecuteSqlRawAsync(sql, pIds, pTenantIds, pOrderStatus, pOrderIds, pDatesCreated, pIncVat, pExcVat, pCurrencies);
                 totalIngested += count;
             }
 

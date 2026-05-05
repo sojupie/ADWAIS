@@ -10,6 +10,12 @@ namespace Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.Sql("DROP MATERIALIZED VIEW IF EXISTS v_mat_financial_daily_global_rollup CASCADE;");
+            migrationBuilder.Sql("DROP MATERIALIZED VIEW IF EXISTS v_mat_financial_daily_tenant_rollup CASCADE;");
+            migrationBuilder.Sql("DROP MATERIALIZED VIEW IF EXISTS v_mat_daily_latency_global_rollup CASCADE;");
+            migrationBuilder.Sql("DROP MATERIALIZED VIEW IF EXISTS v_mat_daily_latency_tenant_rollup CASCADE;");
+            migrationBuilder.Sql("DROP MATERIALIZED VIEW IF EXISTS v_mat_daily_latency_monitor_rollup CASCADE;");
+
             migrationBuilder.Sql(
                 @"
                 CREATE MATERIALIZED VIEW v_mat_financial_daily_tenant_rollup AS
@@ -72,7 +78,11 @@ namespace Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-
+            migrationBuilder.Sql("DROP MATERIALIZED VIEW IF EXISTS v_mat_financial_daily_global_rollup CASCADE;");
+            migrationBuilder.Sql("DROP MATERIALIZED VIEW IF EXISTS v_mat_financial_daily_tenant_rollup CASCADE;");
+            migrationBuilder.Sql("DROP MATERIALIZED VIEW IF EXISTS v_mat_daily_latency_global_rollup CASCADE;");
+            migrationBuilder.Sql("DROP MATERIALIZED VIEW IF EXISTS v_mat_daily_latency_tenant_rollup CASCADE;");
+            migrationBuilder.Sql("DROP MATERIALIZED VIEW IF EXISTS v_mat_daily_latency_monitor_rollup CASCADE;");
         }
     }
 }

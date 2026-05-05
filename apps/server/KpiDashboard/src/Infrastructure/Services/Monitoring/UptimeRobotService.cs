@@ -93,23 +93,24 @@ public class UptimeRobotService(HttpClient httpClient, IDbContextFactory<Analyti
         return response.RootElement.GetProperty("summary").GetProperty("avg").GetInt32();
     }
 
-    public async Task<Type> DeleteMonitorAsync(int monitorId)
+    public async Task<JsonDocument> DeleteMonitorAsync(int monitorId)
     {
         var request = new HttpRequestMessage(HttpMethod.Delete, $"https://api.uptimerobot.com/v3/monitors/{monitorId}");
-        using var response = await GetResponseAsync(request);
-        return response.GetType();
+        return await GetResponseAsync(request);
     }
 
-    public async Task PauseMonitorAsync(int monitorId)
+    public async Task<JsonDocument> PauseMonitorAsync(int monitorId)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, $"https://api.uptimerobot.com/v3/monitors/{monitorId}/pause");
-        await GetResponseAsync(request);
+        request.Content = new StringContent(string.Empty, System.Text.Encoding.UTF8, "application/json");
+        return await GetResponseAsync(request);
     }
 
-    public async Task StartMonitorAsync(int monitorId)
+    public async Task<JsonDocument> StartMonitorAsync(int monitorId)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, $"https://api.uptimerobot.com/v3/monitors/{monitorId}/start");
-        await GetResponseAsync(request);
+        request.Content = new StringContent(string.Empty, System.Text.Encoding.UTF8, "application/json");
+        return await GetResponseAsync(request);
     }
 
     public async Task<JsonDocument> GetAccountDetailsAsync()

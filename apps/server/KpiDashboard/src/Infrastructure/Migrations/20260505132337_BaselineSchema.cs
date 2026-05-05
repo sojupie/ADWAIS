@@ -171,13 +171,6 @@ namespace Infrastructure.Migrations
                 name: "ix_response_time_monitor_id",
                 table: "response_time",
                 column: "monitor_id");
-
-            migrationBuilder.Sql(
-                "CREATE MATERIALIZED VIEW v_mat_financial_daily_tenant_rollup AS\nSELECT date(orders.created_date)       AS created_date,\n       orders.tenant_id,\n       count(orders.id)                AS volume,\n       sum(orders.total_value_inc_vat) AS revenue\nFROM orders\nWHERE orders.created_date >= (CURRENT_DATE - '730 days'::interval)\nGROUP BY date(orders.created_date), orders.tenant_id;" +
-                "CREATE MATERIALIZED VIEW v_mat_financial_daily_global_rollup AS\nSELECT created_date,\n       sum(volume)  AS global_volume,\n       sum(revenue) AS global_revenue\nFROM v_mat_financial_daily_tenant_rollup\nGROUP BY created_date;" +
-                "CREATE MATERIALIZED VIEW v_mat_daily_latency_monitor_rollup AS\nSELECT date(date) AS date,\n       monitor_id,\n       avg(average) AS average,\n       min(lowest)  AS lowest,\n       max(highest) AS highest\nFROM response_time\nGROUP BY date(date), monitor_id;" +
-                "CREATE MATERIALIZED VIEW v_mat_daily_latency_tenant_rollup AS\nSELECT date(rt.date) AS date,\n       m.tenant_id,\n       avg(rt.average) AS average,\n       min(rt.lowest)  AS lowest,\n       max(rt.highest) AS highest\nFROM response_time rt\n         JOIN monitor m ON rt.monitor_id = m.id\nGROUP BY date(rt.date), m.tenant_id;\n" +
-                "CREATE MATERIALIZED VIEW v_mat_daily_latency_global_rollup AS\nSELECT date(date) AS date,\n       avg(average) AS average,\n       min(lowest)  AS lowest,\n       max(highest) AS highest\nFROM response_time\nGROUP BY date(date);");
         }
 
         /// <inheritdoc />

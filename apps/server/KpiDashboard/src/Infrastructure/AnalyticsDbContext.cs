@@ -1,7 +1,7 @@
-using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
 using Domain.Entities.Monitoring;
 using Domain.Entities.OrderData;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure;
 

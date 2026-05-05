@@ -1,6 +1,6 @@
-using System.Text.Json;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text.Json;
 using Domain.Entities.Monitoring;
 using Microsoft.EntityFrameworkCore;
 

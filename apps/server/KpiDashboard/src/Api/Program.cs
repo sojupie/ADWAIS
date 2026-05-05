@@ -1,8 +1,10 @@
 using DotNetEnv;
-using Infrastructure;
-using Microsoft.EntityFrameworkCore;
 using Hangfire;
 using Hangfire.PostgreSql;
+using Infrastructure;
+using Microsoft.EntityFrameworkCore;
+using Polly;
+using Polly.Extensions.Http;
 using Swashbuckle.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,8 +18,16 @@ builder.Services.AddHttpClient<Infrastructure.Services.Monitoring.IUptimeRobotSe
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddScoped<Infrastructure.Services.ITenantIngestionService, Infrastructure.Services.TenantIngestionService>();
 
+builder.Services.AddHttpClient<Infrastructure.Services.ITenantIngestionService, Infrastructure.Services.TenantIngestionService>()
+    .AddPolicyHandler(HttpPolicyExtensions
+        .HandleTransientHttpError()
+        .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+        .WaitAndRetryAsync(
+            retryCount: 5,
+            sleepDurationProvider: retryAttempt => 
+                TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)) + TimeSpan.FromMilliseconds(new Random().Next(0, 1000))
+        ));
 
 var connectionString = builder.Configuration.GetConnectionString("AnalyticsDb");
 
@@ -38,33 +48,6 @@ builder.Services.AddHangfire(config =>
     });
 });
 builder.Services.AddHangfireServer();
-
-// builder.Services.AddQuartz(q =>
-// {
-//     var jobKey = new JobKey("CacheRefreshJob");
-//     
-//     q.AddJob<Infrastructure.Jobs.CacheRefreshJob>(opts => opts.WithIdentity(jobKey));
-//
-//     q.AddTrigger(opts => opts
-//         .ForJob(jobKey)
-//         .WithIdentity("CacheRefreshJob-trigger")
-//         .WithCronSchedule("0 0 2 * * ?"));
-// });
-//
-// //to do: implement fault handling, exponential back-off either with quartz or MS http polly
-// builder.Services.AddQuartz(q =>
-// {
-//     var ingestionJobKey = new JobKey("TenantIngestionJob");
-//     
-//     q.AddJob<Infrastructure.Jobs.TenantIngestionJob>(opts => opts.WithIdentity(ingestionJobKey));
-//     
-//     q.AddTrigger(opts => opts
-//         .ForJob(ingestionJobKey)
-//         .WithIdentity("TenantIngestionJob-trigger")
-//         .WithCronSchedule("0 0/10 * * * ?")); 
-// });
-//
-// builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
 
 var app = builder.Build();
 

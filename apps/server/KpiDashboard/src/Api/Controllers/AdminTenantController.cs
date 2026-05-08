@@ -9,7 +9,7 @@ namespace Api.Controllers;
 [Route("api/admin/tenants")] // Vill vi ha denna route??
 public class AdminTenantController(IDbContextFactory<AnalyticsDbContext> contextFactory) : ControllerBase
 {
-    [HttpGet]
+    [HttpGet("GetTenants")]
     public async Task<IActionResult> GetTenants()
     {
         await using var context = await contextFactory.CreateDbContextAsync();
@@ -33,7 +33,7 @@ public class AdminTenantController(IDbContextFactory<AnalyticsDbContext> context
         return Ok(tenants);
     }
 
-    [HttpGet("{id:guid}")]
+    [HttpGet("{id:guid}/GetTenant")]
     public async Task<IActionResult> GetTenant(Guid id)
     {
         await using var context = await contextFactory.CreateDbContextAsync();
@@ -63,7 +63,7 @@ public class AdminTenantController(IDbContextFactory<AnalyticsDbContext> context
         return Ok(tenant);
     }
 
-    [HttpPost]
+    [HttpPost("CreateTenant")]
     public async Task<IActionResult> CreateTenant([FromBody] CreateTenantRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.Name))

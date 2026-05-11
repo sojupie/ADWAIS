@@ -112,7 +112,6 @@ public class AdminTenantController(IDbContextFactory<AnalyticsDbContext> context
     public async Task<IActionResult> DeleteTenant(Guid id)
     {
         await using var context = await contextFactory.CreateDbContextAsync();
-
         var tenant = await context.Tenants.FindAsync(id);
         if (tenant == null)
         {
@@ -123,6 +122,7 @@ public class AdminTenantController(IDbContextFactory<AnalyticsDbContext> context
         await context.SaveChangesAsync();
         return NoContent();
     }
+    
     [HttpPatch("tenants/{id:guid}")]
     public async Task<IActionResult> UpdateTenant(Guid id, [FromBody] UpdateTenantRequest request)
     {

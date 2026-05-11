@@ -2,40 +2,38 @@
    MOTILLO DASHBOARD — Global Design System
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap');
 
 /* ── Custom Properties ─────────────────────────────────────── */
 :root {
   /* Core Palette */
-  --bg-root:        #0b0c12;
-  --bg-surface:     #13141f;
-  --bg-surface-2:   #1a1c29;
-  --bg-hover:       #1f2133;
-  --border:         rgba(255, 255, 255, 0.07);
-  --border-strong:  rgba(255, 255, 255, 0.13);
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #022d2e;
+  --bg-primaryNeigbour: #e6f4f5;
+  --bg-secondaryNeigbour: #034b4e; 
+  --bg-border: rgba(0, 0, 0, 0.15);
+
 
   /* Text */
-  --text-primary:   #f0f1f5;
-  --text-secondary: #8b8fa8;
-  --text-muted:     #555870;
+  --text-primary:   #022d2e;
+  --text-link:   #06959B;
 
-  /* Accent */
-  --accent:         #6366f1;
-  --accent-light:   rgba(99, 102, 241, 0.15);
-  --accent-glow:    rgba(99, 102, 241, 0.35);
+
+  /* Button */
+  --button-primary: #51B5B9;
+  --button-border: #04686D;
+
+
+  /* Highlight */
+  --highlight-primary: #FFCE44;
 
   /* Status */
-  --green:          #22c55e;
-  --green-bg:       rgba(34, 197, 94, 0.12);
-  --red:            #ef4444;
-  --red-bg:         rgba(239, 68, 68, 0.12);
-  --amber:          #f59e0b;
+  --green: #0b9b06;
+  --red: #ff1200;
 
   /* Chart */
-  --chart-line:     #6366f1;
-  --chart-ghost:    rgba(148, 163, 184, 0.3);
-  --chart-fill:     rgba(99, 102, 241, 0.08);
-  --chart-grid:     rgba(255, 255, 255, 0.04);
+  --chart-line: #6366ff;
+  --chart-grid: rgba(0, 0, 0, 0.18);
 
   /* Spacing */
   --space-1: 4px;
@@ -53,21 +51,21 @@
   --radius-lg: 14px;
 
   /* Shadows */
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.3);
-  --shadow-elevated: 0 4px 24px rgba(0, 0, 0, 0.5);
+  --shadow-card: 0 1px 2px rgba(2, 45, 46, 0.06), 0 12px 28px rgba(2, 45, 46, 0.08);
+  --shadow-elevated: 0 16px 36px rgba(2, 45, 46, 0.14);
 
   /* Typography */
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Manrope', system-ui, -apple-system, sans-serif;
   --font-mono: ui-monospace, 'Cascadia Code', Consolas, monospace;
 
   font-family: var(--font-sans);
   font-size: 14px;
   line-height: 1.5;
   color: var(--text-primary);
-  background-color: var(--bg-root);
+  background-color: var(--bg-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 /* ── Reset ─────────────────────────────────────────────────── */
@@ -84,13 +82,9 @@ html, body, #root {
 
 body {
   overflow-x: hidden;
+  background: var(--bg-primary);
 }
 
-/* ── Scrollbar ─────────────────────────────────────────────── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: var(--bg-root); }
-::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
 /* ── Typography ────────────────────────────────────────────── */
 h1, h2, h3, h4 {
@@ -100,51 +94,49 @@ h1, h2, h3, h4 {
 }
 
 /* ── Utility ───────────────────────────────────────────────── */
-.text-secondary { color: var(--text-secondary); }
-.text-muted     { color: var(--text-muted); }
 .text-green     { color: var(--green); }
 .text-red       { color: var(--red); }
-.text-accent    { color: var(--accent); }
 .font-mono      { font-family: var(--font-mono); }
 
 /* ── Card ──────────────────────────────────────────────────── */
 .card {
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
+  background: var(--bg-primary);
+  border: 1px solid var(--bg-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
 }
 
-/* ── Badge ─────────────────────────────────────────────────── */
+/* ── Button Group ──────────────────────────────────────────── */
 .badge {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
-  padding: 2px 8px;
-  border-radius: 99px;
+  padding: 2px 0;
+  background: transparent;
+  border-radius: 0;
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.02em;
 }
-.badge-green { background: var(--green-bg); color: var(--green); }
-.badge-red   { background: var(--red-bg);   color: var(--red); }
-.badge-neutral { background: var(--bg-surface-2); color: var(--text-secondary); }
 
-/* ── Button Group ──────────────────────────────────────────── */
+.badge-green { color: var(--green); }
+.badge-neutral { color: var(--text-primary); }
+.badge-red { color: var(--red); }
+
 .btn-group {
   display: flex;
   gap: 2px;
-  background: var(--bg-surface-2);
-  border: 1px solid var(--border);
+  background: var(--bg-primary);
+  border: 1px solid var(--bg-border);
   border-radius: var(--radius-md);
   padding: 3px;
 }
 .btn-group button {
   padding: 5px 14px;
-  border: none;
+  border: 1px solid transparent;
   border-radius: var(--radius-sm);
   background: transparent;
-  color: var(--text-secondary);
+  color: var(--button-primary);
   font-size: 12px;
   font-weight: 500;
   font-family: var(--font-sans);
@@ -154,10 +146,10 @@ h1, h2, h3, h4 {
 }
 .btn-group button:hover {
   color: var(--text-primary);
-  background: var(--bg-hover);
+  background: var(--highlight-primary);
+  border-color: var(--button-border)
 }
 .btn-group button.active {
-  background: var(--accent);
-  color: #fff;
-  box-shadow: 0 0 12px var(--accent-glow);
+  color: var(--text-primary);
+  border-color: var(--button-border);
 }

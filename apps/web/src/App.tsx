@@ -87,10 +87,13 @@ export default function App() {
       {/* ── Header ── */}
       <header className="dashboard__header">
         <div className="dashboard__brand">
-          <div className="dashboard__logo">M</div>
+          <img
+            className="dashboard__logo"
+            src="https://www.motillo.se/media/4ejbcxx1/motillo_utanpayoff.svg?mode=pad&width=140&height=0&upscale=false&rnd=132573678104400000"
+            alt="Motillo"
+          />
           <div>
-            <h1 className="dashboard__title">Motillo Dashboard</h1>
-            <p className="dashboard__subtitle">Portfolio Diagnostics</p>
+            <h1 className="dashboard__title">test</h1>
           </div>
         </div>
 
@@ -141,22 +144,28 @@ export default function App() {
         {/* Charts row */}
         <section className="charts-row" aria-label="Revenue charts">
           <div className="chart-slot chart-slot--velocity">
-            {currentRollups.length > 0
-              ? <RevenueVelocityChart current={currentRollups} previous={previousRollups} />
-              : <SkeletonChart />}
+            {loading
+              ? <SkeletonChart />
+              : currentRollups.length > 0
+                ? <RevenueVelocityChart current={currentRollups} previous={previousRollups} />
+                : <EmptyState title="No revenue data" />}
           </div>
           <div className="chart-slot chart-slot--extremes">
-            {tenantKpis.length > 0
-              ? <GrowthExtremesChart tenants={tenantKpis} />
-              : <SkeletonChart />}
+            {loading
+              ? <SkeletonChart />
+              : tenantKpis.length > 0
+                ? <GrowthExtremesChart tenants={tenantKpis} />
+                : <EmptyState title="No tenant data" />}
           </div>
         </section>
 
         {/* Table */}
         <section className="table-row" aria-label="Client performance table">
-          {tenantKpis.length > 0
-            ? <TenantRevenueTable tenants={tenantKpis} />
-            : <SkeletonTable />}
+          {loading
+            ? <SkeletonTable />
+            : tenantKpis.length > 0
+              ? <TenantRevenueTable tenants={tenantKpis} />
+              : <EmptyState title="No clients for this period" />}
         </section>
       </main>
 
@@ -188,6 +197,14 @@ function SkeletonTable() {
       {Array.from({ length: 6 }).map((_, i) => (
         <div key={i} className="skeleton-line" style={{ width: `${90 - i * 8}%`, opacity: 1 - i * 0.1 }} />
       ))}
+    </div>
+  );
+}
+
+function EmptyState({ title }: { title: string }) {
+  return (
+    <div className="card empty-state">
+      <span>{title}</span>
     </div>
   );
 }

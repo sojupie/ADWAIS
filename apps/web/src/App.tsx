@@ -16,6 +16,7 @@ import { StatusBar } from './components/StatusBar';
 const REFRESH_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
 
 type Period = 1 | 7 | 30 | 90;
+type DashboardView = 'financial' | 'uptime' |'Fleet Status' | 'Intranet';
 
 // ── Data Fetching ─────────────────────────────────────────────
 async function fetchJson<T>(url: string): Promise<T> {
@@ -35,6 +36,7 @@ async function loadDashboardData(days: Period) {
 
 // ── Component ─────────────────────────────────────────────────
 export default function App() {
+  const [view, setView] = useState<DashboardView>('financial');
   const [period, setPeriod] = useState<Period>(30);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -92,10 +94,38 @@ export default function App() {
             src="https://www.motillo.se/media/4ejbcxx1/motillo_utanpayoff.svg?mode=pad&width=140&height=0&upscale=false&rnd=132573678104400000"
             alt="Motillo"
           />
-          <div>
-            <h1 className="dashboard__title">test</h1>
-          </div>
         </div>
+
+        <nav className="dashboard-nav" aria-label="Dashboard sections">
+          <button
+            className={view === 'financial' ? 'active' : ''}
+            onClick={() => setView('financial')}
+            aria-current={view === 'financial' ? 'page' : undefined}
+          >
+            Financial
+          </button>
+          <button
+            className={view === 'uptime' ? 'active' : ''}
+            onClick={() => setView('uptime')}
+            aria-current={view === 'uptime' ? 'page' : undefined}
+          >
+            Uptime
+          </button>
+          <button
+              className={view === 'Fleet Status' ? 'active' : ''}
+              onClick={() => setView('Fleet Status')}
+              aria-current={view === 'Fleet Status' ? 'page' : undefined}
+          >
+            Fleet Status
+          </button>
+          <button
+              className={view === 'Intranet' ? 'active' : ''}
+              onClick={() => setView('Intranet')}
+              aria-current={view === 'Intranet' ? 'page' : undefined}
+          >
+            Intranet
+          </button>
+        </nav>
 
         <div className="dashboard__controls">
           {error && (
@@ -119,6 +149,8 @@ export default function App() {
 
       {/* ── Main Content ── */}
       <main className="dashboard__main">
+        {view === 'financial' ? (
+          <>
         {/* KPI row */}
         <section className="kpi-row" aria-label="Key Performance Indicators">
           <KpiCard
@@ -167,6 +199,13 @@ export default function App() {
               ? <TenantRevenueTable tenants={tenantKpis} />
               : <EmptyState title="No clients for this period" />}
         </section>
+          </>
+        ) : (
+          <section className="dashboard-placeholder" aria-label="tba">
+            <EmptyState title="in progress" />
+          </section>
+            
+        )}
       </main>
 
       {/* ── Status Bar ── */}

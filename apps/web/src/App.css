@@ -45,6 +45,40 @@
   letter-spacing: -0.01em;
 }
 
+.dashboard-nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--bg-border);
+  border-radius: var(--radius-md);
+  background: var(--bg-primary);
+}
+
+.dashboard-nav button {
+  min-width: 88px;
+  padding: 6px 14px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-link);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dashboard-nav button:hover {
+  background: var(--bg-primaryNeigbour);
+  color: var(--text-primary);
+}
+
+.dashboard-nav button.active {
+  background: var(--button-primary);
+  border-color: var(--button-border);
+  color: var(--text-primary);
+}
+
 .dashboard__controls {
   display: flex;
   align-items: center;
@@ -97,6 +131,11 @@
 .table-row {
   flex: 1;
   min-height: 240px;
+}
+
+.dashboard-placeholder {
+  flex: 1;
+  min-height: 320px;
 }
 
 /* ── Skeletons ───────────────────────────────────────────────── */

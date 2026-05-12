@@ -1,6 +1,8 @@
 using Domain.Entities;
 using Domain.Entities.Monitoring;
+using Domain.Entities.Office;
 using Domain.Entities.OrderData;
+using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure;
@@ -18,6 +20,11 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options) : 
     public DbSet<DailyLatencyMonitorRollup> DailyLatencyMonitorRollups => Set<DailyLatencyMonitorRollup>();
     public DbSet<DailyLatencyTenantRollup> DailyLatencyTenantRollups => Set<DailyLatencyTenantRollup>();
     public DbSet<DailyLatencyGlobalRollup> DailyLatencyGlobalRollups => Set<DailyLatencyGlobalRollup>();
+
+    // intranät
+    public DbSet<OfficeEvent> OfficeEvents => Set<OfficeEvent>();
+    public DbSet<OfficeVisit> OfficeVisits => Set<OfficeVisit>();
+    public DbSet<OfficeMessage> OfficeMessages => Set<OfficeMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -105,5 +112,42 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options) : 
             .WithMany(m => m.ResponseTimes)
             .HasForeignKey(rt => rt.MonitorId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // intranät
+        modelBuilder.Entity<OfficeEvent>().ToTable("office_event");
+        modelBuilder.Entity<OfficeEvent>()
+            .Property(e => e.Id)
+            .HasDefaultValueSql("uuid_generate_v4()");
+        modelBuilder.Entity<OfficeEvent>()
+            .Property(e => e.EventType)
+            .HasConversion<string>();
+        modelBuilder.Entity<OfficeEvent>()
+            .Property(e => e.Recurrence)
+            .HasConversion<string>();
+        modelBuilder.Entity<OfficeEvent>() // om user raderas så sätts det till null och eventet bevaras
+            .HasOne(e => e.CreatedBy)
+            .WithMany()
+            .HasForeignKey(e => e.CreatedByUserId)
+            .OnDelete(DeleteBehavior.SetNull);
+        
+        modelBuilder.Entity<OfficeVisit>().ToTable("office_visit");
+        modelBuilder.Entity<OfficeVisit>()
+            .Property(v => v.Id)
+            .HasDefaultValueSql("uuid_generate_v4()");
+        modelBuilder.Entity<OfficeVisit>()
+            .HasOne(v => v.CreatedBy)
+            .WithMany()
+            .HasForeignKey(v => v.CreatedByUserId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<OfficeMessage>().ToTable("office_message");
+        modelBuilder.Entity<OfficeMessage>()
+            .Property(m => m.Id)
+            .HasDefaultValueSql("uuid_generate_v4()");
+        modelBuilder.Entity<OfficeMessage>()
+            .HasOne(m => m.CreatedBy)
+            .WithMany()
+            .HasForeignKey(m => m.CreatedByUserId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

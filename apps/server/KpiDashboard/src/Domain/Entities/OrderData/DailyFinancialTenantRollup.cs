@@ -4,6 +4,6 @@ public class DailyFinancialTenantRollup
 {
     public DateTime CreatedDate { get; set; }
     public Guid TenantId { get; set; }
-    public long Volume { get; set; }
-    public long Revenue { get; set; }
+    public decimal Volume { get; set; }
+    public decimal Revenue { get; set; }
 }

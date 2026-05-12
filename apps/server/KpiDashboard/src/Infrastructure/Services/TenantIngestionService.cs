@@ -51,7 +51,7 @@ public class TenantIngestionService(
                     throw new HttpRequestException($"Failed to fetch chunk. Status: {response.StatusCode}");
                 }
 
-                using var contentStream = await response.Content.ReadAsStreamAsync(ct);
+                await using var contentStream = await response.Content.ReadAsStreamAsync(ct);
                 var litiumPayload = await JsonSerializer.DeserializeAsync<LitiumSyncResponse>(
                     contentStream, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }, ct);
 
@@ -63,8 +63,8 @@ public class TenantIngestionService(
                     var pOrderStatus = new string[count];
                     var pOrderIds = new string[count];
                     var pDatesCreated = new DateTimeOffset[count];
-                    var pIncVat = new int[count];
-                    var pExcVat = new int[count];
+                    var pIncVat = new decimal?[count];
+                    var pExcVat = new decimal?[count];
                     var pCurrencies = new string[count];
 
                     for (int i = 0; i < count; i++)
@@ -75,8 +75,8 @@ public class TenantIngestionService(
                         pOrderStatus[i] = o.OrderStatus;
                         pOrderIds[i] = o.OrderNumber;
                         pDatesCreated[i] = o.CreatedDate.ToUniversalTime();
-                        pIncVat[i] = (int)o.TotalValueIncludingVat;
-                        pExcVat[i] = (int)o.TotalValueExcludingVat;
+                        pIncVat[i] = o.TotalValueIncludingVat;
+                        pExcVat[i] = o.TotalValueExcludingVat;
                         pCurrencies[i] = o.Currency ?? "UNK";
                     }
 

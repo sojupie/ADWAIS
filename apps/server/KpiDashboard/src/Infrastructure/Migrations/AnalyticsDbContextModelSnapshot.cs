@@ -25,9 +25,12 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.GlobalConfig", b =>
                 {
-                    b.Property<string>("ActiveSubscription")
-                        .HasColumnType("text")
-                        .HasColumnName("active_subscription");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTimeOffset?>("LastPolled")
                         .HasColumnType("timestamp with time zone")
@@ -45,16 +48,9 @@ namespace Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("litium_rate_limit");
 
-                    b.Property<int?>("MonitorsCount")
-                        .HasColumnType("integer")
-                        .HasColumnName("monitors_count");
-
-                    b.Property<int?>("MonitorsLimit")
-                        .HasColumnType("integer")
-                        .HasColumnName("monitors_limit");
-
                     b.Property<string>("UptimeRobotApiKey")
-                        .HasColumnType("text")
+                        .HasMaxLength(1024)
+                        .HasColumnType("character varying(1024)")
                         .HasColumnName("uptime_robot_api_key");
 
                     b.Property<bool>("UptimeRobotFetchEnabled")
@@ -64,6 +60,9 @@ namespace Infrastructure.Migrations
                     b.Property<int>("UptimeRobotRateLimit")
                         .HasColumnType("integer")
                         .HasColumnName("uptime_robot_rate_limit");
+
+                    b.HasKey("Id")
+                        .HasName("pk_global_config");
 
                     b.ToTable("global_config", (string)null);
                 });
@@ -211,9 +210,14 @@ namespace Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("creation_date");
 
+                    b.Property<DateTimeOffset?>("LastUpdate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_update");
+
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("name");
 
                     b.Property<Guid>("TenantId")
@@ -230,7 +234,8 @@ namespace Infrastructure.Migrations
 
                     b.Property<string>("Url")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)")
                         .HasColumnName("url");
 
                     b.HasKey("Id")
@@ -264,7 +269,8 @@ namespace Infrastructure.Migrations
 
                     b.Property<string>("EventType")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
                         .HasColumnName("event_type");
 
                     b.Property<bool>("IsImportant")
@@ -280,21 +286,24 @@ namespace Infrastructure.Migrations
                         .HasColumnName("is_special");
 
                     b.Property<string>("Location")
-                        .HasColumnType("text")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("location");
 
                     b.Property<string>("Recurrence")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
                         .HasColumnName("recurrence");
 
-                    b.Property<DateTimeOffset>("StartTime")
+                    b.Property<DateTimeOffset?>("StartTime")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("start_time");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("title");
 
                     b.HasKey("Id")
@@ -349,7 +358,8 @@ namespace Infrastructure.Migrations
                         .HasDefaultValueSql("uuid_generate_v4()");
 
                     b.Property<string>("Company")
-                        .HasColumnType("text")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("company");
 
                     b.Property<Guid?>("CreatedByUserId")
@@ -358,11 +368,13 @@ namespace Infrastructure.Migrations
 
                     b.Property<string>("GuestName")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("guest_name");
 
                     b.Property<string>("LogoUrl")
-                        .HasColumnType("text")
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)")
                         .HasColumnName("logo_url");
 
                     b.Property<DateTimeOffset>("VisitTime")
@@ -384,12 +396,12 @@ namespace Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_date");
 
-                    b.Property<long>("GlobalRevenue")
-                        .HasColumnType("bigint")
+                    b.Property<decimal>("GlobalRevenue")
+                        .HasColumnType("numeric")
                         .HasColumnName("global_revenue");
 
-                    b.Property<long>("GlobalVolume")
-                        .HasColumnType("bigint")
+                    b.Property<decimal>("GlobalVolume")
+                        .HasColumnType("numeric")
                         .HasColumnName("global_volume");
 
                     b.HasKey("CreatedDate");
@@ -409,12 +421,12 @@ namespace Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("tenant_id");
 
-                    b.Property<long>("Revenue")
-                        .HasColumnType("bigint")
+                    b.Property<decimal>("Revenue")
+                        .HasColumnType("numeric")
                         .HasColumnName("revenue");
 
-                    b.Property<long>("Volume")
-                        .HasColumnType("bigint")
+                    b.Property<decimal>("Volume")
+                        .HasColumnType("numeric")
                         .HasColumnName("volume");
 
                     b.HasKey("CreatedDate", "TenantId");
@@ -437,17 +449,20 @@ namespace Infrastructure.Migrations
 
                     b.Property<string>("Currency")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
                         .HasColumnName("currency");
 
                     b.Property<string>("LitiumOrderId")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("litium_order_id");
 
                     b.Property<string>("OrderState")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("order_state");
 
                     b.Property<Guid>("TenantId")
@@ -493,10 +508,6 @@ namespace Infrastructure.Migrations
                         .HasColumnName("id")
                         .HasDefaultValueSql("uuid_generate_v4()");
 
-                    b.Property<bool>("CurrentlyFetching")
-                        .HasColumnType("boolean")
-                        .HasColumnName("currently_fetching");
-
                     b.Property<DateTimeOffset?>("FetchedFrom")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("fetched_from");
@@ -511,29 +522,24 @@ namespace Infrastructure.Migrations
 
                     b.Property<string>("LitiumBaseUrl")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)")
                         .HasColumnName("litium_base_url");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("name");
-
-                    b.Property<int>("OrderCount")
-                        .HasColumnType("integer")
-                        .HasColumnName("order_count");
 
                     b.Property<bool>("OrderFetchingEnabled")
                         .HasColumnType("boolean")
                         .HasColumnName("order_fetching_enabled");
 
-                    b.Property<bool?>("PingReachable")
-                        .HasColumnType("boolean")
-                        .HasColumnName("ping_reachable");
-
                     b.Property<string>("ServiceAccountToken")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)")
                         .HasColumnName("service_account_token");
 
                     b.HasKey("Id")
@@ -552,7 +558,8 @@ namespace Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("name");
 
                     b.Property<string>("Role")
@@ -598,7 +605,7 @@ namespace Infrastructure.Migrations
                         .HasForeignKey("MonitorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_response_time_monitor_monitor_id");
+                        .HasConstraintName("fk_response_time_monitors_monitor_id");
 
                     b.Navigation("UptimeMonitor");
                 });

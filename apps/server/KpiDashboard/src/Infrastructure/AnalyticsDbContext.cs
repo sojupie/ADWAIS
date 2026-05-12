@@ -9,14 +9,16 @@ namespace Infrastructure;
 
 public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options) : DbContext(options)
 {
-    public DbSet<Order> Orders => Set<Order>();
     public DbSet<GlobalConfig> GlobalConfigs => Set<GlobalConfig>();
     public DbSet<User> Users => Set<User>();
     public DbSet<Tenant> Tenants => Set<Tenant>();
-    public DbSet<ResponseTime> ResponseTimes => Set<ResponseTime>();
-    public DbSet<UptimeMonitor> Monitors => Set<UptimeMonitor>();
+    
+    public DbSet<Order> Orders => Set<Order>();
     public DbSet<DailyFinancialTenantRollup> DailyTenantRollups => Set<DailyFinancialTenantRollup>();
     public DbSet<DailyFinancialGlobalRollup> DailyGlobalRollups => Set<DailyFinancialGlobalRollup>();
+    
+    public DbSet<ResponseTime> ResponseTimes => Set<ResponseTime>();
+    public DbSet<UptimeMonitor> Monitors => Set<UptimeMonitor>();
     public DbSet<DailyLatencyMonitorRollup> DailyLatencyMonitorRollups => Set<DailyLatencyMonitorRollup>();
     public DbSet<DailyLatencyTenantRollup> DailyLatencyTenantRollups => Set<DailyLatencyTenantRollup>();
     public DbSet<DailyLatencyGlobalRollup> DailyLatencyGlobalRollups => Set<DailyLatencyGlobalRollup>();
@@ -30,124 +32,178 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options) : 
     {
         modelBuilder.HasPostgresExtension("uuid-ossp");
 
-        modelBuilder.Entity<Tenant>().ToTable("tenant");
-        modelBuilder.Entity<Tenant>()
-            .Property(t => t.Id)
-            .HasDefaultValueSql("uuid_generate_v4()");
+        // Tenant
+        modelBuilder.Entity<Tenant>(entity => 
+        {
+            entity.ToTable("tenant");
+            entity.HasKey(t => t.Id);
+            entity.Property(t => t.Id).HasDefaultValueSql("uuid_generate_v4()");
+            entity.Property(t => t.Name).HasMaxLength(255);
+            entity.Property(t => t.LitiumBaseUrl).HasMaxLength(2048);
+            entity.Property(t => t.ServiceAccountToken).HasMaxLength(2048);
+            entity.Ignore(t => t.OrderCount);
+            entity.Ignore(t => t.CurrentlyFetching);
+            entity.Ignore(t => t.PingReachable);
+        });
         
-        modelBuilder.Entity<Order>().ToTable("orders");
-        modelBuilder.Entity<Order>()
-            .HasIndex(o => new { o.TenantId, o.LitiumOrderId })
-            .IsUnique()
-            .HasDatabaseName("uq_orders_tenant_litium");
+        // Order
+        modelBuilder.Entity<Order>(entity => 
+        {
+            entity.ToTable("orders");
+            entity.HasKey(o => o.Id);
+            entity.Property(o => o.OrderState).HasMaxLength(255);
+            entity.Property(o => o.LitiumOrderId).HasMaxLength(255);
+            entity.Property(o => o.Currency).HasMaxLength(10);
             
-        modelBuilder.Entity<Order>()
-            .HasIndex(o => new { o.CreatedDate, o.TenantId })
-            .HasDatabaseName("idx_orders_composite_dash")
-            .IncludeProperties(o => o.TotalValueIncVat);
-            
-        modelBuilder.Entity<Order>()
-            .HasIndex(o => new { o.TenantId, o.TotalValueIncVat })
-            .HasDatabaseName("idx_orders_value_dist");
-            
-        modelBuilder.Entity<Order>()
-            .HasIndex(o => new { o.TenantId, o.CreatedDate })
-            .HasDatabaseName("idx_orders_tenant_isolated")
-            .IncludeProperties(o => o.TotalValueIncVat);
+            entity.HasIndex(o => new { o.TenantId, o.LitiumOrderId })
+                .IsUnique()
+                .HasDatabaseName("uq_orders_tenant_litium");
+                
+            entity.HasIndex(o => new { o.CreatedDate, o.TenantId })
+                .HasDatabaseName("idx_orders_composite_dash")
+                .IncludeProperties(o => o.TotalValueIncVat);
+                
+            entity.HasIndex(o => new { o.TenantId, o.TotalValueIncVat })
+                .HasDatabaseName("idx_orders_value_dist");
+                
+            entity.HasIndex(o => new { o.TenantId, o.CreatedDate })
+                .HasDatabaseName("idx_orders_tenant_isolated")
+                .IncludeProperties(o => o.TotalValueIncVat);
+                
+            entity.HasOne(o => o.Tenant)
+                .WithMany(t => t.Orders)
+                .HasForeignKey(o => o.TenantId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
 
-        modelBuilder.Entity<Order>()
-            .HasOne(o => o.Tenant)
-            .WithMany(t => t.Orders)
-            .HasForeignKey(o => o.TenantId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        modelBuilder.Entity<DailyFinancialTenantRollup>()
-            .ToView("v_mat_financial_daily_tenant_rollup")
-            .HasKey(r => new { r.CreatedDate, r.TenantId });
-
-        modelBuilder.Entity<DailyFinancialGlobalRollup>()
-            .ToView("v_mat_financial_daily_global_rollup")
-            .HasKey(r => r.CreatedDate);
-
-        modelBuilder.Entity<DailyLatencyMonitorRollup>()
-            .ToView("v_mat_daily_latency_monitor_rollup")
-            .HasKey(r => new { r.Date, r.MonitorId });
-
-        modelBuilder.Entity<DailyLatencyTenantRollup>()
-            .ToView("v_mat_daily_latency_tenant_rollup")
-            .HasKey(r => new { r.Date, r.TenantId });
-
-        modelBuilder.Entity<DailyLatencyGlobalRollup>()
-            .ToView("v_mat_daily_latency_global_rollup")
-            .HasKey(r => r.Date);
+        // Rollups
+        modelBuilder.Entity<DailyFinancialTenantRollup>(entity => 
+        {
+            entity.ToView("v_mat_financial_daily_tenant_rollup");
+            entity.HasKey(r => new { r.CreatedDate, r.TenantId });
+        });
         
-        modelBuilder.Entity<GlobalConfig>().ToTable("global_config");
-        modelBuilder.Entity<GlobalConfig>().HasNoKey();
+        modelBuilder.Entity<DailyFinancialGlobalRollup>(entity => 
+        {
+            entity.ToView("v_mat_financial_daily_global_rollup");
+            entity.HasKey(r => r.CreatedDate);
+        });
         
-        modelBuilder.Entity<User>().ToTable("users");
-        modelBuilder.Entity<User>()
-            .Property(u => u.Id)
-            .HasDefaultValueSql("uuid_generate_v4()");
-            
-        modelBuilder.Entity<User>()
-            .Property(u => u.Role)
-            .HasConversion<string>()
-            .HasMaxLength(50);
-            
-        modelBuilder.Entity<ResponseTime>().ToTable("response_time");
-        modelBuilder.Entity<ResponseTime>()
-            .Property(rt => rt.Id)
-            .HasDefaultValueSql("uuid_generate_v4()");
-            
-        modelBuilder.Entity<UptimeMonitor>().ToTable("monitor");
+        modelBuilder.Entity<DailyLatencyMonitorRollup>(entity => 
+        {
+            entity.ToView("v_mat_daily_latency_monitor_rollup");
+            entity.HasKey(r => new { r.Date, r.MonitorId });
+        });
         
-        modelBuilder.Entity<UptimeMonitor>()
-            .HasOne(m => m.Tenant)
-            .WithMany(t => t.Monitors)
-            .HasForeignKey(m => m.TenantId)
-            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<DailyLatencyTenantRollup>(entity => 
+        {
+            entity.ToView("v_mat_daily_latency_tenant_rollup");
+            entity.HasKey(r => new { r.Date, r.TenantId });
+        });
+        
+        modelBuilder.Entity<DailyLatencyGlobalRollup>(entity => 
+        {
+            entity.ToView("v_mat_daily_latency_global_rollup");
+            entity.HasKey(r => r.Date);
+        });
+        
+        // GlobalConfig
+        modelBuilder.Entity<GlobalConfig>(entity => 
+        {
+            entity.ToTable("global_config");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.UptimeRobotApiKey).HasMaxLength(1024);
+            entity.Ignore(x => x.MonitorsCount);
+            entity.Ignore(x => x.MonitorsLimit);
+            entity.Ignore(x => x.ActiveSubscription);
+        });
+        
+        // User
+        modelBuilder.Entity<User>(entity => 
+        {
+            entity.ToTable("users");
+            entity.HasKey(u => u.Id);
+            entity.Property(u => u.Id).HasDefaultValueSql("uuid_generate_v4()");
+            entity.Property(u => u.Name).HasMaxLength(255);
+            entity.Property(u => u.Role)
+                .HasConversion<string>()
+                .HasMaxLength(50);
+        });
             
-        modelBuilder.Entity<ResponseTime>()
-            .HasOne(rt => rt.UptimeMonitor)
-            .WithMany(m => m.ResponseTimes)
-            .HasForeignKey(rt => rt.MonitorId)
-            .OnDelete(DeleteBehavior.Cascade);
-
+        // ResponseTime
+        modelBuilder.Entity<ResponseTime>(entity => 
+        {
+            entity.ToTable("response_time");
+            entity.HasKey(rt => rt.Id);
+            entity.Property(rt => rt.Id).HasDefaultValueSql("uuid_generate_v4()");
+            entity.HasOne(rt => rt.UptimeMonitor)
+                .WithMany(m => m.ResponseTimes)
+                .HasForeignKey(rt => rt.MonitorId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+            
+        // UptimeMonitor
+        modelBuilder.Entity<UptimeMonitor>(entity => 
+        {
+            entity.ToTable("monitor");
+            entity.HasKey(m => m.Id);
+            entity.Ignore(m => m.StatusStr);
+            entity.Property(m => m.Name).HasMaxLength(255);
+            entity.Property(m => m.Url).HasMaxLength(2048);
+            entity.HasOne(m => m.Tenant)
+                .WithMany(t => t.Monitors)
+                .HasForeignKey(m => m.TenantId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+            
         // intranät
-        modelBuilder.Entity<OfficeEvent>().ToTable("office_event");
-        modelBuilder.Entity<OfficeEvent>()
-            .Property(e => e.Id)
-            .HasDefaultValueSql("uuid_generate_v4()");
-        modelBuilder.Entity<OfficeEvent>()
-            .Property(e => e.EventType)
-            .HasConversion<string>();
-        modelBuilder.Entity<OfficeEvent>()
-            .Property(e => e.Recurrence)
-            .HasConversion<string>();
-        modelBuilder.Entity<OfficeEvent>() // om user raderas så sätts det till null och eventet bevaras
-            .HasOne(e => e.CreatedBy)
-            .WithMany()
-            .HasForeignKey(e => e.CreatedByUserId)
-            .OnDelete(DeleteBehavior.SetNull);
+        // OfficeEvent
+        modelBuilder.Entity<OfficeEvent>(entity => 
+        {
+            entity.ToTable("office_event");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasDefaultValueSql("uuid_generate_v4()");
+            entity.Property(e => e.Title).HasMaxLength(255);
+            entity.Property(e => e.Location).HasMaxLength(255);
+            entity.Property(e => e.EventType)
+                .HasConversion<string>()
+                .HasMaxLength(50);
+            entity.Property(e => e.Recurrence)
+                .HasConversion<string>()
+                .HasMaxLength(50);
+            
+            // om user raderas så sätts det till null och eventet bevaras
+            entity.HasOne(e => e.CreatedBy)
+                .WithMany()
+                .HasForeignKey(e => e.CreatedByUserId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
         
-        modelBuilder.Entity<OfficeVisit>().ToTable("office_visit");
-        modelBuilder.Entity<OfficeVisit>()
-            .Property(v => v.Id)
-            .HasDefaultValueSql("uuid_generate_v4()");
-        modelBuilder.Entity<OfficeVisit>()
-            .HasOne(v => v.CreatedBy)
-            .WithMany()
-            .HasForeignKey(v => v.CreatedByUserId)
-            .OnDelete(DeleteBehavior.SetNull);
+        // OfficeVisit
+        modelBuilder.Entity<OfficeVisit>(entity => 
+        {
+            entity.ToTable("office_visit");
+            entity.HasKey(v => v.Id);
+            entity.Property(v => v.Id).HasDefaultValueSql("uuid_generate_v4()");
+            entity.Property(v => v.GuestName).HasMaxLength(255);
+            entity.Property(v => v.Company).HasMaxLength(255);
+            entity.Property(v => v.LogoUrl).HasMaxLength(2048);
+            entity.HasOne(v => v.CreatedBy)
+                .WithMany()
+                .HasForeignKey(v => v.CreatedByUserId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
 
-        modelBuilder.Entity<OfficeMessage>().ToTable("office_message");
-        modelBuilder.Entity<OfficeMessage>()
-            .Property(m => m.Id)
-            .HasDefaultValueSql("uuid_generate_v4()");
-        modelBuilder.Entity<OfficeMessage>()
-            .HasOne(m => m.CreatedBy)
-            .WithMany()
-            .HasForeignKey(m => m.CreatedByUserId)
-            .OnDelete(DeleteBehavior.SetNull);
+        // OfficeMessage
+        modelBuilder.Entity<OfficeMessage>(entity => 
+        {
+            entity.ToTable("office_message");
+            entity.HasKey(m => m.Id);
+            entity.Property(m => m.Id).HasDefaultValueSql("uuid_generate_v4()");
+            entity.HasOne(m => m.CreatedBy)
+                .WithMany()
+                .HasForeignKey(m => m.CreatedByUserId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
     }
 }

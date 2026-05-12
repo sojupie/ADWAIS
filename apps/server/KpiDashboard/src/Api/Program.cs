@@ -1,11 +1,12 @@
+using Api.Exceptions;
 using DotNetEnv;
 using Hangfire;
 using Hangfire.PostgreSql;
 using Infrastructure;
+using Infrastructure.Services.Monitoring;
 using Microsoft.EntityFrameworkCore;
 using Polly;
 using Polly.Extensions.Http;
-using Swashbuckle.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,10 +15,13 @@ builder.Configuration.AddEnvironmentVariables();
 
 builder.Services.AddControllers();
 builder.Services.AddHttpClient();
+builder.Services.AddScoped<IMonitorOrchestrationService, MonitorOrchestrationService>();
 builder.Services.AddHttpClient<Infrastructure.Services.Monitoring.IUptimeRobotService, Infrastructure.Services.Monitoring.UptimeRobotService>();
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 builder.Services.AddHttpClient<Infrastructure.Services.ITenantIngestionService, Infrastructure.Services.TenantIngestionService>()
     .AddPolicyHandler(HttpPolicyExtensions
@@ -54,6 +58,7 @@ var app = builder.Build();
 app.MapOpenApi();
 app.UseSwagger();
 app.UseSwaggerUI();
+app.UseExceptionHandler();
 
 app.MapControllers();
 

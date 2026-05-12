@@ -1,16 +1,19 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import './App.css';
+import './components/financial/FinancialDashboard.css';
 import type {
   GlobalKpi,
   TenantKpi,
   DailyGlobalRollup,
 } from '@types';
 import { formatCurrency, formatCompact, formatNumber } from '@utils';
-import { KpiCard } from './components/KpiCard';
-import { RevenueVelocityChart } from './components/RevenueVelocityChart';
-import { GrowthExtremesChart } from './components/GrowthExtremesChart';
-import { TenantRevenueTable } from './components/TenantRevenueTable';
-import { StatusBar } from './components/StatusBar';
+import { LoadingIcon } from './components/common/LoadingIcon';
+import { GrowthExtremesChart } from './components/financial/GrowthExtremesChart';
+import { KpiCard } from './components/financial/KpiCard';
+import { RevenueVelocityChart } from './components/financial/RevenueVelocityChart';
+import { StatusBar } from './components/financial/StatusBar';
+import { TenantRevenueTable } from './components/financial/TenantRevenueTable';
+import { UptimeDashboard } from './components/uptime/UptimeDashboard';
 
 // ── Constants ─────────────────────────────────────────────────
 const REFRESH_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
@@ -131,26 +134,31 @@ export default function App() {
           {error && (
             <span className="dashboard__error">⚠ {error}</span>
           )}
-          <div className="btn-group" role="group" aria-label="Time period selector">
-            {([1, 7, 30, 90] as Period[]).map((d) => (
-              <button
-                key={d}
-                id={`period-${d}`}
-                className={period === d ? 'active' : ''}
-                onClick={() => setPeriod(d)}
-                aria-pressed={period === d}
-              >
-                {d}D
-              </button>
-            ))}
-          </div>
+          {view === 'financial' && (
+            <div className="btn-group" role="group" aria-label="Time period selector">
+              {([1, 7, 30, 90] as Period[]).map((d) => (
+                <button
+                  key={d}
+                  id={`period-${d}`}
+                  className={period === d ? 'active' : ''}
+                  onClick={() => setPeriod(d)}
+                  aria-pressed={period === d}
+                >
+                  {d}D
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </header>
 
       {/* ── Main Content ── */}
       <main className="dashboard__main">
         {view === 'financial' ? (
-          <>
+          loading ? (
+            <DashboardLoading />
+          ) : (
+            <>
         {/* KPI row */}
         <section className="kpi-row" aria-label="Key Performance Indicators">
           <KpiCard
@@ -176,16 +184,12 @@ export default function App() {
         {/* Charts row */}
         <section className="charts-row" aria-label="Revenue charts">
           <div className="chart-slot chart-slot--velocity">
-            {loading
-              ? <SkeletonChart />
-              : currentRollups.length > 0
+            {currentRollups.length > 0
                 ? <RevenueVelocityChart current={currentRollups} previous={previousRollups} />
                 : <EmptyState title="No revenue data" />}
           </div>
           <div className="chart-slot chart-slot--extremes">
-            {loading
-              ? <SkeletonChart />
-              : tenantKpis.length > 0
+            {tenantKpis.length > 0
                 ? <GrowthExtremesChart tenants={tenantKpis} />
                 : <EmptyState title="No tenant data" />}
           </div>
@@ -193,13 +197,14 @@ export default function App() {
 
         {/* Table */}
         <section className="table-row" aria-label="Client performance table">
-          {loading
-            ? <SkeletonTable />
-            : tenantKpis.length > 0
+          {tenantKpis.length > 0
               ? <TenantRevenueTable tenants={tenantKpis} />
               : <EmptyState title="No clients for this period" />}
         </section>
-          </>
+            </>
+          )
+        ) : view === 'uptime' ? (
+          <UptimeDashboard />
         ) : (
           <section className="dashboard-placeholder" aria-label="tba">
             <EmptyState title="in progress" />
@@ -220,22 +225,10 @@ export default function App() {
 }
 
 // ── Skeleton Placeholders ─────────────────────────────────────
-function SkeletonChart() {
+function DashboardLoading() {
   return (
-    <div className="card skeleton-chart">
-      <div className="skeleton-line skeleton-line--sm" />
-      <div className="skeleton-block" />
-    </div>
-  );
-}
-
-function SkeletonTable() {
-  return (
-    <div className="card skeleton-table">
-      <div className="skeleton-line skeleton-line--sm" />
-      {Array.from({ length: 6 }).map((_, i) => (
-        <div key={i} className="skeleton-line" style={{ width: `${90 - i * 8}%`, opacity: 1 - i * 0.1 }} />
-      ))}
+    <div className="dashboard-loading">
+      <LoadingIcon />
     </div>
   );
 }

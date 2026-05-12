@@ -12,18 +12,15 @@
   --bg-primaryNeigbour: #e6f4f5;
   --bg-secondaryNeigbour: #034b4e; 
   --bg-border: rgba(0, 0, 0, 0.15);
-
-
+  
   /* Text */
   --text-primary:   #022d2e;
   --text-link:   #06959B;
-
-
+  
   /* Button */
   --button-primary: #51B5B9;
   --button-border: #04686D;
-
-
+  
   /* Accessory */
   --highlight-primary: #FFCE44;
 
@@ -106,50 +103,3 @@ h1, h2, h3, h4 {
   box-shadow: var(--shadow-card);
 }
 
-/* ── Button Group ──────────────────────────────────────────── */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  padding: 2px 0;
-  background: transparent;
-  border-radius: 0;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-}
-
-.badge-green { color: var(--green); }
-.badge-neutral { color: var(--text-primary); }
-.badge-red { color: var(--red); }
-
-.btn-group {
-  display: flex;
-  gap: 2px;
-  background: var(--bg-primary);
-  border: 1px solid var(--bg-border);
-  border-radius: var(--radius-md);
-  padding: 3px;
-}
-.btn-group button {
-  padding: 5px 14px;
-  border: 1px solid transparent;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--button-primary);
-  font-size: 12px;
-  font-weight: 500;
-  font-family: var(--font-sans);
-  cursor: pointer;
-  transition: all 0.15s ease;
-  letter-spacing: 0.03em;
-}
-.btn-group button:hover {
-  color: var(--text-primary);
-  background: var(--highlight-primary);
-  border-color: var(--button-border)
-}
-.btn-group button.active {
-  color: var(--text-primary);
-  border-color: var(--button-border);
-}

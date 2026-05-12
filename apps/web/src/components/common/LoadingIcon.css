@@ -1,0 +1,21 @@
+.loading-icon {
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-icon__spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--bg-primaryNeigbour);
+  border-top-color: var(--button-primary);
+  border-radius: 50%;
+  animation: loading-spin 0.8s linear infinite;
+}
+
+@keyframes loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

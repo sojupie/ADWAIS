@@ -1,0 +1,48 @@
+.extremes-chart {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  overflow-y: auto;
+  padding-right: var(--space-1);
+}
+
+.extremes-row {
+  display: grid;
+  grid-template-columns: 100px 1fr 52px;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 22px;
+}
+
+.extremes-row__name {
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: right;
+}
+
+.extremes-row__track {
+  height: 10px;
+  background: var(--bg-primary);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.extremes-row__bar {
+  height: 100%;
+  background: var(--chart-line);
+  border-radius: 99px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0.85;
+}
+
+.extremes-row__bar:hover {
+  opacity: 1;
+}
+
+.extremes-row__value {
+  font-size: 11px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}

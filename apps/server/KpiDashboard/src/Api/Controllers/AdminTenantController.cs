@@ -1,4 +1,6 @@
-﻿using Domain.Entities;
+﻿using Api.DTOs.Tenants;
+using Domain.Entities;
+using FluentValidation;
 using Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -7,7 +9,10 @@ namespace Api.Controllers;
 
 [ApiController]
 [Route("api/admin")] // Vill vi ha denna route??
-public class AdminTenantController(IDbContextFactory<AnalyticsDbContext> contextFactory) : ControllerBase
+public class AdminTenantController(
+    IDbContextFactory<AnalyticsDbContext> contextFactory,
+    IValidator<CreateTenantRequestDto> createTenantValidator,
+    IValidator<UpdateTenantRequestDto> updateTenantValidator) : ControllerBase
 {
     [HttpGet("tenants")]
     public async Task<IActionResult> GetTenants()
@@ -15,7 +20,7 @@ public class AdminTenantController(IDbContextFactory<AnalyticsDbContext> context
         await using var context = await contextFactory.CreateDbContextAsync();
 
         var tenants = await context.Tenants
-            .Select(t => new TenantResponse
+            .Select(t => new TenantResponseDto()
             {
                 Id = t.Id,
                 Name = t.Name,
@@ -40,7 +45,7 @@ public class AdminTenantController(IDbContextFactory<AnalyticsDbContext> context
 
         var tenant = await context.Tenants
             .Where(t => t.Id == id)
-            .Select(t => new TenantResponse
+            .Select(t => new TenantResponseDto()
             {
                 Id = t.Id,
                 Name = t.Name,
@@ -64,22 +69,14 @@ public class AdminTenantController(IDbContextFactory<AnalyticsDbContext> context
     }
 
     [HttpPost("create-tenant")]
-    public async Task<IActionResult> CreateTenant([FromBody] CreateTenantRequest request)
+    public async Task<IActionResult> CreateTenant([FromBody] CreateTenantRequestDto request)
     {
-        if (string.IsNullOrWhiteSpace(request.Name))
+        var validationResult = await createTenantValidator.ValidateAsync(request);
+        if (!validationResult.IsValid)
         {
-            return BadRequest("Name is required.");
+            return BadRequest(validationResult.Errors);
         }
 
-        if (string.IsNullOrWhiteSpace(request.LitiumBaseUrl))
-        {
-            return BadRequest("LitiumBaseUrl is required.");
-        }
-
-        if (string.IsNullOrWhiteSpace(request.ServiceAccountToken))
-        {
-            return BadRequest("ServiceAccountToken is required.");
-        }
         await using var context = await contextFactory.CreateDbContextAsync();
 
         var tenant = new Tenant
@@ -93,7 +90,7 @@ public class AdminTenantController(IDbContextFactory<AnalyticsDbContext> context
         context.Tenants.Add(tenant);
         await context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetTenant), new { id = tenant.Id }, new TenantResponse
+        return CreatedAtAction(nameof(GetTenant), new { id = tenant.Id }, new TenantResponseDto()
             {
                 Id = tenant.Id,
                 Name = tenant.Name,
@@ -124,8 +121,14 @@ public class AdminTenantController(IDbContextFactory<AnalyticsDbContext> context
     }
     
     [HttpPatch("tenants/{id:guid}")]
-    public async Task<IActionResult> UpdateTenant(Guid id, [FromBody] UpdateTenantRequest request)
+    public async Task<IActionResult> UpdateTenant(Guid id, [FromBody] UpdateTenantRequestDto request)
     {
+        var validationResult = await updateTenantValidator.ValidateAsync(request);
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(validationResult.Errors);
+        }
+
         await using var context = await contextFactory.CreateDbContextAsync();
 
         var tenant = await context.Tenants.FindAsync(id);
@@ -135,29 +138,14 @@ public class AdminTenantController(IDbContextFactory<AnalyticsDbContext> context
         }
         if (request.Name is not null)
         {
-            if (string.IsNullOrWhiteSpace(request.Name))
-            {
-                return BadRequest("Name cannot be empty.");
-            }
-
             tenant.Name = request.Name.Trim();
         }
         if (request.LitiumBaseUrl is not null)
         {
-            if (string.IsNullOrWhiteSpace(request.LitiumBaseUrl))
-            {
-                return BadRequest("LitiumBaseUrl cannot be empty.");
-            }
-
             tenant.LitiumBaseUrl = request.LitiumBaseUrl.Trim();
         }
         if (request.ServiceAccountToken is not null)
         {
-            if (string.IsNullOrWhiteSpace(request.ServiceAccountToken))
-            {
-                return BadRequest("ServiceAccountToken cannot be empty.");
-            }
-
             tenant.ServiceAccountToken = request.ServiceAccountToken;
         }
         if (request.OrderFetchingEnabled.HasValue)
@@ -167,7 +155,7 @@ public class AdminTenantController(IDbContextFactory<AnalyticsDbContext> context
 
         await context.SaveChangesAsync();
 
-        return Ok(new TenantResponse
+        return Ok(new TenantResponseDto()
         {
             Id = tenant.Id,
             Name = tenant.Name,
@@ -180,35 +168,5 @@ public class AdminTenantController(IDbContextFactory<AnalyticsDbContext> context
             PingReachable = tenant.PingReachable,
             OrderFetchingEnabled = tenant.OrderFetchingEnabled
         });
-    }
-    
-    public class UpdateTenantRequest
-    {
-        public string? Name { get; set; }
-        public string? LitiumBaseUrl { get; set; }
-        public string? ServiceAccountToken { get; set; }
-        public bool? OrderFetchingEnabled { get; set; }
-    }
-    
-    public class CreateTenantRequest
-    {
-        public string Name { get; set; } = string.Empty;
-        public string LitiumBaseUrl { get; set; } = string.Empty;
-        public string ServiceAccountToken { get; set; } = string.Empty;
-        public bool OrderFetchingEnabled { get; set; } = false;
-    }
-    
-    public class TenantResponse
-    {
-        public Guid Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public string LitiumBaseUrl { get; set; } = string.Empty;
-        public int OrderCount { get; set; }
-        public bool CurrentlyFetching { get; set; }
-        public DateTimeOffset? FetchedFrom { get; set; }
-        public DateTimeOffset? FetchedUntil { get; set; }
-        public DateTimeOffset? LastPolled { get; set; }
-        public bool? PingReachable { get; set; }
-        public bool OrderFetchingEnabled { get; set; }
     }
 }

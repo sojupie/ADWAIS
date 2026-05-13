@@ -51,6 +51,7 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
+  flex-wrap: wrap;
 }
 
 .uptime-table-card__title {
@@ -64,6 +65,24 @@
 .uptime-table-card__count {
   font-size: 11px;
   color: var(--text-primary);
+}
+
+.uptime-table-card__controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.uptime-tenant-select {
+  min-width: 180px;
+  padding: 5px 10px;
+  border: 1px solid var(--bg-border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 12px;
 }
 
 .uptime-table-wrap {

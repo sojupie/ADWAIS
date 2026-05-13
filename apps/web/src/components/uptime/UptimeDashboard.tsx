@@ -2,10 +2,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { LoadingIcon } from '../common/LoadingIcon';
 import './UptimeDashboard.css';
 
-interface MonitorStatus {
-  statusStr?: string;
-  uptime?: number;
-  lastResponseTime?: number | null;
+interface Tenant {
+  id: string;
+  name: string;
 }
 
 interface UptimeMonitor {
@@ -15,24 +14,35 @@ interface UptimeMonitor {
   url: string;
   uptimeSla: number | null;
   uptimeMonitorEnabled: boolean;
-  creationDate: string | null;
-  status?: MonitorStatus;
+  currentStatus: string;
+  currentUptimePercentage: number;
 }
 
-async function fetchMonitors(): Promise<UptimeMonitor[]> {
-  const response = await fetch('/api/UptimeRobot/monitors');
+async function fetchTenants(): Promise<Tenant[]> {
+  const response = await fetch('/api/admin/tenants');
   if (!response.ok) {
-    throw new Error(`HTTP ${response.status} - /api/UptimeRobot/monitors`);
+    throw new Error(`HTTP ${response.status} - /api/admin/tenants`);
+  }
+
+  return response.json() as Promise<Tenant[]>;
+}
+
+async function fetchMonitors(tenantId: string): Promise<UptimeMonitor[]> {
+  const response = await fetch(`/api/tenants/${tenantId}/monitors`);
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status} - /api/tenants/${tenantId}/monitors`);
   }
 
   return response.json() as Promise<UptimeMonitor[]>;
 }
 
-function normalizeStatus(status?: MonitorStatus): string {
-  return (status?.statusStr ?? 'Unknown').replaceAll('"', '');
+function normalizeStatus(status?: string): string {
+  return (status ?? 'Unknown').replaceAll('"', '');
 }
 
 export function UptimeDashboard() {
+  const [tenants, setTenants] = useState<Tenant[]>([]);
+  const [selectedTenantId, setSelectedTenantId] = useState<string>('');
   const [monitors, setMonitors] = useState<UptimeMonitor[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -44,9 +54,14 @@ export function UptimeDashboard() {
       setLoading(true);
       setError(null);
       try {
-        const data = await fetchMonitors();
+        const tenantData = await fetchTenants();
+        const initialTenantId = selectedTenantId || tenantData[0]?.id || '';
+        const monitorData = initialTenantId ? await fetchMonitors(initialTenantId) : [];
+
         if (!cancelled) {
-          setMonitors(data);
+          setTenants(tenantData);
+          setSelectedTenantId(initialTenantId);
+          setMonitors(monitorData);
         }
       } catch (e) {
         if (!cancelled) {
@@ -64,23 +79,23 @@ export function UptimeDashboard() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [selectedTenantId]);
 
   const summary = useMemo(() => {
-    const up = monitors.filter((m) => normalizeStatus(m.status).toUpperCase() === 'UP').length;
+    const up = monitors.filter((m) => normalizeStatus(m.currentStatus).toUpperCase() === 'UP').length;
     const enabled = monitors.filter((m) => m.uptimeMonitorEnabled).length;
-    const responseTimes = monitors
-      .map((m) => m.status?.lastResponseTime)
+    const uptimePercentages = monitors
+      .map((m) => m.currentUptimePercentage)
       .filter((value): value is number => typeof value === 'number');
-    const averageResponseTime = responseTimes.length === 0
+    const averageUptime = uptimePercentages.length === 0
       ? null
-      : Math.round(responseTimes.reduce((sum, value) => sum + value, 0) / responseTimes.length);
+      : uptimePercentages.reduce((sum, value) => sum + value, 0) / uptimePercentages.length;
 
     return {
       total: monitors.length,
       up,
       enabled,
-      averageResponseTime,
+      averageUptime,
     };
   }, [monitors]);
 
@@ -118,9 +133,9 @@ export function UptimeDashboard() {
           <strong className="uptime-stat__value">{summary.enabled}</strong>
         </div>
         <div className="card uptime-stat">
-          <span className="uptime-stat__label">Avg Response</span>
+          <span className="uptime-stat__label">Avg Uptime</span>
           <strong className="uptime-stat__value">
-            {summary.averageResponseTime === null ? 'N/A' : `${summary.averageResponseTime} ms`}
+            {summary.averageUptime === null ? 'N/A' : `${summary.averageUptime.toFixed(1)}%`}
           </strong>
         </div>
       </section>
@@ -128,7 +143,23 @@ export function UptimeDashboard() {
       <section className="card uptime-table-card" aria-label="Uptime monitors">
         <div className="uptime-table-card__header">
           <span className="uptime-table-card__title">Monitor Status</span>
-          <span className="uptime-table-card__count">{monitors.length} monitors</span>
+          <div className="uptime-table-card__controls">
+            {tenants.length > 0 && (
+              <select
+                className="uptime-tenant-select"
+                value={selectedTenantId}
+                onChange={(event) => setSelectedTenantId(event.target.value)}
+                aria-label="Select tenant"
+              >
+                {tenants.map((tenant) => (
+                  <option key={tenant.id} value={tenant.id}>
+                    {tenant.name}
+                  </option>
+                ))}
+              </select>
+            )}
+            <span className="uptime-table-card__count">{monitors.length} monitors</span>
+          </div>
         </div>
 
         {monitors.length === 0 ? (
@@ -144,12 +175,12 @@ export function UptimeDashboard() {
                   <th>Status</th>
                   <th>URL</th>
                   <th>Enabled</th>
-                  <th>Response</th>
+                  <th>Uptime</th>
                 </tr>
               </thead>
               <tbody>
                 {monitors.map((monitor) => {
-                  const status = normalizeStatus(monitor.status);
+                  const status = normalizeStatus(monitor.currentStatus);
                   const isUp = status.toUpperCase() === 'UP';
 
                   return (
@@ -167,9 +198,7 @@ export function UptimeDashboard() {
                       </td>
                       <td>{monitor.uptimeMonitorEnabled ? 'Yes' : 'No'}</td>
                       <td>
-                        {monitor.status?.lastResponseTime == null
-                          ? 'N/A'
-                          : `${monitor.status.lastResponseTime} ms`}
+                        {`${monitor.currentUptimePercentage.toFixed(1)}%`}
                       </td>
                     </tr>
                   );

@@ -1,5 +1,8 @@
+using Api.DTOs.Tenants;
 using Api.Exceptions;
+using Api.Validators.Tenants;
 using DotNetEnv;
+using FluentValidation;
 using Hangfire;
 using Hangfire.PostgreSql;
 using Infrastructure;
@@ -15,6 +18,8 @@ builder.Configuration.AddEnvironmentVariables();
 
 builder.Services.AddControllers();
 builder.Services.AddHttpClient();
+builder.Services.AddScoped<IValidator<CreateTenantRequestDto>, CreateTenantRequestDtoValidator>();
+builder.Services.AddScoped<IValidator<UpdateTenantRequestDto>, UpdateTenantRequestDtoValidator>();
 builder.Services.AddScoped<IMonitorOrchestrationService, MonitorOrchestrationService>();
 builder.Services.AddHttpClient<Infrastructure.Services.Monitoring.IUptimeRobotService, Infrastructure.Services.Monitoring.UptimeRobotService>();
 builder.Services.AddOpenApi();

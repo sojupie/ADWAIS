@@ -133,9 +133,19 @@ public class GlobalDashboardController(IDbContextFactory<AnalyticsDbContext> con
         return (currentStart, currentEnd, previousStart);
     }
 
-    private static double CalculateAov(long revenue, long volume)
+    private static double CalculateAov(decimal revenue, decimal volume)
     {
-        return volume == 0 ? 0 : (double)revenue / volume;
+        return volume == 0 ? 0 : (double)(revenue / volume);
+    }
+
+    private static double CalculatePoP(decimal current, decimal previous)
+    {
+        if (previous == 0)
+        {
+            return current == 0 ? 0 : 100;
+        }
+
+        return (double)((current - previous) / previous * 100);
     }
 
     private static double CalculatePoP(double current, double previous)
@@ -148,13 +158,14 @@ public class GlobalDashboardController(IDbContextFactory<AnalyticsDbContext> con
         return (current - previous) / previous * 100;
     }
 
+    //below dtos probably to be replaced by the ones in the dto folder.
     public class GlobalKpiResponse
     {
-        public long TotalRevenue { get; set; }
-        public long TotalVolume { get; set; }
+        public decimal TotalRevenue { get; set; }
+        public decimal TotalVolume { get; set; }
         public double Aov { get; set; }
-        public long PreviousRevenue { get; set; }
-        public long PreviousVolume { get; set; }
+        public decimal PreviousRevenue { get; set; }
+        public decimal PreviousVolume { get; set; }
         public double PreviousAov { get; set; }
         public double RevenuePoP { get; set; }
         public double VolumePoP { get; set; }
@@ -165,15 +176,15 @@ public class GlobalDashboardController(IDbContextFactory<AnalyticsDbContext> con
     {
         public Guid TenantId { get; set; }
         public string TenantName { get; set; } = string.Empty;
-        public long TotalRevenue { get; set; }
-        public long TotalVolume { get; set; }
+        public decimal TotalRevenue { get; set; }
+        public decimal TotalVolume { get; set; }
         public double Aov { get; set; }
     }
 
     public class DailyGlobalRollupResponse
     {
         public DateTime CreatedDate { get; set; }
-        public long GlobalVolume { get; set; }
-        public long GlobalRevenue { get; set; }
+        public decimal GlobalVolume { get; set; }
+        public decimal GlobalRevenue { get; set; }
     }
 }

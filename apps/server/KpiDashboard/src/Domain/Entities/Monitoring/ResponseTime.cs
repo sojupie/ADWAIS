@@ -1,5 +1,3 @@
-using System;
-
 namespace Domain.Entities.Monitoring;
 
 public class ResponseTime
@@ -10,6 +8,6 @@ public class ResponseTime
     public double? Average { get; set; }
     public double? Lowest { get; set; }
     public double? Highest { get; set; }
-    
-    public UptimeMonitor UptimeMonitor { get; set; } = null!;
+
+    public UptimeMonitor? UptimeMonitor { get; set; }
 }

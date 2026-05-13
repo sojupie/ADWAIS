@@ -1,4 +1,6 @@
-﻿namespace Api.Models;
+﻿using Api.DTOs.Financial;
+
+namespace Api.DTOs.Financial;
 
 public class DashboardKpis
 {

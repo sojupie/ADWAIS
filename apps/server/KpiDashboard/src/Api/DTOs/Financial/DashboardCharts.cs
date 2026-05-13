@@ -1,4 +1,4 @@
-namespace Api.Models;
+namespace Api.DTOs.Financial;
 
 public class DashboardCharts
 {

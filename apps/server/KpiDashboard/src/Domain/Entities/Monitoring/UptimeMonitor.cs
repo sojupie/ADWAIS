@@ -1,28 +1,19 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+namespace Domain.Entities.Monitoring;
 
-namespace Domain.Entities.Monitoring {
-    public class UptimeMonitor {
-        public int Id { get; set; }
-        public Guid TenantId { get; set; }
+public class UptimeMonitor
+{
+    public int Id { get; set; } // External ID from UptimeRobot
+    public Guid TenantId { get; set; }
+    public required string Name { get; set; }
+    public required string Url { get; set; }
+    public double? UptimeSla { get; set; }
+    public bool UptimeMonitorEnabled { get; set; }
+    public DateTimeOffset? LastUpdate { get; set; }
+    public DateTimeOffset? CreationDate { get; set; }
 
-        [Required(ErrorMessage = "NAME REQUIRED")]
-        public string Name { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "URL EMPTY")]
-        [Url(ErrorMessage = "INVALID URL")]
-        public string Url { get; set; } = string.Empty;
-        
-        public double? UptimeSla { get; set; }
-        public bool UptimeMonitorEnabled { get; set; }
-        public DateTimeOffset? CreationDate { get; set; }
-        
-        [NotMapped]
-        public MonitorStatus Status { get; set; } = new MonitorStatus();
-        
-        public Tenant Tenant { get; set; } = null!;
-        public ICollection<ResponseTime> ResponseTimes { get; set; } = new List<ResponseTime>();
-    }
+    public Tenant? Tenant { get; set; }
+    public ICollection<ResponseTime> ResponseTimes { get; set; } = new List<ResponseTime>();
+    
+    // Telemetry and live statuses; do not persist.
+    public string StatusStr { get; set; } = "Unknown";
 }

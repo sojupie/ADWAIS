@@ -3,6 +3,6 @@
 public class DailyFinancialGlobalRollup
 {
     public DateTime CreatedDate { get; set; }
-    public long GlobalVolume { get; set; }
-    public long GlobalRevenue { get; set; }
+    public decimal GlobalVolume { get; set; }
+    public decimal GlobalRevenue { get; set; }
 }

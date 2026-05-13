@@ -4,13 +4,12 @@ public class Order
 {
     public Guid Id { get; set; }
     public Guid TenantId { get; set; }
-    public string OrderState { get; set; } = string.Empty;
-    public string LitiumOrderId { get; set; } = string.Empty;
+    public required string OrderState { get; set; }
+    public required string LitiumOrderId { get; set; }
     public DateTimeOffset CreatedDate { get; set; }
     public int TotalValueIncVat { get; set; }
     public int TotalValueExcVat { get; set; }
-    public string Currency { get; set; } = string.Empty;
+    public required string Currency { get; set; }
 
-
-    public Tenant Tenant { get; set; } = null!;
+    public Tenant? Tenant { get; set; }
 }

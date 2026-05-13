@@ -59,6 +59,7 @@ app.MapOpenApi();
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseExceptionHandler();
+app.UseHangfireDashboard();
 
 app.MapControllers();
 

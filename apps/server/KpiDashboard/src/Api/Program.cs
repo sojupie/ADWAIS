@@ -40,11 +40,17 @@ builder.Services.AddHttpClient<Infrastructure.Services.ITenantIngestionService, 
 
 var connectionString = builder.Configuration.GetConnectionString("AnalyticsDb");
 
+builder.Services.AddDbContext<AnalyticsDbContext>(options =>
+{
+    options.UseNpgsql(connectionString)
+        .UseSnakeCaseNamingConvention();
+});
+
 builder.Services.AddDbContextFactory<AnalyticsDbContext>(options =>
 {
     options.UseNpgsql(connectionString)
         .UseSnakeCaseNamingConvention(); 
-});
+}, ServiceLifetime.Scoped);
 
 builder.Services.AddHangfire(config =>
 {

@@ -1,4 +1,5 @@
-﻿using Infrastructure;
+﻿using Hangfire;
+using Infrastructure;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,27 +10,26 @@ namespace Api.Controllers;
 [Route("api/[controller]")]
 public class IngestionController(
     IDbContextFactory<AnalyticsDbContext> contextFactory,
-    ITenantIngestionService ingestionService)
+    IBackgroundJobClient backgroundJobClient)
     : ControllerBase
 {
     [HttpPost("backfill")]
-    public async Task<IActionResult> ExecuteHistoricalBackfill([FromQuery] Guid tenantId, [FromQuery] DateTimeOffset startDate, [FromQuery] DateTimeOffset endDate)
+    public async Task<IActionResult> ExecuteHistoricalBackfill(
+        [FromQuery] Guid tenantId, 
+        [FromQuery] DateTimeOffset startDate, 
+        [FromQuery] DateTimeOffset endDate,
+        CancellationToken ct)
     {
         if (startDate >= endDate) return BadRequest("startDate must be before endDate");
 
-        using var context = await contextFactory.CreateDbContextAsync();
-        var tenant = await context.Tenants.FindAsync(tenantId);
+        await using var context = await contextFactory.CreateDbContextAsync(ct);
+        var tenant = await context.Tenants.FirstOrDefaultAsync(t => t.Id == tenantId, ct);
         
         if (tenant == null) return NotFound("Tenant not found.");
 
-        try
-        {
-            var totalIngested = await ingestionService.ExecuteIngestionAsync(tenant, startDate, endDate);
-            return Ok(new { IngestedCount = totalIngested });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, ex.Message);
-        }
+        var jobId = backgroundJobClient.Enqueue<ITenantIngestionService>(
+            service => service.ExecuteIngestionAsync(tenant, startDate, endDate, CancellationToken.None));
+
+        return Accepted(new { JobId = jobId });
     }
 }

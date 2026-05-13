@@ -11,8 +11,6 @@ import { LoadingIcon } from './components/common/LoadingIcon';
 import { GrowthExtremesChart } from './components/financial/GrowthExtremesChart';
 import { KpiCard } from './components/financial/KpiCard';
 import { RevenueVelocityChart } from './components/financial/RevenueVelocityChart';
-import { StatusBar } from './components/financial/StatusBar';
-import { TenantRevenueTable } from './components/financial/TenantRevenueTable';
 import { UptimeDashboard } from './components/uptime/UptimeDashboard';
 
 // ── Constants ─────────────────────────────────────────────────
@@ -43,7 +41,6 @@ export default function App() {
   const [period, setPeriod] = useState<Period>(30);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const [globalKpi, setGlobalKpi] = useState<GlobalKpi | null>(null);
   const [tenantKpis, setTenantKpis] = useState<TenantKpi[]>([]);
@@ -59,7 +56,6 @@ export default function App() {
       setGlobalKpi(data.globalKpi);
       setTenantKpis(data.tenantKpis);
       setGlobalRollups(data.globalRollups);
-      setLastUpdated(new Date());
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to fetch data');
     } finally {
@@ -195,12 +191,6 @@ export default function App() {
           </div>
         </section>
 
-        {/* Table */}
-        <section className="table-row" aria-label="Client performance table">
-          {tenantKpis.length > 0
-              ? <TenantRevenueTable tenants={tenantKpis} />
-              : <EmptyState title="No clients for this period" />}
-        </section>
             </>
           )
         ) : view === 'uptime' ? (
@@ -213,13 +203,6 @@ export default function App() {
         )}
       </main>
 
-      {/* ── Status Bar ── */}
-      <StatusBar
-        lastUpdated={lastUpdated}
-        loading={loading}
-        refreshIntervalMs={REFRESH_INTERVAL_MS}
-        onRefresh={() => fetchData(period)}
-      />
     </div>
   );
 }

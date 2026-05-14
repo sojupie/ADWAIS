@@ -4,7 +4,7 @@ import './components/financial/FinancialDashboard.css';
 import { formatCurrency, formatCompact, formatNumber } from '@utils';
 import { LoadingIcon } from './components/common/LoadingIcon';
 import { GrowthExtremesChart } from './components/financial/GrowthExtremesChart';
-import { KpiCard } from './components/financial/KpiCard';
+import { FactPanel } from './components/common/FactPanel';
 import { RevenueVelocityChart } from './components/financial/RevenueVelocityChart';
 import { UptimeDashboard } from './components/uptime/UptimeDashboard';
 import { setDashboardPeriod, useDashboardData, type Period } from './dashboardDataStore';
@@ -92,19 +92,19 @@ export default function App() {
           ) : (
             <>
               <section className="kpi-row" aria-label="Key Performance Indicators">
-                <KpiCard
+                <FactPanel
                   label="Global Revenue"
                   sublabel={`(${period}D)`}
                   value={globalKpi ? formatCurrency(globalKpi.totalRevenue) : '\u2014'}
                   pop={globalKpi?.revenuePoP}
                 />
-                <KpiCard
+                <FactPanel
                   label="Transaction Volume"
                   sublabel="Total absolute orders"
                   value={globalKpi ? formatNumber(globalKpi.totalVolume) : '\u2014'}
                   pop={globalKpi?.volumePoP}
                 />
-                <KpiCard
+                <FactPanel
                   label="Portfolio AOV"
                   sublabel="Derived (Revenue / Volume)"
                   value={globalKpi ? `${formatCompact(globalKpi.aov)} SEK` : '\u2014'}

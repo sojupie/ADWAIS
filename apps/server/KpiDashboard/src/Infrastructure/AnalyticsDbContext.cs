@@ -12,6 +12,7 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options) : 
     public DbSet<GlobalConfig> GlobalConfigs => Set<GlobalConfig>();
     public DbSet<User> Users => Set<User>();
     public DbSet<Tenant> Tenants => Set<Tenant>();
+    public Guid SystemTenantGuid = new Guid("00000000-0000-0000-0000-000000000001");
     
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<DailyFinancialTenantRollup> DailyTenantRollups => Set<DailyFinancialTenantRollup>();
@@ -44,6 +45,18 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options) : 
             entity.Ignore(t => t.OrderCount);
             entity.Ignore(t => t.CurrentlyFetching);
             entity.Ignore(t => t.PingReachable);
+
+            // to catch unassigned monitors since TenantId is not nullable and a foreign key
+            entity.HasData(
+                new Tenant
+                {
+                    Id = SystemTenantGuid,
+                    Name = "System (unassigned monitors)",
+                    LitiumBaseUrl = "N/A",
+                    ServiceAccountToken = "N/A",
+                    OrderFetchingEnabled = false
+                }
+            );
         });
         
         // Order

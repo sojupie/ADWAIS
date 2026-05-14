@@ -1,5 +1,5 @@
-/* Shared chart card wrapper */
-.chart-card {
+/* Shared chart panel wrapper */
+.chart-panel {
   padding: var(--space-5) var(--space-6);
   display: flex;
   flex-direction: column;
@@ -7,7 +7,7 @@
   height: 100%;
 }
 
-.chart-card__header {
+.chart-panel__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -15,7 +15,7 @@
   gap: var(--space-2);
 }
 
-.chart-card__title {
+.chart-panel__title {
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.1em;
@@ -23,7 +23,7 @@
   color: var(--text-primary);
 }
 
-.chart-card__legend {
+.chart-panel__legend {
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -31,21 +31,13 @@
   color: var(--text-primary);
 }
 
-
-.chart-card__legend-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.chart-card__body {
+.chart-panel__body {
   flex: 1;
   min-height: 0;
 }
 
 /* Tooltip */
-.chart-tooltip {
+.chart-panel-tooltip {
   background: var(--bg-primary);
   border: 1px solid var(--bg-secondary);;
   border-radius: var(--radius-md);
@@ -55,7 +47,7 @@
   box-shadow: var(--shadow-elevated);
 }
 
-.chart-tooltip__label {
+.chart-panel-tooltip__label {
   color: var(--text-primary);
   margin-bottom: var(--space-2);
   font-size: 11px;

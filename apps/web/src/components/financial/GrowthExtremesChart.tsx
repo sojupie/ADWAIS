@@ -1,6 +1,6 @@
 import type { TenantKpi } from '@types';
 import { formatCompact } from '@utils';
-import './ChartCard.css';
+import '../common/ChartPanel.css';
 import './GrowthExtremesChart.css';
 
 interface Props {
@@ -21,12 +21,12 @@ export function GrowthExtremesChart({ tenants }: Props) {
   const zeroPosition = Math.abs(minRevenue / revenueRange) * 100;
 
   return (
-    <div className="chart-card card">
-      <div className="chart-card__header">
-        <span className="chart-card__title">Revenue by Client</span>
+    <div className="chart-panel card">
+      <div className="chart-panel__header">
+        <span className="chart-panel__title">Revenue by Client</span>
       </div>
 
-      <div className="chart-card__body extremes-chart">
+      <div className="chart-panel__body extremes-chart">
         {sorted.map((t) => {
           const isNegative = t.totalRevenue < 0;
           const width = Math.abs(t.totalRevenue / revenueRange) * 100;

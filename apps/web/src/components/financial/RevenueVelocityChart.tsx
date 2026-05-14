@@ -9,7 +9,7 @@ import {
 } from 'recharts';
 import type { DailyGlobalRollup } from '@types';
 import { formatDate, formatCompact } from '@utils';
-import './ChartCard.css';
+import '../common/ChartPanel.css';
 
 interface Props {
   current: DailyGlobalRollup[];
@@ -38,8 +38,8 @@ function buildRows(current: DailyGlobalRollup[], previous: DailyGlobalRollup[]):
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="chart-tooltip">
-      <p className="chart-tooltip__label">{label}</p>
+    <div className="chart-panel-tooltip">
+      <p className="chart-panel-tooltip__label">{label}</p>
       {payload.map((entry: any) => (
         <p key={entry.name} style={{ color: entry.color }}>
           {entry.name === 'revenue' ? 'Current' : 'Previous'}: {' '}
@@ -54,18 +54,18 @@ export function RevenueVelocityChart({ current, previous }: Props) {
   const rows = buildRows(current, previous);
 
   return (
-    <div className="chart-card card">
-      <div className="chart-card__header">
-        <span className="chart-card__title">Revenue Velocity</span>
-        <div className="chart-card__legend">
-          <span className="chart-card__legend-dot" style={{ background: 'var(--chart-line)' }} />
+    <div className="chart-panel card">
+      <div className="chart-panel__header">
+        <span className="chart-panel__title">Revenue Velocity</span>
+        <div className="chart-panel__legend">
+          <span className="chart-panel__legend-dot" style={{ background: 'var(--chart-line)' }} />
           <span>Current Period</span>
-          <span className="chart-card__legend-dot" style={{ background: 'var(--chart-ghost)' }} />
+          <span className="chart-panel__legend-dot" style={{ background: 'var(--chart-ghost)' }} />
           <span>Previous Period</span>
         </div>
       </div>
 
-      <div className="chart-card__body">
+      <div className="chart-panel__body">
         <ResponsiveContainer width="100%" height={220}>
           <AreaChart data={rows} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
             <defs>

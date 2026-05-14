@@ -1,14 +1,13 @@
-import './KpiCard.css';
+import './FactPanel.css';
 
-interface KpiCardProps {
+interface FactPanelProps {
   label: string;
   sublabel?: string;
   value: string;
   pop?: number;      // period-over-period %, e.g. 6.37
-  footer?: string;
 }
 
-export function KpiCard({ label, sublabel, value, pop, footer }: KpiCardProps) {
+export function FactPanel({ label, sublabel, value, pop }: FactPanelProps) {
   const badgeClass = pop === undefined
     ? ''
     : pop === 0
@@ -21,14 +20,14 @@ export function KpiCard({ label, sublabel, value, pop, footer }: KpiCardProps) {
     : null;
 
   return (
-    <div className="kpi-card card">
-      <div className="kpi-card__header">
-        <span className="kpi-card__label">{label}</span>
-        {sublabel && <span className="kpi-card__sublabel">{sublabel}</span>}
+    <div className="fact-panel card">
+      <div className="fact-panel__header">
+        <span className="fact-panel__label">{label}</span>
+        {sublabel && <span className="fact-panel__sublabel">{sublabel}</span>}
       </div>
 
-      <div className="kpi-card__body">
-        <span className="kpi-card__value">{value}</span>
+      <div className="fact-panel__body">
+        <span className="fact-panel__value">{value}</span>
         {popLabel && (
           <span className={`badge ${badgeClass}`}>
             {popLabel}
@@ -36,9 +35,6 @@ export function KpiCard({ label, sublabel, value, pop, footer }: KpiCardProps) {
         )}
       </div>
 
-      {footer && (
-        <div className="kpi-card__footer text-muted">{footer}</div>
-      )}
     </div>
   );
 }

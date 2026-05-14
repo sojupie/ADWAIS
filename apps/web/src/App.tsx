@@ -9,7 +9,7 @@ import type {
 import { formatCurrency, formatCompact, formatNumber } from '@utils';
 import { LoadingIcon } from './components/common/LoadingIcon';
 import { GrowthExtremesChart } from './components/financial/GrowthExtremesChart';
-import { KpiCard } from './components/financial/KpiCard';
+import { FactPanel } from './components/common/FactPanel';
 import { RevenueVelocityChart } from './components/financial/RevenueVelocityChart';
 import { UptimeDashboard } from './components/uptime/UptimeDashboard';
 
@@ -17,7 +17,7 @@ import { UptimeDashboard } from './components/uptime/UptimeDashboard';
 const REFRESH_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
 
 type Period = 1 | 7 | 30 | 90;
-type DashboardView = 'financial' | 'uptime' |'Fleet Status' | 'Intranet';
+type DashboardView = 'financial' | 'uptime' |'Fleet Status' | 'Intranet' | 'TenantSpecific';
 
 // ── Data Fetching ─────────────────────────────────────────────
 async function fetchJson<T>(url: string): Promise<T> {
@@ -157,19 +157,19 @@ export default function App() {
             <>
         {/* KPI row */}
         <section className="kpi-row" aria-label="Key Performance Indicators">
-          <KpiCard
+          <FactPanel
             label="Global Revenue"
             sublabel={`(${period}D)`}
             value={globalKpi ? formatCurrency(globalKpi.totalRevenue) : '—'}
             pop={globalKpi?.revenuePoP}
           />
-          <KpiCard
+          <FactPanel
             label="Transaction Volume"
             sublabel="Total absolute orders"
             value={globalKpi ? formatNumber(globalKpi.totalVolume) : '—'}
             pop={globalKpi?.volumePoP}
           />
-          <KpiCard
+          <FactPanel
             label="Portfolio AOV"
             sublabel="Derived (Revenue / Volume)"
             value={globalKpi ? formatCompact(globalKpi.aov) + ' SEK' : '—'}

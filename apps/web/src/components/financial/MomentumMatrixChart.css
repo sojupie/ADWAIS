@@ -1,0 +1,30 @@
+.momentum-matrix-chart {
+  min-height: 280px;
+}
+
+.momentum-matrix-chart__legend {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-primaryNeigbour);
+  color: var(--text-primary);
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.momentum-matrix-chart__label {
+  fill: var(--text-primary);
+  font-size: 10px;
+  font-weight: 500;
+  pointer-events: none;
+}
+
+.momentum-matrix-chart .recharts-scatter-symbol {
+  transition: opacity 0.15s ease;
+}
+
+.momentum-matrix-chart .recharts-scatter-symbol:hover {
+  opacity: 0.86;
+}

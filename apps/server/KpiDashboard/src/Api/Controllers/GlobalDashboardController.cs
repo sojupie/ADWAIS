@@ -63,11 +63,11 @@ public class GlobalDashboardController(IDbContextFactory<AnalyticsDbContext> con
     public async Task<IActionResult> GetTenantKpis([FromQuery] int days = 30)
     {
         days = NormalizeDays(days);
-        var (currentStart, currentEnd, _) = GetPeriods(days);
+        var (currentStart, currentEnd, previousStart) = GetPeriods(days);
 
         await using var context = await contextFactory.CreateDbContextAsync();
 
-        var tenantKpis = await context.DailyTenantRollups
+        var currentRollups = await context.DailyTenantRollups
             .AsNoTracking()
             .Where(r => r.CreatedDate >= currentStart && r.CreatedDate < currentEnd)
             .GroupBy(r => r.TenantId)
@@ -77,20 +77,54 @@ public class GlobalDashboardController(IDbContextFactory<AnalyticsDbContext> con
                 TotalRevenue = g.Sum(r => r.Revenue),
                 TotalVolume = g.Sum(r => r.Volume)
             })
-            .Join(
-                context.Tenants.AsNoTracking(),
-                rollup => rollup.TenantId,
-                tenant => tenant.Id,
-                (rollup, tenant) => new TenantKpiResponse
+            .ToListAsync();
+
+        var previousRollups = await context.DailyTenantRollups
+            .AsNoTracking()
+            .Where(r => r.CreatedDate >= previousStart && r.CreatedDate < currentStart)
+            .GroupBy(r => r.TenantId)
+            .Select(g => new
+            {
+                TenantId = g.Key,
+                PreviousRevenue = g.Sum(r => r.Revenue),
+                PreviousVolume = g.Sum(r => r.Volume)
+            })
+            .ToDictionaryAsync(r => r.TenantId);
+
+        var tenantIds = currentRollups.Select(r => r.TenantId).ToList();
+        var tenants = await context.Tenants
+            .AsNoTracking()
+            .Where(t => tenantIds.Contains(t.Id))
+            .ToDictionaryAsync(t => t.Id);
+
+        var tenantKpis = currentRollups
+            .Where(rollup => tenants.ContainsKey(rollup.TenantId))
+            .Select(rollup =>
+            {
+                previousRollups.TryGetValue(rollup.TenantId, out var previous);
+
+                var previousRevenue = previous?.PreviousRevenue ?? 0;
+                var previousVolume = previous?.PreviousVolume ?? 0;
+                var currentAov = CalculateAov(rollup.TotalRevenue, rollup.TotalVolume);
+                var previousAov = CalculateAov(previousRevenue, previousVolume);
+
+                return new TenantKpiResponse
                 {
                     TenantId = rollup.TenantId,
-                    TenantName = tenant.Name,
+                    TenantName = tenants[rollup.TenantId].Name,
                     TotalRevenue = rollup.TotalRevenue,
                     TotalVolume = rollup.TotalVolume,
-                    Aov = CalculateAov(rollup.TotalRevenue, rollup.TotalVolume)
-                })
+                    Aov = currentAov,
+                    PreviousRevenue = previousRevenue,
+                    PreviousVolume = previousVolume,
+                    PreviousAov = previousAov,
+                    RevenuePoP = CalculatePoP(rollup.TotalRevenue, previousRevenue),
+                    VolumePoP = CalculatePoP(rollup.TotalVolume, previousVolume),
+                    AovPoP = CalculatePoP(currentAov, previousAov)
+                };
+            })
             .OrderByDescending(t => t.TotalRevenue)
-            .ToListAsync();
+            .ToList();
 
         return Ok(tenantKpis);
     }
@@ -179,6 +213,12 @@ public class GlobalDashboardController(IDbContextFactory<AnalyticsDbContext> con
         public decimal TotalRevenue { get; set; }
         public decimal TotalVolume { get; set; }
         public double Aov { get; set; }
+        public decimal PreviousRevenue { get; set; }
+        public decimal PreviousVolume { get; set; }
+        public double PreviousAov { get; set; }
+        public double RevenuePoP { get; set; }
+        public double VolumePoP { get; set; }
+        public double AovPoP { get; set; }
     }
 
     public class DailyGlobalRollupResponse

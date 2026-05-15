@@ -18,6 +18,12 @@ export interface TenantKpi {
   totalRevenue: number;
   totalVolume: number;
   aov: number;
+  previousRevenue: number;
+  previousVolume: number;
+  previousAov: number;
+  revenuePoP: number;
+  volumePoP: number;
+  aovPoP: number;
 }
 
 export interface DailyGlobalRollup {

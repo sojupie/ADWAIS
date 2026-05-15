@@ -2,6 +2,8 @@ import { formatCurrency, formatCompact, formatNumber } from '@utils';
 import { FactPanel } from '../components/common/FactPanel';
 import { LoadingIcon } from '../components/common/LoadingIcon';
 import { GrowthExtremesChart } from '../components/financial/GrowthExtremesChart';
+import { MomentumMatrixChart } from '../components/financial/MomentumMatrixChart';
+import { RevenueDistributionChart } from '../components/financial/RevenueDistributionChart';
 import { RevenueVelocityChart } from '../components/financial/RevenueVelocityChart';
 import { useDashboardData } from '../dashboardDataStore';
 import './Financial.css';
@@ -50,15 +52,28 @@ export function Financial() {
       </section>
 
       <section className="charts-row" aria-label="Revenue charts">
-        <div className="chart-slot chart-slot--velocity">
+        <div className="chart-slot">
           {currentRollups.length > 0
             ? <RevenueVelocityChart current={currentRollups} previous={previousRollups} />
             : <EmptyState title="No revenue data" />}
         </div>
-        <div className="chart-slot chart-slot--extremes">
+        <div className="chart-slot">
           {tenantKpis.length > 0
             ? <GrowthExtremesChart tenants={tenantKpis} />
             : <EmptyState title="No tenant data" />}
+        </div>
+      </section>
+
+      <section className="charts-row charts-row--analysis" aria-label="Portfolio analysis charts">
+        <div className="chart-slot">
+          {tenantKpis.length > 0
+            ? <RevenueDistributionChart tenants={tenantKpis} />
+            : <EmptyState title="No tenant revenue data" />}
+        </div>
+        <div className="chart-slot">
+          {tenantKpis.length > 0
+            ? <MomentumMatrixChart tenants={tenantKpis} />
+            : <EmptyState title="No tenant momentum data" />}
         </div>
       </section>
     </>

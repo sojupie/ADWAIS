@@ -1,0 +1,11 @@
+.revenue-distribution-chart {
+  min-height: 280px;
+}
+
+.revenue-distribution-chart .recharts-bar-rectangle {
+  transition: opacity 0.15s ease;
+}
+
+.revenue-distribution-chart .recharts-bar-rectangle:hover {
+  opacity: 0.92;
+}

@@ -8,4 +8,5 @@ public record UptimeMonitorDto(
     double? UptimeSla, 
     bool UptimeMonitorEnabled, 
     string CurrentStatus, 
-    double CurrentUptimePercentage);
+    double CurrentUptimePercentage,
+    DateTimeOffset CreatedDate);

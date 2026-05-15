@@ -3,6 +3,7 @@ using DotNetEnv;
 using Hangfire;
 using Hangfire.PostgreSql;
 using Infrastructure;
+using Infrastructure.Jobs;
 using Infrastructure.Services.Monitoring;
 using Microsoft.EntityFrameworkCore;
 using Polly;
@@ -22,6 +23,15 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
+builder.Services.AddMemoryCache();
+
+var connectionString = builder.Configuration.GetConnectionString("AnalyticsDb");
+
+builder.Services.AddDbContextFactory<AnalyticsDbContext>(options =>
+{
+    options.UseNpgsql(connectionString)
+        .UseSnakeCaseNamingConvention(); 
+});
 
 builder.Services.AddHttpClient<Infrastructure.Services.ITenantIngestionService, Infrastructure.Services.TenantIngestionService>()
     .AddPolicyHandler(HttpPolicyExtensions
@@ -32,14 +42,6 @@ builder.Services.AddHttpClient<Infrastructure.Services.ITenantIngestionService, 
             sleepDurationProvider: retryAttempt => 
                 TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)) + TimeSpan.FromMilliseconds(new Random().Next(0, 1000))
         ));
-
-var connectionString = builder.Configuration.GetConnectionString("AnalyticsDb");
-
-builder.Services.AddDbContextFactory<AnalyticsDbContext>(options =>
-{
-    options.UseNpgsql(connectionString)
-        .UseSnakeCaseNamingConvention(); 
-});
 
 builder.Services.AddHangfire(config =>
 {
@@ -55,19 +57,26 @@ builder.Services.AddHangfireServer();
 
 var app = builder.Build();
 
+app.MapControllers();
+
 app.MapOpenApi();
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseExceptionHandler();
 app.UseHangfireDashboard();
 
-app.MapControllers();
-
 using (var scope = app.Services.CreateScope())
 {
     var contextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<AnalyticsDbContext>>();
-    using var context = await contextFactory.CreateDbContextAsync();
+    await using var context = await contextFactory.CreateDbContextAsync();
     context.Database.Migrate();
 }
+
+var recurringJobManager = app.Services.GetRequiredService<IRecurringJobManager>();
+recurringJobManager.AddOrUpdate<MonitorSynchronizationJob>(
+    "sync-uptimerobot-fleet",
+    job => job.ExecuteAsync(),
+    "*/5 * * * *"
+);
 
 app.Run();

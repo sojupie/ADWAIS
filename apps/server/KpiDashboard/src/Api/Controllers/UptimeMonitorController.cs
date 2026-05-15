@@ -13,17 +13,33 @@ public class UptimeMonitorController(IMonitorOrchestrationService monitorService
     {
         var entities = await monitorService.GetMonitorsByTenantAsync(tenantId);
         var dtos = entities.Select(m => new UptimeMonitorDto(
-            m.Id, m.TenantId, m.Name, m.Url, m.UptimeSla, m.UptimeMonitorEnabled, m.StatusStr, 0.0));
+            m.Id,
+            m.TenantId,
+            m.Name,
+            m.Url,
+            m.UptimeSla,
+            m.UptimeMonitorEnabled,
+            m.StatusStr,
+            0.0,
+            m.CreatedDate));
         return Ok(dtos);
     }
 
     [HttpPost]
     public async Task<ActionResult<UptimeMonitorDto>> CreateMonitor(Guid tenantId, [FromBody] CreateMonitorRequestDto request)
     {
-        var monitor = await monitorService.CreateMonitorAsync(tenantId, request.Name, request.Url, request.UptimeSla);
+        var m = await monitorService.CreateMonitorAsync(tenantId, request.Name, request.Url, request.UptimeSla);
         var dto = new UptimeMonitorDto(
-            monitor.Id, monitor.TenantId, monitor.Name, monitor.Url, monitor.UptimeSla, monitor.UptimeMonitorEnabled, "Unknown", 0.0);
-        return CreatedAtAction(nameof(GetMonitor), new { tenantId, id = monitor.Id }, dto);
+            m.Id,
+            m.TenantId,
+            m.Name,
+            m.Url,
+            m.UptimeSla,
+            m.UptimeMonitorEnabled,
+            m.StatusStr,
+            0.0,
+            m.CreatedDate);
+        return CreatedAtAction(nameof(GetMonitor), new { tenantId, id = m.Id }, dto);
     }
 
     [HttpGet("{id:int}")]
@@ -31,7 +47,15 @@ public class UptimeMonitorController(IMonitorOrchestrationService monitorService
     {
         var m = await monitorService.GetMonitorAsync(tenantId, id);
         var dto = new UptimeMonitorDto(
-            m.Id, m.TenantId, m.Name, m.Url, m.UptimeSla, m.UptimeMonitorEnabled, m.StatusStr, 0.0);
+            m.Id,
+            m.TenantId,
+            m.Name,
+            m.Url,
+            m.UptimeSla,
+            m.UptimeMonitorEnabled,
+            m.StatusStr,
+            0.0,
+            m.CreatedDate);
         return Ok(dto);
     }
 

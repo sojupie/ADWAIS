@@ -26,11 +26,6 @@
   color: var(--text-primary);
 }
 
-.fact-panel__sublabel {
-  font-size: 13px;
-  color: var(--text-primary);
-}
-
 .fact-panel__body {
   display: flex;
   align-items: center;
@@ -44,5 +39,18 @@
   letter-spacing: -0.03em;
   color: var(--text-primary);
   line-height: 1;
+}
+
+
+.fact-panel__extra {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px 0;
+  background: transparent;
+  border-radius: 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
 

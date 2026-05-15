@@ -9,8 +9,11 @@ import {
 } from 'recharts';
 import type { DailyGlobalRollup } from '@types';
 import { formatDate, formatCompact } from '@utils';
-import '../common/ChartPanel.css';
+import { ChartPanel } from '../common/ChartPanel';
+import './RevenueVelocityChart.css';
 
+
+//should probably be reworked to handle for example no sale days.
 interface Props {
   current: DailyGlobalRollup[];
   previous: DailyGlobalRollup[];
@@ -26,12 +29,14 @@ function buildRows(current: DailyGlobalRollup[], previous: DailyGlobalRollup[]):
   const sorted = [...current].sort(
     (a, b) => new Date(a.createdDate).getTime() - new Date(b.createdDate).getTime()
   );
-  const prevMap = new Map(previous.map((r) => [r.createdDate.slice(5), r.globalRevenue]));
+  const sortedPrevious = [...previous].sort(
+    (a, b) => new Date(a.createdDate).getTime() - new Date(b.createdDate).getTime()
+  );
 
-  return sorted.map((r) => ({
+  return sorted.map((r, index) => ({
     date: formatDate(r.createdDate),
     revenue: r.globalRevenue,
-    prevRevenue: prevMap.get(r.createdDate.slice(5)),
+    prevRevenue: sortedPrevious[index]?.globalRevenue,
   }));
 }
 
@@ -52,66 +57,56 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 export function RevenueVelocityChart({ current, previous }: Props) {
   const rows = buildRows(current, previous);
+  const legend = (
+    <div className="chart-panel__legend">
+      <span className="revenue-velocity-chart__legend-dot" style={{ background: 'var(--chart-line)' }} />
+      <span>Current Period</span>
+      <span className="revenue-velocity-chart__legend-dot" style={{ background: 'var(--chart-ghost)' }} />
+      <span>Previous Period</span>
+    </div>
+  );
 
   return (
-    <div className="chart-panel card">
-      <div className="chart-panel__header">
-        <span className="chart-panel__title">Revenue Velocity</span>
-        <div className="chart-panel__legend">
-          <span className="chart-panel__legend-dot" style={{ background: 'var(--chart-line)' }} />
-          <span>Current Period</span>
-          <span className="chart-panel__legend-dot" style={{ background: 'var(--chart-ghost)' }} />
-          <span>Previous Period</span>
-        </div>
-      </div>
-
-      <div className="chart-panel__body">
-        <ResponsiveContainer width="100%" height={220}>
-          <AreaChart data={rows} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-            <defs>
-              <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%"  stopColor="var(--chart-line)" stopOpacity={0.25} />
-                <stop offset="95%" stopColor="var(--chart-line)" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
-            <XAxis
-              dataKey="date"
-              tick={{ fill: 'var(--text-muted)', fontSize: 10 }}
-              axisLine={false}
-              tickLine={false}
-              interval="preserveStartEnd"
-            />
-            <YAxis
-              tickFormatter={(v) => formatCompact(v)}
-              tick={{ fill: 'var(--text-muted)', fontSize: 10 }}
-              axisLine={false}
-              tickLine={false}
-              width={52}
-            />
-            <Tooltip content={<CustomTooltip />} />
-            <Area
-              type="monotone"
-              dataKey="prevRevenue"
-              stroke="var(--chart-ghost)"
-              strokeWidth={1.5}
-              strokeDasharray="4 3"
-              fill="none"
-              dot={false}
-              activeDot={false}
-            />
-            <Area
-              type="monotone"
-              dataKey="revenue"
-              stroke="var(--chart-line)"
-              strokeWidth={2}
-              fill="url(#colorRevenue)"
-              dot={false}
-              activeDot={{ r: 4, fill: 'var(--chart-line)', strokeWidth: 0 }}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
+    <ChartPanel title="Revenue Velocity" legend={legend}>
+      <ResponsiveContainer width="100%" height={220}>
+        <AreaChart data={rows} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+          <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
+          <XAxis
+            dataKey="date"
+            tick={{ fill: 'var(--text-muted)', fontSize: 10 }}
+            axisLine={false}
+            tickLine={false}
+            interval="preserveStartEnd"
+          />
+          <YAxis
+            tickFormatter={(v) => formatCompact(v)}
+            tick={{ fill: 'var(--text-muted)', fontSize: 10 }}
+            axisLine={false}
+            tickLine={false}
+            width={52}
+          />
+          <Tooltip content={<CustomTooltip />} />
+          <Area
+            type="monotone"
+            dataKey="prevRevenue"
+            className="revenue-velocity-chart__previous-line"
+            strokeWidth={1.5}
+            strokeDasharray="4 3"
+            fill="none"
+            dot={false}
+            activeDot={false}
+          />
+          <Area
+            type="monotone"
+            dataKey="revenue"
+            className="revenue-velocity-chart__current-line"
+            strokeWidth={2}
+            fill="none"
+            dot={false}
+            activeDot={{ r: 4, fill: 'var(--chart-line)', strokeWidth: 0 }}
+          />
+        </AreaChart>
+      </ResponsiveContainer>
+    </ChartPanel>
   );
 }

@@ -1,0 +1,15 @@
+.revenue-velocity-chart__legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  display: inline-block;
+  flex: 0 0 auto;
+}
+
+.revenue-velocity-chart__current-line .recharts-area-curve {
+  stroke: var(--chart-line);
+}
+
+.revenue-velocity-chart__previous-line .recharts-area-curve {
+  stroke: var(--chart-ghost);
+}

@@ -17,21 +17,6 @@
   min-height: 290px;
 }
 
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  padding: 2px 0;
-  background: transparent;
-  border-radius: 0;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-}
-
-.badge-green { color: var(--green); }
-.badge-neutral { color: var(--text-primary); }
-.badge-red { color: var(--red); }
 
 .btn-group {
   display: flex;

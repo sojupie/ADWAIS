@@ -1,0 +1,54 @@
+.fleet-matrix-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  align-content: start;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-6);
+  min-height: 100%;
+}
+
+.fleet-matrix-tile {
+  min-height: 112px;
+  padding: var(--space-4);
+  border: 1px solid var(--bg-border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--space-2);
+  text-decoration: none;
+}
+
+.fleet-matrix-tile:hover {
+  border-color: var(--button-border);
+}
+
+.fleet-matrix-tile strong {
+  font-size: 14px;
+  line-height: 1.25;
+}
+
+.fleet-matrix-tile span {
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+.fleet-matrix-tile__status {
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.fleet-matrix-tile--up .fleet-matrix-tile__status {
+  color: var(--green);
+}
+
+.fleet-matrix-tile--down .fleet-matrix-tile__status {
+  color: var(--red);
+}
+
+.fleet-matrix-tile--disabled {
+  opacity: 0.95;
+}

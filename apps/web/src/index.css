@@ -30,6 +30,7 @@
 
   /* Chart */
   --chart-line: #6366ff;
+  --chart-ghost: #94a3b8;
   --chart-grid: rgba(0, 0, 0, 0.18);
 
   /* Spacing */
@@ -54,7 +55,12 @@
   /* Typography */
   --font-sans: 'Manrope', system-ui, -apple-system, sans-serif;
   --font-mono: ui-monospace, 'Cascadia Code', Consolas, monospace;
-
+  h1, h2, h3, h4 {
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.2;
+  }
+  
   font-family: var(--font-sans);
   font-size: 14px;
   line-height: 1.5;
@@ -82,13 +88,6 @@ body {
   background: var(--bg-primary);
 }
 
-
-/* ── Typography ────────────────────────────────────────────── */
-h1, h2, h3, h4 {
-  font-weight: 600;
-  color: var(--text-primary);
-  line-height: 1.2;
-}
 
 /* ── Utility ───────────────────────────────────────────────── */
 .text-green     { color: var(--green); }

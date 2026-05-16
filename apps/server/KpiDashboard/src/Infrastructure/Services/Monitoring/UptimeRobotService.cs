@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Infrastructure.Services.Monitoring.DTOs;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services.Monitoring;
@@ -33,18 +34,26 @@ public class UptimeRobotService(HttpClient httpClient, IDbContextFactory<Analyti
         return JsonDocument.Parse(responseContent);
     }
 
-    public async Task<int> CreateMonitorAsync(string name, string url)
+    public async Task<UptimeRobotMonitorDto> CreateMonitorAsync(string name, string url)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, "https://api.uptimerobot.com/v3/monitors");
         request.Content = JsonContent.Create(new { friendlyName = name, url, type = "HTTP", interval = 300, timeout = 60 });
-        using var response = await GetResponseAsync(request);    
-        return response.RootElement.GetProperty("id").GetInt32();
+        using var response = await GetResponseAsync(request);
+        
+        var monitor = new UptimeRobotMonitorDto(
+            response.RootElement.GetProperty("id").GetInt32(),
+            response.RootElement.GetProperty("friendlyName").GetString()!,
+            response.RootElement.GetProperty("url").GetString()!,
+            response.RootElement.GetProperty("status").GetString()!,
+            response.RootElement.GetProperty("createDateTime").GetDateTimeOffset()
+        );
+        return monitor;
     }    
     
     public async Task<List<UptimeRobotMonitorDto>> GetMonitorsAsync(int[]? monitorIds = null)
     {
         var url = "https://api.uptimerobot.com/v3/monitors";
-        if (monitorIds != null && monitorIds.Length > 0)
+        if (monitorIds is { Length: > 0 })
         {
             url += $"?monitors={string.Join("-", monitorIds)}";
         }
@@ -57,11 +66,14 @@ public class UptimeRobotService(HttpClient httpClient, IDbContextFactory<Analyti
         {
             monitors.Add(new UptimeRobotMonitorDto(
                 monitor.GetProperty("id").GetInt32(),
-                monitor.GetProperty("friendlyName").GetString() ?? string.Empty,
-                monitor.GetProperty("url").GetString() ?? string.Empty,
-                monitor.GetProperty("status").GetString()!
+                monitor.GetProperty("friendlyName").GetString()!,
+                monitor.GetProperty("url").GetString()!,
+                monitor.GetProperty("status").GetString()!,
+                monitor.GetProperty("createDateTime").GetDateTimeOffset()
             ));
         }
+        
+        Console.WriteLine(monitors[0].CreatedDate + " 123");
         return monitors;
     }
     

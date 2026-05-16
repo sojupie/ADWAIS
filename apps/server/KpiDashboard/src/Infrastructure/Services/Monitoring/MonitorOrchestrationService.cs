@@ -15,18 +15,18 @@ public class MonitorOrchestrationService(
         var monitorExists = await dbContext.Monitors.AnyAsync(m => m.Url == url && m.TenantId == tenantId);
         if (monitorExists) throw new InvalidOperationException($"A monitor with URL {url} already exists.");
 
-        var remoteId = await uptimeRobotService.CreateMonitorAsync(name, url);
-
+        var remoteMonitor = await uptimeRobotService.CreateMonitorAsync(name, url);
+        
         var monitor = new UptimeMonitor
         {
-            Id = remoteId,
+            Id = remoteMonitor.Id,
             TenantId = tenantId,
-            Name = name,
-            Url = url,
+            Name = remoteMonitor.FriendlyName,
+            Url = remoteMonitor.Url,
             UptimeSla = uptimeSla,
             UptimeMonitorEnabled = true,
-            CreationDate = DateTimeOffset.UtcNow,
-            StatusStr = "Not Checked Yet" // Transient property population
+            CreatedDate = remoteMonitor.CreatedDate,
+            StatusStr = remoteMonitor.Status // Transient property population
         };
 
         dbContext.Monitors.Add(monitor);

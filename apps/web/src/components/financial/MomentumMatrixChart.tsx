@@ -28,7 +28,11 @@ interface MomentumPoint {
 
 function buildPoints(tenants: TenantKpi[]): MomentumPoint[] {
   return tenants
-    .filter((tenant) => tenant.totalRevenue > 0 || tenant.previousRevenue > 0)
+    .filter((tenant) => (
+      tenant.previousRevenue > 0
+      && tenant.totalRevenue > 0
+      && Number.isFinite(tenant.revenuePoP)
+    ))
     .map((tenant) => ({
       tenantId: tenant.tenantId,
       tenantName: tenant.tenantName,
@@ -93,16 +97,22 @@ const TenantLabel = ({ x, y, index, payload }: any) => {
 
 export function MomentumMatrixChart({ tenants }: Props) {
   const points = buildPoints(tenants);
-
-  if (points.length === 0) return null;
-
-  const revenueDomain = getRevenueDomain(points);
-  const percentDomain = getPercentDomain(points);
   const legend = (
     <span className="momentum-matrix-chart__legend">
       Size = Total Rev Contribution
     </span>
   );
+
+  if (points.length === 0) {
+    return (
+      <ChartPanel title="Momentum Matrix" legend={legend} bodyClassName="momentum-matrix-chart momentum-matrix-chart--empty">
+        <span className="momentum-matrix-chart__empty">No previous-period baseline data</span>
+      </ChartPanel>
+    );
+  }
+
+  const revenueDomain = getRevenueDomain(points);
+  const percentDomain = getPercentDomain(points);
 
   return (
     <ChartPanel title="Momentum Matrix" legend={legend} bodyClassName="momentum-matrix-chart">

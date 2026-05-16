@@ -2,6 +2,18 @@
   min-height: 280px;
 }
 
+.momentum-matrix-chart--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.momentum-matrix-chart__empty {
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
 .momentum-matrix-chart__legend {
   display: inline-flex;
   align-items: center;

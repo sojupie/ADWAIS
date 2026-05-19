@@ -1,0 +1,64 @@
+.tenant-diagnostics {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.tenant-diagnostics__header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+.tenant-diagnostics__header h1 {
+  font-size: 26px;
+  line-height: 1.1;
+  margin-bottom: var(--space-2);
+}
+
+.tenant-diagnostics__header p {
+  color: var(--text-primary);
+  font-size: 15px;
+  opacity: 0.72;
+}
+
+.tenant-diagnostics__back {
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--bg-border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-card);
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.tenant-diagnostics__back:hover {
+  background: var(--bg-primaryNeigbour);
+}
+
+.tenant-diagnostics__kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.tenant-diagnostics__charts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+  min-height: 360px;
+}
+
+.tenant-diagnostics__charts--primary {
+  min-height: 390px;
+}
+
+@media (max-width: 1100px) {
+  .tenant-diagnostics__kpis,
+  .tenant-diagnostics__charts {
+    grid-template-columns: 1fr;
+  }
+}

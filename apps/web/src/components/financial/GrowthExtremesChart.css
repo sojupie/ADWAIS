@@ -12,6 +12,20 @@
   align-items: center;
   gap: var(--space-3);
   min-height: 22px;
+  width: 100%;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+.extremes-row--clickable {
+  cursor: pointer;
+}
+
+.extremes-row--clickable:hover .extremes-row__bar {
+  opacity: 1;
 }
 
 .extremes-row__name {

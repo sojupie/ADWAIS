@@ -40,3 +40,7 @@
 .momentum-matrix-chart .recharts-scatter-symbol:hover {
   opacity: 0.86;
 }
+
+.momentum-matrix-chart__scatter--clickable .recharts-scatter-symbol {
+  cursor: pointer;
+}

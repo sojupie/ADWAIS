@@ -16,12 +16,15 @@ import './RevenueDistributionChart.css';
 interface Props {
   tenants: TenantKpi[];
   maxTenants?: number;
+  onTenantSelect?: (tenantId: string) => void;
 }
 
 interface DistributionRow {
+  tenantId: string;
   tenantName: string;
   revenue: number;
   cumulativePct: number;
+  isSelectable: boolean;
 }
 
 function buildRows(tenants: TenantKpi[], maxTenants: number): DistributionRow[] {
@@ -34,9 +37,22 @@ function buildRows(tenants: TenantKpi[], maxTenants: number): DistributionRow[] 
     .slice(maxTenants)
     .reduce((sum, tenant) => sum + tenant.totalRevenue, 0);
 
-  const rows = otherRevenue > 0
-    ? [...visible, { tenantId: 'other', tenantName: 'Other', totalRevenue: otherRevenue } as TenantKpi]
-    : visible;
+  const rows = [
+    ...visible.map((tenant) => ({
+      tenantId: tenant.tenantId,
+      tenantName: tenant.tenantName,
+      totalRevenue: tenant.totalRevenue,
+      isSelectable: true,
+    })),
+    ...(otherRevenue > 0
+      ? [{
+          tenantId: 'other',
+          tenantName: 'Other',
+          totalRevenue: otherRevenue,
+          isSelectable: false,
+        }]
+      : []),
+  ];
 
   const totalRevenue = rows.reduce((sum, tenant) => sum + tenant.totalRevenue, 0);
   let cumulativeRevenue = 0;
@@ -45,9 +61,11 @@ function buildRows(tenants: TenantKpi[], maxTenants: number): DistributionRow[] 
     cumulativeRevenue += tenant.totalRevenue;
 
     return {
+      tenantId: tenant.tenantId,
       tenantName: tenant.tenantName,
       revenue: tenant.totalRevenue,
       cumulativePct: totalRevenue === 0 ? 0 : (cumulativeRevenue / totalRevenue) * 100,
+      isSelectable: tenant.isSelectable,
     };
   });
 }
@@ -67,7 +85,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   );
 };
 
-export function RevenueDistributionChart({ tenants, maxTenants = 10 }: Props) {
+export function RevenueDistributionChart({ tenants, maxTenants = 10, onTenantSelect }: Props) {
   const rows = buildRows(tenants, maxTenants);
 
   if (rows.length === 0) return null;
@@ -110,10 +128,18 @@ export function RevenueDistributionChart({ tenants, maxTenants = 10 }: Props) {
           <Bar
             yAxisId="revenue"
             dataKey="revenue"
+            className={onTenantSelect ? 'revenue-distribution-chart__bar--clickable' : undefined}
             fill="var(--chart-line)"
             fillOpacity={0.78}
             radius={[5, 5, 0, 0]}
             maxBarSize={48}
+            onClick={(row) => {
+              const payload = row?.payload as DistributionRow | undefined;
+
+              if (payload?.isSelectable) {
+                onTenantSelect?.(payload.tenantId);
+              }
+            }}
           />
           <Line
             yAxisId="cumulative"

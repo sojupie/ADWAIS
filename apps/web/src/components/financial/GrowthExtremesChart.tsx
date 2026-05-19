@@ -14,7 +14,13 @@ interface TenantRowData {
   barStyle: CSSProperties;
 }
 
-export function GrowthExtremesChart({ tenants }: { tenants: TenantKpi[] }) {
+export function GrowthExtremesChart({
+  tenants,
+  onTenantSelect,
+}: {
+  tenants: TenantKpi[];
+  onTenantSelect?: (tenantId: string) => void;
+}) {
   if (tenants.length === 0) return null;
   const sortedTenants = [...tenants]
       .sort((a, b) => b.totalRevenue - a.totalRevenue)
@@ -65,12 +71,22 @@ export function GrowthExtremesChart({ tenants }: { tenants: TenantKpi[] }) {
                 key={ExtremeRow.tenantId}
                 row={ExtremeRow}
                 zeroPosition={zeroPosition}
+                onTenantSelect={onTenantSelect}
             />
         ))}
       </ChartPanel>
   );
 }
-function GrowthExtremesRowJSX({row, zeroPosition,}: { row: TenantRowData; zeroPosition: number;})
+
+function GrowthExtremesRowJSX({
+  row,
+  zeroPosition,
+  onTenantSelect,
+}: {
+  row: TenantRowData;
+  zeroPosition: number;
+  onTenantSelect?: (tenantId: string) => void;
+})
 {
   let barClass = 'extremes-row__bar extremes-row__bar--positive';
   let valueClass = 'extremes-row__value text-green';
@@ -81,7 +97,11 @@ function GrowthExtremesRowJSX({row, zeroPosition,}: { row: TenantRowData; zeroPo
   }
 
   return (
-      <div className="extremes-row">
+      <button
+          className={`extremes-row ${onTenantSelect ? 'extremes-row--clickable' : ''}`}
+          type="button"
+          onClick={() => onTenantSelect?.(row.tenantId)}
+      >
         <span className="extremes-row__name text-secondary">
           {row.tenantName}
         </span>
@@ -94,6 +114,6 @@ function GrowthExtremesRowJSX({row, zeroPosition,}: { row: TenantRowData; zeroPo
         <span className={valueClass}>
           {row.formattedRevenue}
         </span>
-      </div>
+      </button>
   );
 }

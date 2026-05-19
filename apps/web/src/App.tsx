@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import './App.css';
-import { setDashboardPeriod, useDashboardData, type Period } from './dashboardDataStore';
-import { Financial } from './pages/Financial';
+import { useDashboardData } from './dashboardDataStore';
+import { Financial, FinancialPeriodSelector } from './pages/Financial';
 import { FleetStatus } from './pages/FleetStatus';
 
 type DashboardView = 'financial' | 'Fleet Status' | 'Intranet';
 
 export default function App() {
   const [view, setView] = useState<DashboardView>('financial');
-  const { period, error } = useDashboardData();
+  const { error } = useDashboardData();
 
   return (
     <div className="dashboard">
@@ -49,24 +49,9 @@ export default function App() {
           {error && (
             <span className="dashboard__error">{'\u26a0'} {error}</span>
           )}
-          {view === 'financial' && (
-            <div className="btn-group" role="group" aria-label="Time period selector">
-              {([1, 7, 30, 90] as Period[]).map((d) => (
-                <button
-                  key={d}
-                  id={`period-${d}`}
-                  className={period === d ? 'active' : ''}
-                  onClick={() => setDashboardPeriod(d)}
-                  aria-pressed={period === d}
-                >
-                  {d}D
-                </button>
-              ))}
-            </div>
-          )}
+          {view === 'financial' && <FinancialPeriodSelector />}
         </div>
       </header>
-
       <main className="dashboard__main">
         {view === 'financial' ? (
           <Financial />

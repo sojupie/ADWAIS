@@ -5,7 +5,7 @@ import { GrowthExtremesChart } from '../components/financial/GrowthExtremesChart
 import { MomentumMatrixChart } from '../components/financial/MomentumMatrixChart';
 import { RevenueDistributionChart } from '../components/financial/RevenueDistributionChart';
 import { RevenueVelocityChart } from '../components/financial/RevenueVelocityChart';
-import { useDashboardData } from '../dashboardDataStore';
+import { setDashboardPeriod, useDashboardData, type Period } from '../dashboardDataStore';
 import './Financial.css';
 
 export function Financial() {
@@ -77,6 +77,26 @@ export function Financial() {
         </div>
       </section>
     </>
+  );
+}
+
+export function FinancialPeriodSelector() {
+  const { period } = useDashboardData();
+
+  return (
+    <div className="btn-group" role="group" aria-label="Time period selector">
+      {([1, 7, 30, 90] as Period[]).map((d) => (
+        <button
+          key={d}
+          id={`period-${d}`}
+          className={period === d ? 'active' : ''}
+          onClick={() => setDashboardPeriod(d)}
+          aria-pressed={period === d}
+        >
+          {d}D
+        </button>
+      ))}
+    </div>
   );
 }
 

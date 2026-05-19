@@ -6,10 +6,10 @@
   flex: 0 0 auto;
 }
 
-.revenue-velocity-chart__current-line .recharts-area-curve {
+.revenue-velocity-chart__current-line .recharts-line-curve {
   stroke: var(--chart-line);
 }
 
-.revenue-velocity-chart__previous-line .recharts-area-curve {
+.revenue-velocity-chart__previous-line .recharts-line-curve {
   stroke: var(--chart-ghost);
 }

@@ -4,58 +4,96 @@ import { formatCompact } from '@utils';
 import { ChartPanel } from '../common/ChartPanel';
 import './GrowthExtremesChart.css';
 
-interface Props {
-  tenants: TenantKpi[];
+//need to adjust later since we probably wont have negative revenue
+//will use red for when revenue is less than previous period instead
+interface TenantRowData {
+  tenantId: string;
+  tenantName: string;
+  formattedRevenue: string;
+  isNegative: boolean;
+  barStyle: CSSProperties;
 }
 
-export function GrowthExtremesChart({ tenants }: Props) {
+export function GrowthExtremesChart({ tenants }: { tenants: TenantKpi[] }) {
   if (tenants.length === 0) return null;
+  const sortedTenants = [...tenants]
+      .sort((a, b) => b.totalRevenue - a.totalRevenue)
+      .slice(0,10);
 
-  // Sort by revenue desc, take top 12
-  const sorted = [...tenants]
-    .sort((a, b) => b.totalRevenue - a.totalRevenue)
-    .slice(0, 12);
-
-  const minRevenue = Math.min(...sorted.map((t) => t.totalRevenue), 0);
-  const maxRevenue = Math.max(...sorted.map((t) => t.totalRevenue), 0);
+  let minRevenue = 0;
+  let maxRevenue = 0;
+  for (const tenant of sortedTenants) {
+    if (tenant.totalRevenue < minRevenue) {
+      minRevenue = tenant.totalRevenue;
+    }
+    if (tenant.totalRevenue > maxRevenue) {
+      maxRevenue = tenant.totalRevenue;
+    }
+  }
   const revenueRange = maxRevenue - minRevenue || 1;
   const zeroPosition = Math.abs(minRevenue / revenueRange) * 100;
 
+  const ExtremeRows: TenantRowData[] = sortedTenants.map((tenant) => {
+    const isNegative = tenant.totalRevenue < 0;
+    const width = Math.abs(tenant.totalRevenue / revenueRange) * 100;
+
+    let barStyle: CSSProperties = {
+      left: `${zeroPosition}%`,
+      width: `${width}%`,
+    };
+
+    if (isNegative) {
+      barStyle = {
+        right: `${100 - zeroPosition}%`,
+        width: `${width}%`,
+      };
+    }
+
+    return {
+      tenantId: tenant.tenantId,
+      tenantName: tenant.tenantName,
+      formattedRevenue: formatCompact(tenant.totalRevenue),
+      isNegative,
+      barStyle,
+    };
+  });
+
   return (
-    <ChartPanel title="Revenue by Client" bodyClassName="extremes-chart">
-      {sorted.map((t) => {
-        const isNegative = t.totalRevenue < 0;
-        const width = Math.abs(t.totalRevenue / revenueRange) * 100;
-        let barClass = 'extremes-row__bar extremes-row__bar--positive';
-        let valueClass = 'extremes-row__value text-green';
-        let barStyle: CSSProperties = { left: `${zeroPosition}%`, width: `${width}%` };
+      <ChartPanel title="Revenue by Client" bodyClassName="extremes-chart">
+        {ExtremeRows.map((ExtremeRow) => (
+            <GrowthExtremesRowJSX
+                key={ExtremeRow.tenantId}
+                row={ExtremeRow}
+                zeroPosition={zeroPosition}
+            />
+        ))}
+      </ChartPanel>
+  );
+}
+function GrowthExtremesRowJSX({row, zeroPosition,}: { row: TenantRowData; zeroPosition: number;})
+{
+  let barClass = 'extremes-row__bar extremes-row__bar--positive';
+  let valueClass = 'extremes-row__value text-green';
 
-        if (isNegative) {
-          barClass = 'extremes-row__bar extremes-row__bar--negative';
-          valueClass = 'extremes-row__value text-red';
-          barStyle = { right: `${100 - zeroPosition}%`, width: `${width}%` };
-        }
+  if (row.isNegative) {
+    barClass = 'extremes-row__bar extremes-row__bar--negative';
+    valueClass = 'extremes-row__value text-red';
+  }
 
-        return (
-          <div key={t.tenantId} className="extremes-row">
-            <span className="extremes-row__name text-secondary">{t.tenantName}</span>
-            <div className="extremes-row__track">
-              <span
-                className="extremes-row__zero"
-                style={{ left: `${zeroPosition}%` }}
-              />
-              <div
-                className={barClass}
-                style={barStyle}
-                title={`${formatCompact(t.totalRevenue)} SEK`}
-              />
-            </div>
-            <span className={valueClass}>
-              {formatCompact(t.totalRevenue)}
-            </span>
-          </div>
-        );
-      })}
-    </ChartPanel>
+  return (
+      <div className="extremes-row">
+        <span className="extremes-row__name text-secondary">
+          {row.tenantName}
+        </span>
+        <div className="extremes-row__track">
+          <span className="extremes-row__zero" style={{ left: `${zeroPosition}%` }}/>
+          <div className={barClass}
+               style={row.barStyle}
+               title={`${row.formattedRevenue} SEK`}/>
+        </div>
+        <span className={valueClass}>
+          {row.formattedRevenue}
+        </span>
+      </div>
   );
 }

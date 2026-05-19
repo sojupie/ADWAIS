@@ -1,8 +1,9 @@
-﻿namespace Infrastructure.CacheModels;
+namespace Infrastructure.CacheModels;
 
-public class MonitorCacheKeys
+public static class GlobalCacheKeys
 {
     public static string MonitorState(int monitorId) => $"monitor_state_{monitorId}";
+    public const string UptimeRobotRateLimit = "UptimeRobotRateLimitEpoch";
 }
 
-public record LiveMonitorState(string StatusStr, int? Latency);
+public record LiveMonitorState(string StatusStr);

@@ -5,4 +5,5 @@ public record UptimeRobotMonitorDto(
     string FriendlyName,
     string Url,
     string Status,
-    DateTimeOffset CreatedDate);
+    DateTimeOffset CreatedDate,
+    int UpdateInterval);

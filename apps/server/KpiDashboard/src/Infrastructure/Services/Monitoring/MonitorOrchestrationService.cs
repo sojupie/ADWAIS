@@ -1,4 +1,4 @@
-﻿using Domain.Entities.Monitoring;
+using Domain.Entities.Monitoring;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services.Monitoring;
@@ -23,6 +23,7 @@ public class MonitorOrchestrationService(
             TenantId = tenantId,
             Name = remoteMonitor.FriendlyName,
             Url = remoteMonitor.Url,
+            UpdateInterval = remoteMonitor.UpdateInterval,
             UptimeSla = uptimeSla,
             UptimeMonitorEnabled = true,
             CreatedDate = remoteMonitor.CreatedDate,
@@ -41,22 +42,9 @@ public class MonitorOrchestrationService(
             .Where(m => m.TenantId == tenantId)
             .ToListAsync();
 
-        if (monitors.Count == 0) return monitors;
-        
-        var monitorIds = monitors.Select(m => m.Id).ToArray();
-        var remoteData = await uptimeRobotService.GetMonitorsAsync(monitorIds);
-        var remoteDict = remoteData.ToDictionary(m => m.Id);
-
         foreach (var monitor in monitors)
         {
-            if (remoteDict.TryGetValue(monitor.Id, out var remote))
-            {
-                monitor.StatusStr = FormatStatus(remote.Status);
-            }
-            else
-            {
-                monitor.StatusStr = "Unknown (Not found upstream)";
-            }
+            monitor.StatusStr = FormatStatus(monitor.StatusStr);
         }
 
         return monitors;
@@ -69,9 +57,7 @@ public class MonitorOrchestrationService(
 
         if (monitor == null) throw new KeyNotFoundException($"Monitor {id} not found.");
 
-        var remoteData = await uptimeRobotService.GetMonitorsAsync([id]);
-        var remoteMonitor = remoteData.FirstOrDefault();
-        monitor.StatusStr = remoteMonitor != null ? FormatStatus(remoteMonitor.Status) : "Unknown";
+        monitor.StatusStr = FormatStatus(monitor.StatusStr);
 
         return monitor;
     }

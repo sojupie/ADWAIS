@@ -1,7 +1,10 @@
-﻿using Domain.Entities.Monitoring;
+using Domain.Entities.Monitoring;
+using Hangfire;
+using Hangfire.Storage;
 using Infrastructure.CacheModels;
 using Infrastructure.Services.Monitoring;
 using Microsoft.EntityFrameworkCore;
+using Cronos;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace Infrastructure.Jobs;
@@ -9,29 +12,58 @@ namespace Infrastructure.Jobs;
 public class MonitorSynchronizationJob(
     IDbContextFactory<AnalyticsDbContext> dbContextFactory,
     IUptimeRobotService uptimeRobotService,
-    IMemoryCache cache)
+    IMemoryCache cache,
+    IRecurringJobManager recurringJobManager)
 {
     public async Task ExecuteAsync()
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-
         var upStreamMonitors = await uptimeRobotService.GetMonitorsAsync();
-        var localMonitors = await dbContext.Monitors.ToDictionaryAsync(m => m.Id);
+        
+        var lowestIntervalMins = upStreamMonitors.Any() 
+            ? Math.Max(1, upStreamMonitors.Min(m => m.UpdateInterval) / 60)
+            : 5;
+        recurringJobManager.AddOrUpdate<MonitorSynchronizationJob>("sync-uptimerobot-fleet", job => job.ExecuteAsync(), Cron.MinuteInterval(lowestIntervalMins));
 
+        var localMonitors = await dbContext.Monitors.ToDictionaryAsync(m => m.Id);
+        var cronExpression = JobStorage.Current.GetConnection().GetRecurringJobs()
+            .FirstOrDefault(j => j.Id == "sync-uptimerobot-fleet")?.Cron;
+        
+        TimeSpan cacheDuration = TimeSpan.FromMinutes(6);
+        
+        if (!string.IsNullOrWhiteSpace(cronExpression))
+        {
+            try
+            {
+                var cron = CronExpression.Parse(cronExpression, CronFormat.Standard);
+                var nextRun = cron.GetNextOccurrence(DateTime.UtcNow);
+            
+                if (nextRun.HasValue)
+                {
+                    cacheDuration = nextRun.Value - DateTime.UtcNow + TimeSpan.FromMinutes(1);
+                    Console.WriteLine("Set cache duration to {0} minute", cacheDuration.Minutes);
+                }
+            }
+            catch (CronFormatException) { }
+        }
+        
         foreach (var remote in upStreamMonitors)
         {
-            cache.Set(
-                MonitorCacheKeys.MonitorState(remote.Id),
-                new LiveMonitorState(remote.Status, null),
-                TimeSpan.FromMinutes(6) //to do: validate timespan/strategy/rateLimit
-            );
+            var existing = cache.TryGetValue(GlobalCacheKeys.MonitorState(remote.Id), out LiveMonitorState? state) ? state : null;
 
+            cache.Set(
+                GlobalCacheKeys.MonitorState(remote.Id),
+                new LiveMonitorState(remote.Status),
+                cacheDuration
+            );
             if (localMonitors.TryGetValue(remote.Id, out var local))
             {
                 local.Name = remote.FriendlyName;
                 local.Url = remote.Url;
+                local.UpdateInterval = remote.UpdateInterval;
                 local.CreatedDate = remote.CreatedDate;
-                local.LastUpdate = new DateTimeOffset(DateTime.UtcNow);
+                local.StatusStr = remote.Status;
+                local.LastUpdate = DateTimeOffset.UtcNow;
             }
             else
             {
@@ -42,9 +74,11 @@ public class MonitorSynchronizationJob(
                     TenantId = AnalyticsDbContext.SystemTenantGuid,
                     Name = remote.FriendlyName,
                     Url = remote.Url,
+                    UpdateInterval = remote.UpdateInterval,
                     UptimeMonitorEnabled = monitorState,
                     CreatedDate = remote.CreatedDate,
-                    StatusStr = remote.Status
+                    StatusStr = remote.Status,
+                    LastUpdate = DateTimeOffset.UtcNow
                 });
             }
         }

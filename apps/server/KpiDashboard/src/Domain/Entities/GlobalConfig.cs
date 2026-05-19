@@ -4,12 +4,13 @@ public class GlobalConfig
 {
     public int Id { get; set; }
     public DateTimeOffset? LastPolled { get; set; }
-    public bool LitiumFetchEnabled { get; set; } = true;
-    public bool UptimeRobotFetchEnabled { get; set; } = true;
+    public bool LitiumFetchEnabled { get; set; }
+    public bool UptimeRobotFetchEnabled { get; set; }
     public required int LitiumRateLimit { get; set; }
-    public required int UptimeRobotRateLimit { get; set; }
     public int? LatencyDegradedFloor { get; set; }
     public string? UptimeRobotApiKey { get; set; }
+    public int UptimeFetchIntervalMinutes { get; set; }
+    public int LatencyFetchIntervalMinutes { get; set; }
     
     // Live telemetry from external APIs; do not persist.
     public int? MonitorsCount { get; set; }

@@ -3,6 +3,7 @@ using System;
 using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AnalyticsDbContext))]
-    partial class AnalyticsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260519021039_GlobalConfigMetricsInterval")]
+    partial class GlobalConfigMetricsInterval
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -40,12 +43,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("latency_degraded_floor");
 
-                    b.Property<int>("LatencyFetchIntervalMinutes")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(10)
-                        .HasColumnName("latency_fetch_interval_minutes");
-
                     b.Property<bool>("LitiumFetchEnabled")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
@@ -56,11 +53,11 @@ namespace Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("litium_rate_limit");
 
-                    b.Property<int>("UptimeFetchIntervalMinutes")
+                    b.Property<int>("MetricsFetchIntervalMinutes")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
-                        .HasDefaultValue(60)
-                        .HasColumnName("uptime_fetch_interval_minutes");
+                        .HasDefaultValue(15)
+                        .HasColumnName("metrics_fetch_interval_minutes");
 
                     b.Property<string>("UptimeRobotApiKey")
                         .HasMaxLength(1024)
@@ -226,17 +223,9 @@ namespace Infrastructure.Migrations
                         .HasColumnType("double precision")
                         .HasColumnName("current_uptime_percentage");
 
-                    b.Property<DateTimeOffset?>("LastLatencyUpdate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("last_latency_update");
-
                     b.Property<DateTimeOffset?>("LastUpdate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_update");
-
-                    b.Property<DateTimeOffset?>("LastUptimeUpdate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("last_uptime_update");
 
                     b.Property<string>("Name")
                         .IsRequired()

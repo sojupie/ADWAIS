@@ -5,6 +5,7 @@ using DotNetEnv;
 using FluentValidation;
 using Hangfire;
 using Hangfire.PostgreSql;
+using Hangfire.Storage;
 using Infrastructure;
 using Infrastructure.Jobs;
 using Infrastructure.Services.Monitoring;
@@ -22,7 +23,9 @@ builder.Services.AddHttpClient();
 builder.Services.AddScoped<IValidator<CreateTenantRequestDto>, CreateTenantRequestDtoValidator>();
 builder.Services.AddScoped<IValidator<UpdateTenantRequestDto>, UpdateTenantRequestDtoValidator>();
 builder.Services.AddScoped<IMonitorOrchestrationService, MonitorOrchestrationService>();
-builder.Services.AddHttpClient<Infrastructure.Services.Monitoring.IUptimeRobotService, Infrastructure.Services.Monitoring.UptimeRobotService>();
+builder.Services.AddTransient<UptimeRobotRateLimitHandler>();
+builder.Services.AddHttpClient<Infrastructure.Services.Monitoring.IUptimeRobotService, Infrastructure.Services.Monitoring.UptimeRobotService>()
+    .AddHttpMessageHandler<UptimeRobotRateLimitHandler>();
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -83,11 +86,41 @@ using (var scope = app.Services.CreateScope())
     context.Database.Migrate();
 }
 
-var recurringJobManager = app.Services.GetRequiredService<IRecurringJobManager>();
-recurringJobManager.AddOrUpdate<MonitorSynchronizationJob>(
-    "sync-uptimerobot-fleet",
-    job => job.ExecuteAsync(),
-    "*/5 * * * *"
-);
+using (var connection = JobStorage.Current.GetConnection())
+{
+    var recurringJobManager = app.Services.GetRequiredService<IRecurringJobManager>();
+    var job = connection.GetRecurringJobs().FirstOrDefault(j => j.Id == "sync-uptimerobot-fleet");
+
+    if (job == null)
+    {
+        recurringJobManager.AddOrUpdate<MonitorSynchronizationJob>("sync-uptimerobot-fleet", newJob => newJob.ExecuteAsync(), Cron.MinuteInterval(5));
+    }
+    
+    recurringJobManager.RemoveIfExists("dispatch-uptimerobot-metrics");
+
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<AnalyticsDbContext>>();
+        await using var context = dbFactory.CreateDbContext();
+        var config = context.GlobalConfigs.FirstOrDefault();
+        
+        var uptimeInterval = config?.UptimeFetchIntervalMinutes ?? 60;
+        var latencyInterval = config?.LatencyFetchIntervalMinutes ?? 10;
+        
+        string GetCron(int m) => m < 60 ? Cron.MinuteInterval(Math.Max(1, m)) : (m == 60 ? Cron.Hourly() : $"0 */{Math.Max(1, m/60)} * * *");
+        
+        var uptimeJob = connection.GetRecurringJobs().FirstOrDefault(j => j.Id == "dispatch-uptimerobot-uptime");
+        if (uptimeJob == null)
+        {
+            recurringJobManager.AddOrUpdate<UptimeDispatcherJob>("dispatch-uptimerobot-uptime", newJob => newJob.ExecuteAsync(), GetCron(uptimeInterval));
+        }
+        
+        var latencyJob = connection.GetRecurringJobs().FirstOrDefault(j => j.Id == "dispatch-uptimerobot-latency");
+        if (latencyJob == null)
+        {
+            recurringJobManager.AddOrUpdate<LatencyDispatcherJob>("dispatch-uptimerobot-latency", newJob => newJob.ExecuteAsync(), GetCron(latencyInterval));
+        }
+    }
+}
 
 app.Run();

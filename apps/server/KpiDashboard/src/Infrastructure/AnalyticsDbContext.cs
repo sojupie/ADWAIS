@@ -126,6 +126,10 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options) : 
             entity.ToTable("global_config");
             entity.HasKey(x => x.Id);
             entity.Property(x => x.UptimeRobotApiKey).HasMaxLength(1024);
+            entity.Property(x => x.UptimeFetchIntervalMinutes).HasDefaultValue(60);
+            entity.Property(x => x.LatencyFetchIntervalMinutes).HasDefaultValue(10);
+            entity.Property(x => x.LitiumFetchEnabled).HasDefaultValue(true);
+            entity.Property(x => x.UptimeRobotFetchEnabled).HasDefaultValue(true);
             entity.Ignore(x => x.MonitorsCount);
             entity.Ignore(x => x.MonitorsLimit);
             entity.Ignore(x => x.ActiveSubscription);
@@ -167,6 +171,7 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options) : 
                 .WithMany(t => t.Monitors)
                 .HasForeignKey(m => m.TenantId)
                 .OnDelete(DeleteBehavior.Cascade);
+            entity.Property(m => m.UpdateInterval).HasDefaultValue(300);
         });
             
         // intranät

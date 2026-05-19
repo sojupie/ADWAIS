@@ -41,11 +41,12 @@ public class UptimeRobotService(HttpClient httpClient, IDbContextFactory<Analyti
         using var response = await GetResponseAsync(request);
         
         var monitor = new UptimeRobotMonitorDto(
-            response.RootElement.GetProperty("id").GetInt32(),
-            response.RootElement.GetProperty("friendlyName").GetString()!,
-            response.RootElement.GetProperty("url").GetString()!,
-            response.RootElement.GetProperty("status").GetString()!,
-            response.RootElement.GetProperty("createDateTime").GetDateTimeOffset()
+            Id: response.RootElement.GetProperty("id").GetInt32(),
+            FriendlyName: response.RootElement.GetProperty("friendlyName").GetString()!,
+            Url: response.RootElement.GetProperty("url").GetString()!,
+            Status: response.RootElement.GetProperty("status").GetString()!,
+            CreatedDate: response.RootElement.GetProperty("createDateTime").GetDateTimeOffset(),
+            UpdateInterval: response.RootElement.GetProperty("interval").GetInt32()
         );
         return monitor;
     }    
@@ -65,30 +66,49 @@ public class UptimeRobotService(HttpClient httpClient, IDbContextFactory<Analyti
         foreach (var monitor in response.RootElement.GetProperty("data").EnumerateArray())
         {
             monitors.Add(new UptimeRobotMonitorDto(
-                monitor.GetProperty("id").GetInt32(),
-                monitor.GetProperty("friendlyName").GetString()!,
-                monitor.GetProperty("url").GetString()!,
-                monitor.GetProperty("status").GetString()!,
-                monitor.GetProperty("createDateTime").GetDateTimeOffset()
+                Id: monitor.GetProperty("id").GetInt32(),
+                FriendlyName: monitor.GetProperty("friendlyName").GetString()!,
+                Url: monitor.GetProperty("url").GetString()!,
+                Status: monitor.GetProperty("status").GetString()!,
+                CreatedDate: monitor.GetProperty("createDateTime").GetDateTimeOffset(),
+                UpdateInterval: monitor.GetProperty("interval").GetInt32()
             ));
         }
-        
-        Console.WriteLine(monitors[0].CreatedDate + " 123");
         return monitors;
     }
     
-    public async Task<double> GetUptimeAsync(int monitorId)
+    public async Task<double> GetUptimeAsync(int monitorId, DateTimeOffset? startDate = null, DateTimeOffset? endDate = null)
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, $"https://api.uptimerobot.com/v3/monitors/{monitorId}/stats/uptime");
+        var url = $"https://api.uptimerobot.com/v3/monitors/{monitorId}/stats/uptime";
+        if (startDate.HasValue && endDate.HasValue)
+        {
+            var fromStr = startDate.Value.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ");
+            var toStr = endDate.Value.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ");
+            url += $"?from={fromStr}&to={toStr}";
+        }
+        var request = new HttpRequestMessage(HttpMethod.Get, url);
         using var response = await GetResponseAsync(request);
         return response.RootElement.GetProperty("uptime").GetDouble();
     }
         
-    public async Task<int?> GetResponseTimeAsync(int monitorId)
+    public async Task<(int? Average, int? Lowest, int? Highest)> GetResponseTimeAsync(int monitorId, DateTimeOffset? startDate = null, DateTimeOffset? endDate = null)
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, $"https://api.uptimerobot.com/v3/monitors/{monitorId}/stats/response-time");
+        var url = $"https://api.uptimerobot.com/v3/monitors/{monitorId}/stats/response-time";
+        if (startDate.HasValue && endDate.HasValue)
+        {
+            var fromStr = startDate.Value.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ");
+            var toStr = endDate.Value.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ");
+            url += $"?from={fromStr}&to={toStr}";
+        }
+        var request = new HttpRequestMessage(HttpMethod.Get, url);
         using var response = await GetResponseAsync(request);
-        return response.RootElement.GetProperty("summary").GetProperty("avg").GetInt32();
+        var summary = response.RootElement.GetProperty("summary");
+        
+        int? avg = summary.TryGetProperty("avg", out var avgProp) && avgProp.ValueKind != JsonValueKind.Null ? avgProp.GetInt32() : null;
+        int? lowest = summary.TryGetProperty("min", out var minProp) && minProp.ValueKind != JsonValueKind.Null ? minProp.GetInt32() : null;
+        int? highest = summary.TryGetProperty("max", out var maxProp) && maxProp.ValueKind != JsonValueKind.Null ? maxProp.GetInt32() : null;
+
+        return (avg, lowest, highest);
     }
 
     public async Task DeleteMonitorAsync(int monitorId)

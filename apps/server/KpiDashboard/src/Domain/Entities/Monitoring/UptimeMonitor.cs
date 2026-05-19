@@ -9,8 +9,11 @@ public class UptimeMonitor
     public double? UptimeSla { get; set; }
     public bool UptimeMonitorEnabled { get; set; }
     public DateTimeOffset? LastUpdate { get; set; }
+    public DateTimeOffset? LastUptimeUpdate { get; set; }
+    public DateTimeOffset? LastLatencyUpdate { get; set; }
     public DateTimeOffset CreatedDate { get; set; }
-
+    public int UpdateInterval { get; set; }
+    public double CurrentUptimePercentage { get; set; }
     public Tenant? Tenant { get; set; }
     public ICollection<ResponseTime> ResponseTimes { get; set; } = new List<ResponseTime>();
     

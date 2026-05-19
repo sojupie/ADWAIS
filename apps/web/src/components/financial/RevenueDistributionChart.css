@@ -9,3 +9,7 @@
 .revenue-distribution-chart .recharts-bar-rectangle:hover {
   opacity: 0.92;
 }
+
+.revenue-distribution-chart__bar--clickable .recharts-bar-rectangle {
+  cursor: pointer;
+}

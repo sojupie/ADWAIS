@@ -16,6 +16,7 @@ import './MomentumMatrixChart.css';
 
 interface Props {
   tenants: TenantKpi[];
+  onTenantSelect?: (tenantId: string) => void;
 }
 
 interface MomentumPoint {
@@ -95,7 +96,7 @@ const TenantLabel = ({ x, y, index, payload }: any) => {
   );
 };
 
-export function MomentumMatrixChart({ tenants }: Props) {
+export function MomentumMatrixChart({ tenants, onTenantSelect }: Props) {
   const points = buildPoints(tenants);
   const legend = (
     <span className="momentum-matrix-chart__legend">
@@ -153,11 +154,19 @@ export function MomentumMatrixChart({ tenants }: Props) {
           <Tooltip content={<CustomTooltip />} cursor={{ strokeDasharray: '3 3' }} />
           <Scatter
             data={points}
+            className={onTenantSelect ? 'momentum-matrix-chart__scatter--clickable' : undefined}
             fill="var(--chart-line)"
             fillOpacity={0.62}
             stroke="var(--bg-primary)"
             strokeWidth={1.5}
             label={<TenantLabel />}
+            onClick={(point) => {
+              const payload = point?.payload as MomentumPoint | undefined;
+
+              if (payload?.tenantId) {
+                onTenantSelect?.(payload.tenantId);
+              }
+            }}
           />
         </ScatterChart>
       </ResponsiveContainer>

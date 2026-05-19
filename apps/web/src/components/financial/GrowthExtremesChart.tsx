@@ -6,9 +6,10 @@ import './GrowthExtremesChart.css';
 
 interface Props {
   tenants: TenantKpi[];
+  onTenantSelect?: (tenantId: string) => void;
 }
 
-export function GrowthExtremesChart({ tenants }: Props) {
+export function GrowthExtremesChart({ tenants, onTenantSelect }: Props) {
   if (tenants.length === 0) return null;
 
   // Sort by revenue desc, take top 12
@@ -37,7 +38,12 @@ export function GrowthExtremesChart({ tenants }: Props) {
         }
 
         return (
-          <div key={t.tenantId} className="extremes-row">
+          <button
+            key={t.tenantId}
+            className={`extremes-row ${onTenantSelect ? 'extremes-row--clickable' : ''}`}
+            type="button"
+            onClick={() => onTenantSelect?.(t.tenantId)}
+          >
             <span className="extremes-row__name text-secondary">{t.tenantName}</span>
             <div className="extremes-row__track">
               <span
@@ -53,7 +59,7 @@ export function GrowthExtremesChart({ tenants }: Props) {
             <span className={valueClass}>
               {formatCompact(t.totalRevenue)}
             </span>
-          </div>
+          </button>
         );
       })}
     </ChartPanel>

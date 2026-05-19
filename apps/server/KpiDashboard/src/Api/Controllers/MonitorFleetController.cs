@@ -62,7 +62,7 @@ public class MonitorFleetController(
     public async Task<ActionResult<UptimeMonitorDto>> GetMonitor(Guid tenantId, int id)
     {
         var m = await monitorService.GetMonitorAsync(tenantId, id);
-        return Ok(HydrateWithCache(new[] { m }).First());
+        return Ok(HydrateWithCache([m]).First());
     }
 
     [HttpPost("monitors/{id:int}/pause")]

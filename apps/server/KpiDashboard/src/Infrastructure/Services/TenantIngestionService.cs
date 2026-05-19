@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using Domain.Entities.LitiumDTO;
 using Domain.Entities;
@@ -69,11 +69,11 @@ public class TenantIngestionService(
 
                     for (int i = 0; i < count; i++)
                     {
-                        var o = litiumPayload.Orders[i];
+                        var o = litiumPayload.Orders[i]!;
                         pIds[i] = o.Id;
                         pTenantIds[i] = tenant.Id;
-                        pOrderStatus[i] = o.OrderStatus;
-                        pOrderIds[i] = o.OrderNumber;
+                        pOrderStatus[i] = o.OrderStatus!;
+                        pOrderIds[i] = o.OrderNumber!;
                         pDatesCreated[i] = o.CreatedDate.ToUniversalTime();
                         pIncVat[i] = o.TotalValueIncludingVat;
                         pExcVat[i] = o.TotalValueExcludingVat;

@@ -1,4 +1,4 @@
-﻿namespace Domain.Entities.LitiumDTO;
+namespace Domain.Entities.LitiumDTO;
 
 public class LitiumSyncResponse
 {

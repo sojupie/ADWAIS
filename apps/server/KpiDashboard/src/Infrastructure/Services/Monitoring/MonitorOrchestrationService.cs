@@ -81,9 +81,9 @@ public class MonitorOrchestrationService(
         await dbContext.SaveChangesAsync();
     }
 
-    public async Task PauseMonitorAsync(Guid tenantId, int id)
+    public async Task PauseMonitorAsync(int id)
     {
-        var monitor = await dbContext.Monitors.FirstOrDefaultAsync(m => m.TenantId == tenantId && m.Id == id);
+        var monitor = await dbContext.Monitors.FirstOrDefaultAsync(m => m.Id == id);
         if (monitor == null) throw new KeyNotFoundException();
 
         await uptimeRobotService.PauseMonitorAsync(id);
@@ -92,9 +92,9 @@ public class MonitorOrchestrationService(
         await dbContext.SaveChangesAsync();
     }
 
-    public async Task StartMonitorAsync(Guid tenantId, int id)
+    public async Task StartMonitorAsync(int id)
     {
-        var monitor = await dbContext.Monitors.FirstOrDefaultAsync(m => m.TenantId == tenantId && m.Id == id);
+        var monitor = await dbContext.Monitors.FirstOrDefaultAsync(m => m.Id == id);
         if (monitor == null) throw new KeyNotFoundException();
 
         await uptimeRobotService.StartMonitorAsync(id);

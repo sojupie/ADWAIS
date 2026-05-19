@@ -65,17 +65,17 @@ public class MonitorFleetController(
         return Ok(HydrateWithCache(new[] { m }).First());
     }
 
-    [HttpPost("tenant/{tenantId:guid}/monitors/{id:int}/pause")]
-    public async Task<IActionResult> PauseMonitor(Guid tenantId, int id)
+    [HttpPost("monitors/{id:int}/pause")]
+    public async Task<IActionResult> PauseMonitor(int id)
     {
-        await monitorService.PauseMonitorAsync(tenantId, id);
+        await monitorService.PauseMonitorAsync(id);
         return Ok();
     }
 
-    [HttpPost("tenant/{tenantId:guid}/monitors/{id:int}/start")]
+    [HttpPost("monitors/{id:int}/start")]
     public async Task<IActionResult> StartMonitor(Guid tenantId, int id)
     {
-        await monitorService.StartMonitorAsync(tenantId, id);
+        await monitorService.StartMonitorAsync(id);
         return Ok();
     }
 

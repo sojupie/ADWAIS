@@ -14,6 +14,21 @@ namespace Api.Controllers;
     public class BackgroundJobController(IDbContextFactory<AnalyticsDbContext> dbContextFactory) : ControllerBase
     {
         [HttpPost]
+        [Route("TriggerMonitorSync")]
+        public ActionResult TriggerMonitorSync()
+        {
+            try
+            {
+                RecurringJob.TriggerJob("sync-uptimerobot-fleet");
+                return Ok();
+            }
+            catch (Exception exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { error = "Failed to trigger monitor sync", detail = exception.Message });
+            }
+        }
+        
+        [HttpPost]
         [Route("trigger/uptime-sync")]
         public ActionResult TriggerUptimeSync()
         {
@@ -89,16 +104,7 @@ namespace Api.Controllers;
                     new { error = "Failed to trigger materialized view refresh", detail = e.Message });
             }
         }
-
-        [HttpPost]
-        [Route("update/monitor-sync-rate")]
-        public ActionResult UpdateMonitorSyncRate([FromQuery] int minutes = 5)
-        {
-            RecurringJob.AddOrUpdate<MonitorSynchronizationJob>("sync-uptimerobot-fleet", job => job.ExecuteAsync(), Cron.MinuteInterval(minutes));
-            Console.WriteLine("Updated interval to {0} minutes", minutes);
-            return Ok();
-        }
-
+        
         [HttpPost]
         [Route("update/metrics-sync-rate")]
         public async Task<OkResult> UpdateMetricsSyncRate([FromQuery] int? uptimeMinutes, [FromQuery] int? latencyMinutes)

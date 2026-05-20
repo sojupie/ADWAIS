@@ -59,6 +59,21 @@ namespace Api.Controllers;
         }
 
         [HttpPost]
+        [Route("TriggerLitiumSync")]
+        public ActionResult TriggerLitiumSync()
+        {
+            try
+            {
+                RecurringJob.TriggerJob("dispatch-litium-orders");
+                return Ok();
+            }
+            catch (Exception exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { error = "Failed to trigger Litium sync", detail = exception.Message });
+            }
+        }
+
+        [HttpPost]
         [Route("UpdateMonitorSyncRate")]
         public ActionResult UpdateMonitorSyncRate([FromQuery] int minutes = 5)
         {
@@ -94,6 +109,23 @@ namespace Api.Controllers;
             return Ok();
         }
 
+        [HttpPost]
+        [Route("UpdateLitiumSyncRate")]
+        public async Task<ActionResult> UpdateLitiumSyncRate([FromQuery] int minutes)
+        {
+            string GetCron(int m) => m < 60 ? Cron.MinuteInterval(Math.Max(1, m)) : (m == 60 ? Cron.Hourly() : $"0 */{Math.Max(1, m/60)} * * *");
+
+            await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+            var config = dbContext.GlobalConfigs.FirstOrDefault();
+            if (config == null) return NotFound("Global config not found.");
+
+            config.LitiumRateLimit = minutes;
+            dbContext.SaveChanges();
+
+            RecurringJob.AddOrUpdate<LitiumOrderFetchJob>("dispatch-litium-orders", job => job.ExecuteAsync(), GetCron(minutes));
+            return Ok();
+        }
+
         [HttpGet]
         [Route("RateLimits")]
         public async Task<ActionResult<RateLimits>> GetRateLimit()
@@ -105,7 +137,8 @@ namespace Api.Controllers;
                 .Select(g => new
                 {
                     g.LatencyFetchIntervalMinutes,
-                    g.UptimeFetchIntervalMinutes
+                    g.UptimeFetchIntervalMinutes,
+                    g.LitiumRateLimit
                 })
                 .FirstOrDefaultAsync();
 
@@ -121,7 +154,8 @@ namespace Api.Controllers;
             {
                 LatencyRateLimit = data.LatencyFetchIntervalMinutes,
                 UptimeRateLimit = data.UptimeFetchIntervalMinutes,
-                StatusRateLimit = lowestIntervalMins
+                StatusRateLimit = lowestIntervalMins,
+                LitiumRateLimit = data.LitiumRateLimit
             };
 
             return Ok(rateLimits);

@@ -14,7 +14,7 @@ namespace Api.Controllers;
     public class BackgroundJobController(IDbContextFactory<AnalyticsDbContext> dbContextFactory) : ControllerBase
     {
         [HttpPost]
-        [Route("TriggerMonitorSync")]
+        [Route("trigger/monitor-sync")]
         public ActionResult TriggerMonitorSync()
         {
             try

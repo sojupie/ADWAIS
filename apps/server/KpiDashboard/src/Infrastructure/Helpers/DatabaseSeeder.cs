@@ -1,9 +1,8 @@
 using Domain.Entities;
-using Domain.Entities.Monitoring;
 using Domain.Entities.OrderData;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infrastructure;
+namespace Infrastructure.Helpers;
 
 public static class DatabaseSeeder
 {
@@ -74,66 +73,6 @@ public static class DatabaseSeeder
             if (orders.Any())
             {
                 context.Orders.AddRange(orders);
-                await context.SaveChangesAsync();
-            }
-        }
-
-        // 3. Seed Monitor and Response Times
-        var mockMonitorId = 999999;
-        var monitor = await context.Monitors.FindAsync(mockMonitorId);
-        if (monitor == null)
-        {
-            monitor = new UptimeMonitor
-            {
-                Id = mockMonitorId,
-                TenantId = testTenantId,
-                Name = "Mock Monitor",
-                Url = "https://mock-monitor.com",
-                UptimeMonitorEnabled = true,
-                CreatedDate = startDate,
-                UpdateInterval = 300,
-                CurrentUptimePercentage = 99.95
-            };
-            context.Monitors.Add(monitor);
-            await context.SaveChangesAsync();
-        }
-
-        if (!await context.ResponseTimes.AnyAsync(rt => rt.MonitorId == mockMonitorId))
-        {
-            var responseTimes = new List<ResponseTime>();
-            for (var date = startDate; date <= endDate; date = date.AddDays(1))
-            {
-                // 1-3 records per day to reduce startup time
-                int recordsPerDay = random.Next(1, 4);
-                for (int i = 0; i < recordsPerDay; i++)
-                {
-                    var rtDate = new DateTimeOffset(date.Year, date.Month, date.Day, 
-                        random.Next(0, 24), random.Next(0, 60), random.Next(0, 60), date.Offset);
-
-                    double baseLatency = 150 + (random.NextDouble() * 100); // 150-250ms
-                    
-                    responseTimes.Add(new ResponseTime
-                    {
-                        Id = Guid.NewGuid(),
-                        MonitorId = mockMonitorId,
-                        Date = rtDate,
-                        Average = baseLatency,
-                        Lowest = baseLatency - random.Next(5, 20),
-                        Highest = baseLatency + random.Next(5, 50)
-                    });
-                }
-
-                if (responseTimes.Count > 1000)
-                {
-                    context.ResponseTimes.AddRange(responseTimes);
-                    await context.SaveChangesAsync();
-                    responseTimes.Clear();
-                }
-            }
-
-            if (responseTimes.Any())
-            {
-                context.ResponseTimes.AddRange(responseTimes);
                 await context.SaveChangesAsync();
             }
         }

@@ -43,7 +43,7 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options) : 
             entity.Property(t => t.LitiumBaseUrl).HasMaxLength(2048);
             entity.Property(t => t.ServiceAccountToken).HasMaxLength(2048);
             entity.Ignore(t => t.OrderCount);
-            entity.Ignore(t => t.CurrentlyFetching);
+            entity.Property(t => t.CurrentlyFetching).HasDefaultValue(false);
             entity.Ignore(t => t.PingReachable);
 
             // to catch unassigned monitors since TenantId is not nullable and a foreign key

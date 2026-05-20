@@ -120,6 +120,13 @@ using (var connection = JobStorage.Current.GetConnection())
         {
             recurringJobManager.AddOrUpdate<LatencyDispatcherJob>("dispatch-uptimerobot-latency", newJob => newJob.ExecuteAsync(), GetCron(latencyInterval));
         }
+        
+        var litiumRateLimit = config?.LitiumRateLimit ?? 10;
+        var litiumJob = connection.GetRecurringJobs().FirstOrDefault(j => j.Id == "dispatch-litium-orders");
+        if (litiumJob == null)
+        {
+            recurringJobManager.AddOrUpdate<LitiumOrderFetchJob>("dispatch-litium-orders", newJob => newJob.ExecuteAsync(), GetCron(litiumRateLimit));
+        }
     }
 }
 

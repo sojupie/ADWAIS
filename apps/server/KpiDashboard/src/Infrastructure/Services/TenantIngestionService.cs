@@ -20,6 +20,38 @@ public class TenantIngestionService(
 {
     public async Task<int> ExecuteIngestionAsync(Tenant tenant, DateTimeOffset startDate, DateTimeOffset endDate, CancellationToken ct = default)
     {
+        // Set CurrentlyFetching flag before starting work
+        await using (var flagContext = await contextFactory.CreateDbContextAsync(ct))
+        {
+            var dbTenant = await flagContext.Tenants.FirstAsync(t => t.Id == tenant.Id, ct);
+            dbTenant.CurrentlyFetching = true;
+            await flagContext.SaveChangesAsync(ct);
+        }
+
+        try
+        {
+            return await ExecuteIngestionCoreAsync(tenant, startDate, endDate, ct);
+        }
+        finally
+        {
+            // Always clear flag, even on failure — use separate context to avoid failed-state issues
+            try
+            {
+                await using var cleanupContext = await contextFactory.CreateDbContextAsync(CancellationToken.None);
+                var t = await cleanupContext.Tenants.FirstAsync(x => x.Id == tenant.Id);
+                t.CurrentlyFetching = false;
+                t.LastPolled = DateTimeOffset.UtcNow;
+                await cleanupContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to clear CurrentlyFetching flag for tenant {TenantId}.", tenant.Id);
+            }
+        }
+    }
+
+    private async Task<int> ExecuteIngestionCoreAsync(Tenant tenant, DateTimeOffset startDate, DateTimeOffset endDate, CancellationToken ct)
+    {
         var totalIngested = 0;
         var currentStart = startDate;
 

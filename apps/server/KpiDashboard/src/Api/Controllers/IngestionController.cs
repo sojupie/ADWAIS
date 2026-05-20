@@ -1,4 +1,4 @@
-﻿using Hangfire;
+using Hangfire;
 using Infrastructure;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -26,6 +26,7 @@ public class IngestionController(
         var tenant = await context.Tenants.FirstOrDefaultAsync(t => t.Id == tenantId, ct);
         
         if (tenant == null) return NotFound("Tenant not found.");
+        if (tenant.CurrentlyFetching) return Conflict(new { message = $"Tenant {tenantId} is currently fetching. Wait for the active job to complete." });
 
         var jobId = backgroundJobClient.Enqueue<ITenantIngestionService>(
             service => service.ExecuteIngestionAsync(tenant, startDate, endDate, CancellationToken.None));

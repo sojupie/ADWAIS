@@ -107,25 +107,25 @@ using (var connection = JobStorage.Current.GetConnection())
         var uptimeInterval = config?.UptimeFetchIntervalMinutes ?? 60;
         var latencyInterval = config?.LatencyFetchIntervalMinutes ?? 10;
         
-        string GetCron(int m) => m < 60 ? Cron.MinuteInterval(Math.Max(1, m)) : (m == 60 ? Cron.Hourly() : $"0 */{Math.Max(1, m/60)} * * *");
+
         
         var uptimeJob = connection.GetRecurringJobs().FirstOrDefault(j => j.Id == "dispatch-uptimerobot-uptime");
         if (uptimeJob == null)
         {
-            recurringJobManager.AddOrUpdate<UptimeDispatcherJob>("dispatch-uptimerobot-uptime", newJob => newJob.ExecuteAsync(), GetCron(uptimeInterval));
+            recurringJobManager.AddOrUpdate<UptimeDispatcherJob>("dispatch-uptimerobot-uptime", newJob => newJob.ExecuteAsync(), CronHelper.FromMinutes(uptimeInterval));
         }
         
         var latencyJob = connection.GetRecurringJobs().FirstOrDefault(j => j.Id == "dispatch-uptimerobot-latency");
         if (latencyJob == null)
         {
-            recurringJobManager.AddOrUpdate<LatencyDispatcherJob>("dispatch-uptimerobot-latency", newJob => newJob.ExecuteAsync(), GetCron(latencyInterval));
+            recurringJobManager.AddOrUpdate<LatencyDispatcherJob>("dispatch-uptimerobot-latency", newJob => newJob.ExecuteAsync(), CronHelper.FromMinutes(latencyInterval));
         }
         
-        var litiumRateLimit = config?.LitiumRateLimit ?? 10;
+        var litiumRateLimit = Math.Max(1, config?.LitiumRateLimit ?? 10);
         var litiumJob = connection.GetRecurringJobs().FirstOrDefault(j => j.Id == "dispatch-litium-orders");
         if (litiumJob == null)
         {
-            recurringJobManager.AddOrUpdate<LitiumOrderFetchJob>("dispatch-litium-orders", newJob => newJob.ExecuteAsync(), GetCron(litiumRateLimit));
+            recurringJobManager.AddOrUpdate<LitiumOrderFetchJob>("dispatch-litium-orders", newJob => newJob.ExecuteAsync(), CronHelper.FromMinutes(litiumRateLimit));
         }
     }
 }

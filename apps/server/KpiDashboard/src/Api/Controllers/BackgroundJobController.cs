@@ -86,7 +86,7 @@ namespace Api.Controllers;
         [Route("UpdateMetricsSyncRate")]
         public async Task<OkResult> UpdateMetricsSyncRate([FromQuery] int? uptimeMinutes, [FromQuery] int? latencyMinutes)
         {
-            string GetCron(int m) => m < 60 ? Cron.MinuteInterval(Math.Max(1, m)) : (m == 60 ? Cron.Hourly() : $"0 */{Math.Max(1, m/60)} * * *");
+
 
             await using var dbContext = await dbContextFactory.CreateDbContextAsync();
             var config = dbContext.GlobalConfigs.FirstOrDefault();
@@ -95,13 +95,13 @@ namespace Api.Controllers;
                 if (uptimeMinutes.HasValue)
                 {
                     config.UptimeFetchIntervalMinutes = uptimeMinutes.Value;
-                    RecurringJob.AddOrUpdate<UptimeDispatcherJob>("dispatch-uptimerobot-uptime", job => job.ExecuteAsync(), GetCron(uptimeMinutes.Value));
+                    RecurringJob.AddOrUpdate<UptimeDispatcherJob>("dispatch-uptimerobot-uptime", job => job.ExecuteAsync(), CronHelper.FromMinutes(uptimeMinutes.Value));
                 }
                 
                 if (latencyMinutes.HasValue)
                 {
                     config.LatencyFetchIntervalMinutes = latencyMinutes.Value;
-                    RecurringJob.AddOrUpdate<LatencyDispatcherJob>("dispatch-uptimerobot-latency", job => job.ExecuteAsync(), GetCron(latencyMinutes.Value));
+                    RecurringJob.AddOrUpdate<LatencyDispatcherJob>("dispatch-uptimerobot-latency", job => job.ExecuteAsync(), CronHelper.FromMinutes(latencyMinutes.Value));
                 }
                 
                 dbContext.SaveChanges();
@@ -113,7 +113,7 @@ namespace Api.Controllers;
         [Route("UpdateLitiumSyncRate")]
         public async Task<ActionResult> UpdateLitiumSyncRate([FromQuery] int minutes)
         {
-            string GetCron(int m) => m < 60 ? Cron.MinuteInterval(Math.Max(1, m)) : (m == 60 ? Cron.Hourly() : $"0 */{Math.Max(1, m/60)} * * *");
+
 
             await using var dbContext = await dbContextFactory.CreateDbContextAsync();
             var config = dbContext.GlobalConfigs.FirstOrDefault();
@@ -122,7 +122,7 @@ namespace Api.Controllers;
             config.LitiumRateLimit = minutes;
             dbContext.SaveChanges();
 
-            RecurringJob.AddOrUpdate<LitiumOrderFetchJob>("dispatch-litium-orders", job => job.ExecuteAsync(), GetCron(minutes));
+            RecurringJob.AddOrUpdate<LitiumOrderFetchJob>("dispatch-litium-orders", job => job.ExecuteAsync(), CronHelper.FromMinutes(minutes));
             return Ok();
         }
 

@@ -36,7 +36,6 @@ public class LitiumOrderFetchJob(
 
         foreach (var tenant in tenants)
         {
-            // Layer 3: Reset stale locks from crashed/dead workers
             if (tenant.CurrentlyFetching && tenant.LastPolled.HasValue
                 && now - tenant.LastPolled.Value > StaleThreshold)
             {
@@ -46,7 +45,6 @@ public class LitiumOrderFetchJob(
                 tenant.CurrentlyFetching = false;
             }
 
-            // Layer 2: Skip tenants already being fetched
             if (tenant.CurrentlyFetching)
             {
                 logger.LogInformation("Tenant {Id} is currently fetching. Skipping.", tenant.Id);

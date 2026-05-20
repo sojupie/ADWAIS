@@ -105,12 +105,11 @@ using (var scope = app.Services.CreateScope())
 using (var connection = JobStorage.Current.GetConnection())
 {
     var recurringJobManager = app.Services.GetRequiredService<IRecurringJobManager>();
-    var job = connection.GetRecurringJobs().FirstOrDefault(j => j.Id == "sync-uptimerobot-fleet");
-
-    if (job == null)
-    {
-        recurringJobManager.AddOrUpdate<MonitorSynchronizationJob>("sync-uptimerobot-fleet", newJob => newJob.ExecuteAsync(), Cron.MinuteInterval(5));
-    }
+    
+    recurringJobManager.AddOrUpdate<MonitorSynchronizationJob>(
+        "sync-uptimerobot-fleet", 
+        newJob => newJob.ExecuteAsync(), 
+        Cron.MinuteInterval(5));
     
     recurringJobManager.RemoveIfExists("dispatch-uptimerobot-metrics");
 
@@ -122,61 +121,37 @@ using (var connection = JobStorage.Current.GetConnection())
         
         var uptimeInterval = config?.UptimeFetchIntervalMinutes ?? 60;
         var latencyInterval = config?.LatencyFetchIntervalMinutes ?? 10;
-        
-        var uptimeJob = connection.GetRecurringJobs().FirstOrDefault(j => j.Id == "dispatch-uptimerobot-uptime");
-        if (uptimeJob == null)
-        {
-            recurringJobManager.AddOrUpdate<UptimeDispatcherJob>(
-                    "dispatch-uptimerobot-uptime",
-                    newJob => newJob.ExecuteAsync(),
-                    CronHelper.FromMinutes(uptimeInterval));
-        }
-        
-        var latencyJob = connection.GetRecurringJobs().FirstOrDefault(j => j.Id == "dispatch-uptimerobot-latency");
-        if (latencyJob == null)
-        {
-            recurringJobManager.AddOrUpdate<LatencyDispatcherJob>(
-                "dispatch-uptimerobot-latency",
-                newJob => newJob.ExecuteAsync(),
-                CronHelper.FromMinutes(latencyInterval));
-        }
-        
         var litiumFetchInterval = Math.Max(1, config?.LitiumFetchIntervalMinutes ?? 10);
-        var litiumJob = connection.GetRecurringJobs().FirstOrDefault(j => j.Id == "dispatch-litium-orders");
-        if (litiumJob == null)
-        {
-            recurringJobManager.AddOrUpdate<LitiumOrderFetchJob>(
-                "dispatch-litium-orders",
-                newJob => newJob.ExecuteAsync(),
-                CronHelper.FromMinutes(litiumFetchInterval));
-        }
         
-        var latencyMatViewJob = connection.GetRecurringJobs().FirstOrDefault(j => j.Id == "refresh-latency-materialized-views");
-        if (latencyMatViewJob == null)
-        {
-            recurringJobManager.AddOrUpdate<RefreshLatencyMaterializedViewJob>(
-                "refresh-latency-materialized-views",
+        recurringJobManager.AddOrUpdate<UptimeDispatcherJob>(
+                "dispatch-uptimerobot-uptime",
                 newJob => newJob.ExecuteAsync(),
-                Cron.Daily);
-        }
-        
-        var financialMatViewJob = connection.GetRecurringJobs().FirstOrDefault(j => j.Id == "refresh-financial-materialized-views");
-        if (financialMatViewJob == null)
-        {
-            recurringJobManager.AddOrUpdate<RefreshFinancialMaterializedViewJob>(
-                "refresh-financial-materialized-views",
-                newJob => newJob.ExecuteAsync(),
-                Cron.Daily);
-        }
+                CronHelper.FromMinutes(uptimeInterval));
 
-        var cleanupJob = connection.GetRecurringJobs().FirstOrDefault(j => j.Id == "system-event-cleanup");
-        if (cleanupJob == null)
-        {
-            recurringJobManager.AddOrUpdate<SystemEventCleanupJob>(
-                "system-event-cleanup",
-                newJob => newJob.ExecuteAsync(),
-                Cron.Daily(2)); // Run daily at 02:00
-        }
+        recurringJobManager.AddOrUpdate<LatencyDispatcherJob>(
+            "dispatch-uptimerobot-latency",
+            newJob => newJob.ExecuteAsync(),
+            CronHelper.FromMinutes(latencyInterval));
+
+        recurringJobManager.AddOrUpdate<LitiumOrderFetchJob>(
+            "dispatch-litium-orders",
+            newJob => newJob.ExecuteAsync(),
+            CronHelper.FromMinutes(litiumFetchInterval));
+
+        recurringJobManager.AddOrUpdate<RefreshLatencyMaterializedViewJob>(
+            "refresh-latency-materialized-views",
+            newJob => newJob.ExecuteAsync(),
+            Cron.Daily);
+
+        recurringJobManager.AddOrUpdate<RefreshFinancialMaterializedViewJob>(
+            "refresh-financial-materialized-views",
+            newJob => newJob.ExecuteAsync(),
+            Cron.Daily);
+
+        recurringJobManager.AddOrUpdate<SystemEventCleanupJob>(
+            "system-event-cleanup",
+            newJob => newJob.ExecuteAsync(),
+            Cron.Daily(2)); // Run daily at 02:00
     }
 }
 

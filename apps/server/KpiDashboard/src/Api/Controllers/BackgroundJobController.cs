@@ -99,21 +99,28 @@ namespace Api.Controllers;
         public async Task<ActionResult<RateLimits>> GetRateLimit()
         {
             await using var db = await dbContextFactory.CreateDbContextAsync();
-            var globalConfig = await db.GlobalConfigs.FirstOrDefaultAsync();
+
+            var data = await db.GlobalConfigs
+                .AsNoTracking()
+                .Select(g => new
+                {
+                    g.LatencyFetchIntervalMinutes,
+                    g.UptimeFetchIntervalMinutes
+                })
+                .FirstOrDefaultAsync();
+
+            if (data == null) return NotFound("Global config not found");
             
-            if (globalConfig == null) return NotFound("Global configuration not found.");
-
-            var lowestIntervalMins = await db.Monitors
+            var lowestInterval = await db.Monitors
                 .Where(m => m.TenantId != AnalyticsDbContext.SystemTenantGuid)
-                .Select(m => (int?)m.UpdateInterval)
-                .MinAsync() ?? 300;
+                .MinAsync(m => (int?)m.UpdateInterval);
 
-            lowestIntervalMins = Math.Max(1, lowestIntervalMins / 60);
+            var lowestIntervalMins = Math.Max(1, (lowestInterval ?? 300) / 60);
 
             var rateLimits = new RateLimits
             {
-                LatencyRateLimit = globalConfig.LatencyFetchIntervalMinutes,
-                UptimeRateLimit = globalConfig.UptimeFetchIntervalMinutes,
+                LatencyRateLimit = data.LatencyFetchIntervalMinutes,
+                UptimeRateLimit = data.UptimeFetchIntervalMinutes,
                 StatusRateLimit = lowestIntervalMins
             };
 

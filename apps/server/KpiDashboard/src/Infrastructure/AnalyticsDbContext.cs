@@ -2,7 +2,6 @@
 using Domain.Entities.Monitoring;
 using Domain.Entities.Office;
 using Domain.Entities.OrderData;
-using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure;
@@ -28,10 +27,26 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options) : 
     public DbSet<OfficeEvent> OfficeEvents => Set<OfficeEvent>();
     public DbSet<OfficeVisit> OfficeVisits => Set<OfficeVisit>();
     public DbSet<OfficeMessage> OfficeMessages => Set<OfficeMessage>();
+    public DbSet<SystemEvent> SystemEvents => Set<SystemEvent>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasPostgresExtension("uuid-ossp");
+
+        // SystemEvent
+        modelBuilder.Entity<SystemEvent>(entity =>
+        {
+            entity.ToTable("system_event");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasDefaultValueSql("uuid_generate_v4()");
+            entity.Property(e => e.Source).HasMaxLength(100);
+            entity.Property(e => e.Level).HasConversion<string>().HasMaxLength(50);
+            entity.HasOne(e => e.Tenant)
+                .WithMany()
+                .HasForeignKey(e => e.TenantId)
+                .OnDelete(DeleteBehavior.SetNull);
+            entity.HasIndex(e => e.Timestamp);
+        });
 
         // Tenant
         modelBuilder.Entity<Tenant>(entity => 
@@ -42,9 +57,7 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options) : 
             entity.Property(t => t.Name).HasMaxLength(255);
             entity.Property(t => t.LitiumBaseUrl).HasMaxLength(2048);
             entity.Property(t => t.ServiceAccountToken).HasMaxLength(2048);
-            entity.Ignore(t => t.OrderCount);
             entity.Property(t => t.CurrentlyFetching).HasDefaultValue(false);
-            entity.Ignore(t => t.PingReachable);
 
             // to catch unassigned monitors since TenantId is not nullable and a foreign key
             entity.HasData(
@@ -128,6 +141,7 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options) : 
             entity.Property(x => x.UptimeRobotApiKey).HasMaxLength(1024);
             entity.Property(x => x.UptimeFetchIntervalMinutes).HasDefaultValue(60);
             entity.Property(x => x.LatencyFetchIntervalMinutes).HasDefaultValue(10);
+            entity.Property(x => x.SystemEventRetentionDays).HasDefaultValue(30);
             entity.Property(x => x.LitiumFetchEnabled).HasDefaultValue(true);
             entity.Property(x => x.UptimeRobotFetchEnabled).HasDefaultValue(true);
             entity.Ignore(x => x.MonitorsCount);

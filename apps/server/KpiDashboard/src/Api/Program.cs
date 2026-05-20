@@ -1,13 +1,18 @@
 using Api.DTOs.Tenants;
+using Api.DTOs.Ingestion;
 using Api.Exceptions;
 using Api.Validators.Tenants;
+using Api.Validators.Ingestion;
 using DotNetEnv;
 using FluentValidation;
 using Hangfire;
 using Hangfire.PostgreSql;
 using Hangfire.Storage;
 using Infrastructure;
+using Infrastructure.Helpers;
 using Infrastructure.Jobs;
+using Infrastructure.Jobs.MaterializedViews;
+using Infrastructure.Jobs.Monitor;
 using Infrastructure.Services.Monitoring;
 using Microsoft.EntityFrameworkCore;
 using Polly;
@@ -22,18 +27,24 @@ builder.Services.AddControllers();
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<IValidator<CreateTenantRequestDto>, CreateTenantRequestDtoValidator>();
 builder.Services.AddScoped<IValidator<UpdateTenantRequestDto>, UpdateTenantRequestDtoValidator>();
+builder.Services.AddScoped<IValidator<HistoricalBackfillRequestDto>, HistoricalBackfillRequestDtoValidator>();
 builder.Services.AddScoped<IMonitorOrchestrationService, MonitorOrchestrationService>();
+builder.Services.AddScoped<Infrastructure.Services.ISystemEventService, Infrastructure.Services.SystemEventService>();
 builder.Services.AddTransient<UptimeRobotRateLimitHandler>();
 builder.Services.AddHttpClient<Infrastructure.Services.Monitoring.IUptimeRobotService, Infrastructure.Services.Monitoring.UptimeRobotService>()
     .AddHttpMessageHandler<UptimeRobotRateLimitHandler>();
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    var xmlFilename = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+});
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 builder.Services.AddMemoryCache();
 
-builder.Services.AddHttpClient<Infrastructure.Services.ITenantIngestionService, Infrastructure.Services.TenantIngestionService>()
+builder.Services.AddHttpClient<Infrastructure.Services.ILitiumIngestionService, Infrastructure.Services.LitiumIngestionService>()
     .AddPolicyHandler(HttpPolicyExtensions
         .HandleTransientHttpError()
         .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
@@ -130,14 +141,14 @@ using (var connection = JobStorage.Current.GetConnection())
                 CronHelper.FromMinutes(latencyInterval));
         }
         
-        var litiumRateLimit = Math.Max(1, config?.LitiumRateLimit ?? 10);
+        var litiumFetchInterval = Math.Max(1, config?.LitiumFetchIntervalMinutes ?? 10);
         var litiumJob = connection.GetRecurringJobs().FirstOrDefault(j => j.Id == "dispatch-litium-orders");
         if (litiumJob == null)
         {
             recurringJobManager.AddOrUpdate<LitiumOrderFetchJob>(
                 "dispatch-litium-orders",
                 newJob => newJob.ExecuteAsync(),
-                CronHelper.FromMinutes(litiumRateLimit));
+                CronHelper.FromMinutes(litiumFetchInterval));
         }
         
         var latencyMatViewJob = connection.GetRecurringJobs().FirstOrDefault(j => j.Id == "refresh-latency-materialized-views");
@@ -156,6 +167,15 @@ using (var connection = JobStorage.Current.GetConnection())
                 "refresh-financial-materialized-views",
                 newJob => newJob.ExecuteAsync(),
                 Cron.Daily);
+        }
+
+        var cleanupJob = connection.GetRecurringJobs().FirstOrDefault(j => j.Id == "system-event-cleanup");
+        if (cleanupJob == null)
+        {
+            recurringJobManager.AddOrUpdate<SystemEventCleanupJob>(
+                "system-event-cleanup",
+                newJob => newJob.ExecuteAsync(),
+                Cron.Daily(2)); // Run daily at 02:00
         }
     }
 }

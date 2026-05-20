@@ -8,7 +8,8 @@ namespace Infrastructure.Jobs;
 public class LitiumOrderFetchJob(
     IDbContextFactory<AnalyticsDbContext> dbContextFactory,
     IBackgroundJobClient backgroundJobClient,
-    ILogger<LitiumOrderFetchJob> logger)
+    ILogger<LitiumOrderFetchJob> logger,
+    ISystemEventService eventService)
 {
     private static readonly TimeSpan StaleThreshold = TimeSpan.FromMinutes(60);
 
@@ -25,7 +26,7 @@ public class LitiumOrderFetchJob(
             return;
         }
 
-        var rateLimit = config.LitiumRateLimit;
+        var fetchInterval = config.LitiumFetchIntervalMinutes;
         var now = DateTimeOffset.UtcNow;
 
         var tenants = await db.Tenants
@@ -39,9 +40,8 @@ public class LitiumOrderFetchJob(
             if (tenant.CurrentlyFetching && tenant.LastPolled.HasValue
                 && now - tenant.LastPolled.Value > StaleThreshold)
             {
-                logger.LogWarning(
-                    "Tenant {Id} has stale CurrentlyFetching flag (LastPolled: {LastPolled}). Resetting.",
-                    tenant.Id, tenant.LastPolled);
+                var msg = $"Tenant {tenant.Id} has stale CurrentlyFetching flag. Resetting.";
+                await eventService.LogWarningAsync(nameof(LitiumOrderFetchJob), msg, $"Last polled: {tenant.LastPolled}", tenant.Id);
                 tenant.CurrentlyFetching = false;
             }
 
@@ -51,13 +51,20 @@ public class LitiumOrderFetchJob(
                 continue;
             }
 
-            var start = tenant.FetchedUntil ?? now.AddMinutes(-rateLimit);
+            var start = tenant.FetchedUntil ?? now.AddDays(-2);
             var end = now;
 
-            backgroundJobClient.Enqueue<ITenantIngestionService>(
-                svc => svc.ExecuteIngestionAsync(tenant, start, end, CancellationToken.None));
+            if (end - start > TimeSpan.FromDays(31))
+            {
+                var msg = $"Fetch gap too large ({Math.Floor((end - start).TotalDays)} days). Skipping automated sync.";
+                await eventService.LogWarningAsync(nameof(LitiumOrderFetchJob), msg, "Automated sync only handles gaps up to 31 days. Use the manual backfill endpoint to recover this tenant.", tenant.Id);
+                continue;
+            }
 
-            tenant.FetchedUntil = end;
+            backgroundJobClient.Enqueue<ILitiumIngestionService>(
+                litiumIngestionService => litiumIngestionService.ExecuteIngestionAsync(tenant.Id, start, end, CancellationToken.None));
+
+            tenant.CurrentlyFetching = true;
             tenant.LastPolled = now;
             dispatched++;
         }

@@ -5,13 +5,18 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Infrastructure;
+using Infrastructure.Helpers;
+using Infrastructure.Jobs.Monitor;
+using Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Controllers;
 
 [ApiController]
 [Route("api/job")]
-    public class BackgroundJobController(IDbContextFactory<AnalyticsDbContext> dbContextFactory) : ControllerBase
+    public class BackgroundJobController(
+        IDbContextFactory<AnalyticsDbContext> dbContextFactory,
+        ISystemEventService eventService) : ControllerBase
     {
         [HttpPost]
         [Route("trigger/monitor-sync")]
@@ -106,8 +111,8 @@ namespace Api.Controllers;
         }
         
         [HttpPost]
-        [Route("update/metrics-sync-rate")]
-        public async Task<OkResult> UpdateMetricsSyncRate([FromQuery] int? uptimeMinutes, [FromQuery] int? latencyMinutes)
+        [Route("update/metrics-fetch-interval")]
+        public async Task<OkResult> UpdateMetricsFetchInterval([FromQuery] int? uptimeMinutes, [FromQuery] int? latencyMinutes)
         {
 
 
@@ -119,12 +124,14 @@ namespace Api.Controllers;
                 {
                     config.UptimeFetchIntervalMinutes = uptimeMinutes.Value;
                     RecurringJob.AddOrUpdate<UptimeDispatcherJob>("dispatch-uptimerobot-uptime", job => job.ExecuteAsync(), CronHelper.FromMinutes(uptimeMinutes.Value));
+                    await eventService.LogAsync(nameof(BackgroundJobController), $"Updated Uptime Fetch Interval to {uptimeMinutes} minutes");
                 }
                 
                 if (latencyMinutes.HasValue)
                 {
                     config.LatencyFetchIntervalMinutes = latencyMinutes.Value;
                     RecurringJob.AddOrUpdate<LatencyDispatcherJob>("dispatch-uptimerobot-latency", job => job.ExecuteAsync(), CronHelper.FromMinutes(latencyMinutes.Value));
+                    await eventService.LogAsync(nameof(BackgroundJobController), $"Updated Latency Fetch Interval to {latencyMinutes} minutes");
                 }
                 
                 dbContext.SaveChanges();
@@ -133,8 +140,8 @@ namespace Api.Controllers;
         }
 
         [HttpPost]
-        [Route("update/litium-sync-rate")]
-        public async Task<ActionResult> UpdateLitiumSyncRate([FromQuery] int minutes)
+        [Route("update/litium-fetch-interval")]
+        public async Task<ActionResult> UpdateLitiumFetchInterval([FromQuery] int minutes)
         {
 
 
@@ -142,16 +149,19 @@ namespace Api.Controllers;
             var config = dbContext.GlobalConfigs.SingleOrDefault();
             if (config == null) return NotFound("Global config not found.");
 
-            config.LitiumRateLimit = minutes;
+            config.LitiumFetchIntervalMinutes = minutes;
             dbContext.SaveChanges();
 
             RecurringJob.AddOrUpdate<LitiumOrderFetchJob>("dispatch-litium-orders", job => job.ExecuteAsync(), CronHelper.FromMinutes(minutes));
+            
+            await eventService.LogAsync(nameof(BackgroundJobController), $"Updated Litium Fetch Interval to {minutes} minutes");
+
             return Ok();
         }
 
         [HttpGet]
-        [Route("metrics/rate-limits")]
-        public async Task<ActionResult<RateLimits>> GetRateLimit()
+        [Route("metrics/fetch-intervals")]
+        public async Task<ActionResult<FetchIntervalsDto>> GetFetchIntervals()
         {
             await using var db = await dbContextFactory.CreateDbContextAsync();
 
@@ -161,7 +171,7 @@ namespace Api.Controllers;
                 {
                     g.LatencyFetchIntervalMinutes,
                     g.UptimeFetchIntervalMinutes,
-                    g.LitiumRateLimit
+                    g.LitiumFetchIntervalMinutes
                 })
                 .SingleOrDefaultAsync();
 
@@ -173,15 +183,15 @@ namespace Api.Controllers;
 
             var lowestIntervalMins = Math.Max(1, (lowestInterval ?? 300) / 60);
 
-            var rateLimits = new RateLimits
+            var fetchIntervals = new FetchIntervalsDto
             {
-                LatencyRateLimit = data.LatencyFetchIntervalMinutes,
-                UptimeRateLimit = data.UptimeFetchIntervalMinutes,
-                StatusRateLimit = lowestIntervalMins,
-                LitiumRateLimit = data.LitiumRateLimit
+                LatencyFetchIntervalMinutes = data.LatencyFetchIntervalMinutes,
+                UptimeFetchIntervalMinutes = data.UptimeFetchIntervalMinutes,
+                StatusFetchIntervalMinutes = lowestIntervalMins,
+                LitiumFetchIntervalMinutes = data.LitiumFetchIntervalMinutes
             };
 
-            return Ok(rateLimits);
+            return Ok(fetchIntervals);
         }
         
         

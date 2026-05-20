@@ -1,51 +1,63 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
-using Domain.Entities.LitiumDTO;
 using Domain.Entities;
+using Domain.Entities.Upstream.LitiumDTO;
 using Infrastructure;
 using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Services;
 
-public interface ITenantIngestionService
+public interface ILitiumIngestionService
 {
-    Task<int> ExecuteIngestionAsync(Tenant tenant, DateTimeOffset startDate, DateTimeOffset endDate, CancellationToken ct = default);
+    Task<int> ExecuteIngestionAsync(Guid tenantId, DateTimeOffset startDate, DateTimeOffset endDate, CancellationToken ct = default);
 }
 
-public class TenantIngestionService(
+public class LitiumIngestionService(
     IDbContextFactory<AnalyticsDbContext> contextFactory,
     HttpClient httpClient,
-    ILogger<TenantIngestionService> logger)
-    : ITenantIngestionService
+    ILogger<LitiumIngestionService> logger,
+    ISystemEventService eventService)
+    : ILitiumIngestionService
 {
-    public async Task<int> ExecuteIngestionAsync(Tenant tenant, DateTimeOffset startDate, DateTimeOffset endDate, CancellationToken ct = default)
+    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
+
+    public async Task<int> ExecuteIngestionAsync(Guid tenantId, DateTimeOffset startDate, DateTimeOffset endDate, CancellationToken ct = default)
     {
-        // Set CurrentlyFetching flag before starting work
-        await using (var flagContext = await contextFactory.CreateDbContextAsync(ct))
+        Tenant tenant;
+        await using (var context = await contextFactory.CreateDbContextAsync(ct))
         {
-            var dbTenant = await flagContext.Tenants.FirstAsync(t => t.Id == tenant.Id, ct);
-            dbTenant.CurrentlyFetching = true;
-            await flagContext.SaveChangesAsync(ct);
+            tenant = await context.Tenants.FirstAsync(t => t.Id == tenantId, ct);
         }
 
         try
         {
-            return await ExecuteIngestionCoreAsync(tenant, startDate, endDate, ct);
+            var result = await ExecuteIngestionCoreAsync(tenant, startDate, endDate, ct);
+            
+            if (result > 0)
+            {
+                await eventService.LogAsync(nameof(LitiumIngestionService), $"Successfully ingested {result} orders.", SystemEventLevel.Information, $"Period: {startDate:O} to {endDate:O}", tenantId);
+            }
+            
+            return result;
+        }
+        catch (Exception ex)
+        {
+            await eventService.LogErrorAsync(nameof(LitiumIngestionService), $"Ingestion failed for tenant {tenantId}", ex, tenantId);
+            throw; // Re-throw so Hangfire knows it failed
         }
         finally
         {
-            // Always clear flag, even on failure — use separate context to avoid failed-state issues
             try
             {
                 await using var cleanupContext = await contextFactory.CreateDbContextAsync(CancellationToken.None);
-                var t = await cleanupContext.Tenants.FirstAsync(x => x.Id == tenant.Id);
+                var t = await cleanupContext.Tenants.FirstAsync(x => x.Id == tenantId, cancellationToken: ct);
                 t.CurrentlyFetching = false;
                 t.LastPolled = DateTimeOffset.UtcNow;
-                await cleanupContext.SaveChangesAsync();
+                await cleanupContext.SaveChangesAsync(ct);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Failed to clear CurrentlyFetching flag for tenant {TenantId}.", tenant.Id);
+                logger.LogError(ex, "Failed to clear CurrentlyFetching flag for tenant {TenantId}.", tenantId);
             }
         }
     }
@@ -55,7 +67,7 @@ public class TenantIngestionService(
         var totalIngested = 0;
         var currentStart = startDate;
 
-        await using var context = await contextFactory.CreateDbContextAsync(ct);
+        await using var dbContext = await contextFactory.CreateDbContextAsync(ct);
 
         while (currentStart < endDate)
         {
@@ -85,7 +97,7 @@ public class TenantIngestionService(
 
                 await using var contentStream = await response.Content.ReadAsStreamAsync(ct);
                 var litiumPayload = await JsonSerializer.DeserializeAsync<LitiumSyncResponse>(
-                    contentStream, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }, ct);
+                    contentStream, JsonOptions, ct);
 
                 if (litiumPayload?.Orders != null && litiumPayload.Orders.Count != 0)
                 {
@@ -121,13 +133,18 @@ public class TenantIngestionService(
                             total_value_exc_vat = EXCLUDED.total_value_exc_vat,
                             order_state = EXCLUDED.order_state";
 
-                    await context.Database.ExecuteSqlRawAsync(sql, pIds, pTenantIds, pOrderStatus, pOrderIds, pDatesCreated, pIncVat, pExcVat, pCurrencies);
+                    await dbContext.Database.ExecuteSqlRawAsync(sql, pIds, pTenantIds, pOrderStatus, pOrderIds, pDatesCreated, pIncVat, pExcVat, pCurrencies);
                     totalIngested += count;
                 }
 
                 skip += take;
                 hasMoreOrders = litiumPayload != null && skip < litiumPayload.TotalOrders;
             }
+
+            var t = await dbContext.Tenants.SingleAsync(x => x.Id == tenant.Id, cancellationToken: ct);
+            t.FetchedFrom = t.FetchedFrom == null ? currentStart : (currentStart < t.FetchedFrom ? currentStart : t.FetchedFrom);                                                                                  
+            t.FetchedUntil = t.FetchedUntil == null ? currentEnd : (currentEnd > t.FetchedUntil ? currentEnd : t.FetchedUntil);                                                                                    
+            await dbContext.SaveChangesAsync(ct);      
 
             currentStart = currentEnd;
         }

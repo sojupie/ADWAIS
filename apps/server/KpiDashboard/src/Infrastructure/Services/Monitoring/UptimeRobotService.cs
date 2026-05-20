@@ -11,7 +11,7 @@ public class UptimeRobotService(HttpClient httpClient, IDbContextFactory<Analyti
     private async Task<string> GetApiKeyAsync()
     {
         using var context = await contextFactory.CreateDbContextAsync();
-        var config = await context.GlobalConfigs.FirstOrDefaultAsync();
+        var config = await context.GlobalConfigs.SingleOrDefaultAsync();
         if (config == null || string.IsNullOrWhiteSpace(config.UptimeRobotApiKey))
         {
             throw new InvalidOperationException("UptimeRobotApiKey is not configured in GlobalConfig.");

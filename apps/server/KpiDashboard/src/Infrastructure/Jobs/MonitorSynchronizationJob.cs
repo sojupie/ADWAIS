@@ -27,7 +27,7 @@ public class MonitorSynchronizationJob(
 
         var localMonitors = await dbContext.Monitors.ToDictionaryAsync(m => m.Id);
         var cronExpression = JobStorage.Current.GetConnection().GetRecurringJobs()
-            .FirstOrDefault(j => j.Id == "sync-uptimerobot-fleet")?.Cron;
+            .SingleOrDefault(j => j.Id == "sync-uptimerobot-fleet")?.Cron;
         
         TimeSpan cacheDuration = TimeSpan.FromMinutes(6);
         

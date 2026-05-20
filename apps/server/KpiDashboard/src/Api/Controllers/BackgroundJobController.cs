@@ -10,26 +10,11 @@ using Microsoft.EntityFrameworkCore;
 namespace Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/job")]
     public class BackgroundJobController(IDbContextFactory<AnalyticsDbContext> dbContextFactory) : ControllerBase
     {
         [HttpPost]
-        [Route("TriggerMonitorSync")]
-        public ActionResult TriggerMonitorSync()
-        {
-            try
-            {
-                RecurringJob.TriggerJob("sync-uptimerobot-fleet");
-                return Ok();
-            }
-            catch (Exception exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { error = "Failed to trigger monitor sync", detail = exception.Message });
-            }
-        }
-
-        [HttpPost]
-        [Route("TriggerUptimeSync")]
+        [Route("trigger/uptime-sync")]
         public ActionResult TriggerUptimeSync()
         {
             try
@@ -44,7 +29,7 @@ namespace Api.Controllers;
         }
 
         [HttpPost]
-        [Route("TriggerLatencySync")]
+        [Route("trigger/latency-sync")]
         public ActionResult TriggerLatencySync()
         {
             try
@@ -59,7 +44,7 @@ namespace Api.Controllers;
         }
 
         [HttpPost]
-        [Route("TriggerLitiumSync")]
+        [Route("trigger/litium-sync")]
         public ActionResult TriggerLitiumSync()
         {
             try
@@ -74,7 +59,39 @@ namespace Api.Controllers;
         }
 
         [HttpPost]
-        [Route("UpdateMonitorSyncRate")]
+        [Route("trigger/refresh-historic-order-data")]
+        public ActionResult TriggerMaterialViewRefresh()
+        {
+            try
+            {
+                RecurringJob.TriggerJob("refresh-financial-materialized-views");
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new { error = "Failed to trigger materialized view refresh", detail = e.Message });
+            }
+        }
+        
+        [HttpPost]
+        [Route("trigger/refresh-historic-latency-data")]
+        public ActionResult TriggerLatencyMaterialViewRefresh()
+        {
+            try
+            {
+                RecurringJob.TriggerJob("refresh-latency-materialized-views");
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new { error = "Failed to trigger materialized view refresh", detail = e.Message });
+            }
+        }
+
+        [HttpPost]
+        [Route("update/monitor-sync-rate")]
         public ActionResult UpdateMonitorSyncRate([FromQuery] int minutes = 5)
         {
             RecurringJob.AddOrUpdate<MonitorSynchronizationJob>("sync-uptimerobot-fleet", job => job.ExecuteAsync(), Cron.MinuteInterval(minutes));
@@ -83,13 +100,13 @@ namespace Api.Controllers;
         }
 
         [HttpPost]
-        [Route("UpdateMetricsSyncRate")]
+        [Route("update/metrics-sync-rate")]
         public async Task<OkResult> UpdateMetricsSyncRate([FromQuery] int? uptimeMinutes, [FromQuery] int? latencyMinutes)
         {
 
 
             await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-            var config = dbContext.GlobalConfigs.FirstOrDefault();
+            var config = dbContext.GlobalConfigs.SingleOrDefault();
             if (config != null)
             {
                 if (uptimeMinutes.HasValue)
@@ -110,13 +127,13 @@ namespace Api.Controllers;
         }
 
         [HttpPost]
-        [Route("UpdateLitiumSyncRate")]
+        [Route("update/litium-sync-rate")]
         public async Task<ActionResult> UpdateLitiumSyncRate([FromQuery] int minutes)
         {
 
 
             await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-            var config = dbContext.GlobalConfigs.FirstOrDefault();
+            var config = dbContext.GlobalConfigs.SingleOrDefault();
             if (config == null) return NotFound("Global config not found.");
 
             config.LitiumRateLimit = minutes;
@@ -127,7 +144,7 @@ namespace Api.Controllers;
         }
 
         [HttpGet]
-        [Route("RateLimits")]
+        [Route("metrics/rate-limits")]
         public async Task<ActionResult<RateLimits>> GetRateLimit()
         {
             await using var db = await dbContextFactory.CreateDbContextAsync();
@@ -140,7 +157,7 @@ namespace Api.Controllers;
                     g.UptimeFetchIntervalMinutes,
                     g.LitiumRateLimit
                 })
-                .FirstOrDefaultAsync();
+                .SingleOrDefaultAsync();
 
             if (data == null) return NotFound("Global config not found");
             
@@ -160,4 +177,6 @@ namespace Api.Controllers;
 
             return Ok(rateLimits);
         }
+        
+        
     }

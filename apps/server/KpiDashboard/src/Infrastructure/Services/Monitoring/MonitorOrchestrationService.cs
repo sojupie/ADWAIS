@@ -39,6 +39,7 @@ public class MonitorOrchestrationService(
     public async Task<IEnumerable<UptimeMonitor>> GetMonitorsByTenantAsync(Guid tenantId)
     {
         var monitors = await dbContext.Monitors
+            .AsNoTracking()
             .Where(m => m.TenantId == tenantId)
             .ToListAsync();
 
@@ -53,7 +54,8 @@ public class MonitorOrchestrationService(
     public async Task<UptimeMonitor> GetMonitorAsync(Guid tenantId, int id)
     {
         var monitor = await dbContext.Monitors
-            .FirstOrDefaultAsync(m => m.TenantId == tenantId && m.Id == id);
+            .AsNoTracking()
+            .SingleOrDefaultAsync(m => m.TenantId == tenantId && m.Id == id);
 
         if (monitor == null) throw new KeyNotFoundException($"Monitor {id} not found.");
 
@@ -72,7 +74,7 @@ public class MonitorOrchestrationService(
 
     public async Task DeleteMonitorAsync(Guid tenantId, int id)
     {
-        var monitor = await dbContext.Monitors.FirstOrDefaultAsync(m => m.TenantId == tenantId && m.Id == id);
+        var monitor = await dbContext.Monitors.SingleOrDefaultAsync(m => m.TenantId == tenantId && m.Id == id);
         if (monitor == null) throw new KeyNotFoundException();
 
         await uptimeRobotService.DeleteMonitorAsync(id);
@@ -83,7 +85,7 @@ public class MonitorOrchestrationService(
 
     public async Task PauseMonitorAsync(int id)
     {
-        var monitor = await dbContext.Monitors.FirstOrDefaultAsync(m => m.Id == id);
+        var monitor = await dbContext.Monitors.SingleOrDefaultAsync(m => m.Id == id);
         if (monitor == null) throw new KeyNotFoundException();
 
         await uptimeRobotService.PauseMonitorAsync(id);
@@ -94,7 +96,7 @@ public class MonitorOrchestrationService(
 
     public async Task StartMonitorAsync(int id)
     {
-        var monitor = await dbContext.Monitors.FirstOrDefaultAsync(m => m.Id == id);
+        var monitor = await dbContext.Monitors.SingleOrDefaultAsync(m => m.Id == id);
         if (monitor == null) throw new KeyNotFoundException();
 
         await uptimeRobotService.StartMonitorAsync(id);

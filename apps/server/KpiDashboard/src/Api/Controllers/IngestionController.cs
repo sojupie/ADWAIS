@@ -23,7 +23,7 @@ public class IngestionController(
         if (startDate >= endDate) return BadRequest("startDate must be before endDate");
 
         await using var context = await contextFactory.CreateDbContextAsync(ct);
-        var tenant = await context.Tenants.FirstOrDefaultAsync(t => t.Id == tenantId, ct);
+        var tenant = await context.Tenants.SingleOrDefaultAsync(t => t.Id == tenantId, ct);
         
         if (tenant == null) return NotFound("Tenant not found.");
         if (tenant.CurrentlyFetching) return Conflict(new { message = $"Tenant {tenantId} is currently fetching. Wait for the active job to complete." });

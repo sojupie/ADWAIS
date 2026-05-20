@@ -8,7 +8,7 @@ public class LatencyDispatcherJob(IDbContextFactory<AnalyticsDbContext> dbContex
     public async Task ExecuteAsync()
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        var globalConfig = await dbContext.GlobalConfigs.FirstOrDefaultAsync();
+        var globalConfig = await dbContext.GlobalConfigs.SingleOrDefaultAsync();
         var globalInterval = globalConfig?.LatencyFetchIntervalMinutes ?? 10;
         
         var monitors = await dbContext.Monitors

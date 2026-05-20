@@ -8,7 +8,7 @@ public class UptimeDispatcherJob(IDbContextFactory<AnalyticsDbContext> dbContext
     public async Task ExecuteAsync()
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        var globalConfig = await dbContext.GlobalConfigs.FirstOrDefaultAsync();
+        var globalConfig = await dbContext.GlobalConfigs.SingleOrDefaultAsync();
         var globalInterval = globalConfig?.UptimeFetchIntervalMinutes ?? 60;
         
         var monitors = await dbContext.Monitors

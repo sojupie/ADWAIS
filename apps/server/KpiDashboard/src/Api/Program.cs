@@ -84,6 +84,11 @@ using (var scope = app.Services.CreateScope())
     var contextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<AnalyticsDbContext>>();
     await using var context = await contextFactory.CreateDbContextAsync();
     context.Database.Migrate();
+
+    if (app.Environment.IsDevelopment())
+    {
+        await DatabaseSeeder.SeedSampleDataAsync(context);
+    }
 }
 
 using (var connection = JobStorage.Current.GetConnection())
@@ -102,30 +107,55 @@ using (var connection = JobStorage.Current.GetConnection())
     {
         var dbFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<AnalyticsDbContext>>();
         await using var context = dbFactory.CreateDbContext();
-        var config = context.GlobalConfigs.FirstOrDefault();
+        var config = context.GlobalConfigs.SingleOrDefault();
         
         var uptimeInterval = config?.UptimeFetchIntervalMinutes ?? 60;
         var latencyInterval = config?.LatencyFetchIntervalMinutes ?? 10;
         
-
-        
         var uptimeJob = connection.GetRecurringJobs().FirstOrDefault(j => j.Id == "dispatch-uptimerobot-uptime");
         if (uptimeJob == null)
         {
-            recurringJobManager.AddOrUpdate<UptimeDispatcherJob>("dispatch-uptimerobot-uptime", newJob => newJob.ExecuteAsync(), CronHelper.FromMinutes(uptimeInterval));
+            recurringJobManager.AddOrUpdate<UptimeDispatcherJob>(
+                    "dispatch-uptimerobot-uptime",
+                    newJob => newJob.ExecuteAsync(),
+                    CronHelper.FromMinutes(uptimeInterval));
         }
         
         var latencyJob = connection.GetRecurringJobs().FirstOrDefault(j => j.Id == "dispatch-uptimerobot-latency");
         if (latencyJob == null)
         {
-            recurringJobManager.AddOrUpdate<LatencyDispatcherJob>("dispatch-uptimerobot-latency", newJob => newJob.ExecuteAsync(), CronHelper.FromMinutes(latencyInterval));
+            recurringJobManager.AddOrUpdate<LatencyDispatcherJob>(
+                "dispatch-uptimerobot-latency",
+                newJob => newJob.ExecuteAsync(),
+                CronHelper.FromMinutes(latencyInterval));
         }
         
         var litiumRateLimit = Math.Max(1, config?.LitiumRateLimit ?? 10);
         var litiumJob = connection.GetRecurringJobs().FirstOrDefault(j => j.Id == "dispatch-litium-orders");
         if (litiumJob == null)
         {
-            recurringJobManager.AddOrUpdate<LitiumOrderFetchJob>("dispatch-litium-orders", newJob => newJob.ExecuteAsync(), CronHelper.FromMinutes(litiumRateLimit));
+            recurringJobManager.AddOrUpdate<LitiumOrderFetchJob>(
+                "dispatch-litium-orders",
+                newJob => newJob.ExecuteAsync(),
+                CronHelper.FromMinutes(litiumRateLimit));
+        }
+        
+        var latencyMatViewJob = connection.GetRecurringJobs().FirstOrDefault(j => j.Id == "refresh-latency-materialized-views");
+        if (latencyMatViewJob == null)
+        {
+            recurringJobManager.AddOrUpdate<RefreshLatencyMaterializedViewJob>(
+                "refresh-latency-materialized-views",
+                newJob => newJob.ExecuteAsync(),
+                Cron.Daily);
+        }
+        
+        var financialMatViewJob = connection.GetRecurringJobs().FirstOrDefault(j => j.Id == "refresh-financial-materialized-views");
+        if (financialMatViewJob == null)
+        {
+            recurringJobManager.AddOrUpdate<RefreshFinancialMaterializedViewJob>(
+                "refresh-financial-materialized-views",
+                newJob => newJob.ExecuteAsync(),
+                Cron.Daily);
         }
     }
 }

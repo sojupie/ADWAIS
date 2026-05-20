@@ -1,4 +1,4 @@
-﻿using Api.DTOs.Tenants;
+using Api.DTOs.Tenants;
 using Domain.Entities;
 using FluentValidation;
 using Infrastructure;
@@ -20,6 +20,7 @@ public class AdminTenantController(
         await using var context = await contextFactory.CreateDbContextAsync();
 
         var tenants = await context.Tenants
+            .AsNoTracking()
             .Select(t => new TenantResponseDto()
             {
                 Id = t.Id,
@@ -44,6 +45,7 @@ public class AdminTenantController(
         await using var context = await contextFactory.CreateDbContextAsync();
 
         var tenant = await context.Tenants
+            .AsNoTracking()
             .Where(t => t.Id == id)
             .Select(t => new TenantResponseDto()
             {
@@ -58,7 +60,7 @@ public class AdminTenantController(
                 PingReachable = t.PingReachable,
                 OrderFetchingEnabled = t.OrderFetchingEnabled
             })
-            .FirstOrDefaultAsync();
+            .SingleOrDefaultAsync();
 
         if (tenant == null)
         {

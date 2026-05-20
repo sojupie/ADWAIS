@@ -17,8 +17,4 @@ public class Tenant
 
     public ICollection<Order> Orders { get; set; } = new List<Order>();
     public ICollection<UptimeMonitor> Monitors { get; set; } = new List<UptimeMonitor>();
-    
-    // Telemetry and live statuses; do not persist.
-    public int OrderCount { get; set; }
-    public bool? PingReachable { get; set; }
 }

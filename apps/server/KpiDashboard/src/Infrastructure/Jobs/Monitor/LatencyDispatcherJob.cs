@@ -1,7 +1,7 @@
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infrastructure.Jobs;
+namespace Infrastructure.Jobs.Monitor;
 
 public class LatencyDispatcherJob(IDbContextFactory<AnalyticsDbContext> dbContextFactory, IBackgroundJobClient backgroundJobClient)
 {

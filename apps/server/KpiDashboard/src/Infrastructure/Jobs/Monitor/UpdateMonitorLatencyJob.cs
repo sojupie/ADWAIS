@@ -2,9 +2,9 @@ using Domain.Entities.Monitoring;
 using Infrastructure.Services.Monitoring;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infrastructure.Jobs;
+namespace Infrastructure.Jobs.Monitor;
 
-public class UpdateMonitorUptimeJob(
+public class UpdateMonitorLatencyJob(
     IDbContextFactory<AnalyticsDbContext> dbContextFactory,
     IUptimeRobotService uptimeRobotService)
 {
@@ -18,11 +18,21 @@ public class UpdateMonitorUptimeJob(
             return; // Deleted or paused
         }
 
-        var uptime = await uptimeRobotService.GetUptimeAsync(monitorId, startDate, endDate);
+        var responseTime = await uptimeRobotService.GetResponseTimeAsync(monitorId, startDate, endDate);
 
-        monitor.CurrentUptimePercentage = uptime;
-        monitor.LastUptimeUpdate = endDate;
-        
+        if (responseTime.Average.HasValue)
+        {
+            dbContext.ResponseTimes.Add(new ResponseTime
+            {
+                MonitorId = monitorId,
+                Average = responseTime.Average.Value,
+                Lowest = responseTime.Lowest,
+                Highest = responseTime.Highest,
+                Date = endDate
+            });
+        }
+
+        monitor.LastLatencyUpdate = endDate;
         await dbContext.SaveChangesAsync();
     }
 }

@@ -1,4 +1,4 @@
-﻿using Domain.Enums;
+﻿using Domain.Entities.Office.Enums;
 
 namespace Domain.Entities;
 

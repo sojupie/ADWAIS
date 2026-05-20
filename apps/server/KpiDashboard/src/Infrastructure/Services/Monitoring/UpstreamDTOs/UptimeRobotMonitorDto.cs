@@ -1,4 +1,4 @@
-﻿namespace Infrastructure.Services.Monitoring.DTOs;
+﻿namespace Infrastructure.Services.Monitoring.UpstreamDTOs;
 
 public record UptimeRobotMonitorDto(
     int Id,

@@ -1,6 +1,6 @@
 using Hangfire;
 
-namespace Infrastructure;
+namespace Infrastructure.Helpers;
 
 public static class CronHelper
 {

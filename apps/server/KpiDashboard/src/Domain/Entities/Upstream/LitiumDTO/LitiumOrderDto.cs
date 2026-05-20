@@ -1,4 +1,4 @@
-﻿namespace Domain.Entities.LitiumDTO;
+﻿namespace Domain.Entities.Upstream.LitiumDTO;
 
 public class LitiumOrderDto
 {

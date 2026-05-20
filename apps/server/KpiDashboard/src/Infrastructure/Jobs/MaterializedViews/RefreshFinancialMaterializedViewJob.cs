@@ -1,7 +1,7 @@
 ﻿using Hangfire;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infrastructure.Jobs;
+namespace Infrastructure.Jobs.MaterializedViews;
 
 public class RefreshFinancialMaterializedViewJob(IDbContextFactory<AnalyticsDbContext> dbContextFactory,
     IBackgroundJobClient backgroundJobClient)

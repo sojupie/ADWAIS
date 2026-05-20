@@ -3,7 +3,6 @@ using Domain.Entities.Monitoring;
 using Infrastructure;
 using Infrastructure.CacheModels;
 using Infrastructure.Services.Monitoring;
-using Infrastructure.Services.Monitoring.DTOs;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

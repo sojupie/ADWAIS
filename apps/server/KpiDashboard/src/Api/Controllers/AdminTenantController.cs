@@ -26,12 +26,10 @@ public class AdminTenantController(
                 Id = t.Id,
                 Name = t.Name,
                 LitiumBaseUrl = t.LitiumBaseUrl,
-                OrderCount = t.OrderCount,
                 CurrentlyFetching = t.CurrentlyFetching,
                 FetchedFrom = t.FetchedFrom,
                 FetchedUntil = t.FetchedUntil,
                 LastPolled = t.LastPolled,
-                PingReachable = t.PingReachable,
                 OrderFetchingEnabled = t.OrderFetchingEnabled
             })
             .ToListAsync();
@@ -52,12 +50,10 @@ public class AdminTenantController(
                 Id = t.Id,
                 Name = t.Name,
                 LitiumBaseUrl = t.LitiumBaseUrl,
-                OrderCount = t.OrderCount,
                 CurrentlyFetching = t.CurrentlyFetching,
                 FetchedFrom = t.FetchedFrom,
                 FetchedUntil = t.FetchedUntil,
                 LastPolled = t.LastPolled,
-                PingReachable = t.PingReachable,
                 OrderFetchingEnabled = t.OrderFetchingEnabled
             })
             .SingleOrDefaultAsync();
@@ -97,12 +93,10 @@ public class AdminTenantController(
                 Id = tenant.Id,
                 Name = tenant.Name,
                 LitiumBaseUrl = tenant.LitiumBaseUrl,
-                OrderCount = tenant.OrderCount,
                 CurrentlyFetching = tenant.CurrentlyFetching,
                 FetchedFrom = tenant.FetchedFrom,
                 FetchedUntil = tenant.FetchedUntil,
                 LastPolled = tenant.LastPolled,
-                PingReachable = tenant.PingReachable,
                 OrderFetchingEnabled = tenant.OrderFetchingEnabled
             });
     }
@@ -162,12 +156,10 @@ public class AdminTenantController(
             Id = tenant.Id,
             Name = tenant.Name,
             LitiumBaseUrl = tenant.LitiumBaseUrl,
-            OrderCount = tenant.OrderCount,
             CurrentlyFetching = tenant.CurrentlyFetching,
             FetchedFrom = tenant.FetchedFrom,
             FetchedUntil = tenant.FetchedUntil,
             LastPolled = tenant.LastPolled,
-            PingReachable = tenant.PingReachable,
             OrderFetchingEnabled = tenant.OrderFetchingEnabled
         });
     }

@@ -1,13 +1,13 @@
+using Cronos;
 using Domain.Entities.Monitoring;
 using Hangfire;
 using Hangfire.Storage;
 using Infrastructure.CacheModels;
 using Infrastructure.Services.Monitoring;
 using Microsoft.EntityFrameworkCore;
-using Cronos;
 using Microsoft.Extensions.Caching.Memory;
 
-namespace Infrastructure.Jobs;
+namespace Infrastructure.Jobs.Monitor;
 
 public class MonitorSynchronizationJob(
     IDbContextFactory<AnalyticsDbContext> dbContextFactory,

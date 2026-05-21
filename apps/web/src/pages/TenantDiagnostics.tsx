@@ -1,10 +1,10 @@
 import type { TenantDiagnostics as TenantDiagnosticsData } from '@types';
 import { formatCurrency, formatNumber } from '@utils';
 import { FactPanel } from '../components/common/FactPanel';
-import { CumulativeGrowthDeltaChart } from '../components/financial/CumulativeGrowthDeltaChart';
-import { OrderValueDistributionChart } from '../components/financial/OrderValueDistributionChart';
-import { PortfolioRevenueShareTrajectoryChart } from '../components/financial/PortfolioRevenueShareTrajectoryChart';
-import { TenantRevenueVelocityChart } from '../components/financial/TenantRevenueVelocityChart';
+import { CumulativeGrowthDeltaChart } from '../components/TenantSpecific/CumulativeGrowthDeltaChart';
+import { OrderValueDistributionChart } from '../components/TenantSpecific/OrderValueDistributionChart';
+import { PortfolioRevenueShareTrajectoryChart } from '../components/TenantSpecific/PortfolioRevenueShareTrajectoryChart';
+import { TenantRevenueVelocityChart } from '../components/TenantSpecific/TenantRevenueVelocityChart';
 import './TenantDiagnostics.css';
 
 interface Props {

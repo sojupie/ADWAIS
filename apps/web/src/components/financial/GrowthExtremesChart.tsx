@@ -14,11 +14,7 @@ interface TenantRowData {
   barStyle: CSSProperties;
 }
 
-export function GrowthExtremesChart({
-  tenants,
-  onTenantSelect,
-}: {
-  tenants: TenantKpi[];
+export function GrowthExtremesChart({tenants, onTenantSelect,}: { tenants: TenantKpi[];
   onTenantSelect?: (tenantId: string) => void;
 }) {
   if (tenants.length === 0) return null;

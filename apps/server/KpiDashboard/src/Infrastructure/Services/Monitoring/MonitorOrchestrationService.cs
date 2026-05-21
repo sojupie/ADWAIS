@@ -1,11 +1,14 @@
 using Domain.Entities.Monitoring;
+using Infrastructure.CacheModels;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Infrastructure.Services.Monitoring;
 
 public class MonitorOrchestrationService(
     AnalyticsDbContext dbContext,
-    IUptimeRobotService uptimeRobotService) : IMonitorOrchestrationService
+    IUptimeRobotService uptimeRobotService,
+    IMemoryCache cache) : IMonitorOrchestrationService
 {
     public async Task<UptimeMonitor> CreateMonitorAsync(Guid tenantId, string name, string url, double? uptimeSla)
     {
@@ -33,7 +36,26 @@ public class MonitorOrchestrationService(
         dbContext.Monitors.Add(monitor);
         await dbContext.SaveChangesAsync();
 
-        return monitor;
+        return HydrateLiveStatus(monitor);
+    }
+
+    public async Task AssignMonitorAsync(int monitorId, Guid tenantId)
+    {
+        var monitor = await dbContext.Monitors.SingleOrDefaultAsync(m => m.Id == monitorId);
+        if (monitor == null) throw new KeyNotFoundException($"Monitor {monitorId} not found.");
+
+        var tenantExists = await dbContext.Tenants.AnyAsync(t => t.Id == tenantId);
+        if (!tenantExists) throw new KeyNotFoundException($"Tenant {tenantId} not found.");
+
+        monitor.TenantId = tenantId;
+        await dbContext.SaveChangesAsync();
+    }
+
+    public async Task ReassignAllTenantMonitorsToSystemAsync(Guid tenantId)
+    {
+        await dbContext.Monitors
+            .Where(m => m.TenantId == tenantId)
+            .ExecuteUpdateAsync(s => s.SetProperty(m => m.TenantId, AnalyticsDbContext.SystemTenantGuid));
     }
 
     public async Task<IEnumerable<UptimeMonitor>> GetMonitorsByTenantAsync(Guid tenantId)
@@ -43,12 +65,7 @@ public class MonitorOrchestrationService(
             .Where(m => m.TenantId == tenantId)
             .ToListAsync();
 
-        foreach (var monitor in monitors)
-        {
-            monitor.StatusStr = FormatStatus(monitor.StatusStr);
-        }
-
-        return monitors;
+        return monitors.Select(HydrateLiveStatus);
     }
 
     public async Task<UptimeMonitor> GetMonitorAsync(Guid tenantId, int id)
@@ -59,11 +76,22 @@ public class MonitorOrchestrationService(
 
         if (monitor == null) throw new KeyNotFoundException($"Monitor {id} not found.");
 
-        monitor.StatusStr = FormatStatus(monitor.StatusStr);
-
-        return monitor;
+        return HydrateLiveStatus(monitor);
     }
     
+    private UptimeMonitor HydrateLiveStatus(UptimeMonitor monitor)
+    {
+        if (cache.TryGetValue(GlobalCacheKeys.MonitorState(monitor.Id), out LiveMonitorState? state) && state != null)
+        {
+            monitor.StatusStr = FormatStatus(state.StatusStr);
+        }
+        else
+        {
+            monitor.StatusStr = "Unknown";
+        }
+        return monitor;
+    }
+
     private static string FormatStatus(string status) 
     {
         if (string.IsNullOrWhiteSpace(status)) return "Unknown";
@@ -108,5 +136,20 @@ public class MonitorOrchestrationService(
     public async Task<IEnumerable<ResponseTime>> GetAggregatedLatencyAsync(Guid tenantId, int id, DateTimeOffset from, DateTimeOffset to)
     {
         throw new NotImplementedException("Materialized view aggregation requires explicit SQL definition.");
+    }
+
+    public async Task<UptimeMonitor> UpdateMonitorSlaAsync(int id, double? uptimeSla)
+    {
+        var monitor = await dbContext.Monitors.SingleOrDefaultAsync(m => m.Id == id);
+        if (monitor == null) throw new KeyNotFoundException();
+        
+        if (uptimeSla is not null)
+        {
+            monitor.UptimeSla = uptimeSla;
+        }
+
+        await dbContext.SaveChangesAsync();
+
+        return HydrateLiveStatus(monitor);
     }
 }

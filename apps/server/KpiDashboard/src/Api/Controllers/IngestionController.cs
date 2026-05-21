@@ -1,5 +1,4 @@
 using Api.DTOs.Ingestion;
-using FluentValidation;
 using Hangfire;
 using Infrastructure;
 using Infrastructure.Services;
@@ -8,12 +7,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Api.Controllers;
 
+/// <summary>
+/// Handles manual data ingestion and historical backfills from external sources.
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class IngestionController(
     IDbContextFactory<AnalyticsDbContext> contextFactory,
-    IBackgroundJobClient backgroundJobClient,
-    IValidator<HistoricalBackfillRequestDto> validator)
+    IBackgroundJobClient backgroundJobClient)
     : ControllerBase
 {
     /// <summary>
@@ -22,18 +23,19 @@ public class IngestionController(
     /// <remarks>
     /// If StartDate or EndDate are omitted, the system defaults to a 2-year lookback ending now.
     /// This job is offloaded to Hangfire for background processing.
+    /// Validation is handled automatically by the ValidationFilter.
     /// </remarks>
     /// <param name="request">The backfill request parameters.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The ID of the enqueued background job.</returns>
+    /// <response code="202">If the job was successfully enqueued.</response>
+    /// <response code="404">If the tenant was not found.</response>
+    /// <response code="409">If a fetch job is already running for this tenant.</response>
     [HttpPost("backfill")]
     public async Task<IActionResult> ExecuteHistoricalBackfill(
         [FromBody] HistoricalBackfillRequestDto request,
         CancellationToken ct)
     {
-        var validationResult = await validator.ValidateAsync(request, ct);
-        if (!validationResult.IsValid) return BadRequest(validationResult.Errors);
-
         await using var context = await contextFactory.CreateDbContextAsync(ct);
         var tenant = await context.Tenants.SingleOrDefaultAsync(t => t.Id == request.TenantId, ct);
         
@@ -43,8 +45,11 @@ public class IngestionController(
         tenant.CurrentlyFetching = true;
         await context.SaveChangesAsync(ct);
 
+        var startDate = request.StartDate ?? DateTimeOffset.UtcNow.AddYears(-2);
+        var endDate = request.EndDate ?? DateTimeOffset.UtcNow;
+
         var jobId = backgroundJobClient.Enqueue<ILitiumIngestionService>(
-            service => service.ExecuteIngestionAsync(tenant.Id, request.StartDate, request.EndDate, CancellationToken.None));
+            service => service.ExecuteIngestionAsync(tenant.Id, startDate, endDate, CancellationToken.None));
 
         return Accepted(new { JobId = jobId });
     }

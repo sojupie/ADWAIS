@@ -1,8 +1,6 @@
 using Api.DTOs.Tenants;
 using Api.DTOs.Ingestion;
 using Api.Exceptions;
-using Api.Validators.Tenants;
-using Api.Validators.Ingestion;
 using DotNetEnv;
 using FluentValidation;
 using Hangfire;
@@ -23,11 +21,13 @@ var builder = WebApplication.CreateBuilder(args);
 Env.Load();
 builder.Configuration.AddEnvironmentVariables();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<Api.Filters.ValidationFilter>();
+});
+
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddHttpClient();
-builder.Services.AddScoped<IValidator<CreateTenantRequestDto>, CreateTenantRequestDtoValidator>();
-builder.Services.AddScoped<IValidator<UpdateTenantRequestDto>, UpdateTenantRequestDtoValidator>();
-builder.Services.AddScoped<IValidator<HistoricalBackfillRequestDto>, HistoricalBackfillRequestDtoValidator>();
 builder.Services.AddScoped<IMonitorOrchestrationService, MonitorOrchestrationService>();
 builder.Services.AddScoped<Infrastructure.Services.ISystemEventService, Infrastructure.Services.SystemEventService>();
 builder.Services.AddTransient<UptimeRobotRateLimitHandler>();

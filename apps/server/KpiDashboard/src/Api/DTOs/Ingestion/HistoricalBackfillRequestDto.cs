@@ -1,27 +1,22 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace Api.DTOs.Ingestion;
 
 /// <summary>
-/// Request DTO for triggering a historical order backfill for a tenant.
+/// Data transfer object for requesting a historical data backfill.
 /// </summary>
 public class HistoricalBackfillRequestDto
 {
     /// <summary>
-    /// The unique identifier of the tenant.
+    /// The ID of the tenant for which to backfill data.
     /// </summary>
-    [Required]
     public Guid TenantId { get; set; }
 
     /// <summary>
-    /// The start date for the backfill window. 
-    /// Defaults to 2 years ago if not provided.
+    /// The start date for the backfill operation. If null, a default lookback period is used.
     /// </summary>
-    public DateTimeOffset StartDate { get; set; } = DateTimeOffset.UtcNow.AddYears(-2);
+    public DateTimeOffset? StartDate { get; set; }
 
     /// <summary>
-    /// The end date for the backfill window.
-    /// Defaults to the current time if not provided.
+    /// The end date for the backfill operation. If null, the current time is used.
     /// </summary>
-    public DateTimeOffset EndDate { get; set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset? EndDate { get; set; }
 }

@@ -184,7 +184,7 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options) : 
             entity.HasOne(m => m.Tenant)
                 .WithMany(t => t.Monitors)
                 .HasForeignKey(m => m.TenantId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
             entity.Property(m => m.UpdateInterval).HasDefaultValue(300);
         });
             

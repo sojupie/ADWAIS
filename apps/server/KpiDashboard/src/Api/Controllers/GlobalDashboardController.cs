@@ -4,10 +4,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Api.Controllers;
 
+/// <summary>
+/// Provides high-level KPI and dashboard data aggregated across the system or specific tenants.
+/// </summary>
 [ApiController]
 [Route("api/dashboard")]
 public class GlobalDashboardController(IDbContextFactory<AnalyticsDbContext> contextFactory) : ControllerBase
 {
+    /// <summary>
+    /// Retrieves global KPIs (Revenue, Volume, AOV) for a given lookback period.
+    /// </summary>
+    /// <param name="days">Number of days to look back (default 30).</param>
+    /// <returns>A summary of global KPIs with period-over-period comparison.</returns>
     [HttpGet("kpis/global")]
     public async Task<IActionResult> GetGlobalKpis([FromQuery] int days = 30)
     {
@@ -59,6 +67,11 @@ public class GlobalDashboardController(IDbContextFactory<AnalyticsDbContext> con
         });
     }
 
+    /// <summary>
+    /// Retrieves KPIs for each tenant, sorted by revenue.
+    /// </summary>
+    /// <param name="days">Number of days to look back (default 30).</param>
+    /// <returns>A list of tenant-specific KPIs.</returns>
     [HttpGet("kpis/tenants")]
     public async Task<IActionResult> GetTenantKpis([FromQuery] int days = 30)
     {
@@ -129,6 +142,11 @@ public class GlobalDashboardController(IDbContextFactory<AnalyticsDbContext> con
         return Ok(tenantKpis);
     }
 
+    /// <summary>
+    /// Retrieves daily global revenue and volume rollups for trend analysis.
+    /// </summary>
+    /// <param name="days">Number of days to retrieve (default 60).</param>
+    /// <returns>A chronological list of daily global rollups.</returns>
     [HttpGet("global-rollups")]
     public async Task<IActionResult> GetGlobalRollups([FromQuery] int days = 60)
     {
@@ -192,7 +210,9 @@ public class GlobalDashboardController(IDbContextFactory<AnalyticsDbContext> con
         return (current - previous) / previous * 100;
     }
 
-    //below dtos probably to be replaced by the ones in the dto folder.
+    /// <summary>
+    /// Response model for global KPIs.
+    /// </summary>
     public class GlobalKpiResponse
     {
         public decimal TotalRevenue { get; set; }
@@ -206,6 +226,9 @@ public class GlobalDashboardController(IDbContextFactory<AnalyticsDbContext> con
         public double AovPoP { get; set; }
     }
 
+    /// <summary>
+    /// Response model for tenant-specific KPIs.
+    /// </summary>
     public class TenantKpiResponse
     {
         public Guid TenantId { get; set; }
@@ -221,6 +244,9 @@ public class GlobalDashboardController(IDbContextFactory<AnalyticsDbContext> con
         public double AovPoP { get; set; }
     }
 
+    /// <summary>
+    /// Response model for a single daily global rollup.
+    /// </summary>
     public class DailyGlobalRollupResponse
     {
         public DateTime CreatedDate { get; set; }

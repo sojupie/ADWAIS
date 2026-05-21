@@ -5,10 +5,20 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Api.Controllers;
 
+/// <summary>
+/// Provides access to system-wide audit events and logs.
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class SystemEventController(IDbContextFactory<AnalyticsDbContext> dbContextFactory) : ControllerBase
 {
+    /// <summary>
+    /// Retrieves a list of recent system events, with optional filtering.
+    /// </summary>
+    /// <param name="take">Number of events to retrieve (default 50).</param>
+    /// <param name="minLevel">Minimum event level to include (e.g., Information, Warning, Error).</param>
+    /// <param name="tenantId">Filter events related to a specific tenant.</param>
+    /// <returns>A list of system events.</returns>
     [HttpGet]
     public async Task<ActionResult<IEnumerable<SystemEvent>>> GetEvents(
         [FromQuery] int take = 50, 
@@ -37,6 +47,11 @@ public class SystemEventController(IDbContextFactory<AnalyticsDbContext> dbConte
         return Ok(events);
     }
 
+    /// <summary>
+    /// Deletes system events older than a specified number of days.
+    /// </summary>
+    /// <param name="olderThanDays">Delete events older than this many days (default 30).</param>
+    /// <returns>The number of deleted events.</returns>
     [HttpDelete("clear")]
     public async Task<IActionResult> ClearEvents([FromQuery] int olderThanDays = 30)
     {

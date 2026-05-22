@@ -139,10 +139,10 @@ public static class DatabaseSeeder
         }
 
         // 4. Force refresh all materialized views
-        await context.Database.ExecuteSqlRawAsync("REFRESH MATERIALIZED VIEW v_mat_financial_daily_tenant_rollup;");
-        await context.Database.ExecuteSqlRawAsync("REFRESH MATERIALIZED VIEW v_mat_financial_daily_global_rollup;");
-        await context.Database.ExecuteSqlRawAsync("REFRESH MATERIALIZED VIEW v_mat_daily_latency_monitor_rollup;");
-        await context.Database.ExecuteSqlRawAsync("REFRESH MATERIALIZED VIEW v_mat_daily_latency_tenant_rollup;");
-        await context.Database.ExecuteSqlRawAsync("REFRESH MATERIALIZED VIEW v_mat_daily_latency_global_rollup;");
+        // await context.Database.ExecuteSqlRawAsync("REFRESH MATERIALIZED VIEW v_mat_financial_daily_tenant_rollup;");
+        // await context.Database.ExecuteSqlRawAsync("REFRESH MATERIALIZED VIEW v_mat_financial_daily_global_rollup;");
+        // await context.Database.ExecuteSqlRawAsync("REFRESH MATERIALIZED VIEW v_mat_daily_latency_monitor_rollup;");
+        // await context.Database.ExecuteSqlRawAsync("REFRESH MATERIALIZED VIEW v_mat_daily_latency_tenant_rollup;");
+        // await context.Database.ExecuteSqlRawAsync("REFRESH MATERIALIZED VIEW v_mat_daily_latency_global_rollup;");
     }
 }

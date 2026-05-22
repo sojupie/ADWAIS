@@ -499,12 +499,12 @@ namespace Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("tenant_id");
 
-                    b.Property<int>("TotalValueExcVat")
-                        .HasColumnType("integer")
+                    b.Property<decimal>("TotalValueExcVat")
+                        .HasColumnType("numeric")
                         .HasColumnName("total_value_exc_vat");
 
-                    b.Property<int>("TotalValueIncVat")
-                        .HasColumnType("integer")
+                    b.Property<decimal>("TotalValueIncVat")
+                        .HasColumnType("numeric")
                         .HasColumnName("total_value_inc_vat");
 
                     b.HasKey("Id")

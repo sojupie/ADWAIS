@@ -88,7 +88,7 @@ using (var scope = app.Services.CreateScope())
 
     if (app.Environment.IsDevelopment())
     {
-        await DatabaseSeeder.SeedSampleDataAsync(context);
+        // await DatabaseSeeder.SeedSampleDataAsync(context);
     }
 }
 

@@ -20,7 +20,6 @@ public class TenantIngestionService(
 {
     public async Task<int> ExecuteIngestionAsync(Tenant tenant, DateTimeOffset startDate, DateTimeOffset endDate, CancellationToken ct = default)
     {
-        // Set CurrentlyFetching flag before starting work
         await using (var flagContext = await contextFactory.CreateDbContextAsync(ct))
         {
             var dbTenant = await flagContext.Tenants.FirstAsync(t => t.Id == tenant.Id, ct);
@@ -34,7 +33,6 @@ public class TenantIngestionService(
         }
         finally
         {
-            // Always clear flag, even on failure — use separate context to avoid failed-state issues
             try
             {
                 await using var cleanupContext = await contextFactory.CreateDbContextAsync(CancellationToken.None);

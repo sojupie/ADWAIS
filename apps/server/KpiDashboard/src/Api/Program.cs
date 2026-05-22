@@ -23,6 +23,7 @@ builder.Services.AddHttpClient();
 builder.Services.AddScoped<IValidator<CreateTenantRequestDto>, CreateTenantRequestDtoValidator>();
 builder.Services.AddScoped<IValidator<UpdateTenantRequestDto>, UpdateTenantRequestDtoValidator>();
 builder.Services.AddScoped<IMonitorOrchestrationService, MonitorOrchestrationService>();
+builder.Services.AddScoped<Domain.Services.IFinancialService, Infrastructure.Services.Financial.FinancialService>();
 builder.Services.AddTransient<UptimeRobotRateLimitHandler>();
 builder.Services.AddHttpClient<Infrastructure.Services.Monitoring.IUptimeRobotService, Infrastructure.Services.Monitoring.UptimeRobotService>()
     .AddHttpMessageHandler<UptimeRobotRateLimitHandler>();

@@ -46,8 +46,8 @@ public static class DatabaseSeeder
                     var orderDate = new DateTimeOffset(date.Year, date.Month, date.Day, 
                         random.Next(0, 24), random.Next(0, 60), random.Next(0, 60), date.Offset);
 
-                    int valueIncVat = random.Next(100, 5001);
-                    int valueExcVat = (int)(valueIncVat / 1.25);
+                    decimal valueIncVat = random.Next(100, 5001);
+                    decimal valueExcVat = valueIncVat / 1.25m;
 
                     orders.Add(new Order
                     {
@@ -78,10 +78,10 @@ public static class DatabaseSeeder
         }
 
         // 4. Force refresh all materialized views
-        await context.Database.ExecuteSqlRawAsync("REFRESH MATERIALIZED VIEW v_mat_financial_daily_tenant_rollup;");
-        await context.Database.ExecuteSqlRawAsync("REFRESH MATERIALIZED VIEW v_mat_financial_daily_global_rollup;");
-        await context.Database.ExecuteSqlRawAsync("REFRESH MATERIALIZED VIEW v_mat_daily_latency_monitor_rollup;");
-        await context.Database.ExecuteSqlRawAsync("REFRESH MATERIALIZED VIEW v_mat_daily_latency_tenant_rollup;");
-        await context.Database.ExecuteSqlRawAsync("REFRESH MATERIALIZED VIEW v_mat_daily_latency_global_rollup;");
+        // await context.Database.ExecuteSqlRawAsync("REFRESH MATERIALIZED VIEW v_mat_financial_daily_tenant_rollup;");
+        // await context.Database.ExecuteSqlRawAsync("REFRESH MATERIALIZED VIEW v_mat_financial_daily_global_rollup;");
+        // await context.Database.ExecuteSqlRawAsync("REFRESH MATERIALIZED VIEW v_mat_daily_latency_monitor_rollup;");
+        // await context.Database.ExecuteSqlRawAsync("REFRESH MATERIALIZED VIEW v_mat_daily_latency_tenant_rollup;");
+        // await context.Database.ExecuteSqlRawAsync("REFRESH MATERIALIZED VIEW v_mat_daily_latency_global_rollup;");
     }
 }

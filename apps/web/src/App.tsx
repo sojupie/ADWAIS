@@ -4,6 +4,7 @@ import { useDashboardData } from './dashboardDataStore';
 import { Financial, FinancialPeriodSelector } from './pages/Financial';
 import { FleetStatus } from './pages/FleetStatus';
 import { Intranet } from './pages/Intranet';
+import motilloLogo from './assets/motillo-logo.svg';
 
 type NavbarPage = 'Financial' | 'Fleet-Status' | 'Intranet';
 
@@ -21,11 +22,11 @@ export default function App() {
       <div className="dashboard">
         <header className="dashboard__header">
           <div className="dashboard__brand">
-            <img
-                className="dashboard__logo"
-                src="https://www.motillo.se/media/4ejbcxx1/motillo_utanpayoff.svg?mode=pad&width=140&height=0&upscale=false&rnd=132573678104400000"
-                alt="Motillo"
-            />
+              <img
+                  className="dashboard__logo"
+                  src={motilloLogo}
+                  alt="Motillo"
+              />
           </div>
 
             

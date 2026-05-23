@@ -1,44 +1,41 @@
-import type { TenantKpi } from '@types';
+import type { GrowthExtreme } from '@types';
 import type { CSSProperties } from 'react';
-import { formatCompact } from '@utils';
 import { ChartPanel } from '../common/ChartPanel';
 import './GrowthExtremesChart.css';
 
-//need to adjust later since we probably wont have negative revenue
-//will use red for when revenue is less than previous period instead
 interface TenantRowData {
   tenantId: string;
   tenantName: string;
-  formattedRevenue: string;
+  growth: number;
   isNegative: boolean;
   barStyle: CSSProperties;
 }
 
-export function GrowthExtremesChart({tenants, onTenantSelect,}: { tenants: TenantKpi[];
-  onTenantSelect?: (tenantId: string) => void;
-}) {
+export function GrowthExtremesChart({tenants, onTenantSelect,}: 
+{ tenants: GrowthExtreme[]; onTenantSelect?: (tenantId: string) => void; })
+{
   if (tenants.length === 0) return null;
-  const sortedTenants = [...tenants]
-      .sort((a, b) => b.totalRevenue - a.totalRevenue)
-      .slice(0,10);
-
-  let minRevenue = 0;
-  let maxRevenue = 0;
-  for (const tenant of sortedTenants) {
-    if (tenant.totalRevenue < minRevenue) {
-      minRevenue = tenant.totalRevenue;
+  
+  const tenantsByGrowth = [...tenants];
+  let minGrowth = 0;
+  let maxGrowth = 0;
+  for (const tenant of tenantsByGrowth) {
+    if (tenant.growthPercentage < minGrowth) {
+      minGrowth = tenant.growthPercentage;
     }
-    if (tenant.totalRevenue > maxRevenue) {
-      maxRevenue = tenant.totalRevenue;
+
+    if (tenant.growthPercentage > maxGrowth) {
+      maxGrowth = tenant.growthPercentage;
     }
-  }
-  const revenueRange = maxRevenue - minRevenue || 1;
-  const zeroPosition = Math.abs(minRevenue / revenueRange) * 100;
-
-  const ExtremeRows: TenantRowData[] = sortedTenants.map((tenant) => {
-    const isNegative = tenant.totalRevenue < 0;
-    const width = Math.abs(tenant.totalRevenue / revenueRange) * 100;
-
+  }  
+  const growthRange = maxGrowth - minGrowth || 1;
+  const zeroPosition = Math.abs(minGrowth / growthRange) * 100;
+  
+  const ExtremeRows: TenantRowData[] = tenantsByGrowth.map((tenant) => {
+    const growth = tenant.growthPercentage;
+    const isNegative = growth < 0;
+    const width = Math.abs(growth / growthRange) * 100;
+    
     let barStyle: CSSProperties = {
       left: `${zeroPosition}%`,
       width: `${width}%`,
@@ -54,14 +51,14 @@ export function GrowthExtremesChart({tenants, onTenantSelect,}: { tenants: Tenan
     return {
       tenantId: tenant.tenantId,
       tenantName: tenant.tenantName,
-      formattedRevenue: formatCompact(tenant.totalRevenue),
+      growth,
       isNegative,
       barStyle,
     };
   });
 
   return (
-      <ChartPanel title="Revenue by Client" bodyClassName="extremes-chart">
+      <ChartPanel title="Growth Extremes" bodyClassName="extremes-chart">
         {ExtremeRows.map((ExtremeRow) => (
             <GrowthExtremesRowJSX
                 key={ExtremeRow.tenantId}
@@ -74,20 +71,16 @@ export function GrowthExtremesChart({tenants, onTenantSelect,}: { tenants: Tenan
   );
 }
 
-function GrowthExtremesRowJSX({
-  row,
-  zeroPosition,
-  onTenantSelect,
-}: {
-  row: TenantRowData;
-  zeroPosition: number;
-  onTenantSelect?: (tenantId: string) => void;
-})
+function GrowthExtremesRowJSX({row, zeroPosition, onTenantSelect,}: {
+  row: TenantRowData; zeroPosition: number; onTenantSelect?: (tenantId: string) => void; })
 {
+  const growthLabel = `${row.growth >= 0 ? '+' : ''}${row.growth.toFixed(1)}%`;
   let barClass = 'extremes-row__bar extremes-row__bar--positive';
-  let valueClass = 'extremes-row__value text-green';
+  let valueClass = 'extremes-row__value';
 
-  if (row.isNegative) {
+  if (row.growth > 0) {
+    valueClass = 'extremes-row__value text-green';
+  } else if (row.isNegative) {
     barClass = 'extremes-row__bar extremes-row__bar--negative';
     valueClass = 'extremes-row__value text-red';
   }
@@ -105,10 +98,10 @@ function GrowthExtremesRowJSX({
           <span className="extremes-row__zero" style={{ left: `${zeroPosition}%` }}/>
           <div className={barClass}
                style={row.barStyle}
-               title={`${row.formattedRevenue} SEK`}/>
+               title={growthLabel}/>
         </div>
         <span className={valueClass}>
-          {row.formattedRevenue}
+          {growthLabel}
         </span>
       </button>
   );

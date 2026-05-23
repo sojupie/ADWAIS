@@ -4,7 +4,6 @@ import type {
   FinancialVelocityPoint,
   GlobalKpi,
   GrowthExtreme,
-  TenantKpi,
 } from '@types';
 
 export const REFRESH_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
@@ -17,7 +16,7 @@ type DashboardDataSnapshot = {
   loading: boolean;
   error: string | null;
   globalKpi: GlobalKpi | null;
-  tenantKpis: TenantKpi[];
+  growthExtremes: GrowthExtreme[];
   globalVelocity: FinancialVelocityPoint[];
 };
 
@@ -28,7 +27,7 @@ let snapshot: DashboardDataSnapshot = {
   loading: true,
   error: null,
   globalKpi: null,
-  tenantKpis: [],
+  growthExtremes: [],
   globalVelocity: [],
 };
 
@@ -59,32 +58,16 @@ function mapKpi(kpi: FinancialKpi): GlobalKpi {
   };
 }
 
-function mapGrowthExtreme(extreme: GrowthExtreme): TenantKpi {
-  return {
-    tenantId: extreme.tenantId,
-    tenantName: extreme.tenantName,
-    totalRevenue: extreme.currentRevenue,
-    totalVolume: 0,
-    aov: 0,
-    previousRevenue: extreme.previousRevenue,
-    previousVolume: 0,
-    previousAov: 0,
-    revenuePoP: extreme.growthPercentage,
-    volumePoP: 0,
-    aovPoP: 0,
-  };
-}
-
 async function loadDashboardData(days: Period) {
   const timeframe = getTimeframe(days);
-  const [globalKpi, tenantKpis, globalVelocity] = await Promise.all([
+  const [globalKpi, growthExtremes, globalVelocity] = await Promise.all([
     fetchJson<FinancialKpi>(`/api/financial/kpis?timeframe=${timeframe}`),
     fetchJson<GrowthExtreme[]>(`/api/financial/growth-extremes?timeframe=${timeframe}`),
     fetchJson<FinancialVelocityPoint[]>(`/api/financial/velocity?timeframe=${timeframe}`),
   ]);
   return {
     globalKpi: mapKpi(globalKpi),
-    tenantKpis: tenantKpis.map(mapGrowthExtreme),
+    growthExtremes,
     globalVelocity,
   };
 }
@@ -108,7 +91,7 @@ async function fetchData(days: Period) {
 
     updateSnapshot({
       globalKpi: data.globalKpi,
-      tenantKpis: data.tenantKpis,
+      growthExtremes: data.growthExtremes,
       globalVelocity: data.globalVelocity,
     });
   } catch (e) {

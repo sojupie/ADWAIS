@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { formatCurrency, formatCompact, formatNumber } from '@utils';
-import type { TenantDiagnostics as TenantDiagnosticsData } from '@types';
+import type { GrowthExtreme, TenantDiagnostics as TenantDiagnosticsData, TenantKpi } from '@types';
 import { FactPanel } from '../components/common/FactPanel';
 import { LoadingIcon } from '../components/common/LoadingIcon';
 import { GrowthExtremesChart } from '../components/financial/GrowthExtremesChart';
@@ -11,8 +11,25 @@ import { setDashboardPeriod, useDashboardData, type Period } from '../dashboardD
 import { TenantDiagnostics } from './TenantDiagnostics';
 import './Financial.css';
 
+function mapGrowthExtremeToTenantKpi(tenant: GrowthExtreme): TenantKpi {
+  return {
+    tenantId: tenant.tenantId,
+    tenantName: tenant.tenantName,
+    totalRevenue: tenant.currentRevenue,
+    totalVolume: 0,
+    aov: 0,
+    previousRevenue: tenant.previousRevenue,
+    previousVolume: 0,
+    previousAov: 0,
+    revenuePoP: tenant.growthPercentage,
+    volumePoP: 0,
+    aovPoP: 0,
+  };
+}
+
 export function Financial() {
-  const { period, loading, globalKpi, tenantKpis, globalVelocity } = useDashboardData();
+  const { period, loading, globalKpi, growthExtremes, globalVelocity } = useDashboardData();
+  const tenantKpis = growthExtremes.map(mapGrowthExtremeToTenantKpi);
   const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
   const [tenantDiagnostics, setTenantDiagnostics] = useState<TenantDiagnosticsData | null>(null);
   const [tenantDiagnosticsLoading, setTenantDiagnosticsLoading] = useState(false);
@@ -126,20 +143,20 @@ export function Financial() {
             : <EmptyState title="No revenue data" />}
         </div>
         <div className="chart-slot">
-          {tenantKpis.length > 0
-            ? <GrowthExtremesChart tenants={tenantKpis} onTenantSelect={setSelectedTenantId} />
+          {growthExtremes.length > 0
+            ? <GrowthExtremesChart tenants={growthExtremes} onTenantSelect={setSelectedTenantId} />
             : <EmptyState title="No tenant data" />}
         </div>
       </section>
 
       <section className="charts-row charts-row--analysis" aria-label="Portfolio analysis charts">
         <div className="chart-slot">
-          {tenantKpis.length > 0
+          {growthExtremes.length > 0
             ? <RevenueDistributionChart tenants={tenantKpis} onTenantSelect={setSelectedTenantId} />
             : <EmptyState title="No tenant revenue data" />}
         </div>
         <div className="chart-slot">
-          {tenantKpis.length > 0
+          {growthExtremes.length > 0
             ? <MomentumMatrixChart tenants={tenantKpis} onTenantSelect={setSelectedTenantId} />
             : <EmptyState title="No tenant momentum data" />}
         </div>

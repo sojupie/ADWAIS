@@ -1,8 +1,7 @@
-using Domain.Entities;
+﻿using Domain.Entities;
 using Domain.Entities.Monitoring;
 using Domain.Entities.Office;
 using Domain.Entities.OrderData;
-using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure;
@@ -28,10 +27,26 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options) : 
     public DbSet<OfficeEvent> OfficeEvents => Set<OfficeEvent>();
     public DbSet<OfficeVisit> OfficeVisits => Set<OfficeVisit>();
     public DbSet<OfficeMessage> OfficeMessages => Set<OfficeMessage>();
+    public DbSet<SystemEvent> SystemEvents => Set<SystemEvent>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasPostgresExtension("uuid-ossp");
+
+        // SystemEvent
+        modelBuilder.Entity<SystemEvent>(entity =>
+        {
+            entity.ToTable("system_event");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasDefaultValueSql("uuid_generate_v4()");
+            entity.Property(e => e.Source).HasMaxLength(100);
+            entity.Property(e => e.Level).HasConversion<string>().HasMaxLength(50);
+            entity.HasOne(e => e.Tenant)
+                .WithMany()
+                .HasForeignKey(e => e.TenantId)
+                .OnDelete(DeleteBehavior.SetNull);
+            entity.HasIndex(e => e.Timestamp);
+        });
 
         // Tenant
         modelBuilder.Entity<Tenant>(entity => 
@@ -42,9 +57,7 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options) : 
             entity.Property(t => t.Name).HasMaxLength(255);
             entity.Property(t => t.LitiumBaseUrl).HasMaxLength(2048);
             entity.Property(t => t.ServiceAccountToken).HasMaxLength(2048);
-            entity.Ignore(t => t.OrderCount);
-            entity.Ignore(t => t.CurrentlyFetching);
-            entity.Ignore(t => t.PingReachable);
+            entity.Property(t => t.CurrentlyFetching).HasDefaultValue(false);
 
             // to catch unassigned monitors since TenantId is not nullable and a foreign key
             entity.HasData(
@@ -126,6 +139,11 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options) : 
             entity.ToTable("global_config");
             entity.HasKey(x => x.Id);
             entity.Property(x => x.UptimeRobotApiKey).HasMaxLength(1024);
+            entity.Property(x => x.UptimeFetchIntervalMinutes).HasDefaultValue(60);
+            entity.Property(x => x.LatencyFetchIntervalMinutes).HasDefaultValue(10);
+            entity.Property(x => x.SystemEventRetentionDays).HasDefaultValue(30);
+            entity.Property(x => x.LitiumFetchEnabled).HasDefaultValue(true);
+            entity.Property(x => x.UptimeRobotFetchEnabled).HasDefaultValue(true);
             entity.Ignore(x => x.MonitorsCount);
             entity.Ignore(x => x.MonitorsLimit);
             entity.Ignore(x => x.ActiveSubscription);
@@ -166,7 +184,8 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options) : 
             entity.HasOne(m => m.Tenant)
                 .WithMany(t => t.Monitors)
                 .HasForeignKey(m => m.TenantId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.Property(m => m.UpdateInterval).HasDefaultValue(300);
         });
             
         // intranät

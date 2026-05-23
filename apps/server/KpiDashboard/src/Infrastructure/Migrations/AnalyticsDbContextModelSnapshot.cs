@@ -40,13 +40,33 @@ namespace Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("latency_degraded_floor");
 
+                    b.Property<int>("LatencyFetchIntervalMinutes")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(10)
+                        .HasColumnName("latency_fetch_interval_minutes");
+
                     b.Property<bool>("LitiumFetchEnabled")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
+                        .HasDefaultValue(true)
                         .HasColumnName("litium_fetch_enabled");
 
-                    b.Property<int>("LitiumRateLimit")
+                    b.Property<int>("LitiumFetchIntervalMinutes")
                         .HasColumnType("integer")
-                        .HasColumnName("litium_rate_limit");
+                        .HasColumnName("litium_fetch_interval_minutes");
+
+                    b.Property<int>("SystemEventRetentionDays")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(30)
+                        .HasColumnName("system_event_retention_days");
+
+                    b.Property<int>("UptimeFetchIntervalMinutes")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(60)
+                        .HasColumnName("uptime_fetch_interval_minutes");
 
                     b.Property<string>("UptimeRobotApiKey")
                         .HasMaxLength(1024)
@@ -54,12 +74,10 @@ namespace Infrastructure.Migrations
                         .HasColumnName("uptime_robot_api_key");
 
                     b.Property<bool>("UptimeRobotFetchEnabled")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
+                        .HasDefaultValue(true)
                         .HasColumnName("uptime_robot_fetch_enabled");
-
-                    b.Property<int>("UptimeRobotRateLimit")
-                        .HasColumnType("integer")
-                        .HasColumnName("uptime_robot_rate_limit");
 
                     b.HasKey("Id")
                         .HasName("pk_global_config");
@@ -210,9 +228,21 @@ namespace Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_date");
 
+                    b.Property<double>("CurrentUptimePercentage")
+                        .HasColumnType("double precision")
+                        .HasColumnName("current_uptime_percentage");
+
+                    b.Property<DateTimeOffset?>("LastLatencyUpdate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_latency_update");
+
                     b.Property<DateTimeOffset?>("LastUpdate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_update");
+
+                    b.Property<DateTimeOffset?>("LastUptimeUpdate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_uptime_update");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -223,6 +253,12 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uuid")
                         .HasColumnName("tenant_id");
+
+                    b.Property<int>("UpdateInterval")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(300)
+                        .HasColumnName("update_interval");
 
                     b.Property<bool>("UptimeMonitorEnabled")
                         .HasColumnType("boolean")
@@ -469,12 +505,12 @@ namespace Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("tenant_id");
 
-                    b.Property<int>("TotalValueExcVat")
-                        .HasColumnType("integer")
+                    b.Property<decimal>("TotalValueExcVat")
+                        .HasColumnType("numeric")
                         .HasColumnName("total_value_exc_vat");
 
-                    b.Property<int>("TotalValueIncVat")
-                        .HasColumnType("integer")
+                    b.Property<decimal>("TotalValueIncVat")
+                        .HasColumnType("numeric")
                         .HasColumnName("total_value_inc_vat");
 
                     b.HasKey("Id")
@@ -500,6 +536,55 @@ namespace Infrastructure.Migrations
                     b.ToTable("orders", (string)null);
                 });
 
+            modelBuilder.Entity("Domain.Entities.SystemEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("uuid_generate_v4()");
+
+                    b.Property<string>("Details")
+                        .HasColumnType("text")
+                        .HasColumnName("details");
+
+                    b.Property<string>("Level")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("level");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("message");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("source");
+
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<DateTimeOffset>("Timestamp")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("timestamp");
+
+                    b.HasKey("Id")
+                        .HasName("pk_system_event");
+
+                    b.HasIndex("TenantId")
+                        .HasDatabaseName("ix_system_event_tenant_id");
+
+                    b.HasIndex("Timestamp")
+                        .HasDatabaseName("ix_system_event_timestamp");
+
+                    b.ToTable("system_event", (string)null);
+                });
+
             modelBuilder.Entity("Domain.Entities.Tenant", b =>
                 {
                     b.Property<Guid>("Id")
@@ -507,6 +592,12 @@ namespace Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id")
                         .HasDefaultValueSql("uuid_generate_v4()");
+
+                    b.Property<bool>("CurrentlyFetching")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("currently_fetching");
 
                     b.Property<DateTimeOffset?>("FetchedFrom")
                         .HasColumnType("timestamp with time zone")
@@ -551,6 +642,7 @@ namespace Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000001"),
+                            CurrentlyFetching = false,
                             LitiumBaseUrl = "N/A",
                             Name = "System (unassigned monitors)",
                             OrderFetchingEnabled = false,
@@ -625,7 +717,7 @@ namespace Infrastructure.Migrations
                     b.HasOne("Domain.Entities.Tenant", "Tenant")
                         .WithMany("Monitors")
                         .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_monitor_tenant_tenant_id");
 
@@ -673,6 +765,17 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_orders_tenants_tenant_id");
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("Domain.Entities.SystemEvent", b =>
+                {
+                    b.HasOne("Domain.Entities.Tenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_system_event_tenants_tenant_id");
 
                     b.Navigation("Tenant");
                 });

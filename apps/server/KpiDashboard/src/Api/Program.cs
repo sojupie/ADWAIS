@@ -1,12 +1,17 @@
 using Api.DTOs.Tenants;
+using Api.DTOs.Ingestion;
 using Api.Exceptions;
-using Api.Validators.Tenants;
 using DotNetEnv;
 using FluentValidation;
 using Hangfire;
 using Hangfire.PostgreSql;
+using Hangfire.Storage;
 using Infrastructure;
+using Infrastructure.Helpers;
 using Infrastructure.Jobs;
+using Infrastructure.Jobs.MaterializedViews;
+using Infrastructure.Jobs.Monitor;
+using Infrastructure.Services.Financial;
 using Infrastructure.Services.Monitoring;
 using Microsoft.EntityFrameworkCore;
 using Polly;
@@ -17,20 +22,34 @@ var builder = WebApplication.CreateBuilder(args);
 Env.Load();
 builder.Configuration.AddEnvironmentVariables();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<Api.Filters.ValidationFilter>();
+}).AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+});
+
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddHttpClient();
-builder.Services.AddScoped<IValidator<CreateTenantRequestDto>, CreateTenantRequestDtoValidator>();
-builder.Services.AddScoped<IValidator<UpdateTenantRequestDto>, UpdateTenantRequestDtoValidator>();
 builder.Services.AddScoped<IMonitorOrchestrationService, MonitorOrchestrationService>();
-builder.Services.AddHttpClient<Infrastructure.Services.Monitoring.IUptimeRobotService, Infrastructure.Services.Monitoring.UptimeRobotService>();
+builder.Services.AddScoped<Infrastructure.Services.ISystemEventService, Infrastructure.Services.SystemEventService>();
+builder.Services.AddScoped<IFinancialService, Infrastructure.Services.Financial.FinancialService>();
+builder.Services.AddTransient<UptimeRobotRateLimitHandler>();
+builder.Services.AddHttpClient<Infrastructure.Services.Monitoring.IUptimeRobotService, Infrastructure.Services.Monitoring.UptimeRobotService>()
+    .AddHttpMessageHandler<UptimeRobotRateLimitHandler>();
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    var xmlFilename = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+});
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 builder.Services.AddMemoryCache();
 
-builder.Services.AddHttpClient<Infrastructure.Services.ITenantIngestionService, Infrastructure.Services.TenantIngestionService>()
+builder.Services.AddHttpClient<Infrastructure.Services.ILitiumIngestionService, Infrastructure.Services.LitiumIngestionService>()
     .AddPolicyHandler(HttpPolicyExtensions
         .HandleTransientHttpError()
         .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
@@ -81,13 +100,64 @@ using (var scope = app.Services.CreateScope())
     var contextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<AnalyticsDbContext>>();
     await using var context = await contextFactory.CreateDbContextAsync();
     context.Database.Migrate();
+
+    if (app.Environment.IsDevelopment())
+    {
+        await DatabaseSeeder.SeedSampleDataAsync(context);
+    }
 }
 
-var recurringJobManager = app.Services.GetRequiredService<IRecurringJobManager>();
-recurringJobManager.AddOrUpdate<MonitorSynchronizationJob>(
-    "sync-uptimerobot-fleet",
-    job => job.ExecuteAsync(),
-    "*/5 * * * *"
-);
+using (var connection = JobStorage.Current.GetConnection())
+{
+    var recurringJobManager = app.Services.GetRequiredService<IRecurringJobManager>();
+    
+    recurringJobManager.AddOrUpdate<MonitorSynchronizationJob>(
+        "sync-uptimerobot-fleet", 
+        newJob => newJob.ExecuteAsync(), 
+        Cron.MinuteInterval(5));
+    
+    recurringJobManager.RemoveIfExists("dispatch-uptimerobot-metrics");
+
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<AnalyticsDbContext>>();
+        await using var context = dbFactory.CreateDbContext();
+        var config = context.GlobalConfigs.SingleOrDefault();
+        
+        var uptimeInterval = config?.UptimeFetchIntervalMinutes ?? 60;
+        var latencyInterval = config?.LatencyFetchIntervalMinutes ?? 10;
+        var litiumFetchInterval = Math.Max(1, config?.LitiumFetchIntervalMinutes ?? 10);
+        
+        recurringJobManager.AddOrUpdate<UptimeDispatcherJob>(
+                "dispatch-uptimerobot-uptime",
+                newJob => newJob.ExecuteAsync(),
+                CronHelper.FromMinutes(uptimeInterval));
+
+        recurringJobManager.AddOrUpdate<LatencyDispatcherJob>(
+            "dispatch-uptimerobot-latency",
+            newJob => newJob.ExecuteAsync(),
+            CronHelper.FromMinutes(latencyInterval));
+
+        recurringJobManager.AddOrUpdate<LitiumOrderFetchJob>(
+            "dispatch-litium-orders",
+            newJob => newJob.ExecuteAsync(),
+            CronHelper.FromMinutes(litiumFetchInterval));
+
+        recurringJobManager.AddOrUpdate<RefreshLatencyMaterializedViewJob>(
+            "refresh-latency-materialized-views",
+            newJob => newJob.ExecuteAsync(),
+            Cron.Daily);
+
+        recurringJobManager.AddOrUpdate<RefreshFinancialMaterializedViewJob>(
+            "refresh-financial-materialized-views",
+            newJob => newJob.ExecuteAsync(),
+            Cron.Daily);
+
+        recurringJobManager.AddOrUpdate<SystemEventCleanupJob>(
+            "system-event-cleanup",
+            newJob => newJob.ExecuteAsync(),
+            Cron.Daily(2)); // Run daily at 02:00
+    }
+}
 
 app.Run();

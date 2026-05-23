@@ -28,7 +28,7 @@ function mapGrowthExtremeToTenantKpi(tenant: GrowthExtreme): TenantKpi {
 }
 
 export function Financial() {
-  const { period, loading, globalKpi, growthExtremes, globalVelocity } = useDashboardData();
+  const { period, loading, globalKpi, growthExtremes, globalVelocity, momentum } = useDashboardData();
   const tenantKpis = growthExtremes.map(mapGrowthExtremeToTenantKpi);
   const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
   const [tenantDiagnostics, setTenantDiagnostics] = useState<TenantDiagnosticsData | null>(null);
@@ -156,8 +156,8 @@ export function Financial() {
             : <EmptyState title="No tenant revenue data" />}
         </div>
         <div className="chart-slot">
-          {growthExtremes.length > 0
-            ? <MomentumMatrixChart tenants={tenantKpis} onTenantSelect={setSelectedTenantId} />
+          {momentum && momentum.tenants.length > 0
+            ? <MomentumMatrixChart momentum={momentum} onTenantSelect={setSelectedTenantId} />
             : <EmptyState title="No tenant momentum data" />}
         </div>
       </section>

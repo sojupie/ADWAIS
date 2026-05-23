@@ -48,6 +48,19 @@ export interface GrowthExtreme {
   absoluteVariance: number;
 }
 
+export interface MomentumTenant {
+  tenantId: string;
+  tenantName: string;
+  baselineRevenue: number;
+  growthPercentage: number;
+  currentRevenue: number;
+}
+
+export interface MomentumResponse {
+  medianBaselineRevenue: number;
+  tenants: MomentumTenant[];
+}
+
 export interface OrderBin {
   binLabel: string;
   binMin: number;

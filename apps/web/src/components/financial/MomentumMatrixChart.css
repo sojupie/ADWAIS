@@ -22,13 +22,13 @@
   border-radius: var(--radius-sm);
   background: var(--bg-primaryNeigbour);
   color: var(--text-primary);
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 500;
 }
 
 .momentum-matrix-chart__label {
   fill: var(--text-primary);
-  font-size: 10px;
+  font-size: 15px;
   font-weight: 500;
   pointer-events: none;
 }

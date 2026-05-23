@@ -51,14 +51,14 @@ function RevenueVelocityGraphJSX({ points }: { points: FinancialVelocityPoint[] 
         <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
         <XAxis
           dataKey="periodLabel"
-          tick={{ fill: 'var(--text-muted)', fontSize: 10 }}
+          tick={{ fill: 'var(--text-muted)', fontSize: 12 }}
           axisLine={false}
           tickLine={false}
           interval="preserveStartEnd"
         />
         <YAxis
           tickFormatter={(revenue) => formatCompact(revenue)}
-          tick={{ fill: 'var(--text-muted)', fontSize: 10 }}
+          tick={{ fill: 'var(--text-muted)', fontSize: 12 }}
           axisLine={false}
           tickLine={false}
           width={52}

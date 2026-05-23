@@ -8,92 +8,35 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import type { TenantKpi } from '@types';
+import type { DistributionEntry } from '@types';
 import { formatCompact } from '@utils';
 import { ChartPanel } from '../common/ChartPanel';
 import './RevenueDistributionChart.css';
 
-interface Props {
-  tenants: TenantKpi[];
-  maxTenants?: number;
-  onTenantSelect?: (tenantId: string) => void;
-}
-
-interface DistributionRow {
-  tenantId: string;
-  tenantName: string;
-  revenue: number;
-  cumulativePct: number;
-  isSelectable: boolean;
-}
-
-function buildRows(tenants: TenantKpi[], maxTenants: number): DistributionRow[] {
-  const sorted = [...tenants]
-    .filter((tenant) => tenant.totalRevenue > 0)
-    .sort((a, b) => b.totalRevenue - a.totalRevenue);
-
-  const visible = sorted.slice(0, maxTenants);
-  const otherRevenue = sorted
-    .slice(maxTenants)
-    .reduce((sum, tenant) => sum + tenant.totalRevenue, 0);
-
-  const rows = [
-    ...visible.map((tenant) => ({
-      tenantId: tenant.tenantId,
-      tenantName: tenant.tenantName,
-      totalRevenue: tenant.totalRevenue,
-      isSelectable: true,
-    })),
-    ...(otherRevenue > 0
-      ? [{
-          tenantId: 'other',
-          tenantName: 'Other',
-          totalRevenue: otherRevenue,
-          isSelectable: false,
-        }]
-      : []),
-  ];
-
-  const totalRevenue = rows.reduce((sum, tenant) => sum + tenant.totalRevenue, 0);
-  let cumulativeRevenue = 0;
-
-  return rows.map((tenant) => {
-    cumulativeRevenue += tenant.totalRevenue;
-
-    return {
-      tenantId: tenant.tenantId,
-      tenantName: tenant.tenantName,
-      revenue: tenant.totalRevenue,
-      cumulativePct: totalRevenue === 0 ? 0 : (cumulativeRevenue / totalRevenue) * 100,
-      isSelectable: tenant.isSelectable,
-    };
-  });
-}
-
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
 
-  const revenue = payload.find((entry: any) => entry.dataKey === 'revenue')?.value ?? 0;
-  const cumulativePct = payload.find((entry: any) => entry.dataKey === 'cumulativePct')?.value ?? 0;
+  const revenue = payload.find((entry: any) => entry.dataKey === 'absoluteRevenue')?.value ?? 0;
+  const cumulativeShare = payload.find((entry: any) => entry.dataKey === 'cumulativePortfolioShare')?.value ?? 0;
 
   return (
     <div className="chart-panel-tooltip">
       <p className="chart-panel-tooltip__label">{label}</p>
       <p>Revenue: <strong>{formatCompact(revenue)} SEK</strong></p>
-      <p>Cumulative: <strong>{cumulativePct.toFixed(1)}%</strong></p>
+      <p>Cumulative: <strong>{(cumulativeShare * 100).toFixed(1)}%</strong></p>
     </div>
   );
 };
 
-export function RevenueDistributionChart({ tenants, maxTenants = 10, onTenantSelect }: Props) {
-  const rows = buildRows(tenants, maxTenants);
-
-  if (rows.length === 0) return null;
+export function RevenueDistributionChart({ entries, onTenantSelect }: {
+entries: DistributionEntry[]; onTenantSelect?: (tenantId: string) => void; })
+{
+  if (entries.length === 0) return null;
 
   return (
     <ChartPanel title="Portfolio Revenue Distribution" bodyClassName="revenue-distribution-chart">
       <ResponsiveContainer width="100%" height={280}>
-        <ComposedChart data={rows} margin={{ top: 10, right: 12, left: 4, bottom: 24 }}>
+        <ComposedChart data={entries} margin={{ top: 10, right: 12, left: 4, bottom: 24 }}>
           <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 4" vertical={false} />
           <XAxis
             dataKey="tenantName"
@@ -116,10 +59,10 @@ export function RevenueDistributionChart({ tenants, maxTenants = 10, onTenantSel
           <YAxis
             yAxisId="cumulative"
             orientation="right"
-            domain={[0, 100]}
-            ticks={[0, 25, 50, 75, 100]}
-            tickFormatter={(value) => `${value.toFixed(0)}%`}
-            tick={{ fill: 'var(--text-primary)', fontSize: 10 }}
+            domain={[0, 1]}
+            ticks={[0, 0.25, 0.5, 0.75, 1]}
+            tickFormatter={(value) => `${(value * 100).toFixed(0)}%`}
+            tick={{ fill: 'var(--text-primary)', fontSize: 12 }}
             axisLine={false}
             tickLine={false}
             width={54}
@@ -127,16 +70,16 @@ export function RevenueDistributionChart({ tenants, maxTenants = 10, onTenantSel
           <Tooltip content={<CustomTooltip />} />
           <Bar
             yAxisId="revenue"
-            dataKey="revenue"
+            dataKey="absoluteRevenue"
             className={onTenantSelect ? 'revenue-distribution-chart__bar--clickable' : undefined}
             fill="var(--chart-line)"
             fillOpacity={0.78}
             radius={[5, 5, 0, 0]}
             maxBarSize={48}
             onClick={(row) => {
-              const payload = row?.payload as DistributionRow | undefined;
+              const payload = row?.payload as DistributionEntry | undefined;
 
-              if (payload?.isSelectable) {
+              if (payload?.tenantId) {
                 onTenantSelect?.(payload.tenantId);
               }
             }}
@@ -144,7 +87,7 @@ export function RevenueDistributionChart({ tenants, maxTenants = 10, onTenantSel
           <Line
             yAxisId="cumulative"
             type="monotone"
-            dataKey="cumulativePct"
+            dataKey="cumulativePortfolioShare"
             stroke="var(--text-primary)"
             strokeWidth={2.4}
             dot={{ r: 4.5, fill: 'var(--bg-primary)', stroke: 'var(--text-primary)', strokeWidth: 2 }}

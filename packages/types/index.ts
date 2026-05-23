@@ -61,6 +61,13 @@ export interface MomentumResponse {
   tenants: MomentumTenant[];
 }
 
+export interface DistributionEntry {
+  tenantId: string | null;
+  tenantName: string;
+  absoluteRevenue: number;
+  cumulativePortfolioShare: number;
+}
+
 export interface OrderBin {
   binLabel: string;
   binMin: number;

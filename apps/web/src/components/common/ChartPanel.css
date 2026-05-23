@@ -4,7 +4,9 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  height: 100%;
+  height: 340px;
+  max-height: 340px;
+  overflow: hidden;
 }
 
 .chart-panel__header {
@@ -34,6 +36,7 @@
 .chart-panel__body {
   flex: 1;
   min-height: 0;
+  overflow: hidden;
 }
 
 /* tooltip is the name rechart uses for panels that show when u hover on charts */ 

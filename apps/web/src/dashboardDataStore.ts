@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from 'react';
 import type {
+  DistributionEntry,
   FinancialKpi,
   FinancialVelocityPoint,
   GlobalKpi,
@@ -20,6 +21,7 @@ type DashboardDataSnapshot = {
   growthExtremes: GrowthExtreme[];
   globalVelocity: FinancialVelocityPoint[];
   momentum: MomentumResponse | null;
+  distribution: DistributionEntry[];
 };
 
 const listeners = new Set<() => void>();
@@ -32,6 +34,7 @@ let snapshot: DashboardDataSnapshot = {
   growthExtremes: [],
   globalVelocity: [],
   momentum: null,
+  distribution: [],
 };
 
 let refreshTimer: ReturnType<typeof setInterval> | null = null;
@@ -63,17 +66,19 @@ function mapKpi(kpi: FinancialKpi): GlobalKpi {
 
 async function loadDashboardData(days: Period) {
   const timeframe = getTimeframe(days);
-  const [globalKpi, growthExtremes, globalVelocity, momentum] = await Promise.all([
+  const [globalKpi, growthExtremes, globalVelocity, momentum, distribution] = await Promise.all([
     fetchJson<FinancialKpi>(`/api/financial/kpis?timeframe=${timeframe}`),
     fetchJson<GrowthExtreme[]>(`/api/financial/growth-extremes?timeframe=${timeframe}`),
     fetchJson<FinancialVelocityPoint[]>(`/api/financial/velocity?timeframe=${timeframe}`),
     fetchJson<MomentumResponse>(`/api/financial/momentum?timeframe=${timeframe}`),
+    fetchJson<DistributionEntry[]>(`/api/financial/distribution?timeframe=${timeframe}&topN=10`),
   ]);
   return {
     globalKpi: mapKpi(globalKpi),
     growthExtremes,
     globalVelocity,
     momentum,
+    distribution,
   };
 }
 
@@ -99,6 +104,7 @@ async function fetchData(days: Period) {
       growthExtremes: data.growthExtremes,
       globalVelocity: data.globalVelocity,
       momentum: data.momentum,
+      distribution: data.distribution,
     });
   } catch (e) {
     if (requestId !== activeRequestId) return;

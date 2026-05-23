@@ -39,15 +39,15 @@ points: MomentumTenant[]; medianBaselineRevenue: number; onTenantSelect?: (tenan
         <XAxis
           type="number"
           dataKey="baselineRevenue"
-          name="P30 Baseline Revenue"
+          name="Previous Baseline Revenue" //should maybe depend on period picked
           tickFormatter={(value) => formatCompact(value)}
           tick={{ fill: 'var(--text-primary)', fontSize: 10 }}
           axisLine={false}
           tickLine={false}
           label={{
-            value: 'P30 Baseline Revenue',
+            value: 'Previous Baseline Revenue',
             position: 'insideBottom',
-            offset: -8,
+            offset: -3,
             fill: 'var(--text-primary)',
             fontSize: 12,
           }}

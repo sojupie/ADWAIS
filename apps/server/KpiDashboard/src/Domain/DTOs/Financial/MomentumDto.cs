@@ -5,7 +5,7 @@ public record MomentumTenantDto(
     string TenantName,
     decimal BaselineRevenue,
     decimal GrowthPercentage,
-    decimal CurrentVolume);
+    decimal CurrentRevenue);
 
 public record MomentumDto(
     decimal MedianBaselineRevenue,

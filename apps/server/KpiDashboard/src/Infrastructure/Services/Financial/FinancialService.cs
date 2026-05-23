@@ -1,15 +1,11 @@
 using Domain.DTOs.Financial;
 using Domain.Enums;
-using Domain.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services.Financial;
 
 public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFactory) : IFinancialService
 {
-    // Sentinel tenant for unassigned monitors — excluded from portfolio aggregations
-    private static readonly Guid SystemTenantGuid = new("00000000-0000-0000-0000-000000000001");
-
     #region Internal data model for the merge layer
 
     private record DailyRow(DateTime Date, Guid? TenantId, decimal Revenue, int Volume);
@@ -20,15 +16,14 @@ public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFacto
 
     /// <summary>
     /// Core merge: reads materialized view data up to yesterday, then unions
-    /// today's raw orders (converted from öre to SEK) to produce a unified daily dataset.
+    /// today's raw orders to produce a unified daily dataset.
     /// </summary>
     private async Task<List<DailyRow>> GetMergedTenantDailyDataAsync(
         AnalyticsDbContext context, DateTime start, DateTime end, Guid? tenantId = null)
     {
         var yesterday = DateTime.UtcNow.Date; // today 00:00 UTC = exclusive upper bound for views
         var viewEnd = yesterday < end ? yesterday : end;
-
-        // Step A: Historical data from materialized tenant rollup
+        
         var historicalQuery = context.DailyTenantRollups
             .AsNoTracking()
             .Where(r => r.CreatedDate >= start && r.CreatedDate < viewEnd);
@@ -36,13 +31,12 @@ public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFacto
         if (tenantId.HasValue)
             historicalQuery = historicalQuery.Where(r => r.TenantId == tenantId.Value);
         else
-            historicalQuery = historicalQuery.Where(r => r.TenantId != SystemTenantGuid);
+            historicalQuery = historicalQuery.Where(r => r.TenantId != AnalyticsDbContext.SystemTenantGuid);
 
         var historical = await historicalQuery
             .Select(r => new DailyRow(r.CreatedDate, r.TenantId, r.Revenue, (int)r.Volume))
             .ToListAsync();
-
-        // Step B+C: Fresh data from raw orders table (today only)
+        
         if (yesterday < end)
         {
             var freshStart = yesterday; // today 00:00 UTC
@@ -55,18 +49,17 @@ public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFacto
             if (tenantId.HasValue)
                 freshQuery = freshQuery.Where(o => o.TenantId == tenantId.Value);
             else
-                freshQuery = freshQuery.Where(o => o.TenantId != SystemTenantGuid);
+                freshQuery = freshQuery.Where(o => o.TenantId != AnalyticsDbContext.SystemTenantGuid);
 
             var freshRows = await freshQuery
                 .GroupBy(o => new { Date = o.CreatedDate.Date, o.TenantId })
                 .Select(g => new DailyRow(
                     g.Key.Date,
                     g.Key.TenantId,
-                    g.Sum(o => o.TotalValueIncVat), // Already in SEK
+                    g.Sum(o => o.TotalValueIncVat),
                     g.Count()))
                 .ToListAsync();
-
-            // Step D: Union
+            
             historical.AddRange(freshRows);
         }
 
@@ -94,7 +87,7 @@ public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFacto
             var freshRows = await context.Orders
                 .AsNoTracking()
                 .Where(o => o.CreatedDate >= yesterday && o.CreatedDate < end)
-                .Where(o => o.TenantId != SystemTenantGuid)
+                .Where(o => o.TenantId != AnalyticsDbContext.SystemTenantGuid)
                 .GroupBy(o => o.CreatedDate.Date)
                 .Select(g => new DailyRow(
                     g.Key,
@@ -306,31 +299,30 @@ public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFacto
         return new MomentumDto(median, tenants);
     }
 
-    public async Task<IReadOnlyList<CumulativeGrowthPointDto>> GetCumulativeGrowthAsync(Timeframe timeframe, Guid tenantId)
+    public async Task<IReadOnlyList<NetGrowthAdditionPointDto>> GetNetGrowthAdditionAsync(Timeframe timeframe, Guid tenantId)
     {
-        var (currentStart, currentEnd, previousStart, daysInPeriod) = TimeframeResolver.Resolve(timeframe);
+        var (currentStart, currentEnd, _, daysInPeriod) = TimeframeResolver.Resolve(timeframe);
         await using var context = await contextFactory.CreateDbContextAsync();
 
         var currentRows = await GetMergedTenantDailyDataAsync(context, currentStart, currentEnd, tenantId);
-        var previousRows = await GetMergedTenantDailyDataAsync(context, previousStart, currentStart, tenantId);
+
+        // We need the day right before currentStart to calculate delta for Day 1
+        var startMinusOne = currentStart.AddDays(-1);
+        var beforeStartRows = await GetMergedTenantDailyDataAsync(context, startMinusOne, currentStart, tenantId);
+        var previousDayRevenue = beforeStartRows.Sum(r => r.Revenue);
 
         var currentByDay = currentRows
             .GroupBy(r => (r.Date - currentStart).Days)
             .ToDictionary(g => g.Key, g => g.Sum(r => r.Revenue));
 
-        var previousByDay = previousRows
-            .GroupBy(r => (r.Date - previousStart).Days)
-            .ToDictionary(g => g.Key, g => g.Sum(r => r.Revenue));
-
-        var result = new List<CumulativeGrowthPointDto>(daysInPeriod);
-        decimal cumulative = 0;
+        var result = new List<NetGrowthAdditionPointDto>(daysInPeriod);
 
         for (var i = 0; i < daysInPeriod; i++)
         {
             var cur = currentByDay.GetValueOrDefault(i, 0m);
-            var prev = previousByDay.GetValueOrDefault(i, 0m);
-            cumulative += cur - prev;
-            result.Add(new CumulativeGrowthPointDto($"Day {i + 1}", cumulative));
+            var delta = cur - previousDayRevenue;
+            result.Add(new NetGrowthAdditionPointDto($"Day {i + 1}", delta));
+            previousDayRevenue = cur; // carry over to the next day
         }
 
         return result;
@@ -346,7 +338,7 @@ public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFacto
             .AsNoTracking()
             .Where(o => o.TenantId == tenantId)
             .Where(o => o.CreatedDate >= currentStart && o.CreatedDate < currentEnd)
-            .Select(o => o.TotalValueIncVat) // Already in SEK
+            .Select(o => o.TotalValueIncVat)
             .ToListAsync();
 
         if (orderValues.Count == 0)
@@ -395,6 +387,55 @@ public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFacto
         return bins;
     }
 
+    public async Task<IReadOnlyList<TransactionDensityPointDto>> GetTransactionDensityAsync(Timeframe timeframe, Guid? tenantId = null)
+    {
+        var (currentStart, currentEnd, _, _) = TimeframeResolver.Resolve(timeframe);
+        await using var context = await contextFactory.CreateDbContextAsync();
+
+        var query = context.Orders
+            .AsNoTracking()
+            .Where(o => o.CreatedDate >= currentStart && o.CreatedDate < currentEnd);
+
+        if (tenantId.HasValue)
+            query = query.Where(o => o.TenantId == tenantId.Value);
+        else
+            query = query.Where(o => o.TenantId != AnalyticsDbContext.SystemTenantGuid);
+
+        
+        var data = await query
+            .GroupBy(o => new { o.CreatedDate.DayOfWeek, o.CreatedDate.Hour })
+            .Select(g => new {
+                DayOfWeek = (int)g.Key.DayOfWeek,
+                g.Key.Hour,
+                Count = g.Count(),
+                TotalRevenue = g.Sum(o => o.TotalValueIncVat)
+            })
+            .ToListAsync();
+
+        var dataMap = data.ToDictionary(x => (x.DayOfWeek, x.Hour));
+        var result = new List<TransactionDensityPointDto>(168);
+
+        // Monday (1) through Sunday (7)
+        var days = new[] { 1, 2, 3, 4, 5, 6, 7 };
+
+        foreach (var dow in days)
+        {
+            for (var h = 0; h < 24; h++)
+            {
+                if (dataMap.TryGetValue((dow, h), out var point))
+                {
+                    result.Add(new TransactionDensityPointDto(dow, h, point.Count, point.TotalRevenue));
+                }
+                else
+                {
+                    result.Add(new TransactionDensityPointDto(dow, h, 0, 0m));
+                }
+            }
+        }
+
+        return result;
+    }
+
     #endregion
 
     #region Helpers
@@ -403,14 +444,14 @@ public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFacto
     {
         return await context.Tenants
             .AsNoTracking()
-            .Where(t => t.Id != SystemTenantGuid)
+            .Where(t => t.Id != AnalyticsDbContext.SystemTenantGuid)
             .ToDictionaryAsync(t => t.Id, t => t.Name);
     }
 
     private static decimal CalculateGrowthPercentage(decimal current, decimal previous)
     {
         if (previous == 0)
-            return current == 0 ? 0m : 100m;
+            return 0m;
 
         return Math.Round((current - previous) / previous * 100, 2);
     }

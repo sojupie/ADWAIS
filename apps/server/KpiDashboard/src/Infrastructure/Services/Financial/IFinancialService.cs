@@ -1,7 +1,7 @@
 using Domain.DTOs.Financial;
 using Domain.Enums;
 
-namespace Domain.Services;
+namespace Infrastructure.Services.Financial;
 
 public interface IFinancialService
 {
@@ -10,6 +10,7 @@ public interface IFinancialService
     Task<IReadOnlyList<GrowthExtremeDto>> GetGrowthExtremesAsync(Timeframe timeframe);
     Task<IReadOnlyList<DistributionEntryDto>> GetDistributionAsync(Timeframe timeframe, int topN = 10);
     Task<MomentumDto> GetMomentumAsync(Timeframe timeframe);
-    Task<IReadOnlyList<CumulativeGrowthPointDto>> GetCumulativeGrowthAsync(Timeframe timeframe, Guid tenantId);
+    Task<IReadOnlyList<NetGrowthAdditionPointDto>> GetNetGrowthAdditionAsync(Timeframe timeframe, Guid tenantId);
     Task<IReadOnlyList<OrderBinDto>> GetOrderDistributionAsync(Timeframe timeframe, Guid tenantId, int? binCount = null);
+    Task<IReadOnlyList<TransactionDensityPointDto>> GetTransactionDensityAsync(Timeframe timeframe, Guid? tenantId = null);
 }

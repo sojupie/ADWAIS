@@ -1,5 +1,6 @@
+using Api.DTOs.Financial;
 using Domain.Enums;
-using Domain.Services;
+using Infrastructure.Services.Financial;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
@@ -13,12 +14,15 @@ public class FinancialController(IFinancialService financialService) : Controlle
     /// Scopes to a single tenant if tenantId is provided, otherwise portfolio-wide.
     /// </summary>
     [HttpGet("kpis")]
-    public async Task<IActionResult> GetKpis(
-        [FromQuery] Timeframe timeframe = Timeframe.T30,
-        [FromQuery] Guid? tenantId = null)
+    public async Task<ActionResult<KpiResponseDto>> GetKpis([FromQuery] FinancialRequestDto request)
     {
-        var result = await financialService.GetKpisAsync(timeframe, tenantId);
-        return Ok(result);
+        var result = await financialService.GetKpisAsync(request.Timeframe, request.TenantId);
+        return Ok(new KpiResponseDto(
+            result.CurrentRevenue,
+            result.PreviousRevenue,
+            result.RevenueGrowthPercentage,
+            result.TransactionVolume,
+            result.AverageOrderValue));
     }
 
     /// <summary>
@@ -26,23 +30,30 @@ public class FinancialController(IFinancialService financialService) : Controlle
     /// Scopes to a single tenant if tenantId is provided, otherwise portfolio-wide.
     /// </summary>
     [HttpGet("velocity")]
-    public async Task<IActionResult> GetVelocity(
-        [FromQuery] Timeframe timeframe = Timeframe.T30,
-        [FromQuery] Guid? tenantId = null)
+    public async Task<ActionResult<IEnumerable<VelocityPointResponseDto>>> GetVelocity([FromQuery] FinancialRequestDto request)
     {
-        var result = await financialService.GetVelocityAsync(timeframe, tenantId);
-        return Ok(result);
+        var result = await financialService.GetVelocityAsync(request.Timeframe, request.TenantId);
+        return Ok(result.Select(v => new VelocityPointResponseDto(
+            v.PeriodLabel,
+            v.CurrentRevenue,
+            v.PreviousRevenue,
+            v.AbsoluteVariance)));
     }
 
     /// <summary>
     /// Per-tenant growth %, sorted descending. Portfolio view only.
     /// </summary>
     [HttpGet("growth-extremes")]
-    public async Task<IActionResult> GetGrowthExtremes(
-        [FromQuery] Timeframe timeframe = Timeframe.T30)
+    public async Task<ActionResult<IEnumerable<GrowthExtremeResponseDto>>> GetGrowthExtremes([FromQuery] PortfolioRequestDto request)
     {
-        var result = await financialService.GetGrowthExtremesAsync(timeframe);
-        return Ok(result);
+        var result = await financialService.GetGrowthExtremesAsync(request.Timeframe);
+        return Ok(result.Select(g => new GrowthExtremeResponseDto(
+            g.TenantId,
+            g.TenantName,
+            g.CurrentRevenue,
+            g.PreviousRevenue,
+            g.GrowthPercentage,
+            g.AbsoluteVariance)));
     }
 
     /// <summary>
@@ -50,55 +61,71 @@ public class FinancialController(IFinancialService financialService) : Controlle
     /// Portfolio view only.
     /// </summary>
     [HttpGet("distribution")]
-    public async Task<IActionResult> GetDistribution(
-        [FromQuery] Timeframe timeframe = Timeframe.T30,
-        [FromQuery] int topN = 10)
+    public async Task<ActionResult<IEnumerable<DistributionEntryResponseDto>>> GetDistribution([FromQuery] DistributionRequestDto request)
     {
-        var result = await financialService.GetDistributionAsync(timeframe, topN);
-        return Ok(result);
+        var result = await financialService.GetDistributionAsync(request.Timeframe, request.TopN);
+        return Ok(result.Select(d => new DistributionEntryResponseDto(
+            d.TenantId,
+            d.TenantName,
+            d.AbsoluteRevenue,
+            d.CumulativePortfolioShare)));
     }
 
     /// <summary>
     /// Scatter: baseline revenue × growth % × current volume. Portfolio view only.
     /// </summary>
     [HttpGet("momentum")]
-    public async Task<IActionResult> GetMomentum(
-        [FromQuery] Timeframe timeframe = Timeframe.T30)
+    public async Task<ActionResult<MomentumResponseDto>> GetMomentum([FromQuery] PortfolioRequestDto request)
     {
-        var result = await financialService.GetMomentumAsync(timeframe);
-        return Ok(result);
+        var result = await financialService.GetMomentumAsync(request.Timeframe);
+        return Ok(new MomentumResponseDto(
+            result.MedianBaselineRevenue,
+            result.Tenants.Select(t => new MomentumTenantResponseDto(
+                t.TenantId,
+                t.TenantName,
+                t.BaselineRevenue,
+                t.GrowthPercentage,
+                t.CurrentRevenue)).ToList()));
     }
 
     /// <summary>
     /// Step-line: running tally of daily growth delta. Drilldown view only.
-    /// Returns 400 if tenantId is omitted.
     /// </summary>
-    [HttpGet("cumulative-growth")]
-    public async Task<IActionResult> GetCumulativeGrowth(
-        [FromQuery] Timeframe timeframe = Timeframe.T30,
-        [FromQuery] Guid? tenantId = null)
+    [HttpGet("daily-revenue-delta")]
+    public async Task<ActionResult<IEnumerable<NetGrowthAdditionPointResponseDto>>> GetNetGrowthAddition([FromQuery] DrilldownRequestDto request)
     {
-        if (!tenantId.HasValue)
-            return BadRequest(new { error = "tenantId is required for cumulative-growth." });
-
-        var result = await financialService.GetCumulativeGrowthAsync(timeframe, tenantId.Value);
-        return Ok(result);
+        var result = await financialService.GetNetGrowthAdditionAsync(request.Timeframe, request.TenantId);
+        return Ok(result.Select(n => new NetGrowthAdditionPointResponseDto(
+            n.PeriodLabel,
+            n.NetGrowthAddition)));
     }
 
     /// <summary>
     /// Histogram of order values with adaptive binning. Drilldown view only.
-    /// Returns 400 if tenantId is omitted.
     /// </summary>
     [HttpGet("order-distribution")]
-    public async Task<IActionResult> GetOrderDistribution(
-        [FromQuery] Timeframe timeframe = Timeframe.T30,
-        [FromQuery] Guid? tenantId = null,
-        [FromQuery] int? binCount = null)
+    public async Task<ActionResult<IEnumerable<OrderBinResponseDto>>> GetOrderDistribution([FromQuery] OrderDistributionRequestDto request)
     {
-        if (!tenantId.HasValue)
-            return BadRequest(new { error = "tenantId is required for order-distribution." });
+        var result = await financialService.GetOrderDistributionAsync(request.Timeframe, request.TenantId, request.BinCount);
+        return Ok(result.Select(b => new OrderBinResponseDto(
+            b.BinLabel,
+            b.BinMin,
+            b.BinMax,
+            b.OrderCount)));
+    }
 
-        var result = await financialService.GetOrderDistributionAsync(timeframe, tenantId.Value, binCount);
-        return Ok(result);
+    /// <summary>
+    /// Heatmap data: transaction count and revenue grouped by day of week and hour.
+    /// Scopes to a single tenant if tenantId is provided, otherwise portfolio-wide.
+    /// </summary>
+    [HttpGet("transaction-density")]
+    public async Task<ActionResult<IEnumerable<TransactionDensityPointResponseDto>>> GetTransactionDensity([FromQuery] FinancialRequestDto request)
+    {
+        var result = await financialService.GetTransactionDensityAsync(request.Timeframe, request.TenantId);
+        return Ok(result.Select(p => new TransactionDensityPointResponseDto(
+            p.DayOfWeek,
+            p.Hour,
+            p.Count,
+            p.TotalRevenue)));
     }
 }

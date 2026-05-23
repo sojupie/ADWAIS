@@ -10,37 +10,37 @@ public class ValidationFilter : IAsyncActionFilter
 {
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
-        var bodyParam = context.ActionDescriptor.Parameters
-            .FirstOrDefault(p => p.BindingInfo?.BindingSource == Microsoft.AspNetCore.Mvc.ModelBinding.BindingSource.Body);
-
-        if (bodyParam != null && context.ActionArguments.TryGetValue(bodyParam.Name, out var subject) && subject != null)
+        foreach (var parameter in context.ActionDescriptor.Parameters)
         {
-            var validatorType = typeof(IValidator<>).MakeGenericType(subject.GetType());
-            var validator = context.HttpContext.RequestServices.GetService(validatorType) as IValidator;
-
-            if (validator != null)
+            if (context.ActionArguments.TryGetValue(parameter.Name, out var subject) && subject != null)
             {
-                var validationContext = new ValidationContext<object>(subject);
-                var result = await validator.ValidateAsync(validationContext);
+                var validatorType = typeof(IValidator<>).MakeGenericType(subject.GetType());
+                var validator = context.HttpContext.RequestServices.GetService(validatorType) as IValidator;
 
-                if (!result.IsValid)
+                if (validator != null)
                 {
-                    var errors = result.Errors
-                        .GroupBy(e => e.PropertyName)
-                        .ToDictionary(
-                            g => g.Key,
-                            g => g.Select(e => e.ErrorMessage).ToArray()
-                        );
+                    var validationContext = new ValidationContext<object>(subject);
+                    var result = await validator.ValidateAsync(validationContext);
 
-                    var problemDetails = new ValidationProblemDetails(errors)
+                    if (!result.IsValid)
                     {
-                        Status = StatusCodes.Status400BadRequest,
-                        Title = "One or more validation errors occurred.",
-                        Instance = context.HttpContext.Request.Path
-                    };
+                        var errors = result.Errors
+                            .GroupBy(e => e.PropertyName)
+                            .ToDictionary(
+                                g => g.Key,
+                                g => g.Select(e => e.ErrorMessage).ToArray()
+                            );
 
-                    context.Result = new BadRequestObjectResult(problemDetails);
-                    return;
+                        var problemDetails = new ValidationProblemDetails(errors)
+                        {
+                            Status = StatusCodes.Status400BadRequest,
+                            Title = "One or more validation errors occurred.",
+                            Instance = context.HttpContext.Request.Path
+                        };
+
+                        context.Result = new BadRequestObjectResult(problemDetails);
+                        return;
+                    }
                 }
             }
         }

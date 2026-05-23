@@ -11,6 +11,7 @@ using Infrastructure.Helpers;
 using Infrastructure.Jobs;
 using Infrastructure.Jobs.MaterializedViews;
 using Infrastructure.Jobs.Monitor;
+using Infrastructure.Services.Financial;
 using Infrastructure.Services.Monitoring;
 using Microsoft.EntityFrameworkCore;
 using Polly;
@@ -24,13 +25,16 @@ builder.Configuration.AddEnvironmentVariables();
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add<Api.Filters.ValidationFilter>();
+}).AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
 });
 
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<IMonitorOrchestrationService, MonitorOrchestrationService>();
 builder.Services.AddScoped<Infrastructure.Services.ISystemEventService, Infrastructure.Services.SystemEventService>();
-builder.Services.AddScoped<Domain.Services.IFinancialService, Infrastructure.Services.Financial.FinancialService>();
+builder.Services.AddScoped<IFinancialService, Infrastructure.Services.Financial.FinancialService>();
 builder.Services.AddTransient<UptimeRobotRateLimitHandler>();
 builder.Services.AddHttpClient<Infrastructure.Services.Monitoring.IUptimeRobotService, Infrastructure.Services.Monitoring.UptimeRobotService>()
     .AddHttpMessageHandler<UptimeRobotRateLimitHandler>();

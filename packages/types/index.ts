@@ -1,5 +1,3 @@
-// Shared TypeScript contracts mirroring C# backend models
-
 export interface GlobalKpi {
   totalRevenue: number;
   totalVolume: number;
@@ -24,6 +22,37 @@ export interface TenantKpi {
   revenuePoP: number;
   volumePoP: number;
   aovPoP: number;
+}
+
+export interface FinancialKpi {
+  currentRevenue: number;
+  previousRevenue: number;
+  revenueGrowthPercentage: number;
+  transactionVolume: number;
+  averageOrderValue: number;
+}
+
+export interface FinancialVelocityPoint {
+  periodLabel: string;
+  currentRevenue: number;
+  previousRevenue: number;
+  absoluteVariance: number;
+}
+
+export interface GrowthExtreme {
+  tenantId: string;
+  tenantName: string;
+  currentRevenue: number;
+  previousRevenue: number;
+  growthPercentage: number;
+  absoluteVariance: number;
+}
+
+export interface OrderBin {
+  binLabel: string;
+  binMin: number;
+  binMax: number;
+  orderCount: number;
 }
 
 export interface DailyGlobalRollup {

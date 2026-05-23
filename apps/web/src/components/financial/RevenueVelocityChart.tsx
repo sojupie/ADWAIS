@@ -7,22 +7,13 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import type { DailyGlobalRollup } from '@types';
-import { formatDate, formatCompact } from '@utils';
+import type { FinancialVelocityPoint } from '@types';
+import { formatCompact } from '@utils';
 import { ChartPanel } from '../common/ChartPanel';
 import './RevenueVelocityChart.css';
 
-//may need some smarter way to handle no sale days on current day as well
-interface graphPoint {
-  date: string;
-  currentRevenue?: number;
-  prevRevenue?: number;
-}
-
-export function RevenueVelocityChart({current, previous,}: { current: DailyGlobalRollup[]; previous: DailyGlobalRollup[]; })
+export function RevenueVelocityChart({ points }: { points: FinancialVelocityPoint[] })
 {
-  const graphPoints = buildPoints(current, previous);
-
   return (
       <ChartPanel
           title="Revenue Velocity"
@@ -34,60 +25,32 @@ export function RevenueVelocityChart({current, previous,}: { current: DailyGloba
               <span>Previous Period</span>
             </div>
           }>
-        <RevenueVelocityGraphJSX points={graphPoints} />
+        <RevenueVelocityGraphJSX points={points} />
       </ChartPanel>
   );
 }
 
-function buildPoints(current: DailyGlobalRollup[], previous: DailyGlobalRollup[]): graphPoint[] {
-  //assumes data is returned unsorted by date.
-  const sortedCurrent = [...current].sort(
-    (a, b) => new Date(a.createdDate).getTime() - new Date(b.createdDate).getTime()
-  );
-  const sortedPrevious = [...previous].sort(
-    (a, b) => new Date(a.createdDate).getTime() - new Date(b.createdDate).getTime()
-  );
+const GraphTooltip = ({ active, payload, label }: any) => {
+  if (!active || !payload?.length) return null;
+  const point = payload[0].payload as FinancialVelocityPoint;
 
-  return sortedCurrent.map((dailyGlobalRollup, index) => ({
-    date: formatDate(dailyGlobalRollup.createdDate),
-    currentRevenue: dailyGlobalRollup.globalRevenue,
-    prevRevenue: sortedPrevious[index]?.globalRevenue,
-  }));
-}
-
-//refactor again later prob.
-const GraphTooltip = ({ active, payload: pointValues, label: date }: any) => {
-  if (!active || !pointValues?.length) return null;
-  const previousRevenue = pointValues.find(
-      (pointValue: any) => pointValue.name === 'prevRevenue'
-  );
-  const currentRevenue = pointValues.find(
-      (pointValue: any) => pointValue.name === 'currentRevenue'
-  );
-  
   return (
       <div className="chart-panel-tooltip">
-        <p className="chart-panel-tooltip__label">{date}</p>
-        {previousRevenue && (<p>
-              Previous: <strong>{formatCompact(previousRevenue.value)} SEK</strong>
-            </p>
-        )}
-        {currentRevenue && (<p>
-              Current: <strong>{formatCompact(currentRevenue.value)} SEK</strong>
-            </p>
-        )}
+        <p className="chart-panel-tooltip__label">{label}</p>
+        <p>Previous: <strong>{formatCompact(point.previousRevenue)} SEK</strong></p>
+        <p>Current: <strong>{formatCompact(point.currentRevenue)} SEK</strong></p>
       </div>
   );
 };
 
 //can probably move a lot of styling over to the styling file
-function RevenueVelocityGraphJSX({ points }: { points: graphPoint[] }) {
+function RevenueVelocityGraphJSX({ points }: { points: FinancialVelocityPoint[] }) {
   return (
     <ResponsiveContainer width="100%" height={220}>
       <LineChart data={points} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
         <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
         <XAxis
-          dataKey="date"
+          dataKey="periodLabel"
           tick={{ fill: 'var(--text-muted)', fontSize: 10 }}
           axisLine={false}
           tickLine={false}
@@ -103,7 +66,7 @@ function RevenueVelocityGraphJSX({ points }: { points: graphPoint[] }) {
         <Tooltip content={<GraphTooltip />} />
         <Line
           type="monotone"
-          dataKey="prevRevenue"
+          dataKey="previousRevenue"
           className="revenue-velocity-chart__previous-line"
           strokeWidth={2.5}
           strokeDasharray="4 3"

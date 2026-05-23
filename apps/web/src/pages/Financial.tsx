@@ -12,17 +12,11 @@ import { TenantDiagnostics } from './TenantDiagnostics';
 import './Financial.css';
 
 export function Financial() {
-  const { period, loading, globalKpi, tenantKpis, globalRollups } = useDashboardData();
+  const { period, loading, globalKpi, tenantKpis, globalVelocity } = useDashboardData();
   const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
   const [tenantDiagnostics, setTenantDiagnostics] = useState<TenantDiagnosticsData | null>(null);
   const [tenantDiagnosticsLoading, setTenantDiagnosticsLoading] = useState(false);
   const [tenantDiagnosticsError, setTenantDiagnosticsError] = useState<string | null>(null);
-
-  const sortedRollups = [...globalRollups].sort(
-    (a, b) => new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime()
-  );
-  const currentRollups = sortedRollups.slice(0, period);
-  const previousRollups = sortedRollups.slice(period, period * 2);
 
   useEffect(() => {
     if (!selectedTenantId) {
@@ -127,8 +121,8 @@ export function Financial() {
 
       <section className="charts-row" aria-label="Revenue charts">
         <div className="chart-slot">
-          {currentRollups.length > 0
-            ? <RevenueVelocityChart current={currentRollups} previous={previousRollups} />
+          {globalVelocity.length > 0
+            ? <RevenueVelocityChart points={globalVelocity} />
             : <EmptyState title="No revenue data" />}
         </div>
         <div className="chart-slot">
@@ -159,7 +153,7 @@ export function FinancialPeriodSelector() {
 
   return (
     <div className="btn-group" role="group" aria-label="Time period selector">
-      {([1, 7, 30, 90] as Period[]).map((d) => (
+      {([7, 30, 90] as Period[]).map((d) => (
         <button
           key={d}
           id={`period-${d}`}

@@ -1,13 +1,16 @@
 import { useSyncExternalStore } from 'react';
 import type {
+  FinancialKpi,
+  FinancialVelocityPoint,
   GlobalKpi,
+  GrowthExtreme,
   TenantKpi,
-  DailyGlobalRollup,
 } from '@types';
 
 export const REFRESH_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
 
-export type Period = 1 | 7 | 30 | 90;
+export type Period = 7 | 30 | 90;
+type Timeframe = `T${Period}`;
 
 type DashboardDataSnapshot = {
   period: Period;
@@ -15,7 +18,7 @@ type DashboardDataSnapshot = {
   error: string | null;
   globalKpi: GlobalKpi | null;
   tenantKpis: TenantKpi[];
-  globalRollups: DailyGlobalRollup[];
+  globalVelocity: FinancialVelocityPoint[];
 };
 
 const listeners = new Set<() => void>();
@@ -26,7 +29,7 @@ let snapshot: DashboardDataSnapshot = {
   error: null,
   globalKpi: null,
   tenantKpis: [],
-  globalRollups: [],
+  globalVelocity: [],
 };
 
 let refreshTimer: ReturnType<typeof setInterval> | null = null;
@@ -38,13 +41,52 @@ async function fetchJson<T>(url: string): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+function getTimeframe(days: Period): Timeframe {
+  return `T${days}`;
+}
+
+function mapKpi(kpi: FinancialKpi): GlobalKpi {
+  return {
+    totalRevenue: kpi.currentRevenue,
+    totalVolume: kpi.transactionVolume,
+    aov: kpi.averageOrderValue,
+    previousRevenue: kpi.previousRevenue,
+    previousVolume: 0,
+    previousAov: 0,
+    revenuePoP: kpi.revenueGrowthPercentage,
+    volumePoP: 0,
+    aovPoP: 0,
+  };
+}
+
+function mapGrowthExtreme(extreme: GrowthExtreme): TenantKpi {
+  return {
+    tenantId: extreme.tenantId,
+    tenantName: extreme.tenantName,
+    totalRevenue: extreme.currentRevenue,
+    totalVolume: 0,
+    aov: 0,
+    previousRevenue: extreme.previousRevenue,
+    previousVolume: 0,
+    previousAov: 0,
+    revenuePoP: extreme.growthPercentage,
+    volumePoP: 0,
+    aovPoP: 0,
+  };
+}
+
 async function loadDashboardData(days: Period) {
-  const [globalKpi, tenantKpis, globalRollups] = await Promise.all([
-    fetchJson<GlobalKpi>(`/api/dashboard/kpis/global?days=${days}`),
-    fetchJson<TenantKpi[]>(`/api/dashboard/kpis/tenants?days=${days}`),
-    fetchJson<DailyGlobalRollup[]>(`/api/dashboard/global-rollups?days=${days * 2}`),
+  const timeframe = getTimeframe(days);
+  const [globalKpi, tenantKpis, globalVelocity] = await Promise.all([
+    fetchJson<FinancialKpi>(`/api/financial/kpis?timeframe=${timeframe}`),
+    fetchJson<GrowthExtreme[]>(`/api/financial/growth-extremes?timeframe=${timeframe}`),
+    fetchJson<FinancialVelocityPoint[]>(`/api/financial/velocity?timeframe=${timeframe}`),
   ]);
-  return { globalKpi, tenantKpis, globalRollups };
+  return {
+    globalKpi: mapKpi(globalKpi),
+    tenantKpis: tenantKpis.map(mapGrowthExtreme),
+    globalVelocity,
+  };
 }
 
 function emit() {
@@ -67,7 +109,7 @@ async function fetchData(days: Period) {
     updateSnapshot({
       globalKpi: data.globalKpi,
       tenantKpis: data.tenantKpis,
-      globalRollups: data.globalRollups,
+      globalVelocity: data.globalVelocity,
     });
   } catch (e) {
     if (requestId !== activeRequestId) return;

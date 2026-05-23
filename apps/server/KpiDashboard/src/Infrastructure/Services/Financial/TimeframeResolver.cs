@@ -28,6 +28,9 @@ public static class TimeframeResolver
         };
     }
 
+    /// <summary>
+    /// Builds a fixed-length period (e.g., trailing 30 days) and its previous comparison period.
+    /// </summary>
     private static (DateTime, DateTime, DateTime, int) BuildFixedPeriod(DateTime today, DateTime currentEnd, int days)
     {
         var currentStart = today.AddDays(-(days - 1));
@@ -35,6 +38,9 @@ public static class TimeframeResolver
         return (currentStart, currentEnd, previousStart, days);
     }
 
+    /// <summary>
+    /// Builds a Year-to-Date (YTD) period and an equivalent-length comparison period.
+    /// </summary>
     private static (DateTime, DateTime, DateTime, int) BuildYtdPeriod(DateTime today, DateTime currentEnd)
     {
         var currentStart = new DateTime(today.Year, 1, 1, 0, 0, 0, DateTimeKind.Utc);

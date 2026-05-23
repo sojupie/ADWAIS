@@ -4,11 +4,19 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace Infrastructure.Services.Monitoring;
 
+/// <summary>
+/// A delegating handler that implements client-side rate limiting for the UptimeRobot API.
+/// It monitors rate limit headers and status codes to delay requests when necessary.
+/// </summary>
 public class UptimeRobotRateLimitHandler(IMemoryCache cache) : DelegatingHandler
 {
     private const string RateLimitKey = GlobalCacheKeys.UptimeRobotRateLimit;
     private static readonly SemaphoreSlim Semaphore = new(1, 1);
 
+    /// <summary>
+    /// Sends an HTTP request, potentially delaying it if a rate limit is active.
+    /// Updates the rate limit state based on response headers.
+    /// </summary>
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         await Semaphore.WaitAsync(cancellationToken);

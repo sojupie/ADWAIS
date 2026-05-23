@@ -7,11 +7,25 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Services;
 
+/// <summary>
+/// Provides a service for ingesting order data from Litium.
+/// </summary>
 public interface ILitiumIngestionService
 {
+    /// <summary>
+    /// Executes the ingestion process for a specific tenant and timeframe.
+    /// </summary>
+    /// <param name="tenantId">The ID of the tenant to ingest data for.</param>
+    /// <param name="startDate">The start date of the period to ingest.</param>
+    /// <param name="endDate">The end date of the period to ingest.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>The number of orders successfully ingested or updated.</returns>
     Task<int> ExecuteIngestionAsync(Guid tenantId, DateTimeOffset startDate, DateTimeOffset endDate, CancellationToken ct = default);
 }
 
+/// <summary>
+/// Implementation of ILitiumIngestionService that fetches data from Litium's adapter API and persists it to the database.
+/// </summary>
 public class LitiumIngestionService(
     IDbContextFactory<AnalyticsDbContext> contextFactory,
     HttpClient httpClient,
@@ -21,6 +35,7 @@ public class LitiumIngestionService(
 {
     private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
 
+    /// <inheritdoc />
     public async Task<int> ExecuteIngestionAsync(Guid tenantId, DateTimeOffset startDate, DateTimeOffset endDate, CancellationToken ct = default)
     {
         Tenant tenant;
@@ -62,6 +77,9 @@ public class LitiumIngestionService(
         }
     }
 
+    /// <summary>
+    /// Core ingestion logic that handles chunked fetching and bulk insertion of orders.
+    /// </summary>
     private async Task<int> ExecuteIngestionCoreAsync(Tenant tenant, DateTimeOffset startDate, DateTimeOffset endDate, CancellationToken ct)
     {
         var totalIngested = 0;

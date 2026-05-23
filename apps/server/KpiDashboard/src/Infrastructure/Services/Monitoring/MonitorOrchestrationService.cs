@@ -5,11 +5,15 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace Infrastructure.Services.Monitoring;
 
+/// <summary>
+/// Orchestrates uptime monitor management, including creation, assignment, and status hydration.
+/// </summary>
 public class MonitorOrchestrationService(
     AnalyticsDbContext dbContext,
     IUptimeRobotService uptimeRobotService,
     IMemoryCache cache) : IMonitorOrchestrationService
 {
+    /// <inheritdoc />
     public async Task<UptimeMonitor> CreateMonitorAsync(Guid tenantId, string name, string url, double? uptimeSla)
     {
         var tenantExists = await dbContext.Tenants.AnyAsync(t => t.Id == tenantId);
@@ -39,6 +43,7 @@ public class MonitorOrchestrationService(
         return HydrateLiveStatus(monitor);
     }
 
+    /// <inheritdoc />
     public async Task AssignMonitorAsync(int monitorId, Guid tenantId)
     {
         var monitor = await dbContext.Monitors.SingleOrDefaultAsync(m => m.Id == monitorId);
@@ -51,6 +56,7 @@ public class MonitorOrchestrationService(
         await dbContext.SaveChangesAsync();
     }
 
+    /// <inheritdoc />
     public async Task ReassignAllTenantMonitorsToSystemAsync(Guid tenantId)
     {
         await dbContext.Monitors
@@ -58,6 +64,7 @@ public class MonitorOrchestrationService(
             .ExecuteUpdateAsync(s => s.SetProperty(m => m.TenantId, AnalyticsDbContext.SystemTenantGuid));
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<UptimeMonitor>> GetMonitorsByTenantAsync(Guid tenantId)
     {
         var monitors = await dbContext.Monitors
@@ -68,6 +75,7 @@ public class MonitorOrchestrationService(
         return monitors.Select(HydrateLiveStatus);
     }
 
+    /// <inheritdoc />
     public async Task<UptimeMonitor> GetMonitorAsync(Guid tenantId, int id)
     {
         var monitor = await dbContext.Monitors
@@ -79,6 +87,9 @@ public class MonitorOrchestrationService(
         return HydrateLiveStatus(monitor);
     }
     
+    /// <summary>
+    /// Hydrates a monitor with its live status from the cache.
+    /// </summary>
     private UptimeMonitor HydrateLiveStatus(UptimeMonitor monitor)
     {
         if (cache.TryGetValue(GlobalCacheKeys.MonitorState(monitor.Id), out LiveMonitorState? state) && state != null)
@@ -92,6 +103,9 @@ public class MonitorOrchestrationService(
         return monitor;
     }
 
+    /// <summary>
+    /// Formats a status string to be more human-readable (sentence case).
+    /// </summary>
     private static string FormatStatus(string status) 
     {
         if (string.IsNullOrWhiteSpace(status)) return "Unknown";
@@ -100,6 +114,7 @@ public class MonitorOrchestrationService(
             : status;
     }
 
+    /// <inheritdoc />
     public async Task DeleteMonitorAsync(Guid tenantId, int id)
     {
         var monitor = await dbContext.Monitors.SingleOrDefaultAsync(m => m.TenantId == tenantId && m.Id == id);
@@ -111,6 +126,7 @@ public class MonitorOrchestrationService(
         await dbContext.SaveChangesAsync();
     }
 
+    /// <inheritdoc />
     public async Task PauseMonitorAsync(int id)
     {
         var monitor = await dbContext.Monitors.SingleOrDefaultAsync(m => m.Id == id);
@@ -122,6 +138,7 @@ public class MonitorOrchestrationService(
         await dbContext.SaveChangesAsync();
     }
 
+    /// <inheritdoc />
     public async Task StartMonitorAsync(int id)
     {
         var monitor = await dbContext.Monitors.SingleOrDefaultAsync(m => m.Id == id);
@@ -133,11 +150,13 @@ public class MonitorOrchestrationService(
         await dbContext.SaveChangesAsync();
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<ResponseTime>> GetAggregatedLatencyAsync(Guid tenantId, int id, DateTimeOffset from, DateTimeOffset to)
     {
         throw new NotImplementedException("Materialized view aggregation requires explicit SQL definition.");
     }
 
+    /// <inheritdoc />
     public async Task<UptimeMonitor> UpdateMonitorSlaAsync(int id, double? uptimeSla)
     {
         var monitor = await dbContext.Monitors.SingleOrDefaultAsync(m => m.Id == id);

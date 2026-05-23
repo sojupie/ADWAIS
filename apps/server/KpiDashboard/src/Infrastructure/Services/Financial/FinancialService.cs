@@ -4,6 +4,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services.Financial;
 
+/// <summary>
+/// Provides financial analytics and KPI calculations by merging historical rollup data with real-time order data.
+/// </summary>
 public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFactory) : IFinancialService
 {
     #region Internal data model for the merge layer
@@ -16,7 +19,7 @@ public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFacto
 
     /// <summary>
     /// Core merge: reads materialized view data up to yesterday, then unions
-    /// today's raw orders to produce a unified daily dataset.
+    /// today's raw orders to produce a unified daily dataset for specific tenants.
     /// </summary>
     private async Task<List<DailyRow>> GetMergedTenantDailyDataAsync(
         AnalyticsDbContext context, DateTime start, DateTime end, Guid? tenantId = null)
@@ -106,6 +109,7 @@ public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFacto
 
     #region Widget Implementations
 
+    /// <inheritdoc />
     public async Task<KpiDto> GetKpisAsync(Timeframe timeframe, Guid? tenantId = null)
     {
         var (currentStart, currentEnd, previousStart, _) = TimeframeResolver.Resolve(timeframe);
@@ -133,6 +137,7 @@ public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFacto
         return new KpiDto(currentRevenue, previousRevenue, growthPct, volume, aov);
     }
 
+    /// <inheritdoc />
     public async Task<IReadOnlyList<VelocityPointDto>> GetVelocityAsync(Timeframe timeframe, Guid? tenantId = null)
     {
         var (currentStart, currentEnd, previousStart, daysInPeriod) = TimeframeResolver.Resolve(timeframe);
@@ -175,6 +180,7 @@ public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFacto
         return result;
     }
 
+    /// <inheritdoc />
     public async Task<IReadOnlyList<GrowthExtremeDto>> GetGrowthExtremesAsync(Timeframe timeframe)
     {
         var (currentStart, currentEnd, previousStart, _) = TimeframeResolver.Resolve(timeframe);
@@ -208,6 +214,7 @@ public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFacto
             .ToList();
     }
 
+    /// <inheritdoc />
     public async Task<IReadOnlyList<DistributionEntryDto>> GetDistributionAsync(Timeframe timeframe, int topN = 10)
     {
         var (currentStart, currentEnd, _, _) = TimeframeResolver.Resolve(timeframe);
@@ -259,6 +266,7 @@ public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFacto
         return result;
     }
 
+    /// <inheritdoc />
     public async Task<MomentumDto> GetMomentumAsync(Timeframe timeframe)
     {
         var (currentStart, currentEnd, previousStart, _) = TimeframeResolver.Resolve(timeframe);
@@ -299,6 +307,7 @@ public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFacto
         return new MomentumDto(median, tenants);
     }
 
+    /// <inheritdoc />
     public async Task<IReadOnlyList<NetGrowthAdditionPointDto>> GetNetGrowthAdditionAsync(Timeframe timeframe, Guid tenantId)
     {
         var (currentStart, currentEnd, _, daysInPeriod) = TimeframeResolver.Resolve(timeframe);
@@ -328,6 +337,7 @@ public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFacto
         return result;
     }
 
+    /// <inheritdoc />
     public async Task<IReadOnlyList<OrderBinDto>> GetOrderDistributionAsync(Timeframe timeframe, Guid tenantId, int? binCount = null)
     {
         var (currentStart, currentEnd, _, _) = TimeframeResolver.Resolve(timeframe);
@@ -387,6 +397,7 @@ public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFacto
         return bins;
     }
 
+    /// <inheritdoc />
     public async Task<IReadOnlyList<TransactionDensityPointDto>> GetTransactionDensityAsync(Timeframe timeframe, Guid? tenantId = null)
     {
         var (currentStart, currentEnd, _, _) = TimeframeResolver.Resolve(timeframe);
@@ -440,6 +451,9 @@ public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFacto
 
     #region Helpers
 
+    /// <summary>
+    /// Retrieves a mapping of tenant IDs to their names.
+    /// </summary>
     private static async Task<Dictionary<Guid, string>> GetTenantNameMapAsync(AnalyticsDbContext context)
     {
         return await context.Tenants
@@ -448,6 +462,9 @@ public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFacto
             .ToDictionaryAsync(t => t.Id, t => t.Name);
     }
 
+    /// <summary>
+    /// Calculates the percentage growth between two values.
+    /// </summary>
     private static decimal CalculateGrowthPercentage(decimal current, decimal previous)
     {
         if (previous == 0)
@@ -456,6 +473,9 @@ public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFacto
         return Math.Round((current - previous) / previous * 100, 2);
     }
 
+    /// <summary>
+    /// Calculates the median value of a sorted list of decimals.
+    /// </summary>
     private static decimal CalculateMedian(List<decimal> sorted)
     {
         if (sorted.Count == 0) return 0;
@@ -466,8 +486,8 @@ public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFacto
     }
 
     /// <summary>
-    /// Freedman–Diaconis rule: binWidth = 2 × IQR × n^(-1/3).
-    /// Falls back to Sturges' rule if IQR = 0.
+    /// Calculates an adaptive bin count for a histogram using the Freedman–Diaconis rule.
+    /// Falls back to Sturges' rule if the interquartile range is zero.
     /// </summary>
     private static int CalculateAdaptiveBinCount(List<decimal> sortedValues)
     {
@@ -491,6 +511,9 @@ public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFacto
         return Math.Clamp(count, 5, 30);
     }
 
+    /// <summary>
+    /// Calculates the value at a specific percentile in a sorted list.
+    /// </summary>
     private static decimal Percentile(List<decimal> sorted, double p)
     {
         var index = p * (sorted.Count - 1);
@@ -502,6 +525,9 @@ public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFacto
         return sorted[lower] * (1 - weight) + sorted[upper] * weight;
     }
 
+    /// <summary>
+    /// Formats a bin label for order value ranges.
+    /// </summary>
     private static string FormatBinLabel(decimal min, decimal max)
     {
         return $"{min:N0}–{max:N0} SEK";

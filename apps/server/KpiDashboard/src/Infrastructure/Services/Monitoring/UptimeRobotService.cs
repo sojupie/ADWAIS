@@ -6,11 +6,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services.Monitoring;
 
+/// <summary>
+/// Provides a client implementation for the UptimeRobot API, handling monitor management and metric retrieval.
+/// </summary>
 public class UptimeRobotService(
     HttpClient httpClient, 
     IDbContextFactory<AnalyticsDbContext> contextFactory,
     ISystemEventService eventService) : IUptimeRobotService
 {
+    /// <summary>
+    /// Retrieves the API key from the global configuration.
+    /// </summary>
     private async Task<string> GetApiKeyAsync()
     {
         using var context = await contextFactory.CreateDbContextAsync();
@@ -22,6 +28,9 @@ public class UptimeRobotService(
         return config.UptimeRobotApiKey;
     }
 
+    /// <summary>
+    /// Executes an HTTP request to the UptimeRobot API and parses the response.
+    /// </summary>
     private async Task<JsonDocument> GetResponseAsync(HttpRequestMessage request, string? context = null)
     {
         var apiKey = await GetApiKeyAsync();
@@ -41,6 +50,7 @@ public class UptimeRobotService(
         return JsonDocument.Parse(responseContent);
     }
 
+    /// <inheritdoc />
     public async Task<UptimeRobotMonitorDto> CreateMonitorAsync(string name, string url)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, "https://api.uptimerobot.com/v3/monitors");
@@ -58,6 +68,7 @@ public class UptimeRobotService(
         return monitor;
     }    
     
+    /// <inheritdoc />
     public async Task<List<UptimeRobotMonitorDto>> GetMonitorsAsync(int[]? monitorIds = null)
     {
         var url = "https://api.uptimerobot.com/v3/monitors";
@@ -87,6 +98,7 @@ public class UptimeRobotService(
         return monitors;
     }
     
+    /// <inheritdoc />
     public async Task<double> GetUptimeAsync(int monitorId, DateTimeOffset? startDate = null, DateTimeOffset? endDate = null)
     {
         var url = $"https://api.uptimerobot.com/v3/monitors/{monitorId}/stats/uptime";
@@ -101,6 +113,7 @@ public class UptimeRobotService(
         return response.RootElement.GetProperty("uptime").GetDouble();
     }
         
+    /// <inheritdoc />
     public async Task<(int? Average, int? Lowest, int? Highest)> GetResponseTimeAsync(int monitorId, DateTimeOffset? startDate = null, DateTimeOffset? endDate = null)
     {
         var url = $"https://api.uptimerobot.com/v3/monitors/{monitorId}/stats/response-time";
@@ -121,12 +134,14 @@ public class UptimeRobotService(
         return (avg, lowest, highest);
     }
 
+    /// <inheritdoc />
     public async Task DeleteMonitorAsync(int monitorId)
     {
         var request = new HttpRequestMessage(HttpMethod.Delete, $"https://api.uptimerobot.com/v3/monitors/{monitorId}");
         await GetResponseAsync(request, $"Delete MonitorId: {monitorId}");
     }
 
+    /// <inheritdoc />
     public async Task PauseMonitorAsync(int monitorId)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, $"https://api.uptimerobot.com/v3/monitors/{monitorId}/pause");
@@ -134,6 +149,7 @@ public class UptimeRobotService(
         await GetResponseAsync(request, $"Pause MonitorId: {monitorId}");
     }
 
+    /// <inheritdoc />
     public async Task StartMonitorAsync(int monitorId)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, $"https://api.uptimerobot.com/v3/monitors/{monitorId}/start");

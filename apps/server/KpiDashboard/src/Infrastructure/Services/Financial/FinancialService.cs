@@ -447,6 +447,52 @@ public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFacto
         return result;
     }
 
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<CumulativeGrowthDeltaPointDto>> GetCumulativeGrowthDeltaAsync(Timeframe timeframe, Guid? tenantId = null)
+    {
+        var (currentStart, currentEnd, previousStart, daysInPeriod) = TimeframeResolver.Resolve(timeframe);
+        await using var context = await contextFactory.CreateDbContextAsync();
+
+        List<DailyRow> currentRows, previousRows;
+
+        if (tenantId.HasValue)
+        {
+            currentRows = await GetMergedTenantDailyDataAsync(context, currentStart, currentEnd, tenantId);
+            previousRows = await GetMergedTenantDailyDataAsync(context, previousStart, currentStart, tenantId);
+        }
+        else
+        {
+            currentRows = await GetMergedGlobalDailyDataAsync(context, currentStart, currentEnd);
+            previousRows = await GetMergedGlobalDailyDataAsync(context, previousStart, currentStart);
+        }
+
+        // Index by day offset within period
+        var currentByDay = currentRows
+            .GroupBy(r => (r.Date - currentStart).Days)
+            .ToDictionary(g => g.Key, g => g.Sum(r => r.Revenue));
+
+        var previousByDay = previousRows
+            .GroupBy(r => (r.Date - previousStart).Days)
+            .ToDictionary(g => g.Key, g => g.Sum(r => r.Revenue));
+
+        var result = new List<CumulativeGrowthDeltaPointDto>(daysInPeriod);
+        decimal runningSum = 0;
+
+        for (var i = 0; i < daysInPeriod; i++)
+        {
+            var cur = currentByDay.GetValueOrDefault(i, 0m);
+            var prev = previousByDay.GetValueOrDefault(i, 0m);
+            var dailyVariance = cur - prev;
+            runningSum += dailyVariance;
+
+            result.Add(new CumulativeGrowthDeltaPointDto(
+                $"Day {i + 1}",
+                runningSum));
+        }
+
+        return result;
+    }
+
     #endregion
 
     #region Helpers

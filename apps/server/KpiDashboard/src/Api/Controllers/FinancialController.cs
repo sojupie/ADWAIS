@@ -128,4 +128,17 @@ public class FinancialController(IFinancialService financialService) : Controlle
             p.Count,
             p.TotalRevenue)));
     }
+
+    /// <summary>
+    /// Line-chart: running sum of absolute daily variance between current and previous periods.
+    /// Scopes to a single tenant if tenantId is provided, otherwise portfolio-wide.
+    /// </summary>
+    [HttpGet("cumulative-growth-delta")]
+    public async Task<ActionResult<IEnumerable<CumulativeGrowthDeltaPointResponseDto>>> GetCumulativeGrowthDelta([FromQuery] FinancialRequestDto request)
+    {
+        var result = await financialService.GetCumulativeGrowthDeltaAsync(request.Timeframe, request.TenantId);
+        return Ok(result.Select(p => new CumulativeGrowthDeltaPointResponseDto(
+            p.PeriodLabel,
+            p.CumulativeGrowthDelta)));
+    }
 }

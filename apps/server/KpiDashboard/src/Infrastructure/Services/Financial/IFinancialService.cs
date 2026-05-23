@@ -67,4 +67,12 @@ public interface IFinancialService
     /// <param name="tenantId">Optional tenant ID to filter results. If null, global data is used.</param>
     /// <returns>A list of density points for every hour of the week (168 points).</returns>
     Task<IReadOnlyList<TransactionDensityPointDto>> GetTransactionDensityAsync(Timeframe timeframe, Guid? tenantId = null);
+
+    /// <summary>
+    /// Calculates the cumulative growth delta (running sum of daily variance) for the specified timeframe.
+    /// </summary>
+    /// <param name="timeframe">The timeframe to calculate cumulative growth for.</param>
+    /// <param name="tenantId">Optional tenant ID to filter results. If null, global data is used.</param>
+    /// <returns>A list of points representing the running sum of daily revenue variance.</returns>
+    Task<IReadOnlyList<CumulativeGrowthDeltaPointDto>> GetCumulativeGrowthDeltaAsync(Timeframe timeframe, Guid? tenantId = null);
 }

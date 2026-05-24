@@ -7,14 +7,10 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import type { TenantDiagnosticDailyPoint } from '@types';
+import type { FinancialVelocityPoint } from '@types';
 import { formatCompact } from '@utils';
 import { ChartPanel } from '../common/ChartPanel';
 import './TenantRevenueVelocityChart.css';
-
-interface Props {
-  daily: TenantDiagnosticDailyPoint[];
-}
 
 interface RevenueVelocityRow {
   day: string;
@@ -22,10 +18,10 @@ interface RevenueVelocityRow {
   previousRevenue: number;
 }
 
-function buildRows(daily: TenantDiagnosticDailyPoint[]): RevenueVelocityRow[] {
-  return daily.map((point) => ({
-    day: `Day ${point.dayIndex}`,
-    revenue: point.revenue,
+function buildRows(points: FinancialVelocityPoint[]): RevenueVelocityRow[] {
+  return points.map((point) => ({
+    day: point.periodLabel,
+    revenue: point.currentRevenue,
     previousRevenue: point.previousRevenue,
   }));
 }
@@ -46,8 +42,8 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   );
 };
 
-export function TenantRevenueVelocityChart({ daily }: Props) {
-  const rows = buildRows(daily);
+export function TenantRevenueVelocityChart({ points }: { points: FinancialVelocityPoint[] }) {
+  const rows = buildRows(points);
 
   return (
     <ChartPanel title="Revenue Velocity Over Time" bodyClassName="tenant-revenue-velocity-chart">

@@ -7,24 +7,27 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import type { TenantDiagnosticDailyPoint } from '@types';
+import type { FinancialVelocityPoint } from '@types';
 import { ChartPanel } from '../common/ChartPanel';
 import './PortfolioRevenueShareTrajectoryChart.css';
-
-interface Props {
-  daily: TenantDiagnosticDailyPoint[];
-}
 
 interface ShareTrajectoryRow {
   day: string;
   portfolioShare: number;
 }
 
-function buildRows(daily: TenantDiagnosticDailyPoint[]): ShareTrajectoryRow[] {
-  return daily.map((point) => ({
-    day: `Day ${point.dayIndex}`,
-    portfolioShare: point.portfolioShare,
-  }));
+function buildRows(
+  tenantVelocity: FinancialVelocityPoint[],
+  portfolioVelocity: FinancialVelocityPoint[],
+): ShareTrajectoryRow[] {
+  return tenantVelocity.map((point, index) => {
+    const portfolioRevenue = portfolioVelocity[index]?.currentRevenue ?? 0;
+
+    return {
+      day: point.periodLabel,
+      portfolioShare: portfolioRevenue > 0 ? (point.currentRevenue / portfolioRevenue) * 100 : 0,
+    };
+  });
 }
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -38,8 +41,14 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   );
 };
 
-export function PortfolioRevenueShareTrajectoryChart({ daily }: Props) {
-  const rows = buildRows(daily);
+export function PortfolioRevenueShareTrajectoryChart({
+  tenantVelocity,
+  portfolioVelocity,
+}: {
+  tenantVelocity: FinancialVelocityPoint[];
+  portfolioVelocity: FinancialVelocityPoint[];
+}) {
+  const rows = buildRows(tenantVelocity, portfolioVelocity);
 
   return (
     <ChartPanel title="Portfolio Revenue Share Trajectory" bodyClassName="portfolio-revenue-share-chart">

@@ -7,33 +7,21 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import type { TenantDiagnosticDailyPoint } from '@types';
+import type { CumulativeGrowthDeltaPoint } from '@types';
 import { formatCompact } from '@utils';
 import { ChartPanel } from '../common/ChartPanel';
 import './CumulativeGrowthDeltaChart.css';
-
-interface Props {
-  daily: TenantDiagnosticDailyPoint[];
-}
 
 interface GrowthDeltaRow {
   day: string;
   cumulativeDelta: number;
 }
 
-function buildRows(daily: TenantDiagnosticDailyPoint[]): GrowthDeltaRow[] {
-  let currentCumulative = 0;
-  let previousCumulative = 0;
-
-  return daily.map((point) => {
-    currentCumulative += point.revenue;
-    previousCumulative += point.previousRevenue;
-
-    return {
-      day: `Day ${point.dayIndex}`,
-      cumulativeDelta: currentCumulative - previousCumulative,
-    };
-  });
+function buildRows(points: CumulativeGrowthDeltaPoint[]): GrowthDeltaRow[] {
+  return points.map((point) => ({
+    day: point.periodLabel,
+    cumulativeDelta: point.cumulativeGrowthDelta,
+  }));
 }
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -47,8 +35,8 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   );
 };
 
-export function CumulativeGrowthDeltaChart({ daily }: Props) {
-  const rows = buildRows(daily);
+export function CumulativeGrowthDeltaChart({ points }: { points: CumulativeGrowthDeltaPoint[] }) {
+  const rows = buildRows(points);
 
   return (
     <ChartPanel title="Cumulative Growth Delta (Absolute)" bodyClassName="cumulative-growth-delta-chart">

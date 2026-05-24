@@ -53,13 +53,16 @@ export function TenantDiagnostics({ data, onBack }: Props) {
       </section>
 
       <section className="tenant-diagnostics__charts tenant-diagnostics__charts--primary" aria-label="Tenant revenue diagnostics">
-        <TenantRevenueVelocityChart daily={data.daily} />
-        <PortfolioRevenueShareTrajectoryChart daily={data.daily} />
+        <TenantRevenueVelocityChart points={data.velocity} />
+        <PortfolioRevenueShareTrajectoryChart
+          tenantVelocity={data.velocity}
+          portfolioVelocity={data.portfolioVelocity}
+        />
       </section>
 
       <section className="tenant-diagnostics__charts" aria-label="Tenant order diagnostics">
-        <CumulativeGrowthDeltaChart daily={data.daily} />
-        <OrderValueDistributionChart buckets={data.orderValueDistribution} />
+        <CumulativeGrowthDeltaChart points={data.cumulativeGrowthDelta} />
+        <OrderValueDistributionChart bins={data.orderDistribution} />
       </section>
     </div>
   );

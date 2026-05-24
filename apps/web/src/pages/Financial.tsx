@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { formatCurrency, formatCompact, formatNumber } from '@utils';
 import type {
+  CumulativeGrowthDeltaPoint,
   FinancialKpi,
   FinancialVelocityPoint,
+  OrderBin,
   TenantDiagnostics as TenantDiagnosticsData,
 } from '@types';
 import { FactPanel } from '../components/common/FactPanel';
@@ -18,13 +20,6 @@ import './Financial.css';
 type TenantResponse = {
   id: string;
   name: string;
-};
-
-type OrderDistributionBin = {
-  binLabel: string;
-  binMin: number;
-  binMax: number;
-  orderCount: number;
 };
 
 export function Financial() {
@@ -52,28 +47,14 @@ export function Financial() {
       try {
         const timeframe = `T${period}`;
         const tenantQuery = `timeframe=${timeframe}&tenantId=${encodeURIComponent(tenantId)}`;
-        const [tenant, kpi, tenantVelocity, portfolioVelocity, orderDistribution] = await Promise.all([
+        const [tenant, kpi, tenantVelocity, portfolioVelocity, cumulativeGrowthDelta, orderDistribution] = await Promise.all([
           fetchJson<TenantResponse>(`/api/tenants/${tenantId}`, controller.signal),
           fetchJson<FinancialKpi>(`/api/financial/kpis?${tenantQuery}`, controller.signal),
           fetchJson<FinancialVelocityPoint[]>(`/api/financial/velocity?${tenantQuery}`, controller.signal),
           fetchJson<FinancialVelocityPoint[]>(`/api/financial/velocity?timeframe=${timeframe}`, controller.signal),
-          fetchJson<OrderDistributionBin[]>(`/api/financial/order-distribution?${tenantQuery}`, controller.signal),
+          fetchJson<CumulativeGrowthDeltaPoint[]>(`/api/financial/cumulative-growth-delta?${tenantQuery}`, controller.signal),
+          fetchJson<OrderBin[]>(`/api/financial/order-distribution?${tenantQuery}`, controller.signal),
         ]);
-
-        const daily = tenantVelocity.map((point, index) => {
-          const portfolioPoint = portfolioVelocity[index];
-          const globalRevenue = portfolioPoint?.currentRevenue ?? 0;
-
-          return {
-            createdDate: point.periodLabel,
-            dayIndex: index + 1,
-            revenue: point.currentRevenue,
-            volume: 0,
-            previousRevenue: point.previousRevenue,
-            globalRevenue,
-            portfolioShare: globalRevenue > 0 ? (point.currentRevenue / globalRevenue) * 100 : 0,
-          };
-        });
 
         setTenantDiagnostics({
           tenantId: tenant.id,
@@ -88,13 +69,10 @@ export function Financial() {
           revenuePoP: kpi.revenueGrowthPercentage,
           volumePoP: 0,
           aovPoP: 0,
-          daily,
-          orderValueDistribution: orderDistribution.map((bin) => ({
-            range: bin.binLabel,
-            minValue: bin.binMin,
-            maxValue: bin.binMax,
-            orderCount: bin.orderCount,
-          })),
+          velocity: tenantVelocity,
+          portfolioVelocity,
+          cumulativeGrowthDelta,
+          orderDistribution,
         });
       } catch (error) {
         if (error instanceof DOMException && error.name === 'AbortError') return;

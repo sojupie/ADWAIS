@@ -25,6 +25,18 @@ export interface FinancialVelocityPoint {
   absoluteVariance: number;
 }
 
+export interface CumulativeGrowthDeltaPoint {
+  periodLabel: string;
+  cumulativeGrowthDelta: number;
+}
+
+export interface OrderBin {
+  binLabel: string;
+  binMin: number;
+  binMax: number;
+  orderCount: number;
+}
+
 export interface GrowthExtreme {
   tenantId: string;
   tenantName: string;
@@ -67,23 +79,8 @@ export interface TenantDiagnostics {
   revenuePoP: number;
   volumePoP: number;
   aovPoP: number;
-  daily: TenantDiagnosticDailyPoint[];
-  orderValueDistribution: OrderValueBucket[];
-}
-
-export interface TenantDiagnosticDailyPoint {
-  createdDate: string;
-  dayIndex: number;
-  revenue: number;
-  volume: number;
-  previousRevenue: number;
-  globalRevenue: number;
-  portfolioShare: number;
-}
-
-export interface OrderValueBucket {
-  range: string;
-  minValue: number;
-  maxValue: number;
-  orderCount: number;
+  velocity: FinancialVelocityPoint[];
+  portfolioVelocity: FinancialVelocityPoint[];
+  cumulativeGrowthDelta: CumulativeGrowthDeltaPoint[];
+  orderDistribution: OrderBin[];
 }

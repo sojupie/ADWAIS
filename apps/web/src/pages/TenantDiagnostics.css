@@ -49,11 +49,6 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--space-4);
-  min-height: 360px;
-}
-
-.tenant-diagnostics__charts--primary {
-  min-height: 390px;
 }
 
 @media (max-width: 1100px) {

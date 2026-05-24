@@ -1,93 +1,33 @@
-import { useEffect, useState } from 'react';
 import { formatCurrency, formatCompact, formatNumber } from '@utils';
-import type {
-  CumulativeGrowthDeltaPoint,
-  FinancialKpi,
-  FinancialVelocityPoint,
-  OrderBin,
-  TenantDiagnostics as TenantDiagnosticsData,
-} from '@types';
 import { FactPanel } from '../components/common/FactPanel';
 import { LoadingIcon } from '../components/common/LoadingIcon';
 import { GrowthExtremesChart } from '../components/financial/GrowthExtremesChart';
 import { MomentumMatrixChart } from '../components/financial/MomentumMatrixChart';
 import { RevenueDistributionChart } from '../components/financial/RevenueDistributionChart';
 import { RevenueVelocityChart } from '../components/financial/RevenueVelocityChart';
-import { setDashboardPeriod, useDashboardData, type Period } from '../dashboardDataStore';
 import { TenantDiagnostics } from './TenantDiagnostics';
+import {
+  selectDashboardTenant,
+  setDashboardPeriod,
+  useDashboardData,
+  type Period,
+} from '../dashboardDataStore';
 import './Financial.css';
 
-type TenantResponse = {
-  id: string;
-  name: string;
-};
-
 export function Financial() {
-  const { period, loading, globalKpi, growthExtremes, globalVelocity, momentum, distribution } = useDashboardData();
-  const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
-  const [tenantDiagnostics, setTenantDiagnostics] = useState<TenantDiagnosticsData | null>(null);
-  const [tenantDiagnosticsLoading, setTenantDiagnosticsLoading] = useState(false);
-  const [tenantDiagnosticsError, setTenantDiagnosticsError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!selectedTenantId) {
-      setTenantDiagnostics(null);
-      setTenantDiagnosticsError(null);
-      setTenantDiagnosticsLoading(false);
-      return;
-    }
-
-    const tenantId = selectedTenantId;
-    const controller = new AbortController();
-
-    async function fetchTenantDiagnostics() {
-      setTenantDiagnosticsLoading(true);
-      setTenantDiagnosticsError(null);
-
-      try {
-        const timeframe = `T${period}`;
-        const tenantQuery = `timeframe=${timeframe}&tenantId=${encodeURIComponent(tenantId)}`;
-        const [tenant, kpi, tenantVelocity, portfolioVelocity, cumulativeGrowthDelta, orderDistribution] = await Promise.all([
-          fetchJson<TenantResponse>(`/api/tenants/${tenantId}`, controller.signal),
-          fetchJson<FinancialKpi>(`/api/financial/kpis?${tenantQuery}`, controller.signal),
-          fetchJson<FinancialVelocityPoint[]>(`/api/financial/velocity?${tenantQuery}`, controller.signal),
-          fetchJson<FinancialVelocityPoint[]>(`/api/financial/velocity?timeframe=${timeframe}`, controller.signal),
-          fetchJson<CumulativeGrowthDeltaPoint[]>(`/api/financial/cumulative-growth-delta?${tenantQuery}`, controller.signal),
-          fetchJson<OrderBin[]>(`/api/financial/order-distribution?${tenantQuery}`, controller.signal),
-        ]);
-
-        setTenantDiagnostics({
-          tenantId: tenant.id,
-          tenantName: tenant.name,
-          days: period,
-          totalRevenue: kpi.currentRevenue,
-          totalVolume: kpi.transactionVolume,
-          aov: kpi.averageOrderValue,
-          previousRevenue: kpi.previousRevenue,
-          previousVolume: 0,
-          previousAov: 0,
-          revenuePoP: kpi.revenueGrowthPercentage,
-          volumePoP: 0,
-          aovPoP: 0,
-          velocity: tenantVelocity,
-          portfolioVelocity,
-          cumulativeGrowthDelta,
-          orderDistribution,
-        });
-      } catch (error) {
-        if (error instanceof DOMException && error.name === 'AbortError') return;
-        setTenantDiagnosticsError(error instanceof Error ? error.message : 'Failed to fetch tenant diagnostics');
-      } finally {
-        if (!controller.signal.aborted) {
-          setTenantDiagnosticsLoading(false);
-        }
-      }
-    }
-
-    void fetchTenantDiagnostics();
-
-    return () => controller.abort();
-  }, [selectedTenantId, period]);
+  const {
+    period,
+    loading,
+    selectedTenantId,
+    tenantDiagnostics,
+    tenantDiagnosticsLoading,
+    tenantDiagnosticsError,
+    globalKpi,
+    growthExtremes,
+    globalVelocity,
+    momentum,
+    distribution,
+  } = useDashboardData();
 
   if (loading) {
     return (
@@ -102,7 +42,7 @@ export function Financial() {
       return (
         <div className="card empty-state">
           <span>{tenantDiagnosticsError}</span>
-          <button type="button" onClick={() => setSelectedTenantId(null)}>Back</button>
+          <button type="button" onClick={() => selectDashboardTenant(null)}>Back</button>
         </div>
       );
     }
@@ -118,7 +58,7 @@ export function Financial() {
     return (
       <TenantDiagnostics
         data={tenantDiagnostics}
-        onBack={() => setSelectedTenantId(null)}
+        onBack={() => selectDashboardTenant(null)}
       />
     );
   }
@@ -157,7 +97,7 @@ export function Financial() {
         </div>
         <div className="chart-slot">
           {growthExtremes.length > 0
-            ? <GrowthExtremesChart tenants={growthExtremes} onTenantSelect={setSelectedTenantId} />
+            ? <GrowthExtremesChart tenants={growthExtremes} onTenantSelect={selectDashboardTenant} />
             : <EmptyState title="No tenant data" />}
         </div>
       </section>
@@ -165,27 +105,17 @@ export function Financial() {
       <section className="charts-row charts-row--analysis" aria-label="Portfolio analysis charts">
         <div className="chart-slot">
           {distribution.length > 0
-            ? <RevenueDistributionChart entries={distribution} onTenantSelect={setSelectedTenantId} />
+            ? <RevenueDistributionChart entries={distribution} onTenantSelect={selectDashboardTenant} />
             : <EmptyState title="No tenant revenue data" />}
         </div>
         <div className="chart-slot">
           {momentum && momentum.tenants.length > 0
-            ? <MomentumMatrixChart momentum={momentum} onTenantSelect={setSelectedTenantId} />
+            ? <MomentumMatrixChart momentum={momentum} onTenantSelect={selectDashboardTenant} />
             : <EmptyState title="No tenant momentum data" />}
         </div>
       </section>
     </>
   );
-}
-
-async function fetchJson<T>(url: string, signal: AbortSignal): Promise<T> {
-  const response = await fetch(url, { signal });
-
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}`);
-  }
-
-  return response.json() as Promise<T>;
 }
 
 export function FinancialPeriodSelector() {

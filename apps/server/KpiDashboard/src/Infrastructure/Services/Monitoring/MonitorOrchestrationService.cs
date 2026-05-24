@@ -153,7 +153,21 @@ public class MonitorOrchestrationService(
     /// <inheritdoc />
     public async Task<IEnumerable<ResponseTime>> GetAggregatedLatencyAsync(Guid tenantId, int id, DateTimeOffset from, DateTimeOffset to)
     {
-        throw new NotImplementedException("Materialized view aggregation requires explicit SQL definition.");
+        var monitorExists = await dbContext.Monitors
+            .AsNoTracking()
+            .AnyAsync(m => m.TenantId == tenantId && m.Id == id);
+
+        if (!monitorExists)
+        {
+            throw new KeyNotFoundException($"Monitor {id} not found.");
+        }
+
+        return await dbContext.ResponseTimes
+            .AsNoTracking()
+            .Where(rt => rt.MonitorId == id)
+            .Where(rt => rt.Date >= from && rt.Date <= to)
+            .OrderBy(rt => rt.Date)
+            .ToListAsync();
     }
 
     /// <inheritdoc />

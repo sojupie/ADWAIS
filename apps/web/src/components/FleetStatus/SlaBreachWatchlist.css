@@ -1,0 +1,82 @@
+.sla-breach-watchlist {
+  min-height: 0;
+  overflow: auto;
+}
+
+.sla-breach-watchlist__count {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.sla-breach-watchlist__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-right: var(--space-1);
+}
+
+.sla-breach-watchlist__item {
+  min-height: 76px;
+  padding: var(--space-4);
+  border: 1px solid var(--bg-border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-primary);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.sla-breach-watchlist__item h3 {
+  margin: 0 0 var(--space-2);
+  color: var(--text-primary);
+  font-size: 15px;
+  line-height: 1.2;
+}
+
+.sla-breach-watchlist__item p,
+.sla-breach-watchlist__meta {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.sla-breach-watchlist__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-1);
+  font-weight: 700;
+}
+
+.sla-breach-watchlist__badge {
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(245, 158, 11, 0.16);
+  color: #b7791f;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.sla-breach-watchlist__empty {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+@media (max-width: 560px) {
+  .sla-breach-watchlist__item {
+    grid-template-columns: 1fr;
+  }
+
+  .sla-breach-watchlist__meta {
+    align-items: flex-start;
+  }
+}

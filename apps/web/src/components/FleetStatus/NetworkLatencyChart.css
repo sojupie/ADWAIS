@@ -1,0 +1,36 @@
+.network-latency-chart {
+  min-height: 0;
+}
+
+.network-latency-chart__avg-line {
+  stroke: var(--chart-line);
+}
+
+.network-latency-chart__p95-line {
+  stroke: var(--chart-ghost);
+}
+
+.network-latency-chart__legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+.network-latency-chart__legend-dot--avg {
+  background: var(--chart-line);
+}
+
+.network-latency-chart__legend-dot--p95 {
+  border: 2px solid var(--chart-ghost);
+}
+
+.network-latency-chart__empty {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+}

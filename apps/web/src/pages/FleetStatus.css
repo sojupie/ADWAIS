@@ -13,6 +13,13 @@
   flex-shrink: 0;
 }
 
+.fleet-status-chart-row {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+  gap: var(--space-4);
+  flex-shrink: 0;
+}
+
 .fleet-status-summary {
   color: var(--text-link);
   font-size: 12px;
@@ -38,6 +45,10 @@
 @media (max-width: 980px) {
   .fleet-status-kpi-row {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .fleet-status-chart-row {
+    grid-template-columns: 1fr;
   }
 }
 

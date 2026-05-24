@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react';
 import { formatCurrency, formatCompact, formatNumber } from '@utils';
-import type { TenantDiagnostics as TenantDiagnosticsData } from '@types';
+import type {
+  FinancialKpi,
+  FinancialVelocityPoint,
+  TenantDiagnostics as TenantDiagnosticsData,
+} from '@types';
 import { FactPanel } from '../components/common/FactPanel';
 import { LoadingIcon } from '../components/common/LoadingIcon';
 import { GrowthExtremesChart } from '../components/financial/GrowthExtremesChart';
@@ -10,6 +14,18 @@ import { RevenueVelocityChart } from '../components/financial/RevenueVelocityCha
 import { setDashboardPeriod, useDashboardData, type Period } from '../dashboardDataStore';
 import { TenantDiagnostics } from './TenantDiagnostics';
 import './Financial.css';
+
+type TenantResponse = {
+  id: string;
+  name: string;
+};
+
+type OrderDistributionBin = {
+  binLabel: string;
+  binMin: number;
+  binMax: number;
+  orderCount: number;
+};
 
 export function Financial() {
   const { period, loading, globalKpi, growthExtremes, globalVelocity, momentum, distribution } = useDashboardData();
@@ -26,6 +42,7 @@ export function Financial() {
       return;
     }
 
+    const tenantId = selectedTenantId;
     const controller = new AbortController();
 
     async function fetchTenantDiagnostics() {
@@ -33,17 +50,52 @@ export function Financial() {
       setTenantDiagnosticsError(null);
 
       try {
-        const response = await fetch(
-          `/api/dashboard/tenants/${selectedTenantId}/diagnostics?days=${period}`,
-          { signal: controller.signal }
-        );
+        const timeframe = `T${period}`;
+        const tenantQuery = `timeframe=${timeframe}&tenantId=${encodeURIComponent(tenantId)}`;
+        const [tenant, kpi, tenantVelocity, portfolioVelocity, orderDistribution] = await Promise.all([
+          fetchJson<TenantResponse>(`/api/tenants/${tenantId}`, controller.signal),
+          fetchJson<FinancialKpi>(`/api/financial/kpis?${tenantQuery}`, controller.signal),
+          fetchJson<FinancialVelocityPoint[]>(`/api/financial/velocity?${tenantQuery}`, controller.signal),
+          fetchJson<FinancialVelocityPoint[]>(`/api/financial/velocity?timeframe=${timeframe}`, controller.signal),
+          fetchJson<OrderDistributionBin[]>(`/api/financial/order-distribution?${tenantQuery}`, controller.signal),
+        ]);
 
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
+        const daily = tenantVelocity.map((point, index) => {
+          const portfolioPoint = portfolioVelocity[index];
+          const globalRevenue = portfolioPoint?.currentRevenue ?? 0;
 
-        const data = await response.json() as TenantDiagnosticsData;
-        setTenantDiagnostics(data);
+          return {
+            createdDate: point.periodLabel,
+            dayIndex: index + 1,
+            revenue: point.currentRevenue,
+            volume: 0,
+            previousRevenue: point.previousRevenue,
+            globalRevenue,
+            portfolioShare: globalRevenue > 0 ? (point.currentRevenue / globalRevenue) * 100 : 0,
+          };
+        });
+
+        setTenantDiagnostics({
+          tenantId: tenant.id,
+          tenantName: tenant.name,
+          days: period,
+          totalRevenue: kpi.currentRevenue,
+          totalVolume: kpi.transactionVolume,
+          aov: kpi.averageOrderValue,
+          previousRevenue: kpi.previousRevenue,
+          previousVolume: 0,
+          previousAov: 0,
+          revenuePoP: kpi.revenueGrowthPercentage,
+          volumePoP: 0,
+          aovPoP: 0,
+          daily,
+          orderValueDistribution: orderDistribution.map((bin) => ({
+            range: bin.binLabel,
+            minValue: bin.binMin,
+            maxValue: bin.binMax,
+            orderCount: bin.orderCount,
+          })),
+        });
       } catch (error) {
         if (error instanceof DOMException && error.name === 'AbortError') return;
         setTenantDiagnosticsError(error instanceof Error ? error.message : 'Failed to fetch tenant diagnostics');
@@ -146,6 +198,16 @@ export function Financial() {
       </section>
     </>
   );
+}
+
+async function fetchJson<T>(url: string, signal: AbortSignal): Promise<T> {
+  const response = await fetch(url, { signal });
+
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`);
+  }
+
+  return response.json() as Promise<T>;
 }
 
 export function FinancialPeriodSelector() {

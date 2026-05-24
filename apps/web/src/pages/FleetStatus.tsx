@@ -5,10 +5,6 @@ import { LoadingIcon } from '../components/common/LoadingIcon';
 import { FleetMatrix, type FleetMonitor } from '../components/FleetStatus/FleetMatrix';
 import './FleetStatus.css';
 
-interface Tenant {
-  id: string;
-  name: string;
-}
 
 interface UptimeMonitor {
   id: number;
@@ -21,27 +17,6 @@ interface UptimeMonitor {
   currentUptimePercentage: number;
 }
 
-async function fetchTenants(): Promise<Tenant[]> {
-  const response = await fetch('/api/admin/tenants');
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status} - /api/admin/tenants`);
-  }
-
-  return response.json() as Promise<Tenant[]>;
-}
-
-async function fetchTenantMonitors(tenant: Tenant): Promise<FleetMonitor[]> {
-  const response = await fetch(`/api/tenants/${tenant.id}/monitors`);
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status} - /api/tenants/${tenant.id}/monitors`);
-  }
-
-  const monitors = await response.json() as UptimeMonitor[];
-  return monitors.map((monitor) => ({
-    ...monitor,
-    tenantName: tenant.name,
-  }));
-}
 
 function normalizeStatus(status?: string): string {
   return (status ?? 'Unknown').replaceAll('"', '');
@@ -53,6 +28,20 @@ function formatUptime(value: number | null): string {
   }
 
   return `${value.toFixed(1)}%`;
+}
+
+//will move this later
+async function fetchMonitors(): Promise<FleetMonitor[]> {
+  const response = await fetch('/api/monitors');
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status} - /api/monitors`);
+  }
+
+  const monitors = await response.json() as UptimeMonitor[];
+  return monitors.map((monitor) => ({
+    ...monitor,
+    tenantName: monitor.tenantId,
+  }));
 }
 
 export function FleetStatus() {
@@ -68,12 +57,10 @@ export function FleetStatus() {
       setError(null);
 
       try {
-        const tenants = await fetchTenants();
-        const monitorGroups = await Promise.all(tenants.map((tenant) => fetchTenantMonitors(tenant)));
-        const nextMonitors = monitorGroups
-          .flat()
-          .sort((a, b) => a.tenantName.localeCompare(b.tenantName) || a.name.localeCompare(b.name));
-
+        const nextMonitors = await fetchMonitors();
+        nextMonitors.sort((a, b) =>
+            a.tenantName.localeCompare(b.tenantName) || a.name.localeCompare(b.name));
+        
         if (!cancelled) {
           setMonitors(nextMonitors);
         }

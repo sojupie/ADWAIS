@@ -1,21 +1,28 @@
-﻿using Hangfire;
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Jobs.MaterializedViews;
 
-public class RefreshLatencyMaterializedViewJob(IDbContextFactory<AnalyticsDbContext> dbContextFactory,
-    IBackgroundJobClient backgroundJobClient)
+public class RefreshMonitoringMaterializedViewJob(IDbContextFactory<AnalyticsDbContext> dbContextFactory)
 {
     public async Task ExecuteAsync()
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
-        // Refresh materialized views in sequential order to respect data dependencies.
+        // 1. Latency Views
         await dbContext.Database.ExecuteSqlRawAsync(
             "REFRESH MATERIALIZED VIEW CONCURRENTLY v_mat_daily_latency_monitor_rollup;");
         await dbContext.Database.ExecuteSqlRawAsync(
             "REFRESH MATERIALIZED VIEW CONCURRENTLY v_mat_daily_latency_tenant_rollup;");
         await dbContext.Database.ExecuteSqlRawAsync(
             "REFRESH MATERIALIZED VIEW CONCURRENTLY v_mat_daily_latency_global_rollup;");
+
+        // 2. Availability Views
+        await dbContext.Database.ExecuteSqlRawAsync(
+            "REFRESH MATERIALIZED VIEW CONCURRENTLY v_mat_daily_availability_monitor_rollup;");
+        await dbContext.Database.ExecuteSqlRawAsync(
+            "REFRESH MATERIALIZED VIEW CONCURRENTLY v_mat_daily_availability_tenant_rollup;");
+        await dbContext.Database.ExecuteSqlRawAsync(
+            "REFRESH MATERIALIZED VIEW CONCURRENTLY v_mat_daily_availability_global_rollup;");
     }
 }

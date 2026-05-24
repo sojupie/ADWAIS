@@ -19,13 +19,37 @@ public class TenantController(
     IMonitorOrchestrationService monitorService) : ControllerBase
 {
     /// <summary>
-    /// Retrieves all tenants in the system.
+    /// Retrieves tenants, optionally filtered by ID.
+    /// If an ID is provided, monitor status is hydrated.
     /// </summary>
-    /// <returns>A list of tenants with high-level metadata.</returns>
+    /// <param name="id">Optional tenant ID to retrieve a single tenant.</param>
+    /// <returns>A list of tenants or a single tenant if ID is provided.</returns>
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<TenantResponseDto>>> GetTenants()
+    public async Task<ActionResult<IEnumerable<TenantResponseDto>>> GetTenants([FromQuery] Guid? id)
     {
         await using var context = await contextFactory.CreateDbContextAsync();
+
+        if (id.HasValue)
+        {
+            var tenant = await context.Tenants
+                .AsNoTracking()
+                .Where(t => t.Id == id.Value)
+                .Select(t => new TenantResponseDto()
+                {
+                    Id = t.Id,
+                    Name = t.Name,
+                    LitiumBaseUrl = t.LitiumBaseUrl,
+                    CurrentlyFetching = t.CurrentlyFetching,
+                    FetchedFrom = t.FetchedFrom,
+                    FetchedUntil = t.FetchedUntil,
+                    LastPolled = t.LastPolled,
+                    OrderFetchingEnabled = t.OrderFetchingEnabled,
+                    MonitorCount = t.Monitors.Count
+                })
+                .SingleOrDefaultAsync();
+
+            return Ok(tenant);
+        }
 
         var tenants = await context.Tenants
             .AsNoTracking()
@@ -44,42 +68,6 @@ public class TenantController(
             .ToListAsync();
 
         return Ok(tenants);
-    }
-
-    /// <summary>
-    /// Retrieves a specific tenant by its ID, including active monitors.
-    /// </summary>
-    /// <param name="id">The unique identifier of the tenant.</param>
-    /// <returns>The tenant details and its associated monitors.</returns>
-    [HttpGet("{id:guid}")]
-    public async Task<ActionResult<TenantResponseDto>> GetTenant(Guid id)
-    {
-        await using var context = await contextFactory.CreateDbContextAsync();
-
-        var tenant = await context.Tenants
-            .AsNoTracking()
-            .Where(t => t.Id == id)
-            .Select(t => new TenantResponseDto()
-            {
-                Id = t.Id,
-                Name = t.Name,
-                LitiumBaseUrl = t.LitiumBaseUrl,
-                CurrentlyFetching = t.CurrentlyFetching,
-                FetchedFrom = t.FetchedFrom,
-                FetchedUntil = t.FetchedUntil,
-                LastPolled = t.LastPolled,
-                OrderFetchingEnabled = t.OrderFetchingEnabled,
-                MonitorCount = t.Monitors.Count
-            })
-            .SingleOrDefaultAsync();
-
-        if (tenant == null) return NotFound();
-
-        // Hydrate monitors with live status via service
-        var monitors = await monitorService.GetMonitorsByTenantAsync(id);
-        tenant.Monitors = monitors.Select(ToDto);
-
-        return Ok(tenant);
     }
 
     /// <summary>
@@ -104,7 +92,7 @@ public class TenantController(
         context.Tenants.Add(tenant);
         await context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetTenant), new { id = tenant.Id }, new TenantResponseDto()
+        return CreatedAtAction(nameof(GetTenants), new { id = tenant.Id }, new TenantResponseDto()
             {
                 Id = tenant.Id,
                 Name = tenant.Name,
@@ -201,7 +189,6 @@ public class TenantController(
             UptimeSla: m.UptimeSla,
             UptimeMonitorEnabled: m.UptimeMonitorEnabled,
             CurrentStatus: m.StatusStr, // Hydrated by service
-            CurrentUptimePercentage: m.CurrentUptimePercentage,
             LastUpdate: m.LastUpdate,
             LastUptimeUpdate: m.LastUptimeUpdate,
             LastLatencyUpdate: m.LastLatencyUpdate,

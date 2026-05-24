@@ -1,7 +1,8 @@
 namespace Api.DTOs.Financial;
 
 public record VelocityPointResponseDto(
-    string PeriodLabel,
+    string Label,
+    DateTimeOffset Timestamp,
     decimal CurrentRevenue,
     decimal PreviousRevenue,
     decimal AbsoluteVariance);

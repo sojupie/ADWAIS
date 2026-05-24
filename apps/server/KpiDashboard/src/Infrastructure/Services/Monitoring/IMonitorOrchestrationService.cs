@@ -1,9 +1,16 @@
-﻿using Domain.Entities.Monitoring;
+using Domain.Entities.Monitoring;
+using Domain.DTOs.Monitoring;
+using Domain.Enums;
 
 namespace Infrastructure.Services.Monitoring;
 
 public interface IMonitorOrchestrationService
 {
+    /// <summary>
+    /// Retrieves aggregated monitoring analytics, including latency time-series and monitor list.
+    /// </summary>
+    Task<MonitorAnalyticsDto> GetAnalyticsAsync(Timeframe timeframe, Guid? tenantId = null, int? monitorId = null);
+
     /// <summary>
     /// Retrieves all uptime monitors associated with a specific tenant.
     /// </summary>

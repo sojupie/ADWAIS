@@ -1,5 +1,6 @@
 namespace Api.DTOs.Financial;
 
 public record NetGrowthAdditionPointResponseDto(
-    string PeriodLabel,
+    string Label,
+    DateTimeOffset Timestamp,
     decimal NetGrowthAddition);

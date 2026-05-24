@@ -1,3 +1,4 @@
+using Domain.Entities.Monitoring;
 using Infrastructure.Services.Monitoring;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,6 +22,26 @@ public class UpdateMonitorUptimeJob(
 
         monitor.CurrentUptimePercentage = uptime;
         monitor.LastUptimeUpdate = endDate;
+
+        // Persist historical uptime for rollups
+        var date = new DateTimeOffset(startDate.Year, startDate.Month, startDate.Day, 0, 0, 0, TimeSpan.Zero);
+        var availability = await dbContext.MonitorAvailabilities
+            .FirstOrDefaultAsync(ma => ma.MonitorId == monitorId && ma.Date == date);
+
+        if (availability == null)
+        {
+            availability = new MonitorAvailability
+            {
+                MonitorId = monitorId,
+                Date = date,
+                UptimePercentage = uptime
+            };
+            dbContext.MonitorAvailabilities.Add(availability);
+        }
+        else
+        {
+            availability.UptimePercentage = uptime;
+        }
         
         await dbContext.SaveChangesAsync();
     }

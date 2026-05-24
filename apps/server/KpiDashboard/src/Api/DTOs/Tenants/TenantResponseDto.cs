@@ -13,5 +13,4 @@ public class TenantResponseDto
     public DateTimeOffset? LastPolled { get; set; }
     public bool OrderFetchingEnabled { get; set; }
     public int MonitorCount { get; set; }
-    public IEnumerable<UptimeMonitorDto>? Monitors { get; set; }
 }

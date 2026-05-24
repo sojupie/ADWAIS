@@ -8,21 +8,32 @@ public class UptimeDispatcherJob(IDbContextFactory<AnalyticsDbContext> dbContext
     public async Task ExecuteAsync()
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        var globalConfig = await dbContext.GlobalConfigs.SingleOrDefaultAsync();
-        var globalInterval = globalConfig?.UptimeFetchIntervalMinutes ?? 60;
         
         var monitors = await dbContext.Monitors
             .Where(m => m.UptimeMonitorEnabled)
             .Select(m => new { m.Id, m.LastUptimeUpdate })
             .ToListAsync();
 
-        var end = DateTimeOffset.UtcNow;
+        var now = DateTimeOffset.UtcNow;
+        var todayStart = new DateTimeOffset(now.Year, now.Month, now.Day, 0, 0, 0, TimeSpan.Zero);
 
         foreach (var monitor in monitors)
         {
-            var start = monitor.LastUptimeUpdate ?? end.AddMinutes(-globalInterval);
+            // 1. Always sync the full current day to keep "Today" bucket accurate
+            backgroundJobClient.Enqueue<UpdateMonitorUptimeJob>(x => x.ExecuteAsync(monitor.Id, todayStart, now));
 
-            backgroundJobClient.Enqueue<UpdateMonitorUptimeJob>(x => x.ExecuteAsync(monitor.Id, start, end));
+            // 2. If we missed previous days (e.g. app was down), sync them as full day blocks
+            if (monitor.LastUptimeUpdate.HasValue && monitor.LastUptimeUpdate.Value < todayStart)
+            {
+                var cursor = new DateTimeOffset(monitor.LastUptimeUpdate.Value.Year, monitor.LastUptimeUpdate.Value.Month, monitor.LastUptimeUpdate.Value.Day, 0, 0, 0, TimeSpan.Zero);
+                
+                while (cursor < todayStart)
+                {
+                    var dayEnd = cursor.AddDays(1).AddSeconds(-1);
+                    backgroundJobClient.Enqueue<UpdateMonitorUptimeJob>(x => x.ExecuteAsync(monitor.Id, cursor, dayEnd));
+                    cursor = cursor.AddDays(1);
+                }
+            }
         }
     }
 }

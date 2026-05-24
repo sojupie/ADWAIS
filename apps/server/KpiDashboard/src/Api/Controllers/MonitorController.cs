@@ -1,5 +1,6 @@
 using Api.DTOs.Monitoring;
 using Domain.Entities.Monitoring;
+using Domain.Enums;
 using Infrastructure;
 using Infrastructure.Services.Monitoring;
 using Microsoft.AspNetCore.Mvc;
@@ -17,23 +18,63 @@ public class MonitorController(
     IMonitorOrchestrationService monitorService) : ControllerBase
 {
     /// <summary>
-    /// Retrieves monitors, optionally filtered by tenant.
+    /// Unified analytics endpoint for monitoring data.
+    /// Provides latency time-series and filtered monitor lists.
+    /// </summary>
+    [HttpGet("analytics")]
+    public async Task<ActionResult<MonitorAnalyticsResponseDto>> GetAnalytics(
+        [FromQuery] Timeframe timeframe,
+        [FromQuery] Guid? tenantId,
+        [FromQuery] int? monitorId)
+    {
+        var result = await monitorService.GetAnalyticsAsync(timeframe, tenantId, monitorId);
+
+        return Ok(new MonitorAnalyticsResponseDto(
+            result.LatencyPoints.Select(p => new LatencyPointResponseDto(
+                p.Label,
+                p.Timestamp,
+                p.Average,
+                p.PreviousAverage,
+                p.Lowest,
+                p.Highest)).ToList(),
+            result.Monitors.Select(ToDto).ToList()
+        ));
+    }
+
+    /// <summary>
+    /// Retrieves monitors, optionally filtered by tenant or specific monitor ID.
+    /// Defaults to returning only assigned monitors (non-system tenant).
     /// </summary>
     /// <param name="tenantId">Optional tenant ID to filter by.</param>
-    /// <returns>A list of monitors with live status and uptime data.</returns>
+    /// <param name="id">Optional monitor ID to retrieve a single monitor.</param>
+    /// <returns>A list of monitors with live status.</returns>
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<UptimeMonitorDto>>> GetMonitors([FromQuery] Guid? tenantId)
+    public async Task<ActionResult<IEnumerable<UptimeMonitorDto>>> GetMonitors(
+        [FromQuery] Guid? tenantId,
+        [FromQuery] int? id)
     {
+        if (id.HasValue)
+        {
+            await using var db = await dbContextFactory.CreateDbContextAsync();
+            var tid = await db.Monitors.Where(m => m.Id == id.Value).Select(m => m.TenantId).SingleOrDefaultAsync();
+            if (tid == default) return Ok(Enumerable.Empty<UptimeMonitorDto>());
+
+            var m = await monitorService.GetMonitorAsync(tid, id.Value);
+            return Ok(new[] { ToDto(m) });
+        }
+
         if (tenantId.HasValue)
         {
             var monitors = await monitorService.GetMonitorsByTenantAsync(tenantId.Value);
             return Ok(monitors.Select(ToDto));
         }
 
-        await using var db = await dbContextFactory.CreateDbContextAsync();
-        var allMonitors = await db.Monitors.AsNoTracking().ToListAsync();
+        await using var dbCtx = await dbContextFactory.CreateDbContextAsync();
+        var allMonitors = await dbCtx.Monitors
+            .AsNoTracking()
+            .Where(m => m.TenantId != AnalyticsDbContext.SystemTenantGuid)
+            .ToListAsync();
         
-        // Manual hydration for global list (could be moved to service if common)
         var dtos = new List<UptimeMonitorDto>();
         foreach (var m in allMonitors)
         {
@@ -50,7 +91,8 @@ public class MonitorController(
     [HttpGet("unassigned")]
     public async Task<ActionResult<IEnumerable<UptimeMonitorDto>>> GetUnassignedMonitors()
     {
-        return await GetMonitors(AnalyticsDbContext.SystemTenantGuid);
+        var monitors = await monitorService.GetMonitorsByTenantAsync(AnalyticsDbContext.SystemTenantGuid);
+        return Ok(monitors.Select(ToDto));
     }
 
     /// <summary>
@@ -64,23 +106,7 @@ public class MonitorController(
         [FromBody] CreateMonitorRequestDto request)
     {
         var m = await monitorService.CreateMonitorAsync(tenantId, request.Name, request.Url, request.UptimeSla);
-        return CreatedAtAction(nameof(GetMonitor), new { id = m.Id }, ToDto(m));
-    }
-
-    /// <summary>
-    /// Retrieves a single monitor by its UptimeRobot ID.
-    /// </summary>
-    /// <param name="id">The UptimeRobot monitor ID.</param>
-    [HttpGet("{id:int}")]
-    public async Task<ActionResult<UptimeMonitorDto>> GetMonitor(int id)
-    {
-        await using var db = await dbContextFactory.CreateDbContextAsync();
-        var tenantId = await db.Monitors.Where(m => m.Id == id).Select(m => m.TenantId).SingleOrDefaultAsync();
-        
-        if (tenantId == default) return NotFound();
-
-        var m = await monitorService.GetMonitorAsync(tenantId, id);
-        return Ok(ToDto(m));
+        return CreatedAtAction(nameof(GetMonitors), new { id = m.Id }, ToDto(m));
     }
 
     /// <summary>
@@ -167,8 +193,6 @@ public class MonitorController(
              await using var db = await dbContextFactory.CreateDbContextAsync();
              tenantId = await db.Monitors.Where(m => m.Id == id).Select(m => m.TenantId).SingleOrDefaultAsync();
         }
-        
-        if (tenantId == default) return NotFound();
 
         var metrics = await monitorService.GetAggregatedLatencyAsync(tenantId.Value, id, from, to);
         return Ok(metrics);
@@ -184,7 +208,12 @@ public class MonitorController(
     {
         await monitorService.UpdateMonitorSlaAsync(id, request.Sla);
         
-        return await GetMonitor(id);
+        await using var db = await dbContextFactory.CreateDbContextAsync();
+        var tenantId = await db.Monitors.Where(m => m.Id == id).Select(m => m.TenantId).SingleOrDefaultAsync();
+        if (tenantId == default) return NotFound();
+
+        var m = await monitorService.GetMonitorAsync(tenantId, id);
+        return Ok(ToDto(m));
     }
 
     private static UptimeMonitorDto ToDto(UptimeMonitor m)
@@ -197,8 +226,7 @@ public class MonitorController(
             UpdateInterval: m.UpdateInterval,
             UptimeSla: m.UptimeSla,
             UptimeMonitorEnabled: m.UptimeMonitorEnabled,
-            CurrentStatus: m.StatusStr, // Guaranteed by service
-            CurrentUptimePercentage: m.CurrentUptimePercentage,
+            CurrentStatus: m.StatusStr, // Guaranteed by InMemoryCache service
             LastUpdate: m.LastUpdate,
             LastUptimeUpdate: m.LastUptimeUpdate,
             LastLatencyUpdate: m.LastLatencyUpdate,

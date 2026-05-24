@@ -107,20 +107,20 @@ public class BackgroundJobController(
     }
     
     /// <summary>
-    /// Triggers a refresh of the latency materialized views.
+    /// Triggers a refresh of all monitoring materialized views (latency and availability).
     /// </summary>
-    [HttpPost("trigger/refresh-historic-latency-data")]
-    public ActionResult TriggerLatencyMaterialViewRefresh()
+    [HttpPost("trigger/refresh-monitoring-data")]
+    public ActionResult TriggerMonitoringMaterialViewRefresh()
     {
         try
         {
-            RecurringJob.TriggerJob("refresh-latency-materialized-views");
+            RecurringJob.TriggerJob("refresh-monitoring-materialized-views");
             return Ok();
         }
         catch (Exception e)
         {
             return StatusCode(StatusCodes.Status500InternalServerError,
-                new { error = "Failed to trigger materialized view refresh", detail = e.Message });
+                new { error = "Failed to trigger monitoring materialized view refresh", detail = e.Message });
         }
     }
     

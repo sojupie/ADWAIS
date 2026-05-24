@@ -1,5 +1,8 @@
 using Domain.Entities.Monitoring;
+using Domain.DTOs.Monitoring;
+using Domain.Enums;
 using Infrastructure.CacheModels;
+using Infrastructure.Services.Financial;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -13,6 +16,237 @@ public class MonitorOrchestrationService(
     IUptimeRobotService uptimeRobotService,
     IMemoryCache cache) : IMonitorOrchestrationService
 {
+    private record LatencyRow(DateTime Timestamp, double Average, double Lowest, double Highest);
+
+    /// <inheritdoc />
+    public async Task<MonitorAnalyticsDto> GetAnalyticsAsync(Timeframe timeframe, Guid? tenantId = null, int? monitorId = null)
+    {
+        var (currentStart, currentEnd, previousStart, steps, isHourly, includeActualTime) = TimeframeResolver.Resolve(timeframe);
+
+        var currentRows = await GetMergedLatencyDataAsync(dbContext, currentStart, currentEnd, isHourly, tenantId, monitorId);
+        var previousRows = await GetMergedLatencyDataAsync(dbContext, previousStart, currentStart, isHourly, tenantId, monitorId);
+
+        var currentByStep = currentRows
+            .GroupBy(r => isHourly ? (int)(r.Timestamp - currentStart.UtcDateTime).TotalHours : (int)(r.Timestamp - currentStart.UtcDateTime).TotalDays)
+            .ToDictionary(
+                g => g.Key, 
+                g => new { 
+                    Avg = g.Average(r => r.Average), 
+                    Min = g.Min(r => r.Lowest), 
+                    Max = g.Max(r => r.Highest) 
+                });
+
+        var previousByStep = previousRows
+            .GroupBy(r => isHourly ? (int)(r.Timestamp - previousStart.UtcDateTime).TotalHours : (int)(r.Timestamp - previousStart.UtcDateTime).TotalDays)
+            .ToDictionary(g => g.Key, g => g.Average(r => r.Average));
+
+        var latencyPoints = new List<LatencyPointDto>(steps);
+        for (var i = 0; i < steps; i++)
+        {
+            var timestamp = isHourly ? currentStart.AddHours(i) : currentStart.AddDays(i);
+            var isLast = i == steps - 1;
+            var label = isHourly 
+                ? (isLast && includeActualTime ? currentEnd.ToString("HH:mm") : timestamp.ToString("HH:mm")) 
+                : $"Day {i + 1}";
+            
+            var data = currentByStep.GetValueOrDefault(i);
+            var prevAvg = previousByStep.GetValueOrDefault(i, 0.0);
+
+            latencyPoints.Add(new LatencyPointDto(
+                label, 
+                timestamp, 
+                data?.Avg ?? 0, 
+                prevAvg,
+                data?.Min ?? 0, 
+                data?.Max ?? 0));
+        }
+        
+        IQueryable<UptimeMonitor> monitorQuery = dbContext.Monitors.AsNoTracking();
+        if (monitorId.HasValue) 
+            monitorQuery = monitorQuery.Where(m => m.Id == monitorId.Value);
+        else if (tenantId.HasValue) 
+            monitorQuery = monitorQuery.Where(m => m.TenantId == tenantId.Value);
+        else 
+            monitorQuery = monitorQuery.Where(m => m.TenantId != AnalyticsDbContext.SystemTenantGuid);
+
+        var monitors = await monitorQuery.ToListAsync();
+
+        // Calculate period-accurate uptime
+        var periodUptimes = await GetPeriodUptimesAsync(currentStart, currentEnd, tenantId, monitorId);
+
+        foreach (var m in monitors)
+        {
+            HydrateLiveStatus(m);
+            if (periodUptimes.TryGetValue(m.Id, out var periodUptime))
+            {
+                m.CurrentUptimePercentage = periodUptime;
+            }
+        }
+
+        return new MonitorAnalyticsDto(latencyPoints, monitors);
+    }
+
+    private async Task<Dictionary<int, double>> GetPeriodUptimesAsync(DateTimeOffset start, DateTimeOffset end, Guid? tenantId, int? monitorId)
+    {
+        var yesterday = new DateTimeOffset(DateTimeOffset.UtcNow.Date);
+        var viewEnd = yesterday < end ? yesterday : end;
+
+        // 1. Get historical daily averages from rollups
+        IQueryable<DailyAvailabilityMonitorRollup> histQuery = dbContext.DailyAvailabilityMonitorRollups
+            .AsNoTracking()
+            .Where(r => r.Date >= start && r.Date < viewEnd);
+
+        if (monitorId.HasValue)
+            histQuery = histQuery.Where(r => r.MonitorId == monitorId.Value);
+        else if (tenantId.HasValue)
+            histQuery = histQuery.Where(r => r.UptimeMonitor.TenantId == tenantId.Value);
+        else
+            histQuery = histQuery.Where(r => r.UptimeMonitor.TenantId != AnalyticsDbContext.SystemTenantGuid);
+
+        var historicalDaily = await histQuery
+            .GroupBy(r => r.MonitorId)
+            .Select(g => new { MonitorId = g.Key, Avg = g.Average(r => r.UptimePercentage ?? 0), Count = g.Count() })
+            .ToListAsync();
+
+        // 2. Get today's live data
+        var todayLive = new Dictionary<int, double>();
+        if (yesterday < end)
+        {
+            IQueryable<MonitorAvailability> liveQuery = dbContext.MonitorAvailabilities
+                .AsNoTracking()
+                .Where(ma => ma.Date >= yesterday && ma.Date < end);
+
+            if (monitorId.HasValue)
+                liveQuery = liveQuery.Where(ma => ma.MonitorId == monitorId.Value);
+            else if (tenantId.HasValue)
+                liveQuery = liveQuery.Where(ma => ma.UptimeMonitor!.TenantId == tenantId.Value);
+            else
+                liveQuery = liveQuery.Where(ma => ma.UptimeMonitor!.TenantId != AnalyticsDbContext.SystemTenantGuid);
+
+            todayLive = await liveQuery
+                .ToDictionaryAsync(ma => ma.MonitorId, ma => ma.UptimePercentage);
+        }
+
+
+        // 3. Merge
+        var results = new Dictionary<int, double>();
+        var allMonitorIds = historicalDaily.Select(x => x.MonitorId).Union(todayLive.Keys);
+
+        foreach (var mid in allMonitorIds)
+        {
+            var hist = historicalDaily.FirstOrDefault(x => x.MonitorId == mid);
+            var histSum = (hist?.Avg ?? 0) * (hist?.Count ?? 0);
+            var today = todayLive.GetValueOrDefault(mid, 0);
+            
+            var count = (hist?.Count ?? 0) + (todayLive.ContainsKey(mid) ? 1 : 0);
+            results[mid] = count > 0 ? (histSum + today) / count : 0;
+        }
+
+        return results;
+    }
+
+    private async Task<List<LatencyRow>> GetMergedLatencyDataAsync(
+        AnalyticsDbContext db, DateTimeOffset start, DateTimeOffset end, bool isHourly, Guid? tenantId = null, int? monitorId = null)
+    {
+        if (isHourly)
+        {
+            var query = db.ResponseTimes.AsNoTracking().Where(rt => rt.Date >= start && rt.Date < end);
+            if (monitorId.HasValue) 
+                query = query.Where(rt => rt.MonitorId == monitorId.Value);
+            else if (tenantId.HasValue) 
+                query = query.Where(rt => rt.UptimeMonitor!.TenantId == tenantId.Value);
+            else 
+                query = query.Where(rt => rt.UptimeMonitor!.TenantId != AnalyticsDbContext.SystemTenantGuid);
+
+            var grouped = await query
+                .GroupBy(rt => new {
+                    rt.Date.Year,
+                    rt.Date.Month,
+                    rt.Date.Day,
+                    rt.Date.Hour
+                })
+                .Select(g => new {
+                    g.Key.Year,
+                    g.Key.Month,
+                    g.Key.Day,
+                    g.Key.Hour,
+                    Avg = g.Average(rt => rt.Average) ?? 0,
+                    Min = g.Min(rt => rt.Lowest) ?? 0,
+                    Max = g.Max(rt => rt.Highest) ?? 0
+                })
+                .ToListAsync();
+
+            return grouped.Select(x => new LatencyRow(
+                new DateTime(x.Year, x.Month, x.Day, x.Hour, 0, 0, DateTimeKind.Utc), 
+                x.Avg,
+                x.Min,
+                x.Max))
+                .ToList();
+        }
+
+        var yesterday = new DateTimeOffset(DateTimeOffset.UtcNow.Date);
+        var viewEnd = yesterday < end ? yesterday : end;
+
+        List<LatencyRow> historical;
+        if (monitorId.HasValue)
+        {
+            var raw = await db.DailyLatencyMonitorRollups
+                .AsNoTracking()
+                .Where(r => r.MonitorId == monitorId.Value && r.Date >= start && r.Date < viewEnd)
+                .Select(r => new { r.Date, r.Average, r.Lowest, r.Highest })
+                .ToListAsync();
+            historical = raw.Select(r => new LatencyRow(r.Date.UtcDateTime, r.Average ?? 0, r.Lowest ?? 0, r.Highest ?? 0)).ToList();
+        }
+        else if (tenantId.HasValue)
+        {
+            var raw = await db.DailyLatencyTenantRollups
+                .AsNoTracking()
+                .Where(r => r.TenantId == tenantId.Value && r.Date >= start && r.Date < viewEnd)
+                .Select(r => new { r.Date, r.Average, r.Lowest, r.Highest })
+                .ToListAsync();
+            historical = raw.Select(r => new LatencyRow(r.Date.UtcDateTime, r.Average ?? 0, r.Lowest ?? 0, r.Highest ?? 0)).ToList();
+        }
+        else
+        {
+            var raw = await db.DailyLatencyGlobalRollups
+                .AsNoTracking()
+                .Where(r => r.Date >= start && r.Date < viewEnd)
+                .Select(r => new { r.Date, r.Average, r.Lowest, r.Highest })
+                .ToListAsync();
+            historical = raw.Select(r => new LatencyRow(r.Date.UtcDateTime, r.Average ?? 0, r.Lowest ?? 0, r.Highest ?? 0)).ToList();
+        }
+
+        if (yesterday < end)
+        {
+            var query = db.ResponseTimes.AsNoTracking().Where(rt => rt.Date >= yesterday && rt.Date < end);
+            if (monitorId.HasValue) 
+                query = query.Where(rt => rt.MonitorId == monitorId.Value);
+            else if (tenantId.HasValue) 
+                query = query.Where(rt => rt.UptimeMonitor!.TenantId == tenantId.Value);
+            else 
+                query = query.Where(rt => rt.UptimeMonitor!.TenantId != AnalyticsDbContext.SystemTenantGuid);
+
+            var freshRows = await query
+                .GroupBy(rt => new { rt.Date.Year, rt.Date.Month, rt.Date.Day })
+                .Select(g => new {
+                    g.Key.Year,
+                    g.Key.Month,
+                    g.Key.Day,
+                    Avg = g.Average(rt => rt.Average) ?? 0,
+                    Min = g.Min(rt => rt.Lowest) ?? 0,
+                    Max = g.Max(rt => rt.Highest) ?? 0
+                })
+                .ToListAsync();
+            
+            historical.AddRange(freshRows.Select(x => new LatencyRow(
+                new DateTime(x.Year, x.Month, x.Day, 0, 0, 0, DateTimeKind.Utc), 
+                x.Avg,
+                x.Min,
+                x.Max)));
+        }
+        return historical;
+    }
+
     /// <inheritdoc />
     public async Task<UptimeMonitor> CreateMonitorAsync(Guid tenantId, string name, string url, double? uptimeSla)
     {

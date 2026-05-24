@@ -101,6 +101,9 @@ using (var scope = app.Services.CreateScope())
     await using var context = await contextFactory.CreateDbContextAsync();
     context.Database.Migrate();
 
+    // Ensure materialized views are in sync with the current schema and logic
+    await Infrastructure.Helpers.MaterializedViewOrchestrator.SyncViewsAsync(context);
+
     if (app.Environment.IsDevelopment())
     {
         await DatabaseSeeder.SeedSampleDataAsync(context);
@@ -143,8 +146,8 @@ using (var connection = JobStorage.Current.GetConnection())
             newJob => newJob.ExecuteAsync(),
             CronHelper.FromMinutes(litiumFetchInterval));
 
-        recurringJobManager.AddOrUpdate<RefreshLatencyMaterializedViewJob>(
-            "refresh-latency-materialized-views",
+        recurringJobManager.AddOrUpdate<RefreshMonitoringMaterializedViewJob>(
+            "refresh-monitoring-materialized-views",
             newJob => newJob.ExecuteAsync(),
             Cron.Daily);
 

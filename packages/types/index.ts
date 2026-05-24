@@ -10,20 +10,6 @@ export interface GlobalKpi {
   aovPoP: number;
 }
 
-export interface TenantKpi {
-  tenantId: string;
-  tenantName: string;
-  totalRevenue: number;
-  totalVolume: number;
-  aov: number;
-  previousRevenue: number;
-  previousVolume: number;
-  previousAov: number;
-  revenuePoP: number;
-  volumePoP: number;
-  aovPoP: number;
-}
-
 export interface FinancialKpi {
   currentRevenue: number;
   previousRevenue: number;
@@ -66,26 +52,6 @@ export interface DistributionEntry {
   tenantName: string;
   absoluteRevenue: number;
   cumulativePortfolioShare: number;
-}
-
-export interface OrderBin {
-  binLabel: string;
-  binMin: number;
-  binMax: number;
-  orderCount: number;
-}
-
-export interface DailyGlobalRollup {
-  createdDate: string; // ISO date string
-  globalVolume: number;
-  globalRevenue: number;
-}
-
-export interface DailyTenantRollup {
-  createdDate: string;
-  tenantId: string;
-  volume: number;
-  revenue: number;
 }
 
 export interface TenantDiagnostics {

@@ -19,14 +19,16 @@ export interface FinancialKpi {
 }
 
 export interface FinancialVelocityPoint {
-  periodLabel: string;
+  label: string;
+  timestamp: string;
   currentRevenue: number;
   previousRevenue: number;
   absoluteVariance: number;
 }
 
 export interface CumulativeGrowthDeltaPoint {
-  periodLabel: string;
+  label: string;
+  timestamp: string;
   cumulativeGrowthDelta: number;
 }
 

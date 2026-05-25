@@ -12,19 +12,17 @@ import { ChartPanel } from '../common/ChartPanel';
 import './PortfolioRevenueShareTrajectoryChart.css';
 
 interface ShareTrajectoryRow {
-  day: string;
+  label: string;
   portfolioShare: number;
 }
 
-function buildRows(
-  tenantVelocity: FinancialVelocityPoint[],
-  portfolioVelocity: FinancialVelocityPoint[],
+function buildRows(tenantVelocity: FinancialVelocityPoint[], portfolioVelocity: FinancialVelocityPoint[],
 ): ShareTrajectoryRow[] {
   return tenantVelocity.map((point, index) => {
     const portfolioRevenue = portfolioVelocity[index]?.currentRevenue ?? 0;
 
     return {
-      day: point.periodLabel,
+      label: point.label,
       portfolioShare: portfolioRevenue > 0 ? (point.currentRevenue / portfolioRevenue) * 100 : 0,
     };
   });
@@ -41,12 +39,8 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   );
 };
 
-export function PortfolioRevenueShareTrajectoryChart({
-  tenantVelocity,
-  portfolioVelocity,
-}: {
-  tenantVelocity: FinancialVelocityPoint[];
-  portfolioVelocity: FinancialVelocityPoint[];
+export function PortfolioRevenueShareTrajectoryChart({tenantVelocity, portfolioVelocity,}: {
+  tenantVelocity: FinancialVelocityPoint[]; portfolioVelocity: FinancialVelocityPoint[];
 }) {
   const rows = buildRows(tenantVelocity, portfolioVelocity);
 
@@ -56,7 +50,7 @@ export function PortfolioRevenueShareTrajectoryChart({
         <AreaChart data={rows} margin={{ top: 8, right: 10, left: 8, bottom: 20 }}>
           <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 4" vertical={false} />
           <XAxis
-            dataKey="day"
+            dataKey="label"
             tick={{ fill: 'var(--text-primary)', fontSize: 10 }}
             axisLine={false}
             tickLine={false}

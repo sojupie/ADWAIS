@@ -12,18 +12,6 @@ import { formatCompact } from '@utils';
 import { ChartPanel } from '../common/ChartPanel';
 import './CumulativeGrowthDeltaChart.css';
 
-interface GrowthDeltaRow {
-  day: string;
-  cumulativeDelta: number;
-}
-
-function buildRows(points: CumulativeGrowthDeltaPoint[]): GrowthDeltaRow[] {
-  return points.map((point) => ({
-    day: point.periodLabel,
-    cumulativeDelta: point.cumulativeGrowthDelta,
-  }));
-}
-
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
 
@@ -36,15 +24,13 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 export function CumulativeGrowthDeltaChart({ points }: { points: CumulativeGrowthDeltaPoint[] }) {
-  const rows = buildRows(points);
-
   return (
     <ChartPanel title="Cumulative Growth Delta (Absolute)" bodyClassName="cumulative-growth-delta-chart">
       <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={rows} margin={{ top: 8, right: 10, left: 8, bottom: 20 }}>
+        <LineChart data={points} margin={{ top: 8, right: 10, left: 8, bottom: 20 }}>
           <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 4" vertical={false} />
           <XAxis
-            dataKey="day"
+            dataKey="label"
             tick={{ fill: 'var(--text-primary)', fontSize: 10 }}
             axisLine={false}
             tickLine={false}
@@ -60,7 +46,7 @@ export function CumulativeGrowthDeltaChart({ points }: { points: CumulativeGrowt
           <Tooltip content={<CustomTooltip />} />
           <Line
             type="stepAfter"
-            dataKey="cumulativeDelta"
+            dataKey="cumulativeGrowthDelta"
             stroke="var(--green)"
             strokeWidth={2.4}
             dot={false}

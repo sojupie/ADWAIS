@@ -50,7 +50,7 @@ function RevenueVelocityGraphJSX({ points }: { points: FinancialVelocityPoint[] 
       <LineChart data={points} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
         <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
         <XAxis
-          dataKey="periodLabel"
+          dataKey="label"
           tick={{ fill: 'var(--text-muted)', fontSize: 12 }}
           axisLine={false}
           tickLine={false}

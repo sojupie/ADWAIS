@@ -48,17 +48,21 @@ type UptimeMonitor = {
   tenantId: string;
   name: string;
   url: string;
+  updateInterval: number;
   uptimeSla: number | null;
   uptimeMonitorEnabled: boolean;
   currentStatus: string;
-  currentUptimePercentage: number;
+  lastSyncError: string | null;
 };
 
-type LatencyMetricsResponse = {
-  date: string;
-  average: number | null;
-  lowest: number | null;
-  highest: number | null;
+type MonitorAnalyticsResponse = {
+  latencyPoints: LatencyPoint[];
+  monitors: UptimeMonitor[];
+};
+
+type FleetAnalytics = {
+  monitors: FleetMonitor[];
+  latencyPoints: LatencyPoint[];
 };
 
 type FleetStatusSummary = {
@@ -66,7 +70,7 @@ type FleetStatusSummary = {
   enabled: number;
   up: number;
   down: number;
-  averageUptime: number | null;
+  syncErrors: number;
 };
 
 const emptyFleetSummary: FleetStatusSummary = {
@@ -74,7 +78,7 @@ const emptyFleetSummary: FleetStatusSummary = {
   enabled: 0,
   up: 0,
   down: 0,
-  averageUptime: null,
+  syncErrors: 0,
 };
 
 const listeners = new Set<() => void>();
@@ -136,19 +140,14 @@ function buildFleetSummary(monitors: FleetMonitor[]): FleetStatusSummary {
   const enabled = monitors.filter((monitor) => monitor.uptimeMonitorEnabled).length;
   const up = monitors.filter((monitor) => normalizeStatus(monitor.currentStatus).toUpperCase() === 'UP').length;
   const down = enabled - up;
-  const uptimeValues = monitors
-    .map((monitor) => monitor.currentUptimePercentage)
-    .filter((value): value is number => typeof value === 'number');
-  const averageUptime = uptimeValues.length === 0
-    ? null
-    : uptimeValues.reduce((total, value) => total + value, 0) / uptimeValues.length;
+  const syncErrors = monitors.filter((monitor) => monitor.lastSyncError).length;
 
   return {
     total: monitors.length,
     enabled,
     up,
     down,
-    averageUptime,
+    syncErrors,
   };
 }
 
@@ -202,74 +201,22 @@ async function loadTenantDiagnostics(tenantId: string, days: Period): Promise<Te
   };
 }
 
-async function loadFleetMonitors(): Promise<FleetMonitor[]> {
-  const [monitors, tenants] = await Promise.all([
-    fetchJson<UptimeMonitor[]>('/api/monitors'),
+async function loadFleetAnalytics(): Promise<FleetAnalytics> {
+  const [analytics, tenants] = await Promise.all([
+    fetchJson<MonitorAnalyticsResponse>('/api/monitors/analytics?timeframe=T30'),
     fetchJson<TenantResponse[]>('/api/tenants'),
   ]);
   const tenantNames = new Map(tenants.map((tenant) => [tenant.id, tenant.name]));
 
-  return monitors
-    .map((monitor) => ({
-      ...monitor,
-      tenantName: tenantNames.get(monitor.tenantId) ?? monitor.tenantId,
-    }))
-    .sort((a, b) => a.tenantName.localeCompare(b.tenantName) || a.name.localeCompare(b.name));
-}
-
-async function loadFleetLatencySeries(monitors: FleetMonitor[]): Promise<LatencyPoint[]> {
-  const enabledMonitors = monitors.filter((monitor) => monitor.uptimeMonitorEnabled);
-  if (enabledMonitors.length === 0) return [];
-
-  const to = new Date();
-  const from = new Date(to.getTime() - 24 * 60 * 60 * 1000);
-  const query = `from=${encodeURIComponent(from.toISOString())}&to=${encodeURIComponent(to.toISOString())}`;
-
-  const responses = await Promise.all(
-    enabledMonitors.map(async (monitor) => {
-      const metrics = await fetchJson<LatencyMetricsResponse[]>(
-        `/api/monitors/${monitor.id}/latency?${query}&tenantId=${encodeURIComponent(monitor.tenantId)}`,
-      ).catch(() => []);
-
-      return metrics
-        .filter((metric) => metric.average !== null)
-        .map((metric) => ({
-          date: metric.date,
-          average: metric.average as number,
-        }));
-    }),
-  );
-
-  const buckets = new Map<string, number[]>();
-
-  responses.flat().forEach((metric) => {
-    const date = new Date(metric.date);
-    date.setMinutes(0, 0, 0);
-    const key = date.toISOString();
-    const values = buckets.get(key) ?? [];
-    values.push(metric.average);
-    buckets.set(key, values);
-  });
-
-  return Array.from(buckets.entries())
-    .sort(([left], [right]) => left.localeCompare(right))
-    .map(([date, values]) => ({
-      periodLabel: new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      averageLatency: average(values),
-      p95Latency: percentile(values, 0.95),
-    }));
-}
-
-function average(values: number[]): number {
-  return values.reduce((total, value) => total + value, 0) / values.length;
-}
-
-function percentile(values: number[], p: number): number {
-  if (values.length === 0) return 0;
-
-  const sorted = [...values].sort((a, b) => a - b);
-  const index = Math.ceil(p * sorted.length) - 1;
-  return sorted[Math.max(0, Math.min(index, sorted.length - 1))];
+  return {
+    latencyPoints: analytics.latencyPoints,
+    monitors: analytics.monitors
+      .map((monitor) => ({
+        ...monitor,
+        tenantName: tenantNames.get(monitor.tenantId) ?? monitor.tenantId,
+      }))
+      .sort((a, b) => a.tenantName.localeCompare(b.tenantName) || a.name.localeCompare(b.name)),
+  };
 }
 
 function emit() {
@@ -336,18 +283,14 @@ async function fetchFleetData() {
   updateSnapshot({ fleetLoading: true, fleetError: null });
 
   try {
-    const fleetMonitors = await loadFleetMonitors();
+    const { monitors: fleetMonitors, latencyPoints: fleetLatencyPoints } = await loadFleetAnalytics();
     if (requestId !== activeFleetRequestId) return;
 
     updateSnapshot({
       fleetMonitors,
       fleetSummary: buildFleetSummary(fleetMonitors),
+      fleetLatencyPoints,
     });
-
-    const fleetLatencyPoints = await loadFleetLatencySeries(fleetMonitors);
-    if (requestId !== activeFleetRequestId) return;
-
-    updateSnapshot({ fleetLatencyPoints });
   } catch (e) {
     if (requestId !== activeFleetRequestId) return;
     updateSnapshot({ fleetError: e instanceof Error ? e.message : 'Failed to fetch fleet status' });

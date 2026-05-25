@@ -11,9 +11,12 @@ import { ChartPanel } from '../common/ChartPanel';
 import './NetworkLatencyChart.css';
 
 export interface LatencyPoint {
-  periodLabel: string;
-  averageLatency: number;
-  p95Latency: number;
+  label: string;
+  timestamp: string;
+  average: number;
+  previousAverage: number;
+  lowest: number;
+  highest: number;
 }
 
 function formatLatency(value: number): string {
@@ -33,8 +36,9 @@ const GraphTooltip = ({ active, payload, label }: GraphTooltipProps) => {
   return (
     <div className="chart-panel-tooltip">
       <p className="chart-panel-tooltip__label">{label}</p>
-      <p>Avg: <strong>{formatLatency(point.averageLatency)}</strong></p>
-      <p>p95: <strong>{formatLatency(point.p95Latency)}</strong></p>
+      <p>Avg: <strong>{formatLatency(point.average)}</strong></p>
+      <p>Previous: <strong>{formatLatency(point.previousAverage)}</strong></p>
+      <p>High: <strong>{formatLatency(point.highest)}</strong></p>
     </div>
   );
 };
@@ -44,14 +48,14 @@ export function NetworkLatencyChart({ points }: { points: LatencyPoint[] }) {
 
   return (
     <ChartPanel
-      title="Network Latency (24h)"
+      title="Network Latency"
       bodyClassName="network-latency-chart"
       legend={
         <div className="chart-panel__legend">
           <span className="network-latency-chart__legend-dot network-latency-chart__legend-dot--avg" />
           <span>Avg Latency</span>
           <span className="network-latency-chart__legend-dot network-latency-chart__legend-dot--p95" />
-          <span>p95 Latency</span>
+          <span>Previous Avg</span>
         </div>
       }
     >
@@ -62,7 +66,7 @@ export function NetworkLatencyChart({ points }: { points: LatencyPoint[] }) {
           <LineChart data={points} margin={{ top: 8, right: 10, left: 0, bottom: 0 }}>
             <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 4" vertical={false} />
             <XAxis
-              dataKey="periodLabel"
+              dataKey="label"
               tick={{ fill: 'var(--text-muted)', fontSize: 11 }}
               axisLine={false}
               tickLine={false}
@@ -78,7 +82,7 @@ export function NetworkLatencyChart({ points }: { points: LatencyPoint[] }) {
             <Tooltip content={<GraphTooltip />} />
             <Line
               type="monotone"
-              dataKey="p95Latency"
+              dataKey="previousAverage"
               className="network-latency-chart__p95-line"
               strokeWidth={2}
               strokeDasharray="4 3"
@@ -87,7 +91,7 @@ export function NetworkLatencyChart({ points }: { points: LatencyPoint[] }) {
             />
             <Line
               type="monotone"
-              dataKey="averageLatency"
+              dataKey="average"
               className="network-latency-chart__avg-line"
               strokeWidth={2.8}
               dot={showDots ? { r: 4, strokeWidth: 0 } : false}

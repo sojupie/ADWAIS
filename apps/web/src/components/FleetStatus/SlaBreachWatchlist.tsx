@@ -2,75 +2,73 @@ import { ChartPanel } from '../common/ChartPanel';
 import type { FleetMonitor } from './FleetMatrix';
 import './SlaBreachWatchlist.css';
 
-interface TenantBreach {
+interface MonitorIssue {
   tenantId: string;
   tenantName: string;
-  uptime: number;
-  sla: number;
+  status: string;
+  lastSyncError: string | null;
   monitorCount: number;
 }
 
-function buildBreaches(monitors: FleetMonitor[]): TenantBreach[] {
-  const breaches = new Map<string, TenantBreach>();
+function normalizeStatus(status?: string): string {
+  return (status ?? 'Unknown').replaceAll('"', '').trim();
+}
+
+function buildIssues(monitors: FleetMonitor[]): MonitorIssue[] {
+  const issues = new Map<string, MonitorIssue>();
 
   monitors
     .filter((monitor) =>
       monitor.uptimeMonitorEnabled
-      && monitor.uptimeSla !== null
-      && monitor.currentUptimePercentage < monitor.uptimeSla)
+      && (normalizeStatus(monitor.currentStatus).toUpperCase() !== 'UP' || monitor.lastSyncError))
     .forEach((monitor) => {
-      const existing = breaches.get(monitor.tenantId);
+      const existing = issues.get(monitor.tenantId);
 
       if (!existing) {
-        breaches.set(monitor.tenantId, {
+        issues.set(monitor.tenantId, {
           tenantId: monitor.tenantId,
           tenantName: monitor.tenantName,
-          uptime: monitor.currentUptimePercentage,
-          sla: monitor.uptimeSla as number,
+          status: normalizeStatus(monitor.currentStatus),
+          lastSyncError: monitor.lastSyncError,
           monitorCount: 1,
         });
         return;
       }
 
-      breaches.set(monitor.tenantId, {
+      issues.set(monitor.tenantId, {
         ...existing,
-        uptime: Math.min(existing.uptime, monitor.currentUptimePercentage),
-        sla: Math.max(existing.sla, monitor.uptimeSla as number),
+        lastSyncError: existing.lastSyncError ?? monitor.lastSyncError,
         monitorCount: existing.monitorCount + 1,
       });
     });
 
-  return Array.from(breaches.values())
-    .sort((a, b) => (a.uptime - a.sla) - (b.uptime - b.sla))
+  return Array.from(issues.values())
+    .sort((a, b) => b.monitorCount - a.monitorCount || a.tenantName.localeCompare(b.tenantName))
     .slice(0, 6);
 }
 
-function formatUptime(value: number): string {
-  return `${value.toFixed(2)}%`;
-}
-
 export function SlaBreachWatchlist({ monitors }: { monitors: FleetMonitor[] }) {
-  const breaches = buildBreaches(monitors);
+  const issues = buildIssues(monitors);
 
   return (
     <ChartPanel
-      title="SLA Breach Watchlist"
+      title="Monitor Issue Watchlist"
       bodyClassName="sla-breach-watchlist"
-      legend={<span className="sla-breach-watchlist__count">{breaches.length} tenants</span>}
+      legend={<span className="sla-breach-watchlist__count">{issues.length} tenants</span>}
     >
-      {breaches.length === 0 ? (
-        <div className="sla-breach-watchlist__empty">No SLA breaches</div>
+      {issues.length === 0 ? (
+        <div className="sla-breach-watchlist__empty">No monitor issues</div>
       ) : (
         <div className="sla-breach-watchlist__list">
-          {breaches.map((tenant) => (
+          {issues.map((tenant) => (
             <article className="sla-breach-watchlist__item" key={tenant.tenantId}>
               <div>
                 <h3>{tenant.tenantName}</h3>
-                <p>Uptime: <strong>{formatUptime(tenant.uptime)}</strong></p>
+                <p>Status: <strong>{tenant.status}</strong></p>
               </div>
               <div className="sla-breach-watchlist__meta">
-                <span className="sla-breach-watchlist__badge">Degraded</span>
-                <span>SLA: {formatUptime(tenant.sla)}</span>
+                <span className="sla-breach-watchlist__badge">Issue</span>
+                {tenant.lastSyncError && <span>{tenant.lastSyncError}</span>}
                 {tenant.monitorCount > 1 && <span>{tenant.monitorCount} monitors</span>}
               </div>
             </article>

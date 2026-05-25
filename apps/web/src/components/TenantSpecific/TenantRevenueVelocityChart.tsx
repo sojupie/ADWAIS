@@ -12,20 +12,6 @@ import { formatCompact } from '@utils';
 import { ChartPanel } from '../common/ChartPanel';
 import './TenantRevenueVelocityChart.css';
 
-interface RevenueVelocityRow {
-  day: string;
-  revenue: number;
-  previousRevenue: number;
-}
-
-function buildRows(points: FinancialVelocityPoint[]): RevenueVelocityRow[] {
-  return points.map((point) => ({
-    day: point.periodLabel,
-    revenue: point.currentRevenue,
-    previousRevenue: point.previousRevenue,
-  }));
-}
-
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
 
@@ -34,7 +20,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
       <p className="chart-panel-tooltip__label">{label}</p>
       {payload.map((entry: any) => (
         <p key={entry.dataKey} style={{ color: entry.color }}>
-          {entry.dataKey === 'revenue' ? 'Current' : 'Previous'}:{' '}
+          {entry.dataKey === 'currentRevenue' ? 'Current' : 'Previous'}:{' '}
           <strong>{formatCompact(entry.value)} SEK</strong>
         </p>
       ))}
@@ -43,15 +29,13 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 export function TenantRevenueVelocityChart({ points }: { points: FinancialVelocityPoint[] }) {
-  const rows = buildRows(points);
-
   return (
     <ChartPanel title="Revenue Velocity Over Time" bodyClassName="tenant-revenue-velocity-chart">
       <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={rows} margin={{ top: 8, right: 10, left: 8, bottom: 20 }}>
+        <LineChart data={points} margin={{ top: 8, right: 10, left: 8, bottom: 20 }}>
           <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 4" vertical={false} />
           <XAxis
-            dataKey="day"
+            dataKey="label"
             tick={{ fill: 'var(--text-primary)', fontSize: 10 }}
             axisLine={false}
             tickLine={false}
@@ -75,7 +59,7 @@ export function TenantRevenueVelocityChart({ points }: { points: FinancialVeloci
           />
           <Line
             type="monotone"
-            dataKey="revenue"
+            dataKey="currentRevenue"
             stroke="var(--chart-line)"
             strokeWidth={2.4}
             dot={false}

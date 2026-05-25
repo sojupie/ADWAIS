@@ -41,6 +41,13 @@
   line-height: 1;
 }
 
+.fact-panel__value.text-green {
+  color: var(--green);
+}
+
+.fact-panel__value.text-red {
+  color: var(--red);
+}
 
 .fact-panel__extra {
   display: inline-flex;

@@ -6,10 +6,11 @@ export interface FleetMonitor {
   tenantName: string;
   name: string;
   url: string;
+  updateInterval: number;
   uptimeSla: number | null;
   uptimeMonitorEnabled: boolean;
   currentStatus: string;
-  currentUptimePercentage: number;
+  lastSyncError: string | null;
 }
 
 function normalizeStatus(status?: string): string {
@@ -32,10 +33,6 @@ function getStatusClass(monitor: FleetMonitor): string {
   return classes.join(' ');
 }
 
-function formatUptime(value: number): string {
-  return `${value.toFixed(1)}%`;
-}
-
 export function FleetMatrix({ monitors }: { monitors: FleetMonitor[] }) {
   return (
     <div className="fleet-matrix-grid">
@@ -54,7 +51,7 @@ export function FleetMatrix({ monitors }: { monitors: FleetMonitor[] }) {
             <span className="fleet-matrix-tile__status">{status}</span>
             <strong>{monitor.name}</strong>
             <span>{monitor.url}</span>
-            <span>{formatUptime(monitor.currentUptimePercentage)}</span>
+            <span>{monitor.lastSyncError ?? `${monitor.updateInterval}s interval`}</span>
           </a>
         );
       })}

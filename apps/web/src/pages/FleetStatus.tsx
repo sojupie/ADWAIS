@@ -7,14 +7,6 @@ import { SlaBreachWatchlist } from '../components/FleetStatus/SlaBreachWatchlist
 import { useDashboardData } from '../dashboardDataStore';
 import './FleetStatus.css';
 
-function formatUptime(value: number | null): string {
-  if (value === null) {
-    return 'N/A';
-  }
-  
-  return `${value.toFixed(1)}%`;
-}
-
 export function FleetStatus() {
   const {
     fleetLoading,
@@ -48,7 +40,7 @@ export function FleetStatus() {
         <FactPanel label="Monitors" value={fleetSummary.total.toString()} />
         <FactPanel label="Online" value={fleetSummary.up.toString()} valueColor={fleetSummary.down === 0 ? 'green' : 'red'} />
         <FactPanel label="Enabled" value={fleetSummary.enabled.toString()} />
-        <FactPanel label="Average Uptime" value={formatUptime(fleetSummary.averageUptime)} />
+        <FactPanel label="Sync Errors" value={fleetSummary.syncErrors.toString()} valueColor={fleetSummary.syncErrors === 0 ? 'green' : 'red'} />
       </section>
 
       <section className="fleet-status-chart-row" aria-label="Fleet status diagnostics">

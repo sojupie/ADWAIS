@@ -25,8 +25,12 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 export function OrderValueDistributionChart({ bins }: { bins: OrderBin[] }) {
   return (
-    <ChartPanel title="Order Value Distribution" bodyClassName="order-value-distribution-chart">
-      <ResponsiveContainer width="100%" height={300}>
+    <ChartPanel
+      title="Order Value Distribution"
+      className="tenant-diagnostics__chart-panel"
+      bodyClassName="order-value-distribution-chart"
+    >
+      <ResponsiveContainer width="100%" height="100%">
         <BarChart data={bins} margin={{ top: 8, right: 10, left: 8, bottom: 42 }}>
           <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 4" vertical={false} />
           <XAxis

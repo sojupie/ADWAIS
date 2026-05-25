@@ -13,7 +13,7 @@ import type {
 import type { FleetMonitor } from './components/FleetStatus/FleetMatrix';
 import type { LatencyPoint } from './components/FleetStatus/NetworkLatencyChart';
 
-export const REFRESH_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
+export const REFRESH_INTERVAL_MS = 10 * 60 * 1000;
 
 export type Period = 7 | 30 | 90;
 type Timeframe = `T${Period}`;
@@ -43,26 +43,23 @@ type TenantResponse = {
   name: string;
 };
 
-type UptimeMonitor = {
-  id: number;
-  tenantId: string;
-  name: string;
-  url: string;
-  updateInterval: number;
-  uptimeSla: number | null;
-  uptimeMonitorEnabled: boolean;
-  currentStatus: string;
-  lastSyncError: string | null;
-};
+type UptimeMonitorResponse = Omit<FleetMonitor, 'tenantName'>;
 
 type MonitorAnalyticsResponse = {
   latencyPoints: LatencyPoint[];
-  monitors: UptimeMonitor[];
+  monitors: UptimeMonitorResponse[];
 };
 
-type FleetAnalytics = {
-  monitors: FleetMonitor[];
-  latencyPoints: LatencyPoint[];
+type FinancialVelocityResponsePoint = Omit<FinancialVelocityPoint, 'label' | 'timestamp'> & {
+  label?: string;
+  periodLabel?: string;
+  timestamp?: string;
+};
+
+type CumulativeGrowthDeltaResponsePoint = Omit<CumulativeGrowthDeltaPoint, 'label' | 'timestamp'> & {
+  label?: string;
+  periodLabel?: string;
+  timestamp?: string;
 };
 
 type FleetStatusSummary = {
@@ -73,7 +70,17 @@ type FleetStatusSummary = {
   syncErrors: number;
 };
 
-const emptyFleetSummary: FleetStatusSummary = {
+type FinancialOverviewData = Pick<
+  DashboardDataSnapshot,
+  'globalKpi' | 'growthExtremes' | 'globalVelocity' | 'momentum' | 'distribution'
+>;
+
+type FleetStatusData = {
+  monitors: FleetMonitor[];
+  latencyPoints: LatencyPoint[];
+};
+
+const EMPTY_FLEET_SUMMARY: FleetStatusSummary = {
   total: 0,
   enabled: 0,
   up: 0,
@@ -81,9 +88,7 @@ const emptyFleetSummary: FleetStatusSummary = {
   syncErrors: 0,
 };
 
-const listeners = new Set<() => void>();
-
-let snapshot: DashboardDataSnapshot = {
+const INITIAL_SNAPSHOT: DashboardDataSnapshot = {
   period: 30,
   loading: true,
   error: null,
@@ -91,7 +96,7 @@ let snapshot: DashboardDataSnapshot = {
   fleetError: null,
   fleetMonitors: [],
   fleetLatencyPoints: [],
-  fleetSummary: emptyFleetSummary,
+  fleetSummary: EMPTY_FLEET_SUMMARY,
   selectedTenantId: null,
   tenantDiagnostics: null,
   tenantDiagnosticsLoading: false,
@@ -103,19 +108,56 @@ let snapshot: DashboardDataSnapshot = {
   distribution: [],
 };
 
+const api = {
+  tenants: {
+    list: '/api/tenants',
+    byId: (tenantId: string) => `/api/tenants/${encodeURIComponent(tenantId)}`,
+  },
+  financial: {
+    kpis: (query: string) => `/api/financial/kpis?${query}`,
+    velocity: (query: string) => `/api/financial/velocity?${query}`,
+    growthExtremes: (timeframe: Timeframe) => `/api/financial/growth-extremes?timeframe=${timeframe}`,
+    distribution: (timeframe: Timeframe) => `/api/financial/distribution?timeframe=${timeframe}&topN=10`,
+    momentum: (timeframe: Timeframe) => `/api/financial/momentum?timeframe=${timeframe}`,
+    cumulativeGrowthDelta: (query: string) => `/api/financial/cumulative-growth-delta?${query}`,
+    orderDistribution: (query: string) => `/api/financial/order-distribution?${query}`,
+  },
+  monitors: {
+    analytics: '/api/monitors/analytics?timeframe=T30',
+    list: '/api/monitors',
+  },
+};
+
+const listeners = new Set<() => void>();
+
+let snapshot = INITIAL_SNAPSHOT;
 let refreshTimer: ReturnType<typeof setInterval> | null = null;
-let activeRequestId = 0;
+let activeFinancialRequestId = 0;
 let activeTenantRequestId = 0;
 let activeFleetRequestId = 0;
 
-async function fetchJson<T>(url: string, signal?: AbortSignal): Promise<T> {
-  const res = await fetch(url, { signal });
+async function fetchJson<T>(url: string): Promise<T> {
+  const res = await fetch(url);
   if (!res.ok) throw new Error(`HTTP ${res.status} - ${url}`);
   return res.json() as Promise<T>;
 }
 
-function getTimeframe(days: Period): Timeframe {
-  return `T${days}`;
+function isHttpStatus(error: unknown, status: number): boolean {
+  return error instanceof Error && error.message.startsWith(`HTTP ${status}`);
+}
+
+function getTimeframe(period: Period): Timeframe {
+  return `T${period}`;
+}
+
+function financialQuery(timeframe: Timeframe, tenantId?: string): string {
+  const params = new URLSearchParams({ timeframe });
+  if (tenantId) params.set('tenantId', tenantId);
+  return params.toString();
+}
+
+function getPointLabel(point: { label?: string; periodLabel?: string }, index: number): string {
+  return point.label ?? point.periodLabel ?? `Day ${index + 1}`;
 }
 
 function mapKpi(kpi: FinancialKpi): GlobalKpi {
@@ -132,6 +174,24 @@ function mapKpi(kpi: FinancialKpi): GlobalKpi {
   };
 }
 
+function mapVelocity(points: FinancialVelocityResponsePoint[]): FinancialVelocityPoint[] {
+  return points.map((point, index) => ({
+    ...point,
+    label: getPointLabel(point, index),
+    timestamp: point.timestamp ?? '',
+  }));
+}
+
+function mapCumulativeGrowthDelta(
+  points: CumulativeGrowthDeltaResponsePoint[],
+): CumulativeGrowthDeltaPoint[] {
+  return points.map((point, index) => ({
+    ...point,
+    label: getPointLabel(point, index),
+    timestamp: point.timestamp ?? '',
+  }));
+}
+
 function normalizeStatus(status?: string): string {
   return (status ?? 'Unknown').replaceAll('"', '').trim();
 }
@@ -139,52 +199,54 @@ function normalizeStatus(status?: string): string {
 function buildFleetSummary(monitors: FleetMonitor[]): FleetStatusSummary {
   const enabled = monitors.filter((monitor) => monitor.uptimeMonitorEnabled).length;
   const up = monitors.filter((monitor) => normalizeStatus(monitor.currentStatus).toUpperCase() === 'UP').length;
-  const down = enabled - up;
-  const syncErrors = monitors.filter((monitor) => monitor.lastSyncError).length;
 
   return {
     total: monitors.length,
     enabled,
     up,
-    down,
-    syncErrors,
+    down: enabled - up,
+    syncErrors: monitors.filter((monitor) => monitor.lastSyncError).length,
   };
 }
 
-async function loadDashboardData(days: Period) {
-  const timeframe = getTimeframe(days);
-  const [globalKpi, growthExtremes, globalVelocity, momentum, distribution] = await Promise.all([
-    fetchJson<FinancialKpi>(`/api/financial/kpis?timeframe=${timeframe}`),
-    fetchJson<GrowthExtreme[]>(`/api/financial/growth-extremes?timeframe=${timeframe}`),
-    fetchJson<FinancialVelocityPoint[]>(`/api/financial/velocity?timeframe=${timeframe}`),
-    fetchJson<MomentumResponse>(`/api/financial/momentum?timeframe=${timeframe}`),
-    fetchJson<DistributionEntry[]>(`/api/financial/distribution?timeframe=${timeframe}&topN=10`),
+async function loadFinancialOverview(period: Period): Promise<FinancialOverviewData> {
+  const timeframe = getTimeframe(period);
+  const query = financialQuery(timeframe);
+  const [kpi, growthExtremes, velocity, momentum, distribution] = await Promise.all([
+    fetchJson<FinancialKpi>(api.financial.kpis(query)),
+    fetchJson<GrowthExtreme[]>(api.financial.growthExtremes(timeframe)),
+    fetchJson<FinancialVelocityResponsePoint[]>(api.financial.velocity(query)),
+    fetchJson<MomentumResponse>(api.financial.momentum(timeframe)),
+    fetchJson<DistributionEntry[]>(api.financial.distribution(timeframe)),
   ]);
+
   return {
-    globalKpi: mapKpi(globalKpi),
+    globalKpi: mapKpi(kpi),
     growthExtremes,
-    globalVelocity,
+    globalVelocity: mapVelocity(velocity),
     momentum,
     distribution,
   };
 }
 
-async function loadTenantDiagnostics(tenantId: string, days: Period): Promise<TenantDiagnostics> {
-  const timeframe = getTimeframe(days);
-  const tenantQuery = `timeframe=${timeframe}&tenantId=${encodeURIComponent(tenantId)}`;
+async function loadTenantDiagnostics(tenantId: string, period: Period): Promise<TenantDiagnostics> {
+  const timeframe = getTimeframe(period);
+  const tenantQuery = financialQuery(timeframe, tenantId);
+  const globalQuery = financialQuery(timeframe);
+
   const [tenant, kpi, velocity, portfolioVelocity, cumulativeGrowthDelta, orderDistribution] = await Promise.all([
-    fetchJson<TenantResponse>(`/api/tenants/${tenantId}`),
-    fetchJson<FinancialKpi>(`/api/financial/kpis?${tenantQuery}`),
-    fetchJson<FinancialVelocityPoint[]>(`/api/financial/velocity?${tenantQuery}`),
-    fetchJson<FinancialVelocityPoint[]>(`/api/financial/velocity?timeframe=${timeframe}`),
-    fetchJson<CumulativeGrowthDeltaPoint[]>(`/api/financial/cumulative-growth-delta?${tenantQuery}`),
-    fetchJson<OrderBin[]>(`/api/financial/order-distribution?${tenantQuery}`),
+    fetchJson<TenantResponse>(api.tenants.byId(tenantId)),
+    fetchJson<FinancialKpi>(api.financial.kpis(tenantQuery)),
+    fetchJson<FinancialVelocityResponsePoint[]>(api.financial.velocity(tenantQuery)),
+    fetchJson<FinancialVelocityResponsePoint[]>(api.financial.velocity(globalQuery)),
+    fetchJson<CumulativeGrowthDeltaResponsePoint[]>(api.financial.cumulativeGrowthDelta(tenantQuery)),
+    fetchJson<OrderBin[]>(api.financial.orderDistribution(tenantQuery)),
   ]);
 
   return {
     tenantId: tenant.id,
     tenantName: tenant.name,
-    days,
+    days: period,
     totalRevenue: kpi.currentRevenue,
     totalVolume: kpi.transactionVolume,
     aov: kpi.averageOrderValue,
@@ -194,17 +256,30 @@ async function loadTenantDiagnostics(tenantId: string, days: Period): Promise<Te
     revenuePoP: kpi.revenueGrowthPercentage,
     volumePoP: 0,
     aovPoP: 0,
-    velocity,
-    portfolioVelocity,
-    cumulativeGrowthDelta,
+    velocity: mapVelocity(velocity),
+    portfolioVelocity: mapVelocity(portfolioVelocity),
+    cumulativeGrowthDelta: mapCumulativeGrowthDelta(cumulativeGrowthDelta),
     orderDistribution,
   };
 }
 
-async function loadFleetAnalytics(): Promise<FleetAnalytics> {
+async function loadMonitorAnalytics(): Promise<MonitorAnalyticsResponse> {
+  try {
+    return await fetchJson<MonitorAnalyticsResponse>(api.monitors.analytics);
+  } catch (error) {
+    if (!isHttpStatus(error, 404)) throw error;
+
+    return {
+      latencyPoints: [],
+      monitors: await fetchJson<UptimeMonitorResponse[]>(api.monitors.list),
+    };
+  }
+}
+
+async function loadFleetStatus(): Promise<FleetStatusData> {
   const [analytics, tenants] = await Promise.all([
-    fetchJson<MonitorAnalyticsResponse>('/api/monitors/analytics?timeframe=T30'),
-    fetchJson<TenantResponse[]>('/api/tenants'),
+    loadMonitorAnalytics(),
+    fetchJson<TenantResponse[]>(api.tenants.list),
   ]);
   const tenantNames = new Map(tenants.map((tenant) => [tenant.id, tenant.name]));
 
@@ -213,6 +288,7 @@ async function loadFleetAnalytics(): Promise<FleetAnalytics> {
     monitors: analytics.monitors
       .map((monitor) => ({
         ...monitor,
+        lastSyncError: monitor.lastSyncError ?? null,
         tenantName: tenantNames.get(monitor.tenantId) ?? monitor.tenantId,
       }))
       .sort((a, b) => a.tenantName.localeCompare(b.tenantName) || a.name.localeCompare(b.name)),
@@ -228,32 +304,27 @@ function updateSnapshot(next: Partial<DashboardDataSnapshot>) {
   emit();
 }
 
-async function fetchData(days: Period) {
-  const requestId = ++activeRequestId;
+function errorMessage(error: unknown, fallback: string): string {
+  return error instanceof Error ? error.message : fallback;
+}
+
+async function fetchFinancialData(period: Period) {
+  const requestId = ++activeFinancialRequestId;
   updateSnapshot({ loading: true, error: null });
 
   try {
-    const data = await loadDashboardData(days);
-    if (requestId !== activeRequestId) return;
-
-    updateSnapshot({
-      globalKpi: data.globalKpi,
-      growthExtremes: data.growthExtremes,
-      globalVelocity: data.globalVelocity,
-      momentum: data.momentum,
-      distribution: data.distribution,
-    });
-  } catch (e) {
-    if (requestId !== activeRequestId) return;
-    updateSnapshot({ error: e instanceof Error ? e.message : 'Failed to fetch data' });
+    const data = await loadFinancialOverview(period);
+    if (requestId !== activeFinancialRequestId) return;
+    updateSnapshot(data);
+  } catch (error) {
+    if (requestId !== activeFinancialRequestId) return;
+    updateSnapshot({ error: errorMessage(error, 'Failed to fetch data') });
   } finally {
-    if (requestId === activeRequestId) {
-      updateSnapshot({ loading: false });
-    }
+    if (requestId === activeFinancialRequestId) updateSnapshot({ loading: false });
   }
 }
 
-async function fetchTenantData(tenantId: string, days: Period) {
+async function fetchTenantData(tenantId: string, period: Period) {
   const requestId = ++activeTenantRequestId;
   updateSnapshot({
     tenantDiagnostics: null,
@@ -262,15 +333,12 @@ async function fetchTenantData(tenantId: string, days: Period) {
   });
 
   try {
-    const tenantDiagnostics = await loadTenantDiagnostics(tenantId, days);
+    const tenantDiagnostics = await loadTenantDiagnostics(tenantId, period);
     if (requestId !== activeTenantRequestId || snapshot.selectedTenantId !== tenantId) return;
-
     updateSnapshot({ tenantDiagnostics });
-  } catch (e) {
+  } catch (error) {
     if (requestId !== activeTenantRequestId || snapshot.selectedTenantId !== tenantId) return;
-    updateSnapshot({
-      tenantDiagnosticsError: e instanceof Error ? e.message : 'Failed to fetch tenant diagnostics',
-    });
+    updateSnapshot({ tenantDiagnosticsError: errorMessage(error, 'Failed to fetch tenant diagnostics') });
   } finally {
     if (requestId === activeTenantRequestId && snapshot.selectedTenantId === tenantId) {
       updateSnapshot({ tenantDiagnosticsLoading: false });
@@ -283,58 +351,24 @@ async function fetchFleetData() {
   updateSnapshot({ fleetLoading: true, fleetError: null });
 
   try {
-    const { monitors: fleetMonitors, latencyPoints: fleetLatencyPoints } = await loadFleetAnalytics();
+    const data = await loadFleetStatus();
     if (requestId !== activeFleetRequestId) return;
-
     updateSnapshot({
-      fleetMonitors,
-      fleetSummary: buildFleetSummary(fleetMonitors),
-      fleetLatencyPoints,
+      fleetMonitors: data.monitors,
+      fleetLatencyPoints: data.latencyPoints,
+      fleetSummary: buildFleetSummary(data.monitors),
     });
-  } catch (e) {
+  } catch (error) {
     if (requestId !== activeFleetRequestId) return;
-    updateSnapshot({ fleetError: e instanceof Error ? e.message : 'Failed to fetch fleet status' });
+    updateSnapshot({ fleetError: errorMessage(error, 'Failed to fetch fleet status') });
   } finally {
-    if (requestId === activeFleetRequestId) {
-      updateSnapshot({ fleetLoading: false });
-    }
+    if (requestId === activeFleetRequestId) updateSnapshot({ fleetLoading: false });
   }
 }
 
 function restartRefreshTimer() {
-  if (refreshTimer) {
-    clearInterval(refreshTimer);
-  }
-
-  refreshTimer = setInterval(() => {
-    void fetchData(snapshot.period);
-  }, REFRESH_INTERVAL_MS);
-}
-
-export function setDashboardPeriod(period: Period) {
-  if (period === snapshot.period) return;
-
-  updateSnapshot({ period });
-  void fetchData(period);
-  if (snapshot.selectedTenantId) {
-    void fetchTenantData(snapshot.selectedTenantId, period);
-  }
-  restartRefreshTimer();
-}
-
-export function selectDashboardTenant(tenantId: string | null) {
-  activeTenantRequestId++;
-
-  updateSnapshot({
-    selectedTenantId: tenantId,
-    tenantDiagnostics: null,
-    tenantDiagnosticsLoading: Boolean(tenantId),
-    tenantDiagnosticsError: null,
-  });
-
-  if (tenantId) {
-    void fetchTenantData(tenantId, snapshot.period);
-  }
+  if (refreshTimer) clearInterval(refreshTimer);
+  refreshTimer = setInterval(() => void fetchFinancialData(snapshot.period), REFRESH_INTERVAL_MS);
 }
 
 function subscribe(listener: () => void) {
@@ -348,7 +382,28 @@ function getSnapshot() {
   return snapshot;
 }
 
-void fetchData(snapshot.period);
+export function setDashboardPeriod(period: Period) {
+  if (period === snapshot.period) return;
+
+  updateSnapshot({ period });
+  void fetchFinancialData(period);
+  if (snapshot.selectedTenantId) void fetchTenantData(snapshot.selectedTenantId, period);
+  restartRefreshTimer();
+}
+
+export function selectDashboardTenant(tenantId: string | null) {
+  activeTenantRequestId++;
+  updateSnapshot({
+    selectedTenantId: tenantId,
+    tenantDiagnostics: null,
+    tenantDiagnosticsLoading: Boolean(tenantId),
+    tenantDiagnosticsError: null,
+  });
+
+  if (tenantId) void fetchTenantData(tenantId, snapshot.period);
+}
+
+void fetchFinancialData(snapshot.period);
 void fetchFleetData();
 restartRefreshTimer();
 

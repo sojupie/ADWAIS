@@ -11,10 +11,11 @@ public class GlobalConfig
     public string? UptimeRobotApiKey { get; set; }
     public int UptimeFetchIntervalMinutes { get; set; }
     public int LatencyFetchIntervalMinutes { get; set; }
+    public int UserStatsFetchIntervalMinutes { get; set; }
     public int SystemEventRetentionDays { get; set; }
     
-    // Live telemetry from external APIs; do not persist.
     public int? MonitorsCount { get; set; }
     public int? MonitorsLimit { get; set; }
     public string? ActiveSubscription { get; set; }
+    public string? LastSyncError { get; set; }
 }

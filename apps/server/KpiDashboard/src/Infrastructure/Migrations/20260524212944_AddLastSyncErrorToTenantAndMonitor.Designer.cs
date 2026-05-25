@@ -3,6 +3,7 @@ using System;
 using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AnalyticsDbContext))]
-    partial class AnalyticsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260524212944_AddLastSyncErrorToTenantAndMonitor")]
+    partial class AddLastSyncErrorToTenantAndMonitor
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -32,17 +35,9 @@ namespace Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("ActiveSubscription")
-                        .HasColumnType("text")
-                        .HasColumnName("active_subscription");
-
                     b.Property<DateTimeOffset?>("LastPolled")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_polled");
-
-                    b.Property<string>("LastSyncError")
-                        .HasColumnType("text")
-                        .HasColumnName("last_sync_error");
 
                     b.Property<int?>("LatencyDegradedFloor")
                         .HasColumnType("integer")
@@ -63,14 +58,6 @@ namespace Infrastructure.Migrations
                     b.Property<int>("LitiumFetchIntervalMinutes")
                         .HasColumnType("integer")
                         .HasColumnName("litium_fetch_interval_minutes");
-
-                    b.Property<int?>("MonitorsCount")
-                        .HasColumnType("integer")
-                        .HasColumnName("monitors_count");
-
-                    b.Property<int?>("MonitorsLimit")
-                        .HasColumnType("integer")
-                        .HasColumnName("monitors_limit");
 
                     b.Property<int>("SystemEventRetentionDays")
                         .ValueGeneratedOnAdd()
@@ -94,12 +81,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("boolean")
                         .HasDefaultValue(true)
                         .HasColumnName("uptime_robot_fetch_enabled");
-
-                    b.Property<int>("UserStatsFetchIntervalMinutes")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(60)
-                        .HasColumnName("user_stats_fetch_interval_minutes");
 
                     b.HasKey("Id")
                         .HasName("pk_global_config");

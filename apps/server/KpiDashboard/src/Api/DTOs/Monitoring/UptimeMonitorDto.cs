@@ -12,4 +12,5 @@ public record UptimeMonitorDto(
     DateTimeOffset? LastUpdate,
     DateTimeOffset? LastUptimeUpdate,
     DateTimeOffset? LastLatencyUpdate,
-    DateTimeOffset CreatedDate);
+    DateTimeOffset CreatedDate,
+    string? LastSyncError);

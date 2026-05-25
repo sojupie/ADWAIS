@@ -1,0 +1,23 @@
+using System;
+
+namespace Api.DTOs.System;
+
+public record SystemHealthDto(
+    string DatabaseStatus,
+    HangfireHealthDto Hangfire,
+    SyncHealthDto Sync,
+    DateTimeOffset? LastGlobalPoll
+);
+
+public record HangfireHealthDto(
+    long FailedCount,
+    long ProcessingCount,
+    long EnqueuedCount,
+    long ScheduledCount
+);
+
+public record SyncHealthDto(
+    int TenantsWithErrorsCount,
+    int MonitorsWithErrorsCount,
+    string? GlobalSyncError
+);

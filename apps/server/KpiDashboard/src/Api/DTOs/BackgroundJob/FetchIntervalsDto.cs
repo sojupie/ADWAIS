@@ -6,4 +6,5 @@ public class FetchIntervalsDto
     public int UptimeFetchIntervalMinutes { get; set; }
     public int StatusFetchIntervalMinutes { get; set; }
     public int LitiumFetchIntervalMinutes { get; set; }
+    public int UserStatsFetchIntervalMinutes { get; set; }
 }

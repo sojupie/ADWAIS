@@ -207,12 +207,10 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options) : 
             entity.Property(x => x.UptimeRobotApiKey).HasMaxLength(1024);
             entity.Property(x => x.UptimeFetchIntervalMinutes).HasDefaultValue(60);
             entity.Property(x => x.LatencyFetchIntervalMinutes).HasDefaultValue(10);
+            entity.Property(x => x.UserStatsFetchIntervalMinutes).HasDefaultValue(60);
             entity.Property(x => x.SystemEventRetentionDays).HasDefaultValue(30);
             entity.Property(x => x.LitiumFetchEnabled).HasDefaultValue(true);
             entity.Property(x => x.UptimeRobotFetchEnabled).HasDefaultValue(true);
-            entity.Ignore(x => x.MonitorsCount);
-            entity.Ignore(x => x.MonitorsLimit);
-            entity.Ignore(x => x.ActiveSubscription);
         });
         
         // User

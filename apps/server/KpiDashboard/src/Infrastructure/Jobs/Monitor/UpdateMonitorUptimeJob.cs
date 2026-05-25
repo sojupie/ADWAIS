@@ -13,36 +13,42 @@ public class UpdateMonitorUptimeJob(
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var monitor = await dbContext.Monitors.FirstOrDefaultAsync(m => m.Id == monitorId);
 
-        if (monitor == null || !monitor.UptimeMonitorEnabled)
+        if (monitor == null || !monitor.UptimeMonitorEnabled) return;
+
+        try
         {
-            return; // Deleted or paused
-        }
+            var uptime = await uptimeRobotService.GetUptimeAsync(monitorId, startDate, endDate);
 
-        var uptime = await uptimeRobotService.GetUptimeAsync(monitorId, startDate, endDate);
+            monitor.CurrentUptimePercentage = uptime;
+            monitor.LastUptimeUpdate = endDate;
+            monitor.LastSyncError = null;
 
-        monitor.CurrentUptimePercentage = uptime;
-        monitor.LastUptimeUpdate = endDate;
+            var date = new DateTimeOffset(startDate.Year, startDate.Month, startDate.Day, 0, 0, 0, TimeSpan.Zero);
+            var availability = await dbContext.MonitorAvailabilities
+                .FirstOrDefaultAsync(ma => ma.MonitorId == monitorId && ma.Date == date);
 
-        // Persist historical uptime for rollups
-        var date = new DateTimeOffset(startDate.Year, startDate.Month, startDate.Day, 0, 0, 0, TimeSpan.Zero);
-        var availability = await dbContext.MonitorAvailabilities
-            .FirstOrDefaultAsync(ma => ma.MonitorId == monitorId && ma.Date == date);
-
-        if (availability == null)
-        {
-            availability = new MonitorAvailability
+            if (availability == null)
             {
-                MonitorId = monitorId,
-                Date = date,
-                UptimePercentage = uptime
-            };
-            dbContext.MonitorAvailabilities.Add(availability);
-        }
-        else
-        {
-            availability.UptimePercentage = uptime;
-        }
+                availability = new MonitorAvailability
+                {
+                    MonitorId = monitorId,
+                    Date = date,
+                    UptimePercentage = uptime
+                };
+                dbContext.MonitorAvailabilities.Add(availability);
+            }
+            else
+            {
+                availability.UptimePercentage = uptime;
+            }
         
-        await dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            monitor.LastSyncError = ex.Message;
+            await dbContext.SaveChangesAsync();
+            throw;
+        }
     }
 }

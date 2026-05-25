@@ -47,7 +47,6 @@ public class MonitorController(
     /// </summary>
     /// <param name="tenantId">Optional tenant ID to filter by.</param>
     /// <param name="id">Optional monitor ID to retrieve a single monitor.</param>
-    /// <returns>A list of monitors with live status.</returns>
     [HttpGet]
     public async Task<ActionResult<IEnumerable<UptimeMonitorDto>>> GetMonitors(
         [FromQuery] Guid? tenantId,
@@ -86,7 +85,7 @@ public class MonitorController(
     }
 
     /// <summary>
-    /// Retrieves monitors that are not assigned to any specific tenant (assigned to the system tenant).
+    /// Retrieves monitors that are not assigned to any specific tenant.
     /// </summary>
     [HttpGet("unassigned")]
     public async Task<ActionResult<IEnumerable<UptimeMonitorDto>>> GetUnassignedMonitors()
@@ -98,8 +97,6 @@ public class MonitorController(
     /// <summary>
     /// Creates a new uptime monitor in UptimeRobot and registers it in the system.
     /// </summary>
-    /// <param name="tenantId">The tenant to assign the new monitor to.</param>
-    /// <param name="request">The monitor configuration.</param>
     [HttpPost]
     public async Task<ActionResult<UptimeMonitorDto>> CreateMonitor(
         [FromQuery] Guid tenantId,
@@ -112,8 +109,6 @@ public class MonitorController(
     /// <summary>
     /// Reassigns a monitor to a different tenant.
     /// </summary>
-    /// <param name="id">The monitor ID.</param>
-    /// <param name="tenantId">The new tenant ID.</param>
     [HttpPatch("{id:int}/assign/{tenantId:guid}")]
     public async Task<IActionResult> AssignMonitor(int id, Guid tenantId)
     {
@@ -124,7 +119,6 @@ public class MonitorController(
     /// <summary>
     /// Moves a monitor to the unassigned (system) tenant.
     /// </summary>
-    /// <param name="id">The monitor ID.</param>
     [HttpPatch("{id:int}/unassign")]
     public async Task<IActionResult> UnassignMonitor(int id)
     {
@@ -135,7 +129,6 @@ public class MonitorController(
     /// <summary>
     /// Pauses monitoring for a specific monitor in UptimeRobot.
     /// </summary>
-    /// <param name="id">The monitor ID.</param>
     [HttpPost("{id:int}/pause")]
     public async Task<IActionResult> PauseMonitor(int id)
     {
@@ -146,7 +139,6 @@ public class MonitorController(
     /// <summary>
     /// Resumes monitoring for a specific monitor in UptimeRobot.
     /// </summary>
-    /// <param name="id">The monitor ID.</param>
     [HttpPost("{id:int}/start")]
     public async Task<IActionResult> StartMonitor(int id)
     {
@@ -157,8 +149,6 @@ public class MonitorController(
     /// <summary>
     /// Deletes a monitor from both the system and UptimeRobot.
     /// </summary>
-    /// <param name="id">The monitor ID.</param>
-    /// <param name="tenantId">Optional tenant ID for validation.</param>
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteMonitor(int id, [FromQuery] Guid? tenantId)
     {
@@ -177,10 +167,6 @@ public class MonitorController(
     /// <summary>
     /// Retrieves aggregated latency metrics for a specific monitor.
     /// </summary>
-    /// <param name="id">The monitor ID.</param>
-    /// <param name="from">Start of the time range.</param>
-    /// <param name="to">End of the time range.</param>
-    /// <param name="tenantId">Optional tenant ID for validation.</param>
     [HttpGet("{id:int}/latency")]
     public async Task<ActionResult<IEnumerable<LatencyMetricsDto>>> GetLatencyMetrics(
         int id,
@@ -201,8 +187,6 @@ public class MonitorController(
     /// <summary>
     /// Updates monitor properties, such as SLA.
     /// </summary>
-    /// <param name="id">The monitor ID.</param>
-    /// <param name="request">The update details.</param>
     [HttpPatch("{id:int}")]
     public async Task<ActionResult<UptimeMonitorDto>> UpdateMonitor(int id, [FromBody] UpdateMonitorRequestDto request)
     {
@@ -230,6 +214,7 @@ public class MonitorController(
             LastUpdate: m.LastUpdate,
             LastUptimeUpdate: m.LastUptimeUpdate,
             LastLatencyUpdate: m.LastLatencyUpdate,
-            CreatedDate: m.CreatedDate);
+            CreatedDate: m.CreatedDate,
+            LastSyncError: m.LastSyncError);
     }
 }

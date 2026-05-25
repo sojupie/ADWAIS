@@ -1,35 +1,75 @@
-﻿using Microsoft.AspNetCore.Diagnostics;
+﻿using Infrastructure.Services;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Exceptions;
 
-public class GlobalExceptionHandler : IExceptionHandler
+/// <summary>
+/// Intercepts all unhandled exceptions to provide consistent ProblemDetails responses 
+/// and persist audit logs to the database.
+/// </summary>
+public class GlobalExceptionHandler(
+    ILogger<GlobalExceptionHandler> logger,
+    IServiceProvider serviceProvider) : IExceptionHandler
 {
-    private readonly ILogger<GlobalExceptionHandler> _logger;
-
-    public GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger)
-    {
-        _logger = logger;
-    }
-
     public async ValueTask<bool> TryHandleAsync(
         HttpContext httpContext,
         Exception exception,
         CancellationToken cancellationToken)
     {
-        _logger.LogError(exception, "Exception occurred: {Message}", exception.Message);
+        // Resolve SystemEventService via scope since the handler might be registered as a singleton
+        using var scope = serviceProvider.CreateScope();
+        var eventService = scope.ServiceProvider.GetRequiredService<ISystemEventService>();
+
+        var (statusCode, title, type) = MapException(exception);
+
+        logger.LogError(exception, "Unhandled exception occurred: {Message}", exception.Message);
+        await eventService.LogErrorAsync("GlobalExceptionHandler", exception.Message, exception);
 
         var problemDetails = new ProblemDetails
         {
-            Status = StatusCodes.Status500InternalServerError,
-            Title = "Internal Server Error",
-            Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.6.1"
-            // Omit exception.Message in production to prevent data leakage.
+            Status = statusCode,
+            Title = title,
+            Type = type,
+            Instance = httpContext.Request.Path,
+            Detail = exception.Message
         };
 
-        httpContext.Response.StatusCode = problemDetails.Status.Value;
+        httpContext.Response.StatusCode = statusCode;
         await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
 
         return true;
+    }
+
+    private static (int StatusCode, string Title, string Type) MapException(Exception exception)
+    {
+        return exception switch
+        {
+            ArgumentException or InvalidOperationException => (
+                StatusCodes.Status400BadRequest,
+                "Bad Request",
+                "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1"
+            ),
+            KeyNotFoundException => (
+                StatusCodes.Status404NotFound,
+                "Not Found",
+                "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.4"
+            ),
+            UnauthorizedAccessException => (
+                StatusCodes.Status401Unauthorized,
+                "Unauthorized",
+                "https://datatracker.ietf.org/doc/html/rfc7235#section-3.1"
+            ),
+            HttpRequestException httpEx when httpEx.StatusCode == System.Net.HttpStatusCode.NotFound => (
+                StatusCodes.Status404NotFound,
+                "Downstream Resource Not Found",
+                "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.4"
+            ),
+            _ => (
+                StatusCodes.Status500InternalServerError,
+                "Internal Server Error",
+                "https://datatracker.ietf.org/doc/html/rfc7231#section-6.6.1"
+            )
+        };
     }
 }

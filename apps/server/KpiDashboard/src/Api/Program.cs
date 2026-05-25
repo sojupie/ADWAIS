@@ -130,6 +130,7 @@ using (var connection = JobStorage.Current.GetConnection())
         var uptimeInterval = config?.UptimeFetchIntervalMinutes ?? 60;
         var latencyInterval = config?.LatencyFetchIntervalMinutes ?? 10;
         var litiumFetchInterval = Math.Max(1, config?.LitiumFetchIntervalMinutes ?? 10);
+        var userStatsInterval = config?.UserStatsFetchIntervalMinutes ?? 60;
         
         recurringJobManager.AddOrUpdate<UptimeDispatcherJob>(
                 "dispatch-uptimerobot-uptime",
@@ -146,6 +147,11 @@ using (var connection = JobStorage.Current.GetConnection())
             newJob => newJob.ExecuteAsync(),
             CronHelper.FromMinutes(litiumFetchInterval));
 
+        recurringJobManager.AddOrUpdate<UpdateGlobalUptimeRobotUserStatsJob>(
+            "sync-uptimerobot-account-stats",
+            newJob => newJob.ExecuteAsync(),
+            CronHelper.FromMinutes(userStatsInterval));
+
         recurringJobManager.AddOrUpdate<RefreshMonitoringMaterializedViewJob>(
             "refresh-monitoring-materialized-views",
             newJob => newJob.ExecuteAsync(),
@@ -159,7 +165,7 @@ using (var connection = JobStorage.Current.GetConnection())
         recurringJobManager.AddOrUpdate<SystemEventCleanupJob>(
             "system-event-cleanup",
             newJob => newJob.ExecuteAsync(),
-            Cron.Daily(2)); // Run daily at 02:00
+            Cron.Daily(2));
     }
 }
 

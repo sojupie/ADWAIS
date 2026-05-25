@@ -20,10 +20,8 @@ public class TenantController(
 {
     /// <summary>
     /// Retrieves tenants, optionally filtered by ID.
-    /// If an ID is provided, monitor status is hydrated.
     /// </summary>
     /// <param name="id">Optional tenant ID to retrieve a single tenant.</param>
-    /// <returns>A list of tenants or a single tenant if ID is provided.</returns>
     [HttpGet]
     public async Task<ActionResult<IEnumerable<TenantResponseDto>>> GetTenants([FromQuery] Guid? id)
     {
@@ -44,11 +42,14 @@ public class TenantController(
                     FetchedUntil = t.FetchedUntil,
                     LastPolled = t.LastPolled,
                     OrderFetchingEnabled = t.OrderFetchingEnabled,
-                    MonitorCount = t.Monitors.Count
+                    MonitorCount = t.Monitors.Count,
+                    LastSyncError = t.LastSyncError
                 })
                 .SingleOrDefaultAsync();
 
-            return Ok(tenant);
+            if (tenant == null) return Ok(Enumerable.Empty<TenantResponseDto>());
+
+            return Ok(new[] { tenant });
         }
 
         var tenants = await context.Tenants
@@ -63,7 +64,8 @@ public class TenantController(
                 FetchedUntil = t.FetchedUntil,
                 LastPolled = t.LastPolled,
                 OrderFetchingEnabled = t.OrderFetchingEnabled,
-                MonitorCount = t.Monitors.Count
+                MonitorCount = t.Monitors.Count,
+                LastSyncError = t.LastSyncError
             })
             .ToListAsync();
 
@@ -73,9 +75,6 @@ public class TenantController(
     /// <summary>
     /// Creates a new tenant.
     /// </summary>
-    /// <param name="request">The tenant configuration details.</param>
-    /// <returns>The newly created tenant.</returns>
-    /// <response code="400">If the request is invalid (handled by ValidationFilter).</response>
     [HttpPost]
     public async Task<IActionResult> CreateTenant([FromBody] CreateTenantRequestDto request)
     {
@@ -101,14 +100,14 @@ public class TenantController(
                 FetchedFrom = tenant.FetchedFrom,
                 FetchedUntil = tenant.FetchedUntil,
                 LastPolled = tenant.LastPolled,
-                OrderFetchingEnabled = tenant.OrderFetchingEnabled
+                OrderFetchingEnabled = tenant.OrderFetchingEnabled,
+                LastSyncError = tenant.LastSyncError
             });
     }
 
     /// <summary>
     /// Deletes a tenant and reassigns its monitors to the system tenant.
     /// </summary>
-    /// <param name="id">The ID of the tenant to delete.</param>
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteTenant(Guid id)
     {
@@ -134,8 +133,6 @@ public class TenantController(
     /// <summary>
     /// Partially updates a tenant's configuration.
     /// </summary>
-    /// <param name="id">The ID of the tenant to update.</param>
-    /// <param name="request">The fields to update.</param>
     [HttpPatch("{id:guid}")]
     public async Task<IActionResult> UpdateTenant(Guid id, [FromBody] UpdateTenantRequestDto request)
     {
@@ -174,7 +171,8 @@ public class TenantController(
             FetchedFrom = tenant.FetchedFrom,
             FetchedUntil = tenant.FetchedUntil,
             LastPolled = tenant.LastPolled,
-            OrderFetchingEnabled = tenant.OrderFetchingEnabled
+            OrderFetchingEnabled = tenant.OrderFetchingEnabled,
+            LastSyncError = tenant.LastSyncError
         });
     }
 
@@ -192,6 +190,7 @@ public class TenantController(
             LastUpdate: m.LastUpdate,
             LastUptimeUpdate: m.LastUptimeUpdate,
             LastLatencyUpdate: m.LastLatencyUpdate,
-            CreatedDate: m.CreatedDate);
+            CreatedDate: m.CreatedDate,
+            LastSyncError: m.LastSyncError);
     }
 }

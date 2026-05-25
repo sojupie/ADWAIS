@@ -111,7 +111,7 @@ const INITIAL_SNAPSHOT: DashboardDataSnapshot = {
 const api = {
   tenants: {
     list: '/api/tenants',
-    byId: (tenantId: string) => `/api/tenants/${encodeURIComponent(tenantId)}`,
+    byId: (tenantId: string) => `/api/tenants?id=${encodeURIComponent(tenantId)}`,
   },
   financial: {
     kpis: (query: string) => `/api/financial/kpis?${query}`,
@@ -234,14 +234,16 @@ async function loadTenantDiagnostics(tenantId: string, period: Period): Promise<
   const tenantQuery = financialQuery(timeframe, tenantId);
   const globalQuery = financialQuery(timeframe);
 
-  const [tenant, kpi, velocity, portfolioVelocity, cumulativeGrowthDelta, orderDistribution] = await Promise.all([
-    fetchJson<TenantResponse>(api.tenants.byId(tenantId)),
+  const [tenants, kpi, velocity, portfolioVelocity, cumulativeGrowthDelta, orderDistribution] = await Promise.all([
+    fetchJson<TenantResponse[]>(api.tenants.byId(tenantId)),
     fetchJson<FinancialKpi>(api.financial.kpis(tenantQuery)),
     fetchJson<FinancialVelocityResponsePoint[]>(api.financial.velocity(tenantQuery)),
     fetchJson<FinancialVelocityResponsePoint[]>(api.financial.velocity(globalQuery)),
     fetchJson<CumulativeGrowthDeltaResponsePoint[]>(api.financial.cumulativeGrowthDelta(tenantQuery)),
     fetchJson<OrderBin[]>(api.financial.orderDistribution(tenantQuery)),
   ]);
+  const tenant = tenants[0];
+  if (!tenant) throw new Error(`Tenant not found - ${tenantId}`);
 
   return {
     tenantId: tenant.id,

@@ -34,6 +34,14 @@ export function TenantRevenueVelocityChart({ points }: { points: FinancialVeloci
       title="Revenue Velocity Over Time"
       className="tenant-diagnostics__chart-panel"
       bodyClassName="tenant-revenue-velocity-chart"
+      legend={
+        <div className="chart-panel__legend">
+          <span className="tenant-revenue-velocity-chart__legend-dot tenant-revenue-velocity-chart__legend-dot--current" />
+          <span>Current</span>
+          <span className="tenant-revenue-velocity-chart__legend-dot tenant-revenue-velocity-chart__legend-dot--previous" />
+          <span>Previous</span>
+        </div>
+      }
     >
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={points} margin={{ top: 8, right: 10, left: 8, bottom: 20 }}>

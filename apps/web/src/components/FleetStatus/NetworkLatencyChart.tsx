@@ -54,7 +54,7 @@ export function NetworkLatencyChart({ points }: { points: LatencyPoint[] }) {
         <div className="chart-panel__legend">
           <span className="network-latency-chart__legend-dot network-latency-chart__legend-dot--avg" />
           <span>Avg Latency</span>
-          <span className="network-latency-chart__legend-dot network-latency-chart__legend-dot--p95" />
+          <span className="network-latency-chart__legend-dot network-latency-chart__legend-dot--previous" />
           <span>Previous Avg</span>
         </div>
       }
@@ -83,7 +83,7 @@ export function NetworkLatencyChart({ points }: { points: LatencyPoint[] }) {
             <Line
               type="monotone"
               dataKey="previousAverage"
-              className="network-latency-chart__p95-line"
+              stroke="var(--chart-ghost)"
               strokeWidth={2}
               strokeDasharray="4 3"
               dot={showDots ? { r: 3, strokeWidth: 0 } : false}
@@ -92,7 +92,7 @@ export function NetworkLatencyChart({ points }: { points: LatencyPoint[] }) {
             <Line
               type="monotone"
               dataKey="average"
-              className="network-latency-chart__avg-line"
+              stroke="var(--chart-line)"
               strokeWidth={2.8}
               dot={showDots ? { r: 4, strokeWidth: 0 } : false}
               activeDot={{ r: 4, fill: 'var(--chart-line)', strokeWidth: 0 }}

@@ -1,3 +1,19 @@
 .tenant-revenue-velocity-chart {
   min-height: 0;
 }
+
+.tenant-revenue-velocity-chart__legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  display: inline-block;
+  flex: 0 0 auto;
+}
+
+.tenant-revenue-velocity-chart__legend-dot--current {
+  background: var(--chart-line);
+}
+
+.tenant-revenue-velocity-chart__legend-dot--previous {
+  background: var(--chart-ghost);
+}

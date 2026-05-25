@@ -2,14 +2,6 @@
   min-height: 0;
 }
 
-.network-latency-chart__avg-line {
-  stroke: var(--chart-line);
-}
-
-.network-latency-chart__p95-line {
-  stroke: var(--chart-ghost);
-}
-
 .network-latency-chart__legend-dot {
   width: 8px;
   height: 8px;
@@ -21,7 +13,7 @@
   background: var(--chart-line);
 }
 
-.network-latency-chart__legend-dot--p95 {
+.network-latency-chart__legend-dot--previous {
   border: 2px solid var(--chart-ghost);
 }
 

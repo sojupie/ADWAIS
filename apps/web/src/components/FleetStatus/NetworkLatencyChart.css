@@ -14,7 +14,7 @@
 }
 
 .network-latency-chart__legend-dot--previous {
-  border: 2px solid var(--chart-ghost);
+  background: var(--chart-ghost);
 }
 
 .network-latency-chart__empty {

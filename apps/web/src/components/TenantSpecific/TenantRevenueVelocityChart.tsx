@@ -19,7 +19,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     <div className="chart-panel-tooltip">
       <p className="chart-panel-tooltip__label">{label}</p>
       {payload.map((entry: any) => (
-        <p key={entry.dataKey} style={{ color: entry.color }}>
+        <p key={entry.dataKey}>
           {entry.dataKey === 'currentRevenue' ? 'Current' : 'Previous'}:{' '}
           <strong>{formatCompact(entry.value)} SEK</strong>
         </p>

@@ -150,102 +150,59 @@ public class MonitorOrchestrationService(
                 query = query.Where(rt => rt.UptimeMonitor!.TenantId != AnalyticsDbContext.SystemTenantGuid);
 
             var grouped = await query
-                .GroupBy(rt => new {
-                    rt.Date.Year,
-                    rt.Date.Month,
-                    rt.Date.Day,
-                    rt.Date.Hour
-                })
-                .Select(g => new {
-                    g.Key.Year,
-                    g.Key.Month,
-                    g.Key.Day,
-                    g.Key.Hour,
-                    Avg = g.Average(rt => rt.Average) ?? 0,
-                    Min = g.Min(rt => rt.Lowest) ?? 0,
-                    Max = g.Max(rt => rt.Highest) ?? 0
-                })
+                .GroupBy(rt => new { rt.Date.Year, rt.Date.Month, rt.Date.Day, rt.Date.Hour })
+                .Select(g => new LatencyRow(
+                    new DateTime(g.Key.Year, g.Key.Month, g.Key.Day, g.Key.Hour, 0, 0),
+                    g.Average(rt => rt.Average ?? 0),
+                    g.Min(rt => rt.Lowest ?? 0),
+                    g.Max(rt => rt.Highest ?? 0)
+                ))
                 .ToListAsync();
-
-            return grouped.Select(x => new LatencyRow(
-                new DateTime(x.Year, x.Month, x.Day, x.Hour, 0, 0, DateTimeKind.Utc), 
-                x.Avg,
-                x.Min,
-                x.Max))
-                .ToList();
+            return grouped;
         }
 
         var yesterday = new DateTimeOffset(DateTimeOffset.UtcNow.Date);
         var viewEnd = yesterday < end ? yesterday : end;
 
-        List<LatencyRow> historical;
+        var histQuery = db.DailyLatencyMonitorRollups.AsNoTracking().Where(r => r.Date >= start && r.Date < viewEnd);
         if (monitorId.HasValue)
-        {
-            var raw = await db.DailyLatencyMonitorRollups
-                .AsNoTracking()
-                .Where(r => r.MonitorId == monitorId.Value && r.Date >= start && r.Date < viewEnd)
-                .Select(r => new { r.Date, r.Average, r.Lowest, r.Highest })
-                .ToListAsync();
-            historical = raw.Select(r => new LatencyRow(r.Date.UtcDateTime, r.Average ?? 0, r.Lowest ?? 0, r.Highest ?? 0)).ToList();
-        }
+            histQuery = histQuery.Where(r => r.MonitorId == monitorId.Value);
         else if (tenantId.HasValue)
-        {
-            var raw = await db.DailyLatencyTenantRollups
-                .AsNoTracking()
-                .Where(r => r.TenantId == tenantId.Value && r.Date >= start && r.Date < viewEnd)
-                .Select(r => new { r.Date, r.Average, r.Lowest, r.Highest })
-                .ToListAsync();
-            historical = raw.Select(r => new LatencyRow(r.Date.UtcDateTime, r.Average ?? 0, r.Lowest ?? 0, r.Highest ?? 0)).ToList();
-        }
+            histQuery = histQuery.Where(r => r.UptimeMonitor.TenantId == tenantId.Value);
         else
-        {
-            var raw = await db.DailyLatencyGlobalRollups
-                .AsNoTracking()
-                .Where(r => r.Date >= start && r.Date < viewEnd)
-                .Select(r => new { r.Date, r.Average, r.Lowest, r.Highest })
-                .ToListAsync();
-            historical = raw.Select(r => new LatencyRow(r.Date.UtcDateTime, r.Average ?? 0, r.Lowest ?? 0, r.Highest ?? 0)).ToList();
-        }
+            histQuery = histQuery.Where(r => r.UptimeMonitor.TenantId != AnalyticsDbContext.SystemTenantGuid);
+
+        var historical = await histQuery
+            .Select(r => new LatencyRow(r.Date.DateTime, r.Average ?? 0, r.Lowest ?? 0, r.Highest ?? 0))
+            .ToListAsync();
 
         if (yesterday < end)
         {
-            var query = db.ResponseTimes.AsNoTracking().Where(rt => rt.Date >= yesterday && rt.Date < end);
-            if (monitorId.HasValue) 
-                query = query.Where(rt => rt.MonitorId == monitorId.Value);
-            else if (tenantId.HasValue) 
-                query = query.Where(rt => rt.UptimeMonitor!.TenantId == tenantId.Value);
-            else 
-                query = query.Where(rt => rt.UptimeMonitor!.TenantId != AnalyticsDbContext.SystemTenantGuid);
+            var liveQuery = db.ResponseTimes.AsNoTracking().Where(rt => rt.Date >= yesterday && rt.Date < end);
+            if (monitorId.HasValue)
+                liveQuery = liveQuery.Where(rt => rt.MonitorId == monitorId.Value);
+            else if (tenantId.HasValue)
+                liveQuery = liveQuery.Where(rt => rt.UptimeMonitor!.TenantId == tenantId.Value);
+            else
+                liveQuery = liveQuery.Where(rt => rt.UptimeMonitor!.TenantId != AnalyticsDbContext.SystemTenantGuid);
 
-            var freshRows = await query
-                .GroupBy(rt => new { rt.Date.Year, rt.Date.Month, rt.Date.Day })
-                .Select(g => new {
-                    g.Key.Year,
-                    g.Key.Month,
-                    g.Key.Day,
-                    Avg = g.Average(rt => rt.Average) ?? 0,
-                    Min = g.Min(rt => rt.Lowest) ?? 0,
-                    Max = g.Max(rt => rt.Highest) ?? 0
-                })
+            var fresh = await liveQuery
+                .GroupBy(rt => rt.Date.Date)
+                .Select(g => new LatencyRow(
+                    g.Key,
+                    g.Average(rt => rt.Average ?? 0),
+                    g.Min(rt => rt.Lowest ?? 0),
+                    g.Max(rt => rt.Highest ?? 0)
+                ))
                 .ToListAsync();
-            
-            historical.AddRange(freshRows.Select(x => new LatencyRow(
-                new DateTime(x.Year, x.Month, x.Day, 0, 0, 0, DateTimeKind.Utc), 
-                x.Avg,
-                x.Min,
-                x.Max)));
+            historical.AddRange(fresh);
         }
+
         return historical;
     }
 
     public async Task<UptimeMonitor> CreateMonitorAsync(Guid tenantId, string name, string url, double? uptimeSla)
     {
-        var tenantExists = await dbContext.Tenants.AnyAsync(t => t.Id == tenantId);
-        if (!tenantExists) throw new KeyNotFoundException($"Tenant {tenantId} not found.");
-
-        var monitorExists = await dbContext.Monitors.AnyAsync(m => m.Url == url && m.TenantId == tenantId);
-        if (monitorExists) throw new InvalidOperationException($"A monitor with URL {url} already exists.");
-
         var remoteMonitor = await uptimeRobotService.CreateMonitorAsync(name, url);
         
         var monitor = new UptimeMonitor
@@ -286,23 +243,44 @@ public class MonitorOrchestrationService(
             .ExecuteUpdateAsync(s => s.SetProperty(m => m.TenantId, AnalyticsDbContext.SystemTenantGuid));
     }
 
-    public async Task<IEnumerable<UptimeMonitor>> GetMonitorsByTenantAsync(Guid tenantId)
+    public async Task<IEnumerable<UptimeMonitor>> GetMonitorsByTenantAsync(Guid tenantId, Timeframe timeframe = Timeframe.T30)
     {
+        var (start, end, _, _, _, _) = TimeframeResolver.Resolve(timeframe);
+        
         var monitors = await dbContext.Monitors
             .AsNoTracking()
             .Where(m => m.TenantId == tenantId)
             .ToListAsync();
 
-        return monitors.Select(HydrateLiveStatus);
+        var uptimes = await GetPeriodUptimesAsync(start, end, tenantId, null);
+
+        foreach (var m in monitors)
+        {
+            HydrateLiveStatus(m);
+            if (uptimes.TryGetValue(m.Id, out var uptime))
+            {
+                m.CurrentUptimePercentage = uptime;
+            }
+        }
+
+        return monitors;
     }
 
-    public async Task<UptimeMonitor> GetMonitorAsync(Guid tenantId, int id)
+    public async Task<UptimeMonitor> GetMonitorAsync(Guid tenantId, int id, Timeframe timeframe = Timeframe.T30)
     {
+        var (start, end, _, _, _, _) = TimeframeResolver.Resolve(timeframe);
+
         var monitor = await dbContext.Monitors
             .AsNoTracking()
             .SingleOrDefaultAsync(m => m.TenantId == tenantId && m.Id == id);
 
         if (monitor == null) throw new KeyNotFoundException($"Monitor {id} not found.");
+
+        var uptimes = await GetPeriodUptimesAsync(start, end, null, id);
+        if (uptimes.TryGetValue(id, out var uptime))
+        {
+            monitor.CurrentUptimePercentage = uptime;
+        }
 
         return HydrateLiveStatus(monitor);
     }

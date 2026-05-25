@@ -185,6 +185,7 @@ public class TenantController(
             Url: m.Url,
             UpdateInterval: m.UpdateInterval,
             UptimeSla: m.UptimeSla,
+            CurrentUptimePercentage: m.CurrentUptimePercentage,
             UptimeMonitorEnabled: m.UptimeMonitorEnabled,
             CurrentStatus: m.StatusStr, // Hydrated by service
             LastUpdate: m.LastUpdate,

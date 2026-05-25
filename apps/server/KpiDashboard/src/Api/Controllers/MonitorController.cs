@@ -19,15 +19,12 @@ public class MonitorController(
 {
     /// <summary>
     /// Unified analytics endpoint for monitoring data.
-    /// Provides latency time-series and filtered monitor lists.
+    /// Provides latency time-series and filtered monitor lists hydrated with uptime for the specified timeframe (defaults to T30).
     /// </summary>
     [HttpGet("analytics")]
-    public async Task<ActionResult<MonitorAnalyticsResponseDto>> GetAnalytics(
-        [FromQuery] Timeframe timeframe,
-        [FromQuery] Guid? tenantId,
-        [FromQuery] int? monitorId)
+    public async Task<ActionResult<MonitorAnalyticsResponseDto>> GetAnalytics([FromQuery] MonitorRequestDto request)
     {
-        var result = await monitorService.GetAnalyticsAsync(timeframe, tenantId, monitorId);
+        var result = await monitorService.GetAnalyticsAsync(request.Timeframe, request.TenantId, request.MonitorId);
 
         return Ok(new MonitorAnalyticsResponseDto(
             result.LatencyPoints.Select(p => new LatencyPointResponseDto(
@@ -43,41 +40,41 @@ public class MonitorController(
 
     /// <summary>
     /// Retrieves monitors, optionally filtered by tenant or specific monitor ID.
-    /// Defaults to returning only assigned monitors (non-system tenant).
+    /// Returns monitors hydrated with uptime for the specified timeframe (defaults to T30).
     /// </summary>
     /// <param name="tenantId">Optional tenant ID to filter by.</param>
     /// <param name="id">Optional monitor ID to retrieve a single monitor.</param>
+    /// <param name="timeframe">The timeframe for calculating uptime percentage.</param>
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<UptimeMonitorDto>>> GetMonitors(
-        [FromQuery] Guid? tenantId,
-        [FromQuery] int? id)
+    public async Task<ActionResult<IEnumerable<UptimeMonitorDto>>> GetMonitors([FromQuery] MonitorRequestDto request)
     {
-        if (id.HasValue)
+        if (request.MonitorId.HasValue)
         {
             await using var db = await dbContextFactory.CreateDbContextAsync();
-            var tid = await db.Monitors.Where(m => m.Id == id.Value).Select(m => m.TenantId).SingleOrDefaultAsync();
+            var tid = await db.Monitors.Where(m => m.Id == request.MonitorId.Value).Select(m => m.TenantId).SingleOrDefaultAsync();
             if (tid == default) return Ok(Enumerable.Empty<UptimeMonitorDto>());
 
-            var m = await monitorService.GetMonitorAsync(tid, id.Value);
+            var m = await monitorService.GetMonitorAsync(tid, request.MonitorId.Value, request.Timeframe);
             return Ok(new[] { ToDto(m) });
         }
 
-        if (tenantId.HasValue)
+        if (request.TenantId.HasValue)
         {
-            var monitors = await monitorService.GetMonitorsByTenantAsync(tenantId.Value);
+            var monitors = await monitorService.GetMonitorsByTenantAsync(request.TenantId.Value, request.Timeframe);
             return Ok(monitors.Select(ToDto));
         }
 
         await using var dbCtx = await dbContextFactory.CreateDbContextAsync();
-        var allMonitors = await dbCtx.Monitors
+        var allMonitorIds = await dbCtx.Monitors
             .AsNoTracking()
             .Where(m => m.TenantId != AnalyticsDbContext.SystemTenantGuid)
+            .Select(m => new { m.Id, m.TenantId })
             .ToListAsync();
         
         var dtos = new List<UptimeMonitorDto>();
-        foreach (var m in allMonitors)
+        foreach (var m in allMonitorIds)
         {
-            var hydrated = await monitorService.GetMonitorAsync(m.TenantId, m.Id);
+            var hydrated = await monitorService.GetMonitorAsync(m.TenantId, m.Id, request.Timeframe);
             dtos.Add(ToDto(hydrated));
         }
 
@@ -87,10 +84,11 @@ public class MonitorController(
     /// <summary>
     /// Retrieves monitors that are not assigned to any specific tenant.
     /// </summary>
+    /// <param name="timeframe">The timeframe for calculating uptime percentage.</param>
     [HttpGet("unassigned")]
-    public async Task<ActionResult<IEnumerable<UptimeMonitorDto>>> GetUnassignedMonitors()
+    public async Task<ActionResult<IEnumerable<UptimeMonitorDto>>> GetUnassignedMonitors([FromQuery] Timeframe timeframe = Timeframe.T30)
     {
-        var monitors = await monitorService.GetMonitorsByTenantAsync(AnalyticsDbContext.SystemTenantGuid);
+        var monitors = await monitorService.GetMonitorsByTenantAsync(AnalyticsDbContext.SystemTenantGuid, timeframe);
         return Ok(monitors.Select(ToDto));
     }
 
@@ -209,6 +207,7 @@ public class MonitorController(
             Url: m.Url,
             UpdateInterval: m.UpdateInterval,
             UptimeSla: m.UptimeSla,
+            CurrentUptimePercentage: m.CurrentUptimePercentage,
             UptimeMonitorEnabled: m.UptimeMonitorEnabled,
             CurrentStatus: m.StatusStr, // Guaranteed by InMemoryCache service
             LastUpdate: m.LastUpdate,

@@ -12,19 +12,21 @@ public interface IMonitorOrchestrationService
     Task<MonitorAnalyticsDto> GetAnalyticsAsync(Timeframe timeframe, Guid? tenantId = null, int? monitorId = null);
 
     /// <summary>
-    /// Retrieves all uptime monitors associated with a specific tenant.
+    /// Retrieves all uptime monitors associated with a specific tenant, hydrated with uptime for the given timeframe.
     /// </summary>
     /// <param name="tenantId">The ID of the tenant.</param>
+    /// <param name="timeframe">The timeframe for calculating uptime percentage.</param>
     /// <returns>A collection of uptime monitors.</returns>
-    Task<IEnumerable<UptimeMonitor>> GetMonitorsByTenantAsync(Guid tenantId);
+    Task<IEnumerable<UptimeMonitor>> GetMonitorsByTenantAsync(Guid tenantId, Timeframe timeframe = Timeframe.T30);
 
     /// <summary>
-    /// Retrieves a specific uptime monitor for a tenant.
+    /// Retrieves a specific uptime monitor for a tenant, hydrated with uptime for the given timeframe.
     /// </summary>
     /// <param name="tenantId">The ID of the tenant.</param>
     /// <param name="id">The ID of the monitor.</param>
+    /// <param name="timeframe">The timeframe for calculating uptime percentage.</param>
     /// <returns>The uptime monitor.</returns>
-    Task<UptimeMonitor> GetMonitorAsync(Guid tenantId, int id);
+    Task<UptimeMonitor> GetMonitorAsync(Guid tenantId, int id, Timeframe timeframe = Timeframe.T30);
 
     /// <summary>
     /// Creates a new uptime monitor for a tenant.

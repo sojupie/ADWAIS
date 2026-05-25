@@ -17,7 +17,6 @@ public class GlobalExceptionHandler(
         Exception exception,
         CancellationToken cancellationToken)
     {
-        // Resolve SystemEventService via scope since the handler might be registered as a singleton
         using var scope = serviceProvider.CreateScope();
         var eventService = scope.ServiceProvider.GetRequiredService<ISystemEventService>();
 

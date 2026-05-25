@@ -20,6 +20,12 @@ public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFacto
     private async Task<List<DataRow>> GetMergedTenantDataAsync(
         AnalyticsDbContext context, DateTimeOffset start, DateTimeOffset end, bool isHourly, Guid? tenantId = null)
     {
+        if (tenantId.HasValue)
+        {
+            var tenantExists = await context.Tenants.AnyAsync(t => t.Id == tenantId.Value);
+            if (!tenantExists) throw new KeyNotFoundException($"Tenant {tenantId.Value} not found.");
+        }
+
         if (isHourly)
         {
             var query = context.Orders

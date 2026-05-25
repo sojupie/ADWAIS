@@ -8,6 +8,7 @@ export interface FleetMonitor {
   url: string;
   updateInterval: number;
   uptimeSla: number | null;
+  currentUptimePercentage: number;
   uptimeMonitorEnabled: boolean;
   currentStatus: string;
   lastSyncError: string | null;
@@ -51,7 +52,11 @@ export function FleetMatrix({ monitors }: { monitors: FleetMonitor[] }) {
             <span className="fleet-matrix-tile__status">{status}</span>
             <strong>{monitor.name}</strong>
             <span>{monitor.url}</span>
-            <span>{monitor.lastSyncError ?? `${monitor.updateInterval}s interval`}</span>
+            <span>
+              {monitor.uptimeSla !== null
+                ? `${monitor.currentUptimePercentage.toFixed(2)}% / ${monitor.uptimeSla.toFixed(2)}% SLA`
+                : `${monitor.currentUptimePercentage.toFixed(2)}% uptime`}
+            </span>
           </a>
         );
       })}

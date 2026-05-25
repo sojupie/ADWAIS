@@ -68,6 +68,7 @@ type FleetStatusSummary = {
   up: number;
   down: number;
   syncErrors: number;
+  averageUptime: number;
 };
 
 type FinancialOverviewData = Pick<
@@ -86,6 +87,7 @@ const EMPTY_FLEET_SUMMARY: FleetStatusSummary = {
   up: 0,
   down: 0,
   syncErrors: 0,
+  averageUptime: 0,
 };
 
 const INITIAL_SNAPSHOT: DashboardDataSnapshot = {
@@ -123,8 +125,7 @@ const api = {
     orderDistribution: (query: string) => `/api/financial/order-distribution?${query}`,
   },
   monitors: {
-    analytics: '/api/monitors/analytics?timeframe=T30',
-    list: '/api/monitors',
+    analytics: (timeframe: Timeframe) => `/api/monitors/analytics?timeframe=${timeframe}`,
   },
 };
 
@@ -140,10 +141,6 @@ async function fetchJson<T>(url: string): Promise<T> {
   const res = await fetch(url);
   if (!res.ok) throw new Error(`HTTP ${res.status} - ${url}`);
   return res.json() as Promise<T>;
-}
-
-function isHttpStatus(error: unknown, status: number): boolean {
-  return error instanceof Error && error.message.startsWith(`HTTP ${status}`);
 }
 
 function getTimeframe(period: Period): Timeframe {
@@ -199,6 +196,10 @@ function normalizeStatus(status?: string): string {
 function buildFleetSummary(monitors: FleetMonitor[]): FleetStatusSummary {
   const enabled = monitors.filter((monitor) => monitor.uptimeMonitorEnabled).length;
   const up = monitors.filter((monitor) => normalizeStatus(monitor.currentStatus).toUpperCase() === 'UP').length;
+  const enabledMonitors = monitors.filter((monitor) => monitor.uptimeMonitorEnabled);
+  const averageUptime = enabledMonitors.length > 0
+    ? enabledMonitors.reduce((total, monitor) => total + monitor.currentUptimePercentage, 0) / enabledMonitors.length
+    : 0;
 
   return {
     total: monitors.length,
@@ -206,6 +207,7 @@ function buildFleetSummary(monitors: FleetMonitor[]): FleetStatusSummary {
     up,
     down: enabled - up,
     syncErrors: monitors.filter((monitor) => monitor.lastSyncError).length,
+    averageUptime,
   };
 }
 
@@ -265,22 +267,13 @@ async function loadTenantDiagnostics(tenantId: string, period: Period): Promise<
   };
 }
 
-async function loadMonitorAnalytics(): Promise<MonitorAnalyticsResponse> {
-  try {
-    return await fetchJson<MonitorAnalyticsResponse>(api.monitors.analytics);
-  } catch (error) {
-    if (!isHttpStatus(error, 404)) throw error;
-
-    return {
-      latencyPoints: [],
-      monitors: await fetchJson<UptimeMonitorResponse[]>(api.monitors.list),
-    };
-  }
+async function loadMonitorAnalytics(period: Period): Promise<MonitorAnalyticsResponse> {
+  return fetchJson<MonitorAnalyticsResponse>(api.monitors.analytics(getTimeframe(period)));
 }
 
-async function loadFleetStatus(): Promise<FleetStatusData> {
+async function loadFleetStatus(period: Period): Promise<FleetStatusData> {
   const [analytics, tenants] = await Promise.all([
-    loadMonitorAnalytics(),
+    loadMonitorAnalytics(period),
     fetchJson<TenantResponse[]>(api.tenants.list),
   ]);
   const tenantNames = new Map(tenants.map((tenant) => [tenant.id, tenant.name]));
@@ -348,12 +341,12 @@ async function fetchTenantData(tenantId: string, period: Period) {
   }
 }
 
-async function fetchFleetData() {
+async function fetchFleetData(period: Period) {
   const requestId = ++activeFleetRequestId;
   updateSnapshot({ fleetLoading: true, fleetError: null });
 
   try {
-    const data = await loadFleetStatus();
+    const data = await loadFleetStatus(period);
     if (requestId !== activeFleetRequestId) return;
     updateSnapshot({
       fleetMonitors: data.monitors,
@@ -389,6 +382,7 @@ export function setDashboardPeriod(period: Period) {
 
   updateSnapshot({ period });
   void fetchFinancialData(period);
+  void fetchFleetData(period);
   if (snapshot.selectedTenantId) void fetchTenantData(snapshot.selectedTenantId, period);
   restartRefreshTimer();
 }
@@ -406,7 +400,7 @@ export function selectDashboardTenant(tenantId: string | null) {
 }
 
 void fetchFinancialData(snapshot.period);
-void fetchFleetData();
+void fetchFleetData(snapshot.period);
 restartRefreshTimer();
 
 export function useDashboardData() {

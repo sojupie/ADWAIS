@@ -45,8 +45,12 @@ export function PortfolioRevenueShareTrajectoryChart({tenantVelocity, portfolioV
   const rows = buildRows(tenantVelocity, portfolioVelocity);
 
   return (
-    <ChartPanel title="Portfolio Revenue Share Trajectory" bodyClassName="portfolio-revenue-share-chart">
-      <ResponsiveContainer width="100%" height={300}>
+    <ChartPanel
+      title="Portfolio Revenue Share Trajectory"
+      className="tenant-diagnostics__chart-panel"
+      bodyClassName="portfolio-revenue-share-chart"
+    >
+      <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={rows} margin={{ top: 8, right: 10, left: 8, bottom: 20 }}>
           <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 4" vertical={false} />
           <XAxis

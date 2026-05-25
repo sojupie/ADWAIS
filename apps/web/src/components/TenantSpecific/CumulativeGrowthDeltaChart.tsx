@@ -25,8 +25,12 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 export function CumulativeGrowthDeltaChart({ points }: { points: CumulativeGrowthDeltaPoint[] }) {
   return (
-    <ChartPanel title="Cumulative Growth Delta (Absolute)" bodyClassName="cumulative-growth-delta-chart">
-      <ResponsiveContainer width="100%" height={300}>
+    <ChartPanel
+      title="Cumulative Growth Delta (Absolute)"
+      className="tenant-diagnostics__chart-panel"
+      bodyClassName="cumulative-growth-delta-chart"
+    >
+      <ResponsiveContainer width="100%" height="100%">
         <LineChart data={points} margin={{ top: 8, right: 10, left: 8, bottom: 20 }}>
           <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 4" vertical={false} />
           <XAxis

@@ -30,8 +30,12 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 export function TenantRevenueVelocityChart({ points }: { points: FinancialVelocityPoint[] }) {
   return (
-    <ChartPanel title="Revenue Velocity Over Time" bodyClassName="tenant-revenue-velocity-chart">
-      <ResponsiveContainer width="100%" height={300}>
+    <ChartPanel
+      title="Revenue Velocity Over Time"
+      className="tenant-diagnostics__chart-panel"
+      bodyClassName="tenant-revenue-velocity-chart"
+    >
+      <ResponsiveContainer width="100%" height="100%">
         <LineChart data={points} margin={{ top: 8, right: 10, left: 8, bottom: 20 }}>
           <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 4" vertical={false} />
           <XAxis

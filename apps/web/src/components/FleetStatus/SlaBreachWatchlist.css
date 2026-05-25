@@ -1,6 +1,11 @@
 .sla-breach-watchlist {
   min-height: 0;
   overflow: auto;
+  scrollbar-width: none;
+}
+
+.sla-breach-watchlist::-webkit-scrollbar {
+  display: none;
 }
 
 .sla-breach-watchlist__count {

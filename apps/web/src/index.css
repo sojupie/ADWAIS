@@ -16,7 +16,8 @@
   /* Text */
   --text-primary:   #022d2e;
   --text-link:   #06959B;
-  
+  --text-muted: #7e899a;
+
   /* Button */
   --button-primary: #51B5B9;
   --button-border: #04686D;

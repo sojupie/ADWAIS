@@ -37,6 +37,7 @@ export function FactPanel({ label, value, valueColor, extra }: FactPanelData) {
 
     if (extra !== undefined && extra.type === "Desc") {
         extraText = extra.value;
+        extraColor = 'fact-panel__extra--desc';
     }
 
     return FactPanelJSX(

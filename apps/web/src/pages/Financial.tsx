@@ -77,14 +77,14 @@ export function Financial() {
           label="Transaction Volume"
           value={globalKpi ? formatNumber(globalKpi.totalVolume) : '\u2014'}
           extra={globalKpi?.volumePoP !== undefined
-            ? { type: 'PoP', value: globalKpi.volumePoP }
+            ? { type: 'Desc', value: "Total absolute orders\n" }
             : undefined}
         />
         <FactPanel
           label="Portfolio AOV"
           value={globalKpi ? `${formatCompact(globalKpi.aov)} SEK` : '\u2014'}
           extra={globalKpi?.aovPoP !== undefined
-            ? { type: 'PoP', value: globalKpi.aovPoP }
+            ? { type: 'Desc', value: "Derived (Revenue / Volume)\n" }
             : undefined}
         />
       </section>

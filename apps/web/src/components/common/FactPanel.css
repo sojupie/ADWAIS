@@ -41,6 +41,10 @@
   line-height: 1;
 }
 
+.fact-panel__extra--desc {
+  color: var(--text-muted);
+}
+
 .fact-panel__value.text-green {
   color: var(--green);
 }

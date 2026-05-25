@@ -14,6 +14,7 @@ public class Tenant
     public DateTimeOffset? LastPolled { get; set; }
     public bool OrderFetchingEnabled { get; set; }
     public bool CurrentlyFetching { get; set; }
+    public string? LastSyncError { get; set; }
 
     public ICollection<Order> Orders { get; set; } = new List<Order>();
     public ICollection<UptimeMonitor> Monitors { get; set; } = new List<UptimeMonitor>();

@@ -13,26 +13,33 @@ public class UpdateMonitorLatencyJob(
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var monitor = await dbContext.Monitors.FirstOrDefaultAsync(m => m.Id == monitorId);
 
-        if (monitor == null || !monitor.UptimeMonitorEnabled)
-        {
-            return; // Deleted or paused
-        }
+        if (monitor == null || !monitor.UptimeMonitorEnabled) return;
 
-        var responseTime = await uptimeRobotService.GetResponseTimeAsync(monitorId, startDate, endDate);
-
-        if (responseTime.Average.HasValue)
+        try
         {
-            dbContext.ResponseTimes.Add(new ResponseTime
+            var responseTime = await uptimeRobotService.GetResponseTimeAsync(monitorId, startDate, endDate);
+
+            if (responseTime.Average.HasValue)
             {
-                MonitorId = monitorId,
-                Average = responseTime.Average.Value,
-                Lowest = responseTime.Lowest,
-                Highest = responseTime.Highest,
-                Date = endDate
-            });
-        }
+                dbContext.ResponseTimes.Add(new ResponseTime
+                {
+                    MonitorId = monitorId,
+                    Average = responseTime.Average.Value,
+                    Lowest = responseTime.Lowest,
+                    Highest = responseTime.Highest,
+                    Date = endDate
+                });
+            }
 
-        monitor.LastLatencyUpdate = endDate;
-        await dbContext.SaveChangesAsync();
+            monitor.LastLatencyUpdate = endDate;
+            monitor.LastSyncError = null;
+            await dbContext.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            monitor.LastSyncError = ex.Message;
+            await dbContext.SaveChangesAsync();
+            throw;
+        }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using Domain.Entities;
 using Domain.Entities.Upstream.LitiumDTO;
@@ -7,25 +7,11 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Services;
 
-/// <summary>
-/// Provides a service for ingesting order data from Litium.
-/// </summary>
 public interface ILitiumIngestionService
 {
-    /// <summary>
-    /// Executes the ingestion process for a specific tenant and timeframe.
-    /// </summary>
-    /// <param name="tenantId">The ID of the tenant to ingest data for.</param>
-    /// <param name="startDate">The start date of the period to ingest.</param>
-    /// <param name="endDate">The end date of the period to ingest.</param>
-    /// <param name="ct">Cancellation token.</param>
-    /// <returns>The number of orders successfully ingested or updated.</returns>
     Task<int> ExecuteIngestionAsync(Guid tenantId, DateTimeOffset startDate, DateTimeOffset endDate, CancellationToken ct = default);
 }
 
-/// <summary>
-/// Implementation of ILitiumIngestionService that fetches data from Litium's adapter API and persists it to the database.
-/// </summary>
 public class LitiumIngestionService(
     IDbContextFactory<AnalyticsDbContext> contextFactory,
     HttpClient httpClient,
@@ -35,7 +21,6 @@ public class LitiumIngestionService(
 {
     private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
 
-    /// <inheritdoc />
     public async Task<int> ExecuteIngestionAsync(Guid tenantId, DateTimeOffset startDate, DateTimeOffset endDate, CancellationToken ct = default)
     {
         Tenant tenant;
@@ -48,6 +33,13 @@ public class LitiumIngestionService(
         {
             var result = await ExecuteIngestionCoreAsync(tenant, startDate, endDate, ct);
             
+            await using (var context = await contextFactory.CreateDbContextAsync(ct))
+            {
+                var t = await context.Tenants.FirstAsync(x => x.Id == tenantId, ct);
+                t.LastSyncError = null;
+                await context.SaveChangesAsync(ct);
+            }
+
             if (result > 0)
             {
                 await eventService.LogAsync(nameof(LitiumIngestionService), $"Successfully ingested {result} orders.", SystemEventLevel.Information, $"Period: {startDate:O} to {endDate:O}", tenantId);
@@ -58,7 +50,20 @@ public class LitiumIngestionService(
         catch (Exception ex)
         {
             await eventService.LogErrorAsync(nameof(LitiumIngestionService), $"Ingestion failed for tenant {tenantId}", ex, tenantId);
-            throw; // Re-throw so Hangfire knows it failed
+            
+            try
+            {
+                await using var errorContext = await contextFactory.CreateDbContextAsync(CancellationToken.None);
+                var t = await errorContext.Tenants.FirstAsync(x => x.Id == tenantId, ct);
+                t.LastSyncError = ex.Message;
+                await errorContext.SaveChangesAsync(ct);
+            }
+            catch (Exception innerEx)
+            {
+                logger.LogError(innerEx, "Failed to record error in Tenant {TenantId}.", tenantId);
+            }
+
+            throw;
         }
         finally
         {
@@ -77,9 +82,6 @@ public class LitiumIngestionService(
         }
     }
 
-    /// <summary>
-    /// Core ingestion logic that handles chunked fetching and bulk insertion of orders.
-    /// </summary>
     private async Task<int> ExecuteIngestionCoreAsync(Tenant tenant, DateTimeOffset startDate, DateTimeOffset endDate, CancellationToken ct)
     {
         var totalIngested = 0;

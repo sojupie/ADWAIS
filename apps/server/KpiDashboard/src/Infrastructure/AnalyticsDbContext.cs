@@ -18,10 +18,14 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options) : 
     public DbSet<DailyFinancialGlobalRollup> DailyGlobalRollups => Set<DailyFinancialGlobalRollup>();
     
     public DbSet<ResponseTime> ResponseTimes => Set<ResponseTime>();
+    public DbSet<MonitorAvailability> MonitorAvailabilities => Set<MonitorAvailability>();
     public DbSet<UptimeMonitor> Monitors => Set<UptimeMonitor>();
     public DbSet<DailyLatencyMonitorRollup> DailyLatencyMonitorRollups => Set<DailyLatencyMonitorRollup>();
     public DbSet<DailyLatencyTenantRollup> DailyLatencyTenantRollups => Set<DailyLatencyTenantRollup>();
     public DbSet<DailyLatencyGlobalRollup> DailyLatencyGlobalRollups => Set<DailyLatencyGlobalRollup>();
+    public DbSet<DailyAvailabilityMonitorRollup> DailyAvailabilityMonitorRollups => Set<DailyAvailabilityMonitorRollup>();
+    public DbSet<DailyAvailabilityTenantRollup> DailyAvailabilityTenantRollups => Set<DailyAvailabilityTenantRollup>();
+    public DbSet<DailyAvailabilityGlobalRollup> DailyAvailabilityGlobalRollups => Set<DailyAvailabilityGlobalRollup>();
 
     // intranät
     public DbSet<OfficeEvent> OfficeEvents => Set<OfficeEvent>();
@@ -32,6 +36,38 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options) : 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasPostgresExtension("uuid-ossp");
+
+        // Force all DateTime and DateTimeOffset to UTC
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            foreach (var property in entityType.GetProperties())
+            {
+                if (property.ClrType == typeof(DateTime))
+                {
+                    property.SetValueConverter(new Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<DateTime, DateTime>(
+                        v => v.Kind == DateTimeKind.Utc ? v : v.ToUniversalTime(),
+                        v => DateTime.SpecifyKind(v, DateTimeKind.Utc)));
+                }
+                else if (property.ClrType == typeof(DateTime?))
+                {
+                    property.SetValueConverter(new Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<DateTime?, DateTime?>(
+                        v => v.HasValue ? (v.Value.Kind == DateTimeKind.Utc ? v : v.Value.ToUniversalTime()) : v,
+                        v => v.HasValue ? DateTime.SpecifyKind(v.Value, DateTimeKind.Utc) : v));
+                }
+                else if (property.ClrType == typeof(DateTimeOffset))
+                {
+                    property.SetValueConverter(new Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<DateTimeOffset, DateTimeOffset>(
+                        v => v.Offset == TimeSpan.Zero ? v : v.ToUniversalTime(),
+                        v => v));
+                }
+                else if (property.ClrType == typeof(DateTimeOffset?))
+                {
+                    property.SetValueConverter(new Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<DateTimeOffset?, DateTimeOffset?>(
+                        v => v.HasValue ? (v.Value.Offset == TimeSpan.Zero ? v : v.Value.ToUniversalTime()) : v,
+                        v => v));
+                }
+            }
+        }
 
         // SystemEvent
         modelBuilder.Entity<SystemEvent>(entity =>
@@ -119,17 +155,47 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options) : 
         {
             entity.ToView("v_mat_daily_latency_monitor_rollup");
             entity.HasKey(r => new { r.Date, r.MonitorId });
+            entity.HasOne(r => r.UptimeMonitor)
+                .WithMany()
+                .HasForeignKey(r => r.MonitorId);
         });
         
         modelBuilder.Entity<DailyLatencyTenantRollup>(entity => 
         {
             entity.ToView("v_mat_daily_latency_tenant_rollup");
             entity.HasKey(r => new { r.Date, r.TenantId });
+            entity.HasOne(r => r.Tenant)
+                .WithMany()
+                .HasForeignKey(r => r.TenantId);
         });
         
         modelBuilder.Entity<DailyLatencyGlobalRollup>(entity => 
         {
             entity.ToView("v_mat_daily_latency_global_rollup");
+            entity.HasKey(r => r.Date);
+        });
+
+        modelBuilder.Entity<DailyAvailabilityMonitorRollup>(entity =>
+        {
+            entity.ToView("v_mat_daily_availability_monitor_rollup");
+            entity.HasKey(r => new { r.Date, r.MonitorId });
+            entity.HasOne(r => r.UptimeMonitor)
+                .WithMany()
+                .HasForeignKey(r => r.MonitorId);
+        });
+
+        modelBuilder.Entity<DailyAvailabilityTenantRollup>(entity =>
+        {
+            entity.ToView("v_mat_daily_availability_tenant_rollup");
+            entity.HasKey(r => new { r.Date, r.TenantId });
+            entity.HasOne(r => r.Tenant)
+                .WithMany()
+                .HasForeignKey(r => r.TenantId);
+        });
+
+        modelBuilder.Entity<DailyAvailabilityGlobalRollup>(entity =>
+        {
+            entity.ToView("v_mat_daily_availability_global_rollup");
             entity.HasKey(r => r.Date);
         });
         
@@ -141,12 +207,10 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options) : 
             entity.Property(x => x.UptimeRobotApiKey).HasMaxLength(1024);
             entity.Property(x => x.UptimeFetchIntervalMinutes).HasDefaultValue(60);
             entity.Property(x => x.LatencyFetchIntervalMinutes).HasDefaultValue(10);
+            entity.Property(x => x.UserStatsFetchIntervalMinutes).HasDefaultValue(60);
             entity.Property(x => x.SystemEventRetentionDays).HasDefaultValue(30);
             entity.Property(x => x.LitiumFetchEnabled).HasDefaultValue(true);
             entity.Property(x => x.UptimeRobotFetchEnabled).HasDefaultValue(true);
-            entity.Ignore(x => x.MonitorsCount);
-            entity.Ignore(x => x.MonitorsLimit);
-            entity.Ignore(x => x.ActiveSubscription);
         });
         
         // User
@@ -172,6 +236,19 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options) : 
                 .HasForeignKey(rt => rt.MonitorId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
+
+        // MonitorAvailability
+        modelBuilder.Entity<MonitorAvailability>(entity =>
+        {
+            entity.ToTable("monitor_availability");
+            entity.HasKey(ma => ma.Id);
+            entity.Property(ma => ma.Id).HasDefaultValueSql("uuid_generate_v4()");
+            entity.HasOne(ma => ma.UptimeMonitor)
+                .WithMany()
+                .HasForeignKey(ma => ma.MonitorId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasIndex(ma => new { ma.MonitorId, ma.Date }).IsUnique();
+        });
             
         // UptimeMonitor
         modelBuilder.Entity<UptimeMonitor>(entity => 
@@ -179,6 +256,7 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options) : 
             entity.ToTable("monitor");
             entity.HasKey(m => m.Id);
             entity.Ignore(m => m.StatusStr);
+            entity.Ignore(m => m.CurrentUptimePercentage);
             entity.Property(m => m.Name).HasMaxLength(255);
             entity.Property(m => m.Url).HasMaxLength(2048);
             entity.HasOne(m => m.Tenant)

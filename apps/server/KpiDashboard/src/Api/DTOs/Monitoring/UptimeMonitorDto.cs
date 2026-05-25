@@ -9,8 +9,8 @@ public record UptimeMonitorDto(
     double? UptimeSla, 
     bool UptimeMonitorEnabled, 
     string CurrentStatus, 
-    double CurrentUptimePercentage,
     DateTimeOffset? LastUpdate,
     DateTimeOffset? LastUptimeUpdate,
     DateTimeOffset? LastLatencyUpdate,
-    DateTimeOffset CreatedDate);
+    DateTimeOffset CreatedDate,
+    string? LastSyncError);

@@ -26,7 +26,7 @@ public class FinancialController(IFinancialService financialService) : Controlle
     }
 
     /// <summary>
-    /// Daily time-series: current vs. previous period revenue.
+    /// Daily/Hourly time-series: current vs. previous period revenue.
     /// Scopes to a single tenant if tenantId is provided, otherwise portfolio-wide.
     /// </summary>
     [HttpGet("velocity")]
@@ -34,10 +34,11 @@ public class FinancialController(IFinancialService financialService) : Controlle
     {
         var result = await financialService.GetVelocityAsync(request.Timeframe, request.TenantId);
         return Ok(result.Select(v => new VelocityPointResponseDto(
-            v.PeriodLabel,
-            v.CurrentRevenue,
-            v.PreviousRevenue,
-            v.AbsoluteVariance)));
+                v.Label,
+                v.Timestamp,
+                v.CurrentRevenue,
+                v.PreviousRevenue,
+                v.AbsoluteVariance)).ToList());
     }
 
     /// <summary>
@@ -96,8 +97,9 @@ public class FinancialController(IFinancialService financialService) : Controlle
     {
         var result = await financialService.GetNetGrowthAdditionAsync(request.Timeframe, request.TenantId);
         return Ok(result.Select(n => new NetGrowthAdditionPointResponseDto(
-            n.PeriodLabel,
-            n.NetGrowthAddition)));
+                n.Label,
+                n.Timestamp,
+                n.NetGrowthAddition)).ToList());
     }
 
     /// <summary>
@@ -138,7 +140,8 @@ public class FinancialController(IFinancialService financialService) : Controlle
     {
         var result = await financialService.GetCumulativeGrowthDeltaAsync(request.Timeframe, request.TenantId);
         return Ok(result.Select(p => new CumulativeGrowthDeltaPointResponseDto(
-            p.PeriodLabel,
-            p.CumulativeGrowthDelta)));
+                p.Label,
+                p.Timestamp,
+                p.CumulativeGrowthDelta)).ToList());
     }
 }

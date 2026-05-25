@@ -19,13 +19,38 @@ public class TenantController(
     IMonitorOrchestrationService monitorService) : ControllerBase
 {
     /// <summary>
-    /// Retrieves all tenants in the system.
+    /// Retrieves tenants, optionally filtered by ID.
     /// </summary>
-    /// <returns>A list of tenants with high-level metadata.</returns>
+    /// <param name="id">Optional tenant ID to retrieve a single tenant.</param>
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<TenantResponseDto>>> GetTenants()
+    public async Task<ActionResult<IEnumerable<TenantResponseDto>>> GetTenants([FromQuery] Guid? id)
     {
         await using var context = await contextFactory.CreateDbContextAsync();
+
+        if (id.HasValue)
+        {
+            var tenant = await context.Tenants
+                .AsNoTracking()
+                .Where(t => t.Id == id.Value)
+                .Select(t => new TenantResponseDto()
+                {
+                    Id = t.Id,
+                    Name = t.Name,
+                    LitiumBaseUrl = t.LitiumBaseUrl,
+                    CurrentlyFetching = t.CurrentlyFetching,
+                    FetchedFrom = t.FetchedFrom,
+                    FetchedUntil = t.FetchedUntil,
+                    LastPolled = t.LastPolled,
+                    OrderFetchingEnabled = t.OrderFetchingEnabled,
+                    MonitorCount = t.Monitors.Count,
+                    LastSyncError = t.LastSyncError
+                })
+                .SingleOrDefaultAsync();
+
+            if (tenant == null) return Ok(Enumerable.Empty<TenantResponseDto>());
+
+            return Ok(new[] { tenant });
+        }
 
         var tenants = await context.Tenants
             .AsNoTracking()
@@ -39,7 +64,8 @@ public class TenantController(
                 FetchedUntil = t.FetchedUntil,
                 LastPolled = t.LastPolled,
                 OrderFetchingEnabled = t.OrderFetchingEnabled,
-                MonitorCount = t.Monitors.Count
+                MonitorCount = t.Monitors.Count,
+                LastSyncError = t.LastSyncError
             })
             .ToListAsync();
 
@@ -47,47 +73,8 @@ public class TenantController(
     }
 
     /// <summary>
-    /// Retrieves a specific tenant by its ID, including active monitors.
-    /// </summary>
-    /// <param name="id">The unique identifier of the tenant.</param>
-    /// <returns>The tenant details and its associated monitors.</returns>
-    [HttpGet("{id:guid}")]
-    public async Task<ActionResult<TenantResponseDto>> GetTenant(Guid id)
-    {
-        await using var context = await contextFactory.CreateDbContextAsync();
-
-        var tenant = await context.Tenants
-            .AsNoTracking()
-            .Where(t => t.Id == id)
-            .Select(t => new TenantResponseDto()
-            {
-                Id = t.Id,
-                Name = t.Name,
-                LitiumBaseUrl = t.LitiumBaseUrl,
-                CurrentlyFetching = t.CurrentlyFetching,
-                FetchedFrom = t.FetchedFrom,
-                FetchedUntil = t.FetchedUntil,
-                LastPolled = t.LastPolled,
-                OrderFetchingEnabled = t.OrderFetchingEnabled,
-                MonitorCount = t.Monitors.Count
-            })
-            .SingleOrDefaultAsync();
-
-        if (tenant == null) return NotFound();
-
-        // Hydrate monitors with live status via service
-        var monitors = await monitorService.GetMonitorsByTenantAsync(id);
-        tenant.Monitors = monitors.Select(ToDto);
-
-        return Ok(tenant);
-    }
-
-    /// <summary>
     /// Creates a new tenant.
     /// </summary>
-    /// <param name="request">The tenant configuration details.</param>
-    /// <returns>The newly created tenant.</returns>
-    /// <response code="400">If the request is invalid (handled by ValidationFilter).</response>
     [HttpPost]
     public async Task<IActionResult> CreateTenant([FromBody] CreateTenantRequestDto request)
     {
@@ -104,7 +91,7 @@ public class TenantController(
         context.Tenants.Add(tenant);
         await context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetTenant), new { id = tenant.Id }, new TenantResponseDto()
+        return CreatedAtAction(nameof(GetTenants), new { id = tenant.Id }, new TenantResponseDto()
             {
                 Id = tenant.Id,
                 Name = tenant.Name,
@@ -113,14 +100,14 @@ public class TenantController(
                 FetchedFrom = tenant.FetchedFrom,
                 FetchedUntil = tenant.FetchedUntil,
                 LastPolled = tenant.LastPolled,
-                OrderFetchingEnabled = tenant.OrderFetchingEnabled
+                OrderFetchingEnabled = tenant.OrderFetchingEnabled,
+                LastSyncError = tenant.LastSyncError
             });
     }
 
     /// <summary>
     /// Deletes a tenant and reassigns its monitors to the system tenant.
     /// </summary>
-    /// <param name="id">The ID of the tenant to delete.</param>
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteTenant(Guid id)
     {
@@ -146,8 +133,6 @@ public class TenantController(
     /// <summary>
     /// Partially updates a tenant's configuration.
     /// </summary>
-    /// <param name="id">The ID of the tenant to update.</param>
-    /// <param name="request">The fields to update.</param>
     [HttpPatch("{id:guid}")]
     public async Task<IActionResult> UpdateTenant(Guid id, [FromBody] UpdateTenantRequestDto request)
     {
@@ -186,7 +171,8 @@ public class TenantController(
             FetchedFrom = tenant.FetchedFrom,
             FetchedUntil = tenant.FetchedUntil,
             LastPolled = tenant.LastPolled,
-            OrderFetchingEnabled = tenant.OrderFetchingEnabled
+            OrderFetchingEnabled = tenant.OrderFetchingEnabled,
+            LastSyncError = tenant.LastSyncError
         });
     }
 
@@ -201,10 +187,10 @@ public class TenantController(
             UptimeSla: m.UptimeSla,
             UptimeMonitorEnabled: m.UptimeMonitorEnabled,
             CurrentStatus: m.StatusStr, // Hydrated by service
-            CurrentUptimePercentage: m.CurrentUptimePercentage,
             LastUpdate: m.LastUpdate,
             LastUptimeUpdate: m.LastUptimeUpdate,
             LastLatencyUpdate: m.LastLatencyUpdate,
-            CreatedDate: m.CreatedDate);
+            CreatedDate: m.CreatedDate,
+            LastSyncError: m.LastSyncError);
     }
 }

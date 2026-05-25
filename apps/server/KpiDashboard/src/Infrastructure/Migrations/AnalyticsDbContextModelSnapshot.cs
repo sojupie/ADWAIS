@@ -32,9 +32,17 @@ namespace Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("ActiveSubscription")
+                        .HasColumnType("text")
+                        .HasColumnName("active_subscription");
+
                     b.Property<DateTimeOffset?>("LastPolled")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_polled");
+
+                    b.Property<string>("LastSyncError")
+                        .HasColumnType("text")
+                        .HasColumnName("last_sync_error");
 
                     b.Property<int?>("LatencyDegradedFloor")
                         .HasColumnType("integer")
@@ -55,6 +63,14 @@ namespace Infrastructure.Migrations
                     b.Property<int>("LitiumFetchIntervalMinutes")
                         .HasColumnType("integer")
                         .HasColumnName("litium_fetch_interval_minutes");
+
+                    b.Property<int?>("MonitorsCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("monitors_count");
+
+                    b.Property<int?>("MonitorsLimit")
+                        .HasColumnType("integer")
+                        .HasColumnName("monitors_limit");
 
                     b.Property<int>("SystemEventRetentionDays")
                         .ValueGeneratedOnAdd()
@@ -79,10 +95,80 @@ namespace Infrastructure.Migrations
                         .HasDefaultValue(true)
                         .HasColumnName("uptime_robot_fetch_enabled");
 
+                    b.Property<int>("UserStatsFetchIntervalMinutes")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(60)
+                        .HasColumnName("user_stats_fetch_interval_minutes");
+
                     b.HasKey("Id")
                         .HasName("pk_global_config");
 
                     b.ToTable("global_config", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Entities.Monitoring.DailyAvailabilityGlobalRollup", b =>
+                {
+                    b.Property<DateTimeOffset>("Date")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("date");
+
+                    b.Property<double?>("UptimePercentage")
+                        .HasColumnType("double precision")
+                        .HasColumnName("uptime_percentage");
+
+                    b.HasKey("Date");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("v_mat_daily_availability_global_rollup", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Entities.Monitoring.DailyAvailabilityMonitorRollup", b =>
+                {
+                    b.Property<DateTimeOffset>("Date")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("date");
+
+                    b.Property<int>("MonitorId")
+                        .HasColumnType("integer")
+                        .HasColumnName("monitor_id");
+
+                    b.Property<double?>("UptimePercentage")
+                        .HasColumnType("double precision")
+                        .HasColumnName("uptime_percentage");
+
+                    b.HasKey("Date", "MonitorId");
+
+                    b.HasIndex("MonitorId");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("v_mat_daily_availability_monitor_rollup", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Entities.Monitoring.DailyAvailabilityTenantRollup", b =>
+                {
+                    b.Property<DateTimeOffset>("Date")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("date");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<double?>("UptimePercentage")
+                        .HasColumnType("double precision")
+                        .HasColumnName("uptime_percentage");
+
+                    b.HasKey("Date", "TenantId");
+
+                    b.HasIndex("TenantId")
+                        .HasDatabaseName("ix_daily_availability_tenant_rollups_tenant_id");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("v_mat_daily_availability_tenant_rollup", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Monitoring.DailyLatencyGlobalRollup", b =>
@@ -132,14 +218,9 @@ namespace Infrastructure.Migrations
                         .HasColumnType("double precision")
                         .HasColumnName("lowest");
 
-                    b.Property<int>("UptimeMonitorId")
-                        .HasColumnType("integer")
-                        .HasColumnName("uptime_monitor_id");
-
                     b.HasKey("Date", "MonitorId");
 
-                    b.HasIndex("UptimeMonitorId")
-                        .HasDatabaseName("ix_daily_latency_monitor_rollups_uptime_monitor_id");
+                    b.HasIndex("MonitorId");
 
                     b.ToTable((string)null);
 
@@ -176,6 +257,36 @@ namespace Infrastructure.Migrations
                     b.ToTable((string)null);
 
                     b.ToView("v_mat_daily_latency_tenant_rollup", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Entities.Monitoring.MonitorAvailability", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("uuid_generate_v4()");
+
+                    b.Property<DateTimeOffset>("Date")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("date");
+
+                    b.Property<int>("MonitorId")
+                        .HasColumnType("integer")
+                        .HasColumnName("monitor_id");
+
+                    b.Property<double>("UptimePercentage")
+                        .HasColumnType("double precision")
+                        .HasColumnName("uptime_percentage");
+
+                    b.HasKey("Id")
+                        .HasName("pk_monitor_availability");
+
+                    b.HasIndex("MonitorId", "Date")
+                        .IsUnique()
+                        .HasDatabaseName("ix_monitor_availability_monitor_id_date");
+
+                    b.ToTable("monitor_availability", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Monitoring.ResponseTime", b =>
@@ -228,13 +339,13 @@ namespace Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_date");
 
-                    b.Property<double>("CurrentUptimePercentage")
-                        .HasColumnType("double precision")
-                        .HasColumnName("current_uptime_percentage");
-
                     b.Property<DateTimeOffset?>("LastLatencyUpdate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_latency_update");
+
+                    b.Property<string>("LastSyncError")
+                        .HasColumnType("text")
+                        .HasColumnName("last_sync_error");
 
                     b.Property<DateTimeOffset?>("LastUpdate")
                         .HasColumnType("timestamp with time zone")
@@ -428,7 +539,7 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.OrderData.DailyFinancialGlobalRollup", b =>
                 {
-                    b.Property<DateTime>("CreatedDate")
+                    b.Property<DateTimeOffset>("CreatedDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_date");
 
@@ -449,7 +560,7 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.OrderData.DailyFinancialTenantRollup", b =>
                 {
-                    b.Property<DateTime>("CreatedDate")
+                    b.Property<DateTimeOffset>("CreatedDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_date");
 
@@ -611,6 +722,10 @@ namespace Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_polled");
 
+                    b.Property<string>("LastSyncError")
+                        .HasColumnType("text")
+                        .HasColumnName("last_sync_error");
+
                     b.Property<string>("LitiumBaseUrl")
                         .IsRequired()
                         .HasMaxLength(2048)
@@ -676,11 +791,35 @@ namespace Infrastructure.Migrations
                     b.ToTable("users", (string)null);
                 });
 
+            modelBuilder.Entity("Domain.Entities.Monitoring.DailyAvailabilityMonitorRollup", b =>
+                {
+                    b.HasOne("Domain.Entities.Monitoring.UptimeMonitor", "UptimeMonitor")
+                        .WithMany()
+                        .HasForeignKey("MonitorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_daily_availability_monitor_rollups_monitors_uptime_monitor_");
+
+                    b.Navigation("UptimeMonitor");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Monitoring.DailyAvailabilityTenantRollup", b =>
+                {
+                    b.HasOne("Domain.Entities.Tenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_daily_availability_tenant_rollups_tenants_tenant_id");
+
+                    b.Navigation("Tenant");
+                });
+
             modelBuilder.Entity("Domain.Entities.Monitoring.DailyLatencyMonitorRollup", b =>
                 {
                     b.HasOne("Domain.Entities.Monitoring.UptimeMonitor", "UptimeMonitor")
                         .WithMany()
-                        .HasForeignKey("UptimeMonitorId")
+                        .HasForeignKey("MonitorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_daily_latency_monitor_rollups_monitors_uptime_monitor_id");
@@ -698,6 +837,18 @@ namespace Infrastructure.Migrations
                         .HasConstraintName("fk_daily_latency_tenant_rollups_tenants_tenant_id");
 
                     b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Monitoring.MonitorAvailability", b =>
+                {
+                    b.HasOne("Domain.Entities.Monitoring.UptimeMonitor", "UptimeMonitor")
+                        .WithMany()
+                        .HasForeignKey("MonitorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_monitor_availability_monitors_monitor_id");
+
+                    b.Navigation("UptimeMonitor");
                 });
 
             modelBuilder.Entity("Domain.Entities.Monitoring.ResponseTime", b =>

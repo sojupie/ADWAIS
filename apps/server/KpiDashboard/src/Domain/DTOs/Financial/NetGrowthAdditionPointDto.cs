@@ -1,5 +1,6 @@
 namespace Domain.DTOs.Financial;
 
 public record NetGrowthAdditionPointDto(
-    string PeriodLabel,
+    string Label,
+    DateTimeOffset Timestamp,
     decimal NetGrowthAddition);

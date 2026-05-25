@@ -1,4 +1,4 @@
-﻿using Api.DTOs.Monitoring;
+using Api.DTOs.Monitoring;
 
 namespace Api.DTOs.Tenants;
 
@@ -13,5 +13,5 @@ public class TenantResponseDto
     public DateTimeOffset? LastPolled { get; set; }
     public bool OrderFetchingEnabled { get; set; }
     public int MonitorCount { get; set; }
-    public IEnumerable<UptimeMonitorDto>? Monitors { get; set; }
+    public string? LastSyncError { get; set; }
 }

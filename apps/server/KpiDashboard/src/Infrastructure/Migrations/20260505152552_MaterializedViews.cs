@@ -10,14 +10,13 @@ namespace Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql(SqlDefinitions.DropMaterializedViews);
-            migrationBuilder.Sql(SqlDefinitions.CreateMaterializedViews);
+            migrationBuilder.Sql(SqlDefinitions.DropAllViews);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql(SqlDefinitions.DropMaterializedViews);
+            migrationBuilder.Sql(SqlDefinitions.DropAllViews);
         }
     }
 }

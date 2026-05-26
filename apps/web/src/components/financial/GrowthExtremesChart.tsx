@@ -1,108 +1,98 @@
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  ReferenceLine,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 import type { GrowthExtreme } from '@types';
-import type { CSSProperties } from 'react';
+import { formatCompact } from '@utils';
 import { ChartPanel } from '../common/ChartPanel';
 import './GrowthExtremesChart.css';
 
-interface TenantRowData {
-  tenantId: string;
-  tenantName: string;
-  growth: number;
-  isNegative: boolean;
-  barStyle: CSSProperties;
-}
+const formatGrowth = (value: number) => `${value >= 0 ? '+' : ''}${value.toFixed(1)}%`;
 
-export function GrowthExtremesChart({tenants, onTenantSelect,}: 
-{ tenants: GrowthExtreme[]; onTenantSelect?: (tenantId: string) => void; })
-{
-  if (tenants.length === 0) return null;
-  
-  const tenantsByGrowth = [...tenants];
-  let minGrowth = 0;
-  let maxGrowth = 0;
-  for (const tenant of tenantsByGrowth) {
-    if (tenant.growthPercentage < minGrowth) {
-      minGrowth = tenant.growthPercentage;
-    }
+const CustomTooltip = ({ active, payload }: any) => {
+  if (!active || !payload?.length) return null;
 
-    if (tenant.growthPercentage > maxGrowth) {
-      maxGrowth = tenant.growthPercentage;
-    }
-  }  
-  const growthRange = maxGrowth - minGrowth || 1;
-  const zeroPosition = Math.abs(minGrowth / growthRange) * 100;
-  
-  const ExtremeRows: TenantRowData[] = tenantsByGrowth.map((tenant) => {
-    const growth = tenant.growthPercentage;
-    const isNegative = growth < 0;
-    const width = Math.abs(growth / growthRange) * 100;
-    
-    let barStyle: CSSProperties = {
-      left: `${zeroPosition}%`,
-      width: `${width}%`,
-    };
-
-    if (isNegative) {
-      barStyle = {
-        right: `${100 - zeroPosition}%`,
-        width: `${width}%`,
-      };
-    }
-
-    return {
-      tenantId: tenant.tenantId,
-      tenantName: tenant.tenantName,
-      growth,
-      isNegative,
-      barStyle,
-    };
-  });
+  const tenant = payload[0].payload as GrowthExtreme;
 
   return (
-      <ChartPanel title="Growth Extremes" bodyClassName="extremes-chart">
-        {ExtremeRows.map((ExtremeRow) => (
-            <GrowthExtremesRowJSX
-                key={ExtremeRow.tenantId}
-                row={ExtremeRow}
-                zeroPosition={zeroPosition}
-                onTenantSelect={onTenantSelect}
-            />
-        ))}
-      </ChartPanel>
+    <div className="chart-panel-tooltip">
+      <p className="chart-panel-tooltip__label">{tenant.tenantName}</p>
+      <p>Growth: <strong>{formatGrowth(tenant.growthPercentage)}</strong></p>
+      <p>Current: <strong>{formatCompact(tenant.currentRevenue)} SEK</strong></p>
+      <p>Previous: <strong>{formatCompact(tenant.previousRevenue)} SEK</strong></p>
+      <p>Variance: <strong>{formatCompact(tenant.absoluteVariance)} SEK</strong></p>
+    </div>
   );
-}
+};
 
-function GrowthExtremesRowJSX({row, zeroPosition, onTenantSelect,}: {
-  row: TenantRowData; zeroPosition: number; onTenantSelect?: (tenantId: string) => void; })
-{
-  const growthLabel = `${row.growth >= 0 ? '+' : ''}${row.growth.toFixed(1)}%`;
-  let barClass = 'extremes-row__bar extremes-row__bar--positive';
-  let valueClass = 'extremes-row__value';
+export function GrowthExtremesChart({ tenants, onTenantSelect }: {
+  tenants: GrowthExtreme[]; onTenantSelect?: (tenantId: string) => void;
+}) {
+  if (tenants.length === 0) return null;
 
-  if (row.growth > 0) {
-    valueClass = 'extremes-row__value text-green';
-  } else if (row.isNegative) {
-    barClass = 'extremes-row__bar extremes-row__bar--negative';
-    valueClass = 'extremes-row__value text-red';
-  }
+  const maxAbsGrowth = Math.max(
+    1,
+    ...tenants.map((tenant) => Math.abs(tenant.growthPercentage)),
+  );
+  const chartHeight = Math.max(280, tenants.length * 30);
 
   return (
-      <button
-          className={`extremes-row ${onTenantSelect ? 'extremes-row--clickable' : ''}`}
-          type="button"
-          onClick={() => onTenantSelect?.(row.tenantId)}
-      >
-        <span className="extremes-row__name text-secondary">
-          {row.tenantName}
-        </span>
-        <div className="extremes-row__track">
-          <span className="extremes-row__zero" style={{ left: `${zeroPosition}%` }}/>
-          <div className={barClass}
-               style={row.barStyle}
-               title={growthLabel}/>
-        </div>
-        <span className={valueClass}>
-          {growthLabel}
-        </span>
-      </button>
+    <ChartPanel title="Growth Extremes" bodyClassName="extremes-chart">
+      <ResponsiveContainer width="100%" height={chartHeight}>
+        <BarChart
+          data={tenants}
+          layout="vertical"
+          margin={{ top: 6, right: 28, left: 8, bottom: 18 }}
+        >
+          <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 4" horizontal={false} />
+          <XAxis
+            type="number"
+            domain={[-maxAbsGrowth, maxAbsGrowth]}
+            tickFormatter={(value) => `${value.toFixed(0)}%`}
+            tick={{ fill: 'var(--text-primary)', fontSize: 10 }}
+            axisLine={false}
+            tickLine={false}
+          />
+          <YAxis
+            type="category"
+            dataKey="tenantName"
+            width={104}
+            tick={{ fill: 'var(--text-primary)', fontSize: 11 }}
+            axisLine={false}
+            tickLine={false}
+          />
+          <ReferenceLine x={0} stroke="var(--bg-border)" />
+          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'var(--bg-primaryNeigbour)' }} />
+          <Bar
+            dataKey="growthPercentage"
+            className={onTenantSelect ? 'extremes-chart__bar--clickable' : undefined}
+            radius={[5, 5, 5, 5]}
+            barSize={16}
+            onClick={(row) => {
+              const payload = row?.payload as GrowthExtreme | undefined;
+
+              if (payload?.tenantId) {
+                onTenantSelect?.(payload.tenantId);
+              }
+            }}
+          >
+            {tenants.map((tenant) => (
+              <Cell
+                key={tenant.tenantId}
+                fill={tenant.growthPercentage < 0 ? 'var(--red)' : 'var(--green)'}
+                fillOpacity={0.82}
+              />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+    </ChartPanel>
   );
 }

@@ -1,10 +1,14 @@
 export async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
+  const isBodyRequest = options?.method && ['POST', 'PUT', 'PATCH'].includes(options.method.toUpperCase());
+  const headers = new Headers(options?.headers);
+  
+  if (isBodyRequest && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
+  }
+
   const response = await fetch(url, {
     ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options?.headers,
-    },
+    headers,
   });
 
   if (!response.ok) {

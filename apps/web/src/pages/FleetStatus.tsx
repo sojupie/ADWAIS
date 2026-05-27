@@ -13,6 +13,8 @@ function normalizeStatus(status?: string | number): string {
   const s = status?.toString() ?? 'Unknown';
   if (s === '2') return 'UP';
   if (s === '8' || s === '9') return 'DOWN';
+  if (s === '0') return 'PAUSED';
+  if (s === '1' || !s) return 'UNKNOWN';
   return s.toUpperCase().trim();
 }
 
@@ -159,7 +161,7 @@ export function FleetStatus() {
             {selection && (
               <button 
                 onClick={() => setSelection(null)}
-                className="bg-white border border-[#e5e7eb] px-3 py-1.5 rounded-[4px] text-[11px] font-extrabold text-brand-primary hover:bg-[#f9fafa] uppercase tracking-widest transition-all shadow-sm"
+                className="bg-white border border-[#e5e7eb] px-3 py-1.5 rounded-[4px] text-[11px] font-extrabold text-brand-btn-primary hover:bg-[#f9fafa] uppercase tracking-widest transition-all shadow-sm"
               >
                 &larr; Back to Global
               </button>

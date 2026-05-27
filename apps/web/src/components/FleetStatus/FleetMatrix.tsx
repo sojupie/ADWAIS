@@ -4,12 +4,15 @@ function normalizeStatus(status?: string | number): string {
   const s = status?.toString() ?? 'Unknown';
   if (s === '2') return 'UP';
   if (s === '8' || s === '9') return 'DOWN';
+  if (s === '0') return 'PAUSED';
+  if (s === '1' || !s) return 'UNKNOWN';
   return s.toUpperCase().trim();
 }
 
-function getMonitorStatus(monitor: UptimeMonitorDto): 'operational' | 'degraded' | 'down' {
+function getMonitorStatus(monitor: UptimeMonitorDto): 'operational' | 'degraded' | 'down' | 'unknown' {
   const status = normalizeStatus(monitor.currentStatus);
   if (status === 'DOWN' || status === 'CRITICAL') return 'down';
+  if (status === 'UNKNOWN' || status === 'PAUSED') return 'unknown';
   
   if (monitor.currentLatency && monitor.latencyDegradedFloor && monitor.currentLatency > monitor.latencyDegradedFloor) {
     return 'degraded';
@@ -58,6 +61,14 @@ export function FleetMatrix({
             valueText: 'text-slate-900',
             mutedText: 'text-slate-500',
             dot: 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]'
+          },
+          unknown: { 
+            bg: 'bg-slate-100', 
+            border: 'border-slate-300', 
+            text: 'text-slate-500',
+            valueText: 'text-slate-500',
+            mutedText: 'text-slate-400',
+            dot: 'bg-slate-400'
           }
         };
 
@@ -97,7 +108,7 @@ export function FleetMatrix({
               <div className="flex flex-col gap-0">
                 <span className={`text-[9px] ${theme.mutedText} uppercase font-bold tracking-widest`}>Latency</span>
                 <span className={`text-base font-black ${theme.valueText}`}>
-                  {status === 'down' ? 'N/A' : `${Math.round(monitor.currentLatency ?? 0)}ms`}
+                  {(status === 'down' || status === 'unknown' || monitor.currentLatency === 0) ? 'N/A' : `${Math.round(monitor.currentLatency ?? 0)}ms`}
                 </span>
               </div>
             </div>

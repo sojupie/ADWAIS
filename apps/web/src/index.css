@@ -20,6 +20,15 @@
   --color-status-down: #EF4444;
   --color-status-degraded: #F59E0B;
 
+  --color-chart-grid: #f1f5f9;
+  --color-chart-tick: #94a3b8;
+  --color-chart-prev-line: #cbd5e1;
+  --color-chart-label: #1A1A1A;
+  
+  --color-growth: #37b24d;
+  --color-decline: #f03e3e;
+  --color-decline-warning: #f59f00;
+
   --font-sans: "Manrope", system-ui, sans-serif;
 
   --shadow-card: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);

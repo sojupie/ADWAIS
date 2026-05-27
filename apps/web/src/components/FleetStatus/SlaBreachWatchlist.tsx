@@ -8,7 +8,9 @@ interface MonitorIssue {
   tenantName: string;
   monitorName: string;
   uptime: number;
-  status: 'operational' | 'degraded' | 'down' | 'sla_breach';
+  isDown: boolean;
+  isDegraded: boolean;
+  isSlaBreach: boolean;
   latency: number | null;
   slaLimit?: number;
   degradedFloor?: number;
@@ -42,10 +44,6 @@ function buildIssues(monitors: UptimeMonitorDto[]): MonitorIssue[] {
 
       const tenantName = m.tenantName || m.name.split('-')[0]?.trim() || 'Unknown';
 
-      let currentStatus: MonitorIssue['status'] = 'sla_breach';
-      if (isDown) currentStatus = 'down';
-      else if (isDegraded) currentStatus = 'degraded';
-
       issues.push({
         id: m.id,
         tenantId: m.tenantId,
@@ -53,7 +51,9 @@ function buildIssues(monitors: UptimeMonitorDto[]): MonitorIssue[] {
         monitorName: m.name,
         uptime: m.currentUptimePercentage,
         latency: m.currentLatency,
-        status: currentStatus,
+        isDown,
+        isDegraded,
+        isSlaBreach,
         slaLimit: slaThreshold ?? undefined,
         degradedFloor: m.latencyDegradedFloor ?? undefined,
       });
@@ -61,8 +61,9 @@ function buildIssues(monitors: UptimeMonitorDto[]): MonitorIssue[] {
 
   return issues
     .sort((a, b) => {
-       const statusWeight = { down: 0, degraded: 1, sla_breach: 2, operational: 3 };
-       return statusWeight[a.status] - statusWeight[b.status] || a.uptime - b.uptime;
+       const weightA = (a.isDown ? 300 : 0) + (a.isSlaBreach ? 200 : 0) + (a.isDegraded ? 100 : 0);
+       const weightB = (b.isDown ? 300 : 0) + (b.isSlaBreach ? 200 : 0) + (b.isDegraded ? 100 : 0);
+       return weightB - weightA || a.uptime - b.uptime;
     });
 }
 
@@ -94,12 +95,11 @@ export function SlaBreachWatchlist({ monitors, onClearSelection }: { monitors: U
                     <span className="text-sm font-black text-slate-900 uppercase tracking-tight leading-none truncate">{issue.tenantName}</span>
                     <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-0.5 truncate">{issue.monitorName}</span>
                   </div>
-                  <span className={`text-[9px] font-black px-2 py-0.5 rounded-sm uppercase tracking-widest shrink-0 
-                    ${issue.status === 'down' ? 'bg-red-500 text-white' : 
-                      issue.status === 'degraded' ? 'bg-amber-500 text-white' : 
-                      'bg-slate-700 text-white'}`}>
-                    {issue.status.replace('_', ' ')}
-                  </span>
+                  <div className="flex gap-1 flex-wrap justify-end pl-2">
+                    {issue.isDown && <span className="bg-red-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest shrink-0">DOWN</span>}
+                    {issue.isDegraded && !issue.isDown && <span className="bg-amber-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest shrink-0">DEGRADED</span>}
+                    {issue.isSlaBreach && <span className="bg-slate-700 text-white text-[9px] font-black px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest shrink-0">SLA BREACH</span>}
+                  </div>
                 </div>
                 <div className="flex justify-between items-end">
                   <div className="flex flex-col">
@@ -111,7 +111,7 @@ export function SlaBreachWatchlist({ monitors, onClearSelection }: { monitors: U
                   <div className="flex flex-col items-end">
                     <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Latency</span>
                     <span className="text-base font-black text-slate-900">
-                      {issue.status === 'down' ? 'N/A' : `${Math.round(issue.latency ?? 0)}ms`}
+                      {issue.isDown ? 'N/A' : `${Math.round(issue.latency ?? 0)}ms`}
                     </span>
                   </div>
                 </div>

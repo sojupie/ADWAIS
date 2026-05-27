@@ -99,10 +99,10 @@ export function Financial() {
         <ChartPanel title="Regional Growth (Placeholder)" className="h-full min-h-[350px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={placeholderData}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
-              <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
-              <Bar dataKey="value" fill="#51B5B9" radius={[4, 4, 0, 0]} />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-chart-grid)" />
+              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--color-chart-tick)', fontSize: 12 }} />
+              <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--color-chart-tick)', fontSize: 12 }} />
+              <Bar dataKey="value" fill="var(--color-brand-btn-primary)" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </ChartPanel>

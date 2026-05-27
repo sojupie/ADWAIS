@@ -1,4 +1,5 @@
 import type { UptimeMonitorDto } from '@types';
+import { useMemo } from 'react';
 import { ChartPanel } from '../common/ChartPanel';
 
 interface MonitorIssue {
@@ -66,7 +67,7 @@ function buildIssues(monitors: UptimeMonitorDto[]): MonitorIssue[] {
 }
 
 export function SlaBreachWatchlist({ monitors, onClearSelection }: { monitors: UptimeMonitorDto[], onClearSelection?: () => void }) {
-  const issues = buildIssues(monitors);
+  const issues = useMemo(() => buildIssues(monitors), [monitors]);
 
   return (
     <ChartPanel 
@@ -76,7 +77,7 @@ export function SlaBreachWatchlist({ monitors, onClearSelection }: { monitors: U
       legend={onClearSelection && (
         <button 
           onClick={onClearSelection}
-          className="text-xs font-bold text-brand-primary hover:text-brand-heading uppercase tracking-widest transition-colors cursor-pointer"
+          className="text-xs font-bold text-brand-btn-primary hover:text-brand-text uppercase tracking-widest transition-colors cursor-pointer"
         >
           Clear
         </button>

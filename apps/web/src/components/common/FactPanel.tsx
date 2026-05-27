@@ -1,34 +1,34 @@
 import { LoadingIcon } from './LoadingIcon';
 
-type extra =
+type Extra =
     | 
     { type: "PoP"; value: number; } 
     |
     { type: "Desc"; value: string; };
 
-interface FactPanelData {
+interface FactPanelProps {
     label: string;
     value: string;
     isLoading?: boolean;
     valueColor?: "green" | "red" | "yellow"; 
-    extra?: extra
+    extra?: Extra
 }
 
-export function FactPanel({ label, value, isLoading, valueColor, extra }: FactPanelData) {
-    let valueColorClass = 'text-[#1e293b]';
+export function FactPanel({ label, value, isLoading, valueColor, extra }: FactPanelProps) {
+    let valueColorClass = 'text-slate-800';
     let extraColor = '';
     let extraText = '';
 
-    if (valueColor === 'green') valueColorClass = 'text-[#37b24d]';
-    if (valueColor === 'red') valueColorClass = 'text-[#f03e3e]';
-    if (valueColor === 'yellow') valueColorClass = 'text-[#f59f00]';
+    if (valueColor === 'green') valueColorClass = 'text-growth';
+    if (valueColor === 'red') valueColorClass = 'text-decline';
+    if (valueColor === 'yellow') valueColorClass = 'text-decline-warning';
 
     if (extra !== undefined && extra.type === "PoP") {
         if (extra.value > 0) {
-            extraColor = 'text-[#37b24d]';
+            extraColor = 'text-growth';
             extraText = `▲ ${extra.value.toFixed(2)}% PoP`;
         } else if (extra.value < 0) {
-            extraColor = 'text-[#f03e3e]';
+            extraColor = 'text-decline';
             extraText = `▼ ${Math.abs(extra.value).toFixed(2)}% PoP`;
         } else {
             extraText = `${extra.value.toFixed(2)}% PoP`;
@@ -37,7 +37,7 @@ export function FactPanel({ label, value, isLoading, valueColor, extra }: FactPa
 
     if (extra !== undefined && extra.type === "Desc") {
         extraText = extra.value;
-        extraColor = 'text-[#94a3b8]';
+        extraColor = 'text-slate-400';
     }
 
     return (

@@ -1,0 +1,17 @@
+primär bakgrundsfärg: #ffffff
+sekundär bakgrundsfärg: #022d2e
+tredje/fjärde bakgrundsfärg: #e6f4f5 (om den ligger bredvid #ffffff/primär) & #034b4e (om den ligger bredvid #022d2e/sekundär)
+
+primär knapp färg: #51B5B9
+knapp border: 1px solid #04686D
+
+sekundär knapp bakgrundsfärg: #ffffff
+knapp border: 1px solid #06959B
+
+primär text färg: #022D2E
+font-family: "Manrope",sans-serif 
+logotyp: https://www.motillo.se/media/4ejbcxx1/motillo_utanpayoff.svg?mode=pad&width=140&height=0&upscale=false&rnd=132573678104400000
+
+primär accessoar färg: #FFCE44
+
+text länk färg: #06959B

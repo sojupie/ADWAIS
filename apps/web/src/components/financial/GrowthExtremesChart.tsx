@@ -15,7 +15,7 @@ import { ChartPanel } from '../common/ChartPanel';
 
 const formatGrowth = (value: number) => `${value >= 0 ? '+' : ''}${value.toFixed(1)}%`;
 
-const CustomTooltip = ({ active, payload }: any) => {
+const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: any[] }) => {
   if (!active || !payload?.length) return null;
 
   const tenant = payload[0].payload as GrowthExtreme;
@@ -26,7 +26,7 @@ const CustomTooltip = ({ active, payload }: any) => {
       <div className="space-y-2">
         <p className="flex justify-between gap-6 text-slate-500">
           <span>Growth:</span>
-          <strong className={tenant.growthPercentage >= 0 ? 'text-[#37b24d]' : 'text-[#f03e3e]'}>
+          <strong className={tenant.growthPercentage >= 0 ? 'text-growth' : 'text-decline'}>
             {formatGrowth(tenant.growthPercentage)}
           </strong>
         </p>
@@ -62,12 +62,12 @@ export function GrowthExtremesChart({ tenants, onTenantSelect }: {
           layout="vertical"
           margin={{ top: 6, right: 28, left: 8, bottom: 18 }}
         >
-          <CartesianGrid stroke="#f1f5f9" strokeDasharray="3 4" horizontal={false} />
+          <CartesianGrid stroke="var(--color-chart-grid)" strokeDasharray="3 4" horizontal={false} />
           <XAxis
             type="number"
             domain={[-maxAbsGrowth, maxAbsGrowth]}
             tickFormatter={(value) => `${value.toFixed(0)}%`}
-            tick={{ fill: '#94a3b8', fontSize: 13, fontFamily: 'Manrope, sans-serif' }}
+            tick={{ fill: 'var(--color-chart-tick)', fontSize: 13, fontFamily: 'Manrope, sans-serif' }}
             axisLine={false}
             tickLine={false}
           />
@@ -75,11 +75,11 @@ export function GrowthExtremesChart({ tenants, onTenantSelect }: {
             type="category"
             dataKey="tenantName"
             width={120}
-            tick={{ fill: '#1A1A1A', fontSize: 14, fontWeight: 700, fontFamily: 'Manrope, sans-serif' }}
+            tick={{ fill: 'var(--color-chart-label)', fontSize: 14, fontWeight: 700, fontFamily: 'Manrope, sans-serif' }}
             axisLine={false}
             tickLine={false}
           />
-          <ReferenceLine x={0} stroke="#cbd5e1" strokeWidth={2} />
+          <ReferenceLine x={0} stroke="var(--color-chart-prev-line)" strokeWidth={2} />
           <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f1f5f9' }} />
           <Bar
             dataKey="growthPercentage"
@@ -97,7 +97,7 @@ export function GrowthExtremesChart({ tenants, onTenantSelect }: {
             {tenants.map((tenant) => (
               <Cell
                 key={tenant.tenantId}
-                fill={tenant.growthPercentage < 0 ? '#EF4444' : '#10B981'}
+                fill={tenant.growthPercentage < 0 ? 'var(--color-status-down)' : 'var(--color-status-up)'}
               />
             ))}
           </Bar>

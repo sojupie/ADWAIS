@@ -1,0 +1,2903 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Api",
+    "version": "1.0"
+  },
+  "paths": {
+    "/api/job/trigger/monitor-sync": {
+      "post": {
+        "tags": [
+          "BackgroundJob"
+        ],
+        "summary": "Triggers the UptimeRobot monitor synchronization job immediately.",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/job/trigger/uptime-sync": {
+      "post": {
+        "tags": [
+          "BackgroundJob"
+        ],
+        "summary": "Triggers the UptimeRobot uptime metrics collection job immediately.",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/job/trigger/latency-sync": {
+      "post": {
+        "tags": [
+          "BackgroundJob"
+        ],
+        "summary": "Triggers the UptimeRobot latency metrics collection job immediately.",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/job/trigger/user-stats-sync": {
+      "post": {
+        "tags": [
+          "BackgroundJob"
+        ],
+        "summary": "Triggers the UptimeRobot account statistics synchronization job immediately.",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/job/trigger/litium-sync": {
+      "post": {
+        "tags": [
+          "BackgroundJob"
+        ],
+        "summary": "Triggers the Litium order data ingestion job immediately.",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/job/trigger/refresh-historic-order-data": {
+      "post": {
+        "tags": [
+          "BackgroundJob"
+        ],
+        "summary": "Triggers a refresh of the financial materialized views.",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/job/trigger/refresh-monitoring-data": {
+      "post": {
+        "tags": [
+          "BackgroundJob"
+        ],
+        "summary": "Triggers a refresh of all monitoring materialized views (latency and availability).",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/job/update/intervals": {
+      "patch": {
+        "tags": [
+          "BackgroundJob"
+        ],
+        "summary": "Updates the global fetch intervals for all background jobs.\r\nReturns the updated list of intervals.",
+        "requestBody": {
+          "description": "The request containing the new intervals to set.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateFetchIntervalsRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateFetchIntervalsRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateFetchIntervalsRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/FetchIntervalsDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FetchIntervalsDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FetchIntervalsDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/job/metrics/fetch-intervals": {
+      "get": {
+        "tags": [
+          "BackgroundJob"
+        ],
+        "summary": "Retrieves the current global fetch intervals for all background jobs.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/FetchIntervalsDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FetchIntervalsDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FetchIntervalsDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/job/recurring": {
+      "get": {
+        "tags": [
+          "BackgroundJob"
+        ],
+        "summary": "Retrieves a list of all registered recurring jobs and their current schedules.",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/job/status/{jobId}": {
+      "get": {
+        "tags": [
+          "BackgroundJob"
+        ],
+        "summary": "Retrieves the status and history of a specific background job.",
+        "parameters": [
+          {
+            "name": "jobId",
+            "in": "path",
+            "description": "The Hangfire Job ID.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/financial/kpis": {
+      "get": {
+        "tags": [
+          "Financial"
+        ],
+        "summary": "Revenue, growth %, transaction volume, AOV.\r\nScopes to a single tenant if tenantId is provided, otherwise portfolio-wide.",
+        "parameters": [
+          {
+            "name": "timeframe",
+            "in": "query",
+            "description": "The primary timeframe for the calculation (e.g., T7, T30). \r\nDefaults to T30.",
+            "schema": {
+              "$ref": "#/components/schemas/Timeframe"
+            }
+          },
+          {
+            "name": "tenantId",
+            "in": "query",
+            "description": "Optional. Scopes the metrics to a specific tenant. \r\nIf null, metrics represent the global portfolio total.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/KpiResponseDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KpiResponseDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KpiResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/financial/velocity": {
+      "get": {
+        "tags": [
+          "Financial"
+        ],
+        "summary": "Daily/Hourly time-series: current vs. previous period revenue.\r\nScopes to a single tenant if tenantId is provided, otherwise portfolio-wide.",
+        "parameters": [
+          {
+            "name": "timeframe",
+            "in": "query",
+            "description": "The primary timeframe for the calculation (e.g., T7, T30). \r\nDefaults to T30.",
+            "schema": {
+              "$ref": "#/components/schemas/Timeframe"
+            }
+          },
+          {
+            "name": "tenantId",
+            "in": "query",
+            "description": "Optional. Scopes the metrics to a specific tenant. \r\nIf null, metrics represent the global portfolio total.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/VelocityPointResponseDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/VelocityPointResponseDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/VelocityPointResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/financial/growth-extremes": {
+      "get": {
+        "tags": [
+          "Financial"
+        ],
+        "summary": "Per-tenant growth %, sorted descending. Portfolio view only.",
+        "parameters": [
+          {
+            "name": "timeframe",
+            "in": "query",
+            "description": "The primary timeframe for the calculation (e.g., T7, T30). \r\nDefaults to T30.",
+            "schema": {
+              "$ref": "#/components/schemas/Timeframe"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GrowthExtremeResponseDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GrowthExtremeResponseDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GrowthExtremeResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/financial/distribution": {
+      "get": {
+        "tags": [
+          "Financial"
+        ],
+        "summary": "Pareto distribution: revenue per tenant + cumulative portfolio share.\r\nPortfolio view only.",
+        "parameters": [
+          {
+            "name": "timeframe",
+            "in": "query",
+            "description": "The primary timeframe for the calculation (e.g., T7, T30). \r\nDefaults to T30.",
+            "schema": {
+              "$ref": "#/components/schemas/Timeframe"
+            }
+          },
+          {
+            "name": "topN",
+            "in": "query",
+            "description": "The number of top tenants to include as individual items. \r\nAll other tenants are grouped into an \"Other\" category.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DistributionEntryResponseDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DistributionEntryResponseDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DistributionEntryResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/financial/momentum": {
+      "get": {
+        "tags": [
+          "Financial"
+        ],
+        "summary": "Scatter: baseline revenue × growth % × current volume. Portfolio view only.",
+        "parameters": [
+          {
+            "name": "timeframe",
+            "in": "query",
+            "description": "The primary timeframe for the calculation (e.g., T7, T30). \r\nDefaults to T30.",
+            "schema": {
+              "$ref": "#/components/schemas/Timeframe"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MomentumResponseDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MomentumResponseDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MomentumResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/financial/daily-revenue-delta": {
+      "get": {
+        "tags": [
+          "Financial"
+        ],
+        "summary": "Step-line: running tally of daily growth delta. Drilldown view only.",
+        "parameters": [
+          {
+            "name": "timeframe",
+            "in": "query",
+            "description": "The primary timeframe for the calculation (e.g., T7, T30). \r\nDefaults to T30.",
+            "schema": {
+              "$ref": "#/components/schemas/Timeframe"
+            }
+          },
+          {
+            "name": "tenantId",
+            "in": "query",
+            "description": "The unique identifier of the tenant.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NetGrowthAdditionPointResponseDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NetGrowthAdditionPointResponseDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NetGrowthAdditionPointResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/financial/order-distribution": {
+      "get": {
+        "tags": [
+          "Financial"
+        ],
+        "summary": "Histogram of order values with adaptive binning. Drilldown view only.",
+        "parameters": [
+          {
+            "name": "timeframe",
+            "in": "query",
+            "description": "The primary timeframe for the calculation (e.g., T7, T30). \r\nDefaults to T30.",
+            "schema": {
+              "$ref": "#/components/schemas/Timeframe"
+            }
+          },
+          {
+            "name": "tenantId",
+            "in": "query",
+            "description": "The unique identifier of the tenant.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "binCount",
+            "in": "query",
+            "description": "Optional. The number of bins to use for the histogram. \r\nIf null, an adaptive binning strategy is used.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrderBinResponseDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrderBinResponseDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrderBinResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/financial/transaction-density": {
+      "get": {
+        "tags": [
+          "Financial"
+        ],
+        "summary": "Heatmap data: transaction count and revenue grouped by day of week and hour.\r\nScopes to a single tenant if tenantId is provided, otherwise portfolio-wide.",
+        "parameters": [
+          {
+            "name": "timeframe",
+            "in": "query",
+            "description": "The primary timeframe for the calculation (e.g., T7, T30). \r\nDefaults to T30.",
+            "schema": {
+              "$ref": "#/components/schemas/Timeframe"
+            }
+          },
+          {
+            "name": "tenantId",
+            "in": "query",
+            "description": "Optional. Scopes the metrics to a specific tenant. \r\nIf null, metrics represent the global portfolio total.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TransactionDensityPointResponseDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TransactionDensityPointResponseDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TransactionDensityPointResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/financial/cumulative-growth-delta": {
+      "get": {
+        "tags": [
+          "Financial"
+        ],
+        "summary": "Line-chart: running sum of absolute daily variance between current and previous periods.\r\nScopes to a single tenant if tenantId is provided, otherwise portfolio-wide.",
+        "parameters": [
+          {
+            "name": "timeframe",
+            "in": "query",
+            "description": "The primary timeframe for the calculation (e.g., T7, T30). \r\nDefaults to T30.",
+            "schema": {
+              "$ref": "#/components/schemas/Timeframe"
+            }
+          },
+          {
+            "name": "tenantId",
+            "in": "query",
+            "description": "Optional. Scopes the metrics to a specific tenant. \r\nIf null, metrics represent the global portfolio total.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CumulativeGrowthDeltaPointResponseDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CumulativeGrowthDeltaPointResponseDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CumulativeGrowthDeltaPointResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/global-config": {
+      "get": {
+        "tags": [
+          "GlobalConfig"
+        ],
+        "summary": "Retrieves the current global system configuration.\r\nSensitive values like API keys are masked.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlobalConfigResponseDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlobalConfigResponseDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlobalConfigResponseDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "GlobalConfig"
+        ],
+        "summary": "Partially updates the global system configuration.\r\nUpdating fetch intervals will automatically reschedule associated background jobs.",
+        "requestBody": {
+          "description": "The request containing the settings to update.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateGlobalConfigRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateGlobalConfigRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateGlobalConfigRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlobalConfigResponseDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlobalConfigResponseDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlobalConfigResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Ingestion/backfill": {
+      "post": {
+        "tags": [
+          "Ingestion"
+        ],
+        "summary": "Manually triggers a historical backfill for a specific tenant within a given date range.",
+        "description": "If StartDate or EndDate are omitted, the system defaults to a 2-year lookback ending now.\r\nThis job is offloaded to Hangfire for background processing.\r\nValidation is handled automatically by the ValidationFilter.",
+        "requestBody": {
+          "description": "The backfill request parameters.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HistoricalBackfillRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HistoricalBackfillRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/HistoricalBackfillRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "202": {
+            "description": "If the job was successfully enqueued."
+          },
+          "404": {
+            "description": "If the tenant was not found."
+          },
+          "409": {
+            "description": "If a fetch job is already running for this tenant."
+          }
+        }
+      }
+    },
+    "/api/monitors/analytics": {
+      "get": {
+        "tags": [
+          "Monitor"
+        ],
+        "summary": "Unified analytics endpoint for monitoring data.\r\nProvides latency time-series and filtered monitor lists hydrated with uptime for the specified timeframe (defaults to T30).",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "query",
+            "description": "Optional. Scopes the metrics to a specific tenant. \r\nIf null, metrics represent the global portfolio total.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "monitorId",
+            "in": "query",
+            "description": "Optional. Scopes the metrics to a specific monitor. \r\nIf null, metrics represent the global portfolio total.\r\nOverrides tenantId parameter.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "timeframe",
+            "in": "query",
+            "description": "The primary timeframe for the calculation (e.g., T7, T30). \r\nDefaults to T30.",
+            "schema": {
+              "$ref": "#/components/schemas/Timeframe"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitorAnalyticsResponseDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitorAnalyticsResponseDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitorAnalyticsResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/monitors": {
+      "get": {
+        "tags": [
+          "Monitor"
+        ],
+        "summary": "Retrieves monitors, optionally filtered by tenant or specific monitor ID.\r\nReturns monitors hydrated with uptime for the specified timeframe (defaults to T30).",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "query",
+            "description": "Optional. Scopes the metrics to a specific tenant. \r\nIf null, metrics represent the global portfolio total.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "monitorId",
+            "in": "query",
+            "description": "Optional. Scopes the metrics to a specific monitor. \r\nIf null, metrics represent the global portfolio total.\r\nOverrides tenantId parameter.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "timeframe",
+            "in": "query",
+            "description": "The primary timeframe for the calculation (e.g., T7, T30). \r\nDefaults to T30.",
+            "schema": {
+              "$ref": "#/components/schemas/Timeframe"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UptimeMonitorDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UptimeMonitorDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UptimeMonitorDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Monitor"
+        ],
+        "summary": "Creates a new uptime monitor in UptimeRobot and registers it in the system.",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMonitorRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMonitorRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMonitorRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UptimeMonitorDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UptimeMonitorDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UptimeMonitorDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/monitors/unassigned": {
+      "get": {
+        "tags": [
+          "Monitor"
+        ],
+        "summary": "Retrieves monitors that are not assigned to any specific tenant.",
+        "parameters": [
+          {
+            "name": "timeframe",
+            "in": "query",
+            "description": "The timeframe for calculating uptime percentage.",
+            "schema": {
+              "$ref": "#/components/schemas/Timeframe"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UptimeMonitorDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UptimeMonitorDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UptimeMonitorDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/monitors/{id}/assign/{tenantId}": {
+      "patch": {
+        "tags": [
+          "Monitor"
+        ],
+        "summary": "Reassigns a monitor to a different tenant.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/monitors/{id}/unassign": {
+      "patch": {
+        "tags": [
+          "Monitor"
+        ],
+        "summary": "Moves a monitor to the unassigned (system) tenant.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/monitors/{id}/pause": {
+      "post": {
+        "tags": [
+          "Monitor"
+        ],
+        "summary": "Pauses monitoring for a specific monitor in UptimeRobot.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/monitors/{id}/start": {
+      "post": {
+        "tags": [
+          "Monitor"
+        ],
+        "summary": "Resumes monitoring for a specific monitor in UptimeRobot.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/monitors/{id}": {
+      "delete": {
+        "tags": [
+          "Monitor"
+        ],
+        "summary": "Deletes a monitor from both the system and UptimeRobot.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "tenantId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Monitor"
+        ],
+        "summary": "Updates monitor properties, such as SLA.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMonitorRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMonitorRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMonitorRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UptimeMonitorDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UptimeMonitorDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UptimeMonitorDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/monitors/{id}/latency": {
+      "get": {
+        "tags": [
+          "Monitor"
+        ],
+        "summary": "Retrieves aggregated latency metrics for a specific monitor.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "tenantId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LatencyMetricsDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LatencyMetricsDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LatencyMetricsDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/SystemEvent": {
+      "get": {
+        "tags": [
+          "SystemEvent"
+        ],
+        "summary": "Retrieves a list of recent system events, with optional filtering.",
+        "parameters": [
+          {
+            "name": "take",
+            "in": "query",
+            "description": "Number of events to retrieve (default 50).",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          },
+          {
+            "name": "minLevel",
+            "in": "query",
+            "description": "Minimum event level to include (e.g., Information, Warning, Error).",
+            "schema": {
+              "$ref": "#/components/schemas/SystemEventLevel"
+            }
+          },
+          {
+            "name": "tenantId",
+            "in": "query",
+            "description": "Filter events related to a specific tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SystemEvent"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SystemEvent"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SystemEvent"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/SystemEvent/clear": {
+      "delete": {
+        "tags": [
+          "SystemEvent"
+        ],
+        "summary": "Deletes system events older than a specified number of days.",
+        "parameters": [
+          {
+            "name": "olderThanDays",
+            "in": "query",
+            "description": "Delete events older than this many days (default 30).",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 30
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/system/health": {
+      "get": {
+        "tags": [
+          "SystemHealth"
+        ],
+        "summary": "Retrieves an aggregated health report of the entire application pipeline.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SystemHealthDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SystemHealthDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SystemHealthDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tenants": {
+      "get": {
+        "tags": [
+          "Tenant"
+        ],
+        "summary": "Retrieves tenants, optionally filtered by ID.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "Optional tenant ID to retrieve a single tenant.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TenantResponseDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TenantResponseDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TenantResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Tenant"
+        ],
+        "summary": "Creates a new tenant.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTenantRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTenantRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTenantRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/tenants/{id}": {
+      "delete": {
+        "tags": [
+          "Tenant"
+        ],
+        "summary": "Deletes a tenant and reassigns its monitors to the system tenant.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Tenant"
+        ],
+        "summary": "Partially updates a tenant's configuration.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTenantRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTenantRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTenantRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserResponseDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserResponseDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Manually creates a new user record.\r\nUsed for pre-provisioning users before EntraID sign-in.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/{id}": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "User"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "User"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CreateMonitorRequestDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The display name for the monitor.",
+            "nullable": true
+          },
+          "url": {
+            "type": "string",
+            "description": "The absolute URL to monitor.",
+            "nullable": true
+          },
+          "uptimeSla": {
+            "type": "number",
+            "description": "Optional target uptime percentage (0-1).",
+            "format": "double",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Data transfer object for creating a new uptime monitor."
+      },
+      "CreateTenantRequestDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "litiumBaseUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "serviceAccountToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "orderFetchingEnabled": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateUserRequestDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "role": {
+            "$ref": "#/components/schemas/UserRole"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CumulativeGrowthDeltaPointResponseDto": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "nullable": true
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cumulativeGrowthDelta": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DistributionEntryResponseDto": {
+        "type": "object",
+        "properties": {
+          "tenantId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "tenantName": {
+            "type": "string",
+            "nullable": true
+          },
+          "absoluteRevenue": {
+            "type": "number",
+            "format": "double"
+          },
+          "cumulativePortfolioShare": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "FetchIntervalsDto": {
+        "type": "object",
+        "properties": {
+          "latencyFetchIntervalMinutes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "uptimeFetchIntervalMinutes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "statusFetchIntervalMinutes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "litiumFetchIntervalMinutes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "userStatsFetchIntervalMinutes": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "GlobalConfigResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastPolled": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "litiumFetchEnabled": {
+            "type": "boolean"
+          },
+          "uptimeRobotFetchEnabled": {
+            "type": "boolean"
+          },
+          "litiumFetchIntervalMinutes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "latencyDegradedFloor": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "uptimeRobotApiKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "uptimeFetchIntervalMinutes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "latencyFetchIntervalMinutes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "userStatsFetchIntervalMinutes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "systemEventRetentionDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "monitorsCount": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "monitorsLimit": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "activeSubscription": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "GrowthExtremeResponseDto": {
+        "type": "object",
+        "properties": {
+          "tenantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tenantName": {
+            "type": "string",
+            "nullable": true
+          },
+          "currentRevenue": {
+            "type": "number",
+            "format": "double"
+          },
+          "previousRevenue": {
+            "type": "number",
+            "format": "double"
+          },
+          "growthPercentage": {
+            "type": "number",
+            "format": "double"
+          },
+          "absoluteVariance": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "HangfireHealthDto": {
+        "type": "object",
+        "properties": {
+          "failedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "processingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "enqueuedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "scheduledCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "additionalProperties": false
+      },
+      "HistoricalBackfillRequestDto": {
+        "type": "object",
+        "properties": {
+          "tenantId": {
+            "type": "string",
+            "description": "The ID of the tenant for which to backfill data.",
+            "format": "uuid"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "The start date for the backfill operation. If null, a default lookback period is used.",
+            "format": "date-time",
+            "nullable": true
+          },
+          "endDate": {
+            "type": "string",
+            "description": "The end date for the backfill operation. If null, the current time is used.",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Data transfer object for requesting a historical data backfill."
+      },
+      "KpiResponseDto": {
+        "type": "object",
+        "properties": {
+          "currentRevenue": {
+            "type": "number",
+            "format": "double"
+          },
+          "previousRevenue": {
+            "type": "number",
+            "format": "double"
+          },
+          "revenueGrowthPercentage": {
+            "type": "number",
+            "format": "double"
+          },
+          "transactionVolume": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "averageOrderValue": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "LatencyMetricsDto": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "average": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "lowest": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "highest": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LatencyPointResponseDto": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "nullable": true
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "average": {
+            "type": "number",
+            "format": "double"
+          },
+          "previousAverage": {
+            "type": "number",
+            "format": "double"
+          },
+          "lowest": {
+            "type": "number",
+            "format": "double"
+          },
+          "highest": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "MomentumResponseDto": {
+        "type": "object",
+        "properties": {
+          "medianBaselineRevenue": {
+            "type": "number",
+            "format": "double"
+          },
+          "tenants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MomentumTenantResponseDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "MomentumTenantResponseDto": {
+        "type": "object",
+        "properties": {
+          "tenantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tenantName": {
+            "type": "string",
+            "nullable": true
+          },
+          "baselineRevenue": {
+            "type": "number",
+            "format": "double"
+          },
+          "growthPercentage": {
+            "type": "number",
+            "format": "double"
+          },
+          "currentRevenue": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "MonitorAnalyticsResponseDto": {
+        "type": "object",
+        "properties": {
+          "latencyPoints": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LatencyPointResponseDto"
+            },
+            "nullable": true
+          },
+          "monitors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UptimeMonitorDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "NetGrowthAdditionPointResponseDto": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "nullable": true
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "netGrowthAddition": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Order": {
+        "required": [
+          "currency",
+          "litiumOrderId",
+          "orderState"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tenantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderState": {
+            "type": "string",
+            "nullable": true
+          },
+          "litiumOrderId": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "totalValueIncVat": {
+            "type": "number",
+            "format": "double"
+          },
+          "totalValueExcVat": {
+            "type": "number",
+            "format": "double"
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "tenant": {
+            "$ref": "#/components/schemas/Tenant"
+          }
+        },
+        "additionalProperties": false
+      },
+      "OrderBinResponseDto": {
+        "type": "object",
+        "properties": {
+          "binLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "binMin": {
+            "type": "number",
+            "format": "double"
+          },
+          "binMax": {
+            "type": "number",
+            "format": "double"
+          },
+          "orderCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ResponseTime": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "monitorId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "average": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "lowest": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "highest": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "uptimeMonitor": {
+            "$ref": "#/components/schemas/UptimeMonitor"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SyncHealthDto": {
+        "type": "object",
+        "properties": {
+          "tenantsWithErrorsCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "monitorsWithErrorsCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "globalSyncError": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SystemEvent": {
+        "required": [
+          "message",
+          "source"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "level": {
+            "$ref": "#/components/schemas/SystemEventLevel"
+          },
+          "source": {
+            "type": "string",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "details": {
+            "type": "string",
+            "nullable": true
+          },
+          "tenantId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "tenant": {
+            "$ref": "#/components/schemas/Tenant"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SystemEventLevel": {
+        "enum": [
+          "Information",
+          "Warning",
+          "Error",
+          "Critical"
+        ],
+        "type": "string"
+      },
+      "SystemHealthDto": {
+        "type": "object",
+        "properties": {
+          "databaseStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "hangfire": {
+            "$ref": "#/components/schemas/HangfireHealthDto"
+          },
+          "sync": {
+            "$ref": "#/components/schemas/SyncHealthDto"
+          },
+          "lastGlobalPoll": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Tenant": {
+        "required": [
+          "litiumBaseUrl",
+          "name",
+          "serviceAccountToken"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "litiumBaseUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "serviceAccountToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "fetchedFrom": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "fetchedUntil": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastPolled": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "orderFetchingEnabled": {
+            "type": "boolean"
+          },
+          "currentlyFetching": {
+            "type": "boolean"
+          },
+          "lastSyncError": {
+            "type": "string",
+            "nullable": true
+          },
+          "orders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Order"
+            },
+            "nullable": true
+          },
+          "monitors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UptimeMonitor"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "TenantResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "litiumBaseUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "currentlyFetching": {
+            "type": "boolean"
+          },
+          "fetchedFrom": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "fetchedUntil": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastPolled": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "orderFetchingEnabled": {
+            "type": "boolean"
+          },
+          "monitorCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastSyncError": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Timeframe": {
+        "enum": [
+          "Today",
+          "T7",
+          "T30",
+          "T90",
+          "Ytd",
+          "T365"
+        ],
+        "type": "string"
+      },
+      "TransactionDensityPointResponseDto": {
+        "type": "object",
+        "properties": {
+          "dayOfWeek": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hour": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalRevenue": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateFetchIntervalsRequestDto": {
+        "type": "object",
+        "properties": {
+          "litiumFetchIntervalMinutes": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "uptimeFetchIntervalMinutes": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "userStatsFetchIntervalMinutes": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "latencyFetchIntervalMinutes": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateGlobalConfigRequestDto": {
+        "type": "object",
+        "properties": {
+          "litiumFetchEnabled": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "uptimeRobotFetchEnabled": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "latencyDegradedFloor": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "uptimeRobotApiKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "systemEventRetentionDays": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateMonitorRequestDto": {
+        "required": [
+          "sla"
+        ],
+        "type": "object",
+        "properties": {
+          "sla": {
+            "type": "number",
+            "description": "SLA for the monitor.",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Request DTO updating a monitor."
+      },
+      "UpdateTenantRequestDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "litiumBaseUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "serviceAccountToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "orderFetchingEnabled": {
+            "type": "boolean",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateUserRequestDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "role": {
+            "$ref": "#/components/schemas/UserRole"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UptimeMonitor": {
+        "required": [
+          "name",
+          "url"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tenantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "url": {
+            "type": "string",
+            "nullable": true
+          },
+          "uptimeSla": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "uptimeMonitorEnabled": {
+            "type": "boolean"
+          },
+          "lastUpdate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastUptimeUpdate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastLatencyUpdate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updateInterval": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "currentUptimePercentage": {
+            "type": "number",
+            "format": "double"
+          },
+          "lastSyncError": {
+            "type": "string",
+            "nullable": true
+          },
+          "tenant": {
+            "$ref": "#/components/schemas/Tenant"
+          },
+          "responseTimes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResponseTime"
+            },
+            "nullable": true
+          },
+          "statusStr": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UptimeMonitorDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tenantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "url": {
+            "type": "string",
+            "nullable": true
+          },
+          "updateInterval": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "uptimeSla": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "currentUptimePercentage": {
+            "type": "number",
+            "format": "double"
+          },
+          "uptimeMonitorEnabled": {
+            "type": "boolean"
+          },
+          "currentStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastUpdate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastUptimeUpdate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastLatencyUpdate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastSyncError": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "role": {
+            "$ref": "#/components/schemas/UserRole"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserRole": {
+        "enum": [
+          "Admin",
+          "Viewer",
+          "Employee"
+        ],
+        "type": "string"
+      },
+      "VelocityPointResponseDto": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "nullable": true
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "currentRevenue": {
+            "type": "number",
+            "format": "double"
+          },
+          "previousRevenue": {
+            "type": "number",
+            "format": "double"
+          },
+          "absoluteVariance": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "BackgroundJob"
+    },
+    {
+      "name": "Financial"
+    },
+    {
+      "name": "GlobalConfig"
+    },
+    {
+      "name": "Ingestion"
+    },
+    {
+      "name": "Monitor"
+    },
+    {
+      "name": "SystemEvent"
+    },
+    {
+      "name": "SystemHealth"
+    },
+    {
+      "name": "Tenant"
+    },
+    {
+      "name": "User"
+    }
+  ]
+}

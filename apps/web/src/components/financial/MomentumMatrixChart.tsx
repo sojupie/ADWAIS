@@ -13,7 +13,7 @@ import type { MomentumResponse, MomentumTenant } from '@types';
 import { formatCompact } from '@utils';
 import { ChartPanel } from '../common/ChartPanel';
 
-const CustomTooltip = ({ active, payload }: any) => {
+const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: any[] }) => {
   if (!active || !payload?.length) return null;
 
   const point = payload[0].payload as MomentumTenant;
@@ -32,7 +32,7 @@ const CustomTooltip = ({ active, payload }: any) => {
         </p>
         <p className="flex justify-between gap-6">
           <span className="text-slate-500">Momentum:</span>
-          <strong className={point.growthPercentage >= 0 ? 'text-[#37b24d]' : 'text-[#f03e3e]'}>
+          <strong className={point.growthPercentage >= 0 ? 'text-growth' : 'text-decline'}>
             {point.growthPercentage.toFixed(1)}%
           </strong>
         </p>
@@ -47,20 +47,20 @@ points: MomentumTenant[]; medianBaselineRevenue: number; onTenantSelect?: (tenan
   return (
     <ResponsiveContainer width="100%" height="100%">
       <ScatterChart margin={{ top: 10, right: 24, left: 12, bottom: 14 }}>
-        <CartesianGrid stroke="#f1f5f9" strokeDasharray="3 4" />
+        <CartesianGrid stroke="var(--color-chart-grid)" strokeDasharray="3 4" />
         <XAxis
           type="number"
           dataKey="baselineRevenue"
           name="Previous Baseline Revenue"
           tickFormatter={(value) => formatCompact(value)}
-          tick={{ fill: '#94a3b8', fontSize: 13, fontWeight: 600, fontFamily: 'Manrope, sans-serif' }}
+          tick={{ fill: 'var(--color-chart-tick)', fontSize: 13, fontWeight: 600, fontFamily: 'Manrope, sans-serif' }}
           axisLine={false}
           tickLine={false}
           label={{
             value: 'P30 Baseline Revenue →',
             position: 'insideBottom',
             offset: -3,
-            fill: '#1A1A1A',
+            fill: 'var(--color-chart-label)',
             fontSize: 13,
             fontWeight: 800,
             fontFamily: 'Manrope, sans-serif'
@@ -71,19 +71,19 @@ points: MomentumTenant[]; medianBaselineRevenue: number; onTenantSelect?: (tenan
           dataKey="growthPercentage"
           name="Revenue Momentum"
           tickFormatter={(value) => `${value.toFixed(0)}%`}
-          tick={{ fill: '#94a3b8', fontSize: 13, fontWeight: 600, fontFamily: 'Manrope, sans-serif' }}
+          tick={{ fill: 'var(--color-chart-tick)', fontSize: 13, fontWeight: 600, fontFamily: 'Manrope, sans-serif' }}
           axisLine={false}
           tickLine={false}
           width={52}
         />
         <ZAxis type="number" dataKey="currentRevenue" range={[120, 1200]} />
-        <ReferenceLine x={medianBaselineRevenue} stroke="#cbd5e1" strokeWidth={2} strokeDasharray="5 5" />
-        <ReferenceLine y={0} stroke="#cbd5e1" strokeWidth={2} strokeDasharray="5 5" />
+        <ReferenceLine x={medianBaselineRevenue} stroke="var(--color-chart-prev-line)" strokeWidth={2} strokeDasharray="5 5" />
+        <ReferenceLine y={0} stroke="var(--color-chart-prev-line)" strokeWidth={2} strokeDasharray="5 5" />
         <Tooltip content={<CustomTooltip />} cursor={{ strokeDasharray: '3 3' }} />
         <Scatter
           data={points}
           className={onTenantSelect ? 'cursor-pointer hover:opacity-90 transition-opacity' : undefined}
-          fill="#51B5B9"
+          fill="var(--color-brand-btn-primary)"
           fillOpacity={0.7}
           stroke="#fff"
           strokeWidth={2}

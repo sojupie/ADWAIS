@@ -11,7 +11,7 @@ import type { FinancialVelocityPoint } from '@types';
 import { formatCompact } from '@utils';
 import { ChartPanel } from '../common/ChartPanel';
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: any[]; label?: string }) => {
   if (!active || !payload?.length) return null;
 
   return (
@@ -21,7 +21,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
         {payload.map((entry: any) => (
           <p key={entry.dataKey} className="flex justify-between gap-6">
             <span className="text-slate-500">{entry.dataKey === 'currentRevenue' ? 'Current' : 'Previous'}:</span>
-            <strong className={entry.dataKey === 'currentRevenue' ? 'text-[#51B5B9]' : 'text-slate-700'}>
+            <strong className={entry.dataKey === 'currentRevenue' ? 'text-brand-btn-primary' : 'text-slate-700'}>
               {formatCompact(entry.value)} SEK
             </strong>
           </p>
@@ -40,7 +40,7 @@ export function TenantRevenueVelocityChart({ points, className }: { points: Fina
       legend={
         <div className="flex items-center gap-6 text-[11px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-4 py-2 rounded-full border border-slate-100">
           <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-[#51B5B9]" />
+            <span className="w-3 h-3 rounded-full bg-brand-btn-primary" />
             <span>Current</span>
           </div>
           <div className="flex items-center gap-2">
@@ -52,17 +52,17 @@ export function TenantRevenueVelocityChart({ points, className }: { points: Fina
     >
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={points} margin={{ top: 8, right: 10, left: 8, bottom: 20 }}>
-          <CartesianGrid stroke="#f1f5f9" strokeDasharray="3 4" vertical={false} />
+          <CartesianGrid stroke="var(--color-chart-grid)" strokeDasharray="3 4" vertical={false} />
           <XAxis
             dataKey="label"
-            tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 700, fontFamily: 'Manrope, sans-serif' }}
+            tick={{ fill: 'var(--color-chart-tick)', fontSize: 11, fontWeight: 700, fontFamily: 'Manrope, sans-serif' }}
             axisLine={false}
             tickLine={false}
             interval="preserveStartEnd"
           />
           <YAxis
             tickFormatter={(value) => formatCompact(value)}
-            tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 700, fontFamily: 'Manrope, sans-serif' }}
+            tick={{ fill: 'var(--color-chart-tick)', fontSize: 11, fontWeight: 700, fontFamily: 'Manrope, sans-serif' }}
             axisLine={false}
             tickLine={false}
             width={56}
@@ -71,7 +71,7 @@ export function TenantRevenueVelocityChart({ points, className }: { points: Fina
           <Line
             type="monotone"
             dataKey="previousRevenue"
-            stroke="#cbd5e1"
+            stroke="var(--color-chart-prev-line)"
             strokeWidth={2}
             strokeDasharray="5 5"
             dot={false}
@@ -80,7 +80,7 @@ export function TenantRevenueVelocityChart({ points, className }: { points: Fina
           <Line
             type="monotone"
             dataKey="currentRevenue"
-            stroke="#51B5B9"
+            stroke="var(--color-brand-btn-primary)"
             strokeWidth={2.4}
             dot={false}
             activeDot={{ r: 4, strokeWidth: 0 }}

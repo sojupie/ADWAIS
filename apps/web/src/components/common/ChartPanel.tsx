@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-interface ChartPanelData {
+interface ChartPanelProps {
   title: string;
   legend?: ReactNode;
   bodyClassName?: string;
@@ -8,7 +8,7 @@ interface ChartPanelData {
   children: ReactNode;
 }
 
-export function ChartPanel({ title, legend, bodyClassName = '', className = '', children }: ChartPanelData) {
+export function ChartPanel({ title, legend, bodyClassName = '', className = '', children }: ChartPanelProps) {
   return (
       <div className={`bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-4 flex flex-col min-h-0 ${className}`}>
         <div className="flex justify-between items-center mb-2">

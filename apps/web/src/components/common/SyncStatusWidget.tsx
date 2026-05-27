@@ -1,0 +1,185 @@
+import { useEffect, useState } from 'react';
+import { useQuery, useQueryClient, useIsFetching } from '@tanstack/react-query';
+import { useSearch, useParams, useRouterState } from '@tanstack/react-router';
+import { apiFetch } from '../../apiClient';
+import type { SystemHealthDto, TenantResponseDto } from '@types';
+import { RefreshCw, AlertCircle } from 'lucide-react';
+
+function timeAgo(date: string | number | null | undefined): string {
+  if (!date) return 'Never';
+  const seconds = Math.floor((new Date().getTime() - new Date(date).getTime()) / 1000);
+  if (seconds < 5) return 'Just now';
+  if (seconds < 60) return `${seconds}s ago`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
+}
+
+export function SyncStatusWidget() {
+  const queryClient = useQueryClient();
+  const search = useSearch({ strict: false }) as { tenantId?: string };
+  const params = useParams({ strict: false }) as { tenantId?: string };
+  const matches = useRouterState({ select: (s) => s.matches });
+  
+  const isFinancial = matches.some((m) => m.routeId === '/financial' || m.pathname.includes('/financial'));
+  const isFleet = matches.some((m) => m.routeId === '/fleet-status' || m.pathname.includes('/fleet-status'));
+  
+  // Show globally when on these views
+  if (!isFinancial && !isFleet) return null;
+
+  const tenantId = search?.tenantId || params?.tenantId;
+
+  const { data: health } = useQuery<SystemHealthDto>({
+    queryKey: ['system-health'],
+    queryFn: () => apiFetch<SystemHealthDto>('/api/system/health'),
+    refetchInterval: 60000,
+  });
+
+  const { data: tenants } = useQuery<TenantResponseDto[]>({
+    queryKey: ['tenant', tenantId],
+    queryFn: () => apiFetch<TenantResponseDto[]>(`/api/tenants?id=${tenantId}`),
+    enabled: !!tenantId,
+    refetchInterval: 60000,
+  });
+  
+  const tenant = tenants?.[0];
+
+  const isFetchingCount = useIsFetching({ queryKey: isFinancial ? ['financial'] : ['fleet'] });
+  const isFetching = isFetchingCount > 0;
+  
+  const [dashboardSyncTime, setDashboardSyncTime] = useState<number | null>(null);
+  const [countdown, setCountdown] = useState(60);
+
+  useEffect(() => {
+    const updateDashboardSync = () => {
+      const queries = queryClient.getQueryCache().findAll({ queryKey: isFinancial ? ['financial'] : ['fleet'] });
+      const maxTime = Math.max(...queries.map(q => q.state.dataUpdatedAt), 0);
+      setDashboardSyncTime(maxTime > 0 ? maxTime : null);
+    };
+
+    updateDashboardSync();
+    
+    const unsubscribe = queryClient.getQueryCache().subscribe((event) => {
+      if (event.type === 'updated' && event.action.type === 'success') {
+        const queryKey = event.query.queryKey;
+        if (queryKey.includes(isFinancial ? 'financial' : 'fleet')) {
+           updateDashboardSync();
+           setCountdown(60); // Reset countdown on successful fetch
+        }
+      }
+    });
+
+    return unsubscribe;
+  }, [queryClient, isFinancial]);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCountdown(c => Math.max(0, c - 1));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const forceFetch = () => {
+    setCountdown(60);
+    queryClient.invalidateQueries({ queryKey: ['financial'] });
+    queryClient.invalidateQueries({ queryKey: ['fleet'] });
+    queryClient.invalidateQueries({ queryKey: ['system-health'] });
+    if (tenantId) queryClient.invalidateQueries({ queryKey: ['tenant', tenantId] });
+  };
+
+  const isDrillDown = !!tenantId;
+  const syncError = isDrillDown ? tenant?.lastSyncError : health?.sync?.globalSyncError;
+
+  const progress = ((60 - countdown) / 60) * 100;
+
+  return (
+    <div className="flex items-center gap-2 sm:gap-4 px-2 sm:px-3 py-2 border rounded-[4px] shadow-sm bg-white border-slate-200 w-full md:w-auto max-w-[400px] md:max-w-none">
+      {/* Timer Wheel */}
+      <div className="relative w-6 h-6 flex-shrink-0">
+        <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
+          <circle cx="18" cy="18" r="16" fill="none" stroke="currentColor" strokeWidth="4" className="text-slate-100" />
+          <circle 
+            cx="18" cy="18" r="16" 
+            fill="none" 
+            stroke="currentColor"
+            strokeWidth="4" 
+            strokeDasharray="100, 100"
+            strokeDashoffset={100 - progress}
+            strokeLinecap="round"
+            className="text-[#51B5B9] transition-all duration-1000 ease-linear"
+          />
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-slate-500 font-mono">
+          {countdown}
+        </div>
+      </div>
+
+      {/* Info */}
+      <div className="flex-1 min-w-0">
+        {isDrillDown ? (
+          <div className="flex flex-col gap-[2px]">
+            <div className="flex justify-between items-center gap-4">
+              <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Dashboard UI</span>
+              <span className="text-[10px] font-bold text-slate-700 truncate min-w-[40px] text-right">{timeAgo(dashboardSyncTime)}</span>
+            </div>
+            <div className="flex justify-between items-center gap-4">
+              <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Source Polled</span>
+              <span className="text-[10px] font-bold text-slate-700 truncate min-w-[40px] text-right">{timeAgo(tenant?.lastPolled)}</span>
+            </div>
+          </div>
+        ) : isFinancial ? (
+          <div className="flex flex-col gap-[2px]">
+            <div className="flex justify-between items-center gap-4">
+              <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Dashboard UI</span>
+              <span className="text-[10px] font-bold text-slate-700 truncate min-w-[40px] text-right">{timeAgo(dashboardSyncTime)}</span>
+            </div>
+            <div className="flex justify-between items-center gap-4">
+              <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Litium Sync</span>
+              <span className="text-[10px] font-bold text-slate-700 truncate min-w-[40px] text-right">{timeAgo(health?.lastLitiumSync)}</span>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-x-6 gap-y-1 items-center">
+            <div className="flex justify-between items-center gap-2">
+              <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Dash UI</span>
+              <span className="text-[10px] font-bold text-slate-700 truncate text-right">{timeAgo(dashboardSyncTime)}</span>
+            </div>
+            <div className="flex justify-between items-center gap-2">
+              <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Meta</span>
+              <span className="text-[10px] font-bold text-slate-700 truncate text-right">{timeAgo(health?.lastFleetUpdate)}</span>
+            </div>
+            <div className="flex justify-between items-center gap-2">
+              <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Uptime</span>
+              <span className="text-[10px] font-bold text-slate-700 truncate text-right">{timeAgo(health?.lastFleetUptimeUpdate)}</span>
+            </div>
+            <div className="flex justify-between items-center gap-2">
+              <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Latency</span>
+              <span className="text-[10px] font-bold text-slate-700 truncate text-right">{timeAgo(health?.lastFleetLatencyUpdate)}</span>
+            </div>
+          </div>
+        )}
+        
+        {syncError && (
+          <div className="mt-1 flex items-start gap-1 text-red-600 text-[10px] font-bold bg-red-50 p-1.5 rounded border border-red-100">
+            <AlertCircle size={12} className="flex-shrink-0 mt-0.5" />
+            <span className="leading-tight line-clamp-2" title={syncError}>{syncError}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Action */}
+      <div className="pl-3 border-l border-slate-100 ml-1">
+        <button 
+          onClick={forceFetch}
+          disabled={isFetching}
+          className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-[4px] bg-slate-50 border border-slate-200 text-slate-500 hover:text-brand-text hover:bg-slate-100 transition-colors disabled:opacity-50"
+          title="Force Fetch"
+        >
+          <RefreshCw size={14} className={isFetching ? 'animate-spin' : ''} />
+        </button>
+      </div>
+    </div>
+  );
+}

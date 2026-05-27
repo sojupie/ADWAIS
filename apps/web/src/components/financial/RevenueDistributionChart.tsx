@@ -12,7 +12,7 @@ import type { DistributionEntry } from '@types';
 import { formatCompact } from '@utils';
 import { ChartPanel } from '../common/ChartPanel';
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: any[]; label?: string }) => {
   if (!active || !payload?.length) return null;
 
   const revenue = payload.find((entry: any) => entry.dataKey === 'absoluteRevenue')?.value ?? 0;
@@ -24,7 +24,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
       <div className="space-y-2">
         <p className="flex justify-between gap-6">
           <span className="text-slate-500">Revenue:</span>
-          <strong className="text-[#51B5B9]">{formatCompact(revenue)} SEK</strong>
+          <strong className="text-brand-btn-primary">{formatCompact(revenue)} SEK</strong>
         </p>
         <p className="flex justify-between gap-6">
           <span className="text-slate-500">Cumulative:</span>
@@ -44,10 +44,10 @@ entries: DistributionEntry[]; onTenantSelect?: (tenantId: string) => void; class
     <ChartPanel title="Portfolio Revenue Distribution" className={className || "h-full"} bodyClassName="revenue-distribution-chart flex-1 min-h-0">
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart data={entries} margin={{ top: 10, right: 12, left: 4, bottom: 24 }}>
-          <CartesianGrid stroke="#f1f5f9" strokeDasharray="3 4" vertical={false} />
+          <CartesianGrid stroke="var(--color-chart-grid)" strokeDasharray="3 4" vertical={false} />
           <XAxis
             dataKey="tenantName"
-            tick={{ fill: '#94a3b8', fontSize: 12, fontFamily: 'Manrope, sans-serif' }}
+            tick={{ fill: 'var(--color-chart-tick)', fontSize: 12, fontFamily: 'Manrope, sans-serif' }}
             axisLine={false}
             tickLine={false}
             interval={0}
@@ -58,7 +58,7 @@ entries: DistributionEntry[]; onTenantSelect?: (tenantId: string) => void; class
           <YAxis
             yAxisId="revenue"
             tickFormatter={(value) => formatCompact(value)}
-            tick={{ fill: '#94a3b8', fontSize: 13, fontFamily: 'Manrope, sans-serif' }}
+            tick={{ fill: 'var(--color-chart-tick)', fontSize: 13, fontFamily: 'Manrope, sans-serif' }}
             axisLine={false}
             tickLine={false}
             width={54}
@@ -69,7 +69,7 @@ entries: DistributionEntry[]; onTenantSelect?: (tenantId: string) => void; class
             domain={[0, 1]}
             ticks={[0, 0.25, 0.5, 0.75, 1]}
             tickFormatter={(value) => `${(value * 100).toFixed(0)}%`}
-            tick={{ fill: '#64748b', fontSize: 13, fontFamily: 'Manrope, sans-serif' }}
+            tick={{ fill: 'var(--color-slate-500)', fontSize: 13, fontFamily: 'Manrope, sans-serif' }}
             axisLine={false}
             tickLine={false}
             width={54}
@@ -79,7 +79,7 @@ entries: DistributionEntry[]; onTenantSelect?: (tenantId: string) => void; class
             yAxisId="revenue"
             dataKey="absoluteRevenue"
             className={onTenantSelect ? 'cursor-pointer hover:opacity-90 transition-opacity' : undefined}
-            fill="#51B5B9"
+            fill="var(--color-brand-btn-primary)"
             radius={[4, 4, 0, 0]}
             maxBarSize={48}
             onClick={(row) => {
@@ -94,10 +94,10 @@ entries: DistributionEntry[]; onTenantSelect?: (tenantId: string) => void; class
             yAxisId="cumulative"
             type="monotone"
             dataKey="cumulativePortfolioShare"
-            stroke="#022D2E"
+            stroke="var(--color-brand-text)"
             strokeWidth={3}
-            dot={{ r: 5, fill: '#fff', stroke: '#022D2E', strokeWidth: 3 }}
-            activeDot={{ r: 7, fill: '#fff', stroke: '#022D2E', strokeWidth: 3 }}
+            dot={{ r: 5, fill: '#fff', stroke: 'var(--color-brand-text)', strokeWidth: 3 }}
+            activeDot={{ r: 7, fill: '#fff', stroke: 'var(--color-brand-text)', strokeWidth: 3 }}
           />
         </ComposedChart>
       </ResponsiveContainer>

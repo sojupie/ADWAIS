@@ -20,7 +20,7 @@ export function RevenueVelocityChart({ points, className }: { points: FinancialV
           legend={
             <div className="flex items-center gap-6 text-xs font-bold text-slate-400 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded">
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-[#51B5B9]" />
+                <span className="w-3 h-3 rounded-full bg-brand-btn-primary" />
                 <span>Current Period</span>
               </div>
               <div className="flex items-center gap-2">
@@ -48,7 +48,7 @@ const GraphTooltip = ({ active, payload, label }: any) => {
           </p>
           <p className="flex justify-between gap-6">
             <span className="text-slate-500">Current:</span>
-            <strong className="text-[#51B5B9]">{formatCompact(point.currentRevenue)} SEK</strong>
+            <strong className="text-brand-btn-primary">{formatCompact(point.currentRevenue)} SEK</strong>
           </p>
         </div>
       </div>
@@ -60,17 +60,17 @@ function RevenueVelocityGraphJSX({ points }: { points: FinancialVelocityPoint[] 
   return (
     <ResponsiveContainer width="100%" height="100%">
       <LineChart data={points} margin={{ top: 12, right: 8, left: 0, bottom: 0 }}>
-        <CartesianGrid stroke="#f1f5f9" vertical={false} />
+        <CartesianGrid stroke="var(--color-chart-grid)" vertical={false} />
         <XAxis
           dataKey="label"
-          tick={{ fill: '#94a3b8', fontSize: 14, fontWeight: 600, fontFamily: 'Manrope, sans-serif' }}
+          tick={{ fill: 'var(--color-chart-tick)', fontSize: 14, fontWeight: 600, fontFamily: 'Manrope, sans-serif' }}
           axisLine={false}
           tickLine={false}
           interval="preserveStartEnd"
         />
         <YAxis
           tickFormatter={(revenue) => formatCompact(revenue)}
-          tick={{ fill: '#94a3b8', fontSize: 14, fontWeight: 600, fontFamily: 'Manrope, sans-serif' }}
+          tick={{ fill: 'var(--color-chart-tick)', fontSize: 14, fontWeight: 600, fontFamily: 'Manrope, sans-serif' }}
           axisLine={false}
           tickLine={false}
           width={64}
@@ -79,7 +79,7 @@ function RevenueVelocityGraphJSX({ points }: { points: FinancialVelocityPoint[] 
         <Line
           type="monotone"
           dataKey="previousRevenue"
-          stroke="#cbd5e1"
+          stroke="var(--color-chart-prev-line)"
           strokeWidth={3}
           strokeDasharray="6 6"
           dot={false}
@@ -89,10 +89,10 @@ function RevenueVelocityGraphJSX({ points }: { points: FinancialVelocityPoint[] 
         <Line
           type="monotone"
           dataKey="currentRevenue"
-          stroke="#51B5B9"
+          stroke="var(--color-brand-btn-primary)"
           strokeWidth={4}
           dot={false}
-          activeDot={{ r: 6, fill: '#51B5B9', stroke: '#fff', strokeWidth: 3 }}
+          activeDot={{ r: 6, fill: 'var(--color-brand-btn-primary)', stroke: '#fff', strokeWidth: 3 }}
           isAnimationActive={false}
         />
       </LineChart>

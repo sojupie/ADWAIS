@@ -1,0 +1,38 @@
+import { useQuery } from '@tanstack/react-query';
+import { apiFetch } from '../apiClient';
+import type { UptimeMonitorDto, MonitorAnalyticsDto } from '@types';
+
+export const fleetKeys = {
+  all: ['fleet'] as const,
+  monitors: (timeframe: string, tenantId?: string | null) => [...fleetKeys.all, 'monitors', timeframe, tenantId] as const,
+  analytics: (timeframe: string, tenantId?: string | null, monitorId?: number | null) => 
+    [...fleetKeys.all, 'analytics', timeframe, tenantId, monitorId] as const,
+};
+
+const REFETCH_INTERVAL = 30000;
+
+function buildUrl(base: string, params: Record<string, string | number | null | undefined>) {
+  const url = new URL(base, window.location.origin);
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== null && value !== undefined) {
+      url.searchParams.append(key, value.toString());
+    }
+  });
+  return url.pathname + url.search;
+}
+
+export function useFleetMonitors(timeframe: string, tenantId?: string | null) {
+  return useQuery({
+    queryKey: fleetKeys.monitors(timeframe, tenantId),
+    queryFn: () => apiFetch<UptimeMonitorDto[]>(buildUrl('/api/monitors', { timeframe, tenantId })),
+    refetchInterval: REFETCH_INTERVAL,
+  });
+}
+
+export function useFleetAnalytics(timeframe: string, tenantId?: string | null, monitorId?: number | null) {
+  return useQuery({
+    queryKey: fleetKeys.analytics(timeframe, tenantId, monitorId),
+    queryFn: () => apiFetch<MonitorAnalyticsDto>(buildUrl('/api/monitors/analytics', { timeframe, tenantId, monitorId })),
+    refetchInterval: REFETCH_INTERVAL,
+  });
+}

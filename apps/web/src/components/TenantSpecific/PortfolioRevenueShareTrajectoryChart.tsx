@@ -17,8 +17,8 @@ interface ShareTrajectoryRow {
 
 function buildRows(tenantVelocity: FinancialVelocityPoint[], portfolioVelocity: FinancialVelocityPoint[],
 ): ShareTrajectoryRow[] {
-  return tenantVelocity.map((point, index) => {
-    const portfolioRevenue = portfolioVelocity[index]?.currentRevenue ?? 0;
+  return tenantVelocity.map((point) => {
+    const portfolioRevenue = portfolioVelocity.find(p => p.label === point.label)?.currentRevenue ?? 0;
 
     return {
       label: point.label,
@@ -27,7 +27,7 @@ function buildRows(tenantVelocity: FinancialVelocityPoint[], portfolioVelocity: 
   });
 }
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: any[]; label?: string }) => {
   if (!active || !payload?.length) return null;
 
   return (
@@ -35,7 +35,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
       <p className="font-bold text-slate-900 mb-3 border-b border-slate-50 pb-2">{label}</p>
       <p className="flex justify-between gap-6">
         <span className="text-slate-500">Share:</span>
-        <strong className="text-[#51B5B9]">{payload[0].value.toFixed(2)}%</strong>
+        <strong className="text-brand-btn-primary">{payload[0].value.toFixed(2)}%</strong>
       </p>
     </div>
   );
@@ -54,17 +54,17 @@ export function PortfolioRevenueShareTrajectoryChart({tenantVelocity, portfolioV
     >
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={rows} margin={{ top: 8, right: 10, left: 8, bottom: 20 }}>
-          <CartesianGrid stroke="#f1f5f9" strokeDasharray="3 4" vertical={false} />
+          <CartesianGrid stroke="var(--color-chart-grid)" strokeDasharray="3 4" vertical={false} />
           <XAxis
             dataKey="label"
-            tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 700, fontFamily: 'Manrope, sans-serif' }}
+            tick={{ fill: 'var(--color-chart-tick)', fontSize: 11, fontWeight: 700, fontFamily: 'Manrope, sans-serif' }}
             axisLine={false}
             tickLine={false}
             interval="preserveStartEnd"
           />
           <YAxis
             tickFormatter={(value) => `${value.toFixed(2)}%`}
-            tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 700, fontFamily: 'Manrope, sans-serif' }}
+            tick={{ fill: 'var(--color-chart-tick)', fontSize: 11, fontWeight: 700, fontFamily: 'Manrope, sans-serif' }}
             axisLine={false}
             tickLine={false}
             width={56}
@@ -74,9 +74,9 @@ export function PortfolioRevenueShareTrajectoryChart({tenantVelocity, portfolioV
           <Area
             type="monotone"
             dataKey="portfolioShare"
-            stroke="#51B5B9"
+            stroke="var(--color-brand-btn-primary)"
             strokeWidth={2}
-            fill="#51B5B9"
+            fill="var(--color-brand-btn-primary)"
             fillOpacity={0.15}
             dot={false}
             isAnimationActive={false}

@@ -13,7 +13,9 @@ public class UptimeMonitor
     public DateTimeOffset? LastLatencyUpdate { get; set; }
     public DateTimeOffset CreatedDate { get; set; }
     public int UpdateInterval { get; set; }
+    public int? LatencyDegradedFloor { get; set; }
     public double CurrentUptimePercentage { get; set; }
+    public double? CurrentLatency { get; set; }
     public string? LastSyncError { get; set; }
     public Tenant? Tenant { get; set; }
     public ICollection<ResponseTime> ResponseTimes { get; set; } = new List<ResponseTime>();

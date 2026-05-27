@@ -6,4 +6,4 @@ public static class GlobalCacheKeys
     public const string UptimeRobotRateLimit = "UptimeRobotRateLimitEpoch";
 }
 
-public record LiveMonitorState(string StatusStr);
+public record LiveMonitorState(string StatusStr, double? CurrentLatency);

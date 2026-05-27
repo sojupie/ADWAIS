@@ -6,7 +6,10 @@ public record SystemHealthDto(
     string DatabaseStatus,
     HangfireHealthDto Hangfire,
     SyncHealthDto Sync,
-    DateTimeOffset? LastGlobalPoll
+    DateTimeOffset? LastLitiumSync,
+    DateTimeOffset? LastFleetUpdate,
+    DateTimeOffset? LastFleetUptimeUpdate,
+    DateTimeOffset? LastFleetLatencyUpdate
 );
 
 public record HangfireHealthDto(

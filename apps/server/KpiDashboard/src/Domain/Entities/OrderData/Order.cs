@@ -4,6 +4,7 @@ public class Order
 {
     public Guid Id { get; set; }
     public Guid TenantId { get; set; }
+    public Guid? OrganizationSystemId { get; set; }
     public required string OrderState { get; set; }
     public required string LitiumOrderId { get; set; }
     public DateTimeOffset CreatedDate { get; set; }

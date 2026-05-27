@@ -1,6 +1,7 @@
 using System.Text.Json;
+using Domain.DTOs.Monitoring;
+using Domain.DTOs.Monitoring.Upstream;
 using Domain.Entities.Monitoring;
-using Infrastructure.Services.Monitoring.UpstreamDTOs;
 
 namespace Infrastructure.Services.Monitoring;
 

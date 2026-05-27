@@ -1,5 +1,3 @@
-import './LoadingIcon.css';
-
 interface LoadingIconProps {
   label?: string;
 }

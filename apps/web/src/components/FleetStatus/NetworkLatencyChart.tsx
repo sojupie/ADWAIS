@@ -1,14 +1,12 @@
 import {
   CartesianGrid,
-  Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
+  Line,
+  LineChart,
 } from 'recharts';
-import { ChartPanel } from '../common/ChartPanel';
-import './NetworkLatencyChart.css';
 
 export interface LatencyPoint {
   label: string;
@@ -26,7 +24,7 @@ function formatLatency(value: number): string {
 interface GraphTooltipProps {
   active?: boolean;
   label?: string;
-  payload?: Array<{ payload: LatencyPoint }>;
+  payload?: Array<{ payload: LatencyPoint, name: string, color: string }>;
 }
 
 const GraphTooltip = ({ active, payload, label }: GraphTooltipProps) => {
@@ -34,72 +32,93 @@ const GraphTooltip = ({ active, payload, label }: GraphTooltipProps) => {
   const point = payload[0].payload as LatencyPoint;
 
   return (
-    <div className="chart-panel-tooltip">
-      <p className="chart-panel-tooltip__label">{label}</p>
-      <p>Avg: <strong>{formatLatency(point.average)}</strong></p>
-      <p>Previous: <strong>{formatLatency(point.previousAverage)}</strong></p>
-      <p>High: <strong>{formatLatency(point.highest)}</strong></p>
+    <div className="bg-white border border-slate-100 rounded-lg shadow-lg p-4 text-sm animate-in fade-in zoom-in duration-200">
+      <p className="font-bold text-brand-text mb-3 border-b border-slate-50 pb-2 uppercase tracking-widest text-xs">{label}</p>
+      <div className="space-y-2">
+        <p className="flex justify-between gap-8">
+          <span className="text-slate-500 font-bold uppercase text-[10px] tracking-widest">Current Avg</span> 
+          <strong className="text-brand-btn-primary">{formatLatency(point.average)}</strong>
+        </p>
+        <p className="flex justify-between gap-8">
+          <span className="text-slate-500 font-bold uppercase text-[10px] tracking-widest">Previous Avg</span> 
+          <strong className="text-slate-400">{formatLatency(point.previousAverage)}</strong>
+        </p>
+        <div className="pt-2 border-t border-slate-50 mt-2 space-y-1">
+          <p className="flex justify-between gap-8">
+            <span className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Highest</span> 
+            <strong className="text-red-500 text-xs">{formatLatency(point.highest)}</strong>
+          </p>
+          <p className="flex justify-between gap-8">
+            <span className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Lowest</span> 
+            <strong className="text-emerald-500 text-xs">{formatLatency(point.lowest)}</strong>
+          </p>
+        </div>
+      </div>
     </div>
   );
 };
 
-export function NetworkLatencyChart({ points }: { points: LatencyPoint[] }) {
-  const showDots = points.length < 2;
-
+export function NetworkLatencyChart({ points, title = "Network Latency", className }: { points: LatencyPoint[], title?: string, className?: string }) {
   return (
-    <ChartPanel
-      title="Network Latency"
-      bodyClassName="network-latency-chart"
-      legend={
-        <div className="chart-panel__legend">
-          <span className="network-latency-chart__legend-dot network-latency-chart__legend-dot--avg" />
-          <span>Avg Latency</span>
-          <span className="network-latency-chart__legend-dot network-latency-chart__legend-dot--previous" />
-          <span>Previous Avg</span>
+      <div className={`w-full h-full flex-1 min-h-0 flex flex-col ${className || ''}`}>
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-sm font-black text-slate-500 uppercase tracking-[0.15em]">{title}</h2>
+          <div className="flex gap-6 text-[11px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-4 py-2 rounded-full border border-slate-100">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-brand-btn-primary"></div>
+              <span>Current</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full border-2 border-slate-300 border-dashed bg-transparent"></div>
+              <span>Previous</span>
+            </div>
+          </div>
         </div>
-      }
-    >
-      {points.length === 0 ? (
-        <div className="network-latency-chart__empty">No latency data</div>
-      ) : (
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={points} margin={{ top: 8, right: 10, left: 0, bottom: 0 }}>
-            <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 4" vertical={false} />
-            <XAxis
-              dataKey="label"
-              tick={{ fill: 'var(--text-muted)', fontSize: 11 }}
-              axisLine={false}
-              tickLine={false}
-              interval="preserveStartEnd"
-            />
-            <YAxis
-              tickFormatter={formatLatency}
-              tick={{ fill: 'var(--text-muted)', fontSize: 11 }}
-              axisLine={false}
-              tickLine={false}
-              width={54}
-            />
-            <Tooltip content={<GraphTooltip />} />
-            <Line
-              type="monotone"
-              dataKey="previousAverage"
-              stroke="var(--chart-ghost)"
-              strokeWidth={2}
-              strokeDasharray="4 3"
-              dot={showDots ? { r: 3, strokeWidth: 0 } : false}
-              activeDot={false}
-            />
-            <Line
-              type="monotone"
-              dataKey="average"
-              stroke="var(--chart-line)"
-              strokeWidth={2.8}
-              dot={showDots ? { r: 4, strokeWidth: 0 } : false}
-              activeDot={{ r: 4, fill: 'var(--chart-line)', strokeWidth: 0 }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      )}
-    </ChartPanel>
+        
+        <div className="flex-1 w-full min-h-0">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={points} margin={{ top: 10, right: 20, left: -5, bottom: 10 }}>
+              <CartesianGrid vertical={false} stroke="#f1f5f9" strokeDasharray="3 3" />
+              <XAxis 
+                dataKey="label" 
+                fontSize={12} 
+                tick={{ fill: '#94a3b8', fontWeight: 700, fontFamily: 'Manrope, sans-serif' }} 
+                tickMargin={15} 
+                axisLine={false} 
+                tickLine={false} 
+              />
+              <YAxis 
+                fontSize={12} 
+                tick={{ fill: '#94a3b8', fontWeight: 700, fontFamily: 'Manrope, sans-serif' }} 
+                axisLine={false} 
+                tickLine={false}
+                tickFormatter={(v) => `${v}ms`}
+              />
+              <Tooltip content={<GraphTooltip />} />
+              <Line 
+                type="monotone" 
+                dataKey="previousAverage" 
+                name="Previous Period" 
+                stroke="#cbd5e1" 
+                strokeWidth={2} 
+                strokeDasharray="6 6" 
+                dot={false}
+                activeDot={false}
+                isAnimationActive={false}
+              />
+              <Line 
+                type="monotone" 
+                dataKey="average" 
+                name="Current Period" 
+                stroke="#51B5B9" 
+                strokeWidth={4} 
+                dot={false}
+                activeDot={{ r: 6, fill: '#51B5B9', stroke: '#fff', strokeWidth: 3 }} 
+                isAnimationActive={false}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
   );
 }

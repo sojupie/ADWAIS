@@ -1,147 +1,124 @@
 import { formatCurrency, formatCompact, formatNumber } from '@utils';
+import { useSearch, useNavigate } from '@tanstack/react-router';
+import { useMemo } from 'react';
 import { FactPanel } from '../components/common/FactPanel';
 import { LoadingIcon } from '../components/common/LoadingIcon';
-import { GrowthExtremesChart } from '../components/financial/GrowthExtremesChart';
 import { MomentumMatrixChart } from '../components/financial/MomentumMatrixChart';
 import { RevenueDistributionChart } from '../components/financial/RevenueDistributionChart';
 import { RevenueVelocityChart } from '../components/financial/RevenueVelocityChart';
+import { ChartPanel } from '../components/common/ChartPanel';
+import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { TenantDiagnostics } from './TenantDiagnostics';
-import {
-  selectDashboardTenant,
-  setDashboardPeriod,
-  useDashboardData,
-  type Period,
-} from '../dashboardDataStore';
-import './Financial.css';
+import { 
+  useGlobalKpis, 
+  useFinancialVelocity, 
+  useGrowthExtremes, 
+  useMomentum, 
+  useRevenueDistribution
+} from '../hooks/useFinancialQueries';
 
 export function Financial() {
-  const {
-    period,
-    loading,
-    selectedTenantId,
-    tenantDiagnostics,
-    tenantDiagnosticsLoading,
-    tenantDiagnosticsError,
-    globalKpi,
-    growthExtremes,
-    globalVelocity,
-    momentum,
-    distribution,
-  } = useDashboardData();
+  const { timeframe, tenantId } = useSearch({ from: '/financial' });
+  const navigate = useNavigate({ from: '/financial' });
 
-  if (loading) {
-    return (
-      <div className="dashboard-loading">
-        <LoadingIcon />
-      </div>
-    );
-  }
+  const kpiQuery = useGlobalKpis(timeframe);
+  const velocityQuery = useFinancialVelocity(timeframe);
+  const extremesQuery = useGrowthExtremes(timeframe);
+  const momentumQuery = useMomentum(timeframe);
+  const distributionQuery = useRevenueDistribution(timeframe);
 
-  if (selectedTenantId) {
-    if (tenantDiagnosticsError) {
-      return (
-        <div className="card empty-state">
-          <span>{tenantDiagnosticsError}</span>
-          <button type="button" onClick={() => selectDashboardTenant(null)}>Back</button>
-        </div>
-      );
-    }
+  const selectedTenantName = useMemo(() => {
+    if (!tenantId) return null;
+    return extremesQuery.data?.find(e => e.tenantId === tenantId)?.tenantName 
+      || distributionQuery.data?.find(d => d.tenantId === tenantId)?.tenantName 
+      || momentumQuery.data?.tenants.find(t => t.tenantId === tenantId)?.tenantName
+      || 'Unknown Tenant';
+  }, [tenantId, extremesQuery.data, distributionQuery.data, momentumQuery.data]);
 
-    if (tenantDiagnosticsLoading || !tenantDiagnostics) {
-      return (
-        <div className="dashboard-loading">
-          <LoadingIcon />
-        </div>
-      );
-    }
-
+  if (tenantId && selectedTenantName) {
     return (
       <TenantDiagnostics
-        data={tenantDiagnostics}
-        onBack={() => selectDashboardTenant(null)}
+        tenantId={tenantId}
+        tenantName={selectedTenantName}
+        timeframe={timeframe}
+        onBack={() => navigate({ search: (prev) => ({ ...prev, tenantId: undefined }) })}
       />
     );
   }
 
+  const handleTenantSelect = (id: string) => {
+    navigate({ search: (prev) => ({ ...prev, tenantId: id }) });
+  };
+
+  const placeholderData = [
+    { name: 'A', value: 400 },
+    { name: 'B', value: 300 },
+    { name: 'C', value: 600 },
+    { name: 'D', value: 200 },
+    { name: 'E', value: 500 },
+    { name: 'F', value: 350 },
+  ];
+
   return (
-    <>
-      <section className="kpi-row" aria-label="Key Performance Indicators">
+    <div className="flex flex-col gap-6 w-full min-h-full animate-in fade-in duration-700">
+      {/* KPI Section */}
+      <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 flex-shrink-0">
         <FactPanel
-          label={`Global Revenue (${period}D)`}
-          value={globalKpi ? formatCurrency(globalKpi.totalRevenue) : '\u2014'}
-          extra={globalKpi?.revenuePoP !== undefined
-            ? { type: 'PoP', value: globalKpi.revenuePoP }
+          label={`Global Revenue (${timeframe})`}
+          value={kpiQuery.data ? formatCurrency(kpiQuery.data.currentRevenue) : '\u2014'}
+          isLoading={kpiQuery.isLoading}
+          extra={kpiQuery.data?.revenueGrowthPercentage !== undefined
+            ? { type: 'PoP', value: kpiQuery.data.revenueGrowthPercentage }
             : undefined}
         />
         <FactPanel
           label="Transaction Volume"
-          value={globalKpi ? formatNumber(globalKpi.totalVolume) : '\u2014'}
-          extra={globalKpi?.volumePoP !== undefined
-            ? { type: 'Desc', value: "Total absolute orders\n" }
-            : undefined}
+          value={kpiQuery.data ? formatNumber(kpiQuery.data.transactionVolume) : '\u2014'}
+          isLoading={kpiQuery.isLoading}
         />
         <FactPanel
           label="Portfolio AOV"
-          value={globalKpi ? `${formatCompact(globalKpi.aov)} SEK` : '\u2014'}
-          extra={globalKpi?.aovPoP !== undefined
-            ? { type: 'Desc', value: "Derived (Revenue / Volume)\n" }
-            : undefined}
+          value={kpiQuery.data ? `${formatCompact(kpiQuery.data.averageOrderValue)} SEK` : '\u2014'}
+          isLoading={kpiQuery.isLoading}
+        />
+        <FactPanel
+          label="Baseline Revenue"
+          value={kpiQuery.data ? formatCurrency(kpiQuery.data.previousRevenue) : '\u2014'}
+          isLoading={kpiQuery.isLoading}
         />
       </section>
 
-      <section className="charts-row" aria-label="Revenue charts">
-        <div className="chart-slot">
-          {globalVelocity.length > 0
-            ? <RevenueVelocityChart points={globalVelocity} />
-            : <EmptyState title="No revenue data" />}
-        </div>
-        <div className="chart-slot">
-          {growthExtremes.length > 0
-            ? <GrowthExtremesChart tenants={growthExtremes} onTenantSelect={selectDashboardTenant} />
-            : <EmptyState title="No tenant data" />}
-        </div>
-      </section>
+      {/* Charts Grid: Strictly Responsive & Independent */}
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 pb-4">
+        {velocityQuery.isLoading ? (
+          <div className="bg-white rounded-xl border border-slate-200 p-8 flex items-center justify-center h-full"><LoadingIcon /></div>
+        ) : velocityQuery.data ? (
+          <RevenueVelocityChart points={velocityQuery.data} className="h-full min-h-[350px]" />
+        ) : null}
 
-      <section className="charts-row charts-row--analysis" aria-label="Portfolio analysis charts">
-        <div className="chart-slot">
-          {distribution.length > 0
-            ? <RevenueDistributionChart entries={distribution} onTenantSelect={selectDashboardTenant} />
-            : <EmptyState title="No tenant revenue data" />}
-        </div>
-        <div className="chart-slot">
-          {momentum && momentum.tenants.length > 0
-            ? <MomentumMatrixChart momentum={momentum} onTenantSelect={selectDashboardTenant} />
-            : <EmptyState title="No tenant momentum data" />}
-        </div>
-      </section>
-    </>
-  );
-}
+        <ChartPanel title="Regional Growth (Placeholder)" className="h-full min-h-[350px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={placeholderData}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
+              <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
+              <Bar dataKey="value" fill="#51B5B9" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </ChartPanel>
 
-export function FinancialPeriodSelector() {
-  const { period } = useDashboardData();
+        {distributionQuery.isLoading ? (
+          <div className="bg-white rounded-xl border border-slate-200 p-8 flex items-center justify-center h-full"><LoadingIcon /></div>
+        ) : distributionQuery.data ? (
+          <RevenueDistributionChart entries={distributionQuery.data} onTenantSelect={handleTenantSelect} className="h-full min-h-[350px]" />
+        ) : null}
 
-  return (
-    <div className="btn-group" role="group" aria-label="Time period selector">
-      {([7, 30, 90] as Period[]).map((d) => (
-        <button
-          key={d}
-          id={`period-${d}`}
-          className={period === d ? 'active' : ''}
-          onClick={() => setDashboardPeriod(d)}
-          aria-pressed={period === d}
-        >
-          {d}D
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function EmptyState({ title }: { title: string }) {
-  return (
-    <div className="card empty-state">
-      <span>{title}</span>
+        {momentumQuery.isLoading ? (
+          <div className="bg-white rounded-xl border border-slate-200 p-8 flex items-center justify-center h-full"><LoadingIcon /></div>
+        ) : momentumQuery.data ? (
+          <MomentumMatrixChart momentum={momentumQuery.data} onTenantSelect={handleTenantSelect} className="h-full min-h-[350px]" />
+        ) : null}
+      </div>
     </div>
   );
 }

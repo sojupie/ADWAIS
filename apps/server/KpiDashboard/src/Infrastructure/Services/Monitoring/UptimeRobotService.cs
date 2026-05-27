@@ -1,7 +1,8 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
-using Infrastructure.Services.Monitoring.UpstreamDTOs;
+using Domain.DTOs.Monitoring;
+using Domain.DTOs.Monitoring.Upstream;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services.Monitoring;

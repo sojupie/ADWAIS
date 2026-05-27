@@ -1,105 +1,76 @@
-/* ============================================================
-   MOTILLO DASHBOARD — Global Design System
-   ============================================================ */
-
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
 
-/* ── Custom Properties ─────────────────────────────────────── */
-:root {
-  /* Core Palette */
-  --bg-primary: #FFFFFF;
-  --bg-secondary: #022d2e;
-  --bg-primaryNeigbour: #e6f4f5;
-  --bg-secondaryNeigbour: #034b4e; 
-  --bg-border: rgba(0, 0, 0, 0.15);
+@theme {
+  --color-brand-bg-primary: #ffffff;
+  --color-brand-bg-secondary: #022d2e;
+  --color-brand-bg-tertiary: #e6f4f5;
+  --color-brand-bg-quaternary: #034b4e;
   
-  /* Text */
-  --text-primary:   #022d2e;
-  --text-link:   #06959B;
-  --text-muted: #7e899a;
+  --color-brand-btn-primary: #51B5B9;
+  --color-brand-btn-border-primary: #04686D;
+  --color-brand-btn-secondary: #ffffff;
+  --color-brand-btn-border-secondary: #06959B;
 
-  /* Button */
-  --button-primary: #51B5B9;
-  --button-border: #04686D;
+  --color-brand-text: #022D2E;
+  --color-brand-accent: #FFCE44;
+  --color-brand-link: #06959B;
   
-  /* Accessory */
-  --highlight-primary: #FFCE44;
+  --color-status-up: #10B981;
+  --color-status-down: #EF4444;
+  --color-status-degraded: #F59E0B;
 
-  /* Status */
-  --green: #0b9b06;
-  --red: #ff1200;
+  --font-sans: "Manrope", system-ui, sans-serif;
 
-  /* Chart */
-  --chart-line: #6366ff;
-  --chart-ghost: #94a3b8;
-  --chart-grid: rgba(0, 0, 0, 0.18);
+  --shadow-card: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
 
-  /* Spacing */
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 20px;
-  --space-6: 24px;
-  --space-8: 32px;
-  --space-10: 40px;
-
-  /* Radii */
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-
-  /* Shadows */
-  --shadow-card: 0 1px 2px rgba(2, 45, 46, 0.06), 0 12px 28px rgba(2, 45, 46, 0.08);
-  --shadow-elevated: 0 16px 36px rgba(2, 45, 46, 0.14);
-
-  /* Typography */
-  --font-sans: 'Manrope', system-ui, -apple-system, sans-serif;
-  --font-mono: ui-monospace, 'Cascadia Code', Consolas, monospace;
-  h1, h2, h3, h4 {
-    font-weight: 600;
-    color: var(--text-primary);
-    line-height: 1.2;
+/* ── Base Styles ── */
+@layer base {
+  html, body, #root {
+    @apply h-full w-full m-0 p-0 overflow-hidden select-none;
   }
-  
-  font-family: var(--font-sans);
-  font-size: 14px;
-  line-height: 1.5;
-  color: var(--text-primary);
-  background-color: var(--bg-primary);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  color-scheme: light;
+
+  body {
+    @apply bg-brand-bg-tertiary text-brand-text font-sans antialiased;
+  }
+
+  button {
+    @apply cursor-pointer;
+  }
 }
 
-/* ── Reset ─────────────────────────────────────────────────── */
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+/* ── Utilities ── */
+@layer utilities {
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-slate-300 rounded-full;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-400;
+  }
+
+  .card {
+    @apply bg-white rounded-[18px] border border-[#e8eeee] shadow-card;
+  }
+
+  .dashboard-loading {
+    @apply flex items-center justify-center min-h-[200px] w-full h-full;
+  }
 }
 
-html, body, #root {
-  height: 100%;
-  width: 100%;
+/* ── Kiosk Indicator Animations ── */
+@keyframes pulse {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 137, 150, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(0, 137, 150, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 137, 150, 0); }
 }
 
-body {
-  overflow-x: hidden;
-  background: var(--bg-primary);
+.kiosk-pulse {
+  animation: pulse 2s infinite;
 }
-
-
-/* ── Utility ───────────────────────────────────────────────── */
-.text-green     { color: var(--green); }
-.text-red       { color: var(--red); }
-.font-mono      { font-family: var(--font-mono); }
-
-/* ── Card ──────────────────────────────────────────────────── */
-.card {
-  background: var(--bg-primary);
-  border: 1px solid var(--bg-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-card);
-}
-

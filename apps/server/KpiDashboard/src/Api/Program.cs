@@ -28,6 +28,7 @@ builder.Services.AddControllers(options =>
 }).AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+    options.JsonSerializerOptions.Converters.Add(new Api.Converters.DecimalRoundingConverter());
 });
 
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
@@ -166,6 +167,14 @@ using (var connection = JobStorage.Current.GetConnection())
             "system-event-cleanup",
             newJob => newJob.ExecuteAsync(),
             Cron.Daily(2));
+
+        if (app.Environment.IsDevelopment())
+        {
+            recurringJobManager.AddOrUpdate<RuntimeDataSeederJob>(
+                "dev-runtime-data-seeder",
+                newJob => newJob.ExecuteAsync(),
+                Cron.MinuteInterval(5));
+        }
     }
 }
 

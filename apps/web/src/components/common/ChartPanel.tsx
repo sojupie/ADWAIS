@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react';
-import './ChartPanel.css';
 
 interface ChartPanelData {
   title: string;
@@ -11,14 +10,14 @@ interface ChartPanelData {
 
 export function ChartPanel({ title, legend, bodyClassName = '', className = '', children }: ChartPanelData) {
   return (
-      <div className={`chart-panel card ${className}`}>
-        <div className="chart-panel__header">
-            <span className="chart-panel__title">
+      <div className={`bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-4 flex flex-col min-h-0 ${className}`}>
+        <div className="flex justify-between items-center mb-2">
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">
                 {title}
             </span>
             {legend}
-      </div>
-        <div className={`chart-panel__body ${bodyClassName}`}>
+        </div>
+        <div className={`flex-1 min-h-0 w-full h-full flex flex-col ${bodyClassName}`}>
             {children}
         </div>
       </div>

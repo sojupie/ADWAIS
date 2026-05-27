@@ -22,13 +22,20 @@ public class SystemHealthController(IDbContextFactory<AnalyticsDbContext> dbCont
         await using var db = await dbContextFactory.CreateDbContextAsync();
         
         string dbStatus = "Healthy";
-        DateTimeOffset? lastGlobalPoll = null;
+        DateTimeOffset? lastLitiumSync = null;
+        DateTimeOffset? lastFleetUpdate = null;
+        DateTimeOffset? lastFleetUptimeUpdate = null;
+        DateTimeOffset? lastFleetLatencyUpdate = null;
         string? globalSyncError = null;
         try
         {
             var config = await db.GlobalConfigs.AsNoTracking().FirstOrDefaultAsync();
-            lastGlobalPoll = config?.LastPolled;
+            lastLitiumSync = config?.LastPolled;
             globalSyncError = config?.LastSyncError;
+
+            lastFleetUpdate = await db.Monitors.MaxAsync(m => m.LastUpdate);
+            lastFleetUptimeUpdate = await db.Monitors.MaxAsync(m => m.LastUptimeUpdate);
+            lastFleetLatencyUpdate = await db.Monitors.MaxAsync(m => m.LastLatencyUpdate);
         }
         catch
         {
@@ -54,7 +61,10 @@ public class SystemHealthController(IDbContextFactory<AnalyticsDbContext> dbCont
                 MonitorsWithErrorsCount: monitorsWithErrors,
                 GlobalSyncError: globalSyncError
             ),
-            LastGlobalPoll: lastGlobalPoll
+            LastLitiumSync: lastLitiumSync,
+            LastFleetUpdate: lastFleetUpdate,
+            LastFleetUptimeUpdate: lastFleetUptimeUpdate,
+            LastFleetLatencyUpdate: lastFleetLatencyUpdate
         );
 
         return Ok(health);

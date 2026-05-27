@@ -27,6 +27,7 @@ public class MonitorController(
         var result = await monitorService.GetAnalyticsAsync(request.Timeframe, request.TenantId, request.MonitorId);
 
         return Ok(new MonitorAnalyticsResponseDto(
+            result.GlobalAverageLatency,
             result.LatencyPoints.Select(p => new LatencyPointResponseDto(
                 p.Label,
                 p.Timestamp,
@@ -203,11 +204,14 @@ public class MonitorController(
         return new UptimeMonitorDto(
             Id: m.Id,
             TenantId: m.TenantId,
+            TenantName: m.Tenant?.Name,
             Name: m.Name,
             Url: m.Url,
             UpdateInterval: m.UpdateInterval,
+            LatencyDegradedFloor: m.LatencyDegradedFloor,
             UptimeSla: m.UptimeSla,
             CurrentUptimePercentage: m.CurrentUptimePercentage,
+            CurrentLatency: m.CurrentLatency,
             UptimeMonitorEnabled: m.UptimeMonitorEnabled,
             CurrentStatus: m.StatusStr, // Guaranteed by InMemoryCache service
             LastUpdate: m.LastUpdate,

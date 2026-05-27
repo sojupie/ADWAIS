@@ -10,39 +10,41 @@ import {
 import type { CumulativeGrowthDeltaPoint } from '@types';
 import { formatCompact } from '@utils';
 import { ChartPanel } from '../common/ChartPanel';
-import './CumulativeGrowthDeltaChart.css';
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
 
   return (
-    <div className="chart-panel-tooltip">
-      <p className="chart-panel-tooltip__label">{label}</p>
-      <p>Delta: <strong>{formatCompact(payload[0].value)} SEK</strong></p>
+    <div className="bg-white border border-slate-100 rounded-lg shadow-lg p-4 text-sm animate-in fade-in zoom-in duration-200">
+      <p className="font-bold text-slate-900 mb-3 border-b border-slate-50 pb-2">{label}</p>
+      <p className="flex justify-between gap-6">
+        <span className="text-slate-500">Delta:</span>
+        <strong className="text-[#51B5B9]">{formatCompact(payload[0].value)} SEK</strong>
+      </p>
     </div>
   );
 };
 
-export function CumulativeGrowthDeltaChart({ points }: { points: CumulativeGrowthDeltaPoint[] }) {
+export function CumulativeGrowthDeltaChart({ points, className }: { points: CumulativeGrowthDeltaPoint[], className?: string }) {
   return (
     <ChartPanel
       title="Cumulative Growth Delta (Absolute)"
-      className="tenant-diagnostics__chart-panel"
-      bodyClassName="cumulative-growth-delta-chart"
+      className={className || ''}
+      bodyClassName="w-full h-full flex flex-col flex-1 min-h-0"
     >
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={points} margin={{ top: 8, right: 10, left: 8, bottom: 20 }}>
-          <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 4" vertical={false} />
+          <CartesianGrid stroke="#f1f5f9" strokeDasharray="3 4" vertical={false} />
           <XAxis
             dataKey="label"
-            tick={{ fill: 'var(--text-primary)', fontSize: 10 }}
+            tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 700, fontFamily: 'Manrope, sans-serif' }}
             axisLine={false}
             tickLine={false}
             interval="preserveStartEnd"
           />
           <YAxis
             tickFormatter={(value) => formatCompact(value)}
-            tick={{ fill: 'var(--text-primary)', fontSize: 10 }}
+            tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 700, fontFamily: 'Manrope, sans-serif' }}
             axisLine={false}
             tickLine={false}
             width={56}
@@ -51,10 +53,11 @@ export function CumulativeGrowthDeltaChart({ points }: { points: CumulativeGrowt
           <Line
             type="stepAfter"
             dataKey="cumulativeGrowthDelta"
-            stroke="var(--green)"
+            stroke="#51B5B9"
             strokeWidth={2.4}
             dot={false}
             activeDot={{ r: 4, strokeWidth: 0 }}
+            isAnimationActive={false}
           />
         </LineChart>
       </ResponsiveContainer>

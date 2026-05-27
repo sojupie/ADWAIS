@@ -1,4 +1,4 @@
-﻿namespace Domain.Entities.Upstream.LitiumDTO;
+﻿namespace Domain.DTOs.Financial.Upstream;
 
 public class LitiumSyncResponse
 {

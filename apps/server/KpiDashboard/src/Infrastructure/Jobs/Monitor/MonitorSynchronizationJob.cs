@@ -53,7 +53,7 @@ public class MonitorSynchronizationJob(
 
             cache.Set(
                 GlobalCacheKeys.MonitorState(remote.Id),
-                new LiveMonitorState(remote.Status),
+                new LiveMonitorState(remote.Status, existing?.CurrentLatency),
                 cacheDuration
             );
             if (localMonitors.TryGetValue(remote.Id, out var local))

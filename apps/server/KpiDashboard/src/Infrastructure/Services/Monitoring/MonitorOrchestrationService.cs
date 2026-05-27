@@ -57,7 +57,7 @@ public class MonitorOrchestrationService(
                 data?.Max ?? 0));
         }
         
-        IQueryable<UptimeMonitor> monitorQuery = dbContext.Monitors.AsNoTracking();
+        IQueryable<UptimeMonitor> monitorQuery = dbContext.Monitors.AsNoTracking().Include(m => m.Tenant);
         if (monitorId.HasValue) 
             monitorQuery = monitorQuery.Where(m => m.Id == monitorId.Value);
         else if (tenantId.HasValue) 
@@ -78,7 +78,13 @@ public class MonitorOrchestrationService(
             }
         }
 
-        return new MonitorAnalyticsDto(latencyPoints, monitors);
+        double? globalAvgLatency = null;
+        if (monitors.Any(m => m.CurrentLatency.HasValue))
+        {
+            globalAvgLatency = monitors.Where(m => m.CurrentLatency.HasValue).Average(m => m.CurrentLatency!.Value);
+        }
+
+        return new MonitorAnalyticsDto(globalAvgLatency, latencyPoints, monitors);
     }
 
     private async Task<Dictionary<int, double>> GetPeriodUptimesAsync(DateTimeOffset start, DateTimeOffset end, Guid? tenantId, int? monitorId)
@@ -221,7 +227,8 @@ public class MonitorOrchestrationService(
         dbContext.Monitors.Add(monitor);
         await dbContext.SaveChangesAsync();
 
-        return HydrateLiveStatus(monitor);
+        HydrateLiveStatus(monitor);
+        return monitor;
     }
 
     public async Task AssignMonitorAsync(int monitorId, Guid tenantId)
@@ -249,6 +256,7 @@ public class MonitorOrchestrationService(
         
         var monitors = await dbContext.Monitors
             .AsNoTracking()
+            .Include(m => m.Tenant)
             .Where(m => m.TenantId == tenantId)
             .ToListAsync();
 
@@ -272,6 +280,7 @@ public class MonitorOrchestrationService(
 
         var monitor = await dbContext.Monitors
             .AsNoTracking()
+            .Include(m => m.Tenant)
             .SingleOrDefaultAsync(m => m.TenantId == tenantId && m.Id == id);
 
         if (monitor == null) throw new KeyNotFoundException($"Monitor {id} not found.");
@@ -282,20 +291,21 @@ public class MonitorOrchestrationService(
             monitor.CurrentUptimePercentage = uptime;
         }
 
-        return HydrateLiveStatus(monitor);
+        HydrateLiveStatus(monitor);
+        return monitor;
     }
     
-    private UptimeMonitor HydrateLiveStatus(UptimeMonitor monitor)
+    private void HydrateLiveStatus(UptimeMonitor monitor)
     {
         if (cache.TryGetValue(GlobalCacheKeys.MonitorState(monitor.Id), out LiveMonitorState? state) && state != null)
         {
             monitor.StatusStr = FormatStatus(state.StatusStr);
+            monitor.CurrentLatency = state.CurrentLatency;
         }
         else
         {
             monitor.StatusStr = "Unknown";
         }
-        return monitor;
     }
 
     private static string FormatStatus(string status) 
@@ -370,6 +380,7 @@ public class MonitorOrchestrationService(
 
         await dbContext.SaveChangesAsync();
 
-        return HydrateLiveStatus(monitor);
+        HydrateLiveStatus(monitor);
+        return monitor;
     }
 }

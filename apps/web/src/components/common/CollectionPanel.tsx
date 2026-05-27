@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react';
-import './CollectionPanel.css';
 
 interface CollectionPanelProps {
   title: string;
@@ -10,16 +9,20 @@ interface CollectionPanelProps {
 
 export function CollectionPanel({ title, actions, className = '', children }: CollectionPanelProps) {
   return (
-      <div className={`collection-panel card ${className}`}>
-          <div className="collection-panel__header">
-            <span className="collection-panel__title">
-                {title}
-            </span>
+    <section className={`bg-white rounded-xl border border-slate-200 shadow-sm p-0 flex flex-col min-h-0 overflow-hidden ${className}`}>
+      <div className="flex justify-between items-center px-4 py-3 border-b border-slate-100">
+        <h2 className="text-sm font-bold text-slate-500 uppercase tracking-widest m-0">
+          {title}
+        </h2>
+        {actions && (
+          <div className="flex items-center gap-4">
             {actions}
           </div>
-          <div className="collection-panel__body">
-                {children}
-          </div>
+        )}
       </div>
+      <div className="flex-1 overflow-y-auto custom-scrollbar min-h-0">
+        {children}
+      </div>
+    </section>
   );
 }

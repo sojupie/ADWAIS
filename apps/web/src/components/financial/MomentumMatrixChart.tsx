@@ -12,7 +12,6 @@ import {
 import type { MomentumResponse, MomentumTenant } from '@types';
 import { formatCompact } from '@utils';
 import { ChartPanel } from '../common/ChartPanel';
-import './MomentumMatrixChart.css';
 
 const CustomTooltip = ({ active, payload }: any) => {
   if (!active || !payload?.length) return null;
@@ -20,11 +19,24 @@ const CustomTooltip = ({ active, payload }: any) => {
   const point = payload[0].payload as MomentumTenant;
 
   return (
-    <div className="chart-panel-tooltip">
-      <p className="chart-panel-tooltip__label">{point.tenantName}</p>
-      <p>Baseline: <strong>{formatCompact(point.baselineRevenue)} SEK</strong></p>
-      <p>Current: <strong>{formatCompact(point.currentRevenue)} SEK</strong></p>
-      <p>Momentum: <strong>{point.growthPercentage.toFixed(1)}%</strong></p>
+    <div className="bg-white border border-slate-100 rounded-lg shadow-lg p-4 text-sm animate-in fade-in zoom-in duration-200">
+      <p className="font-bold text-slate-900 mb-3 border-b border-slate-50 pb-2">{point.tenantName}</p>
+      <div className="space-y-2">
+        <p className="flex justify-between gap-6">
+          <span className="text-slate-500">Baseline:</span>
+          <strong className="text-slate-700">{formatCompact(point.baselineRevenue)} SEK</strong>
+        </p>
+        <p className="flex justify-between gap-6">
+          <span className="text-slate-500">Current:</span>
+          <strong className="text-slate-700">{formatCompact(point.currentRevenue)} SEK</strong>
+        </p>
+        <p className="flex justify-between gap-6">
+          <span className="text-slate-500">Momentum:</span>
+          <strong className={point.growthPercentage >= 0 ? 'text-[#37b24d]' : 'text-[#f03e3e]'}>
+            {point.growthPercentage.toFixed(1)}%
+          </strong>
+        </p>
+      </div>
     </div>
   );
 };
@@ -33,23 +45,25 @@ function MomentumScatterPlot({ points, medianBaselineRevenue, onTenantSelect }: 
 points: MomentumTenant[]; medianBaselineRevenue: number; onTenantSelect?: (tenantId: string) => void;
 }) {
   return (
-    <ResponsiveContainer width="100%" height={280}>
+    <ResponsiveContainer width="100%" height="100%">
       <ScatterChart margin={{ top: 10, right: 24, left: 12, bottom: 14 }}>
-        <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 4" />
+        <CartesianGrid stroke="#f1f5f9" strokeDasharray="3 4" />
         <XAxis
           type="number"
           dataKey="baselineRevenue"
-          name="Previous Baseline Revenue" //should maybe depend on period picked
+          name="Previous Baseline Revenue"
           tickFormatter={(value) => formatCompact(value)}
-          tick={{ fill: 'var(--text-primary)', fontSize: 10 }}
+          tick={{ fill: '#94a3b8', fontSize: 13, fontWeight: 600, fontFamily: 'Manrope, sans-serif' }}
           axisLine={false}
           tickLine={false}
           label={{
-            value: 'Previous Baseline Revenue',
+            value: 'P30 Baseline Revenue →',
             position: 'insideBottom',
             offset: -3,
-            fill: 'var(--text-primary)',
-            fontSize: 12,
+            fill: '#1A1A1A',
+            fontSize: 13,
+            fontWeight: 800,
+            fontFamily: 'Manrope, sans-serif'
           }}
         />
         <YAxis
@@ -57,22 +71,22 @@ points: MomentumTenant[]; medianBaselineRevenue: number; onTenantSelect?: (tenan
           dataKey="growthPercentage"
           name="Revenue Momentum"
           tickFormatter={(value) => `${value.toFixed(0)}%`}
-          tick={{ fill: 'var(--text-primary)', fontSize: 12 }}
+          tick={{ fill: '#94a3b8', fontSize: 13, fontWeight: 600, fontFamily: 'Manrope, sans-serif' }}
           axisLine={false}
           tickLine={false}
           width={52}
         />
-        <ZAxis type="number" dataKey="currentRevenue" range={[80, 980]} />
-        <ReferenceLine x={medianBaselineRevenue} stroke="var(--button-border)" strokeDasharray="3 3" />
-        <ReferenceLine y={0} stroke="var(--button-border)" strokeDasharray="3 3" />
+        <ZAxis type="number" dataKey="currentRevenue" range={[120, 1200]} />
+        <ReferenceLine x={medianBaselineRevenue} stroke="#cbd5e1" strokeWidth={2} strokeDasharray="5 5" />
+        <ReferenceLine y={0} stroke="#cbd5e1" strokeWidth={2} strokeDasharray="5 5" />
         <Tooltip content={<CustomTooltip />} cursor={{ strokeDasharray: '3 3' }} />
         <Scatter
           data={points}
-          className={onTenantSelect ? 'momentum-matrix-chart__scatter--clickable' : undefined}
-          fill="var(--chart-line)"
-          fillOpacity={0.62}
-          stroke="var(--bg-primary)"
-          strokeWidth={1.5}
+          className={onTenantSelect ? 'cursor-pointer hover:opacity-90 transition-opacity' : undefined}
+          fill="#51B5B9"
+          fillOpacity={0.7}
+          stroke="#fff"
+          strokeWidth={2}
           onClick={(point) => {
             const payload = point?.payload as MomentumTenant | undefined;
 
@@ -86,8 +100,8 @@ points: MomentumTenant[]; medianBaselineRevenue: number; onTenantSelect?: (tenan
   );
 }
 
-export function MomentumMatrixChart({ momentum, onTenantSelect }: { 
-momentum: MomentumResponse; onTenantSelect?: (tenantId: string) => void; })
+export function MomentumMatrixChart({ momentum, onTenantSelect, className }: { 
+momentum: MomentumResponse; onTenantSelect?: (tenantId: string) => void; className?: string; })
 {
   const points = momentum.tenants;
   const isEmpty = points.length === 0;
@@ -95,11 +109,12 @@ momentum: MomentumResponse; onTenantSelect?: (tenantId: string) => void; })
   return (
     <ChartPanel
       title="Momentum Matrix"
-      legend={<span className="momentum-matrix-chart__legend">Size = Total Rev Contribution</span>}
-      bodyClassName={`momentum-matrix-chart${isEmpty ? ' momentum-matrix-chart--empty' : ''}`}
+      className={className || "h-full"}
+      bodyClassName={isEmpty ? 'flex items-center justify-center' : 'flex-1 min-h-0'}
+      legend={<span className="text-xs font-bold text-slate-400 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded">Size = Total Rev Contribution</span>}
     >
       {isEmpty ? (
-        <span className="momentum-matrix-chart__empty">No previous-period baseline data</span>
+        <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">No previous-period baseline data</span>
       ) : (
         <MomentumScatterPlot
           points={points}

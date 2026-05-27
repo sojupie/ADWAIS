@@ -175,23 +175,4 @@ public class TenantController(
             LastSyncError = tenant.LastSyncError
         });
     }
-
-    private static UptimeMonitorDto ToDto(Domain.Entities.Monitoring.UptimeMonitor m)
-    {
-        return new UptimeMonitorDto(
-            Id: m.Id,
-            TenantId: m.TenantId,
-            Name: m.Name,
-            Url: m.Url,
-            UpdateInterval: m.UpdateInterval,
-            UptimeSla: m.UptimeSla,
-            CurrentUptimePercentage: m.CurrentUptimePercentage,
-            UptimeMonitorEnabled: m.UptimeMonitorEnabled,
-            CurrentStatus: m.StatusStr, // Hydrated by service
-            LastUpdate: m.LastUpdate,
-            LastUptimeUpdate: m.LastUptimeUpdate,
-            LastLatencyUpdate: m.LastLatencyUpdate,
-            CreatedDate: m.CreatedDate,
-            LastSyncError: m.LastSyncError);
-    }
 }

@@ -27,13 +27,10 @@ export function FleetStatus() {
 
   const allMonitorsInSystem = globalMonitorsQuery.data ?? [];
   const tenantMonitors = selection ? allMonitorsInSystem.filter(m => m.tenantId === selection.tenantId) : allMonitorsInSystem;
+  const scopedMonitors = selection?.monitorId ? tenantMonitors.filter(m => m.id === selection.monitorId) : tenantMonitors;
   
   const fleetStats = useMemo(() => {
-    let list = tenantMonitors;
-    if (selection?.monitorId) {
-      list = tenantMonitors.filter(m => m.id === selection.monitorId);
-    }
-    const enabled = list.filter(m => m.uptimeMonitorEnabled);
+    const enabled = scopedMonitors.filter(m => m.uptimeMonitorEnabled);
     
     const latencies = enabled.map(m => m.currentLatency).filter((l): l is number => l !== null && l !== undefined);
     const highestLatency = latencies.length > 0 ? Math.max(...latencies) : 0;
@@ -55,8 +52,8 @@ export function FleetStatus() {
       ? enabled.reduce((acc, m) => acc + m.currentUptimePercentage, 0) / enabled.length 
       : 0;
 
-    return { total: list.length, enabled, highestLatency, lowestLatency, avgLatency, down, degraded, avgUptime };
-  }, [selection, tenantMonitors, allMonitorsInSystem]);
+    return { total: scopedMonitors.length, enabled, highestLatency, lowestLatency, avgLatency, down, degraded, avgUptime };
+  }, [scopedMonitors]);
 
   const handleMonitorSelect = (monitor: UptimeMonitorDto) => {
     if (!selection) {
@@ -148,7 +145,10 @@ export function FleetStatus() {
         </div>
         
         <div className="lg:col-span-2 flex flex-col min-h-0 h-full">
-           <SlaBreachWatchlist monitors={allMonitorsInSystem} />
+           <SlaBreachWatchlist 
+             monitors={scopedMonitors} 
+             onClearSelection={selection ? () => setSelection(null) : undefined} 
+           />
         </div>
       </section>
 

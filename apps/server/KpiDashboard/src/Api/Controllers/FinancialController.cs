@@ -58,18 +58,40 @@ public class FinancialController(IFinancialService financialService) : Controlle
     }
 
     /// <summary>
-    /// Pareto distribution: revenue per tenant + cumulative portfolio share.
+    /// Scatter plot data: revenue efficiency across all tenants. X: AOV, Y: Portfolio share, Bubble: Growth velocity.
     /// Portfolio view only.
     /// </summary>
-    [HttpGet("distribution")]
-    public async Task<ActionResult<IEnumerable<DistributionEntryResponseDto>>> GetDistribution([FromQuery] DistributionRequestDto request)
+    [HttpGet("revenue-efficiency")]
+    public async Task<ActionResult<IEnumerable<RevenueEfficiencyResponseDto>>> GetRevenueEfficiency([FromQuery] PortfolioRequestDto request)
     {
-        var result = await financialService.GetDistributionAsync(request.Timeframe, request.TopN);
-        return Ok(result.Select(d => new DistributionEntryResponseDto(
-            d.TenantId,
-            d.TenantName,
-            d.AbsoluteRevenue,
-            d.CumulativePortfolioShare)));
+        var result = await financialService.GetRevenueEfficiencyAsync(request.Timeframe);
+        return Ok(result.Select(r => new RevenueEfficiencyResponseDto
+        {
+            TenantId = r.TenantId,
+            TenantName = r.TenantName,
+            Type = r.Type,
+            AverageOrderValue = r.AverageOrderValue,
+            PortfolioSharePercentage = r.PortfolioSharePercentage,
+            GrowthVelocity = r.GrowthVelocity
+        }));
+    }
+
+    /// <summary>
+    /// Diverging bar chart data: volume anomalies compared to a baseline period.
+    /// Portfolio view only.
+    /// </summary>
+    [HttpGet("volume-anomaly")]
+    public async Task<ActionResult<IEnumerable<VolumeAnomalyResponseDto>>> GetVolumeAnomaly([FromQuery] PortfolioRequestDto request)
+    {
+        var result = await financialService.GetVolumeAnomalyAsync(request.Timeframe);
+        return Ok(result.Select(r => new VolumeAnomalyResponseDto
+        {
+            TenantId = r.TenantId,
+            TenantName = r.TenantName,
+            VolumeDeviationPercentage = r.VolumeDeviationPercentage,
+            CurrentVolume = r.CurrentVolume,
+            BaselineVolume = r.BaselineVolume
+        }));
     }
 
     /// <summary>

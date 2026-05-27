@@ -298,53 +298,98 @@ public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFacto
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<DistributionEntryDto>> GetDistributionAsync(Timeframe timeframe, int topN = 10)
+    public async Task<IReadOnlyList<RevenueEfficiencyDto>> GetRevenueEfficiencyAsync(Timeframe timeframe)
     {
-        var (currentStart, currentEnd, _, _, isHourly, _) = TimeframeResolver.Resolve(timeframe);
+        var (currentStart, currentEnd, previousStart, _, isHourly, _) = TimeframeResolver.Resolve(timeframe);
         await using var context = await contextFactory.CreateDbContextAsync();
 
         var currentRows = await GetMergedTenantDataAsync(context, currentStart, currentEnd, isHourly);
-        var tenantNames = await GetTenantNameMapAsync(context);
+        var previousRows = await GetMergedTenantDataAsync(context, previousStart, currentStart, isHourly);
+        
+        var tenantDetails = await context.Tenants
+            .AsNoTracking()
+            .Where(t => t.Id != AnalyticsDbContext.SystemTenantGuid)
+            .Select(t => new { t.Id, t.Name, t.Type })
+            .ToDictionaryAsync(t => t.Id);
 
-        var revenueByTenant = currentRows
+        var currentByTenant = currentRows
+            .Where(r => r.TenantId.HasValue && r.TenantId.Value != AnalyticsDbContext.SystemTenantGuid)
             .GroupBy(r => r.TenantId!.Value)
-            .Select(g => new { TenantId = g.Key, Revenue = g.Sum(r => r.Revenue) })
-            .OrderByDescending(x => x.Revenue)
+            .ToDictionary(g => g.Key, g => new { Revenue = g.Sum(r => r.Revenue), Volume = g.Sum(r => r.Volume) });
+
+        var previousByTenant = previousRows
+            .Where(r => r.TenantId.HasValue && r.TenantId.Value != AnalyticsDbContext.SystemTenantGuid)
+            .GroupBy(r => r.TenantId!.Value)
+            .ToDictionary(g => g.Key, g => g.Sum(r => r.Revenue));
+
+        var totalRevenue = currentByTenant.Values.Sum(x => x.Revenue);
+
+        return currentByTenant.Keys.Union(previousByTenant.Keys)
+            .Where(tid => tenantDetails.ContainsKey(tid))
+            .Select(tid =>
+            {
+                var current = currentByTenant.GetValueOrDefault(tid);
+                var curRev = current?.Revenue ?? 0m;
+                var curVol = current?.Volume ?? 0;
+                var prevRev = previousByTenant.GetValueOrDefault(tid, 0m);
+
+                var aov = curVol > 0 ? Math.Round(curRev / curVol, 2) : 0m;
+                var share = totalRevenue > 0 ? Math.Round((curRev / totalRevenue) * 100, 2) : 0m;
+                var growth = CalculateGrowthPercentage(curRev, prevRev);
+                var details = tenantDetails[tid];
+
+                return new RevenueEfficiencyDto(tid, details.Name, details.Type, aov, share, growth);
+            })
             .ToList();
+    }
 
-        var totalRevenue = revenueByTenant.Sum(x => x.Revenue);
-        if (totalRevenue == 0)
-            return Array.Empty<DistributionEntryDto>();
-
-        var result = new List<DistributionEntryDto>();
-        decimal runningShare = 0;
-
-        var topTenants = revenueByTenant.Take(topN).ToList();
-        var otherTenants = revenueByTenant.Skip(topN).ToList();
-
-        foreach (var t in topTenants)
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<VolumeAnomalyDto>> GetVolumeAnomalyAsync(Timeframe timeframe)
+    {
+        var (currentStart, currentEnd, previousStart, _, isHourly, _) = TimeframeResolver.Resolve(timeframe);
+        
+        var timeframeDuration = currentEnd - currentStart;
+        if (timeframeDuration < TimeSpan.FromDays(30))
         {
-            runningShare += t.Revenue / totalRevenue;
-            var name = tenantNames.GetValueOrDefault(t.TenantId, t.TenantId.ToString());
-            result.Add(new DistributionEntryDto(t.TenantId, name, t.Revenue, Math.Round(runningShare, 4)));
+            previousStart = currentStart.AddDays(-30);
         }
+        var previousDuration = currentStart - previousStart;
+        var durationRatio = (decimal)timeframeDuration.TotalDays / (decimal)Math.Max(1, previousDuration.TotalDays);
 
-        if (otherTenants.Count > 0)
-        {
-            var otherRevenue = otherTenants.Sum(x => x.Revenue);
-            result.Add(new DistributionEntryDto(
-                null,
-                $"Other ({otherTenants.Count})",
-                otherRevenue,
-                1.0m));
-        }
-        else if (result.Count > 0)
-        {
-            var last = result[^1];
-            result[^1] = last with { CumulativePortfolioShare = 1.0m };
-        }
+        await using var context = await contextFactory.CreateDbContextAsync();
 
-        return result;
+        var currentRows = await GetMergedTenantDataAsync(context, currentStart, currentEnd, isHourly);
+        var previousRows = await GetMergedTenantDataAsync(context, previousStart, currentStart, isHourly);
+        
+        var tenantDetails = await context.Tenants
+            .AsNoTracking()
+            .Where(t => t.Id != AnalyticsDbContext.SystemTenantGuid)
+            .Select(t => new { t.Id, t.Name })
+            .ToDictionaryAsync(t => t.Id);
+
+        var currentVolumeByTenant = currentRows
+            .GroupBy(r => r.TenantId!.Value)
+            .ToDictionary(g => g.Key, g => g.Sum(r => r.Volume));
+
+        var previousVolumeByTenant = previousRows
+            .GroupBy(r => r.TenantId!.Value)
+            .ToDictionary(g => g.Key, g => g.Sum(r => r.Volume));
+
+        return tenantDetails.Keys
+            .Select(tid =>
+            {
+                var currentVol = currentVolumeByTenant.GetValueOrDefault(tid, 0);
+                var prevVolRaw = previousVolumeByTenant.GetValueOrDefault(tid, 0);
+                
+                var baselineVol = Math.Round(prevVolRaw * durationRatio, 2);
+                
+                var deviation = baselineVol > 0 
+                    ? Math.Round(((currentVol - baselineVol) / baselineVol) * 100, 2) 
+                    : (currentVol > 0 ? 100m : 0m);
+
+                return new VolumeAnomalyDto(tid, tenantDetails[tid].Name, deviation, currentVol, baselineVol);
+            })
+            .ToList();
     }
 
     /// <inheritdoc />

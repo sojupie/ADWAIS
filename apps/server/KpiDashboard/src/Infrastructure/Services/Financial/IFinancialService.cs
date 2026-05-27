@@ -21,9 +21,14 @@ public interface IFinancialService
     Task<IReadOnlyList<GrowthExtremeDto>> GetGrowthExtremesAsync(Timeframe timeframe);
 
     /// <summary>
-    /// Calculates the distribution of revenue across top tenants.
+    /// Analyzes revenue efficiency across all tenants, returning AOV, portfolio share, and growth velocity.
     /// </summary>
-    Task<IReadOnlyList<DistributionEntryDto>> GetDistributionAsync(Timeframe timeframe, int topN = 10);
+    Task<IReadOnlyList<RevenueEfficiencyDto>> GetRevenueEfficiencyAsync(Timeframe timeframe);
+
+    /// <summary>
+    /// Analyzes order volume anomalies by comparing current volume against a baseline period.
+    /// </summary>
+    Task<IReadOnlyList<VolumeAnomalyDto>> GetVolumeAnomalyAsync(Timeframe timeframe);
 
     /// <summary>
     /// Analyzes revenue momentum across all tenants.

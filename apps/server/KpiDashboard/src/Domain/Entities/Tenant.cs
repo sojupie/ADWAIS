@@ -1,5 +1,6 @@
 using Domain.Entities.Monitoring;
 using Domain.Entities.OrderData;
+using Domain.Enums;
 
 namespace Domain.Entities;
 
@@ -7,6 +8,7 @@ public class Tenant
 {
     public Guid Id { get; set; }
     public required string Name { get; set; }
+    public TenantType Type { get; set; }
     public required string LitiumBaseUrl { get; set; }
     public required string ServiceAccountToken { get; set; }
     public DateTimeOffset? FetchedFrom { get; set; }

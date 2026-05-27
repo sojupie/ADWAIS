@@ -1,4 +1,5 @@
 using Api.DTOs.Monitoring;
+using Domain.Enums;
 
 namespace Api.DTOs.Tenants;
 
@@ -6,6 +7,7 @@ public class TenantResponseDto
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
+    public TenantType Type { get; set; }
     public string LitiumBaseUrl { get; set; } = string.Empty;
     public bool CurrentlyFetching { get; set; }
     public DateTimeOffset? FetchedFrom { get; set; }

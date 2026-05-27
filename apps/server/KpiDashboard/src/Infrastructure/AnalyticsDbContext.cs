@@ -1,7 +1,8 @@
-﻿using Domain.Entities;
+using Domain.Entities;
 using Domain.Entities.Monitoring;
 using Domain.Entities.Office;
 using Domain.Entities.OrderData;
+using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure;
@@ -91,6 +92,10 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options) : 
             entity.HasKey(t => t.Id);
             entity.Property(t => t.Id).HasDefaultValueSql("uuid_generate_v4()");
             entity.Property(t => t.Name).HasMaxLength(255);
+            entity.Property(t => t.Type)
+                .HasConversion<string>()
+                .HasMaxLength(50)
+                .HasDefaultValue(TenantType.Mixed);
             entity.Property(t => t.LitiumBaseUrl).HasMaxLength(2048);
             entity.Property(t => t.ServiceAccountToken).HasMaxLength(2048);
             entity.Property(t => t.CurrentlyFetching).HasDefaultValue(false);
@@ -101,6 +106,7 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options) : 
                 {
                     Id = SystemTenantGuid,
                     Name = "System (unassigned monitors)",
+                    Type = TenantType.Mixed,
                     LitiumBaseUrl = "N/A",
                     ServiceAccountToken = "N/A",
                     OrderFetchingEnabled = false

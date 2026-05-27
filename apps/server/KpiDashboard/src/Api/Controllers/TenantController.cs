@@ -36,6 +36,7 @@ public class TenantController(
                 {
                     Id = t.Id,
                     Name = t.Name,
+                    Type = t.Type,
                     LitiumBaseUrl = t.LitiumBaseUrl,
                     CurrentlyFetching = t.CurrentlyFetching,
                     FetchedFrom = t.FetchedFrom,
@@ -58,6 +59,7 @@ public class TenantController(
             {
                 Id = t.Id,
                 Name = t.Name,
+                Type = t.Type,
                 LitiumBaseUrl = t.LitiumBaseUrl,
                 CurrentlyFetching = t.CurrentlyFetching,
                 FetchedFrom = t.FetchedFrom,
@@ -83,6 +85,7 @@ public class TenantController(
         var tenant = new Tenant
         {
             Name = request.Name,
+            Type = request.Type,
             LitiumBaseUrl = request.LitiumBaseUrl,
             ServiceAccountToken = request.ServiceAccountToken,
             OrderFetchingEnabled = request.OrderFetchingEnabled
@@ -95,6 +98,7 @@ public class TenantController(
             {
                 Id = tenant.Id,
                 Name = tenant.Name,
+                Type = tenant.Type,
                 LitiumBaseUrl = tenant.LitiumBaseUrl,
                 CurrentlyFetching = tenant.CurrentlyFetching,
                 FetchedFrom = tenant.FetchedFrom,
@@ -159,6 +163,10 @@ public class TenantController(
         {
             tenant.OrderFetchingEnabled = request.OrderFetchingEnabled.Value;
         }
+        if (request.Type.HasValue)
+        {
+            tenant.Type = request.Type.Value;
+        }
 
         await context.SaveChangesAsync();
 
@@ -166,6 +174,7 @@ public class TenantController(
         {
             Id = tenant.Id,
             Name = tenant.Name,
+            Type = tenant.Type,
             LitiumBaseUrl = tenant.LitiumBaseUrl,
             CurrentlyFetching = tenant.CurrentlyFetching,
             FetchedFrom = tenant.FetchedFrom,

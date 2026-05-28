@@ -1,4 +1,5 @@
 import { formatCurrency, formatNumber } from '@utils';
+import { ArrowLeft } from 'lucide-react';
 import { FactPanel } from '../components/common/FactPanel';
 import { CumulativeGrowthDeltaChart } from '../components/TenantSpecific/CumulativeGrowthDeltaChart';
 import { OrderValueDistributionChart } from '../components/TenantSpecific/OrderValueDistributionChart';
@@ -22,23 +23,29 @@ interface Props {
 
 export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe, onBack }: Props) {
   const kpiQuery = useGlobalKpis(timeframe, tenantId);
+  const globalKpiQuery = useGlobalKpis(timeframe);
   const accumulatedQuery = useAccumulatedRevenue(timeframe, tenantId);
   const densityQuery = useTransactionDensity(timeframe, tenantId);
   const deltaQuery = useCumulativeGrowthDelta(timeframe, tenantId);
   const orderQuery = useOrderDistribution(timeframe, tenantId);
 
   const kpis = kpiQuery.data;
+  const globalKpis = globalKpiQuery.data;
+  
+  const shareOfRevenue = kpis && globalKpis && globalKpis.currentRevenue > 0 
+    ? (kpis.currentRevenue / globalKpis.currentRevenue) * 100 
+    : undefined;
 
   return (
     <div className="flex flex-col gap-6 w-full min-h-full animate-in fade-in slide-in-from-bottom-4 duration-500">
       <header className="flex items-center gap-6 flex-shrink-0">
         <button
-          className="w-10 h-10 rounded-full border border-slate-200 bg-white flex items-center justify-center text-xl font-extrabold text-slate-500 hover:text-slate-700 hover:bg-slate-50 transition-all shadow-sm cursor-pointer"
+          className="w-10 h-10 rounded-full border border-slate-200 bg-white flex items-center justify-center text-xl font-extrabold text-slate-700 hover:text-brand-text hover:bg-slate-100 hover:border-slate-300 transition-all shadow-sm cursor-pointer"
           type="button"
           onClick={onBack}
           aria-label="Back to financial overview"
         >
-          &larr;
+          <ArrowLeft size={20} className="stroke-[3px]" />
         </button>
         <div>
           <div className="flex items-center gap-3 mb-1">
@@ -57,7 +64,7 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe,
         </div>
       </header>
 
-      <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 flex-shrink-0">
+      <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 flex-shrink-0">
         <FactPanel
           label={`Revenue (${timeframe})`}
           value={kpis ? formatCurrency(kpis.currentRevenue) : '\u2014'}
@@ -65,6 +72,12 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe,
           extra={kpis?.revenueGrowthPercentage !== undefined
             ? { type: 'PoP', value: kpis.revenueGrowthPercentage }
             : undefined}
+        />
+        <FactPanel
+          label="Share of Revenue"
+          value={shareOfRevenue !== undefined ? `${shareOfRevenue.toFixed(1)}%` : '\u2014'}
+          isLoading={kpiQuery.isLoading || globalKpiQuery.isLoading}
+          extra={{ type: 'Desc', value: 'of Global Portfolio' }}
         />
         <FactPanel
           label="Transaction Volume"

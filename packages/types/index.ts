@@ -42,9 +42,11 @@ export interface TransactionDensityPointDto {
 
 export interface OrderBin {
   binLabel: string;
-  binMin: number;
-  binMax: number;
+  minValue: number;
+  maxValue: number;
   orderCount: number;
+  cumulativePercentage: number;
+  kdeDensity: number;
 }
 
 export interface GrowthExtreme {

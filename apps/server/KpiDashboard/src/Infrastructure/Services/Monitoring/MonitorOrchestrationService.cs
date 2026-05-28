@@ -304,7 +304,10 @@ public class MonitorOrchestrationService(
         }
         else
         {
-            monitor.StatusStr = "Unknown";
+            // TODO: TEMPORARY — Remove this block when real UptimeRobot monitors are connected.
+            // Provides synthetic status/latency for seeded monitors that have no live cache entry.
+            monitor.StatusStr = "Up";
+            monitor.CurrentLatency = 200 + (monitor.Id % 400); // Deterministic fake latency 200-599ms
         }
     }
 

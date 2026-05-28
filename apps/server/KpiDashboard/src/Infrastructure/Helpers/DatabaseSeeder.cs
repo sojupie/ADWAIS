@@ -12,16 +12,19 @@ public static class DatabaseSeeder
 
     public static async Task SeedSampleDataAsync(AnalyticsDbContext context)
     {
-        if (await context.Orders.AnyAsync())
-        {
-            Console.WriteLine("Data already exists, skipping seed.");
-            return;
-        }
-
         var random = new Random(42);
         var profiles = GenerateProfiles();
         var tenants = await SeedTenantsAsync(context, profiles);
-        
+
+        // Always run monitor seeding independently — idempotent per-tenant guard is inside the method.
+        await SeedMonitorsAndMetricsAsync(context, random);
+
+        if (await context.Orders.AnyAsync())
+        {
+            Console.WriteLine("Orders already exist, skipping order seed.");
+            return;
+        }
+
         var endDate = DateTimeOffset.UtcNow;
         var startDate = endDate.AddMonths(-24);
 
@@ -34,8 +37,6 @@ public static class DatabaseSeeder
             await BulkInsertOrdersForTenantAsync(context, tenant, profile, startDate, endDate, random);
         }
 
-        await SeedMonitorsAndMetricsAsync(context, random);
-        
         // Refresh views at the end to ensure dashboard is functional
         var views = new[]
         {
@@ -51,7 +52,7 @@ public static class DatabaseSeeder
 
         foreach (var view in views)
         {
-            await context.Database.ExecuteSqlRawAsync($"REFRESH MATERIALIZED VIEW {view};");
+            await context.Database.ExecuteSqlRawAsync("REFRESH MATERIALIZED VIEW " + view + ";");
         }
 
         Console.WriteLine($"Seeding completed in {sw.Elapsed.TotalMinutes:F2} minutes.");
@@ -85,8 +86,22 @@ public static class DatabaseSeeder
                 var orderDate = new DateTimeOffset(date.Year, date.Month, date.Day, 
                     random.Next(0, 24), random.Next(0, 60), random.Next(0, 60), TimeSpan.Zero);
 
-                double weight = random.NextDouble();
-                decimal valueIncVat = Math.Round(profile.MinAov + (decimal)(Math.Pow(weight, 2.5) * (profile.MaxAov - profile.MinAov)), 2);
+                // Box-Muller transform for standard normal distribution
+                double u1 = 1.0 - random.NextDouble();
+                double u2 = 1.0 - random.NextDouble();
+                double randStdNormal = Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Sin(2.0 * Math.PI * u2);
+
+                // Create a log-normal distribution for e-commerce AOV
+                // We want the peak (mode) to be around the lower-middle of the range.
+                double meanLog = Math.Log((double)profile.MinAov * 2.5); // Shift mode up a bit from absolute minimum
+                double stdDevLog = 0.6; // Controls the spread and skewness
+
+                double logNormalValue = Math.Exp(meanLog + stdDevLog * randStdNormal);
+
+                // Avoid artificial volume spikes at boundaries by softly clamping to reasonable ranges without piling up values.
+                decimal valueIncVat = Math.Round((decimal)logNormalValue, 2);
+                if (valueIncVat < 50m) valueIncVat = 50m + (decimal)random.NextDouble() * 100m;
+
                 decimal valueExcVat = Math.Round(valueIncVat / 1.25m, 2);
 
                 writer.StartRow();
@@ -140,7 +155,17 @@ public static class DatabaseSeeder
             new("Smart Home Solutions", "B2B", 600, 8000, 85, 20, 1.4m),
             new("The Shoe Box", "B2C", 400, 3500, 150, 35, 1.6m),
             new("Healthy Habits", "B2C", 200, 1200, 290, 70, 1.2m),
-            new("Auto Accessories", "Mixed", 350, 4500, 140, 35, 1.3m)
+            new("Auto Accessories", "Mixed", 350, 4500, 140, 35, 1.3m),
+            new("Crystal Skincare", "B2C", 500, 4000, 120, 30, 1.5m),
+            new("Nordic Outdoors", "B2C", 800, 7000, 70, 18, 1.7m),
+            new("Office Supply Hub", "B2B", 100, 900, 400, 90, 1.1m),
+            new("Craft Brewery Co", "B2C", 200, 1500, 250, 55, 1.3m),
+            new("Digital Print Shop", "B2B", 300, 3000, 180, 40, 1.2m),
+            new("Nordic Candles", "B2C", 150, 1200, 300, 65, 1.4m),
+            new("Vinyl Records", "Mixed", 250, 3500, 95, 22, 1.6m),
+            new("Organic Pantry", "B2C", 100, 800, 350, 75, 1.2m),
+            new("Workshop Tools", "B2B", 500, 6000, 60, 15, 1.5m),
+            new("Scandi Design Studio", "Mixed", 1500, 15000, 30, 8, 1.8m)
         };
     }
 
@@ -172,17 +197,33 @@ public static class DatabaseSeeder
     private static async Task SeedMonitorsAndMetricsAsync(AnalyticsDbContext context, Random random)
     {
         var tenants = await context.Tenants.Where(t => t.Id != AnalyticsDbContext.SystemTenantGuid).ToListAsync();
-        
+
+        // Determine the lowest existing seeded (negative) ID to avoid PK collisions on re-runs.
+        var lowestExistingId = await context.Monitors.Where(m => m.Id < 0).MinAsync(m => (int?)m.Id) ?? 0;
+        var nextId = lowestExistingId - 1;
+
         foreach (var tenant in tenants)
         {
             if (!await context.Monitors.AnyAsync(m => m.TenantId == tenant.Id))
             {
+                // Distribute SLA tiers: ~50% at 99.0, ~30% at 99.5, ~20% at 99.9
+                var slaTier = random.NextDouble();
+                var sla = slaTier < 0.5 ? 99.0 : slaTier < 0.8 ? 99.5 : 99.9;
+
+                // ~5% chance of a low degraded floor (~2 of 40 monitors will be caught by the filter)
+                // Synthetic latency is 160–199ms, so floors below 180ms will trigger degraded state.
+                var degradedFloor = random.NextDouble() < 0.05
+                    ? random.Next(120, 160)   // Low: synthetic latency will exceed this
+                    : random.Next(400, 900);  // Safe: well above synthetic latency
+
                 context.Monitors.Add(new UptimeMonitor
                 {
+                    Id = nextId--,
                     TenantId = tenant.Id,
                     Name = $"{tenant.Name} Storefront",
                     Url = tenant.LitiumBaseUrl,
-                    UptimeSla = 99.9,
+                    UptimeSla = sla,
+                    LatencyDegradedFloor = degradedFloor,
                     UptimeMonitorEnabled = true,
                     CreatedDate = DateTimeOffset.UtcNow.AddDays(-60),
                     UpdateInterval = 300
@@ -211,7 +252,8 @@ public static class DatabaseSeeder
                 {
                     MonitorId = monitor.Id,
                     Date = utcMidnight,
-                    UptimePercentage = random.NextDouble() * (100.0 - 99.0) + 99.0
+                    // Range 99.5–100.0% so most monitors stay above their SLA tier
+                    UptimePercentage = random.NextDouble() * (100.0 - 99.5) + 99.5
                 });
 
                 for (int h = 0; h < 24; h++)

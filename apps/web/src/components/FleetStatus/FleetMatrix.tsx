@@ -1,12 +1,12 @@
 import type { UptimeMonitorDto } from '@types';
 
 function normalizeStatus(status?: string | number): string {
-  const s = status?.toString() ?? 'Unknown';
-  if (s === '2') return 'UP';
-  if (s === '8' || s === '9') return 'DOWN';
-  if (s === '0') return 'PAUSED';
-  if (s === '1' || !s) return 'UNKNOWN';
-  return s.toUpperCase().trim();
+  if (status === undefined || status === null) return 'UNKNOWN';
+  const s = status.toString().toUpperCase().trim();
+  if (s === '2' || s === 'UP') return 'UP';
+  if (s === '8' || s === '9' || s === 'DOWN' || s === 'SEEMS DOWN' || s === 'CRITICAL') return 'DOWN';
+  if (s === '0' || s === 'PAUSED') return 'PAUSED';
+  return 'UNKNOWN';
 }
 
 function getMonitorStatus(monitor: UptimeMonitorDto): 'operational' | 'degraded' | 'down' | 'unknown' {
@@ -108,7 +108,7 @@ export function FleetMatrix({
               <div className="flex flex-col gap-0">
                 <span className={`text-[9px] ${theme.mutedText} uppercase font-bold tracking-widest`}>Latency</span>
                 <span className={`text-base font-black ${theme.valueText}`}>
-                  {(status === 'down' || status === 'unknown' || monitor.currentLatency === 0) ? 'N/A' : `${Math.round(monitor.currentLatency ?? 0)}ms`}
+                  {(status === 'down' || status === 'unknown' || !Number(monitor.currentLatency)) ? 'N/A' : `${Math.round(Number(monitor.currentLatency))}ms`}
                 </span>
               </div>
             </div>

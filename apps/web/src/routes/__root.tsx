@@ -30,7 +30,7 @@ function RootComponent() {
       {/* ── Header ── */}
       <header className="flex flex-col xl:flex-row justify-between items-center px-6 py-3 flex-shrink-0 bg-brand-bg-secondary border-b border-brand-bg-secondary/20 shadow-sm z-10 gap-4 xl:gap-0">
         <div className="w-full xl:w-1/4 flex justify-center xl:justify-start">
-          <img className="h-8 object-contain brightness-0 invert" src={motilloLogo} alt="Motillo" width="150" height="32" />
+          <img className="h-8 w-auto object-contain object-left brightness-0 invert" src={motilloLogo} alt="Motillo" height="32" />
         </div>
 
         <nav className="flex-1 flex flex-wrap justify-center items-center gap-4 md:gap-8 w-full xl:w-auto">
@@ -76,7 +76,7 @@ function RootComponent() {
 
       {/* ── Main Area ── */}
       <main className="flex-1 min-h-0 relative flex flex-col">
-        <div className="flex-1 w-full custom-scrollbar overflow-y-auto px-6 py-6 relative">
+        <div className="flex-1 w-full custom-scrollbar overflow-y-auto px-6 py-6 relative flex flex-col">
            <Outlet />
            
            {/* ── Mobile Inline Widgets ── */}

@@ -1,5 +1,6 @@
 import { useSearch } from '@tanstack/react-router';
 import { useState, useMemo } from 'react';
+import { ArrowLeft } from 'lucide-react';
 import { CollectionPanel } from '../components/common/CollectionPanel';
 import { FactPanel } from '../components/common/FactPanel';
 import { FleetMatrix } from '../components/FleetStatus/FleetMatrix';
@@ -9,12 +10,12 @@ import { useFleetMonitors, useFleetAnalytics } from '../hooks/useFleetQueries';
 import type { UptimeMonitorDto } from '@types';
 
 function normalizeStatus(status?: string | number): string {
-  const s = status?.toString() ?? 'Unknown';
-  if (s === '2') return 'UP';
-  if (s === '8' || s === '9') return 'DOWN';
-  if (s === '0') return 'PAUSED';
-  if (s === '1' || !s) return 'UNKNOWN';
-  return s.toUpperCase().trim();
+  if (status === undefined || status === null) return 'UNKNOWN';
+  const s = status.toString().toUpperCase().trim();
+  if (s === '2' || s === 'UP') return 'UP';
+  if (s === '8' || s === '9' || s === 'DOWN' || s === 'SEEMS DOWN' || s === 'CRITICAL') return 'DOWN';
+  if (s === '0' || s === 'PAUSED') return 'PAUSED';
+  return 'UNKNOWN';
 }
 
 export function FleetStatus() {
@@ -157,9 +158,9 @@ export function FleetStatus() {
             {selection && (
               <button 
                 onClick={() => setSelection(null)}
-                className="bg-white border border-[#e5e7eb] px-3 py-1.5 rounded-[4px] text-[11px] font-extrabold text-brand-btn-primary hover:bg-[#f9fafa] uppercase tracking-widest transition-all shadow-sm"
+                className="bg-brand-bg-secondary border border-brand-bg-secondary px-3 py-1.5 rounded-[4px] text-[11px] font-extrabold text-white hover:bg-brand-text hover:border-brand-text uppercase tracking-widest transition-all shadow-sm"
               >
-                &larr; Back to Global
+                <ArrowLeft size={14} className="mr-1 inline-block -mt-0.5 stroke-[3px]" /> BACK TO GLOBAL
               </button>
             )}
             <span className="text-[13px] font-bold text-[#64748b]">

@@ -84,7 +84,9 @@ public class MonitorSynchronizationJob(
         }
 
         var upStreamIds = upStreamMonitors.Select(m => m.Id).ToHashSet();
-        var toDelete = localMonitors.Values.Where(m => !upStreamIds.Contains(m.Id));
+        // TODO: TEMPORARY — Remove the `m.Id > 0` guard when real UptimeRobot monitors are connected.
+        // Seeded monitors use negative IDs and must not be deleted during sync.
+        var toDelete = localMonitors.Values.Where(m => m.Id > 0 && !upStreamIds.Contains(m.Id));
         dbContext.Monitors.RemoveRange(toDelete);
 
         await dbContext.SaveChangesAsync();

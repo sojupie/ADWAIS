@@ -2,6 +2,8 @@ namespace Domain.DTOs.Financial;
 
 public record OrderBinDto(
     string BinLabel,
-    decimal BinMin,
-    decimal BinMax,
-    int OrderCount);
+    decimal MinValue,
+    decimal MaxValue,
+    int OrderCount,
+    decimal CumulativePercentage,
+    decimal KdeDensity);

@@ -1,4 +1,5 @@
 using Domain.Entities;
+using Domain.Entities.Monitoring;
 using Domain.Entities.OrderData;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
@@ -43,7 +44,17 @@ public class RuntimeDataSeederJob(
         new("Smart Home Solutions", 600, 8000, 8),
         new("The Shoe Box", 400, 3500, 14),
         new("Healthy Habits", 200, 1200, 28),
-        new("Auto Accessories", 350, 4500, 13)
+        new("Auto Accessories", 350, 4500, 13),
+        new("Crystal Skincare", 500, 4000, 12),
+        new("Nordic Outdoors", 800, 7000, 7),
+        new("Office Supply Hub", 100, 900, 38),
+        new("Craft Brewery Co", 200, 1500, 24),
+        new("Digital Print Shop", 300, 3000, 17),
+        new("Nordic Candles", 150, 1200, 29),
+        new("Vinyl Records", 250, 3500, 9),
+        new("Organic Pantry", 100, 800, 33),
+        new("Workshop Tools", 500, 6000, 6),
+        new("Scandi Design Studio", 1500, 15000, 3),
     };
 
     [DisableConcurrentExecution(timeoutInSeconds: 300)]
@@ -89,6 +100,40 @@ public class RuntimeDataSeederJob(
             // await db.Database.ExecuteSqlRawAsync("REFRESH MATERIALIZED VIEW CONCURRENTLY v_mat_financial_daily_tenant_rollup;");
             // await db.Database.ExecuteSqlRawAsync("REFRESH MATERIALIZED VIEW CONCURRENTLY v_mat_financial_daily_global_rollup;");
         }
+
+        // TODO: TEMPORARY — Seed mock ResponseTime ticks for seeded monitors (negative IDs).
+        // Remove this block when real UptimeRobot monitors are connected.
+        await SeedMockMonitorLatencyAsync(db, now, random);
+    }
+
+    /// <summary>
+    /// Seeds a single ResponseTime entry per seeded (negative-ID) monitor for the current timestamp.
+    /// Simulates live latency data that would normally come from UptimeRobot polling.
+    /// </summary>
+    private static async Task SeedMockMonitorLatencyAsync(AnalyticsDbContext db, DateTimeOffset now, Random random)
+    {
+        var seededMonitors = await db.Monitors
+            .AsNoTracking()
+            .Where(m => m.Id < 0)
+            .ToListAsync();
+
+        if (!seededMonitors.Any()) return;
+
+        var responseTimes = seededMonitors.Select(m =>
+        {
+            var baseLatency = 150 + random.Next(0, 250);
+            return new ResponseTime
+            {
+                MonitorId = m.Id,
+                Date = now,
+                Average = baseLatency,
+                Lowest = baseLatency - random.Next(20, 60),
+                Highest = baseLatency + random.Next(40, 150)
+            };
+        }).ToList();
+
+        db.ResponseTimes.AddRange(responseTimes);
+        await db.SaveChangesAsync();
     }
 
     private static void AddOrders(List<Order> orders, Guid tenantId, int count, int minAov, int maxAov, DateTimeOffset now, Random random)
@@ -113,3 +158,4 @@ public class RuntimeDataSeederJob(
         }
     }
 }
+

@@ -597,7 +597,10 @@ public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFacto
         effectiveBinCount = Math.Clamp(effectiveBinCount, 5, 30);
 
         var min = orderValues[0];
-        var max = orderValues[^1];
+        
+        // Cap the max bin range at the 99th percentile to prevent extreme outliers from creating long tails of empty bins.
+        var p99Index = (int)Math.Floor(orderValues.Count * 0.99);
+        var max = p99Index > 0 ? orderValues[p99Index] : orderValues[^1];
 
         if (min == max)
         {
@@ -607,27 +610,64 @@ public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFacto
                     FormatBinLabel(min, max),
                     min,
                     max,
+                    orderValues.Count,
+                    100m,
                     orderValues.Count)
             };
         }
 
         var binWidth = (max - min) / effectiveBinCount;
 
+        // --- KDE & CDF Calculations ---
+        var n = orderValues.Count;
+        var mean = orderValues.Average();
+        var variance = orderValues.Select(v => (double)(v - mean)).Select(v => v * v).Average();
+        var stdDev = Math.Sqrt(variance);
+        if (stdDev == 0) stdDev = 1;
+        // Silverman's Rule of Thumb for bandwidth (h)
+        var h = 1.06 * stdDev * Math.Pow(n, -0.2);
+
+        // Scale KDE so that it visually matches the histogram bars. 
+        // Histogram bar area = count. KDE density integral = 1. Scaled KDE = density * n * binWidth.
+        var scaleFactor = n * (double)binWidth;
+
         var bins = new List<OrderBinDto>(effectiveBinCount);
+        var runningSum = 0;
+
         for (var i = 0; i < effectiveBinCount; i++)
         {
             var binMin = min + i * binWidth;
             var binMax = i == effectiveBinCount - 1 ? max : min + (i + 1) * binWidth;
 
             var count = i == effectiveBinCount - 1
-                ? orderValues.Count(v => v >= binMin && v <= binMax)
+                ? orderValues.Count(v => v >= binMin) // Catch all values >= max boundary
                 : orderValues.Count(v => v >= binMin && v < binMax);
 
+            runningSum += count;
+            var cumulativePercentage = (decimal)runningSum / n * 100m;
+
+            // KDE evaluation at the midpoint of the bin
+            var midpoint = (double)(binMin + binMax) / 2.0;
+            double densitySum = 0;
+            foreach (var value in orderValues)
+            {
+                var u = (midpoint - (double)value) / h;
+                var k = 0.3989422804 * Math.Exp(-0.5 * u * u);
+                densitySum += k;
+            }
+            var kdeValue = (densitySum / (n * h)) * scaleFactor;
+
+            var label = i == effectiveBinCount - 1 
+                ? $"{Math.Round(binMin, 0):N0}+ SEK" 
+                : FormatBinLabel(binMin, binMax);
+
             bins.Add(new OrderBinDto(
-                FormatBinLabel(binMin, binMax),
+                label,
                 Math.Round(binMin, 2),
                 Math.Round(binMax, 2),
-                count));
+                count,
+                Math.Round(cumulativePercentage, 2),
+                (decimal)Math.Round(kdeValue, 2)));
         }
 
         return bins;
@@ -636,7 +676,8 @@ public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFacto
     /// <inheritdoc />
     public async Task<IReadOnlyList<TransactionDensityPointDto>> GetTransactionDensityAsync(Timeframe timeframe, Guid? tenantId = null)
     {
-        var (currentStart, currentEnd, _, _, _, _) = TimeframeResolver.Resolve(timeframe);
+        // Force 30-day rolling timeframe for density to ensure statistical volume regardless of global dropdown
+        var (currentStart, currentEnd, _, _, _, _) = TimeframeResolver.Resolve(Timeframe.T30);
         await using var context = await contextFactory.CreateDbContextAsync();
 
         var query = context.Orders

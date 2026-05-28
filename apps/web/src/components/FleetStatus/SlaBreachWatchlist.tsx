@@ -30,7 +30,7 @@ function buildIssues(monitors: UptimeMonitorDto[]): MonitorIssue[] {
   monitors
     .filter((m) => m.uptimeMonitorEnabled)
     .forEach((m) => {
-      const isDown = m.currentStatus.toUpperCase() === 'DOWN' || m.currentStatus.toUpperCase() === 'CRITICAL';
+      const isDown = ['8', '9', 'DOWN', 'SEEMS DOWN', 'CRITICAL'].includes(m.currentStatus?.toString().toUpperCase().trim() || '');
       const isDegraded = m.latencyDegradedFloor !== null && m.currentLatency !== null && m.currentLatency > m.latencyDegradedFloor;
       
       let slaThreshold = m.uptimeSla;
@@ -76,14 +76,17 @@ export function SlaBreachWatchlist({ isLoading, monitors, onClearSelection }: { 
       title="SLA Breach Watchlist" 
       className="flex-1 min-h-0 h-full"
       bodyClassName="h-full flex flex-col min-h-0"
-      legend={onClearSelection && (
+      legend={
         <button 
           onClick={onClearSelection}
-          className="text-xs font-bold text-brand-btn-primary hover:text-brand-text uppercase tracking-widest transition-colors cursor-pointer"
+          disabled={!onClearSelection}
+          className={`bg-brand-bg-secondary text-white px-3 py-1 rounded-[4px] text-[10px] font-black uppercase tracking-widest hover:bg-brand-text transition-all shadow-sm cursor-pointer ${
+            !onClearSelection ? 'opacity-0 pointer-events-none' : 'opacity-100'
+          }`}
         >
           Clear
         </button>
-      )}
+      }
     >
       <div className="flex-1 overflow-y-auto pr-1 min-h-0 custom-scrollbar grid grid-cols-1 xl:grid-cols-2 gap-2 content-start">
           {issues.length === 0 ? (

@@ -161,9 +161,11 @@ public class FinancialController(IFinancialService financialService) : Controlle
         var result = await financialService.GetOrderDistributionAsync(request.Timeframe, request.TenantId, request.BinCount);
         return Ok(result.Select(b => new OrderBinResponseDto(
             b.BinLabel,
-            b.BinMin,
-            b.BinMax,
-            b.OrderCount)));
+            b.MinValue,
+            b.MaxValue,
+            b.OrderCount,
+            b.CumulativePercentage,
+            b.KdeDensity)));
     }
 
     /// <summary>

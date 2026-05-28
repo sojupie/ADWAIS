@@ -2,6 +2,8 @@ namespace Api.DTOs.Financial;
 
 public record OrderBinResponseDto(
     string BinLabel,
-    decimal BinMin,
-    decimal BinMax,
-    int OrderCount);
+    decimal MinValue,
+    decimal MaxValue,
+    int OrderCount,
+    decimal CumulativePercentage,
+    decimal KdeDensity);

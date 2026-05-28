@@ -4,5 +4,6 @@ public record AccumulatedRevenuePointDto(
     string Label,
     DateTimeOffset Timestamp,
     decimal CurrentRevenue,
-    decimal PreviousRevenue,g
+    decimal PreviousRevenue,
+    decimal CurrentAccumulated,
     decimal PreviousAccumulated);

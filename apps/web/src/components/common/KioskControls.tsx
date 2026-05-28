@@ -5,8 +5,8 @@ import type { Timeframe } from '../../schemas';
 
 type KioskMode = 'kiosk' | 'interactive' | 'paused';
 
-const KIOSK_ROTATION_SECONDS = 30;
-const IDLE_TIMEOUT_SECONDS = 30;
+const KIOSK_ROTATION_SECONDS = 15;
+const IDLE_TIMEOUT_SECONDS = 10;
 
 export function KioskControls() {
   const navigate = useNavigate();

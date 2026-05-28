@@ -25,6 +25,13 @@ export function KioskControls() {
 
   useEffect(() => {
     const ticker = setInterval(() => {
+      if (currentRoute?.startsWith('/settings')) {
+        if (mode !== 'paused') {
+           setMode('paused');
+        }
+        return;
+      }
+      
       if (mode === 'kiosk') {
         setKioskTimer((prev) => {
           if (prev <= 1) {

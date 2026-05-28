@@ -1,18 +1,18 @@
 import { useState, useRef, useEffect } from 'react';
 import { Edit3, Check, X, Loader2 } from 'lucide-react';
 
-type InlineEditFieldProps = {
+type InlineEditFieldProps<T> = {
   label: string;
-  value: any;
+  value: T;
   type?: 'text' | 'number' | 'password' | 'checkbox' | 'select';
-  options?: { label: string; value: any }[];
-  onSave: (val: any) => Promise<void> | void;
+  options?: { label: string; value: T }[];
+  onSave: (val: T) => Promise<void> | void;
   required?: boolean;
   requiredCondition?: string;
   displayValue?: React.ReactNode;
 };
 
-export function InlineEditField({
+export function InlineEditField<T>({
   label,
   value,
   type = 'text',
@@ -21,12 +21,12 @@ export function InlineEditField({
   required = false,
   requiredCondition,
   displayValue,
-}: InlineEditFieldProps) {
+}: InlineEditFieldProps<T>) {
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState(value);
   const [isSaving, setIsSaving] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const inputRef = useRef<any>(null);
+  const inputRef = useRef<HTMLInputElement | HTMLSelectElement>(null);
 
   useEffect(() => {
     setDraft(value);
@@ -41,7 +41,7 @@ export function InlineEditField({
   const handleSave = async () => {
     // If empty and not password
     if (type !== 'password' && required && (draft === '' || draft === null || draft === undefined)) {
-      alert(`${label} is required.`);
+      console.error(`${label} is required.`);
       return;
     }
     
@@ -61,10 +61,10 @@ export function InlineEditField({
       await onSave(draft);
       setIsEditing(false);
       // Reset draft for password to avoid keeping it in state
-      if (type === 'password') setDraft('');
+      if (type === 'password') setDraft('' as unknown as T);
     } catch (e) {
       console.error(e);
-      alert('Failed to save.');
+      console.error('Failed to save.');
     } finally {
       setIsSaving(false);
     }
@@ -84,19 +84,20 @@ export function InlineEditField({
       <div className="flex items-center gap-2 group relative py-1">
         <input
           type="checkbox"
-          checked={isEditing ? draft : value}
+          checked={(isEditing ? draft : value) as unknown as boolean}
           disabled={isSaving}
           onChange={(e) => {
             if (!isEditing) {
               // Direct save on toggle if not in edit mode
               setIsSaving(true);
-              Promise.resolve(onSave(e.target.checked))
+              Promise.resolve(onSave(e.target.checked as unknown as T))
+                .catch((err) => console.error(err))
                 .finally(() => setIsSaving(false));
             } else {
-              setDraft(e.target.checked);
+              setDraft(e.target.checked as unknown as T);
             }
           }}
-          className="w-4 h-4 text-brand-accent cursor-pointer rounded border-slate-300 disabled:opacity-50"
+          className="w-4 h-4 text-brand-link cursor-pointer rounded border-slate-300 disabled:opacity-50"
         />
         <label className="text-sm font-semibold text-slate-700 cursor-pointer select-none">
           {label}
@@ -127,34 +128,34 @@ export function InlineEditField({
         <div className="flex items-center gap-2">
           {type === 'select' ? (
             <select
-              ref={inputRef}
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
+              ref={inputRef as React.RefObject<HTMLSelectElement>}
+              value={draft as unknown as string}
+              onChange={(e) => setDraft(e.target.value as unknown as T)}
               disabled={isSaving}
               onKeyDown={handleKeyDown}
-              className="flex-1 border border-slate-300 rounded-md px-2 py-1.5 text-sm font-semibold focus:ring-2 focus:ring-brand-accent focus:outline-none"
+              className="flex-1 border border-slate-300 rounded-md px-2 py-1.5 text-sm font-semibold focus:ring-2 focus:ring-brand-btn-primary focus:outline-none"
             >
               {options.map((opt) => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                <option key={opt.value as React.Key} value={opt.value as unknown as string}>{opt.label}</option>
               ))}
             </select>
           ) : (
             <input
-              ref={inputRef}
+              ref={inputRef as React.RefObject<HTMLInputElement>}
               type={type}
-              value={draft}
+              value={draft as unknown as string}
               placeholder={type === 'password' ? '••••••••••••' : ''}
-              onChange={(e) => setDraft(type === 'number' ? Number(e.target.value) : e.target.value)}
+              onChange={(e) => setDraft((type === 'number' ? Number(e.target.value) : e.target.value) as unknown as T)}
               disabled={isSaving}
               onKeyDown={handleKeyDown}
-              className={`flex-1 border border-slate-300 rounded-md px-2 py-1.5 text-sm font-semibold focus:ring-2 focus:ring-brand-accent focus:outline-none ${type === 'password' ? 'font-mono' : ''}`}
+              className={`flex-1 border border-slate-300 rounded-md px-2 py-1.5 text-sm font-semibold focus:ring-2 focus:ring-brand-btn-primary focus:outline-none ${type === 'password' ? 'font-mono' : ''}`}
             />
           )}
           <div className="flex items-center gap-1">
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="p-1 text-brand-teal hover:bg-brand-accent/10 rounded"
+              className="p-1 text-brand-link hover:bg-brand-btn-primary/10 rounded"
               title="Save"
             >
               {isSaving ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
@@ -176,15 +177,15 @@ export function InlineEditField({
         <div className="flex items-center justify-between group/val">
           <span className={`text-sm font-semibold text-slate-800 ${type === 'password' || displayValue === 'Not set' ? 'italic text-slate-400' : ''}`}>
             {displayValue ? displayValue : (
-              type === 'password' ? (value ? '••••••••••••' : 'Not set') : (value || '—')
+              type === 'password' ? (value ? '••••••••••••' : 'Not set') : ((value as React.ReactNode) || '—')
             )}
           </span>
           <button
             onClick={() => {
-              setDraft(type === 'password' ? '' : value);
+              setDraft((type === 'password' ? '' : value) as unknown as T);
               setIsEditing(true);
             }}
-            className={`p-1 text-slate-400 hover:text-brand-accent hover:bg-brand-accent/10 rounded cursor-pointer transition-all ${isHovered ? 'opacity-100' : 'opacity-0'}`}
+            className={`p-1 text-slate-400 hover:text-brand-link hover:bg-brand-bg-secondary rounded cursor-pointer transition-all ${isHovered ? 'opacity-100' : 'opacity-0'}`}
             title="Edit"
           >
             <Edit3 size={14} />

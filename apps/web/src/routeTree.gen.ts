@@ -14,6 +14,11 @@ import { Route as IntranetRouteImport } from './routes/intranet'
 import { Route as FleetStatusRouteImport } from './routes/fleet-status'
 import { Route as FinancialRouteImport } from './routes/financial'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SettingsIndexRouteImport } from './routes/settings/index'
+import { Route as SettingsUsersRouteImport } from './routes/settings/users'
+import { Route as SettingsTenantsRouteImport } from './routes/settings/tenants'
+import { Route as SettingsJobsRouteImport } from './routes/settings/jobs'
+import { Route as SettingsEventsRouteImport } from './routes/settings/events'
 
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
@@ -40,20 +45,54 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsIndexRoute = SettingsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => SettingsRoute,
+} as any)
+const SettingsUsersRoute = SettingsUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => SettingsRoute,
+} as any)
+const SettingsTenantsRoute = SettingsTenantsRouteImport.update({
+  id: '/tenants',
+  path: '/tenants',
+  getParentRoute: () => SettingsRoute,
+} as any)
+const SettingsJobsRoute = SettingsJobsRouteImport.update({
+  id: '/jobs',
+  path: '/jobs',
+  getParentRoute: () => SettingsRoute,
+} as any)
+const SettingsEventsRoute = SettingsEventsRouteImport.update({
+  id: '/events',
+  path: '/events',
+  getParentRoute: () => SettingsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/financial': typeof FinancialRoute
   '/fleet-status': typeof FleetStatusRoute
   '/intranet': typeof IntranetRoute
-  '/settings': typeof SettingsRoute
+  '/settings': typeof SettingsRouteWithChildren
+  '/settings/events': typeof SettingsEventsRoute
+  '/settings/jobs': typeof SettingsJobsRoute
+  '/settings/tenants': typeof SettingsTenantsRoute
+  '/settings/users': typeof SettingsUsersRoute
+  '/settings/': typeof SettingsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/financial': typeof FinancialRoute
   '/fleet-status': typeof FleetStatusRoute
   '/intranet': typeof IntranetRoute
-  '/settings': typeof SettingsRoute
+  '/settings/events': typeof SettingsEventsRoute
+  '/settings/jobs': typeof SettingsJobsRoute
+  '/settings/tenants': typeof SettingsTenantsRoute
+  '/settings/users': typeof SettingsUsersRoute
+  '/settings': typeof SettingsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -61,13 +100,37 @@ export interface FileRoutesById {
   '/financial': typeof FinancialRoute
   '/fleet-status': typeof FleetStatusRoute
   '/intranet': typeof IntranetRoute
-  '/settings': typeof SettingsRoute
+  '/settings': typeof SettingsRouteWithChildren
+  '/settings/events': typeof SettingsEventsRoute
+  '/settings/jobs': typeof SettingsJobsRoute
+  '/settings/tenants': typeof SettingsTenantsRoute
+  '/settings/users': typeof SettingsUsersRoute
+  '/settings/': typeof SettingsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/financial' | '/fleet-status' | '/intranet' | '/settings'
+  fullPaths:
+    | '/'
+    | '/financial'
+    | '/fleet-status'
+    | '/intranet'
+    | '/settings'
+    | '/settings/events'
+    | '/settings/jobs'
+    | '/settings/tenants'
+    | '/settings/users'
+    | '/settings/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/financial' | '/fleet-status' | '/intranet' | '/settings'
+  to:
+    | '/'
+    | '/financial'
+    | '/fleet-status'
+    | '/intranet'
+    | '/settings/events'
+    | '/settings/jobs'
+    | '/settings/tenants'
+    | '/settings/users'
+    | '/settings'
   id:
     | '__root__'
     | '/'
@@ -75,6 +138,11 @@ export interface FileRouteTypes {
     | '/fleet-status'
     | '/intranet'
     | '/settings'
+    | '/settings/events'
+    | '/settings/jobs'
+    | '/settings/tenants'
+    | '/settings/users'
+    | '/settings/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -82,7 +150,7 @@ export interface RootRouteChildren {
   FinancialRoute: typeof FinancialRoute
   FleetStatusRoute: typeof FleetStatusRoute
   IntranetRoute: typeof IntranetRoute
-  SettingsRoute: typeof SettingsRoute
+  SettingsRoute: typeof SettingsRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -122,15 +190,70 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings/': {
+      id: '/settings/'
+      path: '/'
+      fullPath: '/settings/'
+      preLoaderRoute: typeof SettingsIndexRouteImport
+      parentRoute: typeof SettingsRoute
+    }
+    '/settings/users': {
+      id: '/settings/users'
+      path: '/users'
+      fullPath: '/settings/users'
+      preLoaderRoute: typeof SettingsUsersRouteImport
+      parentRoute: typeof SettingsRoute
+    }
+    '/settings/tenants': {
+      id: '/settings/tenants'
+      path: '/tenants'
+      fullPath: '/settings/tenants'
+      preLoaderRoute: typeof SettingsTenantsRouteImport
+      parentRoute: typeof SettingsRoute
+    }
+    '/settings/jobs': {
+      id: '/settings/jobs'
+      path: '/jobs'
+      fullPath: '/settings/jobs'
+      preLoaderRoute: typeof SettingsJobsRouteImport
+      parentRoute: typeof SettingsRoute
+    }
+    '/settings/events': {
+      id: '/settings/events'
+      path: '/events'
+      fullPath: '/settings/events'
+      preLoaderRoute: typeof SettingsEventsRouteImport
+      parentRoute: typeof SettingsRoute
+    }
   }
 }
+
+interface SettingsRouteChildren {
+  SettingsEventsRoute: typeof SettingsEventsRoute
+  SettingsJobsRoute: typeof SettingsJobsRoute
+  SettingsTenantsRoute: typeof SettingsTenantsRoute
+  SettingsUsersRoute: typeof SettingsUsersRoute
+  SettingsIndexRoute: typeof SettingsIndexRoute
+}
+
+const SettingsRouteChildren: SettingsRouteChildren = {
+  SettingsEventsRoute: SettingsEventsRoute,
+  SettingsJobsRoute: SettingsJobsRoute,
+  SettingsTenantsRoute: SettingsTenantsRoute,
+  SettingsUsersRoute: SettingsUsersRoute,
+  SettingsIndexRoute: SettingsIndexRoute,
+}
+
+const SettingsRouteWithChildren = SettingsRoute._addFileChildren(
+  SettingsRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   FinancialRoute: FinancialRoute,
   FleetStatusRoute: FleetStatusRoute,
   IntranetRoute: IntranetRoute,
-  SettingsRoute: SettingsRoute,
+  SettingsRoute: SettingsRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

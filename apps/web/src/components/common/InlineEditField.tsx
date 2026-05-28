@@ -1,0 +1,196 @@
+import { useState, useRef, useEffect } from 'react';
+import { Edit3, Check, X, Loader2 } from 'lucide-react';
+
+type InlineEditFieldProps = {
+  label: string;
+  value: any;
+  type?: 'text' | 'number' | 'password' | 'checkbox' | 'select';
+  options?: { label: string; value: any }[];
+  onSave: (val: any) => Promise<void> | void;
+  required?: boolean;
+  requiredCondition?: string;
+  displayValue?: React.ReactNode;
+};
+
+export function InlineEditField({
+  label,
+  value,
+  type = 'text',
+  options = [],
+  onSave,
+  required = false,
+  requiredCondition,
+  displayValue,
+}: InlineEditFieldProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [draft, setDraft] = useState(value);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const inputRef = useRef<any>(null);
+
+  useEffect(() => {
+    setDraft(value);
+  }, [value]);
+
+  useEffect(() => {
+    if (isEditing && inputRef.current && type !== 'checkbox') {
+      inputRef.current.focus();
+    }
+  }, [isEditing, type]);
+
+  const handleSave = async () => {
+    // If empty and not password
+    if (type !== 'password' && required && (draft === '' || draft === null || draft === undefined)) {
+      alert(`${label} is required.`);
+      return;
+    }
+    
+    // For password, if it's empty, it means we don't want to save/change it
+    if (type === 'password' && draft === '') {
+      setIsEditing(false);
+      return;
+    }
+
+    if (draft === value) {
+      setIsEditing(false);
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      await onSave(draft);
+      setIsEditing(false);
+      // Reset draft for password to avoid keeping it in state
+      if (type === 'password') setDraft('');
+    } catch (e) {
+      console.error(e);
+      alert('Failed to save.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') handleSave();
+    if (e.key === 'Escape') {
+      setDraft(value);
+      setIsEditing(false);
+    }
+  };
+
+  // Special handling for checkbox
+  if (type === 'checkbox') {
+    return (
+      <div className="flex items-center gap-2 group relative py-1">
+        <input
+          type="checkbox"
+          checked={isEditing ? draft : value}
+          disabled={isSaving}
+          onChange={(e) => {
+            if (!isEditing) {
+              // Direct save on toggle if not in edit mode
+              setIsSaving(true);
+              Promise.resolve(onSave(e.target.checked))
+                .finally(() => setIsSaving(false));
+            } else {
+              setDraft(e.target.checked);
+            }
+          }}
+          className="w-4 h-4 text-brand-accent cursor-pointer rounded border-slate-300 disabled:opacity-50"
+        />
+        <label className="text-sm font-semibold text-slate-700 cursor-pointer select-none">
+          {label}
+        </label>
+        {isSaving && <Loader2 size={12} className="animate-spin text-slate-400" />}
+      </div>
+    );
+  }
+
+  return (
+    <div 
+      className={`flex flex-col gap-1 py-1 px-2 -mx-2 rounded-lg transition-colors ${isEditing ? 'bg-slate-50 border border-slate-200' : 'hover:bg-slate-50 border border-transparent'}`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex justify-between items-center">
+        <span>{label}</span>
+        {required ? (
+          <span className="text-red-500/70 lowercase font-medium text-[10px]">
+            {requiredCondition ? `(Required ${requiredCondition})` : '(Required)'}
+          </span>
+        ) : (
+          <span className="text-slate-400 lowercase font-medium text-[10px]">(Optional)</span>
+        )}
+      </label>
+
+      {isEditing ? (
+        <div className="flex items-center gap-2">
+          {type === 'select' ? (
+            <select
+              ref={inputRef}
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              disabled={isSaving}
+              onKeyDown={handleKeyDown}
+              className="flex-1 border border-slate-300 rounded-md px-2 py-1.5 text-sm font-semibold focus:ring-2 focus:ring-brand-accent focus:outline-none"
+            >
+              {options.map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          ) : (
+            <input
+              ref={inputRef}
+              type={type}
+              value={draft}
+              placeholder={type === 'password' ? '••••••••••••' : ''}
+              onChange={(e) => setDraft(type === 'number' ? Number(e.target.value) : e.target.value)}
+              disabled={isSaving}
+              onKeyDown={handleKeyDown}
+              className={`flex-1 border border-slate-300 rounded-md px-2 py-1.5 text-sm font-semibold focus:ring-2 focus:ring-brand-accent focus:outline-none ${type === 'password' ? 'font-mono' : ''}`}
+            />
+          )}
+          <div className="flex items-center gap-1">
+            <button
+              onClick={handleSave}
+              disabled={isSaving}
+              className="p-1 text-brand-teal hover:bg-brand-accent/10 rounded"
+              title="Save"
+            >
+              {isSaving ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+            </button>
+            <button
+              onClick={() => {
+                setDraft(value);
+                setIsEditing(false);
+              }}
+              disabled={isSaving}
+              className="p-1 text-slate-500 hover:bg-slate-100 rounded"
+              title="Cancel"
+            >
+              <X size={14} />
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between group/val">
+          <span className={`text-sm font-semibold text-slate-800 ${type === 'password' || displayValue === 'Not set' ? 'italic text-slate-400' : ''}`}>
+            {displayValue ? displayValue : (
+              type === 'password' ? (value ? '••••••••••••' : 'Not set') : (value || '—')
+            )}
+          </span>
+          <button
+            onClick={() => {
+              setDraft(type === 'password' ? '' : value);
+              setIsEditing(true);
+            }}
+            className={`p-1 text-slate-400 hover:text-brand-accent hover:bg-brand-accent/10 rounded cursor-pointer transition-all ${isHovered ? 'opacity-100' : 'opacity-0'}`}
+            title="Edit"
+          >
+            <Edit3 size={14} />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}

@@ -26,7 +26,7 @@ const CustomTooltip = ({ active, payload }: { isLoading?: boolean;  active?: boo
       <div className="space-y-2">
         <p className="flex justify-between gap-6 text-slate-500">
           <span>Growth:</span>
-          <strong className={tenant.growthPercentage >= 0 ? 'text-growth' : 'text-decline'}>
+          <strong className={tenant.growthPercentage >= 0 ? 'text-growth' : 'text-[#c92a2a]'}>
             {formatGrowth(tenant.growthPercentage)}
           </strong>
         </p>
@@ -56,7 +56,7 @@ export function GrowthExtremesChart({ isLoading, tenants, onTenantSelect }: { is
 
   return (
     <ChartPanel isLoading={isLoading} title="Growth Extremes (Relative & Absolute)" bodyClassName="extremes-chart">
-      <ResponsiveContainer width="100%" height={chartHeight}>
+      <ResponsiveContainer debounce={50} width="100%" height={chartHeight}>
         <BarChart
           data={tenants}
           layout="vertical"

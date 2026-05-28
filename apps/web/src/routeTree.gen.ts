@@ -19,22 +19,22 @@ const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() => import('./routes/settings.lazy').then((d) => d.Route))
 const IntranetRoute = IntranetRouteImport.update({
   id: '/intranet',
   path: '/intranet',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() => import('./routes/intranet.lazy').then((d) => d.Route))
 const FleetStatusRoute = FleetStatusRouteImport.update({
   id: '/fleet-status',
   path: '/fleet-status',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() => import('./routes/fleet-status.lazy').then((d) => d.Route))
 const FinancialRoute = FinancialRouteImport.update({
   id: '/financial',
   path: '/financial',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() => import('./routes/financial.lazy').then((d) => d.Route))
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',

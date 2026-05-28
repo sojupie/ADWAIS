@@ -44,11 +44,11 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe,
           <div className="flex items-center gap-3 mb-1">
             <h1 className="text-2xl font-extrabold text-brand-text tracking-tight m-0">{tenantName} Diagnostics</h1>
             <span 
-              className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-widest"
-              style={{
-                backgroundColor: `color-mix(in srgb, var(--color-chart-${tenantType === 'B2C' ? '1' : tenantType === 'B2B' ? '2' : '3'}) 15%, transparent)`,
-                color: `var(--color-chart-${tenantType === 'B2C' ? '1' : tenantType === 'B2B' ? '2' : '3'})`
-              }}
+              className={`inline-flex items-center px-3 py-1 rounded-[4px] text-[11px] font-black uppercase tracking-widest shadow-sm ${
+                tenantType === 'B2C' ? 'bg-[#0ea5e9] text-white' : 
+                tenantType === 'Mixed' ? 'bg-[#8b5cf6] text-white' : 
+                'bg-[var(--color-brand-btn-primary)] text-white'
+              }`}
             >
               {tenantType}
             </span>

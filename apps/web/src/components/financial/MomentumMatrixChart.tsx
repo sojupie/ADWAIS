@@ -14,11 +14,7 @@ import type { MomentumResponse, MomentumTenant } from '@types';
 import { formatCompact } from '@utils';
 import { ChartPanel } from '../common/ChartPanel';
 
-const TYPE_COLORS: Record<string, string> = {
-  'Mixed': 'var(--color-chart-3)',
-  'B2B': 'var(--color-chart-2)',
-  'B2C': 'var(--color-chart-1)',
-};
+
 
 const CustomTooltip = ({ active, payload }: { isLoading?: boolean;  active?: boolean; payload?: any[] }) => {
   if (!active || !payload?.length) return null;
@@ -30,11 +26,11 @@ const CustomTooltip = ({ active, payload }: { isLoading?: boolean;  active?: boo
       <div className="border-b border-slate-50 pb-2 mb-3 flex justify-between items-center">
         <p className="font-bold text-slate-900">{point.tenantName}</p>
         <span 
-          className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest"
-          style={{ 
-            backgroundColor: `color-mix(in srgb, ${TYPE_COLORS[point.type] || TYPE_COLORS['Mixed']} 15%, transparent)`, 
-            color: TYPE_COLORS[point.type] || TYPE_COLORS['Mixed'] 
-          }}
+          className={`inline-flex items-center px-2 py-0.5 rounded-[3px] text-[9px] font-black uppercase tracking-widest text-white ${
+            point.type === 'B2C' ? 'bg-[#0ea5e9]' : 
+            point.type === 'Mixed' ? 'bg-[#8b5cf6]' : 
+            'bg-[var(--color-brand-btn-primary)]'
+          }`}
         >
           {point.type}
         </span>
@@ -46,7 +42,7 @@ const CustomTooltip = ({ active, payload }: { isLoading?: boolean;  active?: boo
         </p>
         <p className="flex justify-between gap-6">
           <span className="text-slate-500">Momentum:</span>
-          <strong className={point.growthPercentage >= 0 ? 'text-growth' : 'text-decline'}>
+          <strong className={point.growthPercentage >= 0 ? 'text-growth' : 'text-[#c92a2a]'}>
             {point.growthPercentage > 0 ? '+' : ''}{point.growthPercentage.toFixed(1)}%
           </strong>
         </p>
@@ -59,7 +55,7 @@ function MomentumScatterPlot({ points, medianBaselineRevenue, globalGrowthPercen
 points: MomentumTenant[]; medianBaselineRevenue: number; globalGrowthPercentage: number; onTenantSelect?: (tenantId: string) => void;
 }) {
   return (
-    <ResponsiveContainer width="100%" height="100%">
+    <ResponsiveContainer debounce={50} width="100%" height="100%">
       <ScatterChart margin={{ top: 10, right: 24, left: 12, bottom: 14 }}>
         <CartesianGrid stroke="var(--color-chart-grid)" strokeDasharray="3 4" />
         <XAxis
@@ -114,10 +110,10 @@ points: MomentumTenant[]; medianBaselineRevenue: number; globalGrowthPercentage:
               key={`cell-${index}`}
               fill={
                 entry.type === 'B2B'
-                  ? 'var(--color-chart-2)'
+                  ? 'var(--color-chart-3)'
                   : entry.type === 'B2C'
                   ? 'var(--color-chart-1)'
-                  : 'var(--color-chart-3)'
+                  : 'var(--color-chart-2)'
               }
             />
           ))}
@@ -138,10 +134,10 @@ momentum: MomentumResponse; onTenantSelect?: (tenantId: string) => void; classNa
       title="Momentum Matrix"
       className={className || "h-full"}
       bodyClassName={isEmpty ? 'flex items-center justify-center' : 'flex-1 min-h-0'}
-      legend={<span className="text-xs font-bold text-slate-400 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded">Size = Total Rev Contribution</span>}
+      legend={<span className="text-xs font-bold text-slate-500 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded">Size = Total Rev Contribution</span>}
     >
       {isEmpty ? (
-        <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">No previous-period baseline data</span>
+        <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">No previous-period baseline data</span>
       ) : (
         <MomentumScatterPlot
           points={points}

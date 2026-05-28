@@ -42,15 +42,15 @@ const GraphTooltip = ({ active, payload, label }: GraphTooltipProps) => {
         </p>
         <p className="flex justify-between gap-8">
           <span className="text-slate-500 font-bold uppercase text-[10px] tracking-widest">Previous Avg</span> 
-          <strong className="text-slate-400">{formatLatency(point.previousAverage)}</strong>
+          <strong className="text-slate-500">{formatLatency(point.previousAverage)}</strong>
         </p>
         <div className="pt-2 border-t border-slate-50 mt-2 space-y-1">
           <p className="flex justify-between gap-8">
-            <span className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Highest</span> 
+            <span className="text-slate-500 font-bold uppercase text-[10px] tracking-widest">Highest</span> 
             <strong className="text-red-500 text-xs">{formatLatency(point.highest)}</strong>
           </p>
           <p className="flex justify-between gap-8">
-            <span className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Lowest</span> 
+            <span className="text-slate-500 font-bold uppercase text-[10px] tracking-widest">Lowest</span> 
             <strong className="text-emerald-500 text-xs">{formatLatency(point.lowest)}</strong>
           </p>
         </div>
@@ -70,7 +70,7 @@ export function NetworkLatencyChart({ isLoading, points, title = "Network Latenc
       <div className={`w-full h-full flex-1 min-h-0 flex flex-col ${className || ''}`}>
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-sm font-black text-slate-500 uppercase tracking-[0.15em]">{title}</h2>
-          <div className="flex gap-6 text-[11px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-4 py-2 rounded-full border border-slate-100">
+          <div className="flex gap-6 text-[11px] font-black text-slate-500 uppercase tracking-widest bg-slate-50 px-4 py-2 rounded-full border border-slate-100">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-brand-btn-primary"></div>
               <span>Current</span>
@@ -83,7 +83,7 @@ export function NetworkLatencyChart({ isLoading, points, title = "Network Latenc
         </div>
         
         <div className="flex-1 w-full min-h-0">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer debounce={50} width="100%" height="100%">
             <LineChart data={points} margin={{ top: 10, right: 20, left: -5, bottom: 10 }}>
               <CartesianGrid vertical={false} stroke="var(--color-chart-grid)" strokeDasharray="3 3" />
               <XAxis 

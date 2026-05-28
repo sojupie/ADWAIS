@@ -67,7 +67,7 @@ export function FleetMatrix({
             border: 'border-slate-300', 
             text: 'text-slate-500',
             valueText: 'text-slate-500',
-            mutedText: 'text-slate-400',
+            mutedText: 'text-slate-500',
             dot: 'bg-slate-400'
           }
         };

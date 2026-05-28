@@ -2,7 +2,6 @@ import { useSearch } from '@tanstack/react-router';
 import { useState, useMemo } from 'react';
 import { CollectionPanel } from '../components/common/CollectionPanel';
 import { FactPanel } from '../components/common/FactPanel';
-import { LoadingIcon } from '../components/common/LoadingIcon';
 import { FleetMatrix } from '../components/FleetStatus/FleetMatrix';
 import { NetworkLatencyChart } from '../components/FleetStatus/NetworkLatencyChart';
 import { SlaBreachWatchlist } from '../components/FleetStatus/SlaBreachWatchlist';
@@ -116,11 +115,11 @@ export function FleetStatus() {
           <div className="flex items-baseline gap-6">
             <div className="flex items-baseline gap-2">
                <span className="text-4xl font-extrabold tracking-tight text-red-500">{fleetStats.down.length}</span>
-               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">DOWN</span>
+               <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">DOWN</span>
             </div>
             <div className="flex items-baseline gap-2">
                <span className="text-4xl font-extrabold tracking-tight text-amber-500">{fleetStats.degraded.length}</span>
-               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">DEGRADED</span>
+               <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">DEGRADED</span>
             </div>
           </div>
         </div>
@@ -152,6 +151,7 @@ export function FleetStatus() {
       <CollectionPanel
         title={selection ? `${selectedTenantName} Monitors` : "Fleet Status Matrix"}
         className="flex-[2] min-h-[300px] flex-shrink-0"
+        isLoading={globalMonitorsQuery.isLoading && selection !== null}
         actions={
           <div className="flex items-center gap-6">
             {selection && (
@@ -169,9 +169,8 @@ export function FleetStatus() {
         }
       >
         <div className="px-4 py-3 h-full flex flex-col min-h-0">
-          {globalMonitorsQuery.isLoading && selection ? <div className="flex flex-1 items-center justify-center py-4"><LoadingIcon /></div> :
-           tenantMonitors.length === 0 && selection ? (
-            <div className="flex flex-1 items-center justify-center py-4 text-[#94a3b8] font-bold uppercase tracking-wider text-xs">No monitors found for this tenant</div>
+          {tenantMonitors.length === 0 && selection ? (
+            <div className="flex flex-1 items-center justify-center py-4 text-slate-500 font-bold uppercase tracking-wider text-xs">No monitors found for this tenant</div>
           ) : (
             <FleetMatrix 
               monitors={tenantMonitors} 

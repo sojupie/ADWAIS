@@ -121,41 +121,41 @@ export function SyncStatusWidget() {
         {isDrillDown ? (
           <div className="flex flex-col gap-[2px]">
             <div className="flex justify-between items-center gap-4">
-              <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Dashboard UI</span>
+              <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Dashboard UI</span>
               <span className="text-[10px] font-bold text-slate-700 truncate min-w-[40px] text-right">{timeAgo(dashboardSyncTime)}</span>
             </div>
             <div className="flex justify-between items-center gap-4">
-              <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Source Polled</span>
+              <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Source Polled</span>
               <span className="text-[10px] font-bold text-slate-700 truncate min-w-[40px] text-right">{timeAgo(tenant?.lastPolled)}</span>
             </div>
           </div>
         ) : isFinancial ? (
           <div className="flex flex-col gap-[2px]">
             <div className="flex justify-between items-center gap-4">
-              <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Dashboard UI</span>
+              <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Dashboard UI</span>
               <span className="text-[10px] font-bold text-slate-700 truncate min-w-[40px] text-right">{timeAgo(dashboardSyncTime)}</span>
             </div>
             <div className="flex justify-between items-center gap-4">
-              <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Litium Sync</span>
+              <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Litium Sync</span>
               <span className="text-[10px] font-bold text-slate-700 truncate min-w-[40px] text-right">{timeAgo(health?.lastLitiumSync)}</span>
             </div>
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-x-6 gap-y-1 items-center">
             <div className="flex justify-between items-center gap-2">
-              <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Dash UI</span>
+              <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Dash UI</span>
               <span className="text-[10px] font-bold text-slate-700 truncate text-right">{timeAgo(dashboardSyncTime)}</span>
             </div>
             <div className="flex justify-between items-center gap-2">
-              <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Meta</span>
+              <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Meta</span>
               <span className="text-[10px] font-bold text-slate-700 truncate text-right">{timeAgo(health?.lastFleetUpdate)}</span>
             </div>
             <div className="flex justify-between items-center gap-2">
-              <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Uptime</span>
+              <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Uptime</span>
               <span className="text-[10px] font-bold text-slate-700 truncate text-right">{timeAgo(health?.lastFleetUptimeUpdate)}</span>
             </div>
             <div className="flex justify-between items-center gap-2">
-              <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Latency</span>
+              <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Latency</span>
               <span className="text-[10px] font-bold text-slate-700 truncate text-right">{timeAgo(health?.lastFleetLatencyUpdate)}</span>
             </div>
           </div>

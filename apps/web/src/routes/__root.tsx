@@ -28,9 +28,9 @@ function RootComponent() {
   return (
     <div className="flex flex-col h-screen w-screen bg-brand-bg-tertiary overflow-hidden select-none font-sans text-brand-text">
       {/* ── Header ── */}
-      <header className="flex flex-col xl:flex-row justify-between items-center px-6 py-3 flex-shrink-0 bg-brand-bg-primary border-b border-brand-bg-secondary/10 shadow-sm z-10 gap-4 xl:gap-0">
+      <header className="flex flex-col xl:flex-row justify-between items-center px-6 py-3 flex-shrink-0 bg-brand-bg-secondary border-b border-brand-bg-secondary/20 shadow-sm z-10 gap-4 xl:gap-0">
         <div className="w-full xl:w-1/4 flex justify-center xl:justify-start">
-          <img className="h-8 object-contain" src={motilloLogo} alt="Motillo" width="150" height="32" />
+          <img className="h-8 object-contain brightness-0 invert" src={motilloLogo} alt="Motillo" width="150" height="32" />
         </div>
 
         <nav className="flex-1 flex flex-wrap justify-center items-center gap-4 md:gap-8 w-full xl:w-auto">
@@ -38,8 +38,8 @@ function RootComponent() {
             to="/financial"
             search={{ timeframe: lastTimeframe }}
             activeOptions={{ includeSearch: false }}
-            className="text-sm font-extrabold text-slate-400 hover:text-brand-text transition-all no-underline pb-1 border-b-4 border-transparent uppercase tracking-wider"
-            activeProps={{ className: '!text-brand-text !border-brand-btn-primary' }}
+            className="text-sm font-extrabold text-white/60 hover:text-white transition-all no-underline pb-1 border-b-4 border-transparent uppercase tracking-wider"
+            activeProps={{ className: '!text-brand-accent !border-brand-accent' }}
           >
             Financial
           </Link>
@@ -47,22 +47,22 @@ function RootComponent() {
             to="/fleet-status"
             search={{ timeframe: lastTimeframe }}
             activeOptions={{ includeSearch: false }}
-            className="text-sm font-extrabold text-slate-400 hover:text-brand-text transition-all no-underline pb-1 border-b-4 border-transparent uppercase tracking-wider"
-            activeProps={{ className: '!text-brand-text !border-brand-btn-primary' }}
+            className="text-sm font-extrabold text-white/60 hover:text-white transition-all no-underline pb-1 border-b-4 border-transparent uppercase tracking-wider"
+            activeProps={{ className: '!text-brand-accent !border-brand-accent' }}
           >
             Fleet Status
           </Link>
           <Link
             to="/intranet"
-            className="text-sm font-extrabold text-slate-400 hover:text-brand-text transition-all no-underline pb-1 border-b-4 border-transparent uppercase tracking-wider"
-            activeProps={{ className: '!text-brand-text !border-brand-btn-primary' }}
+            className="text-sm font-extrabold text-white/60 hover:text-white transition-all no-underline pb-1 border-b-4 border-transparent uppercase tracking-wider"
+            activeProps={{ className: '!text-brand-accent !border-brand-accent' }}
           >
             Intranet
           </Link>
           <Link
             to="/settings"
-            className="p-1 text-slate-400 hover:text-brand-text transition-all"
-            activeProps={{ className: '!text-brand-btn-primary' }}
+            className="p-1 text-white/60 hover:text-white transition-all"
+            activeProps={{ className: '!text-brand-accent' }}
             title="Settings & Administration"
           >
             <Settings size={20} />

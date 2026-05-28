@@ -30,7 +30,7 @@ const CustomTooltip = ({ active, payload, label }: { isLoading?: boolean;  activ
         </p>
         <p className="flex justify-between gap-6 pt-1 border-t border-slate-50">
           <span className="text-slate-500">Delta:</span>
-          <strong className={point.cumulativeGrowthDelta >= 0 ? 'text-growth' : 'text-decline'}>
+          <strong className={point.cumulativeGrowthDelta >= 0 ? 'text-growth' : 'text-[#c92a2a]'}>
             {point.cumulativeGrowthDelta > 0 ? '+' : ''}{formatCompact(point.cumulativeGrowthDelta)} SEK
           </strong>
         </p>
@@ -46,7 +46,7 @@ export function CumulativeGrowthDeltaChart({ isLoading, points, className }: { i
       className={className || ''}
       bodyClassName="w-full h-full flex flex-col flex-1 min-h-0"
     >
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer debounce={50} width="100%" height="100%">
         <LineChart data={points} margin={{ top: 8, right: 10, left: 8, bottom: 20 }}>
           <CartesianGrid stroke="var(--color-chart-grid)" strokeDasharray="3 4" vertical={false} />
           <XAxis

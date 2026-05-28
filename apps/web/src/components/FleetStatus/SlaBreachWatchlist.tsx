@@ -67,11 +67,12 @@ function buildIssues(monitors: UptimeMonitorDto[]): MonitorIssue[] {
     });
 }
 
-export function SlaBreachWatchlist({ monitors, onClearSelection }: { monitors: UptimeMonitorDto[], onClearSelection?: () => void }) {
+export function SlaBreachWatchlist({ isLoading, monitors, onClearSelection }: { isLoading?: boolean; monitors: UptimeMonitorDto[], onClearSelection?: () => void }) {
   const issues = useMemo(() => buildIssues(monitors), [monitors]);
 
   return (
     <ChartPanel 
+      isLoading={isLoading}
       title="SLA Breach Watchlist" 
       className="flex-1 min-h-0 h-full"
       bodyClassName="h-full flex flex-col min-h-0"
@@ -86,7 +87,7 @@ export function SlaBreachWatchlist({ monitors, onClearSelection }: { monitors: U
     >
       <div className="flex-1 overflow-y-auto pr-1 min-h-0 custom-scrollbar grid grid-cols-1 xl:grid-cols-2 gap-2 content-start">
           {issues.length === 0 ? (
-            <div className="col-span-full flex items-center justify-center h-full text-xs font-bold text-slate-400 uppercase tracking-widest">Zero active breaches</div>
+            <div className="col-span-full flex items-center justify-center h-full text-xs font-bold text-slate-500 uppercase tracking-widest">Zero active breaches</div>
           ) : (
             issues.map(issue => (
               <div key={`watch-${issue.id}`} className="p-2 bg-slate-50 border border-slate-100 rounded-lg transition-all hover:border-slate-200 shadow-sm shrink-0 flex flex-col justify-between">
@@ -103,13 +104,13 @@ export function SlaBreachWatchlist({ monitors, onClearSelection }: { monitors: U
                 </div>
                 <div className="flex justify-between items-end">
                   <div className="flex flex-col">
-                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Uptime</span>
+                    <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Uptime</span>
                     <span className={`text-base font-black ${issue.slaLimit && issue.uptime < issue.slaLimit ? 'text-red-600' : 'text-slate-900'}`}>
                       {formatPercent(issue.uptime)}%
                     </span>
                   </div>
                   <div className="flex flex-col items-end">
-                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Latency</span>
+                    <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Latency</span>
                     <span className="text-base font-black text-slate-900">
                       {issue.isDown ? 'N/A' : `${Math.round(issue.latency ?? 0)}ms`}
                     </span>
@@ -119,13 +120,13 @@ export function SlaBreachWatchlist({ monitors, onClearSelection }: { monitors: U
                    <div className="mt-1 pt-1 border-t border-slate-100 flex justify-between items-center gap-2">
                       {issue.slaLimit ? (
                         <div className="flex flex-col">
-                          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">SLA Limit</span>
+                          <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">SLA Limit</span>
                           <span className="text-[9px] font-black text-slate-600 uppercase">{formatPercent(issue.slaLimit)}%</span>
                         </div>
                       ) : <div />}
                       {issue.degradedFloor && (
                         <div className="flex flex-col items-end text-right">
-                          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Degraded</span>
+                          <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Degraded</span>
                           <span className="text-[9px] font-black text-slate-600 uppercase">{issue.degradedFloor}ms</span>
                         </div>
                       )}

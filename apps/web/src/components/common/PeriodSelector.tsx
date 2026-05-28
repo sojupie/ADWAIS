@@ -14,7 +14,7 @@ export function PeriodSelector({ from }: { from: '/financial' | '/fleet-status' 
   ];
 
   return (
-    <div className="grid grid-cols-3 gap-1 md:flex md:gap-1 bg-brand-bg-tertiary p-1.5 rounded-xl md:rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-brand-bg-secondary/10 pointer-events-auto w-full md:w-auto max-w-[400px] md:max-w-none">
+    <div className="grid grid-cols-3 gap-1 md:flex md:gap-1 bg-white p-1.5 rounded-xl md:rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-brand-bg-secondary/10 pointer-events-auto w-full md:w-auto max-w-[400px] md:max-w-none">
       {options.map((opt) => {
         const isActive = timeframe === opt.value;
         return (
@@ -24,8 +24,8 @@ export function PeriodSelector({ from }: { from: '/financial' | '/fleet-status' 
             onClick={() => navigate({ search: (old: any) => ({ ...old, timeframe: opt.value }) })}
             className={`px-2 py-2 md:px-5 text-[10px] md:text-xs font-black rounded-full transition-all tracking-widest uppercase cursor-pointer text-center
               ${isActive 
-                ? 'bg-brand-btn-primary text-white shadow-md' 
-                : 'text-slate-500 hover:text-brand-text hover:bg-brand-bg-primary'
+                ? 'bg-brand-accent text-brand-bg-secondary shadow-md' 
+                : 'text-slate-500 hover:text-brand-text hover:bg-slate-50'
               }
             `}
           >

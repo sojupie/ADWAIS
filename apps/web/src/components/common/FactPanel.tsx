@@ -20,7 +20,7 @@ export function FactPanel({ label, value, isLoading, valueColor, extra }: FactPa
     let extraText = '';
 
     if (valueColor === 'green') valueColorClass = 'text-growth';
-    if (valueColor === 'red') valueColorClass = 'text-decline';
+    if (valueColor === 'red') valueColorClass = 'text-[#c92a2a]';
     if (valueColor === 'yellow') valueColorClass = 'text-decline-warning';
 
     if (extra !== undefined && extra.type === "PoP") {
@@ -28,7 +28,7 @@ export function FactPanel({ label, value, isLoading, valueColor, extra }: FactPa
             extraColor = 'text-growth';
             extraText = `▲ ${extra.value.toFixed(2)}% PoP`;
         } else if (extra.value < 0) {
-            extraColor = 'text-decline';
+            extraColor = 'text-[#c92a2a]';
             extraText = `▼ ${Math.abs(extra.value).toFixed(2)}% PoP`;
         } else {
             extraText = `${extra.value.toFixed(2)}% PoP`;
@@ -37,7 +37,7 @@ export function FactPanel({ label, value, isLoading, valueColor, extra }: FactPa
 
     if (extra !== undefined && extra.type === "Desc") {
         extraText = extra.value;
-        extraColor = 'text-slate-400';
+        extraColor = 'text-slate-500';
     }
 
     return (

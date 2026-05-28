@@ -38,7 +38,7 @@ export function TenantRevenueVelocityChart({ isLoading, points, className }: { i
       className={className || ''}
       bodyClassName="w-full h-full flex flex-col flex-1 min-h-0"
       legend={
-        <div className="flex items-center gap-6 text-[11px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-4 py-2 rounded-full border border-slate-100">
+        <div className="flex items-center gap-6 text-[11px] font-black text-slate-500 uppercase tracking-widest bg-slate-50 px-4 py-2 rounded-full border border-slate-100">
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-brand-btn-primary" />
             <span>Current</span>
@@ -50,7 +50,7 @@ export function TenantRevenueVelocityChart({ isLoading, points, className }: { i
         </div>
       }
     >
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer debounce={50} width="100%" height="100%">
         <LineChart data={points} margin={{ top: 8, right: 10, left: 8, bottom: 20 }}>
           <CartesianGrid stroke="var(--color-chart-grid)" strokeDasharray="3 4" vertical={false} />
           <XAxis

@@ -137,7 +137,7 @@ export function KioskControls() {
 
       <button 
         onClick={togglePaused}
-        className="flex items-center justify-center w-9 h-9 bg-white border border-slate-200 rounded-[4px] text-brand-text hover:bg-brand-bg-tertiary transition-all shadow-sm active:scale-95"
+        className="flex items-center justify-center w-9 h-9 bg-white/10 border border-white/20 rounded-[4px] text-white hover:bg-white/20 transition-all shadow-sm active:scale-95"
         title={mode === 'paused' ? 'Resume Kiosk' : 'Pause Kiosk'}
       >
         {mode === 'paused' ? <Play size={16} fill="currentColor" /> : <Pause size={16} fill="currentColor" />}

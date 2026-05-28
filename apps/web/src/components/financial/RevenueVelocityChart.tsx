@@ -18,7 +18,7 @@ export function RevenueVelocityChart({ isLoading, points, className }: { isLoadi
           title="Revenue Velocity"
           className={className}
           legend={
-            <div className="flex items-center gap-6 text-xs font-bold text-slate-400 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded">
+            <div className="flex items-center gap-6 text-xs font-bold text-slate-500 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded">
               <div className="flex items-center gap-2">
                 <span className="w-3 h-3 rounded-full bg-brand-btn-primary" />
                 <span>Current Period</span>
@@ -58,7 +58,7 @@ const GraphTooltip = ({ active, payload, label }: any) => {
 //can probably move a lot of styling over to the styling file
 function RevenueVelocityGraphJSX({ points }: { isLoading?: boolean;  points: FinancialVelocityPoint[] }) {
   return (
-    <ResponsiveContainer width="100%" height="100%">
+    <ResponsiveContainer debounce={50} width="100%" height="100%">
       <LineChart data={points} margin={{ top: 12, right: 8, left: 0, bottom: 0 }}>
         <CartesianGrid stroke="var(--color-chart-grid)" vertical={false} />
         <XAxis

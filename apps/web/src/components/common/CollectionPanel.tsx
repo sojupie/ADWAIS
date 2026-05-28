@@ -1,13 +1,15 @@
+import { ChartSkeleton } from './ChartSkeleton';
 import type { ReactNode } from 'react';
 
 interface CollectionPanelProps {
   title: string;
   actions?: ReactNode;
   className?: string;
+  isLoading?: boolean;
   children: ReactNode;
 }
 
-export function CollectionPanel({ title, actions, className = '', children }: CollectionPanelProps) {
+export function CollectionPanel({ title, actions, className = '', isLoading, children }: CollectionPanelProps) {
   return (
     <section className={`bg-white rounded-xl border border-slate-200 shadow-sm p-0 flex flex-col min-h-0 overflow-hidden ${className}`}>
       <div className="flex justify-between items-center px-4 py-3 border-b border-slate-100">
@@ -21,7 +23,7 @@ export function CollectionPanel({ title, actions, className = '', children }: Co
         )}
       </div>
       <div className="flex-1 overflow-y-auto custom-scrollbar min-h-0">
-        {children}
+        {isLoading ? <ChartSkeleton /> : children}
       </div>
     </section>
   );

@@ -11,7 +11,7 @@ import type { FinancialVelocityPoint } from '@types';
 import { formatCompact } from '@utils';
 import { ChartPanel } from '../common/ChartPanel';
 
-const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: any[]; label?: string }) => {
+const CustomTooltip = ({ active, payload, label }: { isLoading?: boolean;  active?: boolean; payload?: any[]; label?: string }) => {
   if (!active || !payload?.length) return null;
 
   return (
@@ -31,9 +31,9 @@ const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?:
   );
 };
 
-export function TenantRevenueVelocityChart({ points, className }: { points: FinancialVelocityPoint[], className?: string }) {
+export function TenantRevenueVelocityChart({ isLoading, points, className }: { isLoading?: boolean;  points: FinancialVelocityPoint[], className?: string }) {
   return (
-    <ChartPanel
+    <ChartPanel isLoading={isLoading}
       title="Revenue Velocity Over Time"
       className={className || ''}
       bodyClassName="w-full h-full flex flex-col flex-1 min-h-0"

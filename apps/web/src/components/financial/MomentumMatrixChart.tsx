@@ -8,32 +8,46 @@ import {
   XAxis,
   YAxis,
   ZAxis,
+  Cell
 } from 'recharts';
 import type { MomentumResponse, MomentumTenant } from '@types';
 import { formatCompact } from '@utils';
 import { ChartPanel } from '../common/ChartPanel';
 
-const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: any[] }) => {
+const TYPE_COLORS: Record<string, string> = {
+  'Mixed': 'var(--color-chart-3)',
+  'B2B': 'var(--color-chart-2)',
+  'B2C': 'var(--color-chart-1)',
+};
+
+const CustomTooltip = ({ active, payload }: { isLoading?: boolean;  active?: boolean; payload?: any[] }) => {
   if (!active || !payload?.length) return null;
 
   const point = payload[0].payload as MomentumTenant;
 
   return (
     <div className="bg-white border border-slate-100 rounded-lg shadow-lg p-4 text-sm animate-in fade-in zoom-in duration-200">
-      <p className="font-bold text-slate-900 mb-3 border-b border-slate-50 pb-2">{point.tenantName}</p>
+      <div className="border-b border-slate-50 pb-2 mb-3 flex justify-between items-center">
+        <p className="font-bold text-slate-900">{point.tenantName}</p>
+        <span 
+          className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest"
+          style={{ 
+            backgroundColor: `color-mix(in srgb, ${TYPE_COLORS[point.type] || TYPE_COLORS['Mixed']} 15%, transparent)`, 
+            color: TYPE_COLORS[point.type] || TYPE_COLORS['Mixed'] 
+          }}
+        >
+          {point.type}
+        </span>
+      </div>
       <div className="space-y-2">
         <p className="flex justify-between gap-6">
-          <span className="text-slate-500">Baseline:</span>
-          <strong className="text-slate-700">{formatCompact(point.baselineRevenue)} SEK</strong>
-        </p>
-        <p className="flex justify-between gap-6">
-          <span className="text-slate-500">Current:</span>
-          <strong className="text-slate-700">{formatCompact(point.currentRevenue)} SEK</strong>
+          <span className="text-slate-500">Current Revenue:</span>
+          <strong className="text-slate-700">{formatCompact(point.currentRevenue)}</strong>
         </p>
         <p className="flex justify-between gap-6">
           <span className="text-slate-500">Momentum:</span>
           <strong className={point.growthPercentage >= 0 ? 'text-growth' : 'text-decline'}>
-            {point.growthPercentage.toFixed(1)}%
+            {point.growthPercentage > 0 ? '+' : ''}{point.growthPercentage.toFixed(1)}%
           </strong>
         </p>
       </div>
@@ -41,8 +55,8 @@ const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: any[] 
   );
 };
 
-function MomentumScatterPlot({ points, medianBaselineRevenue, onTenantSelect }: { 
-points: MomentumTenant[]; medianBaselineRevenue: number; onTenantSelect?: (tenantId: string) => void;
+function MomentumScatterPlot({ points, medianBaselineRevenue, globalGrowthPercentage, onTenantSelect }: { isLoading?: boolean;  
+points: MomentumTenant[]; medianBaselineRevenue: number; globalGrowthPercentage: number; onTenantSelect?: (tenantId: string) => void;
 }) {
   return (
     <ResponsiveContainer width="100%" height="100%">
@@ -57,7 +71,7 @@ points: MomentumTenant[]; medianBaselineRevenue: number; onTenantSelect?: (tenan
           axisLine={false}
           tickLine={false}
           label={{
-            value: 'P30 Baseline Revenue →',
+            value: 'Revenue (SEK)→',
             position: 'insideBottom',
             offset: -3,
             fill: 'var(--color-chart-label)',
@@ -78,7 +92,7 @@ points: MomentumTenant[]; medianBaselineRevenue: number; onTenantSelect?: (tenan
         />
         <ZAxis type="number" dataKey="currentRevenue" range={[120, 1200]} />
         <ReferenceLine x={medianBaselineRevenue} stroke="var(--color-chart-prev-line)" strokeWidth={2} strokeDasharray="5 5" />
-        <ReferenceLine y={0} stroke="var(--color-chart-prev-line)" strokeWidth={2} strokeDasharray="5 5" />
+        <ReferenceLine y={globalGrowthPercentage} stroke="var(--color-chart-prev-line)" strokeWidth={2} strokeDasharray="5 5" />
         <Tooltip content={<CustomTooltip />} cursor={{ strokeDasharray: '3 3' }} />
         <Scatter
           data={points}
@@ -94,20 +108,33 @@ points: MomentumTenant[]; medianBaselineRevenue: number; onTenantSelect?: (tenan
               onTenantSelect?.(payload.tenantId);
             }
           }}
-        />
+        >
+          {points.map((entry, index) => (
+            <Cell
+              key={`cell-${index}`}
+              fill={
+                entry.type === 'B2B'
+                  ? 'var(--color-chart-2)'
+                  : entry.type === 'B2C'
+                  ? 'var(--color-chart-1)'
+                  : 'var(--color-chart-3)'
+              }
+            />
+          ))}
+        </Scatter>
       </ScatterChart>
     </ResponsiveContainer>
   );
 }
 
-export function MomentumMatrixChart({ momentum, onTenantSelect, className }: { 
+export function MomentumMatrixChart({ isLoading, momentum, onTenantSelect, className }: { isLoading?: boolean;  
 momentum: MomentumResponse; onTenantSelect?: (tenantId: string) => void; className?: string; })
 {
   const points = momentum.tenants;
   const isEmpty = points.length === 0;
 
   return (
-    <ChartPanel
+    <ChartPanel isLoading={isLoading}
       title="Momentum Matrix"
       className={className || "h-full"}
       bodyClassName={isEmpty ? 'flex items-center justify-center' : 'flex-1 min-h-0'}
@@ -119,6 +146,7 @@ momentum: MomentumResponse; onTenantSelect?: (tenantId: string) => void; classNa
         <MomentumScatterPlot
           points={points}
           medianBaselineRevenue={momentum.medianBaselineRevenue}
+          globalGrowthPercentage={momentum.globalGrowthPercentage}
           onTenantSelect={onTenantSelect}
         />
       )}

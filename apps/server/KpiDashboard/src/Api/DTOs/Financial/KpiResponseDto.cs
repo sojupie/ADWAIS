@@ -5,4 +5,10 @@ public record KpiResponseDto(
     decimal PreviousRevenue,
     decimal RevenueGrowthPercentage,
     int TransactionVolume,
-    decimal AverageOrderValue);
+    decimal VolumeGrowthPercentage,
+    decimal AverageOrderValue,
+    decimal AovGrowthPercentage,
+    int ActiveTenants,
+    decimal ActiveTenantsGrowthPercentage,
+    decimal AverageRevenuePerTenant,
+    decimal ArptGrowthPercentage);

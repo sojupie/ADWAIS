@@ -8,7 +8,7 @@ namespace Infrastructure.Helpers;
 
 public static class DatabaseSeeder
 {
-    private record TenantProfile(string Name, int MinAov, int MaxAov, int DailyVolume, int VolumeVariance, decimal SeasonalMultiplier);
+    private record TenantProfile(string Name, string Type, int MinAov, int MaxAov, int DailyVolume, int VolumeVariance, decimal SeasonalMultiplier);
 
     public static async Task SeedSampleDataAsync(AnalyticsDbContext context)
     {
@@ -111,36 +111,36 @@ public static class DatabaseSeeder
         // Scaling up volumes by roughly 10x to ensure "significant" historical data (millions of rows)
         return new List<TenantProfile>
         {
-            new("Nordic Fashion House", 1200, 8000, 50, 15, 2.5m),
-            new("Tech Gadgets Plus", 400, 1500, 150, 40, 1.2m),
-            new("Daily Grocery Express", 150, 1200, 450, 80, 1.1m),
-            new("Urban Style Co", 800, 4500, 80, 20, 1.8m),
-            new("Home & Hearth", 1500, 12000, 35, 10, 2.2m),
-            new("Pet Paradise", 200, 1500, 220, 50, 1.3m),
-            new("Sporting Goods Pro", 600, 6000, 110, 30, 1.6m),
-            new("Beauty & Bliss", 300, 2500, 190, 45, 1.4m),
-            new("The Coffee Beanery", 50, 400, 650, 120, 1.1m),
-            new("Gourmet Delights", 500, 3500, 130, 35, 1.5m),
-            new("Adventure Gear", 1000, 9000, 65, 15, 2.0m),
-            new("Modern Furniture", 2500, 25000, 25, 8, 1.7m),
-            new("Eco Living", 400, 3000, 145, 35, 1.3m),
-            new("Toy Town", 150, 1800, 260, 60, 3.0m),
-            new("Bookworm Central", 100, 800, 380, 80, 1.2m),
-            new("Music Masters", 200, 5000, 95, 25, 1.5m),
-            new("Gardener's Choice", 300, 4500, 115, 30, 1.2m),
-            new("Fitness First", 450, 4000, 165, 40, 1.4m),
-            new("Chef's Corner", 700, 5500, 75, 20, 1.5m),
-            new("The Stationery Shop", 80, 600, 480, 100, 1.1m),
-            new("Artistic Soul", 400, 7000, 55, 15, 1.6m),
-            new("Gadget Galaxy", 300, 2000, 230, 60, 1.3m),
-            new("Luxe Jewelry", 5000, 50000, 15, 5, 1.8m),
-            new("Baby Steps", 250, 3000, 210, 50, 1.4m),
-            new("Vintage Finds", 400, 6000, 65, 15, 1.5m),
-            new("Outdoor Oasis", 1200, 10000, 45, 12, 1.9m),
-            new("Smart Home Solutions", 600, 8000, 85, 20, 1.4m),
-            new("The Shoe Box", 400, 3500, 150, 35, 1.6m),
-            new("Healthy Habits", 200, 1200, 290, 70, 1.2m),
-            new("Auto Accessories", 350, 4500, 140, 35, 1.3m)
+            new("Nordic Fashion House", "B2C", 1200, 8000, 50, 15, 2.5m),
+            new("Tech Gadgets Plus", "B2B", 400, 1500, 150, 40, 1.2m),
+            new("Daily Grocery Express", "B2C", 150, 1200, 450, 80, 1.1m),
+            new("Urban Style Co", "B2C", 800, 4500, 80, 20, 1.8m),
+            new("Home & Hearth", "Mixed", 1500, 12000, 35, 10, 2.2m),
+            new("Pet Paradise", "B2C", 200, 1500, 220, 50, 1.3m),
+            new("Sporting Goods Pro", "Mixed", 600, 6000, 110, 30, 1.6m),
+            new("Beauty & Bliss", "B2C", 300, 2500, 190, 45, 1.4m),
+            new("The Coffee Beanery", "B2B", 50, 400, 650, 120, 1.1m),
+            new("Gourmet Delights", "Mixed", 500, 3500, 130, 35, 1.5m),
+            new("Adventure Gear", "B2C", 1000, 9000, 65, 15, 2.0m),
+            new("Modern Furniture", "B2B", 2500, 25000, 25, 8, 1.7m),
+            new("Eco Living", "B2C", 400, 3000, 145, 35, 1.3m),
+            new("Toy Town", "B2C", 150, 1800, 260, 60, 3.0m),
+            new("Bookworm Central", "B2C", 100, 800, 380, 80, 1.2m),
+            new("Music Masters", "Mixed", 200, 5000, 95, 25, 1.5m),
+            new("Gardener's Choice", "B2C", 300, 4500, 115, 30, 1.2m),
+            new("Fitness First", "B2B", 450, 4000, 165, 40, 1.4m),
+            new("Chef's Corner", "Mixed", 700, 5500, 75, 20, 1.5m),
+            new("The Stationery Shop", "B2B", 80, 600, 480, 100, 1.1m),
+            new("Artistic Soul", "B2C", 400, 7000, 55, 15, 1.6m),
+            new("Gadget Galaxy", "B2C", 300, 2000, 230, 60, 1.3m),
+            new("Luxe Jewelry", "Mixed", 5000, 50000, 15, 5, 1.8m),
+            new("Baby Steps", "B2C", 250, 3000, 210, 50, 1.4m),
+            new("Vintage Finds", "B2C", 400, 6000, 65, 15, 1.5m),
+            new("Outdoor Oasis", "Mixed", 1200, 10000, 45, 12, 1.9m),
+            new("Smart Home Solutions", "B2B", 600, 8000, 85, 20, 1.4m),
+            new("The Shoe Box", "B2C", 400, 3500, 150, 35, 1.6m),
+            new("Healthy Habits", "B2C", 200, 1200, 290, 70, 1.2m),
+            new("Auto Accessories", "Mixed", 350, 4500, 140, 35, 1.3m)
         };
     }
 
@@ -156,6 +156,7 @@ public static class DatabaseSeeder
                 {
                     Id = Guid.NewGuid(),
                     Name = profile.Name,
+                    Type = Enum.Parse<Domain.Enums.TenantType>(profile.Type),
                     LitiumBaseUrl = $"https://{profile.Name.Replace(" ", "").ToLower()}.mock",
                     ServiceAccountToken = $"mock-token-{profile.Name.GetHashCode()}",
                     OrderFetchingEnabled = false

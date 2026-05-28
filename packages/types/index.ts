@@ -3,7 +3,13 @@ export interface GlobalKpi {
   previousRevenue: number;
   revenueGrowthPercentage: number;
   transactionVolume: number;
+  volumeGrowthPercentage: number;
   averageOrderValue: number;
+  aovGrowthPercentage: number;
+  activeTenants: number;
+  activeTenantsGrowthPercentage: number;
+  averageRevenuePerTenant: number;
+  arptGrowthPercentage: number;
 }
 
 /**
@@ -22,7 +28,16 @@ export interface FinancialVelocityPoint {
 export interface CumulativeGrowthDeltaPoint {
   label: string;
   timestamp: string;
+  currentCumulative: number;
+  previousCumulative: number;
   cumulativeGrowthDelta: number;
+}
+
+export interface TransactionDensityPointDto {
+  dayOfWeek: number;
+  hour: number;
+  count: number;
+  totalRevenue: number;
 }
 
 export interface OrderBin {
@@ -44,6 +59,7 @@ export interface GrowthExtreme {
 export interface MomentumTenant {
   tenantId: string;
   tenantName: string;
+  type: string;
   baselineRevenue: number;
   growthPercentage: number;
   currentRevenue: number;
@@ -51,14 +67,31 @@ export interface MomentumTenant {
 
 export interface MomentumResponse {
   medianBaselineRevenue: number;
+  globalGrowthPercentage: number;
   tenants: MomentumTenant[];
 }
 
-export interface DistributionEntry {
-  tenantId: string | null;
+export interface RevenueEfficiencyTenant {
+  tenantId: string;
   tenantName: string;
-  absoluteRevenue: number;
-  cumulativePortfolioShare: number;
+  type: string;
+  averageOrderValue: number;
+  portfolioSharePercentage: number;
+  growthVelocity: number;
+}
+
+export interface RevenueEfficiencyResponse {
+  globalAverageOrderValue: number;
+  medianPortfolioShare: number;
+  tenants: RevenueEfficiencyTenant[];
+}
+
+export interface VolumeAnomalyResponseDto {
+  tenantId: string;
+  tenantName: string;
+  volumeDeviationPercentage: number;
+  currentVolume: number;
+  baselineVolume: number;
 }
 
 export interface TenantDiagnostics {
@@ -98,6 +131,15 @@ export interface UptimeMonitorDto {
   lastLatencyUpdate: string | null;
   createdDate: string;
   lastSyncError: string | null;
+}
+
+export interface AccumulatedRevenuePointDto {
+  label: string;
+  timestamp: string;
+  currentRevenue: number;
+  previousRevenue: number;
+  currentAccumulated: number;
+  previousAccumulated: number;
 }
 
 export interface LatencyPoint {

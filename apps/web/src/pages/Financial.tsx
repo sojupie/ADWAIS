@@ -2,19 +2,18 @@ import { formatCurrency, formatCompact, formatNumber } from '@utils';
 import { useSearch, useNavigate } from '@tanstack/react-router';
 import { useMemo } from 'react';
 import { FactPanel } from '../components/common/FactPanel';
-import { LoadingIcon } from '../components/common/LoadingIcon';
 import { MomentumMatrixChart } from '../components/financial/MomentumMatrixChart';
-import { RevenueDistributionChart } from '../components/financial/RevenueDistributionChart';
-import { RevenueVelocityChart } from '../components/financial/RevenueVelocityChart';
-import { ChartPanel } from '../components/common/ChartPanel';
-import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { RevenueEfficiencyChart } from '../components/financial/RevenueEfficiencyChart';
+import { VolumeAnomalyChart } from '../components/financial/VolumeAnomalyChart';
+import { AccumulatedRevenueChart } from '../components/financial/AccumulatedRevenueChart';
 import { TenantDiagnostics } from './TenantDiagnostics';
 import { 
   useGlobalKpis, 
-  useFinancialVelocity, 
+  useAccumulatedRevenue, 
   useGrowthExtremes, 
   useMomentum, 
-  useRevenueDistribution
+  useRevenueEfficiency,
+  useVolumeAnomaly
 } from '../hooks/useFinancialQueries';
 
 export function Financial() {
@@ -22,24 +21,37 @@ export function Financial() {
   const navigate = useNavigate({ from: '/financial' });
 
   const kpiQuery = useGlobalKpis(timeframe);
-  const velocityQuery = useFinancialVelocity(timeframe);
+  const velocityQuery = useAccumulatedRevenue(timeframe);
   const extremesQuery = useGrowthExtremes(timeframe);
   const momentumQuery = useMomentum(timeframe);
-  const distributionQuery = useRevenueDistribution(timeframe);
+  const efficiencyQuery = useRevenueEfficiency(timeframe);
+  const anomalyQuery = useVolumeAnomaly(timeframe);
 
-  const selectedTenantName = useMemo(() => {
+  const selectedTenantDetails = useMemo(() => {
     if (!tenantId) return null;
-    return extremesQuery.data?.find(e => e.tenantId === tenantId)?.tenantName 
-      || distributionQuery.data?.find(d => d.tenantId === tenantId)?.tenantName 
-      || momentumQuery.data?.tenants.find(t => t.tenantId === tenantId)?.tenantName
-      || 'Unknown Tenant';
-  }, [tenantId, extremesQuery.data, distributionQuery.data, momentumQuery.data]);
+    
+    const efficiencyTenants = Array.isArray(efficiencyQuery.data) ? efficiencyQuery.data : ((efficiencyQuery.data as any) || { tenants: [], topPerformer: null, bottomPerformer: null })?.tenants;
+    const momentumTenants = Array.isArray(momentumQuery.data) ? momentumQuery.data : ((momentumQuery.data as any) || { tenants: [] })?.tenants;
 
-  if (tenantId && selectedTenantName) {
+    const tenantName = extremesQuery.data?.find(e => e.tenantId === tenantId)?.tenantName 
+      || efficiencyTenants?.find((d: any) => d.tenantId === tenantId)?.tenantName 
+      || anomalyQuery.data?.find(a => a.tenantId === tenantId)?.tenantName
+      || momentumTenants?.find((t: any) => t.tenantId === tenantId)?.tenantName
+      || 'Unknown Tenant';
+
+    const type = efficiencyTenants?.find((d: any) => d.tenantId === tenantId)?.type
+      || momentumTenants?.find((t: any) => t.tenantId === tenantId)?.type
+      || 'Mixed';
+      
+    return { tenantName, type };
+  }, [tenantId, extremesQuery.data, efficiencyQuery.data, anomalyQuery.data, momentumQuery.data]);
+
+  if (tenantId && selectedTenantDetails) {
     return (
       <TenantDiagnostics
         tenantId={tenantId}
-        tenantName={selectedTenantName}
+        tenantName={selectedTenantDetails.tenantName}
+        tenantType={selectedTenantDetails.type}
         timeframe={timeframe}
         onBack={() => navigate({ search: (prev) => ({ ...prev, tenantId: undefined }) })}
       />
@@ -50,19 +62,12 @@ export function Financial() {
     navigate({ search: (prev) => ({ ...prev, tenantId: id }) });
   };
 
-  const placeholderData = [
-    { name: 'A', value: 400 },
-    { name: 'B', value: 300 },
-    { name: 'C', value: 600 },
-    { name: 'D', value: 200 },
-    { name: 'E', value: 500 },
-    { name: 'F', value: 350 },
-  ];
+
 
   return (
     <div className="flex flex-col gap-6 w-full min-h-full animate-in fade-in duration-700">
       {/* KPI Section */}
-      <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 flex-shrink-0">
+      <section className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-4 flex-shrink-0">
         <FactPanel
           label={`Global Revenue (${timeframe})`}
           value={kpiQuery.data ? formatCurrency(kpiQuery.data.currentRevenue) : '\u2014'}
@@ -75,49 +80,64 @@ export function Financial() {
           label="Transaction Volume"
           value={kpiQuery.data ? formatNumber(kpiQuery.data.transactionVolume) : '\u2014'}
           isLoading={kpiQuery.isLoading}
+          extra={kpiQuery.data?.volumeGrowthPercentage !== undefined
+            ? { type: 'PoP', value: kpiQuery.data.volumeGrowthPercentage }
+            : undefined}
         />
         <FactPanel
           label="Portfolio AOV"
           value={kpiQuery.data ? `${formatCompact(kpiQuery.data.averageOrderValue)} SEK` : '\u2014'}
           isLoading={kpiQuery.isLoading}
+          extra={kpiQuery.data?.aovGrowthPercentage !== undefined
+            ? { type: 'PoP', value: kpiQuery.data.aovGrowthPercentage }
+            : undefined}
         />
         <FactPanel
-          label="Baseline Revenue"
-          value={kpiQuery.data ? formatCurrency(kpiQuery.data.previousRevenue) : '\u2014'}
+          label="Active Tenants"
+          value={kpiQuery.data?.activeTenants !== undefined ? kpiQuery.data.activeTenants.toString() : '\u2014'}
           isLoading={kpiQuery.isLoading}
+          extra={kpiQuery.data?.activeTenantsGrowthPercentage !== undefined
+            ? { type: 'PoP', value: kpiQuery.data.activeTenantsGrowthPercentage }
+            : undefined}
+        />
+        <FactPanel
+          label="Avg Revenue Per Tenant"
+          value={kpiQuery.data?.averageRevenuePerTenant !== undefined ? formatCompact(kpiQuery.data.averageRevenuePerTenant) : '\u2014'}
+          isLoading={kpiQuery.isLoading}
+          extra={kpiQuery.data?.arptGrowthPercentage !== undefined
+            ? { type: 'PoP', value: kpiQuery.data.arptGrowthPercentage }
+            : undefined}
         />
       </section>
 
       {/* Charts Grid: Strictly Responsive & Independent */}
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 pb-4">
-        {velocityQuery.isLoading ? (
-          <div className="bg-white rounded-xl border border-slate-200 p-8 flex items-center justify-center h-full"><LoadingIcon /></div>
-        ) : velocityQuery.data ? (
-          <RevenueVelocityChart points={velocityQuery.data} className="h-full min-h-[350px]" />
-        ) : null}
+        <AccumulatedRevenueChart 
+          points={((velocityQuery.data as any) || [])} 
+          isLoading={velocityQuery.isLoading} 
+          className="h-full min-h-[350px]" 
+        />
 
-        <ChartPanel title="Regional Growth (Placeholder)" className="h-full min-h-[350px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={placeholderData}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-chart-grid)" />
-              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--color-chart-tick)', fontSize: 12 }} />
-              <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--color-chart-tick)', fontSize: 12 }} />
-              <Bar dataKey="value" fill="var(--color-brand-btn-primary)" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </ChartPanel>
+        <VolumeAnomalyChart 
+          entries={((anomalyQuery.data as any) || [])} 
+          onTenantSelect={handleTenantSelect} 
+          isLoading={anomalyQuery.isLoading} 
+          className="h-full min-h-[350px]" 
+        />
 
-        {distributionQuery.isLoading ? (
-          <div className="bg-white rounded-xl border border-slate-200 p-8 flex items-center justify-center h-full"><LoadingIcon /></div>
-        ) : distributionQuery.data ? (
-          <RevenueDistributionChart entries={distributionQuery.data} onTenantSelect={handleTenantSelect} className="h-full min-h-[350px]" />
-        ) : null}
+        <RevenueEfficiencyChart 
+          response={((efficiencyQuery.data as any) || { tenants: [], topPerformer: null, bottomPerformer: null })} 
+          onTenantSelect={handleTenantSelect} 
+          isLoading={efficiencyQuery.isLoading} 
+          className="h-full min-h-[350px]" 
+        />
 
-        {momentumQuery.isLoading ? (
-          <div className="bg-white rounded-xl border border-slate-200 p-8 flex items-center justify-center h-full"><LoadingIcon /></div>
-        ) : momentumQuery.data ? (
-          <MomentumMatrixChart momentum={momentumQuery.data} onTenantSelect={handleTenantSelect} className="h-full min-h-[350px]" />
-        ) : null}
+        <MomentumMatrixChart 
+          momentum={((momentumQuery.data as any) || { tenants: [] })} 
+          onTenantSelect={handleTenantSelect} 
+          isLoading={momentumQuery.isLoading} 
+          className="h-full min-h-[350px]" 
+        />
       </div>
     </div>
   );

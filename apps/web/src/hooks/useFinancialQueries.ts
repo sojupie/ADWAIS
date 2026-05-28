@@ -4,10 +4,13 @@ import type {
   GlobalKpi, 
   GrowthExtreme, 
   FinancialVelocityPoint, 
-  MomentumResponse, 
-  DistributionEntry,
+  MomentumResponse,
+  RevenueEfficiencyResponse,
+  VolumeAnomalyResponseDto,
   CumulativeGrowthDeltaPoint,
-  OrderBin
+  OrderBin,
+  AccumulatedRevenuePointDto,
+  TransactionDensityPointDto
 } from '@types';
 
 export const financialKeys = {
@@ -16,9 +19,12 @@ export const financialKeys = {
   velocity: (timeframe: string, tenantId?: string | null) => [...financialKeys.all, 'velocity', timeframe, tenantId] as const,
   extremes: (timeframe: string) => [...financialKeys.all, 'extremes', timeframe] as const,
   momentum: (timeframe: string) => [...financialKeys.all, 'momentum', timeframe] as const,
-  distribution: (timeframe: string) => [...financialKeys.all, 'distribution', timeframe] as const,
+  revenueEfficiency: (timeframe: string) => [...financialKeys.all, 'revenueEfficiency', timeframe] as const,
+  volumeAnomaly: (timeframe: string) => [...financialKeys.all, 'volumeAnomaly', timeframe] as const,
   delta: (timeframe: string, tenantId?: string | null) => [...financialKeys.all, 'delta', timeframe, tenantId] as const,
   orders: (timeframe: string, tenantId?: string | null) => [...financialKeys.all, 'orders', timeframe, tenantId] as const,
+  accumulatedRevenue: (timeframe: string, tenantId?: string | null) => [...financialKeys.all, 'accumulatedRevenue', timeframe, tenantId] as const,
+  transactionDensity: (timeframe: string, tenantId?: string | null) => [...financialKeys.all, 'transactionDensity', timeframe, tenantId] as const,
 };
 
 const REFETCH_INTERVAL = 60000;
@@ -49,6 +55,14 @@ export function useFinancialVelocity(timeframe: string, tenantId?: string | null
   });
 }
 
+export function useAccumulatedRevenue(timeframe: string, tenantId?: string) {
+  return useQuery({
+    queryKey: financialKeys.accumulatedRevenue(timeframe, tenantId),
+    queryFn: () => apiFetch<AccumulatedRevenuePointDto[]>(buildUrl('/api/financial/accumulated-revenue', { timeframe, tenantId })),
+    refetchInterval: REFETCH_INTERVAL,
+  });
+}
+
 export function useGrowthExtremes(timeframe: string) {
   return useQuery({
     queryKey: financialKeys.extremes(timeframe),
@@ -65,10 +79,18 @@ export function useMomentum(timeframe: string) {
   });
 }
 
-export function useRevenueDistribution(timeframe: string) {
+export function useRevenueEfficiency(timeframe: string) {
   return useQuery({
-    queryKey: financialKeys.distribution(timeframe),
-    queryFn: () => apiFetch<DistributionEntry[]>(buildUrl('/api/financial/distribution', { timeframe, topN: 10 })),
+    queryKey: financialKeys.revenueEfficiency(timeframe),
+    queryFn: () => apiFetch<RevenueEfficiencyResponse[]>(buildUrl('/api/financial/revenue-efficiency', { timeframe })),
+    refetchInterval: REFETCH_INTERVAL,
+  });
+}
+
+export function useVolumeAnomaly(timeframe: string) {
+  return useQuery({
+    queryKey: financialKeys.volumeAnomaly(timeframe),
+    queryFn: () => apiFetch<VolumeAnomalyResponseDto[]>(buildUrl('/api/financial/volume-anomaly', { timeframe })),
     refetchInterval: REFETCH_INTERVAL,
   });
 }
@@ -87,6 +109,14 @@ export function useOrderDistribution(timeframe: string, tenantId: string) {
     queryKey: financialKeys.orders(timeframe, tenantId),
     queryFn: () => apiFetch<OrderBin[]>(buildUrl('/api/financial/order-distribution', { timeframe, tenantId })),
     enabled: !!tenantId,
+    refetchInterval: REFETCH_INTERVAL,
+  });
+}
+
+export function useTransactionDensity(timeframe: string, tenantId?: string | null) {
+  return useQuery({
+    queryKey: financialKeys.transactionDensity(timeframe, tenantId),
+    queryFn: () => apiFetch<TransactionDensityPointDto[]>(buildUrl('/api/financial/transaction-density', { timeframe, tenantId })),
     refetchInterval: REFETCH_INTERVAL,
   });
 }

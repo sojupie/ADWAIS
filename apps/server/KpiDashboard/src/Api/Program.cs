@@ -173,7 +173,7 @@ using (var connection = JobStorage.Current.GetConnection())
             recurringJobManager.AddOrUpdate<RuntimeDataSeederJob>(
                 "dev-runtime-data-seeder",
                 newJob => newJob.ExecuteAsync(),
-                Cron.MinuteInterval(5));
+                Cron.MinuteInterval(1));
         }
     }
 }

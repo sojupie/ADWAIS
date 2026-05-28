@@ -130,18 +130,14 @@ export function FleetStatus() {
       {/* Middle Row: Main Diagnostics (Flexible Height) */}
       <section className="flex-1 grid grid-cols-1 lg:grid-cols-5 gap-4 min-h-[350px]">
         <div className="lg:col-span-3 flex flex-col min-h-0 h-full">
-            {analyticsQuery.isLoading ? <div className="bg-white rounded-xl border border-slate-200 px-4 py-3 flex items-center justify-center h-full"><LoadingIcon /></div> :
-             analyticsQuery.data ? (
-               <div className="flex-1 bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-3 flex flex-col min-h-0">
-                 <NetworkLatencyChart 
-                    points={analyticsQuery.data.latencyPoints} 
-                    title={`Latency: ${activeScopeName}`}
-                    className="min-h-[250px]"
-                 />
-               </div>
-             ) : (
-               <div className="bg-white rounded-xl border border-slate-200 px-4 py-3 flex items-center justify-center text-xs font-bold text-slate-400 uppercase tracking-widest h-full">No telemetry data available</div>
-             )}
+            <div className="flex-1 bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-3 flex flex-col min-h-[350px]">
+              <NetworkLatencyChart 
+                 points={((analyticsQuery.data?.latencyPoints as any) || [])} 
+                 title={`Latency: ${activeScopeName}`}
+                 isLoading={analyticsQuery.isLoading}
+                 className="min-h-[250px]"
+              />
+            </div>
         </div>
         
         <div className="lg:col-span-2 flex flex-col min-h-0 h-full">

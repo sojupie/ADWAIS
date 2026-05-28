@@ -192,26 +192,30 @@ public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFacto
         var (currentStart, currentEnd, previousStart, _, isHourly, _) = TimeframeResolver.Resolve(timeframe);
         await using var context = await contextFactory.CreateDbContextAsync();
 
-        List<DataRow> currentRows, previousRows;
-
-        if (tenantId.HasValue)
-        {
-            currentRows = await GetMergedTenantDataAsync(context, currentStart, currentEnd, isHourly, tenantId);
-            previousRows = await GetMergedTenantDataAsync(context, previousStart, currentStart, isHourly, tenantId);
-        }
-        else
-        {
-            currentRows = await GetMergedGlobalDataAsync(context, currentStart, currentEnd, isHourly);
-            previousRows = await GetMergedGlobalDataAsync(context, previousStart, currentStart, isHourly);
-        }
+        var currentRows = await GetMergedTenantDataAsync(context, currentStart, currentEnd, isHourly, tenantId);
+        var previousRows = await GetMergedTenantDataAsync(context, previousStart, currentStart, isHourly, tenantId);
 
         var currentRevenue = currentRows.Sum(r => r.Revenue);
         var previousRevenue = previousRows.Sum(r => r.Revenue);
         var volume = currentRows.Sum(r => r.Volume);
-        var growthPct = CalculateGrowthPercentage(currentRevenue, previousRevenue);
-        var aov = volume > 0 ? Math.Round(currentRevenue / volume, 2) : 0m;
+        var previousVolume = previousRows.Sum(r => r.Volume);
+        
+        var activeTenants = currentRows.Where(r => r.Revenue > 0 && r.TenantId.HasValue).Select(r => r.TenantId!.Value).Distinct().Count();
+        var prevActiveTenants = previousRows.Where(r => r.Revenue > 0 && r.TenantId.HasValue).Select(r => r.TenantId!.Value).Distinct().Count();
 
-        return new KpiDto(currentRevenue, previousRevenue, growthPct, volume, aov);
+        var growthPct = CalculateGrowthPercentage(currentRevenue, previousRevenue);
+        var volumeGrowthPct = CalculateGrowthPercentage(volume, previousVolume);
+        var activeTenantsGrowthPct = CalculateGrowthPercentage(activeTenants, prevActiveTenants);
+        
+        var aov = volume > 0 ? Math.Round(currentRevenue / volume, 2) : 0m;
+        var previousAov = previousVolume > 0 ? Math.Round(previousRevenue / previousVolume, 2) : 0m;
+        var aovGrowthPct = CalculateGrowthPercentage(aov, previousAov);
+
+        var arpt = activeTenants > 0 ? Math.Round(currentRevenue / activeTenants, 2) : 0m;
+        var prevArpt = prevActiveTenants > 0 ? Math.Round(previousRevenue / prevActiveTenants, 2) : 0m;
+        var arptGrowthPct = CalculateGrowthPercentage(arpt, prevArpt);
+
+        return new KpiDto(currentRevenue, previousRevenue, growthPct, volume, volumeGrowthPct, aov, aovGrowthPct, activeTenants, activeTenantsGrowthPct, arpt, arptGrowthPct);
     }
 
     /// <inheritdoc />
@@ -264,6 +268,92 @@ public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFacto
     }
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<AccumulatedRevenuePointDto>> GetAccumulatedRevenueAsync(Timeframe timeframe, Guid? tenantId = null)
+    {
+        var (currentStart, currentEnd, previousStart, steps, isHourly, includeActualTime) = TimeframeResolver.Resolve(timeframe);
+        await using var context = await contextFactory.CreateDbContextAsync();
+
+        List<DataRow> currentRows, previousRows;
+
+        if (tenantId.HasValue)
+        {
+            currentRows = await GetMergedTenantDataAsync(context, currentStart, currentEnd, isHourly, tenantId);
+            previousRows = await GetMergedTenantDataAsync(context, previousStart, currentStart, isHourly, tenantId);
+        }
+        else
+        {
+            currentRows = await GetMergedGlobalDataAsync(context, currentStart, currentEnd, isHourly);
+            previousRows = await GetMergedGlobalDataAsync(context, previousStart, currentStart, isHourly);
+        }
+
+        // Determine bin size (Day, Week, Month)
+        var binSizeDays = 1;
+        if (!isHourly)
+        {
+            if (steps > 180) binSizeDays = 30; // Approx Month
+            else if (steps > 31) binSizeDays = 7; // Week
+        }
+
+        var binnedSteps = isHourly ? steps : (int)Math.Ceiling((double)steps / binSizeDays);
+
+        var currentByStep = currentRows
+            .GroupBy(r => isHourly 
+                ? (int)(r.Timestamp - currentStart).TotalHours 
+                : (int)(r.Timestamp - currentStart).TotalDays / binSizeDays)
+            .ToDictionary(g => g.Key, g => g.Sum(r => r.Revenue));
+
+        var previousByStep = previousRows
+            .GroupBy(r => isHourly 
+                ? (int)(r.Timestamp - previousStart).TotalHours 
+                : (int)(r.Timestamp - previousStart).TotalDays / binSizeDays)
+            .ToDictionary(g => g.Key, g => g.Sum(r => r.Revenue));
+
+        var points = new List<AccumulatedRevenuePointDto>(binnedSteps);
+        decimal runningCur = 0;
+        decimal runningPrev = 0;
+
+        for (var i = 0; i < binnedSteps; i++)
+        {
+            var timestamp = isHourly ? currentStart.AddHours(i) : currentStart.AddDays(i * binSizeDays);
+            var isLast = i == binnedSteps - 1;
+            
+            string label;
+            if (isHourly)
+            {
+                label = (isLast && includeActualTime ? currentEnd.ToString("HH:mm") : timestamp.ToString("HH:mm"));
+            }
+            else if (binSizeDays == 30)
+            {
+                label = timestamp.ToString("MMM");
+            }
+            else if (binSizeDays == 7)
+            {
+                label = $"W{i + 1}";
+            }
+            else
+            {
+                label = $"Day {i + 1}";
+            }
+            
+            var curRev = currentByStep.GetValueOrDefault(i, 0m);
+            var prevRev = previousByStep.GetValueOrDefault(i, 0m);
+            
+            runningCur += curRev;
+            runningPrev += prevRev;
+
+            points.Add(new AccumulatedRevenuePointDto(
+                label,
+                timestamp,
+                curRev,
+                prevRev,
+                runningCur,
+                runningPrev));
+        }
+
+        return points;
+    }
+
+    /// <inheritdoc />
     public async Task<IReadOnlyList<GrowthExtremeDto>> GetGrowthExtremesAsync(Timeframe timeframe)
     {
         var (currentStart, currentEnd, previousStart, _, isHourly, _) = TimeframeResolver.Resolve(timeframe);
@@ -298,7 +388,7 @@ public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFacto
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<RevenueEfficiencyDto>> GetRevenueEfficiencyAsync(Timeframe timeframe)
+    public async Task<RevenueEfficiencyDto> GetRevenueEfficiencyAsync(Timeframe timeframe)
     {
         var (currentStart, currentEnd, previousStart, _, isHourly, _) = TimeframeResolver.Resolve(timeframe);
         await using var context = await contextFactory.CreateDbContextAsync();
@@ -323,8 +413,10 @@ public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFacto
             .ToDictionary(g => g.Key, g => g.Sum(r => r.Revenue));
 
         var totalRevenue = currentByTenant.Values.Sum(x => x.Revenue);
+        var totalVolume = currentByTenant.Values.Sum(x => x.Volume);
+        var globalAov = totalVolume > 0 ? Math.Round(totalRevenue / totalVolume, 2) : 0m;
 
-        return currentByTenant.Keys.Union(previousByTenant.Keys)
+        var tenants = currentByTenant.Keys.Union(previousByTenant.Keys)
             .Where(tid => tenantDetails.ContainsKey(tid))
             .Select(tid =>
             {
@@ -338,9 +430,15 @@ public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFacto
                 var growth = CalculateGrowthPercentage(curRev, prevRev);
                 var details = tenantDetails[tid];
 
-                return new RevenueEfficiencyDto(tid, details.Name, details.Type, aov, share, growth);
+                return new RevenueEfficiencyTenantDto(tid, details.Name, details.Type, aov, share, growth);
             })
             .ToList();
+
+        var medianPortfolioShare = tenants.Count > 0 
+            ? CalculateMedian(tenants.Select(t => t.PortfolioSharePercentage).OrderBy(r => r).ToList()) 
+            : 0m;
+
+        return new RevenueEfficiencyDto(globalAov, medianPortfolioShare, tenants);
     }
 
     /// <inheritdoc />
@@ -358,8 +456,11 @@ public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFacto
 
         await using var context = await contextFactory.CreateDbContextAsync();
 
-        var currentRows = await GetMergedTenantDataAsync(context, currentStart, currentEnd, isHourly);
-        var previousRows = await GetMergedTenantDataAsync(context, previousStart, currentStart, isHourly);
+        // Volume anomaly only calculates aggregate totals and does not need hourly resolution. 
+        // Forcing 'false' ensures we use the fast DailyTenantRollups materialized view for the 30-day baseline 
+        // instead of doing an expensive raw query on the Orders table when the timeframe is "Today" (1d).
+        var currentRows = await GetMergedTenantDataAsync(context, currentStart, currentEnd, false);
+        var previousRows = await GetMergedTenantDataAsync(context, previousStart, currentStart, false);
         
         var tenantDetails = await context.Tenants
             .AsNoTracking()
@@ -400,7 +501,11 @@ public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFacto
 
         var currentRows = await GetMergedTenantDataAsync(context, currentStart, currentEnd, isHourly);
         var previousRows = await GetMergedTenantDataAsync(context, previousStart, currentStart, isHourly);
-        var tenantNames = await GetTenantNameMapAsync(context);
+        var tenantDetails = await context.Tenants
+            .AsNoTracking()
+            .Where(t => t.Id != AnalyticsDbContext.SystemTenantGuid)
+            .Select(t => new { t.Id, t.Name, t.Type })
+            .ToDictionaryAsync(t => t.Id);
 
         var currentByTenant = currentRows
             .GroupBy(r => r.TenantId!.Value)
@@ -410,7 +515,11 @@ public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFacto
             .GroupBy(r => r.TenantId!.Value)
             .ToDictionary(g => g.Key, g => g.Sum(r => r.Revenue));
 
-        var allTenantIds = currentByTenant.Keys.Union(previousByTenant.Keys).ToList();
+        var totalCurrentRevenue = currentByTenant.Values.Sum();
+        var totalPreviousRevenue = previousByTenant.Values.Sum();
+        var globalGrowthPct = CalculateGrowthPercentage(totalCurrentRevenue, totalPreviousRevenue);
+
+        var allTenantIds = currentByTenant.Keys.Union(previousByTenant.Keys).Where(tid => tenantDetails.ContainsKey(tid)).ToList();
 
         var tenants = allTenantIds
             .Select(tid =>
@@ -418,19 +527,17 @@ public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFacto
                 var cur = currentByTenant.GetValueOrDefault(tid, 0m);
                 var prev = previousByTenant.GetValueOrDefault(tid, 0m);
                 var growth = CalculateGrowthPercentage(cur, prev);
-                var name = tenantNames.GetValueOrDefault(tid, tid.ToString());
-                return new MomentumTenantDto(tid, name, prev, growth, cur);
+                var details = tenantDetails[tid];
+
+                return new MomentumTenantDto(tid, details.Name, details.Type, prev, growth, cur);
             })
             .ToList();
 
-        var baselines = tenants
-            .Select(t => t.BaselineRevenue)
-            .OrderBy(b => b)
-            .ToList();
+        var medianBaselineRevenue = tenants.Count > 0 
+            ? CalculateMedian(tenants.Select(t => t.BaselineRevenue).OrderBy(r => r).ToList()) 
+            : 0m;
 
-        var median = CalculateMedian(baselines);
-
-        return new MomentumDto(median, tenants);
+        return new MomentumDto(medianBaselineRevenue, globalGrowthPct, tenants);
     }
 
     /// <inheritdoc />
@@ -604,6 +711,8 @@ public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFacto
 
         var points = new List<CumulativeGrowthDeltaPointDto>(steps);
         decimal runningSum = 0;
+        decimal runningCur = 0;
+        decimal runningPrev = 0;
 
         for (var i = 0; i < steps; i++)
         {
@@ -617,8 +726,10 @@ public class FinancialService(IDbContextFactory<AnalyticsDbContext> contextFacto
             var prev = previousByStep.GetValueOrDefault(i, 0m);
             var variance = cur - prev;
             runningSum += variance;
+            runningCur += cur;
+            runningPrev += prev;
 
-            points.Add(new CumulativeGrowthDeltaPointDto(label, timestamp, runningSum));
+            points.Add(new CumulativeGrowthDeltaPointDto(label, timestamp, runningCur, runningPrev, runningSum));
         }
 
         return points;

@@ -2,11 +2,17 @@ using Domain.Enums;
 
 namespace Domain.DTOs.Financial;
 
-public record RevenueEfficiencyDto(
+public record RevenueEfficiencyTenantDto(
     Guid TenantId,
     string TenantName,
     TenantType Type,
     decimal AverageOrderValue,
     decimal PortfolioSharePercentage,
     decimal GrowthVelocity
+);
+
+public record RevenueEfficiencyDto(
+    decimal GlobalAverageOrderValue,
+    decimal MedianPortfolioShare,
+    IReadOnlyList<RevenueEfficiencyTenantDto> Tenants
 );

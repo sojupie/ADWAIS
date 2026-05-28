@@ -25,6 +25,10 @@
   --color-chart-prev-line: #cbd5e1;
   --color-chart-label: #1A1A1A;
   
+  --color-chart-1: #0ea5e9;
+  --color-chart-2: #8b5cf6;
+  --color-chart-3: var(--color-brand-btn-primary);
+  
   --color-growth: #37b24d;
   --color-decline: #f03e3e;
   --color-decline-warning: #f59f00;

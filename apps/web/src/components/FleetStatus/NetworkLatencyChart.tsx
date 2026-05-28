@@ -22,6 +22,7 @@ function formatLatency(value: number): string {
 }
 
 interface GraphTooltipProps {
+  isLoading?: boolean;
   active?: boolean;
   label?: string;
   payload?: Array<{ payload: LatencyPoint, name: string, color: string }>;
@@ -58,7 +59,13 @@ const GraphTooltip = ({ active, payload, label }: GraphTooltipProps) => {
   );
 };
 
-export function NetworkLatencyChart({ points, title = "Network Latency", className }: { points: LatencyPoint[], title?: string, className?: string }) {
+import { ChartSkeleton } from '../common/ChartSkeleton';
+
+export function NetworkLatencyChart({ isLoading, points, title = "Network Latency", className }: { isLoading?: boolean; points: LatencyPoint[], title?: string, className?: string }) {
+  if (isLoading) {
+    return <ChartSkeleton />;
+  }
+
   return (
       <div className={`w-full h-full flex-1 min-h-0 flex flex-col ${className || ''}`}>
         <div className="flex justify-between items-center mb-8">

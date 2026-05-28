@@ -41,13 +41,11 @@ const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?:
   );
 };
 
-export function PortfolioRevenueShareTrajectoryChart({tenantVelocity, portfolioVelocity, className}: {
-  tenantVelocity: FinancialVelocityPoint[]; portfolioVelocity: FinancialVelocityPoint[]; className?: string;
-}) {
+export function PortfolioRevenueShareTrajectoryChart({isLoading, tenantVelocity, portfolioVelocity, className}: { isLoading?: boolean; tenantVelocity: FinancialVelocityPoint[]; portfolioVelocity: FinancialVelocityPoint[]; className?: string; }) {
   const rows = buildRows(tenantVelocity, portfolioVelocity);
 
   return (
-    <ChartPanel
+    <ChartPanel isLoading={isLoading}
       title="Portfolio Revenue Share Trajectory"
       className={className || ''}
       bodyClassName="w-full h-full flex flex-col flex-1 min-h-0"

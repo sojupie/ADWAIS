@@ -50,7 +50,7 @@ export function FactPanel({ label, value, isLoading, valueColor, extra }: FactPa
                 </span>
 
                 {!isLoading && extraText !== '' && (
-                    <span className={`text-[14px] font-bold uppercase tracking-wider ${extraColor} ml-1`}>
+                    <span className={`text-lg font-bold uppercase tracking-wider ${extraColor} ml-1`}>
                         {extraText}
                     </span>
                 )}

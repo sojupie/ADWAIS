@@ -16,6 +16,11 @@ public interface IFinancialService
     Task<IReadOnlyList<VelocityPointDto>> GetVelocityAsync(Timeframe timeframe, Guid? tenantId = null);
 
     /// <summary>
+    /// Retrieves running accumulated revenue for current and previous periods.
+    /// </summary>
+    Task<IReadOnlyList<AccumulatedRevenuePointDto>> GetAccumulatedRevenueAsync(Timeframe timeframe, Guid? tenantId = null);
+
+    /// <summary>
     /// Identifies tenants with the most extreme growth.
     /// </summary>
     Task<IReadOnlyList<GrowthExtremeDto>> GetGrowthExtremesAsync(Timeframe timeframe);
@@ -23,7 +28,7 @@ public interface IFinancialService
     /// <summary>
     /// Analyzes revenue efficiency across all tenants, returning AOV, portfolio share, and growth velocity.
     /// </summary>
-    Task<IReadOnlyList<RevenueEfficiencyDto>> GetRevenueEfficiencyAsync(Timeframe timeframe);
+    Task<RevenueEfficiencyDto> GetRevenueEfficiencyAsync(Timeframe timeframe);
 
     /// <summary>
     /// Analyzes order volume anomalies by comparing current volume against a baseline period.

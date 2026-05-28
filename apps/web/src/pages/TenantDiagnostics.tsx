@@ -1,33 +1,33 @@
 import { formatCurrency, formatNumber } from '@utils';
 import { FactPanel } from '../components/common/FactPanel';
-import { LoadingIcon } from '../components/common/LoadingIcon';
 import { CumulativeGrowthDeltaChart } from '../components/TenantSpecific/CumulativeGrowthDeltaChart';
 import { OrderValueDistributionChart } from '../components/TenantSpecific/OrderValueDistributionChart';
-import { PortfolioRevenueShareTrajectoryChart } from '../components/TenantSpecific/PortfolioRevenueShareTrajectoryChart';
-import { TenantRevenueVelocityChart } from '../components/TenantSpecific/TenantRevenueVelocityChart';
-import { 
+import { AccumulatedRevenueChart } from '../components/financial/AccumulatedRevenueChart';
+import { TransactionDensityChart } from '../components/financial/TransactionDensityChart';
+import {
   useGlobalKpis, 
-  useFinancialVelocity, 
+  useAccumulatedRevenue,
   useCumulativeGrowthDelta, 
-  useOrderDistribution 
+  useOrderDistribution,
+  useTransactionDensity
 } from '../hooks/useFinancialQueries';
 
 interface Props {
   tenantId: string;
   tenantName: string;
+  tenantType: string;
   timeframe: string;
   onBack: () => void;
 }
 
-export function TenantDiagnostics({ tenantId, tenantName, timeframe, onBack }: Props) {
+export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe, onBack }: Props) {
   const kpiQuery = useGlobalKpis(timeframe, tenantId);
-  const velocityQuery = useFinancialVelocity(timeframe, tenantId);
-  const portfolioVelocityQuery = useFinancialVelocity(timeframe);
+  const accumulatedQuery = useAccumulatedRevenue(timeframe, tenantId);
+  const densityQuery = useTransactionDensity(timeframe, tenantId);
   const deltaQuery = useCumulativeGrowthDelta(timeframe, tenantId);
   const orderQuery = useOrderDistribution(timeframe, tenantId);
 
   const kpis = kpiQuery.data;
-  const growthColor = kpis && kpis.revenueGrowthPercentage > 0 ? 'green' : kpis && kpis.revenueGrowthPercentage < 0 ? 'red' : undefined;
 
   return (
     <div className="flex flex-col gap-6 w-full min-h-full animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -41,71 +41,73 @@ export function TenantDiagnostics({ tenantId, tenantName, timeframe, onBack }: P
           &larr;
         </button>
         <div>
-          <h1 className="text-2xl font-extrabold text-brand-text tracking-tight m-0">{tenantName} Diagnostics</h1>
+          <div className="flex items-center gap-3 mb-1">
+            <h1 className="text-2xl font-extrabold text-brand-text tracking-tight m-0">{tenantName} Diagnostics</h1>
+            <span 
+              className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-widest"
+              style={{
+                backgroundColor: `color-mix(in srgb, var(--color-chart-${tenantType === 'B2C' ? '1' : tenantType === 'B2B' ? '2' : '3'}) 15%, transparent)`,
+                color: `var(--color-chart-${tenantType === 'B2C' ? '1' : tenantType === 'B2B' ? '2' : '3'})`
+              }}
+            >
+              {tenantType}
+            </span>
+          </div>
           <p className="text-sm text-slate-500 m-0 font-medium tracking-wide">Isolated entity performance view for the {timeframe} period.</p>
         </div>
       </header>
 
-      <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 flex-shrink-0">
+      <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 flex-shrink-0">
         <FactPanel
           label={`Revenue (${timeframe})`}
           value={kpis ? formatCurrency(kpis.currentRevenue) : '\u2014'}
           isLoading={kpiQuery.isLoading}
-        />
-        <FactPanel
-          label={`Growth (vs Prev)`}
-          value={kpis ? `${kpis.revenueGrowthPercentage >= 0 ? '+' : ''}${kpis.revenueGrowthPercentage.toFixed(2)}%` : '\u2014'}
-          valueColor={growthColor as any}
-          isLoading={kpiQuery.isLoading}
+          extra={kpis?.revenueGrowthPercentage !== undefined
+            ? { type: 'PoP', value: kpis.revenueGrowthPercentage }
+            : undefined}
         />
         <FactPanel
           label="Transaction Volume"
           value={kpis ? formatNumber(kpis.transactionVolume) : '\u2014'}
           isLoading={kpiQuery.isLoading}
+          extra={kpis?.volumeGrowthPercentage !== undefined
+            ? { type: 'PoP', value: kpis.volumeGrowthPercentage }
+            : undefined}
         />
         <FactPanel
           label="Average Order Value"
           value={kpis ? formatCurrency(kpis.averageOrderValue) : '\u2014'}
           isLoading={kpiQuery.isLoading}
+          extra={kpis?.aovGrowthPercentage !== undefined
+            ? { type: 'PoP', value: kpis.aovGrowthPercentage }
+            : undefined}
         />
       </section>
 
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 pb-4">
-        {velocityQuery.isLoading ? (
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-8 flex items-center justify-center h-full">
-            <LoadingIcon />
-          </div>
-        ) : velocityQuery.data ? (
-          <TenantRevenueVelocityChart points={velocityQuery.data} className="h-full min-h-[350px]" />
-        ) : null}
+        <AccumulatedRevenueChart 
+          points={((accumulatedQuery.data as any) || [])} 
+          isLoading={accumulatedQuery.isLoading} 
+          className="h-full min-h-[350px]" 
+        />
         
-        {velocityQuery.isLoading || portfolioVelocityQuery.isLoading ? (
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-8 flex items-center justify-center h-full">
-            <LoadingIcon />
-          </div>
-        ) : velocityQuery.data && portfolioVelocityQuery.data ? (
-          <PortfolioRevenueShareTrajectoryChart
-            tenantVelocity={velocityQuery.data}
-            portfolioVelocity={portfolioVelocityQuery.data}
-            className="h-full min-h-[350px]"
-          />
-        ) : null}
+        <TransactionDensityChart
+          points={((densityQuery.data as any) || [])}
+          isLoading={densityQuery.isLoading}
+          className="h-full min-h-[350px]"
+        />
 
-        {deltaQuery.isLoading ? (
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-8 flex items-center justify-center h-full">
-            <LoadingIcon />
-          </div>
-        ) : deltaQuery.data ? (
-          <CumulativeGrowthDeltaChart points={deltaQuery.data} className="h-full min-h-[350px]" />
-        ) : null}
+        <CumulativeGrowthDeltaChart 
+          points={((deltaQuery.data as any) || [])} 
+          isLoading={deltaQuery.isLoading} 
+          className="h-full min-h-[350px]" 
+        />
 
-        {orderQuery.isLoading ? (
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-8 flex items-center justify-center h-full">
-            <LoadingIcon />
-          </div>
-        ) : orderQuery.data ? (
-          <OrderValueDistributionChart bins={orderQuery.data} className="h-full min-h-[350px]" />
-        ) : null}
+        <OrderValueDistributionChart 
+          bins={((orderQuery.data as any) || [])} 
+          isLoading={orderQuery.isLoading} 
+          className="h-full min-h-[350px]" 
+        />
       </div>
     </div>
   );

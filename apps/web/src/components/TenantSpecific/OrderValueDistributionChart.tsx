@@ -11,7 +11,7 @@ import type { OrderBin } from '@types';
 import { formatNumber } from '@utils';
 import { ChartPanel } from '../common/ChartPanel';
 
-const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: any[]; label?: string }) => {
+const CustomTooltip = ({ active, payload, label }: { isLoading?: boolean;  active?: boolean; payload?: any[]; label?: string }) => {
   if (!active || !payload?.length) return null;
 
   return (
@@ -25,9 +25,9 @@ const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?:
   );
 };
 
-export function OrderValueDistributionChart({ bins, className }: { bins: OrderBin[], className?: string }) {
+export function OrderValueDistributionChart({ isLoading, bins, className }: { isLoading?: boolean;  bins: OrderBin[], className?: string }) {
   return (
-    <ChartPanel
+    <ChartPanel isLoading={isLoading}
       title="Order Value Distribution"
       className={className || ''}
       bodyClassName="w-full h-full flex flex-col flex-1 min-h-0"

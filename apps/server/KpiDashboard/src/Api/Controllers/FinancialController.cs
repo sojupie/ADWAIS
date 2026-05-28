@@ -22,7 +22,30 @@ public class FinancialController(IFinancialService financialService) : Controlle
             result.PreviousRevenue,
             result.RevenueGrowthPercentage,
             result.TransactionVolume,
-            result.AverageOrderValue));
+            result.VolumeGrowthPercentage,
+            result.AverageOrderValue,
+            result.AovGrowthPercentage,
+            result.ActiveTenants,
+            result.ActiveTenantsGrowthPercentage,
+            result.AverageRevenuePerTenant,
+            result.ArptGrowthPercentage));
+    }
+
+    /// <summary>
+    /// Daily/Hourly time-series: current vs. previous period accumulated revenue.
+    /// Scopes to a single tenant if tenantId is provided, otherwise portfolio-wide.
+    /// </summary>
+    [HttpGet("accumulated-revenue")]
+    public async Task<ActionResult<IEnumerable<AccumulatedRevenuePointResponseDto>>> GetAccumulatedRevenue([FromQuery] FinancialRequestDto request)
+    {
+        var result = await financialService.GetAccumulatedRevenueAsync(request.Timeframe, request.TenantId);
+        return Ok(result.Select(v => new AccumulatedRevenuePointResponseDto(
+                v.Label,
+                v.Timestamp,
+                v.CurrentRevenue,
+                v.PreviousRevenue,
+                v.CurrentAccumulated,
+                v.PreviousAccumulated)).ToList());
     }
 
     /// <summary>
@@ -62,18 +85,21 @@ public class FinancialController(IFinancialService financialService) : Controlle
     /// Portfolio view only.
     /// </summary>
     [HttpGet("revenue-efficiency")]
-    public async Task<ActionResult<IEnumerable<RevenueEfficiencyResponseDto>>> GetRevenueEfficiency([FromQuery] PortfolioRequestDto request)
+    public async Task<ActionResult<RevenueEfficiencyResponseDto>> GetRevenueEfficiency([FromQuery] PortfolioRequestDto request)
     {
         var result = await financialService.GetRevenueEfficiencyAsync(request.Timeframe);
-        return Ok(result.Select(r => new RevenueEfficiencyResponseDto
-        {
-            TenantId = r.TenantId,
-            TenantName = r.TenantName,
-            Type = r.Type,
-            AverageOrderValue = r.AverageOrderValue,
-            PortfolioSharePercentage = r.PortfolioSharePercentage,
-            GrowthVelocity = r.GrowthVelocity
-        }));
+        return Ok(new RevenueEfficiencyResponseDto(
+            result.GlobalAverageOrderValue,
+            result.MedianPortfolioShare,
+            result.Tenants.Select(r => new RevenueEfficiencyTenantResponseDto(
+                r.TenantId,
+                r.TenantName,
+                r.Type,
+                r.AverageOrderValue,
+                r.PortfolioSharePercentage,
+                r.GrowthVelocity
+            )).ToList()
+        ));
     }
 
     /// <summary>
@@ -103,9 +129,11 @@ public class FinancialController(IFinancialService financialService) : Controlle
         var result = await financialService.GetMomentumAsync(request.Timeframe);
         return Ok(new MomentumResponseDto(
             result.MedianBaselineRevenue,
+            result.GlobalGrowthPercentage,
             result.Tenants.Select(t => new MomentumTenantResponseDto(
                 t.TenantId,
                 t.TenantName,
+                t.Type,
                 t.BaselineRevenue,
                 t.GrowthPercentage,
                 t.CurrentRevenue)).ToList()));
@@ -164,6 +192,8 @@ public class FinancialController(IFinancialService financialService) : Controlle
         return Ok(result.Select(p => new CumulativeGrowthDeltaPointResponseDto(
                 p.Label,
                 p.Timestamp,
+                p.CurrentCumulative,
+                p.PreviousCumulative,
                 p.CumulativeGrowthDelta)).ToList());
     }
 }

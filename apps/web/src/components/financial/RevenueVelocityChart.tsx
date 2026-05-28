@@ -11,10 +11,10 @@ import type { FinancialVelocityPoint } from '@types';
 import { formatCompact } from '@utils';
 import { ChartPanel } from '../common/ChartPanel';
 
-export function RevenueVelocityChart({ points, className }: { points: FinancialVelocityPoint[], className?: string })
+export function RevenueVelocityChart({ isLoading, points, className }: { isLoading?: boolean;  points: FinancialVelocityPoint[], className?: string })
 {
   return (
-      <ChartPanel
+      <ChartPanel isLoading={isLoading}
           title="Revenue Velocity"
           className={className}
           legend={
@@ -56,7 +56,7 @@ const GraphTooltip = ({ active, payload, label }: any) => {
 };
 
 //can probably move a lot of styling over to the styling file
-function RevenueVelocityGraphJSX({ points }: { points: FinancialVelocityPoint[] }) {
+function RevenueVelocityGraphJSX({ points }: { isLoading?: boolean;  points: FinancialVelocityPoint[] }) {
   return (
     <ResponsiveContainer width="100%" height="100%">
       <LineChart data={points} margin={{ top: 12, right: 8, left: 0, bottom: 0 }}>

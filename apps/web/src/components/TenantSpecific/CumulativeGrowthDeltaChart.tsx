@@ -11,23 +11,37 @@ import type { CumulativeGrowthDeltaPoint } from '@types';
 import { formatCompact } from '@utils';
 import { ChartPanel } from '../common/ChartPanel';
 
-const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: any[]; label?: string }) => {
+const CustomTooltip = ({ active, payload, label }: { isLoading?: boolean;  active?: boolean; payload?: any[]; label?: string }) => {
   if (!active || !payload?.length) return null;
+
+  const point = payload[0].payload as CumulativeGrowthDeltaPoint;
 
   return (
     <div className="bg-white border border-slate-100 rounded-lg shadow-lg p-4 text-sm animate-in fade-in zoom-in duration-200">
       <p className="font-bold text-slate-900 mb-3 border-b border-slate-50 pb-2">{label}</p>
-      <p className="flex justify-between gap-6">
-        <span className="text-slate-500">Delta:</span>
-        <strong className="text-brand-btn-primary">{formatCompact(payload[0].value)} SEK</strong>
-      </p>
+      <div className="space-y-2">
+        <p className="flex justify-between gap-6">
+          <span className="text-slate-500">Current Cumulative:</span>
+          <strong className="text-slate-700">{formatCompact(point.currentCumulative)} SEK</strong>
+        </p>
+        <p className="flex justify-between gap-6">
+          <span className="text-slate-500">Previous Cumulative:</span>
+          <strong className="text-slate-700">{formatCompact(point.previousCumulative)} SEK</strong>
+        </p>
+        <p className="flex justify-between gap-6 pt-1 border-t border-slate-50">
+          <span className="text-slate-500">Delta:</span>
+          <strong className={point.cumulativeGrowthDelta >= 0 ? 'text-growth' : 'text-decline'}>
+            {point.cumulativeGrowthDelta > 0 ? '+' : ''}{formatCompact(point.cumulativeGrowthDelta)} SEK
+          </strong>
+        </p>
+      </div>
     </div>
   );
 };
 
-export function CumulativeGrowthDeltaChart({ points, className }: { points: CumulativeGrowthDeltaPoint[], className?: string }) {
+export function CumulativeGrowthDeltaChart({ isLoading, points, className }: { isLoading?: boolean;  points: CumulativeGrowthDeltaPoint[], className?: string }) {
   return (
-    <ChartPanel
+    <ChartPanel isLoading={isLoading}
       title="Cumulative Growth Delta (Absolute)"
       className={className || ''}
       bodyClassName="w-full h-full flex flex-col flex-1 min-h-0"

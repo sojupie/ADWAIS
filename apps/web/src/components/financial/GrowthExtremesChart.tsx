@@ -15,7 +15,7 @@ import { ChartPanel } from '../common/ChartPanel';
 
 const formatGrowth = (value: number) => `${value >= 0 ? '+' : ''}${value.toFixed(1)}%`;
 
-const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: any[] }) => {
+const CustomTooltip = ({ active, payload }: { isLoading?: boolean;  active?: boolean; payload?: any[] }) => {
   if (!active || !payload?.length) return null;
 
   const tenant = payload[0].payload as GrowthExtreme;
@@ -43,7 +43,7 @@ const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: any[] 
   );
 };
 
-export function GrowthExtremesChart({ tenants, onTenantSelect }: {
+export function GrowthExtremesChart({ isLoading, tenants, onTenantSelect }: { isLoading?: boolean; 
   tenants: GrowthExtreme[]; onTenantSelect?: (tenantId: string) => void;
 }) {
   if (tenants.length === 0) return null;
@@ -55,7 +55,7 @@ export function GrowthExtremesChart({ tenants, onTenantSelect }: {
   const chartHeight = Math.max(280, tenants.length * 30);
 
   return (
-    <ChartPanel title="Growth Extremes (Relative & Absolute)" bodyClassName="extremes-chart">
+    <ChartPanel isLoading={isLoading} title="Growth Extremes (Relative & Absolute)" bodyClassName="extremes-chart">
       <ResponsiveContainer width="100%" height={chartHeight}>
         <BarChart
           data={tenants}

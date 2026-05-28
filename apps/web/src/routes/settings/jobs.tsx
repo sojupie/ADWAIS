@@ -97,9 +97,8 @@ function BackgroundJobsView() {
               </button>
             ))}
           </div>
-        </section>
 
-        <section className="bg-gradient-to-br from-slate-800 to-brand-text border border-slate-700 rounded-2xl shadow-sm p-6 text-white relative overflow-hidden">
+        <div className="bg-gradient-to-br from-slate-800 to-brand-text border border-slate-700 rounded-2xl shadow-sm p-6 text-white relative overflow-hidden">
           <div className="absolute top-0 right-0 p-8 opacity-10">
             <Database size={100} />
           </div>
@@ -158,8 +157,8 @@ function BackgroundJobsView() {
               </div>
             </div>
           </div>
-        </section>
-        <section className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col break-inside-avoid">
+        </div>
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col break-inside-avoid">
            <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-slate-50/50">
              <div className="flex items-center gap-3">
                <div className="p-2 bg-slate-200 text-slate-700 rounded-lg">
@@ -217,7 +216,7 @@ function BackgroundJobsView() {
               </div>
             )}
           </div>
-        </section>
+        </div>
         </div>
       </section>
 

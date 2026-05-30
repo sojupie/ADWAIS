@@ -1,4 +1,4 @@
-using Adwais.Infrastructure.Services;
+using Adwais.Application.Interfaces;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 

@@ -1,4 +1,4 @@
-using Adwais.Domain.Entities.Office.Enums;
+using Adwais.Domain.Enums;
 
 namespace Adwais.Domain.Entities.Office;
 

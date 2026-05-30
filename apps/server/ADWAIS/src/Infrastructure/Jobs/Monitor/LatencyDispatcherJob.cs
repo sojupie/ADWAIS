@@ -1,3 +1,4 @@
+using Adwais.Infrastructure.Persistence;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,14 +18,16 @@ public class LatencyDispatcherJob(IDbContextFactory<AnalyticsDbContext> dbContex
             .ToListAsync();
 
         var end = DateTimeOffset.UtcNow;
+        int index = 0;
 
         foreach (var monitor in monitors)
         {
             var start = monitor.LastLatencyUpdate ?? end.AddMinutes(-globalInterval);
 
-            backgroundJobClient.Enqueue<UpdateMonitorLatencyJob>(x => x.ExecuteAsync(monitor.Id, start, end));
+            backgroundJobClient.Schedule<UpdateMonitorLatencyJob>(
+                x => x.ExecuteAsync(monitor.Id, start, end), 
+                TimeSpan.FromSeconds(index * 2));
+            index++;
         }
     }
 }
-
-

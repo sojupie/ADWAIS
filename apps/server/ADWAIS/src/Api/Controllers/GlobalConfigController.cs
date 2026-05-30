@@ -1,10 +1,10 @@
 using Adwais.Api.DTOs.GlobalConfig;
 using Adwais.Domain.Entities;
-using Adwais.Infrastructure;
+using Adwais.Infrastructure.Persistence;
 using Adwais.Infrastructure.Helpers;
 using Adwais.Infrastructure.Jobs;
 using Adwais.Infrastructure.Jobs.Monitor;
-using Adwais.Infrastructure.Services;
+using Adwais.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Hangfire;
@@ -95,5 +95,6 @@ public class GlobalConfigController(
         return apiKey[..4] + "****" + apiKey[^4..];
     }
 }
+
 
 

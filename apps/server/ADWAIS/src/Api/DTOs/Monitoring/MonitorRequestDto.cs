@@ -1,3 +1,4 @@
+using Adwais.Domain.Entities;
 using Adwais.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,7 +14,7 @@ public class MonitorRequestDto
     /// If null, metrics represent the global portfolio total.
     /// </summary>
     [FromQuery(Name = "tenantId")] 
-    public Guid? TenantId { get; set; }
+    public TenantId? TenantId { get; set; }
     
     /// <summary>
     /// Optional. Scopes the metrics to a specific monitor. 

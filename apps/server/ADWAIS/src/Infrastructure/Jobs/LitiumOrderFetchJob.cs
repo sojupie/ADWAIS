@@ -1,5 +1,6 @@
+using Adwais.Infrastructure.Persistence;
 using Hangfire;
-using Adwais.Infrastructure.Services;
+using Adwais.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -76,5 +77,6 @@ public class LitiumOrderFetchJob(
             dispatched, tenants.Count);
     }
 }
+
 
 

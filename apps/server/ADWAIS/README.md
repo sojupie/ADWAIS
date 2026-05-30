@@ -7,7 +7,7 @@ The analytics and monitoring server that aggregates data from external resources
 *   **Architecture**: Clean Architecture structure with loose coupling and clear separation of concerns.
 *   **Target Runtime**: .NET 10.0
 *   **Database Integration**: PostgreSQL (via Entity Framework Core with Snake Case naming convention).
-    *   *Convention*: Database schema configurations, attributes, and model mappings are managed **strictly** using Fluent API inside [`AnalyticsDbContext.cs`](file:///c:/Users/ollem/Git/motillo%20project/dashboard/apps/server/Adwais/src/Infrastructure/AnalyticsDbContext.cs). Do **not** use EF Core data annotations on the domain entity models.
+    *   *Convention*: Database schema configurations, attributes, and model mappings are managed **strictly** using Fluent API inside [`AnalyticsDbContext.cs`](file:///c:/Users/ollem/Git/motillo%20project/dashboard/apps/server/Adwais/src/Infrastructure/Persistence/AnalyticsDbContext.cs). Do **not** use EF Core data annotations on the domain entity models.
 *   **Background Ingestion Processing**: Hangfire (configured with PostgreSQL storage) executes scheduled syncing jobs.
 
 ---
@@ -16,15 +16,28 @@ The analytics and monitoring server that aggregates data from external resources
 
 1.  **Api (Presentation Layer)**:
     *   ASP.NET Core Controllers serving RESTful endpoints.
-    *   DTO schemas defining request/response structures.
+    *   References the `Application` layer and does not directly compile against `Infrastructure` for service execution.
+2.  **Application (Application & Use-Case Layer)**:
+    *   Application services coordinating business logic and database access via `IApplicationDbContext`.
+    *   DTO models defining requests and responses.
     *   `FluentValidation` validators protecting endpoint inputs.
-2.  **Domain (Core Enterprise Logic)**:
-    *   Pure business entities (e.g. Orders, Latency data, Tenants).
-    *   Domain enums and system-level configuration parameters.
-3.  **Infrastructure (Implementation Layer)**:
-    *   EF Core DbContext and database migration history.
-    *   External clients (e.g. UptimeRobot REST client).
-    *   Hangfire task scheduler and background sync dispatchers.
+    *   Interfaces decoupling external services and caching dependencies.
+3.  **Domain (Core Enterprise Logic)**:
+    *   Pure business entities (e.g., Orders, Latency data, Tenants).
+    *   Domain enums under the `Domain/Enums` folder.
+    *   No external dependencies or direct dependency on outer layers.
+4.  **Infrastructure (Implementation Layer)**:
+    *   EF Core `AnalyticsDbContext` implementing `IApplicationDbContext` and migrations.
+    *   Implementations of cache services, Hangfire jobs, and external API clients (UptimeRobot, Litium).
+
+---
+
+## Domain Design Patterns
+
+*   **Parse, Don't Check**: Strong typing is enforced at API boundaries and ingestion points rather than performing downstream validation on raw primitives:
+    *   **TenantId**: The `TenantId` record struct wraps a `Guid` and replaces raw `Guid` parameters. Custom model binding and JSON converters are registered to transparently serialize/deserialize it.
+    *   **ResolvedPeriod**: Timeframe requests are parsed into a validated `ResolvedPeriod` at the controller boundary before being passed to business services.
+    *   **OrderState**: External order state strings are parsed into an `OrderState` enum at ingestion, avoiding raw string comparisons.
 
 ---
 

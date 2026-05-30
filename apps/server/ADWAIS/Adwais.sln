@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72D-47B6-A68D-7590B98EB39B}"
 	ProjectSection(SolutionItems) = preProject
@@ -10,6 +10,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Adwais.Domain", "src\Domain\Adwais.Domain.csproj", "{A5A775C1-09B4-489A-963D-3C464B9E9076}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Adwais.Infrastructure", "src\Infrastructure\Adwais.Infrastructure.csproj", "{802C24FA-A13E-4EF4-BC27-B5774DA161B5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Application", "Application", "{22BAF98C-8415-17C4-B26A-D537657BC863}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Adwais.Application", "src\Application\Adwais.Application.csproj", "{74F55D32-D430-4368-94F1-B55359D11E22}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,6 +61,18 @@ Global
 		{802C24FA-A13E-4EF4-BC27-B5774DA161B5}.Release|x64.Build.0 = Release|Any CPU
 		{802C24FA-A13E-4EF4-BC27-B5774DA161B5}.Release|x86.ActiveCfg = Release|Any CPU
 		{802C24FA-A13E-4EF4-BC27-B5774DA161B5}.Release|x86.Build.0 = Release|Any CPU
+		{74F55D32-D430-4368-94F1-B55359D11E22}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{74F55D32-D430-4368-94F1-B55359D11E22}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{74F55D32-D430-4368-94F1-B55359D11E22}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{74F55D32-D430-4368-94F1-B55359D11E22}.Debug|x64.Build.0 = Debug|Any CPU
+		{74F55D32-D430-4368-94F1-B55359D11E22}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{74F55D32-D430-4368-94F1-B55359D11E22}.Debug|x86.Build.0 = Debug|Any CPU
+		{74F55D32-D430-4368-94F1-B55359D11E22}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{74F55D32-D430-4368-94F1-B55359D11E22}.Release|Any CPU.Build.0 = Release|Any CPU
+		{74F55D32-D430-4368-94F1-B55359D11E22}.Release|x64.ActiveCfg = Release|Any CPU
+		{74F55D32-D430-4368-94F1-B55359D11E22}.Release|x64.Build.0 = Release|Any CPU
+		{74F55D32-D430-4368-94F1-B55359D11E22}.Release|x86.ActiveCfg = Release|Any CPU
+		{74F55D32-D430-4368-94F1-B55359D11E22}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -65,5 +81,7 @@ Global
 		{C80275F0-6B87-40A3-88F1-F929FCFC7345} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{A5A775C1-09B4-489A-963D-3C464B9E9076} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{802C24FA-A13E-4EF4-BC27-B5774DA161B5} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{22BAF98C-8415-17C4-B26A-D537657BC863} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{74F55D32-D430-4368-94F1-B55359D11E22} = {22BAF98C-8415-17C4-B26A-D537657BC863}
 	EndGlobalSection
 EndGlobal

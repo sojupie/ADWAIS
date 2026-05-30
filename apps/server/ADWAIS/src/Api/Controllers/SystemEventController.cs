@@ -1,5 +1,5 @@
 using Adwais.Domain.Entities;
-using Adwais.Infrastructure;
+using Adwais.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,7 +23,7 @@ public class SystemEventController(IDbContextFactory<AnalyticsDbContext> dbConte
     public async Task<ActionResult<IEnumerable<SystemEvent>>> GetEvents(
         [FromQuery] int take = 50, 
         [FromQuery] SystemEventLevel? minLevel = null,
-        [FromQuery] Guid? tenantId = null)
+        [FromQuery] TenantId? tenantId = null)
     {
         await using var db = await dbContextFactory.CreateDbContextAsync();
         
@@ -65,5 +65,6 @@ public class SystemEventController(IDbContextFactory<AnalyticsDbContext> dbConte
         return Ok(new { DeletedCount = count });
     }
 }
+
 
 

@@ -1,7 +1,7 @@
 using Adwais.Api.DTOs.Ingestion;
 using Hangfire;
-using Adwais.Infrastructure;
-using Adwais.Infrastructure.Services;
+using Adwais.Infrastructure.Persistence;
+using Adwais.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -54,5 +54,6 @@ public class IngestionController(
         return Accepted(new { JobId = jobId });
     }
 }
+
 
 

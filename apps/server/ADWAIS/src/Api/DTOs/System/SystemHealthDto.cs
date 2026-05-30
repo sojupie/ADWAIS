@@ -13,6 +13,7 @@ public record SystemHealthDto(
 );
 
 public record HangfireHealthDto(
+    string Status, // "Healthy", "Warning", "Failed"
     long FailedCount,
     long ProcessingCount,
     long EnqueuedCount,
@@ -20,9 +21,18 @@ public record HangfireHealthDto(
 );
 
 public record SyncHealthDto(
+    string Status, // "Healthy", "Degraded", "Failed"
     int TenantsWithErrorsCount,
     int MonitorsWithErrorsCount,
     string? GlobalSyncError
 );
 
-
+public record BackgroundJobStatusDto(
+    string JobId,
+    string JobName,
+    string? JobArgs,
+    string State,
+    DateTime? CreatedAt,
+    double? DurationSeconds,
+    string? ExceptionMessage
+);

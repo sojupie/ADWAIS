@@ -1,16 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
-using Adwais.Domain.DTOs.Financial.Upstream;
+using Adwais.Application.DTOs.Financial.Upstream;
 using Adwais.Domain.Entities;
-using Adwais.Infrastructure;
+using Adwais.Domain.Enums;
+using Adwais.Infrastructure.Persistence;
 using Microsoft.Extensions.Logging;
 
-namespace Adwais.Infrastructure.Services;
+using Adwais.Application.Interfaces;
 
-public interface ILitiumIngestionService
-{
-    Task<int> ExecuteIngestionAsync(Guid tenantId, DateTimeOffset startDate, DateTimeOffset endDate, CancellationToken ct = default);
-}
+namespace Adwais.Infrastructure.Services;
 
 public class LitiumIngestionService(
     IDbContextFactory<AnalyticsDbContext> contextFactory,
@@ -21,7 +19,7 @@ public class LitiumIngestionService(
 {
     private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
 
-    public async Task<int> ExecuteIngestionAsync(Guid tenantId, DateTimeOffset startDate, DateTimeOffset endDate, CancellationToken ct = default)
+    public async Task<int> ExecuteIngestionAsync(TenantId tenantId, DateTimeOffset startDate, DateTimeOffset endDate, CancellationToken ct = default)
     {
         Tenant tenant;
         await using (var context = await contextFactory.CreateDbContextAsync(ct))
@@ -49,14 +47,17 @@ public class LitiumIngestionService(
         }
         catch (Exception ex)
         {
-            await eventService.LogErrorAsync(nameof(LitiumIngestionService), $"Ingestion failed for tenant {tenantId}", ex, tenantId);
+            var step = ex.Data.Contains("Step") ? ex.Data["Step"]?.ToString() : "Executing Ingestion Core";
+            var detailedErrorMessage = $"Failed during step '{step}': {ex.Message}";
+            
+            await eventService.LogErrorAsync(nameof(LitiumIngestionService), $"Ingestion failed: {detailedErrorMessage}", ex, tenantId);
             
             try
             {
                 await using var errorContext = await contextFactory.CreateDbContextAsync(CancellationToken.None);
-                var t = await errorContext.Tenants.FirstAsync(x => x.Id == tenantId, ct);
-                t.LastSyncError = ex.Message;
-                await errorContext.SaveChangesAsync(ct);
+                var t = await errorContext.Tenants.FirstAsync(x => x.Id == tenantId, CancellationToken.None);
+                t.LastSyncError = detailedErrorMessage;
+                await errorContext.SaveChangesAsync(CancellationToken.None);
             }
             catch (Exception innerEx)
             {
@@ -70,10 +71,10 @@ public class LitiumIngestionService(
             try
             {
                 await using var cleanupContext = await contextFactory.CreateDbContextAsync(CancellationToken.None);
-                var t = await cleanupContext.Tenants.FirstAsync(x => x.Id == tenantId, cancellationToken: ct);
+                var t = await cleanupContext.Tenants.FirstAsync(x => x.Id == tenantId, cancellationToken: CancellationToken.None);
                 t.CurrentlyFetching = false;
                 t.LastPolled = DateTimeOffset.UtcNow;
-                await cleanupContext.SaveChangesAsync(ct);
+                await cleanupContext.SaveChangesAsync(CancellationToken.None);
             }
             catch (Exception ex)
             {
@@ -136,10 +137,16 @@ public class LitiumIngestionService(
                     {
                         var o = litiumPayload.Orders[i]!;
                         pIds[i] = o.Id;
-                        pTenantIds[i] = tenant.Id;
+                        pTenantIds[i] = tenant.Id.Value;
                         pOrganizationSystemIds[i] = o.OrganizationSystemId;
-                        pOrderStatus[i] = o.OrderStatus!;
-                        pOrderIds[i] = o.OrderNumber!;
+                        
+                        if (!Enum.TryParse<OrderState>(o.OrderStatus, true, out var orderState))
+                        {
+                            orderState = OrderState.Unknown;
+                        }
+                        pOrderStatus[i] = orderState.ToString();
+                        
+                        pOrderIds[i] = o.OrderNumber;
                         pDatesCreated[i] = o.CreatedDate.ToUniversalTime();
                         pIncVat[i] = o.TotalValueIncludingVat;
                         pExcVat[i] = o.TotalValueExcludingVat;

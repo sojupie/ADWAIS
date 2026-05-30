@@ -1,4 +1,5 @@
-using Adwais.Infrastructure.Services.Monitoring;
+using Adwais.Infrastructure.Persistence;
+using Adwais.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -39,5 +40,6 @@ public class UpdateGlobalUptimeRobotUserStatsJob(
         }
     }
 }
+
 
 

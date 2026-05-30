@@ -175,12 +175,14 @@ export interface TenantResponseDto {
 export interface SystemHealthDto {
   databaseStatus: string;
   hangfire: {
+    status: string;
     failedCount: number;
     processingCount: number;
     enqueuedCount: number;
     scheduledCount: number;
   };
   sync: {
+    status: string;
     tenantsWithErrorsCount: number;
     monitorsWithErrorsCount: number;
     globalSyncError: string | null;
@@ -189,4 +191,14 @@ export interface SystemHealthDto {
   lastFleetUpdate: string | null;
   lastFleetUptimeUpdate: string | null;
   lastFleetLatencyUpdate: string | null;
+}
+
+export interface BackgroundJobStatusDto {
+  jobId: string;
+  jobName: string;
+  jobArgs: string | null;
+  state: string;
+  createdAt: string | null;
+  durationSeconds: number | null;
+  exceptionMessage: string | null;
 }

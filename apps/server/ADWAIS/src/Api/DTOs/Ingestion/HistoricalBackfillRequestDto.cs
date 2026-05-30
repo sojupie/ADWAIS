@@ -1,3 +1,4 @@
+using Adwais.Domain.Entities;
 namespace Adwais.Api.DTOs.Ingestion;
 
 /// <summary>
@@ -8,7 +9,7 @@ public class HistoricalBackfillRequestDto
     /// <summary>
     /// The ID of the tenant for which to backfill data.
     /// </summary>
-    public Guid TenantId { get; set; }
+    public TenantId TenantId { get; set; }
 
     /// <summary>
     /// The start date for the backfill operation. If null, a default lookback period is used.

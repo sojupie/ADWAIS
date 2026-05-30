@@ -1,6 +1,8 @@
+using Adwais.Application.Common.Models;
 using Adwais.Api.DTOs.Financial;
 using Adwais.Domain.Enums;
-using Adwais.Infrastructure.Services.Financial;
+using Adwais.Application.Interfaces;
+using Adwais.Application.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Adwais.Api.Controllers;
@@ -16,7 +18,8 @@ public class FinancialController(IFinancialService financialService) : Controlle
     [HttpGet("kpis")]
     public async Task<ActionResult<KpiResponseDto>> GetKpis([FromQuery] FinancialRequestDto request)
     {
-        var result = await financialService.GetKpisAsync(request.Timeframe, request.TenantId);
+        var period = TimeframeResolver.Resolve(request.Timeframe);
+        var result = await financialService.GetKpisAsync(period, request.TenantId);
         return Ok(new KpiResponseDto(
             result.CurrentRevenue,
             result.PreviousRevenue,
@@ -38,7 +41,8 @@ public class FinancialController(IFinancialService financialService) : Controlle
     [HttpGet("accumulated-revenue")]
     public async Task<ActionResult<IEnumerable<AccumulatedRevenuePointResponseDto>>> GetAccumulatedRevenue([FromQuery] FinancialRequestDto request)
     {
-        var result = await financialService.GetAccumulatedRevenueAsync(request.Timeframe, request.TenantId);
+        var period = TimeframeResolver.Resolve(request.Timeframe);
+        var result = await financialService.GetAccumulatedRevenueAsync(period, request.TenantId);
         return Ok(result.Select(v => new AccumulatedRevenuePointResponseDto(
                 v.Label,
                 v.Timestamp,
@@ -55,7 +59,8 @@ public class FinancialController(IFinancialService financialService) : Controlle
     [HttpGet("velocity")]
     public async Task<ActionResult<IEnumerable<VelocityPointResponseDto>>> GetVelocity([FromQuery] FinancialRequestDto request)
     {
-        var result = await financialService.GetVelocityAsync(request.Timeframe, request.TenantId);
+        var period = TimeframeResolver.Resolve(request.Timeframe);
+        var result = await financialService.GetVelocityAsync(period, request.TenantId);
         return Ok(result.Select(v => new VelocityPointResponseDto(
                 v.Label,
                 v.Timestamp,
@@ -70,7 +75,8 @@ public class FinancialController(IFinancialService financialService) : Controlle
     [HttpGet("growth-extremes")]
     public async Task<ActionResult<IEnumerable<GrowthExtremeResponseDto>>> GetGrowthExtremes([FromQuery] PortfolioRequestDto request)
     {
-        var result = await financialService.GetGrowthExtremesAsync(request.Timeframe);
+        var period = TimeframeResolver.Resolve(request.Timeframe);
+        var result = await financialService.GetGrowthExtremesAsync(period);
         return Ok(result.Select(g => new GrowthExtremeResponseDto(
             g.TenantId,
             g.TenantName,
@@ -87,7 +93,8 @@ public class FinancialController(IFinancialService financialService) : Controlle
     [HttpGet("revenue-efficiency")]
     public async Task<ActionResult<RevenueEfficiencyResponseDto>> GetRevenueEfficiency([FromQuery] PortfolioRequestDto request)
     {
-        var result = await financialService.GetRevenueEfficiencyAsync(request.Timeframe);
+        var period = TimeframeResolver.Resolve(request.Timeframe);
+        var result = await financialService.GetRevenueEfficiencyAsync(period);
         return Ok(new RevenueEfficiencyResponseDto(
             result.GlobalAverageOrderValue,
             result.MedianPortfolioShare,
@@ -109,7 +116,8 @@ public class FinancialController(IFinancialService financialService) : Controlle
     [HttpGet("volume-anomaly")]
     public async Task<ActionResult<IEnumerable<VolumeAnomalyResponseDto>>> GetVolumeAnomaly([FromQuery] PortfolioRequestDto request)
     {
-        var result = await financialService.GetVolumeAnomalyAsync(request.Timeframe);
+        var period = TimeframeResolver.Resolve(request.Timeframe);
+        var result = await financialService.GetVolumeAnomalyAsync(period);
         return Ok(result.Select(r => new VolumeAnomalyResponseDto
         {
             TenantId = r.TenantId,
@@ -126,7 +134,8 @@ public class FinancialController(IFinancialService financialService) : Controlle
     [HttpGet("momentum")]
     public async Task<ActionResult<MomentumResponseDto>> GetMomentum([FromQuery] PortfolioRequestDto request)
     {
-        var result = await financialService.GetMomentumAsync(request.Timeframe);
+        var period = TimeframeResolver.Resolve(request.Timeframe);
+        var result = await financialService.GetMomentumAsync(period);
         return Ok(new MomentumResponseDto(
             result.MedianBaselineRevenue,
             result.GlobalGrowthPercentage,
@@ -145,7 +154,8 @@ public class FinancialController(IFinancialService financialService) : Controlle
     [HttpGet("daily-revenue-delta")]
     public async Task<ActionResult<IEnumerable<NetGrowthAdditionPointResponseDto>>> GetNetGrowthAddition([FromQuery] DrilldownRequestDto request)
     {
-        var result = await financialService.GetNetGrowthAdditionAsync(request.Timeframe, request.TenantId);
+        var period = TimeframeResolver.Resolve(request.Timeframe);
+        var result = await financialService.GetNetGrowthAdditionAsync(period, request.TenantId);
         return Ok(result.Select(n => new NetGrowthAdditionPointResponseDto(
                 n.Label,
                 n.Timestamp,
@@ -158,7 +168,8 @@ public class FinancialController(IFinancialService financialService) : Controlle
     [HttpGet("order-distribution")]
     public async Task<ActionResult<IEnumerable<OrderBinResponseDto>>> GetOrderDistribution([FromQuery] OrderDistributionRequestDto request)
     {
-        var result = await financialService.GetOrderDistributionAsync(request.Timeframe, request.TenantId, request.BinCount);
+        var period = TimeframeResolver.Resolve(request.Timeframe);
+        var result = await financialService.GetOrderDistributionAsync(period, request.TenantId, request.BinCount);
         return Ok(result.Select(b => new OrderBinResponseDto(
             b.BinLabel,
             b.MinValue,
@@ -175,7 +186,8 @@ public class FinancialController(IFinancialService financialService) : Controlle
     [HttpGet("transaction-density")]
     public async Task<ActionResult<IEnumerable<TransactionDensityPointResponseDto>>> GetTransactionDensity([FromQuery] FinancialRequestDto request)
     {
-        var result = await financialService.GetTransactionDensityAsync(request.Timeframe, request.TenantId);
+        var period = TimeframeResolver.Resolve(request.Timeframe);
+        var result = await financialService.GetTransactionDensityAsync(period, request.TenantId);
         return Ok(result.Select(p => new TransactionDensityPointResponseDto(
             p.DayOfWeek,
             p.Hour,
@@ -190,7 +202,8 @@ public class FinancialController(IFinancialService financialService) : Controlle
     [HttpGet("cumulative-growth-delta")]
     public async Task<ActionResult<IEnumerable<CumulativeGrowthDeltaPointResponseDto>>> GetCumulativeGrowthDelta([FromQuery] FinancialRequestDto request)
     {
-        var result = await financialService.GetCumulativeGrowthDeltaAsync(request.Timeframe, request.TenantId);
+        var period = TimeframeResolver.Resolve(request.Timeframe);
+        var result = await financialService.GetCumulativeGrowthDeltaAsync(period, request.TenantId);
         return Ok(result.Select(p => new CumulativeGrowthDeltaPointResponseDto(
                 p.Label,
                 p.Timestamp,
@@ -199,5 +212,6 @@ public class FinancialController(IFinancialService financialService) : Controlle
                 p.CumulativeGrowthDelta)).ToList());
     }
 }
+
 
 

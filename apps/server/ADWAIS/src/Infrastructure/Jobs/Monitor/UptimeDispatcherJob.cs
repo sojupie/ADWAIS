@@ -1,3 +1,4 @@
+using Adwais.Infrastructure.Persistence;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,11 +17,15 @@ public class UptimeDispatcherJob(IDbContextFactory<AnalyticsDbContext> dbContext
 
         var now = DateTimeOffset.UtcNow;
         var todayStart = new DateTimeOffset(now.Year, now.Month, now.Day, 0, 0, 0, TimeSpan.Zero);
+        int index = 0;
 
         foreach (var monitor in monitors)
         {
             // 1. Always sync the full current day to keep "Today" bucket accurate
-            backgroundJobClient.Enqueue<UpdateMonitorUptimeJob>(x => x.ExecuteAsync(monitor.Id, todayStart, now));
+            backgroundJobClient.Schedule<UpdateMonitorUptimeJob>(
+                x => x.ExecuteAsync(monitor.Id, todayStart, now),
+                TimeSpan.FromSeconds(index * 2));
+            index++;
 
             // 2. If we missed previous days (e.g. app was down), sync them as full day blocks
             if (monitor.LastUptimeUpdate.HasValue && monitor.LastUptimeUpdate.Value < todayStart)
@@ -30,12 +35,13 @@ public class UptimeDispatcherJob(IDbContextFactory<AnalyticsDbContext> dbContext
                 while (cursor < todayStart)
                 {
                     var dayEnd = cursor.AddDays(1).AddSeconds(-1);
-                    backgroundJobClient.Enqueue<UpdateMonitorUptimeJob>(x => x.ExecuteAsync(monitor.Id, cursor, dayEnd));
+                    backgroundJobClient.Schedule<UpdateMonitorUptimeJob>(
+                        x => x.ExecuteAsync(monitor.Id, cursor, dayEnd),
+                        TimeSpan.FromSeconds(index * 2));
+                    index++;
                     cursor = cursor.AddDays(1);
                 }
             }
         }
     }
 }
-
-

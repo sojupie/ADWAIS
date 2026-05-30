@@ -1,3 +1,4 @@
+using Adwais.Domain.Entities;
 using Adwais.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,7 +21,7 @@ public class FinancialRequestDto
     /// If null, metrics represent the global portfolio total.
     /// </summary>
     [FromQuery(Name = "tenantId")]
-    public Guid? TenantId { get; set; }
+    public TenantId? TenantId { get; set; }
 }
 
 

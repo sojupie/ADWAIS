@@ -1,3 +1,4 @@
+using Adwais.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -32,4 +33,5 @@ public class SystemEventCleanupJob(
         }
     }
 }
+
 

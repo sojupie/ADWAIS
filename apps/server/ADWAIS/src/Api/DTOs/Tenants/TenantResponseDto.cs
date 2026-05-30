@@ -1,11 +1,12 @@
 using Adwais.Api.DTOs.Monitoring;
+using Adwais.Domain.Entities;
 using Adwais.Domain.Enums;
 
 namespace Adwais.Api.DTOs.Tenants;
 
 public class TenantResponseDto
 {
-    public Guid Id { get; set; }
+    public TenantId Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public TenantType Type { get; set; }
     public string LitiumBaseUrl { get; set; } = string.Empty;

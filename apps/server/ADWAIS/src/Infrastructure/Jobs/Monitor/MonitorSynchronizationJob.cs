@@ -1,9 +1,10 @@
+using Adwais.Infrastructure.Persistence;
 using Cronos;
 using Adwais.Domain.Entities.Monitoring;
 using Hangfire;
 using Hangfire.Storage;
-using Adwais.Infrastructure.CacheModels;
-using Adwais.Infrastructure.Services.Monitoring;
+using Adwais.Application.Common.Caching;
+using Adwais.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -92,4 +93,5 @@ public class MonitorSynchronizationJob(
         await dbContext.SaveChangesAsync();
     }
 }
+
 

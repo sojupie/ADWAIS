@@ -1,3 +1,4 @@
+using Adwais.Domain.Entities;
 using Adwais.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,7 +20,7 @@ public class OrderDistributionRequestDto
     /// The unique identifier of the tenant.
     /// </summary>
     [FromQuery(Name = "tenantId")]
-    public required Guid TenantId { get; set; }
+    public required TenantId TenantId { get; set; }
 
     /// <summary>
     /// Optional. The number of bins to use for the histogram. 

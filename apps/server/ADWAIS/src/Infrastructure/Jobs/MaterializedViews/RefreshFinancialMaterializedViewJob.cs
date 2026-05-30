@@ -1,3 +1,4 @@
+using Adwais.Infrastructure.Persistence;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,4 +17,5 @@ public class RefreshFinancialMaterializedViewJob(IDbContextFactory<AnalyticsDbCo
             "REFRESH MATERIALIZED VIEW CONCURRENTLY v_mat_financial_daily_global_rollup;");
     }
 }
+
 

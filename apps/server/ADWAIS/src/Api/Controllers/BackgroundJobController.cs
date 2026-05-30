@@ -5,10 +5,10 @@ using Hangfire.Storage;
 using Adwais.Infrastructure.Jobs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Adwais.Infrastructure;
+using Adwais.Infrastructure.Persistence;
 using Adwais.Infrastructure.Helpers;
 using Adwais.Infrastructure.Jobs.Monitor;
-using Adwais.Infrastructure.Services;
+using Adwais.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Adwais.Api.Controllers;
@@ -226,5 +226,6 @@ public class BackgroundJobController(
         });
     }
 }
+
 
 

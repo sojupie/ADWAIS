@@ -1,11 +1,13 @@
+using Adwais.Domain.Enums;
+
 namespace Adwais.Domain.Entities.OrderData;
 
 public class Order
 {
     public Guid Id { get; set; }
-    public Guid TenantId { get; set; }
+    public TenantId TenantId { get; set; }
     public Guid? OrganizationSystemId { get; set; }
-    public required string OrderState { get; set; }
+    public OrderState OrderState { get; set; }
     public required string LitiumOrderId { get; set; }
     public DateTimeOffset CreatedDate { get; set; }
     public decimal TotalValueIncVat { get; set; }

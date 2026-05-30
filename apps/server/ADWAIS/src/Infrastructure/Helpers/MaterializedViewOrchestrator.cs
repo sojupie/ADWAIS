@@ -1,4 +1,5 @@
-using Adwais.Infrastructure.Migrations;
+using Adwais.Infrastructure.Persistence;
+using Adwais.Infrastructure.Persistence.Migrations;
 using Microsoft.EntityFrameworkCore;
 
 namespace Adwais.Infrastructure.Helpers;

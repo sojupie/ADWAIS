@@ -1,5 +1,5 @@
 using System.Net;
-using Adwais.Infrastructure.CacheModels;
+using Adwais.Application.Common.Caching;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace Adwais.Infrastructure.Services.Monitoring;
@@ -41,24 +41,36 @@ public class UptimeRobotRateLimitHandler(IMemoryCache cache) : DelegatingHandler
         if (response.Headers.TryGetValues("X-RateLimit-Remaining", out var remainingVals) &&
             int.TryParse(remainingVals.FirstOrDefault(), out var remaining))
         {
-            if (remaining == 0 && response.Headers.TryGetValues("X-RateLimit-Reset", out var resetVals) &&
+            if (remaining <= 2 && response.Headers.TryGetValues("X-RateLimit-Reset", out var resetVals) &&
                 long.TryParse(resetVals.FirstOrDefault(), out var resetEpoch))
             {
                 var resetDate = DateTimeOffset.FromUnixTimeSeconds(resetEpoch);
-                cache.Set(RateLimitKey, resetDate, resetDate);
+                if (resetDate > DateTimeOffset.UtcNow)
+                {
+                    cache.Set(RateLimitKey, resetDate, resetDate);
+                }
             }
         }
-        else if (response.StatusCode == HttpStatusCode.TooManyRequests)
+
+        if (response.StatusCode == HttpStatusCode.TooManyRequests)
         {
-            // Fallback if headers are missing but 429 is returned
-            var delay = TimeSpan.FromMinutes(1);
+            var delay = TimeSpan.FromSeconds(10); // Default fallback
             if (response.Headers.TryGetValues("Retry-After", out var retryVals) &&
                 int.TryParse(retryVals.FirstOrDefault(), out var retrySeconds))
             {
                 delay = TimeSpan.FromSeconds(retrySeconds);
             }
-            cache.Set(RateLimitKey, DateTimeOffset.UtcNow.Add(delay), delay);
-            throw new HttpRequestException("UptimeRobot rate limit exceeded. Retry after delay.", null, HttpStatusCode.TooManyRequests);
+            else if (response.Headers.RetryAfter?.Delta.HasValue == true)
+            {
+                delay = response.Headers.RetryAfter.Delta.Value;
+            }
+
+            var resetDate = DateTimeOffset.UtcNow.Add(delay).AddSeconds(1);
+            cache.Set(RateLimitKey, resetDate, resetDate);
+
+            // Wait out the delay and retry the request
+            await Task.Delay(delay.Add(TimeSpan.FromSeconds(1)), cancellationToken);
+            return await base.SendAsync(request, cancellationToken);
         }
 
         return response;

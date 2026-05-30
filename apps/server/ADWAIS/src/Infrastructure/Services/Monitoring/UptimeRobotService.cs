@@ -1,8 +1,9 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
-using Adwais.Domain.DTOs.Monitoring;
-using Adwais.Domain.DTOs.Monitoring.Upstream;
+using Adwais.Application.DTOs.Monitoring.Upstream;
+using Adwais.Application.Interfaces;
+using Adwais.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace Adwais.Infrastructure.Services.Monitoring;
@@ -88,7 +89,7 @@ public class UptimeRobotService(
         return monitors;
     }
     
-    public async Task<double> GetUptimeAsync(int monitorId, DateTimeOffset? startDate = null, DateTimeOffset? endDate = null)
+    public async Task<double> GetUptimeAsync(int monitorId, DateTimeOffset? startDate = null, DateTimeOffset? endDate = null, string? monitorName = null)
     {
         var url = $"https://api.uptimerobot.com/v3/monitors/{monitorId}/stats/uptime";
         if (startDate.HasValue && endDate.HasValue)
@@ -98,11 +99,11 @@ public class UptimeRobotService(
             url += $"?from={fromStr}&to={toStr}";
         }
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        using var response = await GetResponseAsync(request, $"MonitorId: {monitorId}");
+        using var response = await GetResponseAsync(request, monitorName != null ? $"Monitor: {monitorName}" : $"MonitorId: {monitorId}");
         return response.RootElement.GetProperty("uptime").GetDouble();
     }
         
-    public async Task<(int? Average, int? Lowest, int? Highest)> GetResponseTimeAsync(int monitorId, DateTimeOffset? startDate = null, DateTimeOffset? endDate = null)
+    public async Task<(int? Average, int? Lowest, int? Highest)> GetResponseTimeAsync(int monitorId, DateTimeOffset? startDate = null, DateTimeOffset? endDate = null, string? monitorName = null)
     {
         var url = $"https://api.uptimerobot.com/v3/monitors/{monitorId}/stats/response-time";
         if (startDate.HasValue && endDate.HasValue)
@@ -112,7 +113,7 @@ public class UptimeRobotService(
             url += $"?from={fromStr}&to={toStr}";
         }
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        using var response = await GetResponseAsync(request, $"MonitorId: {monitorId}");
+        using var response = await GetResponseAsync(request, monitorName != null ? $"Monitor: {monitorName}" : $"MonitorId: {monitorId}");
         var summary = response.RootElement.GetProperty("summary");
         
         int? avg = summary.TryGetProperty("avg", out var avgProp) && avgProp.ValueKind != JsonValueKind.Null ? avgProp.GetInt32() : null;

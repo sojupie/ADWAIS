@@ -1,6 +1,6 @@
 using Adwais.Api.DTOs.Users;
 using Adwais.Domain.Entities;
-using Adwais.Infrastructure;
+using Adwais.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -86,5 +86,6 @@ public class UserController(IDbContextFactory<AnalyticsDbContext> dbContextFacto
         return NoContent();
     }
 }
+
 
 

@@ -6,16 +6,15 @@ using FluentValidation;
 using Hangfire;
 using Hangfire.PostgreSql;
 using Hangfire.Storage;
+using Adwais.Application.Interfaces;
+using Adwais.Application.Services;
 using Adwais.Infrastructure;
+using Adwais.Infrastructure.Persistence;
 using Adwais.Infrastructure.Helpers;
 using Adwais.Infrastructure.Jobs;
 using Adwais.Infrastructure.Jobs.MaterializedViews;
 using Adwais.Infrastructure.Jobs.Monitor;
-using Adwais.Infrastructure.Services.Financial;
-using Adwais.Infrastructure.Services.Monitoring;
 using Microsoft.EntityFrameworkCore;
-using Polly;
-using Polly.Extensions.Http;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,12 +32,11 @@ builder.Services.AddControllers(options =>
 
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddHttpClient();
+builder.Services.AddInfrastructure(builder.Configuration);
+
+builder.Services.AddScoped<IFinancialService, FinancialService>();
 builder.Services.AddScoped<IMonitorOrchestrationService, MonitorOrchestrationService>();
-builder.Services.AddScoped<Adwais.Infrastructure.Services.ISystemEventService, Adwais.Infrastructure.Services.SystemEventService>();
-builder.Services.AddScoped<IFinancialService, Adwais.Infrastructure.Services.Financial.FinancialService>();
-builder.Services.AddTransient<UptimeRobotRateLimitHandler>();
-builder.Services.AddHttpClient<Adwais.Infrastructure.Services.Monitoring.IUptimeRobotService, Adwais.Infrastructure.Services.Monitoring.UptimeRobotService>()
-    .AddHttpMessageHandler<UptimeRobotRateLimitHandler>();
+
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -50,29 +48,7 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 builder.Services.AddMemoryCache();
 
-builder.Services.AddHttpClient<Adwais.Infrastructure.Services.ILitiumIngestionService, Adwais.Infrastructure.Services.LitiumIngestionService>()
-    .AddPolicyHandler(HttpPolicyExtensions
-        .HandleTransientHttpError()
-        .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
-        .WaitAndRetryAsync(
-            retryCount: 5,
-            sleepDurationProvider: retryAttempt =>
-                TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)) + TimeSpan.FromMilliseconds(new Random().Next(0, 1000))
-        ));
-
 var connectionString = builder.Configuration.GetConnectionString("AnalyticsDb");
-
-builder.Services.AddDbContext<AnalyticsDbContext>(options =>
-{
-    options.UseNpgsql(connectionString)
-        .UseSnakeCaseNamingConvention();
-});
-
-builder.Services.AddDbContextFactory<AnalyticsDbContext>(options =>
-{
-    options.UseNpgsql(connectionString)
-        .UseSnakeCaseNamingConvention();
-}, ServiceLifetime.Scoped);
 
 builder.Services.AddHangfire(config =>
 {

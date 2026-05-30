@@ -2,8 +2,8 @@ using Adwais.Api.DTOs.Tenants;
 using Adwais.Api.DTOs.Monitoring;
 using Adwais.Domain.Entities;
 using FluentValidation;
-using Adwais.Infrastructure;
-using Adwais.Infrastructure.Services.Monitoring;
+using Adwais.Infrastructure.Persistence;
+using Adwais.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,7 +23,7 @@ public class TenantController(
     /// </summary>
     /// <param name="id">Optional tenant ID to retrieve a single tenant.</param>
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<TenantResponseDto>>> GetTenants([FromQuery] Guid? id)
+    public async Task<ActionResult<IEnumerable<TenantResponseDto>>> GetTenants([FromQuery] TenantId? id)
     {
         await using var context = await contextFactory.CreateDbContextAsync();
 
@@ -118,7 +118,8 @@ public class TenantController(
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteTenant(Guid id)
     {
-        if (id == AnalyticsDbContext.SystemTenantGuid)
+        TenantId tenantId = id;
+        if (tenantId == AnalyticsDbContext.SystemTenantGuid)
         {
             return BadRequest("Cannot delete the system tenant.");
         }
@@ -130,7 +131,7 @@ public class TenantController(
             return NotFound();
         }
         
-        await monitorService.ReassignAllTenantMonitorsToSystemAsync(id);
+        await monitorService.ReassignAllTenantMonitorsToSystemAsync(tenantId);
 
         context.Tenants.Remove(tenant);
         await context.SaveChangesAsync();
@@ -189,5 +190,6 @@ public class TenantController(
         });
     }
 }
+
 
 

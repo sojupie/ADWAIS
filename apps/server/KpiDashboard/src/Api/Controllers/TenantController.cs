@@ -44,7 +44,8 @@ public class TenantController(
                     LastPolled = t.LastPolled,
                     OrderFetchingEnabled = t.OrderFetchingEnabled,
                     MonitorCount = t.Monitors.Count,
-                    LastSyncError = t.LastSyncError
+                    LastSyncError = t.LastSyncError,
+                    HasServiceAccountToken = !string.IsNullOrWhiteSpace(t.ServiceAccountToken) && t.ServiceAccountToken != "N/A" && !t.ServiceAccountToken.StartsWith("mock-token-")
                 })
                 .SingleOrDefaultAsync();
 
@@ -67,7 +68,8 @@ public class TenantController(
                 LastPolled = t.LastPolled,
                 OrderFetchingEnabled = t.OrderFetchingEnabled,
                 MonitorCount = t.Monitors.Count,
-                LastSyncError = t.LastSyncError
+                LastSyncError = t.LastSyncError,
+                HasServiceAccountToken = !string.IsNullOrWhiteSpace(t.ServiceAccountToken) && t.ServiceAccountToken != "N/A" && !t.ServiceAccountToken.StartsWith("mock-token-")
             })
             .ToListAsync();
 
@@ -105,7 +107,8 @@ public class TenantController(
                 FetchedUntil = tenant.FetchedUntil,
                 LastPolled = tenant.LastPolled,
                 OrderFetchingEnabled = tenant.OrderFetchingEnabled,
-                LastSyncError = tenant.LastSyncError
+                LastSyncError = tenant.LastSyncError,
+                HasServiceAccountToken = !string.IsNullOrWhiteSpace(tenant.ServiceAccountToken) && tenant.ServiceAccountToken != "N/A" && !tenant.ServiceAccountToken.StartsWith("mock-token-")
             });
     }
 
@@ -181,7 +184,8 @@ public class TenantController(
             FetchedUntil = tenant.FetchedUntil,
             LastPolled = tenant.LastPolled,
             OrderFetchingEnabled = tenant.OrderFetchingEnabled,
-            LastSyncError = tenant.LastSyncError
+            LastSyncError = tenant.LastSyncError,
+            HasServiceAccountToken = !string.IsNullOrWhiteSpace(tenant.ServiceAccountToken) && tenant.ServiceAccountToken != "N/A" && !tenant.ServiceAccountToken.StartsWith("mock-token-")
         });
     }
 }

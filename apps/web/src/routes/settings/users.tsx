@@ -46,7 +46,7 @@ function UsersView() {
   });
 
   return (
-    <div className="flex flex-col gap-6 h-[calc(100vh-250px)] min-h-[500px]">
+    <div className="flex flex-col gap-6 h-full min-h-0">
       <section className="bg-white border border-slate-200 rounded-2xl shadow-sm p-4 flex flex-col sm:flex-row gap-6 items-center justify-between shrink-0">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-brand-bg-secondary text-white rounded-xl shadow-sm">

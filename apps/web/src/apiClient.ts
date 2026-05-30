@@ -17,5 +17,9 @@ export async function apiFetch<T>(url: string, options?: RequestInit): Promise<T
     throw new Error(errorBody || `Request failed with status ${response.status}`);
   }
 
-  return response.json();
+  const text = await response.text();
+  if (!text) {
+    return null as unknown as T;
+  }
+  return JSON.parse(text);
 }

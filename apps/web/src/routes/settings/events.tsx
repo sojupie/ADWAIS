@@ -33,7 +33,7 @@ function SystemEventsView() {
   });
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 h-[calc(100vh-250px)] min-h-[500px]">
+    <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 h-full min-h-0">
       <section className="flex flex-col h-full col-span-1 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
         <div className="flex items-center justify-between shrink-0 p-4 bg-brand-bg-secondary border-b border-slate-200 shadow-sm z-10">
           <div className="flex items-center gap-3">

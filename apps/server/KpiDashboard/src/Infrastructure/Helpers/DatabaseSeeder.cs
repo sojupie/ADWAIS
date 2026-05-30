@@ -17,7 +17,7 @@ public static class DatabaseSeeder
         var tenants = await SeedTenantsAsync(context, profiles);
 
         // Always run monitor seeding independently — idempotent per-tenant guard is inside the method.
-        await SeedMonitorsAndMetricsAsync(context, random);
+        // await SeedMonitorsAndMetricsAsync(context, random);
 
         if (await context.Orders.AnyAsync())
         {

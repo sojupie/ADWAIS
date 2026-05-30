@@ -2,10 +2,7 @@
   "name": "motillo-dashboard",
   "version": "1.0.0",
   "private": true,
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
+  "packageManager": "pnpm@11.5.0",
   "dependencies": {
     "pg": "^8.20.0"
   }

@@ -24,6 +24,11 @@ function BackgroundJobsView() {
     queryFn: () => apiFetch<any[]>('/api/job/recurring')
   });
 
+  const { data: tenants } = useQuery({
+    queryKey: ['tenants'],
+    queryFn: () => apiFetch<any[]>('/api/tenants')
+  });
+
   const triggerJob = useMutation({
     mutationFn: (endpoint: string) => apiFetch(endpoint, { method: 'POST' }),
     onSuccess: () => alert('Job triggered successfully.')
@@ -67,7 +72,7 @@ function BackgroundJobsView() {
   ];
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 h-[calc(100vh-250px)] min-h-[500px]">
+    <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 h-full min-h-0">
       {/* Top Action Section / Left Pane */}
       <section className="flex flex-col h-full bg-slate-50/50 rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="flex items-center justify-between shrink-0 p-4 bg-brand-bg-secondary border-b border-slate-200 shadow-sm z-10">
@@ -81,8 +86,9 @@ function BackgroundJobsView() {
              </div>
           </div>
         </div>
-        <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-8 custom-scrollbar bg-slate-50/50">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar bg-slate-50/50">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 lg:col-span-2">
             {manualJobs.map(job => (
               <button 
                 key={job.id} 
@@ -96,70 +102,72 @@ function BackgroundJobsView() {
                 <span className="text-xs text-slate-500 font-medium">{job.desc}</span>
               </button>
             ))}
-          </div>
+            </div>
 
-        <div className="bg-gradient-to-br from-slate-800 to-brand-text border border-slate-700 rounded-2xl shadow-sm p-6 text-white relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-8 opacity-10">
-            <Database size={100} />
-          </div>
-          <div className="relative z-10">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-white/10 text-white rounded-lg backdrop-blur-sm">
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+          <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-slate-50/50">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-brand-btn-primary/10 text-brand-link rounded-lg">
                   <Database size={20} />
               </div>
               <div>
-                  <h2 className="text-lg font-bold">Historical Backfill</h2>
-                  <p className="text-xs font-medium text-slate-300">Force massive data ingestion for a specific tenant</p>
+                  <h2 className="text-lg font-bold text-brand-text">Historical Backfill</h2>
+                  <p className="text-sm font-medium text-slate-500">Force massive data ingestion</p>
               </div>
             </div>
+          </div>
+          <div className="p-4 flex flex-col gap-4">
             <div className="flex flex-col gap-4">
               <div className="flex gap-3">
-                <input 
-                  type="text" 
-                  placeholder="Enter Tenant ID (UUID)" 
+                <select 
                   value={backfill.tenantId} 
                   onChange={e => setBackfill({ ...backfill, tenantId: e.target.value })} 
-                  className="bg-white/10 border border-white/20 text-white placeholder:text-white/50 px-4 py-2.5 rounded-xl text-sm flex-1 focus:ring-2 focus:ring-brand-accent focus:outline-none backdrop-blur-sm font-mono" 
-                />
+                  className="bg-white border border-slate-200 text-slate-800 px-3 py-2 rounded-lg text-sm flex-1 focus:ring-2 focus:ring-brand-btn-primary focus:outline-none"
+                >
+                  <option value="" disabled>Select a tenant...</option>
+                  {(tenants || []).map((t: any) => (
+                    <option key={t.id} value={t.id}>{t.name} ({(t.type === 1 ? 'Production' : 'Sandbox')})</option>
+                  ))}
+                </select>
               </div>
               <div className="flex gap-3">
                 <div className="flex-1">
-                  <label className="text-xs font-bold text-slate-400 mb-1 block uppercase tracking-wider">Start Date (Optional)</label>
+                  <label className="text-[10px] font-bold text-slate-500 mb-1 block uppercase tracking-wider">Start Date</label>
                   <input 
                     type="datetime-local" 
                     value={backfill.startDate} 
                     onChange={e => setBackfill({ ...backfill, startDate: e.target.value })} 
-                    className="w-full bg-white/10 border border-white/20 text-white placeholder:text-white/50 px-4 py-2.5 rounded-xl text-sm focus:ring-2 focus:ring-brand-accent focus:outline-none backdrop-blur-sm" 
+                    className="w-full bg-white border border-slate-200 text-slate-800 placeholder:text-slate-400 px-3 py-2 rounded-lg text-sm focus:ring-2 focus:ring-brand-btn-primary focus:outline-none" 
                   />
                 </div>
                 <div className="flex-1">
-                  <label className="text-xs font-bold text-slate-400 mb-1 block uppercase tracking-wider">End Date (Optional)</label>
+                  <label className="text-[10px] font-bold text-slate-500 mb-1 block uppercase tracking-wider">End Date</label>
                   <input 
                     type="datetime-local" 
                     value={backfill.endDate} 
                     onChange={e => setBackfill({ ...backfill, endDate: e.target.value })} 
-                    className="w-full bg-white/10 border border-white/20 text-white placeholder:text-white/50 px-4 py-2.5 rounded-xl text-sm focus:ring-2 focus:ring-brand-accent focus:outline-none backdrop-blur-sm" 
+                    className="w-full bg-white border border-slate-200 text-slate-800 placeholder:text-slate-400 px-3 py-2 rounded-lg text-sm focus:ring-2 focus:ring-brand-btn-primary focus:outline-none" 
                   />
                 </div>
               </div>
               <button 
                 onClick={() => triggerBackfill.mutate(backfill)} 
                 disabled={!backfill.tenantId}
-                className="bg-brand-accent hover:bg-brand-accent/90 text-white px-6 py-3 rounded-xl text-sm font-bold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-brand-accent/20 flex items-center justify-center gap-2 mt-2 w-full sm:w-auto"
+                className="bg-brand-btn-primary hover:bg-brand-btn-primary/90 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-sm flex items-center justify-center gap-2 mt-2 w-full"
               >
                 <Play size={16} /> Execute Backfill
               </button>
-              <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 flex items-start gap-3 mt-1">
-                <ShieldAlert size={16} className="text-red-400 shrink-0 mt-0.5" />
-                <p className="text-xs text-slate-300 font-medium leading-relaxed">
-                  Warning: Backfilling drops existing materialized views for the tenant and rebuilds them. Expect performance degradation during execution.
+              <div className="bg-red-50 border border-red-100 rounded-lg p-3 flex items-start gap-2 mt-1">
+                <ShieldAlert size={16} className="text-red-500 shrink-0 mt-0.5" />
+                <p className="text-xs text-red-700 font-medium leading-relaxed">
+                  Long backfills require multiple GET requests for pagination that are likely to get rate limited (although automatically managed by back-off and retry policies). <br />Triggering a backfill also drops existing materialized views. Expect performance degradation.
                 </p>
               </div>
             </div>
           </div>
         </div>
         <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col break-inside-avoid">
-           <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-slate-50/50">
+           <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-slate-50/50">
              <div className="flex items-center gap-3">
                <div className="p-2 bg-slate-200 text-slate-700 rounded-lg">
                   <Settings size={20} />
@@ -217,6 +225,7 @@ function BackgroundJobsView() {
             )}
           </div>
         </div>
+          </div>
         </div>
       </section>
 

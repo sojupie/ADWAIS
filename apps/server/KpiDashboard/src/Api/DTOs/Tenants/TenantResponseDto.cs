@@ -16,4 +16,5 @@ public class TenantResponseDto
     public bool OrderFetchingEnabled { get; set; }
     public int MonitorCount { get; set; }
     public string? LastSyncError { get; set; }
+    public bool HasServiceAccountToken { get; set; }
 }

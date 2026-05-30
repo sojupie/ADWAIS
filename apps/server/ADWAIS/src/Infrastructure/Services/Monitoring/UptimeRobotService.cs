@@ -44,7 +44,7 @@ public class UptimeRobotService(
 
     public async Task<UptimeRobotMonitorDto> CreateMonitorAsync(string name, string url)
     {
-        var request = new HttpRequestMessage(HttpMethod.Post, "https://Adwais.Api.uptimerobot.com/v3/monitors");
+        var request = new HttpRequestMessage(HttpMethod.Post, "https://api.uptimerobot.com/v3/monitors");
         request.Content = JsonContent.Create(new { friendlyName = name, url, type = "HTTP", interval = 300, timeout = 60 });
         using var response = await GetResponseAsync(request, $"Create: {name}");
         
@@ -61,7 +61,7 @@ public class UptimeRobotService(
     
     public async Task<List<UptimeRobotMonitorDto>> GetMonitorsAsync(int[]? monitorIds = null)
     {
-        var url = "https://Adwais.Api.uptimerobot.com/v3/monitors";
+        var url = "https://api.uptimerobot.com/v3/monitors";
         var context = "GetMonitors";
         if (monitorIds is { Length: > 0 })
         {
@@ -90,7 +90,7 @@ public class UptimeRobotService(
     
     public async Task<double> GetUptimeAsync(int monitorId, DateTimeOffset? startDate = null, DateTimeOffset? endDate = null)
     {
-        var url = $"https://Adwais.Api.uptimerobot.com/v3/monitors/{monitorId}/stats/uptime";
+        var url = $"https://api.uptimerobot.com/v3/monitors/{monitorId}/stats/uptime";
         if (startDate.HasValue && endDate.HasValue)
         {
             var fromStr = startDate.Value.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ");
@@ -104,7 +104,7 @@ public class UptimeRobotService(
         
     public async Task<(int? Average, int? Lowest, int? Highest)> GetResponseTimeAsync(int monitorId, DateTimeOffset? startDate = null, DateTimeOffset? endDate = null)
     {
-        var url = $"https://Adwais.Api.uptimerobot.com/v3/monitors/{monitorId}/stats/response-time";
+        var url = $"https://api.uptimerobot.com/v3/monitors/{monitorId}/stats/response-time";
         if (startDate.HasValue && endDate.HasValue)
         {
             var fromStr = startDate.Value.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ");
@@ -124,27 +124,27 @@ public class UptimeRobotService(
 
     public async Task DeleteMonitorAsync(int monitorId)
     {
-        var request = new HttpRequestMessage(HttpMethod.Delete, $"https://Adwais.Api.uptimerobot.com/v3/monitors/{monitorId}");
+        var request = new HttpRequestMessage(HttpMethod.Delete, $"https://api.uptimerobot.com/v3/monitors/{monitorId}");
         await GetResponseAsync(request, $"Delete MonitorId: {monitorId}");
     }
 
     public async Task PauseMonitorAsync(int monitorId)
     {
-        var request = new HttpRequestMessage(HttpMethod.Post, $"https://Adwais.Api.uptimerobot.com/v3/monitors/{monitorId}/pause");
+        var request = new HttpRequestMessage(HttpMethod.Post, $"https://api.uptimerobot.com/v3/monitors/{monitorId}/pause");
         request.Content = new StringContent(string.Empty, System.Text.Encoding.UTF8, "application/json");
         await GetResponseAsync(request, $"Pause MonitorId: {monitorId}");
     }
 
     public async Task StartMonitorAsync(int monitorId)
     {
-        var request = new HttpRequestMessage(HttpMethod.Post, $"https://Adwais.Api.uptimerobot.com/v3/monitors/{monitorId}/start");
+        var request = new HttpRequestMessage(HttpMethod.Post, $"https://api.uptimerobot.com/v3/monitors/{monitorId}/start");
         request.Content = new StringContent(string.Empty, System.Text.Encoding.UTF8, "application/json");
         await GetResponseAsync(request, $"Start MonitorId: {monitorId}");
     }
 
     public async Task<UptimeRobotUserDto> GetAccountDetailsAsync()
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://Adwais.Api.uptimerobot.com/v3/user/me");
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://api.uptimerobot.com/v3/user/me");
         using var response = await GetResponseAsync(request, "GetAccountDetails");
         
         var root = response.RootElement;

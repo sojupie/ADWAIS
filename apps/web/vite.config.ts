@@ -38,7 +38,22 @@ export default defineConfig({
       '/api': {
         target: 'http://127.0.0.1:5002',
         changeOrigin: true,
-        secure: false, // Allow self-signed dev certs
+        secure: false,
+      },
+      '/swagger': {
+        target: 'http://127.0.0.1:5002',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/openapi': {
+        target: 'http://127.0.0.1:5002',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/hangfire': {
+        target: 'http://127.0.0.1:5002',
+        changeOrigin: true,
+        secure: false,
       },
     },
   },

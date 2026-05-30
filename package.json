@@ -1,8 +1,18 @@
 {
-  "name": "motillo-dashboard",
+  "name": "adwais",
   "version": "1.0.0",
   "private": true,
   "packageManager": "pnpm@11.5.0",
+  "engines": {
+    "node": ">=24.15.0",
+    "pnpm": ">=11.5.0"
+  },
+  "scripts": {
+    "preinstall": "npx only-allow pnpm",
+    "db:up": "docker compose -f apps/server/docker-compose.yml up -d",
+    "db:down": "docker compose -f apps/server/docker-compose.yml down",
+    "dev:web": "pnpm --filter web dev"
+  },
   "dependencies": {
     "pg": "^8.20.0"
   }

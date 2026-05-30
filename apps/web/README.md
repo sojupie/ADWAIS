@@ -1,73 +1,46 @@
-# React + TypeScript + Vite
+# Web Application (Frontend)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The user-facing dashboard displaying daily order rollups, financial stats, site latency monitors, and internal office events.
 
-Currently, two official plugins are available:
+## Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+*   **Runtime & Builder**: Node.js, Vite, TypeScript.
+*   **UI Framework**: React 19.
+*   **Routing**: `@tanstack/react-router` (File-based, type-safe routing).
+*   **Data Fetching**: `@tanstack/react-query` (Caching, auto-refreshing).
+*   **Styling**: Tailwind CSS v4.
+*   **Visualizations**: Recharts.
+*   **Schemas**: Zod.
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Directory Structure
 
-## Expanding the ESLint configuration
+*   [`/src/routes`](file:///c:/Users/ollem/Git/motillo%20project/dashboard/apps/web/src/routes) - File-based routes (compiled by TanStack Router).
+    *   `/settings` - User configuration, tenant settings, and background jobs dashboard.
+*   [`/src/components`](file:///c:/Users/ollem/Git/motillo%20project/dashboard/apps/web/src/components) - Reusable components (e.g., Layouts, Charts, Status Cards).
+*   [`/src/hooks`](file:///c:/Users/ollem/Git/motillo%20project/dashboard/apps/web/src/hooks) - React hooks for state and queries.
+*   [`/src/apiClient.ts`](file:///c:/Users/ollem/Git/motillo%20project/dashboard/apps/web/src/apiClient.ts) - Global fetch wrapper communicating with the .NET backend.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Configuration
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+The API client assumes the backend API is running locally. You can customize the fetch target inside [`src/apiClient.ts`](file:///c:/Users/ollem/Git/motillo%20project/dashboard/apps/web/src/apiClient.ts).
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+---
+
+## Local Development
+
+All commands should ideally be run from the repository root:
+
+*   **Start dev server**: `pnpm --filter web dev`
+*   **Build production bundle**: `pnpm --filter web build`
+*   **Lint codebase**: `pnpm --filter web lint`
+
+If running directly in this directory (not recommended unless testing locally):
+```bash
+pnpm dev
+pnpm build
 ```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+*(Ensure `corepack enable` has been run on your system)*

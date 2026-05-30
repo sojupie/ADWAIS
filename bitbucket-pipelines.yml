@@ -6,8 +6,8 @@ pipelines:
           services:
             - docker
           script:
-            - export IMAGE_NAME=$DOCKER_HUB_USER/kpi-dashboard-api:latest
-            - docker build -t $IMAGE_NAME -f apps/server/KpiDashboard/src/Api/Dockerfile .
+            - export IMAGE_NAME=$DOCKER_HUB_USER/adwais-api:latest
+            - docker build -t $IMAGE_NAME -f apps/server/Adwais/src/Api/Dockerfile .
             - docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
             - docker push $IMAGE_NAME
       - step:
@@ -18,8 +18,8 @@ pipelines:
                 SSH_USER: 'root'
                 REMOTE_HOST: $SERVER_IP
                 COMMANDS:
-                  - 'mkdir -p /opt/dashboard'
-                  - 'cd /opt/dashboard'
+                  - 'mkdir -p /opt/adwais'
+                  - 'cd /opt/adwais'
                   #- 'echo "DOCKER_HUB_USER=${DOCKER_HUB_USER}\nDB_PASSWORD=${DB_PASSWORD}\nAZURE_TENANT_ID=${AZURE_TENANT_ID}\nAZURE_CLIENT_ID=${AZURE_CLIENT_ID}" > .env'
                   - 'docker compose pull'
                   - 'docker compose up -d'

@@ -1,4 +1,4 @@
-// Pure helper functions for the Motillo Dashboard
+// Pure helper functions for the Motillo ADWAIS project
 
 /** Format a revenue value (whole SEK) into a locale currency string */
 export function formatCurrency(value: number, currency = 'SEK'): string {

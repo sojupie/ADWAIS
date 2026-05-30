@@ -1,7 +1,7 @@
 services:
     api:
-        image: ${DOCKER_HUB_USER}/kpi-dashboard-api:latest
-        container_name: dashboard-api
+        image: ${DOCKER_HUB_USER}/adwais-api:latest
+        container_name: adwais-api
         ports:
             - "127.0.0.1:5003:8080"
         environment:
@@ -15,7 +15,7 @@ services:
 
     db:
         image: postgres:16-alpine
-        container_name: dashboard-db
+        container_name: adwais-db
         environment:
             - POSTGRES_DB=analyticsdb
             - POSTGRES_PASSWORD=${DB_PASSWORD}

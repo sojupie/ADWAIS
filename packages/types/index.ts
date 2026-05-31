@@ -162,6 +162,7 @@ export interface MonitorAnalyticsDto {
 export interface TenantResponseDto {
   id: string;
   name: string;
+  type: number;
   litiumBaseUrl: string;
   currentlyFetching: boolean;
   fetchedFrom: string | null;
@@ -170,6 +171,7 @@ export interface TenantResponseDto {
   orderFetchingEnabled: boolean;
   monitorCount: number;
   lastSyncError: string | null;
+  hasServiceAccountToken: boolean;
 }
 
 export interface SystemHealthDto {
@@ -201,4 +203,30 @@ export interface BackgroundJobStatusDto {
   createdAt: string | null;
   durationSeconds: number | null;
   exceptionMessage: string | null;
+}
+
+export interface UserResponseDto {
+  id: string;
+  name: string;
+  role: string;
+}
+
+export interface GlobalConfigDto {
+  litiumFetchEnabled: boolean;
+  litiumFetchIntervalMinutes: number;
+  uptimeFetchIntervalMinutes: number;
+  latencyFetchIntervalMinutes: number;
+  userStatsFetchIntervalMinutes: number;
+  retentionDays: number;
+  lastPolled: string | null;
+  lastSyncError: string | null;
+}
+
+export interface RecurringJobDto {
+  id: string;
+  cron: string;
+  nextExecution: string | null;
+  lastExecution: string | null;
+  lastJobState: string | null;
+  lastJobDuration: number | null;
 }

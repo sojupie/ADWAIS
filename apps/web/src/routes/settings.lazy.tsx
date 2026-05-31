@@ -45,7 +45,7 @@ function SettingsLayout() {
               key={t.id}
               to={t.path}
               className="pb-2 text-sm font-bold tracking-wider uppercase transition-colors text-slate-500 hover:text-slate-800"
-              activeProps={{ className: '!text-brand-accent border-b-2 !border-brand-accent' }}
+              activeProps={{ className: '!text-brand-link border-b-2 !border-brand-link' }}
             >
               {t.label}
             </Link>

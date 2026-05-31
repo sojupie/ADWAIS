@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useRouterState, useSearch } from '@tanstack/react-router';
 import { Play, Pause } from 'lucide-react';
-import type { Timeframe } from '../../schemas';
+import type { Timeframe } from '../../../schemas';
 
 type KioskMode = 'kiosk' | 'interactive' | 'paused';
 
@@ -35,15 +35,18 @@ export function KioskControls() {
       if (mode === 'kiosk') {
         setKioskTimer((prev) => {
           if (prev <= 1) {
-            const routes = ['/financial', '/fleet-status', '/intranet'];
-            const currentIndex = routes.indexOf(currentRoute as string);
+            const routes = ['/financial', '/fleet-status', '/intranet'] as const;
+            const currentIndex = routes.indexOf(currentRoute as '/financial' | '/fleet-status' | '/intranet');
             const nextIndex = (currentIndex + 1) % routes.length;
             const nextRoute = routes[nextIndex];
             
-            navigate({ 
-              to: nextRoute as any, 
-              search: (nextRoute === '/intranet' ? undefined : { timeframe: lastTimeframe }) as any
-            });
+            if (nextRoute === '/financial') {
+              navigate({ to: '/financial', search: { timeframe: lastTimeframe } });
+            } else if (nextRoute === '/fleet-status') {
+              navigate({ to: '/fleet-status', search: { timeframe: lastTimeframe } });
+            } else if (nextRoute === '/intranet') {
+              navigate({ to: '/intranet' });
+            }
             return KIOSK_ROTATION_SECONDS;
           }
           return prev - 1;

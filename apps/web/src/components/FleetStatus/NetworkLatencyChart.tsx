@@ -59,7 +59,7 @@ const GraphTooltip = ({ active, payload, label }: GraphTooltipProps) => {
   );
 };
 
-import { ChartSkeleton } from '../common/ChartSkeleton';
+import { ChartSkeleton } from '../common/charts/ChartSkeleton';
 
 export function NetworkLatencyChart({ isLoading, points, title = "Network Latency", className }: { isLoading?: boolean; points: LatencyPoint[], title?: string, className?: string }) {
   if (isLoading) {

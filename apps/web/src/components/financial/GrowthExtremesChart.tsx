@@ -11,11 +11,11 @@ import {
 } from 'recharts';
 import type { GrowthExtreme } from '@types';
 import { formatCompact } from '@utils';
-import { ChartPanel } from '../common/ChartPanel';
+import { ChartPanel } from '../common/charts/ChartPanel';
 
 const formatGrowth = (value: number) => `${value >= 0 ? '+' : ''}${value.toFixed(1)}%`;
 
-const CustomTooltip = ({ active, payload }: { isLoading?: boolean;  active?: boolean; payload?: any[] }) => {
+const CustomTooltip = ({ active, payload }: { isLoading?: boolean;  active?: boolean; payload?: { payload: unknown }[] }) => {
   if (!active || !payload?.length) return null;
 
   const tenant = payload[0].payload as GrowthExtreme;

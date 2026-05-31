@@ -82,7 +82,7 @@ export function useMomentum(timeframe: string) {
 export function useRevenueEfficiency(timeframe: string) {
   return useQuery({
     queryKey: financialKeys.revenueEfficiency(timeframe),
-    queryFn: () => apiFetch<RevenueEfficiencyResponse[]>(buildUrl('/api/financial/revenue-efficiency', { timeframe })),
+    queryFn: () => apiFetch<RevenueEfficiencyResponse>(buildUrl('/api/financial/revenue-efficiency', { timeframe })),
     refetchInterval: REFETCH_INTERVAL,
   });
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Database, Play, ShieldAlert } from 'lucide-react';
-import { SettingsCard } from '../../common/SettingsCard';
+import { SettingsCard } from '../../common/layout/SettingsCard';
 import type { TenantResponseDto } from '@types';
 
 interface ManualBackfillPanelProps {

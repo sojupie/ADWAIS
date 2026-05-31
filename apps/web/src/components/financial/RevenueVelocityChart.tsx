@@ -9,7 +9,7 @@ import {
 } from 'recharts';
 import type { FinancialVelocityPoint } from '@types';
 import { formatCompact } from '@utils';
-import { ChartPanel } from '../common/ChartPanel';
+import { ChartPanel } from '../common/charts/ChartPanel';
 
 export function RevenueVelocityChart({ isLoading, points, className }: { isLoading?: boolean;  points: FinancialVelocityPoint[], className?: string })
 {
@@ -34,7 +34,7 @@ export function RevenueVelocityChart({ isLoading, points, className }: { isLoadi
   );
 }
 
-const GraphTooltip = ({ active, payload, label }: any) => {
+const GraphTooltip = ({ active, payload, label }: { active?: boolean; payload?: { payload: unknown }[]; label?: string }) => {
   if (!active || !payload?.length) return null;
   const point = payload[0].payload as FinancialVelocityPoint;
 

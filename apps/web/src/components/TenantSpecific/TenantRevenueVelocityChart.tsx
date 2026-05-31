@@ -9,16 +9,16 @@ import {
 } from 'recharts';
 import type { FinancialVelocityPoint } from '@types';
 import { formatCompact } from '@utils';
-import { ChartPanel } from '../common/ChartPanel';
+import { ChartPanel } from '../common/charts/ChartPanel';
 
-const CustomTooltip = ({ active, payload, label }: { isLoading?: boolean;  active?: boolean; payload?: any[]; label?: string }) => {
+const CustomTooltip = ({ active, payload, label }: { isLoading?: boolean;  active?: boolean; payload?: { dataKey?: string | number; value: number }[]; label?: string }) => {
   if (!active || !payload?.length) return null;
 
   return (
     <div className="bg-white border border-slate-100 rounded-lg shadow-lg p-4 text-sm animate-in fade-in zoom-in duration-200">
       <p className="font-bold text-slate-900 mb-3 border-b border-slate-50 pb-2">{label}</p>
       <div className="space-y-2">
-        {payload.map((entry: any) => (
+        {payload.map((entry) => (
           <p key={entry.dataKey} className="flex justify-between gap-6">
             <span className="text-slate-500">{entry.dataKey === 'currentRevenue' ? 'Current' : 'Previous'}:</span>
             <strong className={entry.dataKey === 'currentRevenue' ? 'text-brand-btn-primary' : 'text-slate-700'}>

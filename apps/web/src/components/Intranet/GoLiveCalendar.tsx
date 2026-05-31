@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CollectionPanel } from '../common/CollectionPanel';
+import { CollectionPanel } from '../common/dashboard/CollectionPanel';
 
 const INITIAL_MILESTONES = [
   { id: 1, client: 'Intersport', project: 'Checkout V2', days: 2, date: 'May 30' },

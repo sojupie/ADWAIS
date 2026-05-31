@@ -1,12 +1,12 @@
 import { Settings } from 'lucide-react';
-import { SettingsCard } from '../../common/SettingsCard';
-import { InlineEditField } from '../../common/InlineEditField';
+import { SettingsCard } from '../../common/layout/SettingsCard';
+import { InlineEditField } from '../../common/ui/InlineEditField';
 import type { GlobalConfigDto } from '@types';
 
 interface SyncIntervalsFormProps {
   config: (GlobalConfigDto & { uptimeRobotApiKey?: string; latencyDegradedFloor?: number; systemEventRetentionDays?: number; uptimeRobotFetchEnabled?: boolean }) | undefined;
   updateConfig: {
-    mutate: (variables: any) => void;
+    mutate: (variables: Partial<GlobalConfigDto & { uptimeRobotApiKey?: string; latencyDegradedFloor?: number; systemEventRetentionDays?: number; uptimeRobotFetchEnabled?: boolean }>) => void;
   };
 }
 

@@ -1,4 +1,4 @@
-import { ChartSkeleton } from './ChartSkeleton';
+import { ChartSkeleton } from '../charts/ChartSkeleton';
 import type { ReactNode } from 'react';
 
 interface CollectionPanelProps {

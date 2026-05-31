@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Trash2 } from 'lucide-react';
 import type { TenantResponseDto } from '@types';
-import { TileCard } from '../../common/TileCard';
-import { TileSaveBar } from '../../common/TileSaveBar';
+import { TileCard } from '../../common/layout/TileCard';
+import { TileSaveBar } from '../../common/ui/TileSaveBar';
 
 interface TenantTileProps {
   t: TenantResponseDto;

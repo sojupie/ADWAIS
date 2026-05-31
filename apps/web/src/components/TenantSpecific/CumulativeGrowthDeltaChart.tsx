@@ -9,9 +9,9 @@ import {
 } from 'recharts';
 import type { CumulativeGrowthDeltaPoint } from '@types';
 import { formatCompact } from '@utils';
-import { ChartPanel } from '../common/ChartPanel';
+import { ChartPanel } from '../common/charts/ChartPanel';
 
-const CustomTooltip = ({ active, payload, label }: { isLoading?: boolean;  active?: boolean; payload?: any[]; label?: string }) => {
+const CustomTooltip = ({ active, payload, label }: { isLoading?: boolean;  active?: boolean; payload?: { payload: unknown }[]; label?: string }) => {
   if (!active || !payload?.length) return null;
 
   const point = payload[0].payload as CumulativeGrowthDeltaPoint;

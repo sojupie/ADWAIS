@@ -1,5 +1,5 @@
 import { Trash2, Shield, User } from 'lucide-react';
-import { InlineEditField } from '../../common/InlineEditField';
+import { InlineEditField } from '../../common/ui/InlineEditField';
 import type { UserResponseDto } from '@types';
 
 interface UserRowProps {

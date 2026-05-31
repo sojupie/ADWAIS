@@ -1,6 +1,6 @@
 import { ComposedChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import type { AccumulatedRevenuePointDto } from '@types';
-import { ChartPanel } from '../common/ChartPanel';
+import { ChartPanel } from '../common/charts/ChartPanel';
 import { formatCurrency } from '@utils';
 
 interface AccumulatedRevenueChartProps {
@@ -9,7 +9,7 @@ interface AccumulatedRevenueChartProps {
   className?: string;
 }
 
-const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: any[]; label?: string }) => {
+const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: { name?: string; color?: string; value: number }[]; label?: string }) => {
   if (!active || !payload?.length) return null;
 
   return (

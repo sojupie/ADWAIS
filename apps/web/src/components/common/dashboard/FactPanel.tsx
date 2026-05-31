@@ -1,4 +1,4 @@
-import { LoadingIcon } from './LoadingIcon';
+import { LoadingIcon } from '../ui/LoadingIcon';
 
 type Extra =
     | 

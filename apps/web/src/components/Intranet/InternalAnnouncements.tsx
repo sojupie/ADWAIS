@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CollectionPanel } from '../common/CollectionPanel';
+import { CollectionPanel } from '../common/dashboard/CollectionPanel';
 
 const INITIAL_ANNOUNCEMENTS = [
   { id: 1, title: 'Motillo Summer Party 2026', date: 'May 28', summary: 'Please RSVP by Friday for the annual summer party. Food and drinks will be provided!' },

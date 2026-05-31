@@ -4,6 +4,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { HeartPulse, TerminalSquare, AlertCircle, CheckCircle2, Info, AlertTriangle, Activity, Copy, Check } from 'lucide-react';
 import { apiFetch } from '../../apiClient';
 import type { SystemHealthDto, BackgroundJobStatusDto } from '@types';
+import { SettingsPanel } from '../../components/common/layout/SettingsPanel';
+import { SectionHeader } from '../../components/common/layout/SectionHeader';
+import { SubSectionHeader } from '../../components/common/layout/SubSectionHeader';
 
 interface SystemEvent {
   id?: string | number;
@@ -28,6 +31,46 @@ function timeAgo(date: string | number | null | undefined): string {
   const hours = Math.floor(minutes / 60);
   if (hours < 24) return `${hours}h ago`;
   return `${Math.floor(hours / 24)}d ago`;
+}
+
+interface HealthStatusCardProps {
+  title: string;
+  subtitle: string;
+  status: 'Healthy' | 'Degraded' | 'Failed' | 'Warning' | string;
+  children?: React.ReactNode;
+}
+
+function HealthStatusCard({ title, subtitle, status, children }: HealthStatusCardProps) {
+  const isHealthy = status === 'Healthy' || status === 'OK';
+  const isWarning = status === 'Degraded' || status === 'Warning';
+  const isFailed = status === 'Failed' || status === 'Error' || status === 'Critical';
+
+  return (
+    <div className="flex flex-col p-3 border border-slate-200 rounded-xl bg-white shadow-sm gap-2">
+      <div className="flex items-center justify-between">
+        <div className="flex flex-col">
+          <span className="text-sm font-bold text-slate-800">{title}</span>
+          <span className="text-xs text-slate-400">{subtitle}</span>
+        </div>
+        {isHealthy && (
+          <span className="flex items-center gap-1.5 px-2.5 py-1 bg-green-50 text-green-700 rounded-full text-xs font-bold border border-green-200">
+            <CheckCircle2 size={13} /> OK
+          </span>
+        )}
+        {isWarning && (
+          <span className="flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-bold border border-amber-200">
+            <AlertTriangle size={13} /> WARN
+          </span>
+        )}
+        {isFailed && (
+          <span className="flex items-center gap-1.5 px-2.5 py-1 bg-red-50 text-red-700 rounded-full text-xs font-bold border border-red-200">
+            <AlertCircle size={13} /> ERR
+          </span>
+        )}
+      </div>
+      {children}
+    </div>
+  );
 }
 
 export const Route = createFileRoute('/settings/events')({
@@ -66,63 +109,31 @@ function SystemEventsView() {
     <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 h-full min-h-0">
       
       {/* Diagnostics / Health Panel */}
-      <section className="flex flex-col h-full col-span-1 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-        <div className="flex items-center justify-between shrink-0 p-4 bg-brand-bg-secondary border-b border-slate-200 shadow-sm z-10">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-white/10 text-white rounded-lg shadow-sm">
-              <HeartPulse size={24} />
-            </div>
-            <div>
-              <h2 className="text-lg font-extrabold text-white">Pipeline Health</h2>
-              <p className="text-xs font-semibold text-slate-300">Live connectivity</p>
-            </div>
-          </div>
-        </div>
-        
+      <SettingsPanel className="col-span-1 bg-white">
+        <SectionHeader
+          title="Pipeline Health"
+          subtitle="Live connectivity"
+          icon={<HeartPulse size={24} />}
+          dark={true}
+        />
+
         <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-5 custom-scrollbar bg-slate-50/50">
           {health ? (
             <div className="flex flex-col gap-4">
-              
+
               {/* Database Health Card */}
-              <div className="flex items-center justify-between p-3 border border-slate-200 rounded-xl bg-white shadow-sm">
-                <div className="flex flex-col">
-                  <span className="text-sm font-bold text-slate-800">Database Status</span>
-                  <span className="text-xs text-slate-400">Core database connection</span>
-                </div>
-                {health.databaseStatus === 'Healthy' ? (
-                  <span className="flex items-center gap-1.5 px-2.5 py-1 bg-green-50 text-green-700 rounded-full text-xs font-bold border border-green-200">
-                    <CheckCircle2 size={13} /> OK
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1.5 px-2.5 py-1 bg-red-50 text-red-700 rounded-full text-xs font-bold border border-red-200">
-                    <AlertCircle size={13} /> ERR
-                  </span>
-                )}
-              </div>
+              <HealthStatusCard
+                title="Database Status"
+                subtitle="Core database connection"
+                status={health.databaseStatus}
+              />
 
               {/* Sync Pipeline Health Card */}
-              <div className="flex flex-col p-3 border border-slate-200 rounded-xl bg-white shadow-sm gap-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex flex-col">
-                    <span className="text-sm font-bold text-slate-800">Sync Status</span>
-                    <span className="text-xs text-slate-400">Monitoring & order ingestion</span>
-                  </div>
-                  {health.sync?.status === 'Healthy' && (
-                    <span className="flex items-center gap-1.5 px-2.5 py-1 bg-green-50 text-green-700 rounded-full text-xs font-bold border border-green-200">
-                      <CheckCircle2 size={13} /> OK
-                    </span>
-                  )}
-                  {health.sync?.status === 'Degraded' && (
-                    <span className="flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-bold border border-amber-200">
-                      <AlertTriangle size={13} /> WARN
-                    </span>
-                  )}
-                  {health.sync?.status === 'Failed' && (
-                    <span className="flex items-center gap-1.5 px-2.5 py-1 bg-red-50 text-red-700 rounded-full text-xs font-bold border border-red-200">
-                      <AlertCircle size={13} /> ERR
-                    </span>
-                  )}
-                </div>
+              <HealthStatusCard
+                title="Sync Status"
+                subtitle="Monitoring & order ingestion"
+                status={health.sync?.status}
+              >
                 <div className="grid grid-cols-2 gap-2 mt-1 text-xs border-t border-slate-100 pt-2 text-slate-500">
                   <div>Tenants with errors: <span className="font-bold text-slate-800">{health.sync?.tenantsWithErrorsCount}</span></div>
                   <div>Monitors with errors: <span className="font-bold text-slate-800">{health.sync?.monitorsWithErrorsCount}</span></div>
@@ -132,31 +143,14 @@ function SystemEventsView() {
                     {health.sync.globalSyncError}
                   </div>
                 )}
-              </div>
+              </HealthStatusCard>
 
               {/* Hangfire Background Health Card */}
-              <div className="flex flex-col p-3 border border-slate-200 rounded-xl bg-white shadow-sm gap-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex flex-col">
-                    <span className="text-sm font-bold text-slate-800">Hangfire Status</span>
-                    <span className="text-xs text-slate-400">Scheduler worker queues</span>
-                  </div>
-                  {health.hangfire?.status === 'Healthy' && (
-                    <span className="flex items-center gap-1.5 px-2.5 py-1 bg-green-50 text-green-700 rounded-full text-xs font-bold border border-green-200">
-                      <CheckCircle2 size={13} /> OK
-                    </span>
-                  )}
-                  {health.hangfire?.status === 'Warning' && (
-                    <span className="flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-bold border border-amber-200">
-                      <AlertTriangle size={13} /> WARN
-                    </span>
-                  )}
-                  {health.hangfire?.status === 'Failed' && (
-                    <span className="flex items-center gap-1.5 px-2.5 py-1 bg-red-50 text-red-700 rounded-full text-xs font-bold border border-red-200">
-                      <AlertCircle size={13} /> ERR
-                    </span>
-                  )}
-                </div>
+              <HealthStatusCard
+                title="Hangfire Status"
+                subtitle="Scheduler worker queues"
+                status={health.hangfire?.status}
+              >
                 <div className="grid grid-cols-4 gap-1 mt-1 text-center border-t border-slate-100 pt-2 text-[10px] text-slate-500">
                   <div className="flex flex-col p-1.5 bg-slate-50 rounded">
                     <span className="font-extrabold text-slate-850">{health.hangfire?.processingCount}</span>
@@ -175,13 +169,13 @@ function SystemEventsView() {
                     <span>Failed</span>
                   </div>
                 </div>
-              </div>
+              </HealthStatusCard>
 
               {/* Clear Errors Action */}
               <button
                 onClick={() => clearErrorsMutation.mutate()}
                 disabled={clearErrorsMutation.isPending}
-                className="w-full py-2.5 px-4 bg-slate-150 hover:bg-slate-200 active:bg-slate-250 text-slate-700 font-bold rounded-xl text-xs shadow-sm transition-colors border border-slate-250 disabled:opacity-50"
+                className="w-full py-2.5 px-4 bg-slate-150 hover:bg-slate-200 active:bg-slate-250 text-slate-700 font-bold rounded-xl text-xs shadow-sm transition-colors border border-slate-250 disabled:opacity-50 cursor-pointer"
               >
                 {clearErrorsMutation.isPending ? 'Clearing Diagnostics...' : 'Clear Sync Errors'}
               </button>
@@ -221,20 +215,18 @@ function SystemEventsView() {
             </div>
           )}
         </div>
-      </section>
+      </SettingsPanel>
 
       {/* Main Status Grid (Jobs + Logs) */}
       <div className="flex flex-col col-span-1 xl:col-span-2 gap-6 h-full min-h-0">
         
         {/* Background Jobs Panel */}
         <section className="flex flex-col bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden h-[320px] shrink-0">
-          <div className="flex items-center justify-between shrink-0 p-4 border-b border-slate-200 bg-slate-50">
-            <div className="flex items-center gap-3">
-              <Activity size={18} className="text-slate-500" />
-              <h2 className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">Recent Background Jobs</h2>
-            </div>
-            <div className="text-[10px] font-bold text-slate-400">Updates every 15s</div>
-          </div>
+          <SubSectionHeader
+            title="Recent Background Jobs"
+            subtitle="Updates every 15s"
+            icon={<Activity size={18} />}
+          />
           <div className="flex-1 overflow-y-auto custom-scrollbar p-3 bg-slate-50/20">
             {jobs && jobs.length > 0 ? (
               <div className="flex flex-col gap-2">

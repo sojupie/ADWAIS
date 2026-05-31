@@ -2,9 +2,9 @@ import { createRootRoute, Link, Outlet, useRouterState, useSearch } from '@tanst
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Settings } from 'lucide-react';
-import { PeriodSelector } from '../components/common/PeriodSelector';
-import { SyncStatusWidget } from '../components/common/SyncStatusWidget';
-import { KioskControls } from '../components/common/KioskControls';
+import { PeriodSelector } from '../components/common/charts/PeriodSelector';
+import { SyncStatusWidget } from '../components/common/dashboard/SyncStatusWidget';
+import { KioskControls } from '../components/common/dashboard/KioskControls';
 import motilloLogo from '../assets/motillo-logo.svg';
 import type { Timeframe } from '../schemas';
 

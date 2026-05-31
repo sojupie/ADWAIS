@@ -3,9 +3,9 @@ import { Users } from 'lucide-react';
 import { useUsersQuery, useCreateUserMutation, useUpdateUserMutation, useDeleteUserMutation } from '../../hooks/useUserQueries';
 import { UserRow } from '../../components/settings/users/UserRow';
 import { ProvisionUserPanel } from '../../components/settings/users/ProvisionUserPanel';
-import { SectionHeader } from '../../components/common/SectionHeader';
-import { SettingsPanel } from '../../components/common/SettingsPanel';
-import { EmptyState } from '../../components/common/EmptyState';
+import { SectionHeader } from '../../components/common/layout/SectionHeader';
+import { SettingsPanel } from '../../components/common/layout/SettingsPanel';
+import { EmptyState } from '../../components/common/ui/EmptyState';
 
 export const Route = createFileRoute('/settings/users')({
   component: UsersView,

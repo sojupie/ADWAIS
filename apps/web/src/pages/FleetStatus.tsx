@@ -1,8 +1,8 @@
 import { useSearch } from '@tanstack/react-router';
 import { useState, useMemo } from 'react';
 import { ArrowLeft } from 'lucide-react';
-import { CollectionPanel } from '../components/common/CollectionPanel';
-import { FactPanel } from '../components/common/FactPanel';
+import { CollectionPanel } from '../components/common/dashboard/CollectionPanel';
+import { FactPanel } from '../components/common/dashboard/FactPanel';
 import { FleetMatrix } from '../components/FleetStatus/FleetMatrix';
 import { NetworkLatencyChart } from '../components/FleetStatus/NetworkLatencyChart';
 import { SlaBreachWatchlist } from '../components/FleetStatus/SlaBreachWatchlist';
@@ -132,7 +132,7 @@ export function FleetStatus() {
         <div className="lg:col-span-3 flex flex-col min-h-0 h-full">
             <div className="flex-1 bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-3 flex flex-col min-h-[350px]">
               <NetworkLatencyChart 
-                 points={((analyticsQuery.data?.latencyPoints as any) || [])} 
+                 points={analyticsQuery.data?.latencyPoints || []} 
                  title={`Latency: ${activeScopeName}`}
                  isLoading={analyticsQuery.isLoading}
                  className="min-h-[250px]"

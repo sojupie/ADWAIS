@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CollectionPanel } from '../common/CollectionPanel';
+import { CollectionPanel } from '../common/dashboard/CollectionPanel';
 
 const SOCIAL_POSTS = [
   {

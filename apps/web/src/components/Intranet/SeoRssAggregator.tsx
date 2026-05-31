@@ -1,4 +1,4 @@
-import { CollectionPanel } from '../common/CollectionPanel';
+import { CollectionPanel } from '../common/dashboard/CollectionPanel';
 
 const news = [
   { id: 1, source: 'Search Engine Land', title: 'Google confirms May 2026 core update is rolling out', time: '2h ago' },

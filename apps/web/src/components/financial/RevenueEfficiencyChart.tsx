@@ -11,7 +11,7 @@ import {
 } from 'recharts';
 import type { RevenueEfficiencyResponse, RevenueEfficiencyTenant } from '@types';
 import { formatCompact, formatCurrency } from '@utils';
-import { ChartPanel } from '../common/ChartPanel';
+import { ChartPanel } from '../common/charts/ChartPanel';
 
 const TYPE_COLORS: Record<string, string> = {
   'B2C': 'var(--color-chart-1)',
@@ -19,7 +19,7 @@ const TYPE_COLORS: Record<string, string> = {
   'B2B': 'var(--color-chart-3)',
 };
 
-const CustomTooltip = ({ active, payload }: { isLoading?: boolean;  active?: boolean; payload?: any[] }) => {
+const CustomTooltip = ({ active, payload }: { isLoading?: boolean;  active?: boolean; payload?: { payload: unknown }[] }) => {
   if (!active || !payload?.length) return null;
 
   const point = payload[0].payload as RevenueEfficiencyTenant;

@@ -8,7 +8,7 @@ import {
   YAxis,
 } from 'recharts';
 import type { FinancialVelocityPoint } from '@types';
-import { ChartPanel } from '../common/ChartPanel';
+import { ChartPanel } from '../common/charts/ChartPanel';
 
 interface ShareTrajectoryRow {
   label: string;
@@ -27,7 +27,7 @@ function buildRows(tenantVelocity: FinancialVelocityPoint[], portfolioVelocity: 
   });
 }
 
-const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: any[]; label?: string }) => {
+const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: { value: number }[]; label?: string }) => {
   if (!active || !payload?.length) return null;
 
   return (

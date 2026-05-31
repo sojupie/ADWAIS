@@ -5,8 +5,8 @@ import { useTenantsQuery } from '../../hooks/useTenantQueries';
 import { RecurringJobsTable } from '../../components/settings/jobs/RecurringJobsTable';
 import { ManualBackfillPanel } from '../../components/settings/jobs/ManualBackfillPanel';
 import { SyncIntervalsForm } from '../../components/settings/jobs/SyncIntervalsForm';
-import { SectionHeader } from '../../components/common/SectionHeader';
-import { SettingsPanel } from '../../components/common/SettingsPanel';
+import { SectionHeader } from '../../components/common/layout/SectionHeader';
+import { SettingsPanel } from '../../components/common/layout/SettingsPanel';
 
 export const Route = createFileRoute('/settings/jobs')({
   component: BackgroundJobsView,

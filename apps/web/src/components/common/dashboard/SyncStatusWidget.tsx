@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useQuery, useQueryClient, useIsFetching } from '@tanstack/react-query';
 import { useSearch, useParams, useRouterState } from '@tanstack/react-router';
-import { apiFetch } from '../../apiClient';
+import { apiFetch } from '../../../apiClient';
 import type { SystemHealthDto, TenantResponseDto } from '@types';
 import { RefreshCw, AlertCircle } from 'lucide-react';
 
@@ -26,33 +26,32 @@ export function SyncStatusWidget() {
   const isFinancial = matches.some((m) => m.routeId === '/financial' || m.pathname.includes('/financial'));
   const isFleet = matches.some((m) => m.routeId === '/fleet-status' || m.pathname.includes('/fleet-status'));
   
-  // Show globally when on these views
-  if (!isFinancial && !isFleet) return null;
-
   const tenantId = search?.tenantId || params?.tenantId;
 
   const { data: health } = useQuery<SystemHealthDto>({
     queryKey: ['system-health'],
     queryFn: () => apiFetch<SystemHealthDto>('/api/system/health'),
     refetchInterval: 60000,
+    enabled: isFinancial || isFleet,
   });
 
   const { data: tenants } = useQuery<TenantResponseDto[]>({
     queryKey: ['tenant', tenantId],
     queryFn: () => apiFetch<TenantResponseDto[]>(`/api/tenants?id=${tenantId}`),
-    enabled: !!tenantId,
+    enabled: !!tenantId && (isFinancial || isFleet),
     refetchInterval: 60000,
   });
   
   const tenant = tenants?.[0];
 
-  const isFetchingCount = useIsFetching({ queryKey: isFinancial ? ['financial'] : ['fleet'] });
+  const isFetchingCount = useIsFetching({ queryKey: isFinancial ? ['financial'] : isFleet ? ['fleet'] : ['disabled-key'] });
   const isFetching = isFetchingCount > 0;
   
   const [dashboardSyncTime, setDashboardSyncTime] = useState<number | null>(null);
   const [countdown, setCountdown] = useState(60);
 
   useEffect(() => {
+    if (!isFinancial && !isFleet) return;
     const updateDashboardSync = () => {
       const queries = queryClient.getQueryCache().findAll({ queryKey: isFinancial ? ['financial'] : ['fleet'] });
       const maxTime = Math.max(...queries.map(q => q.state.dataUpdatedAt), 0);
@@ -72,14 +71,15 @@ export function SyncStatusWidget() {
     });
 
     return unsubscribe;
-  }, [queryClient, isFinancial]);
+  }, [queryClient, isFinancial, isFleet]);
 
   useEffect(() => {
+    if (!isFinancial && !isFleet) return;
     const timer = setInterval(() => {
       setCountdown(c => Math.max(0, c - 1));
     }, 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [isFinancial, isFleet]);
 
   const forceFetch = () => {
     setCountdown(60);
@@ -93,6 +93,8 @@ export function SyncStatusWidget() {
   const syncError = isDrillDown ? tenant?.lastSyncError : health?.sync?.globalSyncError;
 
   const progress = ((60 - countdown) / 60) * 100;
+
+  if (!isFinancial && !isFleet) return null;
 
   return (
     <div className="flex items-center gap-2 sm:gap-4 px-2 sm:px-3 py-2 border rounded-[4px] shadow-sm bg-brand-bg-secondary border-brand-bg-secondary/20 w-full md:w-auto max-w-[400px] md:max-w-none">

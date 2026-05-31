@@ -1,6 +1,6 @@
 import { formatCurrency, formatNumber } from '@utils';
 import { ArrowLeft } from 'lucide-react';
-import { FactPanel } from '../components/common/FactPanel';
+import { FactPanel } from '../components/common/dashboard/FactPanel';
 import { CumulativeGrowthDeltaChart } from '../components/TenantSpecific/CumulativeGrowthDeltaChart';
 import { OrderValueDistributionChart } from '../components/TenantSpecific/OrderValueDistributionChart';
 import { AccumulatedRevenueChart } from '../components/financial/AccumulatedRevenueChart';
@@ -99,25 +99,25 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe,
 
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 pb-4">
         <AccumulatedRevenueChart 
-          points={((accumulatedQuery.data as any) || [])} 
+          points={accumulatedQuery.data || []} 
           isLoading={accumulatedQuery.isLoading} 
           className="h-full min-h-[350px]" 
         />
         
         <TransactionDensityChart
-          points={((densityQuery.data as any) || [])}
+          points={densityQuery.data || []}
           isLoading={densityQuery.isLoading}
           className="h-full min-h-[350px]"
         />
 
         <CumulativeGrowthDeltaChart 
-          points={((deltaQuery.data as any) || [])} 
+          points={deltaQuery.data || []} 
           isLoading={deltaQuery.isLoading} 
           className="h-full min-h-[350px]" 
         />
 
         <OrderValueDistributionChart 
-          bins={((orderQuery.data as any) || [])} 
+          bins={orderQuery.data || []} 
           isLoading={orderQuery.isLoading} 
           className="h-full min-h-[350px]" 
         />

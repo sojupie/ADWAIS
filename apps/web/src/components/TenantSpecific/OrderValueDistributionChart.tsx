@@ -12,9 +12,9 @@ import {
 } from 'recharts';
 import type { OrderBin } from '@types';
 import { formatNumber } from '@utils';
-import { ChartPanel } from '../common/ChartPanel';
+import { ChartPanel } from '../common/charts/ChartPanel';
 
-const CustomTooltip = ({ active, payload, label }: { isLoading?: boolean;  active?: boolean; payload?: any[]; label?: string }) => {
+const CustomTooltip = ({ active, payload, label }: { isLoading?: boolean;  active?: boolean; payload?: { dataKey?: string | number; value: number }[]; label?: string }) => {
   if (!active || !payload?.length) return null;
 
   const orderCount = payload.find(p => p.dataKey === 'orderCount')?.value;

@@ -1,7 +1,7 @@
 import { Clock, CheckCircle2, Activity } from 'lucide-react';
-import { SectionHeader } from '../../common/SectionHeader';
-import { SettingsPanel } from '../../common/SettingsPanel';
-import { EmptyState } from '../../common/EmptyState';
+import { SectionHeader } from '../../common/layout/SectionHeader';
+import { SettingsPanel } from '../../common/layout/SettingsPanel';
+import { EmptyState } from '../../common/ui/EmptyState';
 import type { RecurringJobDto } from '@types';
 
 interface RecurringJobsTableProps {
@@ -39,7 +39,7 @@ export function RecurringJobsTable({ recurring }: RecurringJobsTableProps) {
                       {job.cron}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-slate-500">{(job as any).queue || 'default'}</td>
+                  <td className="px-6 py-4 text-slate-500">{(job as RecurringJobDto & { queue?: string }).queue || 'default'}</td>
                   <td className="px-6 py-4 text-slate-700 font-bold">
                     {job.lastExecution ? new Date(job.lastExecution).toLocaleString() : 'Never'}
                   </td>

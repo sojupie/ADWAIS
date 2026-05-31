@@ -28,9 +28,11 @@ export function InlineEditField<T>({
   const [isHovered, setIsHovered] = useState(false);
   const inputRef = useRef<HTMLInputElement | HTMLSelectElement>(null);
 
-  useEffect(() => {
+  const [prevValue, setPrevValue] = useState(value);
+  if (value !== prevValue) {
+    setPrevValue(value);
     setDraft(value);
-  }, [value]);
+  }
 
   useEffect(() => {
     if (isEditing && inputRef.current && type !== 'checkbox') {

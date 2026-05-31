@@ -1,7 +1,7 @@
 import { useState, Fragment } from 'react';
 import type { TransactionDensityPointDto } from '@types';
 import { formatCurrency } from '@utils';
-import { ChartPanel } from '../common/ChartPanel';
+import { ChartPanel } from '../common/charts/ChartPanel';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 

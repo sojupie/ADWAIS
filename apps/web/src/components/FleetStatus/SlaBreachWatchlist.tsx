@@ -1,6 +1,6 @@
 import type { UptimeMonitorDto } from '@types';
 import { useMemo } from 'react';
-import { ChartPanel } from '../common/ChartPanel';
+import { ChartPanel } from '../common/charts/ChartPanel';
 
 interface MonitorIssue {
   id: number;

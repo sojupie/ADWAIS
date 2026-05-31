@@ -6,10 +6,10 @@ import { useMonitorsQuery, useUnassignedMonitorsQuery, useCreateMonitorMutation,
 import { TenantTile } from '../../components/settings/tenants/TenantTile';
 import { MonitorTile } from '../../components/settings/tenants/MonitorTile';
 import { TenantFilterMenu } from '../../components/settings/tenants/TenantFilterMenu';
-import { SectionHeader } from '../../components/common/SectionHeader';
-import { SearchInput } from '../../components/common/SearchInput';
-import { SettingsPanel } from '../../components/common/SettingsPanel';
-import { EmptyState } from '../../components/common/EmptyState';
+import { SectionHeader } from '../../components/common/layout/SectionHeader';
+import { SearchInput } from '../../components/common/ui/SearchInput';
+import { SettingsPanel } from '../../components/common/layout/SettingsPanel';
+import { EmptyState } from '../../components/common/ui/EmptyState';
 import type { UptimeMonitorDto } from '@types';
 
 export const Route = createFileRoute('/settings/tenants')({

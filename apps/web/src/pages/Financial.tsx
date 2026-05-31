@@ -1,7 +1,7 @@
 import { formatCurrency, formatCompact, formatNumber } from '@utils';
 import { useSearch, useNavigate } from '@tanstack/react-router';
 import { useMemo } from 'react';
-import { FactPanel } from '../components/common/FactPanel';
+import { FactPanel } from '../components/common/dashboard/FactPanel';
 import { MomentumMatrixChart } from '../components/financial/MomentumMatrixChart';
 import { RevenueEfficiencyChart } from '../components/financial/RevenueEfficiencyChart';
 import { VolumeAnomalyChart } from '../components/financial/VolumeAnomalyChart';
@@ -28,19 +28,17 @@ export function Financial() {
   const anomalyQuery = useVolumeAnomaly(timeframe);
 
   const selectedTenantDetails = useMemo(() => {
-    if (!tenantId) return null;
-    
-    const efficiencyTenants = Array.isArray(efficiencyQuery.data) ? efficiencyQuery.data : ((efficiencyQuery.data as any) || { tenants: [], topPerformer: null, bottomPerformer: null })?.tenants;
-    const momentumTenants = Array.isArray(momentumQuery.data) ? momentumQuery.data : ((momentumQuery.data as any) || { tenants: [] })?.tenants;
+    const efficiencyTenants = efficiencyQuery.data?.tenants;
+    const momentumTenants = momentumQuery.data?.tenants;
 
     const tenantName = extremesQuery.data?.find(e => e.tenantId === tenantId)?.tenantName 
-      || efficiencyTenants?.find((d: any) => d.tenantId === tenantId)?.tenantName 
+      || efficiencyTenants?.find((d) => d.tenantId === tenantId)?.tenantName 
       || anomalyQuery.data?.find(a => a.tenantId === tenantId)?.tenantName
-      || momentumTenants?.find((t: any) => t.tenantId === tenantId)?.tenantName
+      || momentumTenants?.find((t) => t.tenantId === tenantId)?.tenantName
       || 'Unknown Tenant';
 
-    const type = efficiencyTenants?.find((d: any) => d.tenantId === tenantId)?.type
-      || momentumTenants?.find((t: any) => t.tenantId === tenantId)?.type
+    const type = efficiencyTenants?.find((d) => d.tenantId === tenantId)?.type
+      || momentumTenants?.find((t) => t.tenantId === tenantId)?.type
       || 'Mixed';
       
     return { tenantName, type };
@@ -113,27 +111,27 @@ export function Financial() {
       {/* Charts Grid: Strictly Responsive & Independent */}
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 pb-4">
         <AccumulatedRevenueChart 
-          points={((velocityQuery.data as any) || [])} 
+          points={velocityQuery.data || []} 
           isLoading={velocityQuery.isLoading} 
           className="h-full min-h-[350px]" 
         />
 
         <VolumeAnomalyChart 
-          entries={((anomalyQuery.data as any) || [])} 
+          entries={anomalyQuery.data || []} 
           onTenantSelect={handleTenantSelect} 
           isLoading={anomalyQuery.isLoading} 
           className="h-full min-h-[350px]" 
         />
 
         <RevenueEfficiencyChart 
-          response={((efficiencyQuery.data as any) || { tenants: [], topPerformer: null, bottomPerformer: null })} 
+          response={efficiencyQuery.data || { tenants: [], globalAverageOrderValue: 0, medianPortfolioShare: 0 }} 
           onTenantSelect={handleTenantSelect} 
           isLoading={efficiencyQuery.isLoading} 
           className="h-full min-h-[350px]" 
         />
 
         <MomentumMatrixChart 
-          momentum={((momentumQuery.data as any) || { tenants: [] })} 
+          momentum={momentumQuery.data || { tenants: [], medianBaselineRevenue: 0, globalGrowthPercentage: 0 }} 
           onTenantSelect={handleTenantSelect} 
           isLoading={momentumQuery.isLoading} 
           className="h-full min-h-[350px]" 

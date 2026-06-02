@@ -15,7 +15,7 @@ public interface ISystemEventService
     /// <param name="level">The severity level of the event.</param>
     /// <param name="details">Optional detailed information or stack trace.</param>
     /// <param name="tenantId">Optional tenant ID associated with the event.</param>
-    Task LogAsync(string source, string message, SystemEventLevel level = SystemEventLevel.Information, string? details = null, TenantId? tenantId = null);
+    Task LogAsync(string source, string message, SystemEventLevel level = SystemEventLevel.Information, string? details = null, Guid? tenantId = null);
 
     /// <summary>
     /// Logs a warning event.
@@ -24,7 +24,7 @@ public interface ISystemEventService
     /// <param name="message">The main message.</param>
     /// <param name="details">Optional detailed information.</param>
     /// <param name="tenantId">Optional tenant ID.</param>
-    Task LogWarningAsync(string source, string message, string? details = null, TenantId? tenantId = null);
+    Task LogWarningAsync(string source, string message, string? details = null, Guid? tenantId = null);
 
     /// <summary>
     /// Logs an error event, including exception details.
@@ -33,5 +33,5 @@ public interface ISystemEventService
     /// <param name="message">The main message.</param>
     /// <param name="ex">Optional exception that occurred.</param>
     /// <param name="tenantId">Optional tenant ID.</param>
-    Task LogErrorAsync(string source, string message, Exception? ex = null, TenantId? tenantId = null);
+    Task LogErrorAsync(string source, string message, Exception? ex = null, Guid? tenantId = null);
 }

@@ -3,7 +3,6 @@ namespace Adwais.Application.DTOs.Financial.Upstream;
 public class LitiumOrderDto
 {
     public required Guid Id { get; set; }
-    public Guid? OrganizationSystemId { get; set; }
     public required string OrderNumber { get; set; }
     public required DateTimeOffset CreatedDate { get; set; }
     public required string OrderStatus { get; set; }

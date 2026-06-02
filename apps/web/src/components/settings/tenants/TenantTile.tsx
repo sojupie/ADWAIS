@@ -18,7 +18,7 @@ interface TenantTileProps {
 export function TenantTile({ t, updateTenant, deleteTenant }: TenantTileProps) {
   const [draft, setDraft] = useState({
     name: t.name,
-    type: t.type ?? 1,
+    type: t.type ?? 'Mixed',
     litiumBaseUrl: t.litiumBaseUrl || '',
     serviceAccountToken: '',
     orderFetchingEnabled: t.orderFetchingEnabled ?? false
@@ -26,7 +26,7 @@ export function TenantTile({ t, updateTenant, deleteTenant }: TenantTileProps) {
 
   const isDirty =
     draft.name !== t.name ||
-    draft.type !== (t.type ?? 1) ||
+    draft.type !== (t.type ?? 'Mixed') ||
     draft.litiumBaseUrl !== (t.litiumBaseUrl || '') ||
     draft.serviceAccountToken !== '' ||
     draft.orderFetchingEnabled !== (t.orderFetchingEnabled ?? false);
@@ -34,7 +34,7 @@ export function TenantTile({ t, updateTenant, deleteTenant }: TenantTileProps) {
   const handleSave = () => {
     const payload: Partial<TenantResponseDto> & { serviceAccountToken?: string } = {};
     if (draft.name !== t.name) payload.name = draft.name;
-    if (draft.type !== (t.type ?? 1)) payload.type = draft.type;
+    if (draft.type !== (t.type ?? 'Mixed')) payload.type = draft.type;
     if (draft.litiumBaseUrl !== (t.litiumBaseUrl || '')) payload.litiumBaseUrl = draft.litiumBaseUrl;
     if (draft.serviceAccountToken !== '') payload.serviceAccountToken = draft.serviceAccountToken;
     if (draft.orderFetchingEnabled !== (t.orderFetchingEnabled ?? false)) payload.orderFetchingEnabled = draft.orderFetchingEnabled;
@@ -44,7 +44,7 @@ export function TenantTile({ t, updateTenant, deleteTenant }: TenantTileProps) {
   const handleCancel = () => {
     setDraft({
       name: t.name,
-      type: t.type ?? 1,
+      type: t.type ?? 'Mixed',
       litiumBaseUrl: t.litiumBaseUrl || '',
       serviceAccountToken: '',
       orderFetchingEnabled: t.orderFetchingEnabled ?? false
@@ -61,16 +61,16 @@ export function TenantTile({ t, updateTenant, deleteTenant }: TenantTileProps) {
         />
         <select
           value={draft.type}
-          onChange={e => setDraft({...draft, type: Number(e.target.value)})}
+          onChange={e => setDraft({...draft, type: e.target.value as 'Mixed' | 'B2B' | 'B2C'})}
           className={`px-1.5 py-0.5 rounded-[4px] text-xs uppercase font-bold tracking-widest shadow-sm text-white cursor-pointer hover:opacity-90 outline-none shrink-0 ${
-            draft.type === 1 ? 'bg-[var(--color-brand-btn-primary)]' :
-            draft.type === 2 ? 'bg-[#0ea5e9]' :
+            draft.type === 'B2B' ? 'bg-[var(--color-brand-btn-primary)]' :
+            draft.type === 'B2C' ? 'bg-[#0ea5e9]' :
             'bg-[#8b5cf6]'
           }`}
         >
-          <option value={0} className="text-slate-800 bg-white">MIXED</option>
-          <option value={1} className="text-slate-800 bg-white">B2B</option>
-          <option value={2} className="text-slate-800 bg-white">B2C</option>
+          <option value="Mixed" className="text-slate-800 bg-white">MIXED</option>
+          <option value="B2B" className="text-slate-800 bg-white">B2B</option>
+          <option value="B2C" className="text-slate-800 bg-white">B2C</option>
         </select>
       </span>
       <span className="text-xs text-slate-400 font-mono font-medium select-text cursor-text truncate">{t.id}</span>

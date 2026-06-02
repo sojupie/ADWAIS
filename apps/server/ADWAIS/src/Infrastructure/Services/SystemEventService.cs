@@ -15,7 +15,7 @@ public class SystemEventService(
     ILogger<SystemEventService> logger) : ISystemEventService
 {
     /// <inheritdoc />
-    public async Task LogAsync(string source, string message, SystemEventLevel level = SystemEventLevel.Information, string? details = null, TenantId? tenantId = null)
+    public async Task LogAsync(string source, string message, SystemEventLevel level = SystemEventLevel.Information, string? details = null, Guid? tenantId = null)
     {
         try
         {
@@ -50,11 +50,11 @@ public class SystemEventService(
     }
 
     /// <inheritdoc />
-    public Task LogWarningAsync(string source, string message, string? details = null, TenantId? tenantId = null)
+    public Task LogWarningAsync(string source, string message, string? details = null, Guid? tenantId = null)
         => LogAsync(source, message, SystemEventLevel.Warning, details, tenantId);
 
     /// <inheritdoc />
-    public Task LogErrorAsync(string source, string message, Exception? ex = null, TenantId? tenantId = null)
+    public Task LogErrorAsync(string source, string message, Exception? ex = null, Guid? tenantId = null)
         => LogAsync(source, message, SystemEventLevel.Error, ex?.ToString(), tenantId);
 }
 

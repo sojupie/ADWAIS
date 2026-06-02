@@ -25,15 +25,19 @@ export function useTriggerJobMutation() {
 
 export function useBackfillMutation(onSuccessCallback?: () => void) {
   return useMutation({
-    mutationFn: (payload: { tenantId: string; startDate: string; endDate: string }) => 
-      apiFetch('/api/Ingestion/backfill', {
-        method: 'POST',
-        body: JSON.stringify({ 
-          tenantId: payload.tenantId, 
-          startDate: payload.startDate ? new Date(payload.startDate).toISOString() : null, 
-          endDate: payload.endDate ? new Date(payload.endDate).toISOString() : null 
-        })
-      }),
+    mutationFn: (payload: { tenantId: string; startDate: string; endDate: string }) => {
+      const params = new URLSearchParams();
+      params.append('tenantId', payload.tenantId);
+      if (payload.startDate) {
+        params.append('startDate', new Date(payload.startDate).toISOString());
+      }
+      if (payload.endDate) {
+        params.append('endDate', new Date(payload.endDate).toISOString());
+      }
+      return apiFetch(`/api/Ingestion/backfill?${params.toString()}`, {
+        method: 'POST'
+      });
+    },
     onSuccess: () => {
       alert('Backfill initiated.');
       if (onSuccessCallback) onSuccessCallback();
@@ -54,3 +58,6 @@ export function useUpdateConfigMutation() {
     }
   });
 }
+
+// Second test comment for verifying permission prompt
+

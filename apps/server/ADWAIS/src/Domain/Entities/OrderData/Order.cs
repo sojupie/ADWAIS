@@ -5,7 +5,7 @@ namespace Adwais.Domain.Entities.OrderData;
 public class Order
 {
     public Guid Id { get; set; }
-    public TenantId TenantId { get; set; }
+    public Guid TenantId { get; set; }
     public Guid? OrganizationSystemId { get; set; }
     public OrderState OrderState { get; set; }
     public required string LitiumOrderId { get; set; }

@@ -14,7 +14,7 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options)
     public DbSet<GlobalConfig> GlobalConfigs => Set<GlobalConfig>();
     public DbSet<User> Users => Set<User>();
     public DbSet<Tenant> Tenants => Set<Tenant>();
-    public static readonly TenantId SystemTenantGuid = new TenantId(new Guid("00000000-0000-0000-0000-000000000001"));
+    public static readonly Guid SystemTenantGuid = new Guid("00000000-0000-0000-0000-000000000001");
     
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<DailyFinancialTenantRollup> DailyTenantRollups => Set<DailyFinancialTenantRollup>();
@@ -328,22 +328,6 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options)
                 .HasForeignKey(m => m.CreatedByUserId)
                 .OnDelete(DeleteBehavior.SetNull);
         });
-    }
-
-    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
-    {
-        configurationBuilder
-            .Properties<TenantId>()
-            .HaveConversion<TenantIdValueConverter>();
-    }
-}
-
-public class TenantIdValueConverter : Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<TenantId, Guid>
-{
-    public TenantIdValueConverter() : base(
-        id => id.Value,
-        value => new TenantId(value))
-    {
     }
 }
 

@@ -20,7 +20,7 @@ public class OrderDistributionRequestDto
     /// The unique identifier of the tenant.
     /// </summary>
     [FromQuery(Name = "tenantId")]
-    public required TenantId TenantId { get; set; }
+    public required Guid TenantId { get; set; }
 
     /// <summary>
     /// Optional. The number of bins to use for the histogram. 

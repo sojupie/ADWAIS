@@ -17,14 +17,14 @@ public class FinancialService(IApplicationDbContextFactory contextFactory) : IFi
 {
     #region Internal data model for the merge layer
 
-    private record DataRow(DateTimeOffset Timestamp, TenantId? TenantId, decimal Revenue, int Volume);
+    private record DataRow(DateTimeOffset Timestamp, Guid? TenantId, decimal Revenue, int Volume);
 
     #endregion
 
     #region Historical + Fresh Data Merge
 
     private async Task<List<DataRow>> GetMergedTenantDataAsync(
-        IApplicationDbContext context, DateTimeOffset start, DateTimeOffset end, bool isHourly, TenantId? tenantId = null)
+        IApplicationDbContext context, DateTimeOffset start, DateTimeOffset end, bool isHourly, Guid? tenantId = null)
     {
         if (tenantId.HasValue)
         {
@@ -193,7 +193,7 @@ public class FinancialService(IApplicationDbContextFactory contextFactory) : IFi
     #region Widget Implementations
 
     /// <inheritdoc />
-    public async Task<KpiDto> GetKpisAsync(ResolvedPeriod period, TenantId? tenantId = null)
+    public async Task<KpiDto> GetKpisAsync(ResolvedPeriod period, Guid? tenantId = null)
     {
         var currentStart = period.CurrentStart;
         var currentEnd = period.CurrentEnd;
@@ -228,7 +228,7 @@ public class FinancialService(IApplicationDbContextFactory contextFactory) : IFi
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<VelocityPointDto>> GetVelocityAsync(ResolvedPeriod period, TenantId? tenantId = null)
+    public async Task<IReadOnlyList<VelocityPointDto>> GetVelocityAsync(ResolvedPeriod period, Guid? tenantId = null)
     {
         var currentStart = period.CurrentStart;
         var currentEnd = period.CurrentEnd;
@@ -282,7 +282,7 @@ public class FinancialService(IApplicationDbContextFactory contextFactory) : IFi
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<AccumulatedRevenuePointDto>> GetAccumulatedRevenueAsync(ResolvedPeriod period, TenantId? tenantId = null)
+    public async Task<IReadOnlyList<AccumulatedRevenuePointDto>> GetAccumulatedRevenueAsync(ResolvedPeriod period, Guid? tenantId = null)
     {
         var currentStart = period.CurrentStart;
         var currentEnd = period.CurrentEnd;
@@ -572,7 +572,7 @@ public class FinancialService(IApplicationDbContextFactory contextFactory) : IFi
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<NetGrowthAdditionPointDto>> GetNetGrowthAdditionAsync(ResolvedPeriod period, TenantId tenantId)
+    public async Task<IReadOnlyList<NetGrowthAdditionPointDto>> GetNetGrowthAdditionAsync(ResolvedPeriod period, Guid tenantId)
     {
         var currentStart = period.CurrentStart;
         var currentEnd = period.CurrentEnd;
@@ -611,7 +611,7 @@ public class FinancialService(IApplicationDbContextFactory contextFactory) : IFi
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<OrderBinDto>> GetOrderDistributionAsync(ResolvedPeriod period, TenantId tenantId, int? binCount = null)
+    public async Task<IReadOnlyList<OrderBinDto>> GetOrderDistributionAsync(ResolvedPeriod period, Guid tenantId, int? binCount = null)
     {
         var currentStart = period.CurrentStart;
         var currentEnd = period.CurrentEnd;
@@ -710,7 +710,7 @@ public class FinancialService(IApplicationDbContextFactory contextFactory) : IFi
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<TransactionDensityPointDto>> GetTransactionDensityAsync(ResolvedPeriod period, TenantId? tenantId = null)
+    public async Task<IReadOnlyList<TransactionDensityPointDto>> GetTransactionDensityAsync(ResolvedPeriod period, Guid? tenantId = null)
     {
         // Force 30-day rolling timeframe for density to ensure statistical volume regardless of global dropdown
         var t30 = TimeframeResolver.Resolve(Timeframe.T30);
@@ -762,7 +762,7 @@ public class FinancialService(IApplicationDbContextFactory contextFactory) : IFi
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<CumulativeGrowthDeltaPointDto>> GetCumulativeGrowthDeltaAsync(ResolvedPeriod period, TenantId? tenantId = null)
+    public async Task<IReadOnlyList<CumulativeGrowthDeltaPointDto>> GetCumulativeGrowthDeltaAsync(ResolvedPeriod period, Guid? tenantId = null)
     {
         var currentStart = period.CurrentStart;
         var currentEnd = period.CurrentEnd;
@@ -823,7 +823,7 @@ public class FinancialService(IApplicationDbContextFactory contextFactory) : IFi
 
     #region Helpers
 
-    private static async Task<Dictionary<TenantId, string>> GetTenantNameMapAsync(IApplicationDbContext context)
+    private static async Task<Dictionary<Guid, string>> GetTenantNameMapAsync(IApplicationDbContext context)
     {
         return await context.Tenants
             .AsNoTracking()

@@ -33,7 +33,7 @@ public class IngestionController(
     /// <response code="409">If a fetch job is already running for this tenant.</response>
     [HttpPost("backfill")]
     public async Task<IActionResult> ExecuteHistoricalBackfill(
-        [FromBody] HistoricalBackfillRequestDto request,
+        [FromQuery] HistoricalBackfillRequestDto request,
         CancellationToken ct)
     {
         await using var context = await contextFactory.CreateDbContextAsync(ct);
@@ -45,7 +45,7 @@ public class IngestionController(
         tenant.CurrentlyFetching = true;
         await context.SaveChangesAsync(ct);
 
-        var startDate = request.StartDate ?? DateTimeOffset.UtcNow.AddYears(-2);
+        var startDate = request.StartDate ?? DateTimeOffset.UtcNow.AddYears(request.DefaultLookBackPeriodYears);
         var endDate = request.EndDate ?? DateTimeOffset.UtcNow;
 
         var jobId = backgroundJobClient.Enqueue<ILitiumIngestionService>(

@@ -1,13 +1,13 @@
-using Adwais.Domain.Enums;
 using Adwais.Domain.Entities;
 using Adwais.Domain.Entities.Monitoring;
 using Adwais.Domain.Entities.OrderData;
+using Adwais.Domain.Enums;
 using Adwais.Infrastructure.Persistence;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace Adwais.Infrastructure.Jobs;
+namespace Adwais.Infrastructure.Helpers;
 
 public class RuntimeDataSeederJob(
     IDbContextFactory<AnalyticsDbContext> dbContextFactory,
@@ -138,7 +138,7 @@ public class RuntimeDataSeederJob(
         await db.SaveChangesAsync();
     }
 
-    private static void AddOrders(List<Order> orders, TenantId tenantId, int count, int minAov, int maxAov, DateTimeOffset now, Random random)
+    private static void AddOrders(List<Order> orders, Guid tenantId, int count, int minAov, int maxAov, DateTimeOffset now, Random random)
     {
         for (int i = 0; i < count; i++)
         {

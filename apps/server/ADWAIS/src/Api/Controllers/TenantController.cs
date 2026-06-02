@@ -23,7 +23,7 @@ public class TenantController(
     /// </summary>
     /// <param name="id">Optional tenant ID to retrieve a single tenant.</param>
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<TenantResponseDto>>> GetTenants([FromQuery] TenantId? id)
+    public async Task<ActionResult<IEnumerable<TenantResponseDto>>> GetTenants([FromQuery] Guid? id)
     {
         await using var context = await contextFactory.CreateDbContextAsync();
 
@@ -118,8 +118,7 @@ public class TenantController(
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteTenant(Guid id)
     {
-        TenantId tenantId = id;
-        if (tenantId == AnalyticsDbContext.SystemTenantGuid)
+        if (id == AnalyticsDbContext.SystemTenantGuid)
         {
             return BadRequest("Cannot delete the system tenant.");
         }
@@ -131,7 +130,7 @@ public class TenantController(
             return NotFound();
         }
         
-        await monitorService.ReassignAllTenantMonitorsToSystemAsync(tenantId);
+        await monitorService.ReassignAllTenantMonitorsToSystemAsync(id);
 
         context.Tenants.Remove(tenant);
         await context.SaveChangesAsync();

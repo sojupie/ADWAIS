@@ -18,7 +18,7 @@ public class MonitorOrchestrationService(
 {
     private record LatencyRow(DateTime Timestamp, double Average, double Lowest, double Highest);
 
-    public async Task<MonitorAnalyticsDto> GetAnalyticsAsync(ResolvedPeriod period, TenantId? tenantId = null, int? monitorId = null)
+    public async Task<MonitorAnalyticsDto> GetAnalyticsAsync(ResolvedPeriod period, Guid? tenantId = null, int? monitorId = null)
     {
         var currentStart = period.CurrentStart;
         var currentEnd = period.CurrentEnd;
@@ -95,7 +95,7 @@ public class MonitorOrchestrationService(
         return new MonitorAnalyticsDto(globalAvgLatency, latencyPoints, monitors);
     }
 
-    private async Task<Dictionary<int, double>> GetPeriodUptimesAsync(DateTimeOffset start, DateTimeOffset end, TenantId? tenantId, int? monitorId)
+    private async Task<Dictionary<int, double>> GetPeriodUptimesAsync(DateTimeOffset start, DateTimeOffset end, Guid? tenantId, int? monitorId)
     {
         var yesterday = new DateTimeOffset(DateTimeOffset.UtcNow.Date);
         var viewEnd = yesterday < end ? yesterday : end;
@@ -151,7 +151,7 @@ public class MonitorOrchestrationService(
     }
 
     private async Task<List<LatencyRow>> GetMergedLatencyDataAsync(
-        IApplicationDbContext db, DateTimeOffset start, DateTimeOffset end, bool isHourly, TenantId? tenantId = null, int? monitorId = null)
+        IApplicationDbContext db, DateTimeOffset start, DateTimeOffset end, bool isHourly, Guid? tenantId = null, int? monitorId = null)
     {
         if (isHourly)
         {
@@ -215,7 +215,7 @@ public class MonitorOrchestrationService(
         return historical;
     }
 
-    public async Task<UptimeMonitor> CreateMonitorAsync(TenantId tenantId, string name, string url, double? uptimeSla)
+    public async Task<UptimeMonitor> CreateMonitorAsync(Guid tenantId, string name, string url, double? uptimeSla)
     {
         var remoteMonitor = await uptimeRobotService.CreateMonitorAsync(name, url);
         
@@ -239,7 +239,7 @@ public class MonitorOrchestrationService(
         return monitor;
     }
 
-    public async Task AssignMonitorAsync(int monitorId, TenantId tenantId)
+    public async Task AssignMonitorAsync(int monitorId, Guid tenantId)
     {
         var monitor = await dbContext.Monitors.SingleOrDefaultAsync(m => m.Id == monitorId);
         if (monitor == null) throw new KeyNotFoundException($"Monitor {monitorId} not found.");
@@ -251,14 +251,14 @@ public class MonitorOrchestrationService(
         await dbContext.SaveChangesAsync();
     }
 
-    public async Task ReassignAllTenantMonitorsToSystemAsync(TenantId tenantId)
+    public async Task ReassignAllTenantMonitorsToSystemAsync(Guid tenantId)
     {
         await dbContext.Monitors
             .Where(m => m.TenantId == tenantId)
             .ExecuteUpdateAsync(s => s.SetProperty(m => m.TenantId, IApplicationDbContext.SystemTenantGuid));
     }
 
-    public async Task<IEnumerable<UptimeMonitor>> GetMonitorsByTenantAsync(TenantId tenantId, ResolvedPeriod period)
+    public async Task<IEnumerable<UptimeMonitor>> GetMonitorsByTenantAsync(Guid tenantId, ResolvedPeriod period)
     {
         var start = period.CurrentStart;
         var end = period.CurrentEnd;
@@ -283,7 +283,7 @@ public class MonitorOrchestrationService(
         return monitors;
     }
 
-    public async Task<UptimeMonitor> GetMonitorAsync(TenantId tenantId, int id, ResolvedPeriod period)
+    public async Task<UptimeMonitor> GetMonitorAsync(Guid tenantId, int id, ResolvedPeriod period)
     {
         var start = period.CurrentStart;
         var end = period.CurrentEnd;
@@ -329,7 +329,7 @@ public class MonitorOrchestrationService(
             : status;
     }
 
-    public async Task DeleteMonitorAsync(TenantId tenantId, int id)
+    public async Task DeleteMonitorAsync(Guid tenantId, int id)
     {
         var monitor = await dbContext.Monitors.SingleOrDefaultAsync(m => m.TenantId == tenantId && m.Id == id);
         if (monitor == null) throw new KeyNotFoundException();
@@ -362,7 +362,7 @@ public class MonitorOrchestrationService(
         await dbContext.SaveChangesAsync();
     }
 
-    public async Task<IEnumerable<ResponseTime>> GetAggregatedLatencyAsync(TenantId tenantId, int id, DateTimeOffset from, DateTimeOffset to)
+    public async Task<IEnumerable<ResponseTime>> GetAggregatedLatencyAsync(Guid tenantId, int id, DateTimeOffset from, DateTimeOffset to)
     {
         var monitorExists = await dbContext.Monitors
             .AsNoTracking()

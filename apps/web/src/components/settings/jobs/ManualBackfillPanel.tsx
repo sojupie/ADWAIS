@@ -33,7 +33,7 @@ export function ManualBackfillPanel({ tenants, triggerBackfill }: ManualBackfill
         >
           <option value="" disabled>Select a tenant...</option>
           {(tenants || []).map((t) => (
-            <option key={t.id} value={t.id}>{t.name} ({t.type === 2 ? 'Sandbox' : 'Production'})</option>
+            <option key={t.id} value={t.id}>{t.name} ({t.type})</option>
           ))}
         </select>
       </div>

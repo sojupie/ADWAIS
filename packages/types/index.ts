@@ -162,7 +162,7 @@ export interface MonitorAnalyticsDto {
 export interface TenantResponseDto {
   id: string;
   name: string;
-  type: number;
+  type: 'Mixed' | 'B2B' | 'B2C';
   litiumBaseUrl: string;
   currentlyFetching: boolean;
   fetchedFrom: string | null;

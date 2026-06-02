@@ -10,37 +10,37 @@ public interface IMonitorOrchestrationService
     /// <summary>
     /// Retrieves aggregated monitoring analytics, including latency time-series and monitor list.
     /// </summary>
-    Task<MonitorAnalyticsDto> GetAnalyticsAsync(ResolvedPeriod period, TenantId? tenantId = null, int? monitorId = null);
+    Task<MonitorAnalyticsDto> GetAnalyticsAsync(ResolvedPeriod period, Guid? tenantId = null, int? monitorId = null);
 
     /// <summary>
     /// Retrieves all uptime monitors associated with a specific tenant, hydrated with uptime for the given timeframe.
     /// </summary>
-    Task<IEnumerable<UptimeMonitor>> GetMonitorsByTenantAsync(TenantId tenantId, ResolvedPeriod period);
+    Task<IEnumerable<UptimeMonitor>> GetMonitorsByTenantAsync(Guid tenantId, ResolvedPeriod period);
 
     /// <summary>
     /// Retrieves a specific uptime monitor for a tenant, hydrated with uptime for the given timeframe.
     /// </summary>
-    Task<UptimeMonitor> GetMonitorAsync(TenantId tenantId, int id, ResolvedPeriod period);
+    Task<UptimeMonitor> GetMonitorAsync(Guid tenantId, int id, ResolvedPeriod period);
 
     /// <summary>
     /// Creates a new uptime monitor for a tenant.
     /// </summary>
-    Task<UptimeMonitor> CreateMonitorAsync(TenantId tenantId, string name, string url, double? uptimeSla); 
+    Task<UptimeMonitor> CreateMonitorAsync(Guid tenantId, string name, string url, double? uptimeSla); 
 
     /// <summary>
     /// Assigns an existing monitor to a specific tenant.
     /// </summary>
-    Task AssignMonitorAsync(int monitorId, TenantId tenantId);
+    Task AssignMonitorAsync(int monitorId, Guid tenantId);
 
     /// <summary>
     /// Reassigns all monitors from a specific tenant to the system tenant.
     /// </summary>
-    Task ReassignAllTenantMonitorsToSystemAsync(TenantId tenantId);
+    Task ReassignAllTenantMonitorsToSystemAsync(Guid tenantId);
 
     /// <summary>
     /// Deletes a monitor for a specific tenant.
     /// </summary>
-    Task DeleteMonitorAsync(TenantId tenantId, int id);
+    Task DeleteMonitorAsync(Guid tenantId, int id);
 
     /// <summary>
     /// Pauses an uptime monitor.
@@ -55,7 +55,7 @@ public interface IMonitorOrchestrationService
     /// <summary>
     /// Retrieves aggregated latency (response time) data for a specific monitor within a timeframe.
     /// </summary>
-    Task<IEnumerable<ResponseTime>> GetAggregatedLatencyAsync(TenantId tenantId, int id, DateTimeOffset from, DateTimeOffset to);
+    Task<IEnumerable<ResponseTime>> GetAggregatedLatencyAsync(Guid tenantId, int id, DateTimeOffset from, DateTimeOffset to);
 
     /// <summary>
     /// Updates the uptime SLA for a specific monitor.

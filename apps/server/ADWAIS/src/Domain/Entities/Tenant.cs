@@ -6,7 +6,7 @@ namespace Adwais.Domain.Entities;
 
 public class Tenant
 {
-    public TenantId Id { get; set; }
+    public Guid Id { get; set; }
     public required string Name { get; set; }
     public TenantType Type { get; set; }
     public required string LitiumBaseUrl { get; set; }

@@ -19,7 +19,7 @@ public class LitiumIngestionService(
 {
     private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
 
-    public async Task<int> ExecuteIngestionAsync(TenantId tenantId, DateTimeOffset startDate, DateTimeOffset endDate, CancellationToken ct = default)
+    public async Task<int> ExecuteIngestionAsync(Guid tenantId, DateTimeOffset startDate, DateTimeOffset endDate, CancellationToken ct = default)
     {
         Tenant tenant;
         await using (var context = await contextFactory.CreateDbContextAsync(ct))
@@ -125,7 +125,6 @@ public class LitiumIngestionService(
                     var count = litiumPayload.Orders.Count;
                     var pIds = new Guid[count];
                     var pTenantIds = new Guid[count];
-                    var pOrganizationSystemIds = new Guid?[count];
                     var pOrderStatus = new string[count];
                     var pOrderIds = new string[count];
                     var pDatesCreated = new DateTimeOffset[count];
@@ -137,8 +136,7 @@ public class LitiumIngestionService(
                     {
                         var o = litiumPayload.Orders[i]!;
                         pIds[i] = o.Id;
-                        pTenantIds[i] = tenant.Id.Value;
-                        pOrganizationSystemIds[i] = o.OrganizationSystemId;
+                        pTenantIds[i] = tenant.Id;
                         
                         if (!Enum.TryParse<OrderState>(o.OrderStatus, true, out var orderState))
                         {
@@ -154,15 +152,15 @@ public class LitiumIngestionService(
                     }
 
                     const string sql = @"
-                        INSERT INTO orders (id, tenant_id, organization_system_id, order_state, litium_order_id, created_date, total_value_inc_vat, total_value_exc_vat, currency)
-                        SELECT * FROM UNNEST(@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8)
+                        INSERT INTO orders (id, tenant_id, order_state, litium_order_id, created_date, total_value_inc_vat, total_value_exc_vat, currency)
+                        SELECT * FROM UNNEST(@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7)
                         ON CONFLICT (tenant_id, litium_order_id) 
                         DO UPDATE SET 
                             total_value_inc_vat = EXCLUDED.total_value_inc_vat,
                             total_value_exc_vat = EXCLUDED.total_value_exc_vat,
                             order_state = EXCLUDED.order_state";
 
-                    await dbContext.Database.ExecuteSqlRawAsync(sql, pIds, pTenantIds, pOrganizationSystemIds, pOrderStatus, pOrderIds, pDatesCreated, pIncVat, pExcVat, pCurrencies);
+                    await dbContext.Database.ExecuteSqlRawAsync(sql, pIds, pTenantIds, pOrderStatus, pOrderIds, pDatesCreated, pIncVat, pExcVat, pCurrencies);
                     totalIngested += count;
                 }
 

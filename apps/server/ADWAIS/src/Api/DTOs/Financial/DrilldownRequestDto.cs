@@ -20,7 +20,7 @@ public class DrilldownRequestDto
     /// The unique identifier of the tenant.
     /// </summary>
     [FromQuery(Name = "tenantId")]
-    public required TenantId TenantId { get; set; }
+    public required Guid TenantId { get; set; }
 }
 
 

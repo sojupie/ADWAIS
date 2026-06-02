@@ -23,7 +23,7 @@ public class SystemEventController(IDbContextFactory<AnalyticsDbContext> dbConte
     public async Task<ActionResult<IEnumerable<SystemEvent>>> GetEvents(
         [FromQuery] int take = 50, 
         [FromQuery] SystemEventLevel? minLevel = null,
-        [FromQuery] TenantId? tenantId = null)
+        [FromQuery] Guid? tenantId = null)
     {
         await using var db = await dbContextFactory.CreateDbContextAsync();
         

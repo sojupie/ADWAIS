@@ -3,7 +3,7 @@ namespace Adwais.Domain.Entities.Monitoring;
 public class UptimeMonitor
 {
     public int Id { get; set; } // External ID from UptimeRobot
-    public TenantId TenantId { get; set; }
+    public Guid TenantId { get; set; }
     public required string Name { get; set; }
     public required string Url { get; set; }
     public double? UptimeSla { get; set; }

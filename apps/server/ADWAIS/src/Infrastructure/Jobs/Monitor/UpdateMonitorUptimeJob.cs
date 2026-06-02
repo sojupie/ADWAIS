@@ -25,6 +25,8 @@ public class UpdateMonitorUptimeJob(
 
             if (monitor == null || !monitor.UptimeMonitorEnabled) return;
 
+            //TODO: remove this block when we're no longer mocking UptimeRobot monitors
+            if (monitorId <= 0) return;
             currentStep = "Fetching uptime status from UptimeRobot API";
             var uptime = await uptimeRobotService.GetUptimeAsync(monitorId, startDate, endDate, monitor.Name);
 

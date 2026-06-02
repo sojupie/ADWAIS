@@ -14,7 +14,7 @@ public class MonitorRequestDto
     /// If null, metrics represent the global portfolio total.
     /// </summary>
     [FromQuery(Name = "tenantId")] 
-    public TenantId? TenantId { get; set; }
+    public Guid? TenantId { get; set; }
     
     /// <summary>
     /// Optional. Scopes the metrics to a specific monitor. 

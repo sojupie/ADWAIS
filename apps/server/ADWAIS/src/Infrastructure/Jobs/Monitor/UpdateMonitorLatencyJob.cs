@@ -28,6 +28,8 @@ public class UpdateMonitorLatencyJob(
 
             if (monitor == null || !monitor.UptimeMonitorEnabled) return;
 
+            //TODO: remove this block when we're no longer mocking UptimeRobot monitors
+            if (monitorId <= 0) return;
             currentStep = "Fetching response latency time-series from UptimeRobot API";
             var responseTime = await uptimeRobotService.GetResponseTimeAsync(monitorId, startDate, endDate, monitor.Name);
 

@@ -17,10 +17,18 @@ public static class DatabaseSeeder
         var profiles = GenerateProfiles();
         var tenants = await SeedTenantsAsync(context, profiles);
 
-        // Always run monitor seeding independently — idempotent per-tenant guard is inside the method.
-        // await SeedMonitorsAndMetricsAsync(context, random);
+        var forceReSeed = Environment.GetEnvironmentVariable("RESEED") == "true";
+        if (forceReSeed)
+        {
+            Console.WriteLine("Forcing re-seed of monitor and order data...");
+            await context.Database.ExecuteSqlRawAsync("TRUNCATE TABLE orders CASCADE;");
+            await context.Database.ExecuteSqlRawAsync("TRUNCATE TABLE monitor CASCADE;");
+        }
 
-        if (await context.Orders.AnyAsync())
+        // Always run monitor seeding independently — idempotent per-tenant guard is inside the method.
+        await SeedMonitorsAndMetricsAsync(context, random);
+
+        if (!forceReSeed && await context.Orders.AnyAsync())
         {
             Console.WriteLine("Orders already exist, skipping order seed.");
             return;

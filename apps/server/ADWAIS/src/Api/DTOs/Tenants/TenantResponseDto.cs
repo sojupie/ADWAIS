@@ -6,7 +6,7 @@ namespace Adwais.Api.DTOs.Tenants;
 
 public class TenantResponseDto
 {
-    public TenantId Id { get; set; }
+    public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public TenantType Type { get; set; }
     public string LitiumBaseUrl { get; set; } = string.Empty;

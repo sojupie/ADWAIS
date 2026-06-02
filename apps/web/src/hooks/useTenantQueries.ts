@@ -15,7 +15,7 @@ export function useCreateTenantMutation(onSuccessCallback?: () => void) {
     mutationFn: (payload: { name: string; litiumBaseUrl: string; serviceAccountToken: string }) => 
       apiFetch<TenantResponseDto>('/api/tenants', { 
         method: 'POST', 
-        body: JSON.stringify({ ...payload, type: 1, orderFetchingEnabled: false }) 
+        body: JSON.stringify({ ...payload, type: 'B2B', orderFetchingEnabled: false }) 
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tenants'] });

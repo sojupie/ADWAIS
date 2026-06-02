@@ -1,0 +1,10 @@
+- make sure monitor deletions cascade properly (both from manual and upstream deletions)
+- more PATCH options for monitor updates (sla, name, url, what else?)
+- authentication
+- entraid auth and device auth for kiosk mode
+- order anomaly monitor does not take time of day into account
+- more granular time series for latency chart
+- remove "(Production)" from tenant name when searching for tenant in ingestion trigger
+- when using historic backfill, provide visual feedback of status/success/failure/errors
+- more info for "recent background jobs"
+- add a toggle for switching between vat and no vat

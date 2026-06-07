@@ -38,7 +38,7 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe,
 
   return (
     <div className="flex flex-col gap-6 w-full min-h-full animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <header className="flex items-center gap-6 flex-shrink-0">
+      <header className="flex items-center gap-6 shrink-0">
         <button
           className="w-10 h-10 rounded-full border border-slate-200 bg-white flex items-center justify-center text-xl font-extrabold text-slate-700 hover:text-brand-text hover:bg-slate-100 hover:border-slate-300 transition-all shadow-sm cursor-pointer"
           type="button"
@@ -51,10 +51,10 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe,
           <div className="flex items-center gap-3 mb-1">
             <h1 className="text-2xl font-extrabold text-brand-text tracking-tight m-0">{tenantName} Diagnostics</h1>
             <span 
-              className={`inline-flex items-center px-3 py-1 rounded-[4px] text-[11px] font-black uppercase tracking-widest shadow-sm ${
-                tenantType === 'B2C' ? 'bg-[#0ea5e9] text-white' : 
-                tenantType === 'Mixed' ? 'bg-[#8b5cf6] text-white' : 
-                'bg-[var(--color-brand-btn-primary)] text-white'
+              className={`inline-flex items-center px-3 py-1 rounded-sm text-[11px] font-black uppercase tracking-widest shadow-sm ${
+                tenantType === 'B2C' ? 'bg-chart-1 text-white' : 
+                tenantType === 'Mixed' ? 'bg-chart-2 text-white' : 
+                'bg-(--color-brand-btn-primary) text-white'
               }`}
             >
               {tenantType}
@@ -101,25 +101,25 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe,
         <AccumulatedRevenueChart 
           points={accumulatedQuery.data || []} 
           isLoading={accumulatedQuery.isLoading} 
-          className="h-full min-h-[350px]" 
+          className="h-full min-h-87.5"
         />
         
         <TransactionDensityChart
           points={densityQuery.data || []}
           isLoading={densityQuery.isLoading}
-          className="h-full min-h-[350px]"
+          className="h-full min-h-87.5"
         />
 
         <CumulativeGrowthDeltaChart 
           points={deltaQuery.data || []} 
           isLoading={deltaQuery.isLoading} 
-          className="h-full min-h-[350px]" 
+          className="h-full min-h-87.5"
         />
 
         <OrderValueDistributionChart 
           bins={orderQuery.data || []} 
           isLoading={orderQuery.isLoading} 
-          className="h-full min-h-[350px]" 
+          className="h-full min-h-87.5"
         />
       </div>
     </div>

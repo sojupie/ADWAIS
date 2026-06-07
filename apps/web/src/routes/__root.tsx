@@ -6,7 +6,7 @@ import { PeriodSelector } from '../components/common/charts/PeriodSelector';
 import { SyncStatusWidget } from '../components/common/dashboard/SyncStatusWidget';
 import { KioskControls } from '../components/common/dashboard/KioskControls';
 import motilloLogo from '../assets/motillo-logo.svg';
-import type { Timeframe } from '../schemas';
+import { timeframeSchema } from '../schemas';
 
 export const Route = createRootRoute({
   component: RootComponent,
@@ -15,12 +15,10 @@ export const Route = createRootRoute({
 function RootComponent() {
   const matches = useRouterState({ select: (s) => s.matches });
   // Root search has no schema; generic accessor
-  const search = useSearch({ 
-    strict: false,
-    select: (s: Record<string, unknown>) => s
-  });
-  
-  const lastTimeframe: Timeframe = (search?.timeframe as Timeframe) ?? 'T30';
+  const search = useSearch({ strict: false });;
+
+  const parsedTimeframe = timeframeSchema.safeParse(search?.timeframe);
+  const lastTimeframe = parsedTimeframe.success ? parsedTimeframe.data : 'T30';
 
   const isFinancial = matches.some((m) => m.routeId === '/financial' || m.pathname.includes('/financial'));
   const isFleet = matches.some((m) => m.routeId === '/fleet-status' || m.pathname.includes('/fleet-status'));
@@ -77,15 +75,15 @@ function RootComponent() {
       {/* ── Main Area ── */}
       <main className="flex-1 min-h-0 relative flex flex-col">
         <div className="flex-1 w-full custom-scrollbar overflow-y-auto px-6 py-6 relative flex flex-col">
-           <Outlet />
-           
-           {/* ── Mobile Inline Widgets ── */}
-           {(isFinancial || isFleet) && (
-             <div className="md:hidden mt-8 flex flex-col gap-4 items-center w-full max-w-full overflow-x-auto no-scrollbar pb-6">
-                <PeriodSelector from={isFinancial ? '/financial' : '/fleet-status'} />
-                <SyncStatusWidget />
-             </div>
-           )}
+          <Outlet />
+
+          {/* ── Mobile Inline Widgets ── */}
+          {(isFinancial || isFleet) && (
+            <div className="md:hidden mt-8 flex flex-col gap-4 items-center w-full max-w-full overflow-x-auto no-scrollbar pb-6">
+              <PeriodSelector from={isFinancial ? '/financial' : '/fleet-status'} />
+              <SyncStatusWidget />
+            </div>
+          )}
         </div>
 
         {/* ── Floating Sync Status (Desktop) ── */}

@@ -1,4 +1,4 @@
-import { createRootRoute, Link, Outlet, useRouterState} from '@tanstack/react-router';
+import { createRootRoute, Outlet, useRouterState} from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Settings } from 'lucide-react';
@@ -7,6 +7,7 @@ import { SyncStatusWidget } from '../components/common/dashboard/SyncStatusWidge
 import { KioskControls } from '../components/common/dashboard/KioskControls';
 import motilloLogo from '../assets/motillo-logo.svg';
 import { getSavedTimeframe } from '../utils/timeframeStorage';
+import {NavLink} from "../components/common/layout/NavLink.tsx";
 
 export const Route = createRootRoute({
   component: RootComponent
@@ -30,39 +31,14 @@ function RootComponent() {
         </div>
 
         <nav className="flex-1 flex flex-wrap justify-center items-center gap-4 md:gap-8 w-full xl:w-auto">
-          <Link
-            to="/financial"
-            search={{ timeframe: financialTf }}
-            activeOptions={{ includeSearch: false }}
-            className="text-sm font-extrabold text-white/60 hover:text-white transition-all no-underline pb-1 border-b-4 border-transparent uppercase tracking-wider"
-            activeProps={{ className: '!text-brand-accent !border-brand-accent' }}
-          >
+          <NavLink to={"/financial"} search={{ timeframe: financialTf }}>
             Financial
-          </Link>
-          <Link
-            to="/fleet-status"
-            search={{ timeframe: fleetTf }}
-            activeOptions={{ includeSearch: false }}
-            className="text-sm font-extrabold text-white/60 hover:text-white transition-all no-underline pb-1 border-b-4 border-transparent uppercase tracking-wider"
-            activeProps={{ className: '!text-brand-accent !border-brand-accent' }}
-          >
-            Fleet Status
-          </Link>
-          <Link
-            to="/intranet"
-            className="text-sm font-extrabold text-white/60 hover:text-white transition-all no-underline pb-1 border-b-4 border-transparent uppercase tracking-wider"
-            activeProps={{ className: '!text-brand-accent !border-brand-accent' }}
-          >
-            Intranet
-          </Link>
-          <Link
-            to="/settings"
-            className="p-1 text-white/60 hover:text-white transition-all"
-            activeProps={{ className: '!text-brand-accent' }}
-            title="Settings & Administration"
-          >
-            <Settings size={20} />
-          </Link>
+          </NavLink>
+          <NavLink to={"/fleet-status"} search={{ timeframe: fleetTf }}>
+            Fleet status
+          </NavLink>
+          <NavLink to={"/intranet"}>Intranet</NavLink>
+          <NavLink to={"/settings"}> <Settings size={20}/> </NavLink>
         </nav>
 
         <div className="w-full xl:w-1/4 flex justify-center xl:justify-end">

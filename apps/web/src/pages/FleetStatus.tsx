@@ -8,15 +8,7 @@ import { NetworkLatencyChart } from '../components/FleetStatus/NetworkLatencyCha
 import { SlaBreachWatchlist } from '../components/FleetStatus/SlaBreachWatchlist';
 import { useFleetMonitors, useFleetAnalytics } from '../hooks/useFleetQueries';
 import type { UptimeMonitorDto } from '@types';
-
-function normalizeStatus(status?: string | number): string {
-  if (status === undefined || status === null) return 'UNKNOWN';
-  const s = status.toString().toUpperCase().trim();
-  if (s === '2' || s === 'UP') return 'UP';
-  if (s === '8' || s === '9' || s === 'DOWN' || s === 'SEEMS DOWN' || s === 'CRITICAL') return 'DOWN';
-  if (s === '0' || s === 'PAUSED') return 'PAUSED';
-  return 'UNKNOWN';
-}
+import {normalizeStatus} from "../utils/monitorStatusHelper.tsx";
 
 export function FleetStatus() {
   const { timeframe } = useSearch({ from: '/fleet-status' });
@@ -84,7 +76,7 @@ export function FleetStatus() {
   return (
     <div className="flex flex-col gap-4 w-full min-h-full">
       {/* Top Row: Macro Stats */}
-      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 flex-shrink-0">
+      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 shrink-0">
         <FactPanel
           label={`Uptime: ${activeScopeName}`}
           value={globalMonitorsQuery.isLoading ? '...' : `${fleetStats.avgUptime.toFixed(3)}%`}
@@ -111,7 +103,7 @@ export function FleetStatus() {
           valueColor="green"
         />
 
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-3 flex flex-col justify-center min-h-[90px]">
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-3 flex flex-col justify-center min-h-22.5">
           <h2 className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Active Incidents</h2>
           <div className="flex items-baseline gap-6">
             <div className="flex items-baseline gap-2">
@@ -128,14 +120,14 @@ export function FleetStatus() {
       </section>
 
       {/* Middle Row: Main Diagnostics (Flexible Height) */}
-      <section className="flex-1 grid grid-cols-1 lg:grid-cols-5 gap-4 min-h-[350px]">
+      <section className="flex-1 grid grid-cols-1 lg:grid-cols-5 gap-4 min-h-87.5">
         <div className="lg:col-span-3 flex flex-col min-h-0 h-full">
-            <div className="flex-1 bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-3 flex flex-col min-h-[350px]">
+            <div className="flex-1 bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-3 flex flex-col min-h-87.5">
               <NetworkLatencyChart 
                  points={analyticsQuery.data?.latencyPoints || []} 
                  title={`Latency: ${activeScopeName}`}
                  isLoading={analyticsQuery.isLoading}
-                 className="min-h-[250px]"
+                 className="min-h-62.5"
               />
             </div>
         </div>
@@ -148,17 +140,17 @@ export function FleetStatus() {
         </div>
       </section>
 
-      {/* Bottom Row: Matrix (Expanded real estate) */}
+      {/* Bottom Row: Matrix */}
       <CollectionPanel
         title={selection ? `${selectedTenantName} Monitors` : "Fleet Status Matrix"}
-        className="flex-[2] min-h-[300px] flex-shrink-0"
+        className="flex-2 min-h-75 shrink-0"
         isLoading={globalMonitorsQuery.isLoading && selection !== null}
         actions={
           <div className="flex items-center gap-6">
             {selection && (
               <button 
                 onClick={() => setSelection(null)}
-                className="bg-brand-bg-secondary border border-brand-bg-secondary px-3 py-1.5 rounded-[4px] text-[11px] font-extrabold text-white hover:bg-brand-text hover:border-brand-text uppercase tracking-widest transition-all shadow-sm"
+                className="bg-brand-bg-secondary border border-brand-bg-secondary px-3 py-1.5 rounded-sm text-[11px] font-extrabold text-white hover:bg-brand-text hover:border-brand-text uppercase tracking-widest transition-all shadow-sm"
               >
                 <ArrowLeft size={14} className="mr-1 inline-block -mt-0.5 stroke-[3px]" /> BACK TO GLOBAL
               </button>

@@ -1,15 +1,7 @@
 import type { UptimeMonitorDto } from '@types';
+import {normalizeStatus} from "../../utils/monitorStatusHelper.tsx";
 
-function normalizeStatus(status?: string | number): string {
-  if (status === undefined || status === null) return 'UNKNOWN';
-  const s = status.toString().toUpperCase().trim();
-  if (s === '2' || s === 'UP') return 'UP';
-  if (s === '8' || s === '9' || s === 'DOWN' || s === 'SEEMS DOWN' || s === 'CRITICAL') return 'DOWN';
-  if (s === '0' || s === 'PAUSED') return 'PAUSED';
-  return 'UNKNOWN';
-}
-
-function getMonitorStatus(monitor: UptimeMonitorDto): 'operational' | 'degraded' | 'down' | 'unknown' {
+function getMonitorStatus(monitor: UptimeMonitorDto): 'operational' | 'degraded' | 'down' | 'unknown' | 'paused' {
   const status = normalizeStatus(monitor.currentStatus);
   if (status === 'DOWN' || status === 'CRITICAL') return 'down';
   if (status === 'UNKNOWN' || status === 'PAUSED') return 'unknown';
@@ -69,6 +61,14 @@ export function FleetMatrix({
             valueText: 'text-slate-500',
             mutedText: 'text-slate-500',
             dot: 'bg-slate-400'
+          },
+          paused: {
+            bg: 'bg-blue-50',
+            border: 'border-slate-300',
+            text: 'text-slate-500',
+            valueText: 'text-slate-500',
+            mutedText: 'text-slate-500',
+            dot: 'bg-slate-400'
           }
         };
 
@@ -79,7 +79,7 @@ export function FleetMatrix({
             key={`${monitor.tenantId}-${monitor.id}`}
             type="button"
             onClick={() => onMonitorSelect?.(monitor)}
-            className={`flex flex-col p-3 rounded-lg border-2 transition-all text-left relative group min-h-[90px] shadow-sm
+            className={`flex flex-col p-3 rounded-lg border-2 transition-all text-left relative group min-h-22.5 shadow-sm
               ${theme.bg} ${theme.border}
               ${isActive ? 'ring-4 ring-slate-300/40 scale-[1.02] z-10' : 'hover:scale-[1.01] hover:shadow-md'}
               ${selectedMonitorId && !isActive ? 'opacity-30' : 'opacity-100'}

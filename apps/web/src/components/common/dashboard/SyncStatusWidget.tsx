@@ -97,9 +97,9 @@ export function SyncStatusWidget() {
   if (!isFinancial && !isFleet) return null;
 
   return (
-    <div className="flex items-center gap-2 sm:gap-4 px-2 sm:px-3 py-2 border rounded-[4px] shadow-sm bg-brand-bg-secondary border-brand-bg-secondary/20 w-full md:w-auto max-w-[400px] md:max-w-none">
+    <div className="flex items-center gap-2 sm:gap-4 px-2 sm:px-3 py-2 border rounded-sm shadow-sm bg-brand-bg-secondary border-brand-bg-secondary/20 w-full md:w-auto max-w-100 md:max-w-none">
       {/* Timer Wheel */}
-      <div className="relative w-6 h-6 flex-shrink-0">
+      <div className="relative w-6 h-6 shrink-0">
         <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
           <circle cx="18" cy="18" r="16" fill="none" stroke="currentColor" strokeWidth="4" className="text-white/10" />
           <circle 
@@ -121,25 +121,25 @@ export function SyncStatusWidget() {
       {/* Info */}
       <div className="flex-1 min-w-0">
         {isDrillDown ? (
-          <div className="flex flex-col gap-[2px]">
+          <div className="flex flex-col gap-0.5">
             <div className="flex justify-between items-center gap-4">
               <span className="text-[9px] font-black uppercase tracking-widest text-white/60">Dashboard UI</span>
-              <span className="text-[10px] font-bold text-white truncate min-w-[40px] text-right">{timeAgo(dashboardSyncTime)}</span>
+              <span className="text-[10px] font-bold text-white truncate min-w-10 text-right">{timeAgo(dashboardSyncTime)}</span>
             </div>
             <div className="flex justify-between items-center gap-4">
               <span className="text-[9px] font-black uppercase tracking-widest text-white/60">Source Polled</span>
-              <span className="text-[10px] font-bold text-white truncate min-w-[40px] text-right">{timeAgo(tenant?.lastPolled)}</span>
+              <span className="text-[10px] font-bold text-white truncate min-w-10 text-right">{timeAgo(tenant?.lastPolled)}</span>
             </div>
           </div>
         ) : isFinancial ? (
-          <div className="flex flex-col gap-[2px]">
+          <div className="flex flex-col gap-0.5">
             <div className="flex justify-between items-center gap-4">
               <span className="text-[9px] font-black uppercase tracking-widest text-white/60">Dashboard UI</span>
-              <span className="text-[10px] font-bold text-white truncate min-w-[40px] text-right">{timeAgo(dashboardSyncTime)}</span>
+              <span className="text-[10px] font-bold text-white truncate min-w-10 text-right">{timeAgo(dashboardSyncTime)}</span>
             </div>
             <div className="flex justify-between items-center gap-4">
               <span className="text-[9px] font-black uppercase tracking-widest text-white/60">Litium Sync</span>
-              <span className="text-[10px] font-bold text-white truncate min-w-[40px] text-right">{timeAgo(health?.lastLitiumSync)}</span>
+              <span className="text-[10px] font-bold text-white truncate min-w-10 text-right">{timeAgo(health?.lastLitiumSync)}</span>
             </div>
           </div>
         ) : (
@@ -165,7 +165,7 @@ export function SyncStatusWidget() {
         
         {syncError && (
           <div className="mt-1 flex items-start gap-1 text-red-600 text-[10px] font-bold bg-red-50 p-1.5 rounded border border-red-100">
-            <AlertCircle size={12} className="flex-shrink-0 mt-0.5" />
+            <AlertCircle size={12} className="shrink-0 mt-0.5" />
             <span className="leading-tight line-clamp-2" title={syncError}>{syncError}</span>
           </div>
         )}
@@ -176,7 +176,7 @@ export function SyncStatusWidget() {
         <button 
           onClick={forceFetch}
           disabled={isFetching}
-          className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-[4px] bg-white/10 border border-white/20 text-white hover:bg-white/20 hover:border-transparent transition-colors disabled:opacity-50"
+          className="shrink-0 w-8 h-8 flex items-center justify-center rounded-sm bg-white/10 border border-white/20 text-white hover:bg-white/20 hover:border-transparent transition-colors disabled:opacity-50"
           title="Force Fetch"
         >
           <RefreshCw size={14} className={isFetching ? 'animate-spin' : ''} />

@@ -24,7 +24,7 @@ function RootComponent() {
   return (
     <div className="flex flex-col h-screen w-screen bg-brand-bg-tertiary overflow-hidden select-none font-sans text-brand-text">
       {/* ── Header ── */}
-      <header className="flex flex-col xl:flex-row justify-between items-center px-6 py-3 flex-shrink-0 bg-brand-bg-secondary border-b border-brand-bg-secondary/20 shadow-sm z-10 gap-4 xl:gap-0">
+      <header className="flex flex-col xl:flex-row justify-between items-center px-6 py-3 shrink-0 bg-brand-bg-secondary border-b border-brand-bg-secondary/20 shadow-sm z-10 gap-4 xl:gap-0">
         <div className="w-full xl:w-1/4 flex justify-center xl:justify-start">
           <img className="h-8 w-auto object-contain object-left brightness-0 invert" src={motilloLogo} alt="Motillo" height="32" />
         </div>

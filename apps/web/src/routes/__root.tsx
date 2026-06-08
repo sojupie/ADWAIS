@@ -1,4 +1,4 @@
-import { createRootRoute, Link, Outlet, useRouterState, useSearch } from '@tanstack/react-router';
+import { createRootRoute, Link, Outlet, useRouterState} from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Settings } from 'lucide-react';
@@ -6,19 +6,17 @@ import { PeriodSelector } from '../components/common/charts/PeriodSelector';
 import { SyncStatusWidget } from '../components/common/dashboard/SyncStatusWidget';
 import { KioskControls } from '../components/common/dashboard/KioskControls';
 import motilloLogo from '../assets/motillo-logo.svg';
-import { timeframeSchema } from '../schemas';
+import { getSavedTimeframe } from '../utils/timeframeStorage';
 
 export const Route = createRootRoute({
-  component: RootComponent,
+  component: RootComponent
 });
 
 function RootComponent() {
   const matches = useRouterState({ select: (s) => s.matches });
-  // Root search has no schema; generic accessor
-  const search = useSearch({ strict: false });;
 
-  const parsedTimeframe = timeframeSchema.safeParse(search?.timeframe);
-  const lastTimeframe = parsedTimeframe.success ? parsedTimeframe.data : 'T30';
+  const financialTf = getSavedTimeframe('/financial');
+  const fleetTf = getSavedTimeframe('/fleet-status');
 
   const isFinancial = matches.some((m) => m.routeId === '/financial' || m.pathname.includes('/financial'));
   const isFleet = matches.some((m) => m.routeId === '/fleet-status' || m.pathname.includes('/fleet-status'));
@@ -34,7 +32,7 @@ function RootComponent() {
         <nav className="flex-1 flex flex-wrap justify-center items-center gap-4 md:gap-8 w-full xl:w-auto">
           <Link
             to="/financial"
-            search={{ timeframe: lastTimeframe }}
+            search={{ timeframe: financialTf }}
             activeOptions={{ includeSearch: false }}
             className="text-sm font-extrabold text-white/60 hover:text-white transition-all no-underline pb-1 border-b-4 border-transparent uppercase tracking-wider"
             activeProps={{ className: '!text-brand-accent !border-brand-accent' }}
@@ -43,7 +41,7 @@ function RootComponent() {
           </Link>
           <Link
             to="/fleet-status"
-            search={{ timeframe: lastTimeframe }}
+            search={{ timeframe: fleetTf }}
             activeOptions={{ includeSearch: false }}
             className="text-sm font-extrabold text-white/60 hover:text-white transition-all no-underline pb-1 border-b-4 border-transparent uppercase tracking-wider"
             activeProps={{ className: '!text-brand-accent !border-brand-accent' }}

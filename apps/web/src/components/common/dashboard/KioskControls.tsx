@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useRouterState, useSearch } from '@tanstack/react-router';
+import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { Play, Pause } from 'lucide-react';
-import type { Timeframe } from '../../../schemas';
+import { getSavedTimeframe } from '../../../utils/timeframeStorage';
 
 type KioskMode = 'kiosk' | 'interactive' | 'paused';
 
@@ -11,16 +11,11 @@ const IDLE_TIMEOUT_SECONDS = 10;
 export function KioskControls() {
   const navigate = useNavigate();
   const matches = useRouterState({ select: (s) => s.matches });
-  const search = useSearch({ 
-    strict: false,
-    select: (s: Record<string, unknown>) => s
-  });
   
   const [mode, setMode] = useState<KioskMode>('kiosk');
   const [kioskTimer, setKioskTimer] = useState(KIOSK_ROTATION_SECONDS);
   const [idleTimer, setIdleTimer] = useState(0);
   
-  const lastTimeframe: Timeframe = (search?.timeframe as Timeframe) ?? 'T30';
   const currentRoute = matches[matches.length - 1]?.routeId;
 
   useEffect(() => {
@@ -41,11 +36,11 @@ export function KioskControls() {
             const nextRoute = routes[nextIndex];
             
             if (nextRoute === '/financial') {
-              navigate({ to: '/financial', search: { timeframe: lastTimeframe } });
+              void navigate({ to: '/financial', search: { timeframe: getSavedTimeframe('/financial') } });
             } else if (nextRoute === '/fleet-status') {
-              navigate({ to: '/fleet-status', search: { timeframe: lastTimeframe } });
+              void navigate({ to: '/fleet-status', search: { timeframe: getSavedTimeframe('/fleet-status') } });
             } else if (nextRoute === '/intranet') {
-              navigate({ to: '/intranet' });
+              void navigate({ to: '/intranet' });
             }
             return KIOSK_ROTATION_SECONDS;
           }
@@ -64,7 +59,7 @@ export function KioskControls() {
     }, 1000);
 
     return () => clearInterval(ticker);
-  }, [mode, currentRoute, lastTimeframe, navigate]);
+  }, [mode, currentRoute, navigate]);
 
   useEffect(() => {
     const handleInteraction = () => {
@@ -107,7 +102,7 @@ export function KioskControls() {
 
   return (
     <div className="flex items-center gap-4">
-      <div className={`flex items-center gap-4 px-3 py-1.5 border rounded-[4px] shadow-sm transition-colors duration-500
+      <div className={`flex items-center gap-4 px-3 py-1.5 border rounded-sm shadow-sm transition-colors duration-500
         ${mode === 'kiosk' ? 'bg-emerald-50 border-emerald-200' : 
           mode === 'interactive' ? 'bg-amber-50 border-amber-200' : 'bg-slate-50 border-slate-200'}`}>
           <div className="flex items-center gap-3">
@@ -147,7 +142,7 @@ export function KioskControls() {
 
       <button 
         onClick={togglePaused}
-        className="flex items-center justify-center w-9 h-9 bg-white/10 border border-white/20 rounded-[4px] text-white hover:bg-white/20 transition-all shadow-sm active:scale-95"
+        className="flex items-center justify-center w-9 h-9 bg-white/10 border border-white/20 rounded-sm text-white hover:bg-white/20 transition-all shadow-sm active:scale-95"
         title={mode === 'paused' ? 'Resume Kiosk' : 'Pause Kiosk'}
       >
         {mode === 'paused' ? <Play size={16} fill="currentColor" /> : <Pause size={16} fill="currentColor" />}

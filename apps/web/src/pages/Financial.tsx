@@ -15,9 +15,14 @@ import {
   useRevenueEfficiency,
   useVolumeAnomaly
 } from '../hooks/useFinancialQueries';
+import {getSavedTimeframe} from "../utils/timeframeStorage.ts";
+import {DashboardLayout} from "../components/common/layout/DashboardLayout.tsx";
+import {DashboardTopRow} from "../components/common/layout/DashboardTopRow.tsx";
+import {DashboardFlexRow} from "../components/common/layout/DashboardFlexRow.tsx";
 
 export function Financial() {
-  const { timeframe, tenantId } = useSearch({ from: '/financial' });
+  const { tenantId } = useSearch({ from: '/financial' });
+  const timeframe = getSavedTimeframe('/financial');
   const navigate = useNavigate({ from: '/financial' });
 
   const kpiQuery = useGlobalKpis(timeframe);
@@ -60,12 +65,10 @@ export function Financial() {
     navigate({ search: (prev) => ({ ...prev, tenantId: id }) });
   };
 
-
-
   return (
-    <div className="flex flex-col gap-6 w-full min-h-full animate-in fade-in duration-700">
+    <DashboardLayout>
       {/* KPI Section */}
-      <section className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-4 flex-shrink-0">
+      <DashboardTopRow>
         <FactPanel
           label={`Global Revenue (${timeframe})`}
           value={kpiQuery.data ? formatCurrency(kpiQuery.data.currentRevenue) : '\u2014'}
@@ -106,37 +109,37 @@ export function Financial() {
             ? { type: 'PoP', value: kpiQuery.data.arptGrowthPercentage }
             : undefined}
         />
-      </section>
+      </DashboardTopRow>
 
       {/* Charts Grid: Strictly Responsive & Independent */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 pb-4">
+      <DashboardFlexRow weight={"flex-1"} gridCols={"2"}>
         <AccumulatedRevenueChart 
           points={velocityQuery.data || []} 
           isLoading={velocityQuery.isLoading} 
-          className="h-full min-h-[350px]" 
+          className="h-full min-h-87.5"
         />
 
         <VolumeAnomalyChart 
           entries={anomalyQuery.data || []} 
           onTenantSelect={handleTenantSelect} 
           isLoading={anomalyQuery.isLoading} 
-          className="h-full min-h-[350px]" 
+          className="h-full min-h-87.5"
         />
 
         <RevenueEfficiencyChart 
           response={efficiencyQuery.data || { tenants: [], globalAverageOrderValue: 0, medianPortfolioShare: 0 }} 
           onTenantSelect={handleTenantSelect} 
           isLoading={efficiencyQuery.isLoading} 
-          className="h-full min-h-[350px]" 
+          className="h-full min-h-87.5"
         />
 
         <MomentumMatrixChart 
           momentum={momentumQuery.data || { tenants: [], medianBaselineRevenue: 0, globalGrowthPercentage: 0 }} 
           onTenantSelect={handleTenantSelect} 
           isLoading={momentumQuery.isLoading} 
-          className="h-full min-h-[350px]" 
+          className="h-full min-h-87.5"
         />
-      </div>
-    </div>
+      </DashboardFlexRow>
+    </DashboardLayout>
   );
 }

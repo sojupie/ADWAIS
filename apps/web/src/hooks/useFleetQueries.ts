@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { apiFetch } from '../apiClient';
 import type { UptimeMonitorDto, MonitorAnalyticsDto } from '@types';
+import {buildUrl} from "./useBuildUrl.ts";
 
 export const fleetKeys = {
   all: ['fleet'] as const,
@@ -10,16 +11,6 @@ export const fleetKeys = {
 };
 
 const REFETCH_INTERVAL = 30000;
-
-function buildUrl(base: string, params: Record<string, string | number | null | undefined>) {
-  const url = new URL(base, window.location.origin);
-  Object.entries(params).forEach(([key, value]) => {
-    if (value !== null && value !== undefined) {
-      url.searchParams.append(key, value.toString());
-    }
-  });
-  return url.pathname + url.search;
-}
 
 export function useFleetMonitors(timeframe: string, tenantId?: string | null) {
   return useQuery({

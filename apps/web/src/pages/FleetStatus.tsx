@@ -1,105 +1,72 @@
-import { useSearch } from '@tanstack/react-router';
-import { useState, useMemo } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { CollectionPanel } from '../components/common/dashboard/CollectionPanel';
 import { FactPanel } from '../components/common/dashboard/FactPanel';
 import { FleetMatrix } from '../components/FleetStatus/FleetMatrix';
 import { NetworkLatencyChart } from '../components/FleetStatus/NetworkLatencyChart';
 import { SlaBreachWatchlist } from '../components/FleetStatus/SlaBreachWatchlist';
-import { useFleetMonitors, useFleetAnalytics } from '../hooks/useFleetQueries';
-import type { UptimeMonitorDto } from '@types';
-import {normalizeStatus} from "../utils/monitorStatusHelper.tsx";
+import {DashboardLayout} from "../components/common/layout/DashboardLayout.tsx";
+import {DashboardTopRow} from "../components/common/layout/DashboardTopRow.tsx";
+import {DashboardFlexRow} from "../components/common/layout/DashboardFlexRow.tsx";
+import {useFleetStatusViewModel} from "../hooks/useFleetStatusViewModel.ts";
 
 export function FleetStatus() {
-  const { timeframe } = useSearch({ from: '/fleet-status' });
-  const [selection, setSelection] = useState<{ tenantId: string, monitorId: number | null } | null>(null);
+  const vm = useFleetStatusViewModel();
 
-  const analyticsQuery = useFleetAnalytics(timeframe, selection?.tenantId, selection?.monitorId);
-  const globalMonitorsQuery = useFleetMonitors(timeframe);
+  const matrixActions = (
+    <div className="flex items-center gap-6">
+      {vm.selection && (
+        <button 
+          onClick={() => vm.setSelection(null)}
+          className="bg-brand-bg-secondary border border-brand-bg-secondary px-3 py-1.5 rounded-sm text-[11px] font-extrabold text-white hover:bg-brand-text hover:border-brand-text uppercase tracking-widest transition-all shadow-sm"
+        >
+          <ArrowLeft size={14} className="mr-1 inline-block -mt-0.5 stroke-[3px]" /> BACK TO GLOBAL
+        </button>
+      )}
+      <span className="text-[13px] font-bold text-[#64748b]">
+        {vm.fleetStats.enabled.length} Online
+      </span>
+    </div>
+  );
 
-  const allMonitorsInSystem = globalMonitorsQuery.data ?? [];
-  const tenantMonitors = selection ? allMonitorsInSystem.filter(m => m.tenantId === selection.tenantId) : allMonitorsInSystem;
-  const scopedMonitors = selection?.monitorId ? tenantMonitors.filter(m => m.id === selection.monitorId) : tenantMonitors;
-  
-  const fleetStats = useMemo(() => {
-    const enabled = scopedMonitors.filter(m => m.uptimeMonitorEnabled);
-    
-    const latencies = enabled.map(m => m.currentLatency).filter((l): l is number => l !== null && l !== undefined);
-    const highestLatency = latencies.length > 0 ? Math.max(...latencies) : 0;
-    const lowestLatency = latencies.length > 0 ? Math.min(...latencies) : 0;
-    const avgLatency = latencies.length > 0 ? latencies.reduce((a, b) => a + b, 0) / latencies.length : 0;
-
-    const down = enabled.filter(m => {
-      const s = normalizeStatus(m.currentStatus);
-      return s === 'DOWN' || s === 'CRITICAL';
-    });
-
-    const degraded = enabled.filter(m => {
-      const s = normalizeStatus(m.currentStatus);
-      const isUp = s === 'UP' || s === 'OPERATIONAL' || s === 'UNKNOWN' || s === 'PAUSED';
-      return isUp && m.currentLatency && m.latencyDegradedFloor && m.currentLatency > m.latencyDegradedFloor;
-    });
-
-    const avgUptime = enabled.length > 0 
-      ? enabled.reduce((acc, m) => acc + m.currentUptimePercentage, 0) / enabled.length 
-      : 0;
-
-    return { total: scopedMonitors.length, enabled, highestLatency, lowestLatency, avgLatency, down, degraded, avgUptime };
-  }, [scopedMonitors]);
-
-  const handleMonitorSelect = (monitor: UptimeMonitorDto) => {
-    if (!selection) {
-      setSelection({ tenantId: monitor.tenantId, monitorId: null });
-    } else {
-      if (monitor.id === selection.monitorId) {
-        setSelection({ ...selection, monitorId: null });
-      } else {
-        setSelection({ ...selection, monitorId: monitor.id });
-      }
-    }
-  };
-
-  const selectedMonitorName = selection?.monitorId 
-    ? tenantMonitors.find(m => m.id === selection.monitorId)?.name 
-    : null;
-
-  const selectedTenantName = selection?.tenantId 
-    ? (tenantMonitors.find(m => m.tenantId === selection.tenantId)?.tenantName || tenantMonitors.find(m => m.tenantId === selection.tenantId)?.name?.split('-')[0]?.trim() || "Tenant")
-    : null;
-
-  const activeScopeName = selection?.monitorId
-    ? `${selectedTenantName} - ${selectedMonitorName}`
-    : selection?.tenantId
-    ? `${selectedTenantName} (Tenant Avg)`
-    : 'Global (Fleet Avg)';
+  const matrixContent = vm.tenantMonitors.length === 0 && vm.selection ? (
+    <div className="flex flex-1 items-center justify-center py-4 text-slate-500 font-bold uppercase tracking-wider text-xs">
+      No monitors found for this tenant
+    </div>
+  ) : (
+    <FleetMatrix 
+      monitors={vm.tenantMonitors}
+      onMonitorSelect={vm.handleMonitorSelect}
+      selectedMonitorId={vm.selection?.monitorId}
+    />
+  );
 
   return (
-    <div className="flex flex-col gap-4 w-full min-h-full">
+    <DashboardLayout>
       {/* Top Row: Macro Stats */}
-      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 shrink-0">
+      <DashboardTopRow>
         <FactPanel
-          label={`Uptime: ${activeScopeName}`}
-          value={globalMonitorsQuery.isLoading ? '...' : `${fleetStats.avgUptime.toFixed(3)}%`}
-          isLoading={globalMonitorsQuery.isLoading}
+          label={`Uptime: ${vm.activeScopeName}`}
+          value={vm.globalMonitorsQuery.isLoading ? '...' : `${vm.fleetStats.avgUptime.toFixed(3)}%`}
+          isLoading={vm.globalMonitorsQuery.isLoading}
         />
         
         <FactPanel
-          label={`Latency: ${activeScopeName}`}
-          value={analyticsQuery.isLoading ? '...' : `${Math.round(fleetStats.avgLatency)}ms`}
-          isLoading={analyticsQuery.isLoading}
+          label={`Latency: ${vm.activeScopeName}`}
+          value={vm.analyticsQuery.isLoading ? '...' : `${Math.round(vm.fleetStats.avgLatency)}ms`}
+          isLoading={vm.analyticsQuery.isLoading}
         />
 
         <FactPanel
           label={`Highest Latency`}
-          value={analyticsQuery.isLoading ? '...' : `${Math.round(fleetStats.highestLatency)}ms`}
-          isLoading={analyticsQuery.isLoading}
+          value={vm.analyticsQuery.isLoading ? '...' : `${Math.round(vm.fleetStats.highestLatency)}ms`}
+          isLoading={vm.analyticsQuery.isLoading}
           valueColor="red"
         />
 
         <FactPanel
           label={`Lowest Latency`}
-          value={analyticsQuery.isLoading ? '...' : `${Math.round(fleetStats.lowestLatency)}ms`}
-          isLoading={analyticsQuery.isLoading}
+          value={vm.analyticsQuery.isLoading ? '...' : `${Math.round(vm.fleetStats.lowestLatency)}ms`}
+          isLoading={vm.analyticsQuery.isLoading}
           valueColor="green"
         />
 
@@ -107,72 +74,52 @@ export function FleetStatus() {
           <h2 className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Active Incidents</h2>
           <div className="flex items-baseline gap-6">
             <div className="flex items-baseline gap-2">
-               <span className="text-4xl font-extrabold tracking-tight text-red-500">{fleetStats.down.length}</span>
+               <span className="text-4xl font-extrabold tracking-tight text-red-500">{vm.fleetStats.down.length}</span>
                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">DOWN</span>
             </div>
             <div className="flex items-baseline gap-2">
-               <span className="text-4xl font-extrabold tracking-tight text-amber-500">{fleetStats.degraded.length}</span>
+               <span className="text-4xl font-extrabold tracking-tight text-amber-500">{vm.fleetStats.degraded.length}</span>
                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">DEGRADED</span>
             </div>
           </div>
         </div>
 
-      </section>
+      </DashboardTopRow>
 
       {/* Middle Row: Main Diagnostics (Flexible Height) */}
-      <section className="flex-1 grid grid-cols-1 lg:grid-cols-5 gap-4 min-h-87.5">
-        <div className="lg:col-span-3 flex flex-col min-h-0 h-full">
-            <div className="flex-1 bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-3 flex flex-col min-h-87.5">
+      <DashboardFlexRow weight={"flex-1"} gridCols={"5"}>
+        <div className="lg:col-span-3 flex flex-col h-full min-h-0">
+            <div className="flex-1 bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-3 flex flex-col min-h-0">
               <NetworkLatencyChart 
-                 points={analyticsQuery.data?.latencyPoints || []} 
-                 title={`Latency: ${activeScopeName}`}
-                 isLoading={analyticsQuery.isLoading}
-                 className="min-h-62.5"
+                 points={vm.analyticsQuery.data?.latencyPoints || []}
+                 title={`Latency: ${vm.activeScopeName}`}
+                 isLoading={vm.analyticsQuery.isLoading}
+                 className="min-h-[250px]"
               />
             </div>
         </div>
-        
-        <div className="lg:col-span-2 flex flex-col min-h-0 h-full">
-           <SlaBreachWatchlist 
-             monitors={scopedMonitors} 
-             onClearSelection={selection ? () => setSelection(null) : undefined} 
+
+        <div className="lg:col-span-2 flex flex-col h-full min-h-0">
+           <SlaBreachWatchlist
+             monitors={vm.scopedMonitors}
+             onClearSelection={vm.selection ? () => vm.setSelection(null) : undefined}
            />
         </div>
-      </section>
+      </DashboardFlexRow>
 
       {/* Bottom Row: Matrix */}
-      <CollectionPanel
-        title={selection ? `${selectedTenantName} Monitors` : "Fleet Status Matrix"}
-        className="flex-2 min-h-75 shrink-0"
-        isLoading={globalMonitorsQuery.isLoading && selection !== null}
-        actions={
-          <div className="flex items-center gap-6">
-            {selection && (
-              <button 
-                onClick={() => setSelection(null)}
-                className="bg-brand-bg-secondary border border-brand-bg-secondary px-3 py-1.5 rounded-sm text-[11px] font-extrabold text-white hover:bg-brand-text hover:border-brand-text uppercase tracking-widest transition-all shadow-sm"
-              >
-                <ArrowLeft size={14} className="mr-1 inline-block -mt-0.5 stroke-[3px]" /> BACK TO GLOBAL
-              </button>
-            )}
-            <span className="text-[13px] font-bold text-[#64748b]">
-              {fleetStats.enabled.length} Online
-            </span>
+      <DashboardFlexRow weight="flex-2">
+        <CollectionPanel
+          title={vm.selection ? `${vm.selectedTenantName} Monitors` : "Fleet Status Matrix"}
+          className="h-full min-h-75"
+          isLoading={vm.globalMonitorsQuery.isLoading && vm.selection !== null}
+          actions={matrixActions}
+        >
+          <div className="px-4 py-3 h-full flex flex-col min-h-0">
+            {matrixContent}
           </div>
-        }
-      >
-        <div className="px-4 py-3 h-full flex flex-col min-h-0">
-          {tenantMonitors.length === 0 && selection ? (
-            <div className="flex flex-1 items-center justify-center py-4 text-slate-500 font-bold uppercase tracking-wider text-xs">No monitors found for this tenant</div>
-          ) : (
-            <FleetMatrix 
-              monitors={tenantMonitors} 
-              onMonitorSelect={handleMonitorSelect}
-              selectedMonitorId={selection?.monitorId}
-            />
-          )}
-        </div>
-      </CollectionPanel>
-    </div>
+        </CollectionPanel>
+      </DashboardFlexRow>
+    </DashboardLayout>
   );
 }

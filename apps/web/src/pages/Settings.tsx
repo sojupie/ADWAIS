@@ -2,6 +2,8 @@ import { Link, Outlet } from "@tanstack/react-router";
 import { useQueryClient } from '@tanstack/react-query';
 import { RefreshCw } from 'lucide-react';
 import { useState } from 'react';
+import {DashboardLayout} from "../components/common/layout/DashboardLayout.tsx";
+import {DashboardFlexRow} from "../components/common/layout/DashboardFlexRow.tsx";
 
 export function Settings() {
     const queryClient = useQueryClient();
@@ -15,7 +17,7 @@ export function Settings() {
     ];
 
     return (
-        <div className="flex flex-col gap-6 w-full h-full animate-in fade-in duration-700">
+        <DashboardLayout>
             <header className="flex justify-between items-start shrink-0">
                 <div className="flex flex-col gap-1">
                     <h1 className="text-2xl font-extrabold text-brand-text tracking-tight m-0">Settings & Administration</h1>
@@ -34,23 +36,25 @@ export function Settings() {
                 </button>
             </header>
 
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 flex-1 flex flex-col min-h-0">
-                <div className="flex border-b border-slate-200 mb-4 gap-6 shrink-0">
-                    {tabs.map((t) => (
-                        <Link
-                            key={t.id}
-                            to={t.path}
-                            className="pb-2 text-sm font-bold tracking-wider uppercase transition-colors text-slate-500 hover:text-slate-800"
-                            activeProps={{ className: '!text-brand-link border-b-2 !border-brand-link' }}
-                        >
-                            {t.label}
-                        </Link>
-                    ))}
+            <DashboardFlexRow weight={"flex-1"}>
+                <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 flex-1 flex flex-col min-h-0">
+                    <div className="flex border-b border-slate-200 mb-4 gap-6 shrink-0">
+                        {tabs.map((t) => (
+                            <Link
+                                key={t.id}
+                                to={t.path}
+                                className="pb-2 text-sm font-bold tracking-wider uppercase transition-colors text-slate-500 hover:text-slate-800"
+                                activeProps={{ className: '!text-brand-link border-b-2 !border-brand-link' }}
+                            >
+                                {t.label}
+                            </Link>
+                        ))}
+                    </div>
+                    <div className="mt-4 flex-1 min-h-0 relative">
+                        <Outlet />
+                    </div>
                 </div>
-                <div className="mt-4 flex-1 min-h-0 relative">
-                    <Outlet />
-                </div>
-            </div>
-        </div>
+            </DashboardFlexRow>
+        </DashboardLayout>
     );
 }

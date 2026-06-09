@@ -80,7 +80,7 @@ export function SlaBreachWatchlist({ isLoading, monitors, onClearSelection }: { 
         <button 
           onClick={onClearSelection}
           disabled={!onClearSelection}
-          className={`bg-brand-bg-secondary text-white px-3 py-1 rounded-[4px] text-[10px] font-black uppercase tracking-widest hover:bg-brand-text transition-all shadow-sm cursor-pointer ${
+          className={`bg-brand-bg-secondary text-white px-3 py-1 rounded-sm text-[10px] font-black uppercase tracking-widest hover:bg-brand-text transition-all shadow-sm cursor-pointer ${
             !onClearSelection ? 'opacity-0 pointer-events-none' : 'opacity-100'
           }`}
         >

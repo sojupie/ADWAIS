@@ -43,7 +43,6 @@ export function FactPanel({ label, value, isLoading, valueColor, extra }: FactPa
     return (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-3 flex flex-col justify-center min-h-[90px] transition-all hover:shadow-md animate-in fade-in duration-300">
             <h2 className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">{label}</h2>
-
             <div className="flex items-baseline gap-2">
                 <span className={`text-4xl font-extrabold tracking-tight ${valueColorClass}`}>
                     {isLoading ? <LoadingIcon /> : value}

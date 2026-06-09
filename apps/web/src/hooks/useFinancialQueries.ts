@@ -12,6 +12,7 @@ import type {
   AccumulatedRevenuePointDto,
   TransactionDensityPointDto
 } from '@types';
+import {buildUrl} from "./useBuildUrl.ts";
 
 export const financialKeys = {
   all: ['financial'] as const,
@@ -28,16 +29,6 @@ export const financialKeys = {
 };
 
 const REFETCH_INTERVAL = 60000;
-
-function buildUrl(base: string, params: Record<string, string | number | null | undefined>) {
-  const url = new URL(base, window.location.origin);
-  Object.entries(params).forEach(([key, value]) => {
-    if (value !== null && value !== undefined) {
-      url.searchParams.append(key, value.toString());
-    }
-  });
-  return url.pathname + url.search;
-}
 
 export function useGlobalKpis(timeframe: string, tenantId?: string | null) {
   return useQuery({

@@ -1,5 +1,5 @@
 import type { UptimeMonitorDto } from '@types';
-import {normalizeStatus} from "../../utils/monitorStatusHelper.tsx";
+import {normalizeStatus} from "../../utils/monitorStatusHelper.ts";
 
 function getMonitorStatus(monitor: UptimeMonitorDto): 'operational' | 'degraded' | 'down' | 'unknown' | 'paused' {
   const status = normalizeStatus(monitor.currentStatus);

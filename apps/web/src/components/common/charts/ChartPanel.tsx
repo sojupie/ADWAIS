@@ -12,7 +12,7 @@ interface ChartPanelProps {
 
 export function ChartPanel({ title, legend, bodyClassName = '', className = '', isLoading = false, children }: ChartPanelProps) {
   return (
-      <div className={`bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-4 flex flex-col min-h-[300px] lg:min-h-[400px] ${className}`}>
+      <div className={`bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-4 flex flex-col h-full min-h-0 ${className}`}>
         <div className="flex justify-between items-center mb-2">
             <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">
                 {title}

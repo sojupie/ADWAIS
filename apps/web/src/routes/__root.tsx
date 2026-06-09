@@ -48,35 +48,37 @@ function RootComponent() {
 
       {/* ── Main Area ── */}
       <main className="flex-1 min-h-0 relative flex flex-col">
-        <div className="flex-1 w-full custom-scrollbar overflow-y-auto px-6 py-6 relative flex flex-col">
-          <Outlet />
+        <div className="flex-1 w-full px-6 py-6 relative flex flex-col min-h-0">
+          <div className="flex-1 min-h-0 flex flex-col">
+            <Outlet />
+          </div>
 
-          {/* ── Mobile Inline Widgets ── */}
+          {/* ── Inline Widgets (Mobile, Tablet, Laptop) ── */}
           {(isFinancial || isFleet) && (
-            <div className="md:hidden mt-8 flex flex-col gap-4 items-center w-full max-w-full overflow-x-auto no-scrollbar pb-6">
-              <PeriodSelector from={isFinancial ? '/financial' : '/fleet-status'} />
+            <div className="xl:hidden mt-6 flex flex-col md:flex-row justify-center gap-6 items-center w-full max-w-full overflow-x-auto no-scrollbar shrink-0">
               <SyncStatusWidget />
+              <PeriodSelector from={isFinancial ? '/financial' : '/fleet-status'} />
             </div>
           )}
         </div>
 
-        {/* ── Floating Sync Status (Desktop) ── */}
+        {/* ── Floating Sync Status (Desktop Wide) ── */}
         {(isFinancial || isFleet) && (
-          <div className="hidden md:block absolute bottom-6 left-6 z-20 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="hidden xl:block absolute bottom-6 left-6 z-20 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <SyncStatusWidget />
           </div>
         )}
 
-        {/* ── Floating Period Selector (Desktop) ── */}
+        {/* ── Floating Period Selector (Desktop Wide) ── */}
         {(isFinancial || isFleet) && (
-          <div className="hidden md:block absolute bottom-6 right-8 z-20 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="hidden xl:block absolute bottom-6 right-8 z-20 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <PeriodSelector from={isFinancial ? '/financial' : '/fleet-status'} />
           </div>
         )}
       </main>
 
-      {import.meta.env.DEV && <TanStackRouterDevtools position="bottom-right" />}
-      {import.meta.env.DEV && <ReactQueryDevtools buttonPosition="bottom-left" />}
+      {/*{import.meta.env.DEV && <TanStackRouterDevtools position="bottom-right" />}*/}
+      {/*{import.meta.env.DEV && <ReactQueryDevtools buttonPosition="bottom-left" />}*/}
     </div>
   );
 }

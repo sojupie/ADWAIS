@@ -12,6 +12,9 @@ import {
   useOrderDistribution,
   useTransactionDensity
 } from '../hooks/useFinancialQueries';
+import {DashboardLayout} from "../components/common/layout/DashboardLayout.tsx";
+import {DashboardTopRow} from "../components/common/layout/DashboardTopRow.tsx";
+import {DashboardFlexRow} from "../components/common/layout/DashboardFlexRow.tsx";
 
 interface Props {
   tenantId: string;
@@ -37,7 +40,7 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe,
     : undefined;
 
   return (
-    <div className="flex flex-col gap-6 w-full min-h-full animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <DashboardLayout>
       <header className="flex items-center gap-6 shrink-0">
         <button
           className="w-10 h-10 rounded-full border border-slate-200 bg-white flex items-center justify-center text-xl font-extrabold text-slate-700 hover:text-brand-text hover:bg-slate-100 hover:border-slate-300 transition-all shadow-sm cursor-pointer"
@@ -64,7 +67,7 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe,
         </div>
       </header>
 
-      <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 flex-shrink-0">
+      <DashboardTopRow>
         <FactPanel
           label={`Revenue (${timeframe})`}
           value={kpis ? formatCurrency(kpis.currentRevenue) : '\u2014'}
@@ -95,9 +98,9 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe,
             ? { type: 'PoP', value: kpis.aovGrowthPercentage }
             : undefined}
         />
-      </section>
+      </DashboardTopRow>
 
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 pb-4">
+      <DashboardFlexRow weight={"flex-1"} gridCols={"2"}>
         <AccumulatedRevenueChart 
           points={accumulatedQuery.data || []} 
           isLoading={accumulatedQuery.isLoading} 
@@ -121,7 +124,7 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe,
           isLoading={orderQuery.isLoading} 
           className="h-full min-h-87.5"
         />
-      </div>
-    </div>
+      </DashboardFlexRow>
+    </DashboardLayout>
   );
 }

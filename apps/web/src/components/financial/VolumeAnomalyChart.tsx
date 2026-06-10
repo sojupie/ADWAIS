@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import {
   BarChart,
   Bar,
@@ -44,7 +45,7 @@ const CustomTooltip = ({ active, payload }: { isLoading?: boolean;  active?: boo
   );
 };
 
-export function VolumeAnomalyChart({
+export const VolumeAnomalyChart = memo(function VolumeAnomalyChart({
   isLoading, isStale, entries,
   onTenantSelect,
   className }: { isLoading?: boolean; isStale?: boolean;
@@ -112,4 +113,4 @@ export function VolumeAnomalyChart({
       )}
     </ChartPanel>
   );
-}
+});

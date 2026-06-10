@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { ComposedChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import type { AccumulatedRevenuePointDto } from '@types';
 import { ChartPanel } from '../common/charts/ChartPanel';
@@ -31,7 +32,7 @@ const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?:
   );
 };
 
-export function AccumulatedRevenueChart({ isLoading, isStale, points, className }: AccumulatedRevenueChartProps) {
+export const AccumulatedRevenueChart = memo(function AccumulatedRevenueChart({ isLoading, isStale, points, className }: AccumulatedRevenueChartProps) {
   return (
     <ChartPanel isLoading={isLoading} isStale={isStale} title="Revenue Performance" className={className} bodyClassName={points.length === 0 ? "flex items-center justify-center" : ""}>
       {points.length === 0 ? (
@@ -104,4 +105,4 @@ export function AccumulatedRevenueChart({ isLoading, isStale, points, className 
       )}
     </ChartPanel>
   );
-}
+});

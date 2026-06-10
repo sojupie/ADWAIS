@@ -1,5 +1,5 @@
 import { useSearch, useNavigate } from '@tanstack/react-router';
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import { 
   useGlobalKpis, 
   useAccumulatedRevenue, 
@@ -41,13 +41,13 @@ export function useFinancialViewModel() {
     return { tenantName, type };
   }, [tenantId, extremesQuery.data, efficiencyQuery.data, anomalyQuery.data, momentumQuery.data]);
 
-  const handleTenantSelect = (id: string) => {
+  const handleTenantSelect = useCallback((id: string) => {
     void navigate({ search: (prev: Record<string, unknown>) => ({ ...prev, tenantId: id }) });
-  };
+  }, [navigate]);
 
-  const handleBackToGlobal = () => {
+  const handleBackToGlobal = useCallback(() => {
     void navigate({ search: (prev: Record<string, unknown>) => ({ ...prev, tenantId: undefined }) });
-  };
+  }, [navigate]);
 
   return {
     timeframe,

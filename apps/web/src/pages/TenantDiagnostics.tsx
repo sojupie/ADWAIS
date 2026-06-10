@@ -16,6 +16,11 @@ import {DashboardLayout} from "../components/common/layout/DashboardLayout.tsx";
 import {DashboardTopRow} from "../components/common/layout/DashboardTopRow.tsx";
 import {DashboardFlexRow} from "../components/common/layout/DashboardFlexRow.tsx";
 
+const EMPTY_ACCUMULATED: never[] = [];
+const EMPTY_DENSITY: never[] = [];
+const EMPTY_DELTA: never[] = [];
+const EMPTY_BINS: never[] = [];
+
 interface Props {
   tenantId: string;
   tenantName: string;
@@ -102,25 +107,25 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe,
 
       <DashboardFlexRow weight={"flex-1"} gridCols={"2"}>
         <AccumulatedRevenueChart 
-          points={accumulatedQuery.data || []} 
+          points={accumulatedQuery.data || EMPTY_ACCUMULATED} 
           isLoading={accumulatedQuery.isLoading} 
           className="h-full min-h-87.5"
         />
         
         <TransactionDensityChart
-          points={densityQuery.data || []}
+          points={densityQuery.data || EMPTY_DENSITY}
           isLoading={densityQuery.isLoading}
           className="h-full min-h-87.5"
         />
 
         <CumulativeGrowthDeltaChart 
-          points={deltaQuery.data || []} 
+          points={deltaQuery.data || EMPTY_DELTA} 
           isLoading={deltaQuery.isLoading} 
           className="h-full min-h-87.5"
         />
 
         <OrderValueDistributionChart 
-          bins={orderQuery.data || []} 
+          bins={orderQuery.data || EMPTY_BINS} 
           isLoading={orderQuery.isLoading} 
           className="h-full min-h-87.5"
         />

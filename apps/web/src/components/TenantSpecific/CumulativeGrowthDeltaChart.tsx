@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import {
   CartesianGrid,
   Line,
@@ -39,7 +40,7 @@ const CustomTooltip = ({ active, payload, label }: { isLoading?: boolean;  activ
   );
 };
 
-export function CumulativeGrowthDeltaChart({ isLoading, points, className }: { isLoading?: boolean;  points: CumulativeGrowthDeltaPoint[], className?: string }) {
+export const CumulativeGrowthDeltaChart = memo(function CumulativeGrowthDeltaChart({ isLoading, points, className }: { isLoading?: boolean;  points: CumulativeGrowthDeltaPoint[], className?: string }) {
   return (
     <ChartPanel isLoading={isLoading}
       title="Cumulative Growth Delta (Absolute)"
@@ -77,4 +78,4 @@ export function CumulativeGrowthDeltaChart({ isLoading, points, className }: { i
       </ResponsiveContainer>
     </ChartPanel>
   );
-}
+});

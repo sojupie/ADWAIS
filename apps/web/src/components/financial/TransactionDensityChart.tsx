@@ -1,4 +1,4 @@
-import { useState, Fragment } from 'react';
+import { useState, Fragment, memo } from 'react';
 import type { TransactionDensityPointDto } from '@types';
 import { formatCurrency } from '@utils';
 import { ChartPanel } from '../common/charts/ChartPanel';
@@ -20,7 +20,7 @@ const getColor = (value: number, min: number, max: number) => {
   return PALETTE[index];
 };
 
-export function TransactionDensityChart({
+export const TransactionDensityChart = memo(function TransactionDensityChart({
   isLoading, points,
   className }: { isLoading?: boolean; 
   points: TransactionDensityPointDto[];
@@ -132,4 +132,4 @@ export function TransactionDensityChart({
       )}
     </ChartPanel>
   );
-}
+});

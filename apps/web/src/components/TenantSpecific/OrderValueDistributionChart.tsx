@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import {
   Bar,
   ComposedChart,
@@ -42,7 +43,7 @@ const CustomTooltip = ({ active, payload, label }: { isLoading?: boolean;  activ
   );
 };
 
-export function OrderValueDistributionChart({ isLoading, bins, className }: { isLoading?: boolean;  bins: OrderBin[], className?: string }) {
+export const OrderValueDistributionChart = memo(function OrderValueDistributionChart({ isLoading, bins, className }: { isLoading?: boolean;  bins: OrderBin[], className?: string }) {
   return (
     <ChartPanel isLoading={isLoading}
       title="Order Distribution & Shipping Threshold"
@@ -123,4 +124,4 @@ export function OrderValueDistributionChart({ isLoading, bins, className }: { is
       </ResponsiveContainer>
     </ChartPanel>
   );
-}
+});

@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import {
   CartesianGrid,
   ReferenceLine,
@@ -125,7 +126,7 @@ points: MomentumTenant[]; medianBaselineRevenue: number; globalGrowthPercentage:
   );
 }
 
-export function MomentumMatrixChart({ isLoading, isStale, momentum, onTenantSelect, className }: { isLoading?: boolean; isStale?: boolean;  
+export const MomentumMatrixChart = memo(function MomentumMatrixChart({ isLoading, isStale, momentum, onTenantSelect, className }: { isLoading?: boolean; isStale?: boolean;  
 momentum: MomentumResponse; onTenantSelect?: (tenantId: string) => void; className?: string; })
 {
   const points = momentum.tenants;
@@ -150,4 +151,4 @@ momentum: MomentumResponse; onTenantSelect?: (tenantId: string) => void; classNa
       )}
     </ChartPanel>
   );
-}
+});

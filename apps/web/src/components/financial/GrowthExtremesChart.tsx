@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import {
   Bar,
   BarChart,
@@ -43,7 +44,7 @@ const CustomTooltip = ({ active, payload }: { isLoading?: boolean;  active?: boo
   );
 };
 
-export function GrowthExtremesChart({ isLoading, tenants, onTenantSelect }: { isLoading?: boolean; 
+export const GrowthExtremesChart = memo(function GrowthExtremesChart({ isLoading, tenants, onTenantSelect }: { isLoading?: boolean; 
   tenants: GrowthExtreme[]; onTenantSelect?: (tenantId: string) => void;
 }) {
   if (tenants.length === 0) return null;
@@ -106,4 +107,4 @@ export function GrowthExtremesChart({ isLoading, tenants, onTenantSelect }: { is
       </ResponsiveContainer>
     </ChartPanel>
   );
-}
+});

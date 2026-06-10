@@ -14,7 +14,7 @@ interface ChartPanelProps {
 
 export function ChartPanel({ title, legend, bodyClassName = '', className = '', isLoading = false, isStale = false, children }: ChartPanelProps) {
   return (
-      <div className={`bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-4 flex flex-col h-full min-h-0 relative overflow-hidden ${className}`}>
+      <div className={`bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-4 flex flex-col h-full min-h-0 relative overflow-hidden ${className}`} style={{ contain: 'layout style paint', contentVisibility: 'auto', containIntrinsicSize: 'auto 350px' }}>
         {isStale && !isLoading && (
             <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-20 flex flex-col items-center justify-center animate-in fade-in duration-200">
                <Loader2 size={32} className="text-brand-accent animate-spin opacity-80" />

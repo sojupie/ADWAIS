@@ -12,6 +12,8 @@ import { PeriodSelector } from '../components/common/charts/PeriodSelector';
 import {useFleetStatusViewModel} from "../hooks/useFleetStatusViewModel.ts";
 import {EmptyState} from "../components/common/ui/EmptyState.tsx";
 
+const EMPTY_LATENCY: never[] = [];
+
 export function FleetStatus() {
   const vm = useFleetStatusViewModel();
 
@@ -125,7 +127,7 @@ export function FleetStatus() {
                   </div>
               )}
               <NetworkLatencyChart 
-                 points={vm.analyticsQuery.data?.latencyPoints || []}
+                 points={vm.analyticsQuery.data?.latencyPoints || EMPTY_LATENCY}
                  title={`Latency: ${vm.activeScopeName}`}
                  isLoading={vm.analyticsQuery.isLoading}
               />

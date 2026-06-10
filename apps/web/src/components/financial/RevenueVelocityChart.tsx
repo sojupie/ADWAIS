@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import {
   LineChart,
   Line,
@@ -11,7 +12,7 @@ import type { FinancialVelocityPoint } from '@types';
 import { formatCompact } from '@utils';
 import { ChartPanel } from '../common/charts/ChartPanel';
 
-export function RevenueVelocityChart({ isLoading, points, className }: { isLoading?: boolean;  points: FinancialVelocityPoint[], className?: string })
+export const RevenueVelocityChart = memo(function RevenueVelocityChart({ isLoading, points, className }: { isLoading?: boolean;  points: FinancialVelocityPoint[], className?: string })
 {
   return (
       <ChartPanel isLoading={isLoading}
@@ -32,7 +33,7 @@ export function RevenueVelocityChart({ isLoading, points, className }: { isLoadi
         <RevenueVelocityGraphJSX points={points} />
       </ChartPanel>
   );
-}
+});
 
 const GraphTooltip = ({ active, payload, label }: { active?: boolean; payload?: { payload: unknown }[]; label?: string }) => {
   if (!active || !payload?.length) return null;

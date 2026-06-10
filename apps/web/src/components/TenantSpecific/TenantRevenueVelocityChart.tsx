@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import {
   CartesianGrid,
   Line,
@@ -31,7 +32,7 @@ const CustomTooltip = ({ active, payload, label }: { isLoading?: boolean;  activ
   );
 };
 
-export function TenantRevenueVelocityChart({ isLoading, points, className }: { isLoading?: boolean;  points: FinancialVelocityPoint[], className?: string }) {
+export const TenantRevenueVelocityChart = memo(function TenantRevenueVelocityChart({ isLoading, points, className }: { isLoading?: boolean;  points: FinancialVelocityPoint[], className?: string }) {
   return (
     <ChartPanel isLoading={isLoading}
       title="Revenue Velocity Over Time"
@@ -90,4 +91,4 @@ export function TenantRevenueVelocityChart({ isLoading, points, className }: { i
       </ResponsiveContainer>
     </ChartPanel>
   );
-}
+});

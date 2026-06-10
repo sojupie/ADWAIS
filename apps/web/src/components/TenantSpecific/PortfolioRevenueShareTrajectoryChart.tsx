@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import {
   Area,
   AreaChart,
@@ -41,7 +42,7 @@ const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?:
   );
 };
 
-export function PortfolioRevenueShareTrajectoryChart({isLoading, tenantVelocity, portfolioVelocity, className}: { isLoading?: boolean; tenantVelocity: FinancialVelocityPoint[]; portfolioVelocity: FinancialVelocityPoint[]; className?: string; }) {
+export const PortfolioRevenueShareTrajectoryChart = memo(function PortfolioRevenueShareTrajectoryChart({isLoading, tenantVelocity, portfolioVelocity, className}: { isLoading?: boolean; tenantVelocity: FinancialVelocityPoint[]; portfolioVelocity: FinancialVelocityPoint[]; className?: string; }) {
   const rows = buildRows(tenantVelocity, portfolioVelocity);
 
   return (
@@ -83,4 +84,4 @@ export function PortfolioRevenueShareTrajectoryChart({isLoading, tenantVelocity,
       </ResponsiveContainer>
     </ChartPanel>
   );
-}
+});

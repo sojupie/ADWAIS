@@ -1,9 +1,7 @@
-import { createRootRoute, Outlet, useRouterState} from '@tanstack/react-router';
+import { createRootRoute, Outlet } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Settings } from 'lucide-react';
-import { PeriodSelector } from '../components/common/charts/PeriodSelector';
-import { SyncStatusWidget } from '../components/common/dashboard/SyncStatusWidget';
 import { KioskControls } from '../components/common/dashboard/KioskControls';
 import motilloLogo from '../assets/motillo-logo.svg';
 import { getSavedTimeframe } from '../utils/timeframeStorage';
@@ -14,13 +12,8 @@ export const Route = createRootRoute({
 });
 
 function RootComponent() {
-  const matches = useRouterState({ select: (s) => s.matches });
-
   const financialTf = getSavedTimeframe('/financial');
   const fleetTf = getSavedTimeframe('/fleet-status');
-
-  const isFinancial = matches.some((m) => m.routeId === '/financial' || m.pathname.includes('/financial'));
-  const isFleet = matches.some((m) => m.routeId === '/fleet-status' || m.pathname.includes('/fleet-status'));
 
   return (
     <div className="flex flex-col h-screen w-screen bg-brand-bg-tertiary overflow-hidden select-none font-sans text-brand-text">

@@ -8,10 +8,15 @@ import { TenantDiagnostics } from './TenantDiagnostics';
 import { DashboardLayout } from "../components/common/layout/DashboardLayout.tsx";
 import { DashboardTopRow } from "../components/common/layout/DashboardTopRow.tsx";
 import { DashboardFlexRow } from "../components/common/layout/DashboardFlexRow.tsx";
-import { DashboardFooter } from "../components/common/layout/DashboardFooter.tsx";
 import { SyncStatusWidget } from '../components/common/dashboard/SyncStatusWidget';
 import { PeriodSelector } from '../components/common/charts/PeriodSelector';
 import { useFinancialViewModel } from "../hooks/useFinancialViewModel.ts";
+import type { RevenueEfficiencyResponse, MomentumResponse } from '@types';
+
+const EMPTY_VELOCITY: never[] = [];
+const EMPTY_ANOMALY: never[] = [];
+const EMPTY_EFFICIENCY: RevenueEfficiencyResponse = { tenants: [], globalAverageOrderValue: 0, medianPortfolioShare: 0 };
+const EMPTY_MOMENTUM: MomentumResponse = { tenants: [], medianBaselineRevenue: 0, globalGrowthPercentage: 0 };
 
 export function Financial() {
   const vm = useFinancialViewModel();
@@ -77,7 +82,7 @@ export function Financial() {
       {/* Charts Grid: Strictly Responsive & Independent */}
       <DashboardFlexRow weight={"flex-1"} gridCols={"2"}>
         <AccumulatedRevenueChart 
-          points={vm.velocityQuery.data || []}
+          points={vm.velocityQuery.data || EMPTY_VELOCITY}
 
           isLoading={vm.velocityQuery.isLoading} 
           isStale={vm.velocityQuery.isPlaceholderData}
@@ -85,7 +90,7 @@ export function Financial() {
         />
 
         <VolumeAnomalyChart 
-          entries={vm.anomalyQuery.data || []}
+          entries={vm.anomalyQuery.data || EMPTY_ANOMALY}
 
           onTenantSelect={vm.handleTenantSelect} 
           isLoading={vm.anomalyQuery.isLoading} 
@@ -94,7 +99,7 @@ export function Financial() {
         />
 
         <RevenueEfficiencyChart 
-          response={vm.efficiencyQuery.data || { tenants: [], globalAverageOrderValue: 0, medianPortfolioShare: 0 }}
+          response={vm.efficiencyQuery.data || EMPTY_EFFICIENCY}
 
           onTenantSelect={vm.handleTenantSelect} 
           isLoading={vm.efficiencyQuery.isLoading} 
@@ -103,7 +108,7 @@ export function Financial() {
         />
 
         <MomentumMatrixChart 
-          momentum={vm.momentumQuery.data || { tenants: [], medianBaselineRevenue: 0, globalGrowthPercentage: 0 }}
+          momentum={vm.momentumQuery.data || EMPTY_MOMENTUM}
 
           onTenantSelect={vm.handleTenantSelect} 
           isLoading={vm.momentumQuery.isLoading} 

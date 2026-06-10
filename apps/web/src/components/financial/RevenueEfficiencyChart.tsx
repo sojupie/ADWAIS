@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import {
   Cell,
   ReferenceLine,
@@ -50,7 +51,7 @@ const CustomTooltip = ({ active, payload }: { isLoading?: boolean;  active?: boo
   );
 };
 
-export function RevenueEfficiencyChart({
+export const RevenueEfficiencyChart = memo(function RevenueEfficiencyChart({
   isLoading, isStale, response,
   onTenantSelect,
   className }: { isLoading?: boolean; isStale?: boolean;
@@ -130,4 +131,4 @@ export function RevenueEfficiencyChart({
       )}
     </ChartPanel>
   );
-}
+});

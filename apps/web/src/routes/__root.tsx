@@ -1,4 +1,4 @@
-import { createRootRoute, Outlet } from '@tanstack/react-router';
+import { createRootRoute, Outlet, useSearch } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Settings } from 'lucide-react';
@@ -13,6 +13,7 @@ export const Route = createRootRoute({
 });
 
 function RootComponent() {
+  useSearch({ strict: false });
   const financialTf = getSavedTimeframe('/financial');
   const fleetTf = getSavedTimeframe('/fleet-status');
 

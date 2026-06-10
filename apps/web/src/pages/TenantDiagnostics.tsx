@@ -15,6 +15,8 @@ import {
 import {DashboardLayout} from "../components/common/layout/DashboardLayout.tsx";
 import {DashboardTopRow} from "../components/common/layout/DashboardTopRow.tsx";
 import {DashboardFlexRow} from "../components/common/layout/DashboardFlexRow.tsx";
+import { SyncStatusWidget } from '../components/common/dashboard/SyncStatusWidget';
+import { PeriodSelector } from '../components/common/charts/PeriodSelector';
 
 const EMPTY_ACCUMULATED: never[] = [];
 const EMPTY_DENSITY: never[] = [];
@@ -59,7 +61,7 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe,
           <div className="flex items-center gap-3 mb-1">
             <h1 className="text-2xl font-extrabold text-brand-text tracking-tight m-0">{tenantName} Diagnostics</h1>
             <span 
-              className={`inline-flex items-center px-3 py-1 rounded-sm text-[11px] font-black uppercase tracking-widest shadow-sm ${
+              className={`inline-flex items-center px-3 py-1 rounded-sm text-xs font-black uppercase tracking-widest shadow-sm ${
                 tenantType === 'B2C' ? 'bg-chart-1 text-white' : 
                 tenantType === 'Mixed' ? 'bg-chart-2 text-white' : 
                 'bg-(--color-brand-btn-primary) text-white'
@@ -130,6 +132,20 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe,
           className="h-full min-h-87.5"
         />
       </DashboardFlexRow>
+
+      {/* ── Inline Widgets (Mobile/Tablet) ── */}
+      <div className="xl:hidden flex flex-col md:flex-row justify-center gap-6 items-center w-full pb-6 shrink-0">
+        <SyncStatusWidget />
+        <PeriodSelector from="/financial" />
+      </div>
+
+      {/* ── Floating Widgets (Desktop Wide) ── */}
+      <div className="hidden xl:block fixed bottom-6 left-8 z-50 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <SyncStatusWidget />
+      </div>
+      <div className="hidden xl:block fixed bottom-6 right-8 z-50 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <PeriodSelector from="/financial" />
+      </div>
     </DashboardLayout>
   );
 }

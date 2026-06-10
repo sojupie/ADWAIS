@@ -41,7 +41,7 @@ export const AccumulatedRevenueChart = memo(function AccumulatedRevenueChart({ i
   }));
 
   return (
-    <ChartPanel isLoading={isLoading} isStale={isStale} title="Revenue Performance" subtitle={comparison === 'YearOverYear' ? 'vs. Same Period Last Year' : 'vs. Preceding Period'} className={className} bodyClassName={points.length === 0 ? "flex items-center justify-center" : ""}>
+    <ChartPanel isLoading={isLoading} isStale={isStale} title="Revenue Performance" comparison={comparison} className={className} bodyClassName={points.length === 0 ? "flex items-center justify-center" : ""}>
       {points.length === 0 ? (
         <EmptyState message="No revenue data available" variant="minimal" />
       ) : (

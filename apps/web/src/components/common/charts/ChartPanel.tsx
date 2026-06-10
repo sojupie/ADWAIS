@@ -1,10 +1,12 @@
 import type { ReactNode } from 'react';
+import type { ComparisonPeriod } from '@types';
 import { ChartSkeleton } from './ChartSkeleton';
 import { Loader2 } from 'lucide-react';
 
 interface ChartPanelProps {
   title: string;
   subtitle?: string;
+  comparison?: ComparisonPeriod;
   legend?: ReactNode;
   bodyClassName?: string;
   className?: string;
@@ -13,7 +15,8 @@ interface ChartPanelProps {
   children: ReactNode;
 }
 
-export function ChartPanel({ title, subtitle, legend, bodyClassName = '', className = '', isLoading = false, isStale = false, children }: ChartPanelProps) {
+export function ChartPanel({ title, subtitle, comparison, legend, bodyClassName = '', className = '', isLoading = false, isStale = false, children }: ChartPanelProps) {
+  const displaySubtitle = subtitle || (comparison ? (comparison === 'YearOverYear' ? 'vs. Same Period Last Year' : 'vs. Preceding Period') : undefined);
   return (
       <div className={`bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-4 flex flex-col h-full min-h-0 relative overflow-hidden ${className}`} style={{ contain: 'layout style paint', contentVisibility: 'auto', containIntrinsicSize: 'auto 350px' }}>
         {isStale && !isLoading && (
@@ -27,9 +30,9 @@ export function ChartPanel({ title, subtitle, legend, bodyClassName = '', classN
                 <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">
                     {title}
                 </span>
-                {subtitle && (
+                {displaySubtitle && (
                     <span className="text-[10px] font-medium text-slate-400">
-                        {subtitle}
+                        {displaySubtitle}
                     </span>
                 )}
             </div>

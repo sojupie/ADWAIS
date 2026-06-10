@@ -66,7 +66,7 @@ export const RevenueEfficiencyChart = memo(function RevenueEfficiencyChart({
   return (
     <ChartPanel isLoading={isLoading} isStale={isStale}
       title="Revenue Efficiency Matrix"
-      subtitle={comparison === 'YearOverYear' ? 'vs. Same Period Last Year' : 'vs. Preceding Period'}
+      comparison={comparison}
       className={className || "h-full"}
       bodyClassName={isEmpty ? 'flex items-center justify-center' : 'flex-1 min-h-0'}
       legend={<span className="text-xs font-bold text-slate-500 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded">Size = Growth Velocity</span>}

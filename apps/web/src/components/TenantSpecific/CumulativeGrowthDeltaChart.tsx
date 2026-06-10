@@ -51,7 +51,7 @@ export const CumulativeGrowthDeltaChart = memo(function CumulativeGrowthDeltaCha
   return (
     <ChartPanel isLoading={isLoading}
       title="Cumulative Growth Delta (Absolute)"
-      subtitle={comparison === 'YearOverYear' ? 'vs. Same Period Last Year' : 'vs. Preceding Period'}
+      comparison={comparison}
       className={className || ''}
       bodyClassName="w-full h-full flex flex-col flex-1 min-h-0"
     >

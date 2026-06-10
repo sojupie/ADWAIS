@@ -13,7 +13,7 @@ import { formatChartLabel, inferBinSize } from '@utils';
 import { ChartPanel } from '../common/charts/ChartPanel';
 
 interface ShareTrajectoryRow {
-  timestamp: string;
+  label: string;
   portfolioShare: number;
 }
 
@@ -51,7 +51,7 @@ export const PortfolioRevenueShareTrajectoryChart = memo(function PortfolioReven
 
   return (
     <ChartPanel isLoading={isLoading}
-      title="Portfolio Revenue Share Trajectory"
+      title="Portfolio Share Trajectory"
       className={className || ''}
       bodyClassName="w-full h-full flex flex-col flex-1 min-h-0"
     >

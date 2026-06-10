@@ -63,7 +63,7 @@ export const VolumeAnomalyChart = memo(function VolumeAnomalyChart({
   return (
     <ChartPanel isLoading={isLoading} isStale={isStale}
       title="Volume Anomaly Monitor"
-      subtitle={comparison === 'YearOverYear' ? 'vs. Same Period Last Year' : 'vs. Preceding Period'}
+      comparison={comparison}
       className={className || "h-full"}
       bodyClassName={isEmpty ? 'flex items-center justify-center' : 'flex-1 min-h-0'}
       legend={<span className="text-xs font-bold text-slate-500 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded">Deviation from baseline</span>}

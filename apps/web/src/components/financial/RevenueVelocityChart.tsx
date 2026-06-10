@@ -17,7 +17,7 @@ export const RevenueVelocityChart = memo(function RevenueVelocityChart({ isLoadi
   return (
       <ChartPanel isLoading={isLoading}
           title="Revenue Velocity"
-          subtitle={comparison === 'YearOverYear' ? 'vs. Same Period Last Year' : 'vs. Preceding Period'}
+          comparison={comparison}
           className={className}
           legend={
             <div className="flex items-center gap-6 text-xs font-bold text-slate-500 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded">

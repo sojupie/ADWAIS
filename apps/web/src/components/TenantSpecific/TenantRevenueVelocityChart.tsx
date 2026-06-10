@@ -43,7 +43,7 @@ export const TenantRevenueVelocityChart = memo(function TenantRevenueVelocityCha
   return (
     <ChartPanel isLoading={isLoading}
       title="Revenue Velocity Over Time"
-      subtitle={comparison === 'YearOverYear' ? 'vs. Same Period Last Year' : 'vs. Preceding Period'}
+      comparison={comparison}
       className={className || ''}
       bodyClassName="w-full h-full flex flex-col flex-1 min-h-0"
       legend={

@@ -29,8 +29,11 @@ export function PeriodSelector({ from }: PeriodSelectorProps ) {
     void navigate({ search: (old: Record<string, unknown>) => ({ ...old, timeframe: val }) });
   };
 
+  const opacityCls = isKiosk ? 'xl:opacity-40 hover:xl:opacity-100' : 'xl:opacity-100';
+  const gapCls = isKiosk ? 'xl:gap-0 group-hover:xl:gap-1' : 'xl:gap-1';
+
   return (
-    <div className="group grid grid-cols-3 gap-1 md:flex md:gap-1 bg-brand-bg-secondary p-1.5 rounded-xl md:rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-brand-bg-secondary/10 pointer-events-auto w-full md:w-auto max-w-[400px] md:max-w-none transition-all duration-350 ease-out">
+    <div className={`group grid grid-cols-3 gap-1 md:flex md:gap-1 bg-brand-bg-secondary p-1.5 rounded-xl md:rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-brand-bg-secondary/10 pointer-events-auto w-full md:w-auto max-w-[400px] md:max-w-none transition-all duration-350 ease-out ${opacityCls} ${gapCls}`}>
       {options.map((opt) => {
         const isActive = timeframe === opt.value;
         const buttonCls = isActive

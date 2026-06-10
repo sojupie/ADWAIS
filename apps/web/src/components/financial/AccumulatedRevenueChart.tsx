@@ -1,14 +1,15 @@
 import { memo } from 'react';
 import { ComposedChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import type { AccumulatedRevenuePointDto } from '@types';
+import type { AccumulatedRevenuePointDto, ComparisonPeriod } from '@types';
 import { ChartPanel } from '../common/charts/ChartPanel';
-import { formatCurrency } from '@utils';
+import { formatCurrency, formatDate } from '@utils';
 import { EmptyState } from '../common/ui/EmptyState';
 
 interface AccumulatedRevenueChartProps {
   isLoading?: boolean;
   isStale?: boolean;
   points: AccumulatedRevenuePointDto[];
+  comparison?: ComparisonPeriod;
   className?: string;
 }
 
@@ -32,9 +33,9 @@ const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?:
   );
 };
 
-export const AccumulatedRevenueChart = memo(function AccumulatedRevenueChart({ isLoading, isStale, points, className }: AccumulatedRevenueChartProps) {
+export const AccumulatedRevenueChart = memo(function AccumulatedRevenueChart({ isLoading, isStale, points, comparison, className }: AccumulatedRevenueChartProps) {
   return (
-    <ChartPanel isLoading={isLoading} isStale={isStale} title="Revenue Performance" className={className} bodyClassName={points.length === 0 ? "flex items-center justify-center" : ""}>
+    <ChartPanel isLoading={isLoading} isStale={isStale} title="Revenue Performance" subtitle={comparison === 'YearOverYear' ? 'vs. Same Period Last Year' : 'vs. Preceding Period'} className={className} bodyClassName={points.length === 0 ? "flex items-center justify-center" : ""}>
       {points.length === 0 ? (
         <EmptyState message="No revenue data available" variant="minimal" />
       ) : (
@@ -42,9 +43,10 @@ export const AccumulatedRevenueChart = memo(function AccumulatedRevenueChart({ i
           <ComposedChart data={points} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-chart-grid)" />
             <XAxis 
-              dataKey="label" 
+              dataKey="timestamp" 
               axisLine={false} 
               tickLine={false} 
+              tickFormatter={(value) => formatDate(value)}
               tick={{ fill: 'var(--color-chart-tick)', fontSize: 12 }} 
               minTickGap={30}
             />

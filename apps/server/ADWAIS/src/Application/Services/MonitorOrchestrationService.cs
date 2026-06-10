@@ -18,7 +18,7 @@ public class MonitorOrchestrationService(
 {
     private record LatencyRow(DateTime Timestamp, double Average, double Lowest, double Highest);
 
-    public async Task<MonitorAnalyticsDto> GetAnalyticsAsync(ResolvedPeriod period, Guid? tenantId = null, int? monitorId = null)
+    public async Task<MonitorAnalyticsDto> GetAnalyticsAsync(ResolvedPeriod period, Guid? tenantId = null, int? monitorId = null, CancellationToken ct = default)
     {
         var currentStart = period.CurrentStart;
         var currentEnd = period.CurrentEnd;
@@ -27,8 +27,8 @@ public class MonitorOrchestrationService(
         var isHourly = period.IsHourly;
         var includeActualTime = period.IncludeActualTime;
 
-        var currentRows = await GetMergedLatencyDataAsync(dbContext, currentStart, currentEnd, isHourly, tenantId, monitorId);
-        var previousRows = await GetMergedLatencyDataAsync(dbContext, previousStart, currentStart, isHourly, tenantId, monitorId);
+        var currentRows = await GetMergedLatencyDataAsync(dbContext, currentStart, currentEnd, isHourly, tenantId, monitorId, ct);
+        var previousRows = await GetMergedLatencyDataAsync(dbContext, previousStart, period.PreviousEnd, isHourly, tenantId, monitorId, ct);
 
         var currentByStep = currentRows
             .GroupBy(r => isHourly ? (int)(r.Timestamp - currentStart.UtcDateTime).TotalHours : (int)(r.Timestamp - currentStart.UtcDateTime).TotalDays)
@@ -48,16 +48,11 @@ public class MonitorOrchestrationService(
         for (var i = 0; i < steps; i++)
         {
             var timestamp = isHourly ? currentStart.AddHours(i) : currentStart.AddDays(i);
-            var isLast = i == steps - 1;
-            var label = isHourly 
-                ? (isLast && includeActualTime ? currentEnd.ToString("HH:mm") : timestamp.ToString("HH:mm")) 
-                : $"Day {i + 1}";
             
             var data = currentByStep.GetValueOrDefault(i);
             var prevAvg = previousByStep.GetValueOrDefault(i, 0.0);
 
             latencyPoints.Add(new LatencyPointDto(
-                label, 
                 timestamp, 
                 data?.Avg ?? 0, 
                 prevAvg,
@@ -73,9 +68,9 @@ public class MonitorOrchestrationService(
         else 
             monitorQuery = monitorQuery.Where(m => m.TenantId != IApplicationDbContext.SystemTenantGuid);
 
-        var monitors = await monitorQuery.ToListAsync();
+        var monitors = await monitorQuery.ToListAsync(ct);
 
-        var periodUptimes = await GetPeriodUptimesAsync(currentStart, currentEnd, tenantId, monitorId);
+        var periodUptimes = await GetPeriodUptimesAsync(currentStart, currentEnd, tenantId, monitorId, ct);
 
         foreach (var m in monitors)
         {
@@ -95,7 +90,7 @@ public class MonitorOrchestrationService(
         return new MonitorAnalyticsDto(globalAvgLatency, latencyPoints, monitors);
     }
 
-    private async Task<Dictionary<int, double>> GetPeriodUptimesAsync(DateTimeOffset start, DateTimeOffset end, Guid? tenantId, int? monitorId)
+    private async Task<Dictionary<int, double>> GetPeriodUptimesAsync(DateTimeOffset start, DateTimeOffset end, Guid? tenantId, int? monitorId, CancellationToken ct = default)
     {
         var yesterday = new DateTimeOffset(DateTimeOffset.UtcNow.Date);
         var viewEnd = yesterday < end ? yesterday : end;
@@ -114,7 +109,7 @@ public class MonitorOrchestrationService(
         var historicalDaily = await histQuery
             .GroupBy(r => r.MonitorId)
             .Select(g => new { MonitorId = g.Key, Avg = g.Average(r => r.UptimePercentage ?? 0), Count = g.Count() })
-            .ToListAsync();
+            .ToListAsync(ct);
 
         var todayLive = new Dictionary<int, double>();
         if (yesterday < end)
@@ -131,7 +126,7 @@ public class MonitorOrchestrationService(
                 liveQuery = liveQuery.Where(ma => ma.UptimeMonitor!.TenantId != IApplicationDbContext.SystemTenantGuid);
 
             todayLive = await liveQuery
-                .ToDictionaryAsync(ma => ma.MonitorId, ma => ma.UptimePercentage);
+                .ToDictionaryAsync(ma => ma.MonitorId, ma => ma.UptimePercentage, ct);
         }
 
         var results = new Dictionary<int, double>();
@@ -151,7 +146,7 @@ public class MonitorOrchestrationService(
     }
 
     private async Task<List<LatencyRow>> GetMergedLatencyDataAsync(
-        IApplicationDbContext db, DateTimeOffset start, DateTimeOffset end, bool isHourly, Guid? tenantId = null, int? monitorId = null)
+        IApplicationDbContext db, DateTimeOffset start, DateTimeOffset end, bool isHourly, Guid? tenantId = null, int? monitorId = null, CancellationToken ct = default)
     {
         if (isHourly)
         {
@@ -171,7 +166,7 @@ public class MonitorOrchestrationService(
                     g.Min(rt => rt.Lowest ?? 0),
                     g.Max(rt => rt.Highest ?? 0)
                 ))
-                .ToListAsync();
+                .ToListAsync(ct);
             return grouped;
         }
 
@@ -188,7 +183,7 @@ public class MonitorOrchestrationService(
 
         var historical = await histQuery
             .Select(r => new LatencyRow(r.Date.DateTime, r.Average ?? 0, r.Lowest ?? 0, r.Highest ?? 0))
-            .ToListAsync();
+            .ToListAsync(ct);
 
         if (yesterday < end)
         {
@@ -208,14 +203,14 @@ public class MonitorOrchestrationService(
                     g.Min(rt => rt.Lowest ?? 0),
                     g.Max(rt => rt.Highest ?? 0)
                 ))
-                .ToListAsync();
+                .ToListAsync(ct);
             historical.AddRange(fresh);
         }
 
         return historical;
     }
 
-    public async Task<UptimeMonitor> CreateMonitorAsync(Guid tenantId, string name, string url, double? uptimeSla)
+    public async Task<UptimeMonitor> CreateMonitorAsync(Guid tenantId, string name, string url, double? uptimeSla, CancellationToken ct = default)
     {
         var remoteMonitor = await uptimeRobotService.CreateMonitorAsync(name, url);
         
@@ -233,32 +228,32 @@ public class MonitorOrchestrationService(
         };
 
         dbContext.Monitors.Add(monitor);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(ct);
 
         HydrateLiveStatus(monitor);
         return monitor;
     }
 
-    public async Task AssignMonitorAsync(int monitorId, Guid tenantId)
+    public async Task AssignMonitorAsync(int monitorId, Guid tenantId, CancellationToken ct = default)
     {
-        var monitor = await dbContext.Monitors.SingleOrDefaultAsync(m => m.Id == monitorId);
+        var monitor = await dbContext.Monitors.SingleOrDefaultAsync(m => m.Id == monitorId, ct);
         if (monitor == null) throw new KeyNotFoundException($"Monitor {monitorId} not found.");
 
-        var tenantExists = await dbContext.Tenants.AnyAsync(t => t.Id == tenantId);
+        var tenantExists = await dbContext.Tenants.AnyAsync(t => t.Id == tenantId, ct);
         if (!tenantExists) throw new KeyNotFoundException($"Tenant {tenantId} not found.");
 
         monitor.TenantId = tenantId;
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(ct);
     }
 
-    public async Task ReassignAllTenantMonitorsToSystemAsync(Guid tenantId)
+    public async Task ReassignAllTenantMonitorsToSystemAsync(Guid tenantId, CancellationToken ct = default)
     {
         await dbContext.Monitors
             .Where(m => m.TenantId == tenantId)
-            .ExecuteUpdateAsync(s => s.SetProperty(m => m.TenantId, IApplicationDbContext.SystemTenantGuid));
+            .ExecuteUpdateAsync(s => s.SetProperty(m => m.TenantId, IApplicationDbContext.SystemTenantGuid), ct);
     }
 
-    public async Task<IEnumerable<UptimeMonitor>> GetMonitorsByTenantAsync(Guid tenantId, ResolvedPeriod period)
+    public async Task<IEnumerable<UptimeMonitor>> GetMonitorsByTenantAsync(Guid tenantId, ResolvedPeriod period, CancellationToken ct = default)
     {
         var start = period.CurrentStart;
         var end = period.CurrentEnd;
@@ -267,9 +262,9 @@ public class MonitorOrchestrationService(
             .AsNoTracking()
             .Include(m => m.Tenant)
             .Where(m => m.TenantId == tenantId)
-            .ToListAsync();
+            .ToListAsync(ct);
 
-        var uptimes = await GetPeriodUptimesAsync(start, end, tenantId, null);
+        var uptimes = await GetPeriodUptimesAsync(start, end, tenantId, null, ct);
 
         foreach (var m in monitors)
         {
@@ -283,7 +278,7 @@ public class MonitorOrchestrationService(
         return monitors;
     }
 
-    public async Task<UptimeMonitor> GetMonitorAsync(Guid tenantId, int id, ResolvedPeriod period)
+    public async Task<UptimeMonitor> GetMonitorAsync(Guid tenantId, int id, ResolvedPeriod period, CancellationToken ct = default)
     {
         var start = period.CurrentStart;
         var end = period.CurrentEnd;
@@ -291,11 +286,11 @@ public class MonitorOrchestrationService(
         var monitor = await dbContext.Monitors
             .AsNoTracking()
             .Include(m => m.Tenant)
-            .SingleOrDefaultAsync(m => m.TenantId == tenantId && m.Id == id);
+            .SingleOrDefaultAsync(m => m.TenantId == tenantId && m.Id == id, ct);
 
         if (monitor == null) throw new KeyNotFoundException($"Monitor {id} not found.");
 
-        var uptimes = await GetPeriodUptimesAsync(start, end, null, id);
+        var uptimes = await GetPeriodUptimesAsync(start, end, null, id, ct);
         if (uptimes.TryGetValue(id, out var uptime))
         {
             monitor.CurrentUptimePercentage = uptime;
@@ -329,44 +324,44 @@ public class MonitorOrchestrationService(
             : status;
     }
 
-    public async Task DeleteMonitorAsync(Guid tenantId, int id)
+    public async Task DeleteMonitorAsync(Guid tenantId, int id, CancellationToken ct = default)
     {
-        var monitor = await dbContext.Monitors.SingleOrDefaultAsync(m => m.TenantId == tenantId && m.Id == id);
+        var monitor = await dbContext.Monitors.SingleOrDefaultAsync(m => m.TenantId == tenantId && m.Id == id, ct);
         if (monitor == null) throw new KeyNotFoundException();
 
         await uptimeRobotService.DeleteMonitorAsync(id);
 
         dbContext.Monitors.Remove(monitor);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(ct);
     }
 
-    public async Task PauseMonitorAsync(int id)
+    public async Task PauseMonitorAsync(int id, CancellationToken ct = default)
     {
-        var monitor = await dbContext.Monitors.SingleOrDefaultAsync(m => m.Id == id);
+        var monitor = await dbContext.Monitors.SingleOrDefaultAsync(m => m.Id == id, ct);
         if (monitor == null) throw new KeyNotFoundException();
 
         await uptimeRobotService.PauseMonitorAsync(id);
         
         monitor.UptimeMonitorEnabled = false;
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(ct);
     }
 
-    public async Task StartMonitorAsync(int id)
+    public async Task StartMonitorAsync(int id, CancellationToken ct = default)
     {
-        var monitor = await dbContext.Monitors.SingleOrDefaultAsync(m => m.Id == id);
+        var monitor = await dbContext.Monitors.SingleOrDefaultAsync(m => m.Id == id, ct);
         if (monitor == null) throw new KeyNotFoundException();
 
         await uptimeRobotService.StartMonitorAsync(id);
         
         monitor.UptimeMonitorEnabled = true;
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(ct);
     }
 
-    public async Task<IEnumerable<ResponseTime>> GetAggregatedLatencyAsync(Guid tenantId, int id, DateTimeOffset from, DateTimeOffset to)
+    public async Task<IEnumerable<ResponseTime>> GetAggregatedLatencyAsync(Guid tenantId, int id, DateTimeOffset from, DateTimeOffset to, CancellationToken ct = default)
     {
         var monitorExists = await dbContext.Monitors
             .AsNoTracking()
-            .AnyAsync(m => m.TenantId == tenantId && m.Id == id);
+            .AnyAsync(m => m.TenantId == tenantId && m.Id == id, ct);
 
         if (!monitorExists)
         {
@@ -378,12 +373,12 @@ public class MonitorOrchestrationService(
             .Where(rt => rt.MonitorId == id)
             .Where(rt => rt.Date >= from && rt.Date <= to)
             .OrderBy(rt => rt.Date)
-            .ToListAsync();
+            .ToListAsync(ct);
     }
 
-    public async Task<UptimeMonitor> UpdateMonitorSlaAsync(int id, double? uptimeSla)
+    public async Task<UptimeMonitor> UpdateMonitorSlaAsync(int id, double? uptimeSla, CancellationToken ct = default)
     {
-        var monitor = await dbContext.Monitors.SingleOrDefaultAsync(m => m.Id == id);
+        var monitor = await dbContext.Monitors.SingleOrDefaultAsync(m => m.Id == id, ct);
         if (monitor == null) throw new KeyNotFoundException();
         
         if (uptimeSla is not null)
@@ -391,7 +386,7 @@ public class MonitorOrchestrationService(
             monitor.UptimeSla = uptimeSla;
         }
 
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(ct);
 
         HydrateLiveStatus(monitor);
         return monitor;

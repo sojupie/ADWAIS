@@ -8,15 +8,16 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import type { FinancialVelocityPoint } from '@types';
-import { formatCompact } from '@utils';
+import type { FinancialVelocityPoint, ComparisonPeriod } from '@types';
+import { formatCompact, formatDate } from '@utils';
 import { ChartPanel } from '../common/charts/ChartPanel';
 
-export const RevenueVelocityChart = memo(function RevenueVelocityChart({ isLoading, points, className }: { isLoading?: boolean;  points: FinancialVelocityPoint[], className?: string })
+export const RevenueVelocityChart = memo(function RevenueVelocityChart({ isLoading, points, comparison, className }: { isLoading?: boolean;  points: FinancialVelocityPoint[], comparison?: ComparisonPeriod, className?: string })
 {
   return (
       <ChartPanel isLoading={isLoading}
           title="Revenue Velocity"
+          subtitle={comparison === 'YearOverYear' ? 'vs. Same Period Last Year' : 'vs. Preceding Period'}
           className={className}
           legend={
             <div className="flex items-center gap-6 text-xs font-bold text-slate-500 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded">
@@ -63,7 +64,8 @@ function RevenueVelocityGraphJSX({ points }: { isLoading?: boolean;  points: Fin
       <LineChart data={points} margin={{ top: 12, right: 8, left: 0, bottom: 0 }}>
         <CartesianGrid stroke="var(--color-chart-grid)" vertical={false} />
         <XAxis
-          dataKey="label"
+          dataKey="timestamp"
+          tickFormatter={(value) => formatDate(value)}
           tick={{ fill: 'var(--color-chart-tick)', fontSize: 14, fontWeight: 600, fontFamily: 'Manrope, sans-serif' }}
           axisLine={false}
           tickLine={false}

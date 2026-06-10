@@ -1,18 +1,19 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiFetch } from '../apiClient';
-import type { UptimeMonitorDto } from '@types';
+import type { UptimeMonitorDto, ComparisonPeriod } from '@types';
+import { buildUrl } from './useBuildUrl.ts';
 
-export function useMonitorsQuery() {
+export function useMonitorsQuery(timeframe?: string, tenantId?: string | null, comparison?: ComparisonPeriod) {
   return useQuery<UptimeMonitorDto[]>({
-    queryKey: ['monitors'],
-    queryFn: () => apiFetch<UptimeMonitorDto[]>('/api/monitors')
+    queryKey: ['monitors', timeframe, tenantId, comparison],
+    queryFn: () => apiFetch<UptimeMonitorDto[]>(buildUrl('/api/monitors', { timeframe, tenantId, comparison }))
   });
 }
 
-export function useUnassignedMonitorsQuery() {
+export function useUnassignedMonitorsQuery(timeframe?: string, comparison?: ComparisonPeriod) {
   return useQuery<UptimeMonitorDto[]>({
-    queryKey: ['unassigned-monitors'],
-    queryFn: () => apiFetch<UptimeMonitorDto[]>('/api/monitors/unassigned')
+    queryKey: ['unassigned-monitors', timeframe, comparison],
+    queryFn: () => apiFetch<UptimeMonitorDto[]>(buildUrl('/api/monitors/unassigned', { timeframe, comparison }))
   });
 }
 

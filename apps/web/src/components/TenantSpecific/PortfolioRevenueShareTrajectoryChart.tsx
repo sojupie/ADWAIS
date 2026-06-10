@@ -9,20 +9,21 @@ import {
   YAxis,
 } from 'recharts';
 import type { FinancialVelocityPoint } from '@types';
+import { formatDate } from '@utils';
 import { ChartPanel } from '../common/charts/ChartPanel';
 
 interface ShareTrajectoryRow {
-  label: string;
+  timestamp: string;
   portfolioShare: number;
 }
 
 function buildRows(tenantVelocity: FinancialVelocityPoint[], portfolioVelocity: FinancialVelocityPoint[],
 ): ShareTrajectoryRow[] {
   return tenantVelocity.map((point) => {
-    const portfolioRevenue = portfolioVelocity.find(p => p.label === point.label)?.currentRevenue ?? 0;
+    const portfolioRevenue = portfolioVelocity.find(p => p.timestamp === point.timestamp)?.currentRevenue ?? 0;
 
     return {
-      label: point.label,
+      timestamp: point.timestamp,
       portfolioShare: portfolioRevenue > 0 ? (point.currentRevenue / portfolioRevenue) * 100 : 0,
     };
   });
@@ -55,7 +56,8 @@ export const PortfolioRevenueShareTrajectoryChart = memo(function PortfolioReven
         <AreaChart data={rows} margin={{ top: 8, right: 10, left: 8, bottom: 20 }}>
           <CartesianGrid stroke="var(--color-chart-grid)" strokeDasharray="3 4" vertical={false} />
           <XAxis
-            dataKey="label"
+            dataKey="timestamp"
+            tickFormatter={(value) => formatDate(value)}
             tick={{ fill: 'var(--color-chart-tick)', fontSize: 11, fontWeight: 700, fontFamily: 'Manrope, sans-serif' }}
             axisLine={false}
             tickLine={false}

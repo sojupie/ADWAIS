@@ -25,15 +25,14 @@ public class MonitorController(
     /// Provides latency time-series and filtered monitor lists hydrated with uptime for the specified timeframe (defaults to T30).
     /// </summary>
     [HttpGet("analytics")]
-    public async Task<ActionResult<MonitorAnalyticsResponseDto>> GetAnalytics([FromQuery] MonitorRequestDto request)
+    public async Task<ActionResult<MonitorAnalyticsResponseDto>> GetAnalytics([FromQuery] MonitorRequestDto request, [FromQuery] ComparisonType comparison = ComparisonType.Preceding, CancellationToken ct = default)
     {
-        var period = TimeframeResolver.Resolve(request.Timeframe);
-        var result = await monitorService.GetAnalyticsAsync(period, request.TenantId, request.MonitorId);
+        var period = TimeframeResolver.Resolve(request.Timeframe, comparison);
+        var result = await monitorService.GetAnalyticsAsync(period, request.TenantId, request.MonitorId, ct);
 
         return Ok(new MonitorAnalyticsResponseDto(
             result.GlobalAverageLatency,
             result.LatencyPoints.Select(p => new LatencyPointResponseDto(
-                p.Label,
                 p.Timestamp,
                 p.Average,
                 p.PreviousAverage,
@@ -49,37 +48,37 @@ public class MonitorController(
     /// </summary>
     /// <param name="request">The request containing query filters and timeframe.</param>
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<UptimeMonitorDto>>> GetMonitors([FromQuery] MonitorRequestDto request)
+    public async Task<ActionResult<IEnumerable<UptimeMonitorDto>>> GetMonitors([FromQuery] MonitorRequestDto request, [FromQuery] ComparisonType comparison = ComparisonType.Preceding, CancellationToken ct = default)
     {
-        var period = TimeframeResolver.Resolve(request.Timeframe);
+        var period = TimeframeResolver.Resolve(request.Timeframe, comparison);
 
         if (request.MonitorId.HasValue)
         {
-            await using var db = await dbContextFactory.CreateDbContextAsync();
-            var tid = await db.Monitors.Where(m => m.Id == request.MonitorId.Value).Select(m => (Guid?)m.TenantId).SingleOrDefaultAsync();
+            await using var db = await dbContextFactory.CreateDbContextAsync(ct);
+            var tid = await db.Monitors.Where(m => m.Id == request.MonitorId.Value).Select(m => (Guid?)m.TenantId).SingleOrDefaultAsync(ct);
             if (tid == null) return Ok(Enumerable.Empty<UptimeMonitorDto>());
 
-            var m = await monitorService.GetMonitorAsync(tid.Value, request.MonitorId.Value, period);
+            var m = await monitorService.GetMonitorAsync(tid.Value, request.MonitorId.Value, period, ct);
             return Ok(new[] { ToDto(m) });
         }
 
         if (request.TenantId.HasValue)
         {
-            var monitors = await monitorService.GetMonitorsByTenantAsync(request.TenantId.Value, period);
+            var monitors = await monitorService.GetMonitorsByTenantAsync(request.TenantId.Value, period, ct);
             return Ok(monitors.Select(ToDto));
         }
 
-        await using var dbCtx = await dbContextFactory.CreateDbContextAsync();
+        await using var dbCtx = await dbContextFactory.CreateDbContextAsync(ct);
         var allMonitorIds = await dbCtx.Monitors
             .AsNoTracking()
             .Where(m => m.TenantId != AnalyticsDbContext.SystemTenantGuid)
             .Select(m => new { m.Id, m.TenantId })
-            .ToListAsync();
+            .ToListAsync(ct);
         
         var dtos = new List<UptimeMonitorDto>();
         foreach (var m in allMonitorIds)
         {
-            var hydrated = await monitorService.GetMonitorAsync(m.TenantId, m.Id, period);
+            var hydrated = await monitorService.GetMonitorAsync(m.TenantId, m.Id, period, ct);
             dtos.Add(ToDto(hydrated));
         }
 
@@ -91,10 +90,10 @@ public class MonitorController(
     /// </summary>
     /// <param name="timeframe">The timeframe for calculating uptime percentage.</param>
     [HttpGet("unassigned")]
-    public async Task<ActionResult<IEnumerable<UptimeMonitorDto>>> GetUnassignedMonitors([FromQuery] Timeframe timeframe = Timeframe.T30)
+    public async Task<ActionResult<IEnumerable<UptimeMonitorDto>>> GetUnassignedMonitors([FromQuery] Timeframe timeframe = Timeframe.T30, [FromQuery] ComparisonType comparison = ComparisonType.Preceding, CancellationToken ct = default)
     {
-        var period = TimeframeResolver.Resolve(timeframe);
-        var monitors = await monitorService.GetMonitorsByTenantAsync(AnalyticsDbContext.SystemTenantGuid, period);
+        var period = TimeframeResolver.Resolve(timeframe, comparison);
+        var monitors = await monitorService.GetMonitorsByTenantAsync(AnalyticsDbContext.SystemTenantGuid, period, ct);
         return Ok(monitors.Select(ToDto));
     }
 
@@ -104,9 +103,10 @@ public class MonitorController(
     [HttpPost]
     public async Task<ActionResult<UptimeMonitorDto>> CreateMonitor(
         [FromQuery] Guid tenantId,
-        [FromBody] CreateMonitorRequestDto request)
+        [FromBody] CreateMonitorRequestDto request,
+        CancellationToken ct = default)
     {
-        var m = await monitorService.CreateMonitorAsync(tenantId, request.Name, request.Url, request.UptimeSla);
+        var m = await monitorService.CreateMonitorAsync(tenantId, request.Name, request.Url, request.UptimeSla, ct);
         return CreatedAtAction(nameof(GetMonitors), new { id = m.Id }, ToDto(m));
     }
 
@@ -114,9 +114,9 @@ public class MonitorController(
     /// Reassigns a monitor to a different tenant.
     /// </summary>
     [HttpPatch("{id:int}/assign/{tenantId:guid}")]
-    public async Task<IActionResult> AssignMonitor(int id, Guid tenantId)
+    public async Task<IActionResult> AssignMonitor(int id, Guid tenantId, CancellationToken ct = default)
     {
-        await monitorService.AssignMonitorAsync(id, tenantId);
+        await monitorService.AssignMonitorAsync(id, tenantId, ct);
         return Ok();
     }
 
@@ -124,9 +124,9 @@ public class MonitorController(
     /// Moves a monitor to the unassigned (system) tenant.
     /// </summary>
     [HttpPatch("{id:int}/unassign")]
-    public async Task<IActionResult> UnassignMonitor(int id)
+    public async Task<IActionResult> UnassignMonitor(int id, CancellationToken ct = default)
     {
-        await monitorService.AssignMonitorAsync(id, AnalyticsDbContext.SystemTenantGuid);
+        await monitorService.AssignMonitorAsync(id, AnalyticsDbContext.SystemTenantGuid, ct);
         return Ok();
     }
 
@@ -134,9 +134,9 @@ public class MonitorController(
     /// Pauses monitoring for a specific monitor in UptimeRobot.
     /// </summary>
     [HttpPost("{id:int}/pause")]
-    public async Task<IActionResult> PauseMonitor(int id)
+    public async Task<IActionResult> PauseMonitor(int id, CancellationToken ct = default)
     {
-        await monitorService.PauseMonitorAsync(id);
+        await monitorService.PauseMonitorAsync(id, ct);
         return Ok();
     }
 
@@ -144,9 +144,9 @@ public class MonitorController(
     /// Resumes monitoring for a specific monitor in UptimeRobot.
     /// </summary>
     [HttpPost("{id:int}/start")]
-    public async Task<IActionResult> StartMonitor(int id)
+    public async Task<IActionResult> StartMonitor(int id, CancellationToken ct = default)
     {
-        await monitorService.StartMonitorAsync(id);
+        await monitorService.StartMonitorAsync(id, ct);
         return Ok();
     }
 
@@ -154,17 +154,17 @@ public class MonitorController(
     /// Deletes a monitor from both the system and UptimeRobot.
     /// </summary>
     [HttpDelete("{id:int}")]
-    public async Task<IActionResult> DeleteMonitor(int id, [FromQuery] Guid? tenantId)
+    public async Task<IActionResult> DeleteMonitor(int id, [FromQuery] Guid? tenantId, CancellationToken ct = default)
     {
         if (!tenantId.HasValue)
         {
-            await using var db = await dbContextFactory.CreateDbContextAsync();
-            tenantId = await db.Monitors.Where(m => m.Id == id).Select(m => (Guid?)m.TenantId).SingleOrDefaultAsync();
+            await using var db = await dbContextFactory.CreateDbContextAsync(ct);
+            tenantId = await db.Monitors.Where(m => m.Id == id).Select(m => (Guid?)m.TenantId).SingleOrDefaultAsync(ct);
         }
 
         if (tenantId == null) return NotFound();
 
-        await monitorService.DeleteMonitorAsync(tenantId.Value, id);
+        await monitorService.DeleteMonitorAsync(tenantId.Value, id, ct);
         return NoContent();
     }
 
@@ -176,17 +176,18 @@ public class MonitorController(
         int id,
         [FromQuery] DateTimeOffset from,
         [FromQuery] DateTimeOffset to,
-        [FromQuery] Guid? tenantId = null)
+        [FromQuery] Guid? tenantId = null,
+        CancellationToken ct = default)
     {
         if (!tenantId.HasValue)
         {
-             await using var db = await dbContextFactory.CreateDbContextAsync();
-             tenantId = await db.Monitors.Where(m => m.Id == id).Select(m => (Guid?)m.TenantId).SingleOrDefaultAsync();
+             await using var db = await dbContextFactory.CreateDbContextAsync(ct);
+             tenantId = await db.Monitors.Where(m => m.Id == id).Select(m => (Guid?)m.TenantId).SingleOrDefaultAsync(ct);
         }
 
         if (tenantId == null) return NotFound();
 
-        var metrics = await monitorService.GetAggregatedLatencyAsync(tenantId.Value, id, from, to);
+        var metrics = await monitorService.GetAggregatedLatencyAsync(tenantId.Value, id, from, to, ct);
         return Ok(metrics);
     }
 
@@ -194,15 +195,15 @@ public class MonitorController(
     /// Updates monitor properties, such as SLA.
     /// </summary>
     [HttpPatch("{id:int}")]
-    public async Task<ActionResult<UptimeMonitorDto>> UpdateMonitor(int id, [FromBody] UpdateMonitorRequestDto request)
+    public async Task<ActionResult<UptimeMonitorDto>> UpdateMonitor(int id, [FromBody] UpdateMonitorRequestDto request, CancellationToken ct = default)
     {
-        await monitorService.UpdateMonitorSlaAsync(id, request.Sla);
+        await monitorService.UpdateMonitorSlaAsync(id, request.Sla, ct);
         
-        await using var db = await dbContextFactory.CreateDbContextAsync();
-        var tenantId = await db.Monitors.Where(m => m.Id == id).Select(m => (Guid?)m.TenantId).SingleOrDefaultAsync();
+        await using var db = await dbContextFactory.CreateDbContextAsync(ct);
+        var tenantId = await db.Monitors.Where(m => m.Id == id).Select(m => (Guid?)m.TenantId).SingleOrDefaultAsync(ct);
         if (tenantId == null) return NotFound();
 
-        var m = await monitorService.GetMonitorAsync(tenantId.Value, id, TimeframeResolver.Resolve(Timeframe.T30));
+        var m = await monitorService.GetMonitorAsync(tenantId.Value, id, TimeframeResolver.Resolve(Timeframe.T30), ct);
         return Ok(ToDto(m));
     }
 

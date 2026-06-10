@@ -34,9 +34,9 @@ interface Props {
 export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe, onBack }: Props) {
   const kpiQuery = useGlobalKpis(timeframe, tenantId);
   const globalKpiQuery = useGlobalKpis(timeframe);
-  const accumulatedQuery = useAccumulatedRevenue(timeframe, tenantId);
+  const accumulatedQuery = useAccumulatedRevenue(timeframe, tenantId, 'YearOverYear');
   const densityQuery = useTransactionDensity(timeframe, tenantId);
-  const deltaQuery = useCumulativeGrowthDelta(timeframe, tenantId);
+  const deltaQuery = useCumulativeGrowthDelta(timeframe, tenantId, 'YearOverYear');
   const orderQuery = useOrderDistribution(timeframe, tenantId);
 
   const kpis = kpiQuery.data;

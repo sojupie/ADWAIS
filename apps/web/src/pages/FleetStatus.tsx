@@ -130,6 +130,7 @@ export function FleetStatus() {
                  points={vm.analyticsQuery.data?.latencyPoints || EMPTY_LATENCY}
                  title={`Latency: ${vm.activeScopeName}`}
                  isLoading={vm.analyticsQuery.isLoading}
+                 comparison="Preceding"
               />
           </div>
 

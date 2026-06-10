@@ -18,7 +18,7 @@ export function useFinancialViewModel() {
   const navigate = useNavigate({ from: '/financial' });
 
   const kpiQuery = useGlobalKpis(timeframe);
-  const velocityQuery = useAccumulatedRevenue(timeframe);
+  const velocityQuery = useAccumulatedRevenue(timeframe, undefined, 'YearOverYear');
   const extremesQuery = useGrowthExtremes(timeframe);
   const momentumQuery = useMomentum(timeframe);
   const efficiencyQuery = useRevenueEfficiency(timeframe);

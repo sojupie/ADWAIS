@@ -19,9 +19,9 @@ export function useFinancialViewModel() {
 
   const kpiQuery = useGlobalKpis(timeframe);
   const velocityQuery = useAccumulatedRevenue(timeframe, undefined, 'YearOverYear');
-  const extremesQuery = useGrowthExtremes(timeframe);
-  const momentumQuery = useMomentum(timeframe);
-  const efficiencyQuery = useRevenueEfficiency(timeframe);
+  const extremesQuery = useGrowthExtremes(timeframe, 'YearOverYear');
+  const momentumQuery = useMomentum(timeframe, 'YearOverYear');
+  const efficiencyQuery = useRevenueEfficiency(timeframe, 'YearOverYear');
   const anomalyQuery = useVolumeAnomaly(timeframe);
 
   const selectedTenantDetails = useMemo(() => {

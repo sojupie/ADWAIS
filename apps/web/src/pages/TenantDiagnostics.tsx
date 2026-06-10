@@ -111,6 +111,7 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe,
         <AccumulatedRevenueChart 
           points={accumulatedQuery.data || EMPTY_ACCUMULATED} 
           isLoading={accumulatedQuery.isLoading} 
+          comparison="YearOverYear"
           className="h-full min-h-87.5"
         />
         
@@ -123,6 +124,7 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe,
         <CumulativeGrowthDeltaChart 
           points={deltaQuery.data || EMPTY_DELTA} 
           isLoading={deltaQuery.isLoading} 
+          comparison="YearOverYear"
           className="h-full min-h-87.5"
         />
 

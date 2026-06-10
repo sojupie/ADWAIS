@@ -83,9 +83,9 @@ export function Financial() {
       <DashboardFlexRow weight={"flex-1"} gridCols={"2"}>
         <AccumulatedRevenueChart 
           points={vm.velocityQuery.data || EMPTY_VELOCITY}
-
           isLoading={vm.velocityQuery.isLoading} 
           isStale={vm.velocityQuery.isPlaceholderData}
+          comparison="YearOverYear"
           className="h-full min-h-87.5"
         />
 

@@ -2,6 +2,7 @@ import { useState, Fragment } from 'react';
 import type { TransactionDensityPointDto } from '@types';
 import { formatCurrency } from '@utils';
 import { ChartPanel } from '../common/charts/ChartPanel';
+import {EmptyState} from "../common/ui/EmptyState.tsx";
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -56,7 +57,7 @@ export function TransactionDensityChart({
       legend={<span className="text-xs font-bold text-slate-500 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded">30-Day Rolling Density</span>}
     >
       {isEmpty ? (
-        <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">No data available</span>
+        <EmptyState message={"No data available"} variant={"minimal"}/>
       ) : (
         <div className="flex-1 flex flex-col h-full w-full relative">
           

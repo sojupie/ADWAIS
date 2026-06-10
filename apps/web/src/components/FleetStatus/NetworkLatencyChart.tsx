@@ -60,6 +60,7 @@ const GraphTooltip = ({ active, payload, label }: GraphTooltipProps) => {
 };
 
 import { ChartSkeleton } from '../common/charts/ChartSkeleton';
+import { EmptyState } from '../common/ui/EmptyState';
 
 export function NetworkLatencyChart({ isLoading, points, title = "Network Latency", className }: { isLoading?: boolean; points: LatencyPoint[], title?: string, className?: string }) {
   if (isLoading) {
@@ -83,48 +84,52 @@ export function NetworkLatencyChart({ isLoading, points, title = "Network Latenc
         </div>
         
         <div className="flex-1 w-full min-h-0">
-          <ResponsiveContainer debounce={50} width="100%" height="100%">
-            <LineChart data={points} margin={{ top: 10, right: 20, left: -5, bottom: 10 }}>
-              <CartesianGrid vertical={false} stroke="var(--color-chart-grid)" strokeDasharray="3 3" />
-              <XAxis 
-                dataKey="label" 
-                fontSize={12} 
-                tick={{ fill: 'var(--color-chart-tick)', fontWeight: 700, fontFamily: 'Manrope, sans-serif' }} 
-                tickMargin={15} 
-                axisLine={false} 
-                tickLine={false} 
-              />
-              <YAxis 
-                fontSize={12} 
-                tick={{ fill: 'var(--color-chart-tick)', fontWeight: 700, fontFamily: 'Manrope, sans-serif' }} 
-                axisLine={false} 
-                tickLine={false}
-                tickFormatter={(v) => `${v}ms`}
-              />
-              <Tooltip content={<GraphTooltip />} />
-              <Line 
-                type="monotone" 
-                dataKey="previousAverage" 
-                name="Previous Period" 
-                stroke="var(--color-chart-prev-line)" 
-                strokeWidth={2} 
-                strokeDasharray="6 6" 
-                dot={false}
-                activeDot={false}
-                isAnimationActive={false}
-              />
-              <Line 
-                type="monotone" 
-                dataKey="average" 
-                name="Current Period" 
-                stroke="var(--color-brand-btn-primary)" 
-                strokeWidth={4} 
-                dot={false}
-                activeDot={{ r: 6, fill: 'var(--color-brand-btn-primary)', stroke: '#fff', strokeWidth: 3 }} 
-                isAnimationActive={false}
-              />
-            </LineChart>
-          </ResponsiveContainer>
+          {points.length === 0 ? (
+            <EmptyState message="No latency data available" variant="minimal" />
+          ) : (
+            <ResponsiveContainer width="100%" height="100%" debounce={100}>
+              <LineChart data={points} margin={{ top: 10, right: 20, left: -5, bottom: 10 }}>
+                <CartesianGrid vertical={false} stroke="var(--color-chart-grid)" strokeDasharray="3 3" />
+                <XAxis 
+                  dataKey="label" 
+                  fontSize={12} 
+                  tick={{ fill: 'var(--color-chart-tick)', fontWeight: 700, fontFamily: 'Manrope, sans-serif' }} 
+                  tickMargin={15} 
+                  axisLine={false} 
+                  tickLine={false} 
+                />
+                <YAxis 
+                  fontSize={12} 
+                  tick={{ fill: 'var(--color-chart-tick)', fontWeight: 700, fontFamily: 'Manrope, sans-serif' }} 
+                  axisLine={false} 
+                  tickLine={false}
+                  tickFormatter={(v) => `${v}ms`}
+                />
+                <Tooltip content={<GraphTooltip />} />
+                <Line 
+                  type="monotone" 
+                  dataKey="previousAverage" 
+                  name="Previous Period" 
+                  stroke="var(--color-chart-prev-line)" 
+                  strokeWidth={2} 
+                  strokeDasharray="6 6" 
+                  dot={false}
+                  activeDot={false}
+                  
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="average" 
+                  name="Current Period" 
+                  stroke="var(--color-brand-btn-primary)" 
+                  strokeWidth={4} 
+                  dot={false}
+                  activeDot={{ r: 6, fill: 'var(--color-brand-btn-primary)', stroke: '#fff', strokeWidth: 3 }} 
+                  
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
         </div>
       </div>
   );

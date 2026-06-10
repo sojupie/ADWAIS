@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { apiFetch } from '../apiClient';
 import type { 
   GlobalKpi, 
@@ -35,6 +35,7 @@ export function useGlobalKpis(timeframe: string, tenantId?: string | null) {
     queryKey: financialKeys.kpis(timeframe, tenantId),
     queryFn: () => apiFetch<GlobalKpi>(buildUrl('/api/financial/kpis', { timeframe, tenantId })),
     refetchInterval: REFETCH_INTERVAL,
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -43,6 +44,7 @@ export function useFinancialVelocity(timeframe: string, tenantId?: string | null
     queryKey: financialKeys.velocity(timeframe, tenantId),
     queryFn: () => apiFetch<FinancialVelocityPoint[]>(buildUrl('/api/financial/velocity', { timeframe, tenantId })),
     refetchInterval: REFETCH_INTERVAL,
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -51,6 +53,7 @@ export function useAccumulatedRevenue(timeframe: string, tenantId?: string) {
     queryKey: financialKeys.accumulatedRevenue(timeframe, tenantId),
     queryFn: () => apiFetch<AccumulatedRevenuePointDto[]>(buildUrl('/api/financial/accumulated-revenue', { timeframe, tenantId })),
     refetchInterval: REFETCH_INTERVAL,
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -59,6 +62,7 @@ export function useGrowthExtremes(timeframe: string) {
     queryKey: financialKeys.extremes(timeframe),
     queryFn: () => apiFetch<GrowthExtreme[]>(buildUrl('/api/financial/growth-extremes', { timeframe })),
     refetchInterval: REFETCH_INTERVAL,
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -67,6 +71,7 @@ export function useMomentum(timeframe: string) {
     queryKey: financialKeys.momentum(timeframe),
     queryFn: () => apiFetch<MomentumResponse>(buildUrl('/api/financial/momentum', { timeframe })),
     refetchInterval: REFETCH_INTERVAL,
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -75,6 +80,7 @@ export function useRevenueEfficiency(timeframe: string) {
     queryKey: financialKeys.revenueEfficiency(timeframe),
     queryFn: () => apiFetch<RevenueEfficiencyResponse>(buildUrl('/api/financial/revenue-efficiency', { timeframe })),
     refetchInterval: REFETCH_INTERVAL,
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -83,6 +89,7 @@ export function useVolumeAnomaly(timeframe: string) {
     queryKey: financialKeys.volumeAnomaly(timeframe),
     queryFn: () => apiFetch<VolumeAnomalyResponseDto[]>(buildUrl('/api/financial/volume-anomaly', { timeframe })),
     refetchInterval: REFETCH_INTERVAL,
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -92,6 +99,7 @@ export function useCumulativeGrowthDelta(timeframe: string, tenantId: string) {
     queryFn: () => apiFetch<CumulativeGrowthDeltaPoint[]>(buildUrl('/api/financial/cumulative-growth-delta', { timeframe, tenantId })),
     enabled: !!tenantId,
     refetchInterval: REFETCH_INTERVAL,
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -101,6 +109,7 @@ export function useOrderDistribution(timeframe: string, tenantId: string) {
     queryFn: () => apiFetch<OrderBin[]>(buildUrl('/api/financial/order-distribution', { timeframe, tenantId })),
     enabled: !!tenantId,
     refetchInterval: REFETCH_INTERVAL,
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -109,5 +118,6 @@ export function useTransactionDensity(timeframe: string, tenantId?: string | nul
     queryKey: financialKeys.transactionDensity(timeframe, tenantId),
     queryFn: () => apiFetch<TransactionDensityPointDto[]>(buildUrl('/api/financial/transaction-density', { timeframe, tenantId })),
     refetchInterval: REFETCH_INTERVAL,
+    placeholderData: keepPreviousData,
   });
 }

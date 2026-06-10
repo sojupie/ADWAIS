@@ -12,6 +12,7 @@ import {
 import type { RevenueEfficiencyResponse, RevenueEfficiencyTenant } from '@types';
 import { formatCompact, formatCurrency } from '@utils';
 import { ChartPanel } from '../common/charts/ChartPanel';
+import {EmptyState} from "../common/ui/EmptyState.tsx";
 
 const TYPE_COLORS: Record<string, string> = {
   'B2C': 'var(--color-chart-1)',
@@ -50,9 +51,9 @@ const CustomTooltip = ({ active, payload }: { isLoading?: boolean;  active?: boo
 };
 
 export function RevenueEfficiencyChart({
-  isLoading, response,
+  isLoading, isStale, response,
   onTenantSelect,
-  className }: { isLoading?: boolean; 
+  className }: { isLoading?: boolean; isStale?: boolean;
   response: RevenueEfficiencyResponse;
   onTenantSelect?: (tenantId: string) => void;
   className?: string;
@@ -60,16 +61,16 @@ export function RevenueEfficiencyChart({
   const isEmpty = !response || response.tenants.length === 0;
 
   return (
-    <ChartPanel isLoading={isLoading}
+    <ChartPanel isLoading={isLoading} isStale={isStale}
       title="Revenue Efficiency Matrix"
       className={className || "h-full"}
       bodyClassName={isEmpty ? 'flex items-center justify-center' : 'flex-1 min-h-0'}
       legend={<span className="text-xs font-bold text-slate-500 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded">Size = Growth Velocity</span>}
     >
       {isEmpty ? (
-        <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">No data available</span>
+        <EmptyState message={"No data available"} variant={"minimal"}/>
       ) : (
-        <ResponsiveContainer debounce={50} width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" debounce={100}>
           <ScatterChart margin={{ top: 10, right: 24, left: 12, bottom: 14 }}>
             <XAxis
               type="number"

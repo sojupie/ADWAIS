@@ -16,7 +16,7 @@ export function DashboardFlexRow({ children, weight = 'flex-1', gridCols = '1', 
     }[gridCols];
 
     return (
-        <section className={`${weight} grid ${gridClass} gap-4 ${className} min-h-0`}>
+        <section className={`${weight} grid ${gridClass} gap-4 lg:min-h-0 ${className}`}>
             {children}
         </section>
     )

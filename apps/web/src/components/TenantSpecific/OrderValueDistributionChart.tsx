@@ -49,7 +49,7 @@ export function OrderValueDistributionChart({ isLoading, bins, className }: { is
       className={className || ''}
       bodyClassName="w-full h-full flex flex-col flex-1 min-h-0"
     >
-      <ResponsiveContainer debounce={50} width="100%" height="100%">
+      <ResponsiveContainer width="100%" height="100%">
         <ComposedChart data={bins} margin={{ top: 16, right: 10, left: 8, bottom: 42 }}>
           <CartesianGrid stroke="var(--color-chart-grid)" strokeDasharray="3 4" vertical={false} />
           <XAxis
@@ -90,7 +90,7 @@ export function OrderValueDistributionChart({ isLoading, bins, className }: { is
             fillOpacity={0.6}
             radius={[4, 4, 0, 0]}
             maxBarSize={60}
-            isAnimationActive={false}
+            
           />
           
           <Line
@@ -102,7 +102,7 @@ export function OrderValueDistributionChart({ isLoading, bins, className }: { is
             strokeWidth={2.5}
             dot={false}
             activeDot={{ r: 4, fill: '#0d9488', stroke: '#fff', strokeWidth: 2 }}
-            isAnimationActive={false}
+            
           />
 
           <Line
@@ -114,7 +114,7 @@ export function OrderValueDistributionChart({ isLoading, bins, className }: { is
             strokeWidth={2}
             strokeDasharray="4 4"
             dot={false}
-            isAnimationActive={false}
+            
           />
 
           <ReferenceLine yAxisId="right" y={70} stroke="#ef4444" strokeDasharray="3 3" opacity={0.6} />

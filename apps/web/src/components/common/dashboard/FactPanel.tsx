@@ -1,4 +1,4 @@
-import { LoadingIcon } from '../ui/LoadingIcon';
+// import { LoadingIcon } from '../ui/LoadingIcon';
 
 type Extra =
     | 
@@ -41,19 +41,26 @@ export function FactPanel({ label, value, isLoading, valueColor, extra }: FactPa
     }
 
     return (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-3 flex flex-col justify-center min-h-[90px] transition-all hover:shadow-md animate-in fade-in duration-300">
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-3 flex flex-col justify-between min-h-[90px] transition-all hover:shadow-md animate-in fade-in duration-300">
             <h2 className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">{label}</h2>
-            <div className="flex items-baseline gap-2">
-                <span className={`text-4xl font-extrabold tracking-tight ${valueColorClass}`}>
-                    {isLoading ? <LoadingIcon /> : value}
-                </span>
-
-                {!isLoading && extraText !== '' && (
-                    <span className={`text-lg font-bold uppercase tracking-wider ${extraColor} ml-1`}>
-                        {extraText}
+            {isLoading ? (
+                <div className="flex items-center gap-2 mt-1 animate-pulse">
+                    <div className="h-8 w-24 bg-slate-200 rounded"></div>
+                    <div className="h-5 w-16 bg-slate-100 rounded"></div>
+                </div>
+            ) : (
+                <div className="flex items-baseline gap-2">
+                    <span className={`text-4xl font-extrabold tracking-tight ${valueColorClass}`}>
+                        {value}
                     </span>
-                )}
-            </div>
+
+                    {extraText !== '' && (
+                        <span className={`text-lg font-bold uppercase tracking-wider ${extraColor} ml-1`}>
+                            {extraText}
+                        </span>
+                    )}
+                </div>
+            )}
         </div>
     );
 }

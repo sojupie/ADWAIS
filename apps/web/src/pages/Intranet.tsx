@@ -3,11 +3,12 @@ import { GoLiveCalendar } from '../components/Intranet/GoLiveCalendar';
 import { SeoRssAggregator } from '../components/Intranet/SeoRssAggregator';
 import { AgencySocialWall } from '../components/Intranet/AgencySocialWall';
 import { OfficeContext } from '../components/Intranet/OfficeContext';
+import { DashboardLayout } from '../components/common/layout/DashboardLayout';
 
 export function Intranet() {
   return (
-    <div className="flex flex-col w-full flex-1 min-h-0 animate-in fade-in duration-500">
-      <div className="grid grid-cols-1 lg:grid-cols-3 lg:grid-rows-2 gap-6 flex-1 min-h-0">
+    <DashboardLayout>
+      <div className="grid grid-cols-1 lg:grid-cols-3 lg:grid-rows-2 gap-6 flex-1 min-h-0 animate-in fade-in duration-500">
         {/* Top row */}
         <div className="col-span-1 min-h-0 h-full flex flex-col [&>*]:flex-1 [&>*]:min-h-0">
           <OfficeContext />
@@ -30,6 +31,6 @@ export function Intranet() {
           <AgencySocialWall />
         </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 }

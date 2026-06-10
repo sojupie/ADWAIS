@@ -50,7 +50,7 @@ export function PortfolioRevenueShareTrajectoryChart({isLoading, tenantVelocity,
       className={className || ''}
       bodyClassName="w-full h-full flex flex-col flex-1 min-h-0"
     >
-      <ResponsiveContainer debounce={50} width="100%" height="100%">
+      <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={rows} margin={{ top: 8, right: 10, left: 8, bottom: 20 }}>
           <CartesianGrid stroke="var(--color-chart-grid)" strokeDasharray="3 4" vertical={false} />
           <XAxis
@@ -77,7 +77,7 @@ export function PortfolioRevenueShareTrajectoryChart({isLoading, tenantVelocity,
             fill="var(--color-brand-btn-primary)"
             fillOpacity={0.15}
             dot={false}
-            isAnimationActive={false}
+            
           />
         </AreaChart>
       </ResponsiveContainer>

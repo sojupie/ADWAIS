@@ -1,6 +1,7 @@
 import type { UptimeMonitorDto } from '@types';
 import { useMemo } from 'react';
 import { ChartPanel } from '../common/charts/ChartPanel';
+import {EmptyState} from "../common/ui/EmptyState.tsx";
 
 interface MonitorIssue {
   id: number;
@@ -74,7 +75,7 @@ export function SlaBreachWatchlist({ isLoading, monitors, onClearSelection }: { 
     <ChartPanel 
       isLoading={isLoading}
       title="SLA Breach Watchlist" 
-      className="flex-1 min-h-0 h-full"
+      className="flex-1 min-h-0 h-full max-h-[600px] xl:max-h-none"
       bodyClassName="h-full flex flex-col min-h-0"
       legend={
         <button 
@@ -88,9 +89,11 @@ export function SlaBreachWatchlist({ isLoading, monitors, onClearSelection }: { 
         </button>
       }
     >
-      <div className="flex-1 overflow-y-auto pr-1 min-h-0 custom-scrollbar grid grid-cols-1 xl:grid-cols-2 gap-2 content-start">
+      <div className="flex-1 overflow-y-auto pr-1 min-h-0 custom-scrollbar grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-2 content-start">
           {issues.length === 0 ? (
-            <div className="col-span-full flex items-center justify-center h-full text-xs font-bold text-slate-500 uppercase tracking-widest">Zero active breaches</div>
+            <div className="col-span-full h-full">
+                <EmptyState message={"No issues detected"} variant={"minimal"}/>
+            </div>
           ) : (
             issues.map(issue => (
               <div key={`watch-${issue.id}`} className="p-2 bg-slate-50 border border-slate-100 rounded-lg transition-all hover:border-slate-200 shadow-sm shrink-0 flex flex-col justify-between">

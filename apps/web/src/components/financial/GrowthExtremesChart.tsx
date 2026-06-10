@@ -56,7 +56,7 @@ export function GrowthExtremesChart({ isLoading, tenants, onTenantSelect }: { is
 
   return (
     <ChartPanel isLoading={isLoading} title="Growth Extremes (Relative & Absolute)" bodyClassName="extremes-chart">
-      <ResponsiveContainer debounce={50} width="100%" height={chartHeight}>
+      <ResponsiveContainer width="100%" height={chartHeight}>
         <BarChart
           data={tenants}
           layout="vertical"

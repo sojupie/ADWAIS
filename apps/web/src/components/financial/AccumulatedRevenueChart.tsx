@@ -2,9 +2,11 @@ import { ComposedChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Respons
 import type { AccumulatedRevenuePointDto } from '@types';
 import { ChartPanel } from '../common/charts/ChartPanel';
 import { formatCurrency } from '@utils';
+import { EmptyState } from '../common/ui/EmptyState';
 
 interface AccumulatedRevenueChartProps {
   isLoading?: boolean;
+  isStale?: boolean;
   points: AccumulatedRevenuePointDto[];
   className?: string;
 }
@@ -29,70 +31,74 @@ const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?:
   );
 };
 
-export function AccumulatedRevenueChart({ isLoading, points, className }: AccumulatedRevenueChartProps) {
+export function AccumulatedRevenueChart({ isLoading, isStale, points, className }: AccumulatedRevenueChartProps) {
   return (
-    <ChartPanel isLoading={isLoading} title="Revenue Performance" className={className}>
-      <ResponsiveContainer debounce={50} width="100%" height="100%">
-        <ComposedChart data={points} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-chart-grid)" />
-          <XAxis 
-            dataKey="label" 
-            axisLine={false} 
-            tickLine={false} 
-            tick={{ fill: 'var(--color-chart-tick)', fontSize: 12 }} 
-            minTickGap={30}
-          />
-          <YAxis 
-            yAxisId="left"
-            axisLine={false} 
-            tickLine={false} 
-            tick={{ fill: 'var(--color-chart-tick)', fontSize: 12 }}
-            tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
-          />
-          <YAxis 
-            yAxisId="right"
-            orientation="right"
-            axisLine={false} 
-            tickLine={false} 
-            tick={{ fill: 'var(--color-chart-tick)', fontSize: 12 }}
-            tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
-          />
-          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'var(--color-chart-grid)', opacity: 0.4 }} />
-          <Legend wrapperStyle={{ fontSize: 12, paddingTop: 10 }} />
-          
-          {/* Discrete Revenue (Bars) */}
-          <Bar 
-            yAxisId="left"
-            dataKey="currentRevenue" 
-            name="Current Revenue" 
-            fill="var(--color-brand-btn-primary)"
-            fillOpacity={0.25}
-            radius={[4, 4, 0, 0]} 
-            barSize={20}
-          />
+    <ChartPanel isLoading={isLoading} isStale={isStale} title="Revenue Performance" className={className} bodyClassName={points.length === 0 ? "flex items-center justify-center" : ""}>
+      {points.length === 0 ? (
+        <EmptyState message="No revenue data available" variant="minimal" />
+      ) : (
+        <ResponsiveContainer width="100%" height="100%" debounce={100}>
+          <ComposedChart data={points} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-chart-grid)" />
+            <XAxis 
+              dataKey="label" 
+              axisLine={false} 
+              tickLine={false} 
+              tick={{ fill: 'var(--color-chart-tick)', fontSize: 12 }} 
+              minTickGap={30}
+            />
+            <YAxis 
+              yAxisId="left"
+              axisLine={false} 
+              tickLine={false} 
+              tick={{ fill: 'var(--color-chart-tick)', fontSize: 12 }}
+              tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
+            />
+            <YAxis 
+              yAxisId="right"
+              orientation="right"
+              axisLine={false} 
+              tickLine={false} 
+              tick={{ fill: 'var(--color-chart-tick)', fontSize: 12 }}
+              tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
+            />
+            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'var(--color-chart-grid)', opacity: 0.4 }} />
+            <Legend wrapperStyle={{ fontSize: 12, paddingTop: 10 }} />
+            
+            {/* Discrete Revenue (Bars) */}
+            <Bar 
+              yAxisId="left"
+              dataKey="currentRevenue" 
+              name="Current Revenue" 
+              fill="var(--color-brand-btn-primary)"
+              fillOpacity={0.25}
+              radius={[4, 4, 0, 0]} 
+              barSize={20}
+            />
 
-          {/* Accumulated Revenue (Lines) */}
-          <Line 
-            yAxisId="right"
-            type="monotone" 
-            dataKey="previousAccumulated" 
-            name="Previous Accumulated"
-            stroke="var(--color-chart-tick)" 
-            strokeWidth={2}
-            strokeDasharray="4 4"
-            dot={false}
-          />
-          <Line 
-            yAxisId="right"
-            type="monotone" 
-            dataKey="currentAccumulated" 
-            name="Current Accumulated"
-            stroke="var(--color-brand-btn-primary)" 
-            strokeWidth={2}
-            dot={false}
-          />
-        </ComposedChart>
-      </ResponsiveContainer>
+            {/* Accumulated Revenue (Lines) */}
+            <Line 
+              yAxisId="right"
+              type="monotone" 
+              dataKey="previousAccumulated" 
+              name="Previous Accumulated"
+              stroke="var(--color-chart-tick)" 
+              strokeWidth={2}
+              strokeDasharray="4 4"
+              dot={false}
+            />
+            <Line 
+              yAxisId="right"
+              type="monotone" 
+              dataKey="currentAccumulated" 
+              name="Current Accumulated"
+              stroke="var(--color-brand-btn-primary)" 
+              strokeWidth={2}
+              dot={false}
+            />
+          </ComposedChart>
+        </ResponsiveContainer>
+      )}
     </ChartPanel>
   );
 }

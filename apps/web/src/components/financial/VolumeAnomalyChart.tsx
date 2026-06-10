@@ -12,6 +12,7 @@ import {
 import type { VolumeAnomalyResponseDto } from '@types';
 import { formatNumber } from '@utils';
 import { ChartPanel } from '../common/charts/ChartPanel';
+import {EmptyState} from "../common/ui/EmptyState.tsx";
 
 const CustomTooltip = ({ active, payload }: { isLoading?: boolean;  active?: boolean; payload?: { payload: unknown }[] }) => {
   if (!active || !payload?.length) return null;
@@ -44,9 +45,9 @@ const CustomTooltip = ({ active, payload }: { isLoading?: boolean;  active?: boo
 };
 
 export function VolumeAnomalyChart({
-  isLoading, entries,
+  isLoading, isStale, entries,
   onTenantSelect,
-  className }: { isLoading?: boolean; 
+  className }: { isLoading?: boolean; isStale?: boolean;
   entries: VolumeAnomalyResponseDto[];
   onTenantSelect?: (tenantId: string) => void;
   className?: string;
@@ -57,16 +58,16 @@ export function VolumeAnomalyChart({
   const sortedEntries = [...entries].sort((a, b) => b.volumeDeviationPercentage - a.volumeDeviationPercentage);
 
   return (
-    <ChartPanel isLoading={isLoading}
+    <ChartPanel isLoading={isLoading} isStale={isStale}
       title="Volume Anomaly Monitor"
       className={className || "h-full"}
       bodyClassName={isEmpty ? 'flex items-center justify-center' : 'flex-1 min-h-0'}
       legend={<span className="text-xs font-bold text-slate-500 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded">Deviation from baseline</span>}
     >
       {isEmpty ? (
-        <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">No data available</span>
+        <EmptyState message={"No data available"} variant={"minimal"}/>
       ) : (
-        <ResponsiveContainer debounce={50} width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" debounce={100}>
           <BarChart data={sortedEntries} margin={{ top: 10, right: 24, left: 12, bottom: 14 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-chart-grid)" />
             <XAxis

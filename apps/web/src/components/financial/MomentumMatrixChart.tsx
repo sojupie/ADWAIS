@@ -13,6 +13,7 @@ import {
 import type { MomentumResponse, MomentumTenant } from '@types';
 import { formatCompact } from '@utils';
 import { ChartPanel } from '../common/charts/ChartPanel';
+import {EmptyState} from "../common/ui/EmptyState.tsx";
 
 
 
@@ -55,7 +56,7 @@ function MomentumScatterPlot({ points, medianBaselineRevenue, globalGrowthPercen
 points: MomentumTenant[]; medianBaselineRevenue: number; globalGrowthPercentage: number; onTenantSelect?: (tenantId: string) => void;
 }) {
   return (
-    <ResponsiveContainer debounce={50} width="100%" height="100%">
+    <ResponsiveContainer width="100%" height="100%" debounce={100}>
       <ScatterChart margin={{ top: 10, right: 24, left: 12, bottom: 14 }}>
         <CartesianGrid stroke="var(--color-chart-grid)" strokeDasharray="3 4" />
         <XAxis
@@ -123,21 +124,21 @@ points: MomentumTenant[]; medianBaselineRevenue: number; globalGrowthPercentage:
   );
 }
 
-export function MomentumMatrixChart({ isLoading, momentum, onTenantSelect, className }: { isLoading?: boolean;  
+export function MomentumMatrixChart({ isLoading, isStale, momentum, onTenantSelect, className }: { isLoading?: boolean; isStale?: boolean;  
 momentum: MomentumResponse; onTenantSelect?: (tenantId: string) => void; className?: string; })
 {
   const points = momentum.tenants;
   const isEmpty = points.length === 0;
 
   return (
-    <ChartPanel isLoading={isLoading}
+    <ChartPanel isLoading={isLoading} isStale={isStale}
       title="Momentum Matrix"
       className={className || "h-full"}
       bodyClassName={isEmpty ? 'flex items-center justify-center' : 'flex-1 min-h-0'}
       legend={<span className="text-xs font-bold text-slate-500 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded">Size = Total Rev Contribution</span>}
     >
       {isEmpty ? (
-        <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">No previous-period baseline data</span>
+        <EmptyState message={"No previous-period baseline data"} variant={"minimal"}/>
       ) : (
         <MomentumScatterPlot
           points={points}

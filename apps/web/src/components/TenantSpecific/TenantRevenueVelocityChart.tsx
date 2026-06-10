@@ -50,7 +50,7 @@ export function TenantRevenueVelocityChart({ isLoading, points, className }: { i
         </div>
       }
     >
-      <ResponsiveContainer debounce={50} width="100%" height="100%">
+      <ResponsiveContainer width="100%" height="100%">
         <LineChart data={points} margin={{ top: 8, right: 10, left: 8, bottom: 20 }}>
           <CartesianGrid stroke="var(--color-chart-grid)" strokeDasharray="3 4" vertical={false} />
           <XAxis
@@ -75,7 +75,7 @@ export function TenantRevenueVelocityChart({ isLoading, points, className }: { i
             strokeWidth={2}
             strokeDasharray="5 5"
             dot={false}
-            isAnimationActive={false}
+            
           />
           <Line
             type="monotone"
@@ -84,7 +84,7 @@ export function TenantRevenueVelocityChart({ isLoading, points, className }: { i
             strokeWidth={2.4}
             dot={false}
             activeDot={{ r: 4, strokeWidth: 0 }}
-            isAnimationActive={false}
+            
           />
         </LineChart>
       </ResponsiveContainer>

@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { apiFetch } from '../apiClient';
 import type { UptimeMonitorDto, MonitorAnalyticsDto } from '@types';
 import {buildUrl} from "./useBuildUrl.ts";
@@ -25,5 +25,6 @@ export function useFleetAnalytics(timeframe: string, tenantId?: string | null, m
     queryKey: fleetKeys.analytics(timeframe, tenantId, monitorId),
     queryFn: () => apiFetch<MonitorAnalyticsDto>(buildUrl('/api/monitors/analytics', { timeframe, tenantId, monitorId })),
     refetchInterval: REFETCH_INTERVAL,
+    placeholderData: keepPreviousData,
   });
 }

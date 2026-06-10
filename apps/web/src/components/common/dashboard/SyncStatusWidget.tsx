@@ -47,6 +47,7 @@ export function SyncStatusWidget() {
   const isFetchingCount = useIsFetching({ queryKey: isFinancial ? ['financial'] : isFleet ? ['fleet'] : ['disabled-key'] });
   const isFetching = isFetchingCount > 0;
   
+  const [isHovered, setIsHovered] = useState(false);
   const [dashboardSyncTime, setDashboardSyncTime] = useState<number | null>(null);
   const [countdown, setCountdown] = useState(60);
 
@@ -91,13 +92,20 @@ export function SyncStatusWidget() {
 
   const isDrillDown = !!tenantId;
   const syncError = isDrillDown ? tenant?.lastSyncError : health?.sync?.globalSyncError;
+  const strokeColor = syncError ? 'text-red-500' : 'text-[#51B5B9]';
 
   const progress = ((60 - countdown) / 60) * 100;
 
   if (!isFinancial && !isFleet) return null;
 
   return (
-    <div className="flex items-center gap-2 sm:gap-4 px-2 sm:px-3 py-2 border rounded-sm shadow-sm bg-brand-bg-secondary border-brand-bg-secondary/20 w-full md:w-auto max-w-100 md:max-w-none">
+    <div 
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className={`flex items-center gap-2 sm:gap-4 px-2 sm:px-3 py-2 border rounded-sm shadow-sm bg-brand-bg-secondary border-brand-bg-secondary/20 w-full md:w-auto max-w-100 md:max-w-none transition-all duration-350 ease-out
+        ${isHovered ? 'xl:w-auto xl:opacity-100 xl:shadow-lg' : 'xl:w-[46px] xl:opacity-40 xl:overflow-hidden xl:px-2'}
+      `}
+    >
       {/* Timer Wheel */}
       <div className="relative w-6 h-6 shrink-0">
         <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
@@ -110,7 +118,7 @@ export function SyncStatusWidget() {
             strokeDasharray="100, 100"
             strokeDashoffset={100 - progress}
             strokeLinecap="round"
-            className="text-[#51B5B9] transition-all duration-1000 ease-linear"
+            className={`${strokeColor} transition-all duration-1000 ease-linear`}
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-white/60 font-mono">

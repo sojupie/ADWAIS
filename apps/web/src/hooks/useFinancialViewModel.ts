@@ -22,7 +22,7 @@ export function useFinancialViewModel() {
   const extremesQuery = useGrowthExtremes(timeframe, 'YearOverYear');
   const momentumQuery = useMomentum(timeframe, 'YearOverYear');
   const efficiencyQuery = useRevenueEfficiency(timeframe, 'YearOverYear');
-  const anomalyQuery = useVolumeAnomaly(timeframe);
+  const anomalyQuery = useVolumeAnomaly(timeframe, 'YearOverYear');
 
   const selectedTenantDetails = useMemo(() => {
     const efficiencyTenants = efficiencyQuery.data?.tenants;

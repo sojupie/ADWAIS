@@ -10,7 +10,7 @@ import {
   ResponsiveContainer,
   ReferenceLine
 } from 'recharts';
-import type { VolumeAnomalyResponseDto } from '@types';
+import type { VolumeAnomalyResponseDto, ComparisonPeriod } from '@types';
 import { formatNumber } from '@utils';
 import { ChartPanel } from '../common/charts/ChartPanel';
 import {EmptyState} from "../common/ui/EmptyState.tsx";
@@ -47,9 +47,11 @@ const CustomTooltip = ({ active, payload }: { isLoading?: boolean;  active?: boo
 
 export const VolumeAnomalyChart = memo(function VolumeAnomalyChart({
   isLoading, isStale, entries,
+  comparison,
   onTenantSelect,
   className }: { isLoading?: boolean; isStale?: boolean;
   entries: VolumeAnomalyResponseDto[];
+  comparison?: ComparisonPeriod;
   onTenantSelect?: (tenantId: string) => void;
   className?: string;
 }) {
@@ -61,6 +63,7 @@ export const VolumeAnomalyChart = memo(function VolumeAnomalyChart({
   return (
     <ChartPanel isLoading={isLoading} isStale={isStale}
       title="Volume Anomaly Monitor"
+      subtitle={comparison === 'YearOverYear' ? 'vs. Same Period Last Year' : 'vs. Preceding Period'}
       className={className || "h-full"}
       bodyClassName={isEmpty ? 'flex items-center justify-center' : 'flex-1 min-h-0'}
       legend={<span className="text-xs font-bold text-slate-500 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded">Deviation from baseline</span>}

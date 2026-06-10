@@ -91,7 +91,7 @@ export function Financial() {
 
         <VolumeAnomalyChart 
           entries={vm.anomalyQuery.data || EMPTY_ANOMALY}
-
+          comparison="YearOverYear"
           onTenantSelect={vm.handleTenantSelect} 
           isLoading={vm.anomalyQuery.isLoading} 
           isStale={vm.anomalyQuery.isPlaceholderData}
@@ -100,7 +100,7 @@ export function Financial() {
 
         <RevenueEfficiencyChart 
           response={vm.efficiencyQuery.data || EMPTY_EFFICIENCY}
-
+          comparison="YearOverYear"
           onTenantSelect={vm.handleTenantSelect} 
           isLoading={vm.efficiencyQuery.isLoading} 
           isStale={vm.efficiencyQuery.isPlaceholderData}
@@ -109,7 +109,7 @@ export function Financial() {
 
         <MomentumMatrixChart 
           momentum={vm.momentumQuery.data || EMPTY_MOMENTUM}
-
+          comparison="YearOverYear"
           onTenantSelect={vm.handleTenantSelect} 
           isLoading={vm.momentumQuery.isLoading} 
           isStale={vm.momentumQuery.isPlaceholderData}

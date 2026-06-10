@@ -4,6 +4,7 @@ import { useSearch, useParams, useRouterState } from '@tanstack/react-router';
 import { apiFetch } from '../../../apiClient';
 import type { SystemHealthDto, TenantResponseDto } from '@types';
 import { RefreshCw, AlertCircle } from 'lucide-react';
+import { useKiosk } from './KioskContext';
 
 function timeAgo(date: string | number | null | undefined): string {
   if (!date) return 'Never';
@@ -22,6 +23,8 @@ export function SyncStatusWidget() {
   const search = useSearch({ strict: false }) as { tenantId?: string };
   const params = useParams({ strict: false }) as { tenantId?: string };
   const matches = useRouterState({ select: (s) => s.matches });
+  const { mode } = useKiosk();
+  const isKiosk = mode === 'kiosk';
   
   const isFinancial = matches.some((m) => m.routeId === '/financial' || m.pathname.includes('/financial'));
   const isFleet = matches.some((m) => m.routeId === '/fleet-status' || m.pathname.includes('/fleet-status'));
@@ -95,6 +98,7 @@ export function SyncStatusWidget() {
   const strokeColor = syncError ? 'text-red-500' : 'text-[#51B5B9]';
 
   const progress = ((60 - countdown) / 60) * 100;
+  const isExpanded = !isKiosk || isHovered;
 
   if (!isFinancial && !isFleet) return null;
 
@@ -102,8 +106,8 @@ export function SyncStatusWidget() {
     <div 
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`flex items-center gap-2 sm:gap-4 px-2 sm:px-3 py-2 border rounded-sm shadow-sm bg-brand-bg-secondary border-brand-bg-secondary/20 w-full md:w-auto max-w-100 md:max-w-none transition-all duration-350 ease-out
-        ${isHovered ? 'xl:w-auto xl:opacity-100 xl:shadow-lg' : 'xl:w-[46px] xl:opacity-40 xl:overflow-hidden xl:px-2'}
+      className={`flex items-center gap-2 sm:gap-4 px-2 sm:px-3 h-[46px] border rounded-sm shadow-sm bg-brand-bg-secondary border-brand-bg-secondary/20 w-full md:w-auto max-w-100 md:max-w-none transition-all duration-350 ease-out
+        ${isExpanded ? 'xl:w-auto xl:opacity-100 xl:shadow-lg' : 'xl:w-[46px] xl:opacity-40 xl:overflow-hidden xl:px-2'}
       `}
     >
       {/* Timer Wheel */}

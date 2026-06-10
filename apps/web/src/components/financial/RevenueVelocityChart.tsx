@@ -8,15 +8,16 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import type { FinancialVelocityPoint } from '@types';
+import type { FinancialVelocityPoint, ComparisonPeriod } from '@types';
 import { formatCompact, formatChartLabel, inferBinSize } from '@utils';
 import { ChartPanel } from '../common/charts/ChartPanel';
 
-export const RevenueVelocityChart = memo(function RevenueVelocityChart({ isLoading, points, className }: { isLoading?: boolean;  points: FinancialVelocityPoint[], className?: string })
+export const RevenueVelocityChart = memo(function RevenueVelocityChart({ isLoading, points, comparison, className }: { isLoading?: boolean;  points: FinancialVelocityPoint[], comparison?: ComparisonPeriod, className?: string })
 {
   return (
       <ChartPanel isLoading={isLoading}
           title="Revenue Velocity"
+          subtitle={comparison === 'YearOverYear' ? 'vs. Same Period Last Year' : 'vs. Preceding Period'}
           className={className}
           legend={
             <div className="flex items-center gap-6 text-xs font-bold text-slate-500 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded">

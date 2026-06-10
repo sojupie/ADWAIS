@@ -4,6 +4,7 @@ import { Loader2 } from 'lucide-react';
 
 interface ChartPanelProps {
   title: string;
+  subtitle?: string;
   legend?: ReactNode;
   bodyClassName?: string;
   className?: string;
@@ -12,7 +13,7 @@ interface ChartPanelProps {
   children: ReactNode;
 }
 
-export function ChartPanel({ title, legend, bodyClassName = '', className = '', isLoading = false, isStale = false, children }: ChartPanelProps) {
+export function ChartPanel({ title, subtitle, legend, bodyClassName = '', className = '', isLoading = false, isStale = false, children }: ChartPanelProps) {
   return (
       <div className={`bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-4 flex flex-col h-full min-h-0 relative overflow-hidden ${className}`} style={{ contain: 'layout style paint', contentVisibility: 'auto', containIntrinsicSize: 'auto 350px' }}>
         {isStale && !isLoading && (
@@ -21,10 +22,17 @@ export function ChartPanel({ title, legend, bodyClassName = '', className = '', 
                <span className="text-[10px] font-bold text-brand-accent uppercase tracking-widest mt-2 bg-white/80 px-2 py-1 rounded">Updating...</span>
             </div>
         )}
-        <div className="flex justify-between items-center mb-2 z-10">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">
-                {title}
-            </span>
+        <div className="flex justify-between items-start mb-2 z-10">
+            <div className="flex flex-col gap-0.5">
+                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">
+                    {title}
+                </span>
+                {subtitle && (
+                    <span className="text-[10px] font-medium text-slate-400">
+                        {subtitle}
+                    </span>
+                )}
+            </div>
             {legend}
         </div>
         <div className={`flex-1 min-h-0 w-full h-full flex flex-col z-10 ${bodyClassName}`}>

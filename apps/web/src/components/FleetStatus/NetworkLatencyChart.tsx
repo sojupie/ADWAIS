@@ -6,9 +6,9 @@ import {
   XAxis,
   YAxis,
   Line,
-  LineChart,
+  LineChart
 } from 'recharts';
-import type { LatencyPoint } from '@types';
+import type { LatencyPoint, ComparisonPeriod } from '@types';
 import { formatChartLabel, inferBinSize } from '@utils';
 
 function formatLatency(value: number): string {
@@ -56,7 +56,19 @@ const GraphTooltip = ({ active, payload, label }: GraphTooltipProps) => {
 import { ChartSkeleton } from '../common/charts/ChartSkeleton';
 import { EmptyState } from '../common/ui/EmptyState';
 
-export const NetworkLatencyChart = memo(function NetworkLatencyChart({ isLoading, points, title = "Network Latency", className }: { isLoading?: boolean; points: LatencyPoint[], title?: string, className?: string }) {
+export const NetworkLatencyChart = memo(function NetworkLatencyChart({ 
+  isLoading, 
+  points, 
+  title = "Network Latency", 
+  className,
+  comparison = 'Preceding'
+}: { 
+  isLoading?: boolean; 
+  points: LatencyPoint[]; 
+  title?: string; 
+  className?: string;
+  comparison?: ComparisonPeriod;
+}) {
   const isHourly = points.length > 0 && points.length <= 24;
   const binSize = inferBinSize(points.map(p => p.timestamp), isHourly);
   const chartData = points.map((p, i) => ({
@@ -64,14 +76,20 @@ export const NetworkLatencyChart = memo(function NetworkLatencyChart({ isLoading
     label: formatChartLabel(p.timestamp, binSize, i)
   }));
 
+
   if (isLoading) {
     return <ChartSkeleton />;
   }
 
   return (
       <div className={`w-full h-full flex-1 min-h-0 flex flex-col ${className || ''}`}>
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-sm font-black text-slate-500 uppercase tracking-[0.15em]">{title}</h2>
+        <div className="flex justify-between items-start mb-8">
+          <div className="flex flex-col gap-0.5">
+            <h2 className="text-sm font-black text-slate-500 uppercase tracking-[0.15em]">{title}</h2>
+            <span className="text-[10px] font-medium text-slate-400">
+              {comparison === 'YearOverYear' ? 'vs. Same Period Last Year' : 'vs. Preceding Period'}
+            </span>
+          </div>
           <div className="flex gap-6 text-[11px] font-black text-slate-500 uppercase tracking-widest bg-slate-50 px-4 py-2 rounded-full border border-slate-100">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-brand-btn-primary"></div>
@@ -92,7 +110,7 @@ export const NetworkLatencyChart = memo(function NetworkLatencyChart({ isLoading
               <LineChart data={chartData} margin={{ top: 10, right: 20, left: -5, bottom: 10 }}>
                 <CartesianGrid vertical={false} stroke="var(--color-chart-grid)" strokeDasharray="3 3" />
                 <XAxis 
-                   dataKey="label" 
+                  dataKey="label" 
                   fontSize={12} 
                   tick={{ fill: 'var(--color-chart-tick)', fontWeight: 700, fontFamily: 'Manrope, sans-serif' }} 
                   tickMargin={15} 

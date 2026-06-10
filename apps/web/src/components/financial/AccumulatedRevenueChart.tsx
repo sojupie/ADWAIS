@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { ComposedChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import type { AccumulatedRevenuePointDto } from '@types';
+import type { AccumulatedRevenuePointDto, ComparisonPeriod } from '@types';
 import { ChartPanel } from '../common/charts/ChartPanel';
 import { formatCurrency, formatChartLabel, inferBinSize } from '@utils';
 import { EmptyState } from '../common/ui/EmptyState';
@@ -9,6 +9,7 @@ interface AccumulatedRevenueChartProps {
   isLoading?: boolean;
   isStale?: boolean;
   points: AccumulatedRevenuePointDto[];
+  comparison?: ComparisonPeriod;
   className?: string;
 }
 
@@ -32,7 +33,7 @@ const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?:
   );
 };
 
-export const AccumulatedRevenueChart = memo(function AccumulatedRevenueChart({ isLoading, isStale, points, className }: AccumulatedRevenueChartProps) {
+export const AccumulatedRevenueChart = memo(function AccumulatedRevenueChart({ isLoading, isStale, points, comparison, className }: AccumulatedRevenueChartProps) {
   const binSize = inferBinSize(points.map(p => p.timestamp), false);
   const chartData = points.map((p, i) => ({
     ...p,
@@ -40,7 +41,7 @@ export const AccumulatedRevenueChart = memo(function AccumulatedRevenueChart({ i
   }));
 
   return (
-    <ChartPanel isLoading={isLoading} isStale={isStale} title="Revenue Performance" className={className} bodyClassName={points.length === 0 ? "flex items-center justify-center" : ""}>
+    <ChartPanel isLoading={isLoading} isStale={isStale} title="Revenue Performance" subtitle={comparison === 'YearOverYear' ? 'vs. Same Period Last Year' : 'vs. Preceding Period'} className={className} bodyClassName={points.length === 0 ? "flex items-center justify-center" : ""}>
       {points.length === 0 ? (
         <EmptyState message="No revenue data available" variant="minimal" />
       ) : (

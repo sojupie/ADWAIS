@@ -1,3 +1,5 @@
+export type ComparisonPeriod = 'Preceding' | 'YearOverYear';
+
 export interface GlobalKpi {
   currentRevenue: number;
   previousRevenue: number;

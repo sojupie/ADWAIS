@@ -3,7 +3,6 @@ using System;
 namespace Adwais.Api.DTOs.Monitoring;
 
 public record LatencyPointResponseDto(
-    string Label,
     DateTimeOffset Timestamp,
     double Average,
     double PreviousAverage,

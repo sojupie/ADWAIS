@@ -8,7 +8,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import type { CumulativeGrowthDeltaPoint } from '@types';
+import type { CumulativeGrowthDeltaPoint, ComparisonPeriod } from '@types';
 import { formatCompact, formatChartLabel, inferBinSize } from '@utils';
 import { ChartPanel } from '../common/charts/ChartPanel';
 
@@ -40,7 +40,7 @@ const CustomTooltip = ({ active, payload, label }: { isLoading?: boolean;  activ
   );
 };
 
-export const CumulativeGrowthDeltaChart = memo(function CumulativeGrowthDeltaChart({ isLoading, points, className }: { isLoading?: boolean;  points: CumulativeGrowthDeltaPoint[], className?: string }) {
+export const CumulativeGrowthDeltaChart = memo(function CumulativeGrowthDeltaChart({ isLoading, points, comparison, className }: { isLoading?: boolean;  points: CumulativeGrowthDeltaPoint[], comparison?: ComparisonPeriod, className?: string }) {
   const isHourly = points.length > 0 && points.length <= 24;
   const binSize = inferBinSize(points.map(p => p.timestamp), isHourly);
   const chartData = points.map((p, i) => ({
@@ -51,6 +51,7 @@ export const CumulativeGrowthDeltaChart = memo(function CumulativeGrowthDeltaCha
   return (
     <ChartPanel isLoading={isLoading}
       title="Cumulative Growth Delta (Absolute)"
+      subtitle={comparison === 'YearOverYear' ? 'vs. Same Period Last Year' : 'vs. Preceding Period'}
       className={className || ''}
       bodyClassName="w-full h-full flex flex-col flex-1 min-h-0"
     >

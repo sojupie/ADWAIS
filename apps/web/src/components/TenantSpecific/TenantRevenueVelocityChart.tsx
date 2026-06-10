@@ -8,7 +8,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import type { FinancialVelocityPoint } from '@types';
+import type { FinancialVelocityPoint, ComparisonPeriod } from '@types';
 import { formatCompact, formatChartLabel, inferBinSize } from '@utils';
 import { ChartPanel } from '../common/charts/ChartPanel';
 
@@ -32,7 +32,7 @@ const CustomTooltip = ({ active, payload, label }: { isLoading?: boolean;  activ
   );
 };
 
-export const TenantRevenueVelocityChart = memo(function TenantRevenueVelocityChart({ isLoading, points, className }: { isLoading?: boolean;  points: FinancialVelocityPoint[], className?: string }) {
+export const TenantRevenueVelocityChart = memo(function TenantRevenueVelocityChart({ isLoading, points, comparison, className }: { isLoading?: boolean;  points: FinancialVelocityPoint[], comparison?: ComparisonPeriod, className?: string }) {
   const isHourly = points.length > 0 && points.length <= 24;
   const binSize = inferBinSize(points.map(p => p.timestamp), isHourly);
   const chartData = points.map((p, i) => ({
@@ -43,6 +43,7 @@ export const TenantRevenueVelocityChart = memo(function TenantRevenueVelocityCha
   return (
     <ChartPanel isLoading={isLoading}
       title="Revenue Velocity Over Time"
+      subtitle={comparison === 'YearOverYear' ? 'vs. Same Period Last Year' : 'vs. Preceding Period'}
       className={className || ''}
       bodyClassName="w-full h-full flex flex-col flex-1 min-h-0"
       legend={

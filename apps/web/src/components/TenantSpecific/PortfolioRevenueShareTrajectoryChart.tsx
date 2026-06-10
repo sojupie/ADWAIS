@@ -13,7 +13,7 @@ import { formatChartLabel, inferBinSize } from '@utils';
 import { ChartPanel } from '../common/charts/ChartPanel';
 
 interface ShareTrajectoryRow {
-  label: string;
+  timestamp: string;
   portfolioShare: number;
 }
 

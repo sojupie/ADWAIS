@@ -37,7 +37,7 @@ export function AccumulatedRevenueChart({ isLoading, isStale, points, className 
       {points.length === 0 ? (
         <EmptyState message="No revenue data available" variant="minimal" />
       ) : (
-        <ResponsiveContainer width="100%" height="100%" debounce={100}>
+        <ResponsiveContainer width="100%" height="100%" debounce={150}>
           <ComposedChart data={points} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-chart-grid)" />
             <XAxis 
@@ -62,7 +62,7 @@ export function AccumulatedRevenueChart({ isLoading, isStale, points, className 
               tick={{ fill: 'var(--color-chart-tick)', fontSize: 12 }}
               tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
             />
-            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'var(--color-chart-grid)', opacity: 0.4 }} />
+            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'var(--color-chart-grid)', opacity: 0.4 }} useTranslate3d={true} />
             <Legend wrapperStyle={{ fontSize: 12, paddingTop: 10 }} />
             
             {/* Discrete Revenue (Bars) */}
@@ -74,6 +74,7 @@ export function AccumulatedRevenueChart({ isLoading, isStale, points, className 
               fillOpacity={0.25}
               radius={[4, 4, 0, 0]} 
               barSize={20}
+              isAnimationActive={false}
             />
 
             {/* Accumulated Revenue (Lines) */}
@@ -86,6 +87,7 @@ export function AccumulatedRevenueChart({ isLoading, isStale, points, className 
               strokeWidth={2}
               strokeDasharray="4 4"
               dot={false}
+              isAnimationActive={false}
             />
             <Line 
               yAxisId="right"
@@ -95,6 +97,7 @@ export function AccumulatedRevenueChart({ isLoading, isStale, points, className 
               stroke="var(--color-brand-btn-primary)" 
               strokeWidth={2}
               dot={false}
+              isAnimationActive={false}
             />
           </ComposedChart>
         </ResponsiveContainer>

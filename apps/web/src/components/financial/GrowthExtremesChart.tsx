@@ -56,7 +56,7 @@ export function GrowthExtremesChart({ isLoading, tenants, onTenantSelect }: { is
 
   return (
     <ChartPanel isLoading={isLoading} title="Growth Extremes (Relative & Absolute)" bodyClassName="extremes-chart">
-      <ResponsiveContainer width="100%" height={chartHeight}>
+      <ResponsiveContainer width="100%" height={chartHeight} debounce={150}>
         <BarChart
           data={tenants}
           layout="vertical"
@@ -80,12 +80,13 @@ export function GrowthExtremesChart({ isLoading, tenants, onTenantSelect }: { is
             tickLine={false}
           />
           <ReferenceLine x={0} stroke="var(--color-chart-prev-line)" strokeWidth={2} />
-          <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f1f5f9' }} />
+          <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f1f5f9' }} useTranslate3d={true} />
           <Bar
             dataKey="growthPercentage"
             className={onTenantSelect ? 'cursor-pointer hover:opacity-90 transition-opacity' : undefined}
             radius={[0, 4, 4, 0]}
             barSize={20}
+            isAnimationActive={false}
             onClick={(row) => {
               const payload = row?.payload as GrowthExtreme | undefined;
 

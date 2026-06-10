@@ -87,7 +87,7 @@ export function NetworkLatencyChart({ isLoading, points, title = "Network Latenc
           {points.length === 0 ? (
             <EmptyState message="No latency data available" variant="minimal" />
           ) : (
-            <ResponsiveContainer width="100%" height="100%" debounce={100}>
+            <ResponsiveContainer width="100%" height="100%" debounce={150}>
               <LineChart data={points} margin={{ top: 10, right: 20, left: -5, bottom: 10 }}>
                 <CartesianGrid vertical={false} stroke="var(--color-chart-grid)" strokeDasharray="3 3" />
                 <XAxis 
@@ -105,7 +105,7 @@ export function NetworkLatencyChart({ isLoading, points, title = "Network Latenc
                   tickLine={false}
                   tickFormatter={(v) => `${v}ms`}
                 />
-                <Tooltip content={<GraphTooltip />} />
+                <Tooltip content={<GraphTooltip />} useTranslate3d={true} />
                 <Line 
                   type="monotone" 
                   dataKey="previousAverage" 
@@ -115,7 +115,7 @@ export function NetworkLatencyChart({ isLoading, points, title = "Network Latenc
                   strokeDasharray="6 6" 
                   dot={false}
                   activeDot={false}
-                  
+                  isAnimationActive={false}
                 />
                 <Line 
                   type="monotone" 
@@ -125,7 +125,7 @@ export function NetworkLatencyChart({ isLoading, points, title = "Network Latenc
                   strokeWidth={4} 
                   dot={false}
                   activeDot={{ r: 6, fill: 'var(--color-brand-btn-primary)', stroke: '#fff', strokeWidth: 3 }} 
-                  
+                  isAnimationActive={false}
                 />
               </LineChart>
             </ResponsiveContainer>

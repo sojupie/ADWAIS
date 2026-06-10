@@ -58,7 +58,7 @@ const GraphTooltip = ({ active, payload, label }: { active?: boolean; payload?: 
 //can probably move a lot of styling over to the styling file
 function RevenueVelocityGraphJSX({ points }: { isLoading?: boolean;  points: FinancialVelocityPoint[] }) {
   return (
-    <ResponsiveContainer width="100%" height="100%">
+    <ResponsiveContainer width="100%" height="100%" debounce={150}>
       <LineChart data={points} margin={{ top: 12, right: 8, left: 0, bottom: 0 }}>
         <CartesianGrid stroke="var(--color-chart-grid)" vertical={false} />
         <XAxis
@@ -75,7 +75,7 @@ function RevenueVelocityGraphJSX({ points }: { isLoading?: boolean;  points: Fin
           tickLine={false}
           width={64}
         />
-        <Tooltip content={<GraphTooltip />} />
+        <Tooltip content={<GraphTooltip />} useTranslate3d={true} />
         <Line
           type="monotone"
           dataKey="previousRevenue"
@@ -84,7 +84,7 @@ function RevenueVelocityGraphJSX({ points }: { isLoading?: boolean;  points: Fin
           strokeDasharray="6 6"
           dot={false}
           activeDot={false}
-          
+          isAnimationActive={false}
         />
         <Line
           type="monotone"
@@ -93,7 +93,7 @@ function RevenueVelocityGraphJSX({ points }: { isLoading?: boolean;  points: Fin
           strokeWidth={4}
           dot={false}
           activeDot={{ r: 6, fill: 'var(--color-brand-btn-primary)', stroke: '#fff', strokeWidth: 3 }}
-          
+          isAnimationActive={false}
         />
       </LineChart>
     </ResponsiveContainer>

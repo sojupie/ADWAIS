@@ -70,7 +70,7 @@ export function RevenueEfficiencyChart({
       {isEmpty ? (
         <EmptyState message={"No data available"} variant={"minimal"}/>
       ) : (
-        <ResponsiveContainer width="100%" height="100%" debounce={100}>
+        <ResponsiveContainer width="100%" height="100%" debounce={150}>
           <ScatterChart margin={{ top: 10, right: 24, left: 12, bottom: 14 }}>
             <XAxis
               type="number"
@@ -105,7 +105,7 @@ export function RevenueEfficiencyChart({
             <ZAxis type="number" dataKey="growthVelocity" range={[50, 1500]} name="Growth Velocity" />
             <ReferenceLine x={response.globalAverageOrderValue} stroke="var(--color-chart-prev-line)" strokeWidth={2} strokeDasharray="5 5" />
             <ReferenceLine y={response.medianPortfolioShare} stroke="var(--color-chart-prev-line)" strokeWidth={2} strokeDasharray="5 5" />
-            <Tooltip content={<CustomTooltip />} cursor={{ strokeDasharray: '3 3' }} />
+            <Tooltip content={<CustomTooltip />} cursor={{ strokeDasharray: '3 3' }} useTranslate3d={true} />
             <Scatter
               data={response.tenants.map(e => ({ ...e, absoluteGrowth: Math.abs(e.growthVelocity) }))}
               dataKey="absoluteGrowth"
@@ -113,6 +113,7 @@ export function RevenueEfficiencyChart({
               fillOpacity={0.7}
               stroke="#fff"
               strokeWidth={2}
+              isAnimationActive={false}
               onClick={(point) => {
                 const payload = point?.payload as RevenueEfficiencyTenant | undefined;
                 if (payload?.tenantId) {

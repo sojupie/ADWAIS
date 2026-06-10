@@ -56,7 +56,7 @@ function MomentumScatterPlot({ points, medianBaselineRevenue, globalGrowthPercen
 points: MomentumTenant[]; medianBaselineRevenue: number; globalGrowthPercentage: number; onTenantSelect?: (tenantId: string) => void;
 }) {
   return (
-    <ResponsiveContainer width="100%" height="100%" debounce={100}>
+    <ResponsiveContainer width="100%" height="100%" debounce={150}>
       <ScatterChart margin={{ top: 10, right: 24, left: 12, bottom: 14 }}>
         <CartesianGrid stroke="var(--color-chart-grid)" strokeDasharray="3 4" />
         <XAxis
@@ -90,7 +90,7 @@ points: MomentumTenant[]; medianBaselineRevenue: number; globalGrowthPercentage:
         <ZAxis type="number" dataKey="currentRevenue" range={[120, 1200]} />
         <ReferenceLine x={medianBaselineRevenue} stroke="var(--color-chart-prev-line)" strokeWidth={2} strokeDasharray="5 5" />
         <ReferenceLine y={globalGrowthPercentage} stroke="var(--color-chart-prev-line)" strokeWidth={2} strokeDasharray="5 5" />
-        <Tooltip content={<CustomTooltip />} cursor={{ strokeDasharray: '3 3' }} />
+        <Tooltip content={<CustomTooltip />} cursor={{ strokeDasharray: '3 3' }} useTranslate3d={true} />
         <Scatter
           data={points}
           className={onTenantSelect ? 'cursor-pointer hover:opacity-90 transition-opacity' : undefined}
@@ -98,6 +98,7 @@ points: MomentumTenant[]; medianBaselineRevenue: number; globalGrowthPercentage:
           fillOpacity={0.7}
           stroke="#fff"
           strokeWidth={2}
+          isAnimationActive={false}
           onClick={(point) => {
             const payload = point?.payload as MomentumTenant | undefined;
 

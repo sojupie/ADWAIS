@@ -67,7 +67,7 @@ export function VolumeAnomalyChart({
       {isEmpty ? (
         <EmptyState message={"No data available"} variant={"minimal"}/>
       ) : (
-        <ResponsiveContainer width="100%" height="100%" debounce={100}>
+        <ResponsiveContainer width="100%" height="100%" debounce={150}>
           <BarChart data={sortedEntries} margin={{ top: 10, right: 24, left: 12, bottom: 14 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-chart-grid)" />
             <XAxis
@@ -86,12 +86,13 @@ export function VolumeAnomalyChart({
               tickFormatter={(value) => `${value > 0 ? '+' : ''}${value}%`}
               tick={{ fill: 'var(--color-chart-tick)', fontSize: 12, fontFamily: 'Manrope, sans-serif' }}
             />
-            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'var(--color-chart-grid)', opacity: 0.4 }} />
+            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'var(--color-chart-grid)', opacity: 0.4 }} useTranslate3d={true} />
             <ReferenceLine y={0} stroke="#cbd5e1" strokeWidth={2} />
             <Bar 
               dataKey="volumeDeviationPercentage" 
               className={onTenantSelect ? 'cursor-pointer hover:opacity-90 transition-opacity' : undefined}
               radius={[4, 4, 4, 4]}
+              isAnimationActive={false}
               onClick={(row) => {
                 const payload = row?.payload as VolumeAnomalyResponseDto | undefined;
                 if (payload?.tenantId) {

@@ -15,7 +15,8 @@ Redesign `SyncStatusWidget` and `PeriodSelector` to implement a hybrid (collapse
 ## 2. Proposed Changes
 
 ### A. Layout Integration
-* Include both components inside [TenantDiagnostics.tsx](file:///C:/Users/ollem/Git/motillo%20project/ADWAIS/apps/web/src/pages/TenantDiagnostics.tsx) using the same desktop-floating and mobile-inline layouts used in [Financial.tsx](file:///C:/Users/ollem/Git/motillo%20project/ADWAIS/apps/web/src/pages/Financial.tsx) and [FleetStatus.tsx](file:///C:/Users/ollem/Git/motillo%20project/ADWAIS/apps/web/src/pages/FleetStatus.tsx).
+* Update `PeriodSelector.tsx` and `SyncStatusWidget.tsx` core implementations. Because they are shared components, updates apply globally to [Financial.tsx](file:///C:/Users/ollem/Git/motillo%20project/ADWAIS/apps/web/src/pages/Financial.tsx), [FleetStatus.tsx](file:///C:/Users/ollem/Git/motillo%20project/ADWAIS/apps/web/src/pages/FleetStatus.tsx), and [TenantDiagnostics.tsx](file:///C:/Users/ollem/Git/motillo%20project/ADWAIS/apps/web/src/pages/TenantDiagnostics.tsx).
+* Include both components inside [TenantDiagnostics.tsx](file:///C:/Users/ollem/Git/motillo%20project/ADWAIS/apps/web/src/pages/TenantDiagnostics.tsx) using the same desktop-floating and mobile-inline layouts.
 
 ### B. Interactive Behavior & Styling
 

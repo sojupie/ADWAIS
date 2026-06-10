@@ -9,7 +9,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import type { FinancialVelocityPoint } from '@types';
-import { formatCompact } from '@utils';
+import { formatCompact, formatChartLabel, inferBinSize } from '@utils';
 import { ChartPanel } from '../common/charts/ChartPanel';
 
 export const RevenueVelocityChart = memo(function RevenueVelocityChart({ isLoading, points, className }: { isLoading?: boolean;  points: FinancialVelocityPoint[], className?: string })
@@ -58,9 +58,16 @@ const GraphTooltip = ({ active, payload, label }: { active?: boolean; payload?: 
 
 //can probably move a lot of styling over to the styling file
 function RevenueVelocityGraphJSX({ points }: { isLoading?: boolean;  points: FinancialVelocityPoint[] }) {
+  const isHourly = points.length > 0 && points.length <= 24;
+  const binSize = inferBinSize(points.map(p => p.timestamp), isHourly);
+  const chartData = points.map((p, i) => ({
+    ...p,
+    label: formatChartLabel(p.timestamp, binSize, i)
+  }));
+
   return (
     <ResponsiveContainer width="100%" height="100%" debounce={150}>
-      <LineChart data={points} margin={{ top: 12, right: 8, left: 0, bottom: 0 }}>
+      <LineChart data={chartData} margin={{ top: 12, right: 8, left: 0, bottom: 0 }}>
         <CartesianGrid stroke="var(--color-chart-grid)" vertical={false} />
         <XAxis
           dataKey="label"

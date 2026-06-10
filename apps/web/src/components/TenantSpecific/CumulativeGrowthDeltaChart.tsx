@@ -9,7 +9,7 @@ import {
   YAxis,
 } from 'recharts';
 import type { CumulativeGrowthDeltaPoint } from '@types';
-import { formatCompact } from '@utils';
+import { formatCompact, formatChartLabel, inferBinSize } from '@utils';
 import { ChartPanel } from '../common/charts/ChartPanel';
 
 const CustomTooltip = ({ active, payload, label }: { isLoading?: boolean;  active?: boolean; payload?: { payload: unknown }[]; label?: string }) => {
@@ -41,6 +41,13 @@ const CustomTooltip = ({ active, payload, label }: { isLoading?: boolean;  activ
 };
 
 export const CumulativeGrowthDeltaChart = memo(function CumulativeGrowthDeltaChart({ isLoading, points, className }: { isLoading?: boolean;  points: CumulativeGrowthDeltaPoint[], className?: string }) {
+  const isHourly = points.length > 0 && points.length <= 24;
+  const binSize = inferBinSize(points.map(p => p.timestamp), isHourly);
+  const chartData = points.map((p, i) => ({
+    ...p,
+    label: formatChartLabel(p.timestamp, binSize, i)
+  }));
+
   return (
     <ChartPanel isLoading={isLoading}
       title="Cumulative Growth Delta (Absolute)"
@@ -48,7 +55,7 @@ export const CumulativeGrowthDeltaChart = memo(function CumulativeGrowthDeltaCha
       bodyClassName="w-full h-full flex flex-col flex-1 min-h-0"
     >
       <ResponsiveContainer width="100%" height="100%" debounce={150}>
-        <LineChart data={points} margin={{ top: 8, right: 10, left: 8, bottom: 20 }}>
+        <LineChart data={chartData} margin={{ top: 8, right: 10, left: 8, bottom: 20 }}>
           <CartesianGrid stroke="var(--color-chart-grid)" strokeDasharray="3 4" vertical={false} />
           <XAxis
             dataKey="label"

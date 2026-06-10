@@ -9,6 +9,7 @@ import {
   YAxis,
 } from 'recharts';
 import type { FinancialVelocityPoint } from '@types';
+import { formatChartLabel, inferBinSize } from '@utils';
 import { ChartPanel } from '../common/charts/ChartPanel';
 
 interface ShareTrajectoryRow {
@@ -18,11 +19,14 @@ interface ShareTrajectoryRow {
 
 function buildRows(tenantVelocity: FinancialVelocityPoint[], portfolioVelocity: FinancialVelocityPoint[],
 ): ShareTrajectoryRow[] {
-  return tenantVelocity.map((point) => {
-    const portfolioRevenue = portfolioVelocity.find(p => p.label === point.label)?.currentRevenue ?? 0;
+  const isHourly = tenantVelocity.length > 0 && tenantVelocity.length <= 24;
+  const binSize = inferBinSize(tenantVelocity.map(p => p.timestamp), isHourly);
+
+  return tenantVelocity.map((point, index) => {
+    const portfolioRevenue = portfolioVelocity.find(p => p.timestamp === point.timestamp)?.currentRevenue ?? 0;
 
     return {
-      label: point.label,
+      label: formatChartLabel(point.timestamp, binSize, index),
       portfolioShare: portfolioRevenue > 0 ? (point.currentRevenue / portfolioRevenue) * 100 : 0,
     };
   });

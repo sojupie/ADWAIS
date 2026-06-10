@@ -41,3 +41,5 @@ export function formatDate(isoDate: string): string {
   const d = new Date(isoDate);
   return new Intl.DateTimeFormat('sv-SE', { month: 'short', day: 'numeric' }).format(d);
 }
+
+export { formatChartLabel, inferBinSize } from './formatChartLabel';

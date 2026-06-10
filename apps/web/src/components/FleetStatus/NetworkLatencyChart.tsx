@@ -8,15 +8,8 @@ import {
   Line,
   LineChart,
 } from 'recharts';
-
-export interface LatencyPoint {
-  label: string;
-  timestamp: string;
-  average: number;
-  previousAverage: number;
-  lowest: number;
-  highest: number;
-}
+import type { LatencyPoint } from '@types';
+import { formatChartLabel, inferBinSize } from '@utils';
 
 function formatLatency(value: number): string {
   return `${Math.round(value)}ms`;
@@ -64,6 +57,13 @@ import { ChartSkeleton } from '../common/charts/ChartSkeleton';
 import { EmptyState } from '../common/ui/EmptyState';
 
 export const NetworkLatencyChart = memo(function NetworkLatencyChart({ isLoading, points, title = "Network Latency", className }: { isLoading?: boolean; points: LatencyPoint[], title?: string, className?: string }) {
+  const isHourly = points.length > 0 && points.length <= 24;
+  const binSize = inferBinSize(points.map(p => p.timestamp), isHourly);
+  const chartData = points.map((p, i) => ({
+    ...p,
+    label: formatChartLabel(p.timestamp, binSize, i)
+  }));
+
   if (isLoading) {
     return <ChartSkeleton />;
   }
@@ -89,7 +89,7 @@ export const NetworkLatencyChart = memo(function NetworkLatencyChart({ isLoading
             <EmptyState message="No latency data available" variant="minimal" />
           ) : (
             <ResponsiveContainer width="100%" height="100%" debounce={150}>
-              <LineChart data={points} margin={{ top: 10, right: 20, left: -5, bottom: 10 }}>
+              <LineChart data={chartData} margin={{ top: 10, right: 20, left: -5, bottom: 10 }}>
                 <CartesianGrid vertical={false} stroke="var(--color-chart-grid)" strokeDasharray="3 3" />
                 <XAxis 
                    dataKey="label" 

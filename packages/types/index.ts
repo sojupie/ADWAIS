@@ -18,7 +18,6 @@ export interface GlobalKpi {
 export interface FinancialKpi extends GlobalKpi {}
 
 export interface FinancialVelocityPoint {
-  label: string;
   timestamp: string;
   currentRevenue: number;
   previousRevenue: number;
@@ -26,7 +25,6 @@ export interface FinancialVelocityPoint {
 }
 
 export interface CumulativeGrowthDeltaPoint {
-  label: string;
   timestamp: string;
   currentCumulative: number;
   previousCumulative: number;
@@ -136,7 +134,6 @@ export interface UptimeMonitorDto {
 }
 
 export interface AccumulatedRevenuePointDto {
-  label: string;
   timestamp: string;
   currentRevenue: number;
   previousRevenue: number;
@@ -145,7 +142,6 @@ export interface AccumulatedRevenuePointDto {
 }
 
 export interface LatencyPoint {
-  label: string;
   timestamp: string;
   average: number;
   previousAverage: number;

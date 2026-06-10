@@ -2,7 +2,7 @@ import { memo } from 'react';
 import { ComposedChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import type { AccumulatedRevenuePointDto } from '@types';
 import { ChartPanel } from '../common/charts/ChartPanel';
-import { formatCurrency } from '@utils';
+import { formatCurrency, formatChartLabel, inferBinSize } from '@utils';
 import { EmptyState } from '../common/ui/EmptyState';
 
 interface AccumulatedRevenueChartProps {
@@ -33,13 +33,19 @@ const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?:
 };
 
 export const AccumulatedRevenueChart = memo(function AccumulatedRevenueChart({ isLoading, isStale, points, className }: AccumulatedRevenueChartProps) {
+  const binSize = inferBinSize(points.map(p => p.timestamp), false);
+  const chartData = points.map((p, i) => ({
+    ...p,
+    label: formatChartLabel(p.timestamp, binSize, i)
+  }));
+
   return (
     <ChartPanel isLoading={isLoading} isStale={isStale} title="Revenue Performance" className={className} bodyClassName={points.length === 0 ? "flex items-center justify-center" : ""}>
       {points.length === 0 ? (
         <EmptyState message="No revenue data available" variant="minimal" />
       ) : (
         <ResponsiveContainer width="100%" height="100%" debounce={150}>
-          <ComposedChart data={points} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+          <ComposedChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-chart-grid)" />
             <XAxis 
               dataKey="label" 

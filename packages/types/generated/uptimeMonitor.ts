@@ -27,9 +27,12 @@ export interface UptimeMonitor {
   updateInterval?: number;
   /** @nullable */
   latencyDegradedFloor?: number | null;
-  currentUptimePercentage?: number;
+  /** @nullable */
+  currentUptimePercentage?: number | null;
   /** @nullable */
   currentLatency?: number | null;
+  /** @nullable */
+  tags?: string[] | null;
   /** @nullable */
   lastSyncError?: string | null;
   tenant?: Tenant;

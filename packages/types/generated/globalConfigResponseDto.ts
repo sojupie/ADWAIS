@@ -26,4 +26,6 @@ export interface GlobalConfigResponseDto {
   monitorsLimit?: number | null;
   /** @nullable */
   activeSubscription?: string | null;
+  /** @nullable */
+  defaultUptimeSla?: number | null;
 }

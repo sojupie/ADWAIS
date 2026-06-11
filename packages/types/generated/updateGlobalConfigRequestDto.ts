@@ -16,4 +16,6 @@ export interface UpdateGlobalConfigRequestDto {
   uptimeRobotApiKey?: string | null;
   /** @nullable */
   systemEventRetentionDays?: number | null;
+  /** @nullable */
+  defaultUptimeSla?: number | null;
 }

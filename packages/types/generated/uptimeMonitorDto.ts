@@ -19,7 +19,8 @@ export interface UptimeMonitorDto {
   latencyDegradedFloor?: number | null;
   /** @nullable */
   uptimeSla?: number | null;
-  currentUptimePercentage?: number;
+  /** @nullable */
+  currentUptimePercentage?: number | null;
   /** @nullable */
   currentLatency?: number | null;
   uptimeMonitorEnabled?: boolean;
@@ -34,4 +35,6 @@ export interface UptimeMonitorDto {
   createdDate?: string;
   /** @nullable */
   lastSyncError?: string | null;
+  /** @nullable */
+  tags?: string[] | null;
 }

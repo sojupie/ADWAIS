@@ -79,6 +79,8 @@ import type {
 import { customClient } from '../../apiClient';
 
 
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
 
 
 export type postApiJobTriggerMonitorSyncResponse200 = {
@@ -119,15 +121,15 @@ export const postApiJobTriggerMonitorSync = async ( options?: RequestInit): Prom
 
 
 export const getPostApiJobTriggerMonitorSyncMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerMonitorSync>>, TError,void, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerMonitorSync>>, TError,void, TContext>, request?: SecondParameter<typeof customClient>}
 ): UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerMonitorSync>>, TError,void, TContext> => {
 
 const mutationKey = ['postApiJobTriggerMonitorSync'];
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -135,7 +137,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiJobTriggerMonitorSync>>, void> = () => {
 
 
-          return  postApiJobTriggerMonitorSync()
+          return  postApiJobTriggerMonitorSync(requestOptions)
         }
 
 
@@ -153,7 +155,7 @@ const {mutation: mutationOptions} = options ?
  * @summary Triggers the UptimeRobot monitor synchronization job immediately.
  */
 export const usePostApiJobTriggerMonitorSync = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerMonitorSync>>, TError,void, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerMonitorSync>>, TError,void, TContext>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof postApiJobTriggerMonitorSync>>,
         TError,
@@ -201,15 +203,15 @@ export const postApiJobTriggerUptimeSync = async ( options?: RequestInit): Promi
 
 
 export const getPostApiJobTriggerUptimeSyncMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerUptimeSync>>, TError,void, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerUptimeSync>>, TError,void, TContext>, request?: SecondParameter<typeof customClient>}
 ): UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerUptimeSync>>, TError,void, TContext> => {
 
 const mutationKey = ['postApiJobTriggerUptimeSync'];
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -217,7 +219,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiJobTriggerUptimeSync>>, void> = () => {
 
 
-          return  postApiJobTriggerUptimeSync()
+          return  postApiJobTriggerUptimeSync(requestOptions)
         }
 
 
@@ -235,7 +237,7 @@ const {mutation: mutationOptions} = options ?
  * @summary Triggers the UptimeRobot uptime metrics collection job immediately.
  */
 export const usePostApiJobTriggerUptimeSync = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerUptimeSync>>, TError,void, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerUptimeSync>>, TError,void, TContext>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof postApiJobTriggerUptimeSync>>,
         TError,
@@ -283,15 +285,15 @@ export const postApiJobTriggerLatencySync = async ( options?: RequestInit): Prom
 
 
 export const getPostApiJobTriggerLatencySyncMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerLatencySync>>, TError,void, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerLatencySync>>, TError,void, TContext>, request?: SecondParameter<typeof customClient>}
 ): UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerLatencySync>>, TError,void, TContext> => {
 
 const mutationKey = ['postApiJobTriggerLatencySync'];
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -299,7 +301,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiJobTriggerLatencySync>>, void> = () => {
 
 
-          return  postApiJobTriggerLatencySync()
+          return  postApiJobTriggerLatencySync(requestOptions)
         }
 
 
@@ -317,7 +319,7 @@ const {mutation: mutationOptions} = options ?
  * @summary Triggers the UptimeRobot latency metrics collection job immediately.
  */
 export const usePostApiJobTriggerLatencySync = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerLatencySync>>, TError,void, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerLatencySync>>, TError,void, TContext>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof postApiJobTriggerLatencySync>>,
         TError,
@@ -365,15 +367,15 @@ export const postApiJobTriggerUserStatsSync = async ( options?: RequestInit): Pr
 
 
 export const getPostApiJobTriggerUserStatsSyncMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerUserStatsSync>>, TError,void, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerUserStatsSync>>, TError,void, TContext>, request?: SecondParameter<typeof customClient>}
 ): UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerUserStatsSync>>, TError,void, TContext> => {
 
 const mutationKey = ['postApiJobTriggerUserStatsSync'];
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -381,7 +383,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiJobTriggerUserStatsSync>>, void> = () => {
 
 
-          return  postApiJobTriggerUserStatsSync()
+          return  postApiJobTriggerUserStatsSync(requestOptions)
         }
 
 
@@ -399,7 +401,7 @@ const {mutation: mutationOptions} = options ?
  * @summary Triggers the UptimeRobot account statistics synchronization job immediately.
  */
 export const usePostApiJobTriggerUserStatsSync = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerUserStatsSync>>, TError,void, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerUserStatsSync>>, TError,void, TContext>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof postApiJobTriggerUserStatsSync>>,
         TError,
@@ -447,15 +449,15 @@ export const postApiJobTriggerLitiumSync = async ( options?: RequestInit): Promi
 
 
 export const getPostApiJobTriggerLitiumSyncMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerLitiumSync>>, TError,void, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerLitiumSync>>, TError,void, TContext>, request?: SecondParameter<typeof customClient>}
 ): UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerLitiumSync>>, TError,void, TContext> => {
 
 const mutationKey = ['postApiJobTriggerLitiumSync'];
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -463,7 +465,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiJobTriggerLitiumSync>>, void> = () => {
 
 
-          return  postApiJobTriggerLitiumSync()
+          return  postApiJobTriggerLitiumSync(requestOptions)
         }
 
 
@@ -481,7 +483,7 @@ const {mutation: mutationOptions} = options ?
  * @summary Triggers the Litium order data ingestion job immediately.
  */
 export const usePostApiJobTriggerLitiumSync = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerLitiumSync>>, TError,void, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerLitiumSync>>, TError,void, TContext>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof postApiJobTriggerLitiumSync>>,
         TError,
@@ -529,15 +531,15 @@ export const postApiJobTriggerRefreshHistoricOrderData = async ( options?: Reque
 
 
 export const getPostApiJobTriggerRefreshHistoricOrderDataMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerRefreshHistoricOrderData>>, TError,void, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerRefreshHistoricOrderData>>, TError,void, TContext>, request?: SecondParameter<typeof customClient>}
 ): UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerRefreshHistoricOrderData>>, TError,void, TContext> => {
 
 const mutationKey = ['postApiJobTriggerRefreshHistoricOrderData'];
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -545,7 +547,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiJobTriggerRefreshHistoricOrderData>>, void> = () => {
 
 
-          return  postApiJobTriggerRefreshHistoricOrderData()
+          return  postApiJobTriggerRefreshHistoricOrderData(requestOptions)
         }
 
 
@@ -563,7 +565,7 @@ const {mutation: mutationOptions} = options ?
  * @summary Triggers a refresh of the financial materialized views.
  */
 export const usePostApiJobTriggerRefreshHistoricOrderData = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerRefreshHistoricOrderData>>, TError,void, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerRefreshHistoricOrderData>>, TError,void, TContext>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof postApiJobTriggerRefreshHistoricOrderData>>,
         TError,
@@ -611,15 +613,15 @@ export const postApiJobTriggerRefreshMonitoringData = async ( options?: RequestI
 
 
 export const getPostApiJobTriggerRefreshMonitoringDataMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerRefreshMonitoringData>>, TError,void, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerRefreshMonitoringData>>, TError,void, TContext>, request?: SecondParameter<typeof customClient>}
 ): UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerRefreshMonitoringData>>, TError,void, TContext> => {
 
 const mutationKey = ['postApiJobTriggerRefreshMonitoringData'];
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -627,7 +629,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiJobTriggerRefreshMonitoringData>>, void> = () => {
 
 
-          return  postApiJobTriggerRefreshMonitoringData()
+          return  postApiJobTriggerRefreshMonitoringData(requestOptions)
         }
 
 
@@ -645,7 +647,7 @@ const {mutation: mutationOptions} = options ?
  * @summary Triggers a refresh of all monitoring materialized views (latency and availability).
  */
 export const usePostApiJobTriggerRefreshMonitoringData = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerRefreshMonitoringData>>, TError,void, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerRefreshMonitoringData>>, TError,void, TContext>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof postApiJobTriggerRefreshMonitoringData>>,
         TError,
@@ -704,15 +706,15 @@ export const patchApiJobUpdateIntervals = async (updateFetchIntervalsRequestDto?
 
 
 export const getPatchApiJobUpdateIntervalsMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiJobUpdateIntervals>>, TError,{data?: UpdateFetchIntervalsRequestDto}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiJobUpdateIntervals>>, TError,{data?: UpdateFetchIntervalsRequestDto}, TContext>, request?: SecondParameter<typeof customClient>}
 ): UseMutationOptions<Awaited<ReturnType<typeof patchApiJobUpdateIntervals>>, TError,{data?: UpdateFetchIntervalsRequestDto}, TContext> => {
 
 const mutationKey = ['patchApiJobUpdateIntervals'];
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -720,7 +722,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof patchApiJobUpdateIntervals>>, {data?: UpdateFetchIntervalsRequestDto}> = (props) => {
           const {data} = props ?? {};
 
-          return  patchApiJobUpdateIntervals(data,)
+          return  patchApiJobUpdateIntervals(data,requestOptions)
         }
 
 
@@ -739,7 +741,7 @@ const {mutation: mutationOptions} = options ?
 Returns the updated list of intervals.
  */
 export const usePatchApiJobUpdateIntervals = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiJobUpdateIntervals>>, TError,{data?: UpdateFetchIntervalsRequestDto}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiJobUpdateIntervals>>, TError,{data?: UpdateFetchIntervalsRequestDto}, TContext>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof patchApiJobUpdateIntervals>>,
         TError,
@@ -804,16 +806,16 @@ export const getGetApiJobMetricsFetchIntervalsQueryKey = () => {
     }
 
 
-export const getGetApiJobMetricsFetchIntervalsQueryOptions = <TData = Awaited<ReturnType<typeof getApiJobMetricsFetchIntervals>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiJobMetricsFetchIntervals>>, TError, TData>>, }
+export const getGetApiJobMetricsFetchIntervalsQueryOptions = <TData = Awaited<ReturnType<typeof getApiJobMetricsFetchIntervals>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiJobMetricsFetchIntervals>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
 ) => {
 
-const {query: queryOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetApiJobMetricsFetchIntervalsQueryKey();
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiJobMetricsFetchIntervals>>> = ({ signal }) => getApiJobMetricsFetchIntervals({ signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiJobMetricsFetchIntervals>>> = ({ signal }) => getApiJobMetricsFetchIntervals({ signal, ...requestOptions });
 
 
 
@@ -833,7 +835,7 @@ export function useGetApiJobMetricsFetchIntervals<TData = Awaited<ReturnType<typ
           TError,
           Awaited<ReturnType<typeof getApiJobMetricsFetchIntervals>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiJobMetricsFetchIntervals<TData = Awaited<ReturnType<typeof getApiJobMetricsFetchIntervals>>, TError = unknown>(
@@ -843,11 +845,11 @@ export function useGetApiJobMetricsFetchIntervals<TData = Awaited<ReturnType<typ
           TError,
           Awaited<ReturnType<typeof getApiJobMetricsFetchIntervals>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiJobMetricsFetchIntervals<TData = Awaited<ReturnType<typeof getApiJobMetricsFetchIntervals>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiJobMetricsFetchIntervals>>, TError, TData>>, }
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiJobMetricsFetchIntervals>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -855,7 +857,7 @@ export function useGetApiJobMetricsFetchIntervals<TData = Awaited<ReturnType<typ
  */
 
 export function useGetApiJobMetricsFetchIntervals<TData = Awaited<ReturnType<typeof getApiJobMetricsFetchIntervals>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiJobMetricsFetchIntervals>>, TError, TData>>, }
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiJobMetricsFetchIntervals>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -917,16 +919,16 @@ export const getGetApiJobRecurringQueryKey = () => {
     }
 
 
-export const getGetApiJobRecurringQueryOptions = <TData = Awaited<ReturnType<typeof getApiJobRecurring>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiJobRecurring>>, TError, TData>>, }
+export const getGetApiJobRecurringQueryOptions = <TData = Awaited<ReturnType<typeof getApiJobRecurring>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiJobRecurring>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
 ) => {
 
-const {query: queryOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetApiJobRecurringQueryKey();
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiJobRecurring>>> = ({ signal }) => getApiJobRecurring({ signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiJobRecurring>>> = ({ signal }) => getApiJobRecurring({ signal, ...requestOptions });
 
 
 
@@ -946,7 +948,7 @@ export function useGetApiJobRecurring<TData = Awaited<ReturnType<typeof getApiJo
           TError,
           Awaited<ReturnType<typeof getApiJobRecurring>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiJobRecurring<TData = Awaited<ReturnType<typeof getApiJobRecurring>>, TError = unknown>(
@@ -956,11 +958,11 @@ export function useGetApiJobRecurring<TData = Awaited<ReturnType<typeof getApiJo
           TError,
           Awaited<ReturnType<typeof getApiJobRecurring>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiJobRecurring<TData = Awaited<ReturnType<typeof getApiJobRecurring>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiJobRecurring>>, TError, TData>>, }
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiJobRecurring>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -968,7 +970,7 @@ export function useGetApiJobRecurring<TData = Awaited<ReturnType<typeof getApiJo
  */
 
 export function useGetApiJobRecurring<TData = Awaited<ReturnType<typeof getApiJobRecurring>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiJobRecurring>>, TError, TData>>, }
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiJobRecurring>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -1030,16 +1032,16 @@ export const getGetApiJobStatusJobIdQueryKey = (jobId: string,) => {
     }
 
 
-export const getGetApiJobStatusJobIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiJobStatusJobId>>, TError = unknown>(jobId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiJobStatusJobId>>, TError, TData>>, }
+export const getGetApiJobStatusJobIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiJobStatusJobId>>, TError = unknown>(jobId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiJobStatusJobId>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
 ) => {
 
-const {query: queryOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetApiJobStatusJobIdQueryKey(jobId);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiJobStatusJobId>>> = ({ signal }) => getApiJobStatusJobId(jobId, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiJobStatusJobId>>> = ({ signal }) => getApiJobStatusJobId(jobId, { signal, ...requestOptions });
 
 
 
@@ -1059,7 +1061,7 @@ export function useGetApiJobStatusJobId<TData = Awaited<ReturnType<typeof getApi
           TError,
           Awaited<ReturnType<typeof getApiJobStatusJobId>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiJobStatusJobId<TData = Awaited<ReturnType<typeof getApiJobStatusJobId>>, TError = unknown>(
@@ -1069,11 +1071,11 @@ export function useGetApiJobStatusJobId<TData = Awaited<ReturnType<typeof getApi
           TError,
           Awaited<ReturnType<typeof getApiJobStatusJobId>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiJobStatusJobId<TData = Awaited<ReturnType<typeof getApiJobStatusJobId>>, TError = unknown>(
- jobId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiJobStatusJobId>>, TError, TData>>, }
+ jobId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiJobStatusJobId>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -1081,7 +1083,7 @@ export function useGetApiJobStatusJobId<TData = Awaited<ReturnType<typeof getApi
  */
 
 export function useGetApiJobStatusJobId<TData = Awaited<ReturnType<typeof getApiJobStatusJobId>>, TError = unknown>(
- jobId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiJobStatusJobId>>, TError, TData>>, }
+ jobId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiJobStatusJobId>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -1161,16 +1163,16 @@ export const getGetApiFinancialKpisQueryKey = (params?: GetApiFinancialKpisParam
     }
 
 
-export const getGetApiFinancialKpisQueryOptions = <TData = Awaited<ReturnType<typeof getApiFinancialKpis>>, TError = unknown>(params?: GetApiFinancialKpisParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialKpis>>, TError, TData>>, }
+export const getGetApiFinancialKpisQueryOptions = <TData = Awaited<ReturnType<typeof getApiFinancialKpis>>, TError = unknown>(params?: GetApiFinancialKpisParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialKpis>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
 ) => {
 
-const {query: queryOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetApiFinancialKpisQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiFinancialKpis>>> = ({ signal }) => getApiFinancialKpis(params, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiFinancialKpis>>> = ({ signal }) => getApiFinancialKpis(params, { signal, ...requestOptions });
 
 
 
@@ -1190,7 +1192,7 @@ export function useGetApiFinancialKpis<TData = Awaited<ReturnType<typeof getApiF
           TError,
           Awaited<ReturnType<typeof getApiFinancialKpis>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiFinancialKpis<TData = Awaited<ReturnType<typeof getApiFinancialKpis>>, TError = unknown>(
@@ -1200,11 +1202,11 @@ export function useGetApiFinancialKpis<TData = Awaited<ReturnType<typeof getApiF
           TError,
           Awaited<ReturnType<typeof getApiFinancialKpis>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiFinancialKpis<TData = Awaited<ReturnType<typeof getApiFinancialKpis>>, TError = unknown>(
- params?: GetApiFinancialKpisParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialKpis>>, TError, TData>>, }
+ params?: GetApiFinancialKpisParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialKpis>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -1213,7 +1215,7 @@ Scopes to a single tenant if tenantId is provided, otherwise portfolio-wide.
  */
 
 export function useGetApiFinancialKpis<TData = Awaited<ReturnType<typeof getApiFinancialKpis>>, TError = unknown>(
- params?: GetApiFinancialKpisParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialKpis>>, TError, TData>>, }
+ params?: GetApiFinancialKpisParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialKpis>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -1293,16 +1295,16 @@ export const getGetApiFinancialAccumulatedRevenueQueryKey = (params?: GetApiFina
     }
 
 
-export const getGetApiFinancialAccumulatedRevenueQueryOptions = <TData = Awaited<ReturnType<typeof getApiFinancialAccumulatedRevenue>>, TError = unknown>(params?: GetApiFinancialAccumulatedRevenueParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialAccumulatedRevenue>>, TError, TData>>, }
+export const getGetApiFinancialAccumulatedRevenueQueryOptions = <TData = Awaited<ReturnType<typeof getApiFinancialAccumulatedRevenue>>, TError = unknown>(params?: GetApiFinancialAccumulatedRevenueParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialAccumulatedRevenue>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
 ) => {
 
-const {query: queryOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetApiFinancialAccumulatedRevenueQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiFinancialAccumulatedRevenue>>> = ({ signal }) => getApiFinancialAccumulatedRevenue(params, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiFinancialAccumulatedRevenue>>> = ({ signal }) => getApiFinancialAccumulatedRevenue(params, { signal, ...requestOptions });
 
 
 
@@ -1322,7 +1324,7 @@ export function useGetApiFinancialAccumulatedRevenue<TData = Awaited<ReturnType<
           TError,
           Awaited<ReturnType<typeof getApiFinancialAccumulatedRevenue>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiFinancialAccumulatedRevenue<TData = Awaited<ReturnType<typeof getApiFinancialAccumulatedRevenue>>, TError = unknown>(
@@ -1332,11 +1334,11 @@ export function useGetApiFinancialAccumulatedRevenue<TData = Awaited<ReturnType<
           TError,
           Awaited<ReturnType<typeof getApiFinancialAccumulatedRevenue>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiFinancialAccumulatedRevenue<TData = Awaited<ReturnType<typeof getApiFinancialAccumulatedRevenue>>, TError = unknown>(
- params?: GetApiFinancialAccumulatedRevenueParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialAccumulatedRevenue>>, TError, TData>>, }
+ params?: GetApiFinancialAccumulatedRevenueParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialAccumulatedRevenue>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -1345,7 +1347,7 @@ Scopes to a single tenant if tenantId is provided, otherwise portfolio-wide.
  */
 
 export function useGetApiFinancialAccumulatedRevenue<TData = Awaited<ReturnType<typeof getApiFinancialAccumulatedRevenue>>, TError = unknown>(
- params?: GetApiFinancialAccumulatedRevenueParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialAccumulatedRevenue>>, TError, TData>>, }
+ params?: GetApiFinancialAccumulatedRevenueParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialAccumulatedRevenue>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -1425,16 +1427,16 @@ export const getGetApiFinancialVelocityQueryKey = (params?: GetApiFinancialVeloc
     }
 
 
-export const getGetApiFinancialVelocityQueryOptions = <TData = Awaited<ReturnType<typeof getApiFinancialVelocity>>, TError = unknown>(params?: GetApiFinancialVelocityParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialVelocity>>, TError, TData>>, }
+export const getGetApiFinancialVelocityQueryOptions = <TData = Awaited<ReturnType<typeof getApiFinancialVelocity>>, TError = unknown>(params?: GetApiFinancialVelocityParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialVelocity>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
 ) => {
 
-const {query: queryOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetApiFinancialVelocityQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiFinancialVelocity>>> = ({ signal }) => getApiFinancialVelocity(params, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiFinancialVelocity>>> = ({ signal }) => getApiFinancialVelocity(params, { signal, ...requestOptions });
 
 
 
@@ -1454,7 +1456,7 @@ export function useGetApiFinancialVelocity<TData = Awaited<ReturnType<typeof get
           TError,
           Awaited<ReturnType<typeof getApiFinancialVelocity>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiFinancialVelocity<TData = Awaited<ReturnType<typeof getApiFinancialVelocity>>, TError = unknown>(
@@ -1464,11 +1466,11 @@ export function useGetApiFinancialVelocity<TData = Awaited<ReturnType<typeof get
           TError,
           Awaited<ReturnType<typeof getApiFinancialVelocity>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiFinancialVelocity<TData = Awaited<ReturnType<typeof getApiFinancialVelocity>>, TError = unknown>(
- params?: GetApiFinancialVelocityParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialVelocity>>, TError, TData>>, }
+ params?: GetApiFinancialVelocityParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialVelocity>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -1477,7 +1479,7 @@ Scopes to a single tenant if tenantId is provided, otherwise portfolio-wide.
  */
 
 export function useGetApiFinancialVelocity<TData = Awaited<ReturnType<typeof getApiFinancialVelocity>>, TError = unknown>(
- params?: GetApiFinancialVelocityParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialVelocity>>, TError, TData>>, }
+ params?: GetApiFinancialVelocityParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialVelocity>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -1556,16 +1558,16 @@ export const getGetApiFinancialGrowthExtremesQueryKey = (params?: GetApiFinancia
     }
 
 
-export const getGetApiFinancialGrowthExtremesQueryOptions = <TData = Awaited<ReturnType<typeof getApiFinancialGrowthExtremes>>, TError = unknown>(params?: GetApiFinancialGrowthExtremesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialGrowthExtremes>>, TError, TData>>, }
+export const getGetApiFinancialGrowthExtremesQueryOptions = <TData = Awaited<ReturnType<typeof getApiFinancialGrowthExtremes>>, TError = unknown>(params?: GetApiFinancialGrowthExtremesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialGrowthExtremes>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
 ) => {
 
-const {query: queryOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetApiFinancialGrowthExtremesQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiFinancialGrowthExtremes>>> = ({ signal }) => getApiFinancialGrowthExtremes(params, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiFinancialGrowthExtremes>>> = ({ signal }) => getApiFinancialGrowthExtremes(params, { signal, ...requestOptions });
 
 
 
@@ -1585,7 +1587,7 @@ export function useGetApiFinancialGrowthExtremes<TData = Awaited<ReturnType<type
           TError,
           Awaited<ReturnType<typeof getApiFinancialGrowthExtremes>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiFinancialGrowthExtremes<TData = Awaited<ReturnType<typeof getApiFinancialGrowthExtremes>>, TError = unknown>(
@@ -1595,11 +1597,11 @@ export function useGetApiFinancialGrowthExtremes<TData = Awaited<ReturnType<type
           TError,
           Awaited<ReturnType<typeof getApiFinancialGrowthExtremes>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiFinancialGrowthExtremes<TData = Awaited<ReturnType<typeof getApiFinancialGrowthExtremes>>, TError = unknown>(
- params?: GetApiFinancialGrowthExtremesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialGrowthExtremes>>, TError, TData>>, }
+ params?: GetApiFinancialGrowthExtremesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialGrowthExtremes>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -1607,7 +1609,7 @@ export function useGetApiFinancialGrowthExtremes<TData = Awaited<ReturnType<type
  */
 
 export function useGetApiFinancialGrowthExtremes<TData = Awaited<ReturnType<typeof getApiFinancialGrowthExtremes>>, TError = unknown>(
- params?: GetApiFinancialGrowthExtremesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialGrowthExtremes>>, TError, TData>>, }
+ params?: GetApiFinancialGrowthExtremesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialGrowthExtremes>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -1687,16 +1689,16 @@ export const getGetApiFinancialRevenueEfficiencyQueryKey = (params?: GetApiFinan
     }
 
 
-export const getGetApiFinancialRevenueEfficiencyQueryOptions = <TData = Awaited<ReturnType<typeof getApiFinancialRevenueEfficiency>>, TError = unknown>(params?: GetApiFinancialRevenueEfficiencyParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialRevenueEfficiency>>, TError, TData>>, }
+export const getGetApiFinancialRevenueEfficiencyQueryOptions = <TData = Awaited<ReturnType<typeof getApiFinancialRevenueEfficiency>>, TError = unknown>(params?: GetApiFinancialRevenueEfficiencyParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialRevenueEfficiency>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
 ) => {
 
-const {query: queryOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetApiFinancialRevenueEfficiencyQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiFinancialRevenueEfficiency>>> = ({ signal }) => getApiFinancialRevenueEfficiency(params, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiFinancialRevenueEfficiency>>> = ({ signal }) => getApiFinancialRevenueEfficiency(params, { signal, ...requestOptions });
 
 
 
@@ -1716,7 +1718,7 @@ export function useGetApiFinancialRevenueEfficiency<TData = Awaited<ReturnType<t
           TError,
           Awaited<ReturnType<typeof getApiFinancialRevenueEfficiency>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiFinancialRevenueEfficiency<TData = Awaited<ReturnType<typeof getApiFinancialRevenueEfficiency>>, TError = unknown>(
@@ -1726,11 +1728,11 @@ export function useGetApiFinancialRevenueEfficiency<TData = Awaited<ReturnType<t
           TError,
           Awaited<ReturnType<typeof getApiFinancialRevenueEfficiency>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiFinancialRevenueEfficiency<TData = Awaited<ReturnType<typeof getApiFinancialRevenueEfficiency>>, TError = unknown>(
- params?: GetApiFinancialRevenueEfficiencyParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialRevenueEfficiency>>, TError, TData>>, }
+ params?: GetApiFinancialRevenueEfficiencyParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialRevenueEfficiency>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -1739,7 +1741,7 @@ Portfolio view only.
  */
 
 export function useGetApiFinancialRevenueEfficiency<TData = Awaited<ReturnType<typeof getApiFinancialRevenueEfficiency>>, TError = unknown>(
- params?: GetApiFinancialRevenueEfficiencyParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialRevenueEfficiency>>, TError, TData>>, }
+ params?: GetApiFinancialRevenueEfficiencyParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialRevenueEfficiency>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -1819,16 +1821,16 @@ export const getGetApiFinancialVolumeAnomalyQueryKey = (params?: GetApiFinancial
     }
 
 
-export const getGetApiFinancialVolumeAnomalyQueryOptions = <TData = Awaited<ReturnType<typeof getApiFinancialVolumeAnomaly>>, TError = unknown>(params?: GetApiFinancialVolumeAnomalyParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialVolumeAnomaly>>, TError, TData>>, }
+export const getGetApiFinancialVolumeAnomalyQueryOptions = <TData = Awaited<ReturnType<typeof getApiFinancialVolumeAnomaly>>, TError = unknown>(params?: GetApiFinancialVolumeAnomalyParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialVolumeAnomaly>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
 ) => {
 
-const {query: queryOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetApiFinancialVolumeAnomalyQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiFinancialVolumeAnomaly>>> = ({ signal }) => getApiFinancialVolumeAnomaly(params, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiFinancialVolumeAnomaly>>> = ({ signal }) => getApiFinancialVolumeAnomaly(params, { signal, ...requestOptions });
 
 
 
@@ -1848,7 +1850,7 @@ export function useGetApiFinancialVolumeAnomaly<TData = Awaited<ReturnType<typeo
           TError,
           Awaited<ReturnType<typeof getApiFinancialVolumeAnomaly>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiFinancialVolumeAnomaly<TData = Awaited<ReturnType<typeof getApiFinancialVolumeAnomaly>>, TError = unknown>(
@@ -1858,11 +1860,11 @@ export function useGetApiFinancialVolumeAnomaly<TData = Awaited<ReturnType<typeo
           TError,
           Awaited<ReturnType<typeof getApiFinancialVolumeAnomaly>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiFinancialVolumeAnomaly<TData = Awaited<ReturnType<typeof getApiFinancialVolumeAnomaly>>, TError = unknown>(
- params?: GetApiFinancialVolumeAnomalyParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialVolumeAnomaly>>, TError, TData>>, }
+ params?: GetApiFinancialVolumeAnomalyParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialVolumeAnomaly>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -1871,7 +1873,7 @@ Portfolio view only.
  */
 
 export function useGetApiFinancialVolumeAnomaly<TData = Awaited<ReturnType<typeof getApiFinancialVolumeAnomaly>>, TError = unknown>(
- params?: GetApiFinancialVolumeAnomalyParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialVolumeAnomaly>>, TError, TData>>, }
+ params?: GetApiFinancialVolumeAnomalyParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialVolumeAnomaly>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -1950,16 +1952,16 @@ export const getGetApiFinancialMomentumQueryKey = (params?: GetApiFinancialMomen
     }
 
 
-export const getGetApiFinancialMomentumQueryOptions = <TData = Awaited<ReturnType<typeof getApiFinancialMomentum>>, TError = unknown>(params?: GetApiFinancialMomentumParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialMomentum>>, TError, TData>>, }
+export const getGetApiFinancialMomentumQueryOptions = <TData = Awaited<ReturnType<typeof getApiFinancialMomentum>>, TError = unknown>(params?: GetApiFinancialMomentumParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialMomentum>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
 ) => {
 
-const {query: queryOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetApiFinancialMomentumQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiFinancialMomentum>>> = ({ signal }) => getApiFinancialMomentum(params, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiFinancialMomentum>>> = ({ signal }) => getApiFinancialMomentum(params, { signal, ...requestOptions });
 
 
 
@@ -1979,7 +1981,7 @@ export function useGetApiFinancialMomentum<TData = Awaited<ReturnType<typeof get
           TError,
           Awaited<ReturnType<typeof getApiFinancialMomentum>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiFinancialMomentum<TData = Awaited<ReturnType<typeof getApiFinancialMomentum>>, TError = unknown>(
@@ -1989,11 +1991,11 @@ export function useGetApiFinancialMomentum<TData = Awaited<ReturnType<typeof get
           TError,
           Awaited<ReturnType<typeof getApiFinancialMomentum>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiFinancialMomentum<TData = Awaited<ReturnType<typeof getApiFinancialMomentum>>, TError = unknown>(
- params?: GetApiFinancialMomentumParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialMomentum>>, TError, TData>>, }
+ params?: GetApiFinancialMomentumParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialMomentum>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -2001,7 +2003,7 @@ export function useGetApiFinancialMomentum<TData = Awaited<ReturnType<typeof get
  */
 
 export function useGetApiFinancialMomentum<TData = Awaited<ReturnType<typeof getApiFinancialMomentum>>, TError = unknown>(
- params?: GetApiFinancialMomentumParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialMomentum>>, TError, TData>>, }
+ params?: GetApiFinancialMomentumParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialMomentum>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -2080,16 +2082,16 @@ export const getGetApiFinancialDailyRevenueDeltaQueryKey = (params?: GetApiFinan
     }
 
 
-export const getGetApiFinancialDailyRevenueDeltaQueryOptions = <TData = Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>, TError = unknown>(params: GetApiFinancialDailyRevenueDeltaParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>, TError, TData>>, }
+export const getGetApiFinancialDailyRevenueDeltaQueryOptions = <TData = Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>, TError = unknown>(params: GetApiFinancialDailyRevenueDeltaParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
 ) => {
 
-const {query: queryOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetApiFinancialDailyRevenueDeltaQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>> = ({ signal }) => getApiFinancialDailyRevenueDelta(params, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>> = ({ signal }) => getApiFinancialDailyRevenueDelta(params, { signal, ...requestOptions });
 
 
 
@@ -2109,7 +2111,7 @@ export function useGetApiFinancialDailyRevenueDelta<TData = Awaited<ReturnType<t
           TError,
           Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiFinancialDailyRevenueDelta<TData = Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>, TError = unknown>(
@@ -2119,11 +2121,11 @@ export function useGetApiFinancialDailyRevenueDelta<TData = Awaited<ReturnType<t
           TError,
           Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiFinancialDailyRevenueDelta<TData = Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>, TError = unknown>(
- params: GetApiFinancialDailyRevenueDeltaParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>, TError, TData>>, }
+ params: GetApiFinancialDailyRevenueDeltaParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -2131,7 +2133,7 @@ export function useGetApiFinancialDailyRevenueDelta<TData = Awaited<ReturnType<t
  */
 
 export function useGetApiFinancialDailyRevenueDelta<TData = Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>, TError = unknown>(
- params: GetApiFinancialDailyRevenueDeltaParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>, TError, TData>>, }
+ params: GetApiFinancialDailyRevenueDeltaParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -2210,16 +2212,16 @@ export const getGetApiFinancialOrderDistributionQueryKey = (params?: GetApiFinan
     }
 
 
-export const getGetApiFinancialOrderDistributionQueryOptions = <TData = Awaited<ReturnType<typeof getApiFinancialOrderDistribution>>, TError = unknown>(params: GetApiFinancialOrderDistributionParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialOrderDistribution>>, TError, TData>>, }
+export const getGetApiFinancialOrderDistributionQueryOptions = <TData = Awaited<ReturnType<typeof getApiFinancialOrderDistribution>>, TError = unknown>(params: GetApiFinancialOrderDistributionParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialOrderDistribution>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
 ) => {
 
-const {query: queryOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetApiFinancialOrderDistributionQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiFinancialOrderDistribution>>> = ({ signal }) => getApiFinancialOrderDistribution(params, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiFinancialOrderDistribution>>> = ({ signal }) => getApiFinancialOrderDistribution(params, { signal, ...requestOptions });
 
 
 
@@ -2239,7 +2241,7 @@ export function useGetApiFinancialOrderDistribution<TData = Awaited<ReturnType<t
           TError,
           Awaited<ReturnType<typeof getApiFinancialOrderDistribution>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiFinancialOrderDistribution<TData = Awaited<ReturnType<typeof getApiFinancialOrderDistribution>>, TError = unknown>(
@@ -2249,11 +2251,11 @@ export function useGetApiFinancialOrderDistribution<TData = Awaited<ReturnType<t
           TError,
           Awaited<ReturnType<typeof getApiFinancialOrderDistribution>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiFinancialOrderDistribution<TData = Awaited<ReturnType<typeof getApiFinancialOrderDistribution>>, TError = unknown>(
- params: GetApiFinancialOrderDistributionParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialOrderDistribution>>, TError, TData>>, }
+ params: GetApiFinancialOrderDistributionParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialOrderDistribution>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -2261,7 +2263,7 @@ export function useGetApiFinancialOrderDistribution<TData = Awaited<ReturnType<t
  */
 
 export function useGetApiFinancialOrderDistribution<TData = Awaited<ReturnType<typeof getApiFinancialOrderDistribution>>, TError = unknown>(
- params: GetApiFinancialOrderDistributionParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialOrderDistribution>>, TError, TData>>, }
+ params: GetApiFinancialOrderDistributionParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialOrderDistribution>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -2341,16 +2343,16 @@ export const getGetApiFinancialTransactionDensityQueryKey = (params?: GetApiFina
     }
 
 
-export const getGetApiFinancialTransactionDensityQueryOptions = <TData = Awaited<ReturnType<typeof getApiFinancialTransactionDensity>>, TError = unknown>(params?: GetApiFinancialTransactionDensityParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialTransactionDensity>>, TError, TData>>, }
+export const getGetApiFinancialTransactionDensityQueryOptions = <TData = Awaited<ReturnType<typeof getApiFinancialTransactionDensity>>, TError = unknown>(params?: GetApiFinancialTransactionDensityParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialTransactionDensity>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
 ) => {
 
-const {query: queryOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetApiFinancialTransactionDensityQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiFinancialTransactionDensity>>> = ({ signal }) => getApiFinancialTransactionDensity(params, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiFinancialTransactionDensity>>> = ({ signal }) => getApiFinancialTransactionDensity(params, { signal, ...requestOptions });
 
 
 
@@ -2370,7 +2372,7 @@ export function useGetApiFinancialTransactionDensity<TData = Awaited<ReturnType<
           TError,
           Awaited<ReturnType<typeof getApiFinancialTransactionDensity>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiFinancialTransactionDensity<TData = Awaited<ReturnType<typeof getApiFinancialTransactionDensity>>, TError = unknown>(
@@ -2380,11 +2382,11 @@ export function useGetApiFinancialTransactionDensity<TData = Awaited<ReturnType<
           TError,
           Awaited<ReturnType<typeof getApiFinancialTransactionDensity>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiFinancialTransactionDensity<TData = Awaited<ReturnType<typeof getApiFinancialTransactionDensity>>, TError = unknown>(
- params?: GetApiFinancialTransactionDensityParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialTransactionDensity>>, TError, TData>>, }
+ params?: GetApiFinancialTransactionDensityParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialTransactionDensity>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -2393,7 +2395,7 @@ Scopes to a single tenant if tenantId is provided, otherwise portfolio-wide.
  */
 
 export function useGetApiFinancialTransactionDensity<TData = Awaited<ReturnType<typeof getApiFinancialTransactionDensity>>, TError = unknown>(
- params?: GetApiFinancialTransactionDensityParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialTransactionDensity>>, TError, TData>>, }
+ params?: GetApiFinancialTransactionDensityParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialTransactionDensity>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -2473,16 +2475,16 @@ export const getGetApiFinancialCumulativeGrowthDeltaQueryKey = (params?: GetApiF
     }
 
 
-export const getGetApiFinancialCumulativeGrowthDeltaQueryOptions = <TData = Awaited<ReturnType<typeof getApiFinancialCumulativeGrowthDelta>>, TError = unknown>(params?: GetApiFinancialCumulativeGrowthDeltaParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialCumulativeGrowthDelta>>, TError, TData>>, }
+export const getGetApiFinancialCumulativeGrowthDeltaQueryOptions = <TData = Awaited<ReturnType<typeof getApiFinancialCumulativeGrowthDelta>>, TError = unknown>(params?: GetApiFinancialCumulativeGrowthDeltaParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialCumulativeGrowthDelta>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
 ) => {
 
-const {query: queryOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetApiFinancialCumulativeGrowthDeltaQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiFinancialCumulativeGrowthDelta>>> = ({ signal }) => getApiFinancialCumulativeGrowthDelta(params, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiFinancialCumulativeGrowthDelta>>> = ({ signal }) => getApiFinancialCumulativeGrowthDelta(params, { signal, ...requestOptions });
 
 
 
@@ -2502,7 +2504,7 @@ export function useGetApiFinancialCumulativeGrowthDelta<TData = Awaited<ReturnTy
           TError,
           Awaited<ReturnType<typeof getApiFinancialCumulativeGrowthDelta>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiFinancialCumulativeGrowthDelta<TData = Awaited<ReturnType<typeof getApiFinancialCumulativeGrowthDelta>>, TError = unknown>(
@@ -2512,11 +2514,11 @@ export function useGetApiFinancialCumulativeGrowthDelta<TData = Awaited<ReturnTy
           TError,
           Awaited<ReturnType<typeof getApiFinancialCumulativeGrowthDelta>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiFinancialCumulativeGrowthDelta<TData = Awaited<ReturnType<typeof getApiFinancialCumulativeGrowthDelta>>, TError = unknown>(
- params?: GetApiFinancialCumulativeGrowthDeltaParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialCumulativeGrowthDelta>>, TError, TData>>, }
+ params?: GetApiFinancialCumulativeGrowthDeltaParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialCumulativeGrowthDelta>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -2525,7 +2527,7 @@ Scopes to a single tenant if tenantId is provided, otherwise portfolio-wide.
  */
 
 export function useGetApiFinancialCumulativeGrowthDelta<TData = Awaited<ReturnType<typeof getApiFinancialCumulativeGrowthDelta>>, TError = unknown>(
- params?: GetApiFinancialCumulativeGrowthDeltaParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialCumulativeGrowthDelta>>, TError, TData>>, }
+ params?: GetApiFinancialCumulativeGrowthDeltaParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialCumulativeGrowthDelta>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -2598,16 +2600,16 @@ export const getGetApiGlobalConfigQueryKey = () => {
     }
 
 
-export const getGetApiGlobalConfigQueryOptions = <TData = Awaited<ReturnType<typeof getApiGlobalConfig>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiGlobalConfig>>, TError, TData>>, }
+export const getGetApiGlobalConfigQueryOptions = <TData = Awaited<ReturnType<typeof getApiGlobalConfig>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiGlobalConfig>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
 ) => {
 
-const {query: queryOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetApiGlobalConfigQueryKey();
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiGlobalConfig>>> = ({ signal }) => getApiGlobalConfig({ signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiGlobalConfig>>> = ({ signal }) => getApiGlobalConfig({ signal, ...requestOptions });
 
 
 
@@ -2627,7 +2629,7 @@ export function useGetApiGlobalConfig<TData = Awaited<ReturnType<typeof getApiGl
           TError,
           Awaited<ReturnType<typeof getApiGlobalConfig>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiGlobalConfig<TData = Awaited<ReturnType<typeof getApiGlobalConfig>>, TError = unknown>(
@@ -2637,11 +2639,11 @@ export function useGetApiGlobalConfig<TData = Awaited<ReturnType<typeof getApiGl
           TError,
           Awaited<ReturnType<typeof getApiGlobalConfig>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiGlobalConfig<TData = Awaited<ReturnType<typeof getApiGlobalConfig>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiGlobalConfig>>, TError, TData>>, }
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiGlobalConfig>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -2650,7 +2652,7 @@ Sensitive values like API keys are masked.
  */
 
 export function useGetApiGlobalConfig<TData = Awaited<ReturnType<typeof getApiGlobalConfig>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiGlobalConfig>>, TError, TData>>, }
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiGlobalConfig>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -2716,15 +2718,15 @@ export const patchApiGlobalConfig = async (updateGlobalConfigRequestDto?: Update
 
 
 export const getPatchApiGlobalConfigMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiGlobalConfig>>, TError,{data?: UpdateGlobalConfigRequestDto}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiGlobalConfig>>, TError,{data?: UpdateGlobalConfigRequestDto}, TContext>, request?: SecondParameter<typeof customClient>}
 ): UseMutationOptions<Awaited<ReturnType<typeof patchApiGlobalConfig>>, TError,{data?: UpdateGlobalConfigRequestDto}, TContext> => {
 
 const mutationKey = ['patchApiGlobalConfig'];
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -2732,7 +2734,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof patchApiGlobalConfig>>, {data?: UpdateGlobalConfigRequestDto}> = (props) => {
           const {data} = props ?? {};
 
-          return  patchApiGlobalConfig(data,)
+          return  patchApiGlobalConfig(data,requestOptions)
         }
 
 
@@ -2751,7 +2753,7 @@ const {mutation: mutationOptions} = options ?
 Updating fetch intervals will automatically reschedule associated background jobs.
  */
 export const usePatchApiGlobalConfig = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiGlobalConfig>>, TError,{data?: UpdateGlobalConfigRequestDto}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiGlobalConfig>>, TError,{data?: UpdateGlobalConfigRequestDto}, TContext>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof patchApiGlobalConfig>>,
         TError,
@@ -2826,15 +2828,15 @@ export const postApiIngestionBackfill = async (params?: PostApiIngestionBackfill
 
 
 export const getPostApiIngestionBackfillMutationOptions = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiIngestionBackfill>>, TError,{params?: PostApiIngestionBackfillParams}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiIngestionBackfill>>, TError,{params?: PostApiIngestionBackfillParams}, TContext>, request?: SecondParameter<typeof customClient>}
 ): UseMutationOptions<Awaited<ReturnType<typeof postApiIngestionBackfill>>, TError,{params?: PostApiIngestionBackfillParams}, TContext> => {
 
 const mutationKey = ['postApiIngestionBackfill'];
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -2842,7 +2844,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiIngestionBackfill>>, {params?: PostApiIngestionBackfillParams}> = (props) => {
           const {params} = props ?? {};
 
-          return  postApiIngestionBackfill(params,)
+          return  postApiIngestionBackfill(params,requestOptions)
         }
 
 
@@ -2860,7 +2862,7 @@ const {mutation: mutationOptions} = options ?
  * @summary Manually triggers a historical backfill for a specific tenant within a given date range.
  */
 export const usePostApiIngestionBackfill = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiIngestionBackfill>>, TError,{params?: PostApiIngestionBackfillParams}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiIngestionBackfill>>, TError,{params?: PostApiIngestionBackfillParams}, TContext>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof postApiIngestionBackfill>>,
         TError,
@@ -2933,16 +2935,16 @@ export const getGetApiMonitorsAnalyticsQueryKey = (params?: GetApiMonitorsAnalyt
     }
 
 
-export const getGetApiMonitorsAnalyticsQueryOptions = <TData = Awaited<ReturnType<typeof getApiMonitorsAnalytics>>, TError = unknown>(params?: GetApiMonitorsAnalyticsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiMonitorsAnalytics>>, TError, TData>>, }
+export const getGetApiMonitorsAnalyticsQueryOptions = <TData = Awaited<ReturnType<typeof getApiMonitorsAnalytics>>, TError = unknown>(params?: GetApiMonitorsAnalyticsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiMonitorsAnalytics>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
 ) => {
 
-const {query: queryOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetApiMonitorsAnalyticsQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiMonitorsAnalytics>>> = ({ signal }) => getApiMonitorsAnalytics(params, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiMonitorsAnalytics>>> = ({ signal }) => getApiMonitorsAnalytics(params, { signal, ...requestOptions });
 
 
 
@@ -2962,7 +2964,7 @@ export function useGetApiMonitorsAnalytics<TData = Awaited<ReturnType<typeof get
           TError,
           Awaited<ReturnType<typeof getApiMonitorsAnalytics>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiMonitorsAnalytics<TData = Awaited<ReturnType<typeof getApiMonitorsAnalytics>>, TError = unknown>(
@@ -2972,11 +2974,11 @@ export function useGetApiMonitorsAnalytics<TData = Awaited<ReturnType<typeof get
           TError,
           Awaited<ReturnType<typeof getApiMonitorsAnalytics>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiMonitorsAnalytics<TData = Awaited<ReturnType<typeof getApiMonitorsAnalytics>>, TError = unknown>(
- params?: GetApiMonitorsAnalyticsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiMonitorsAnalytics>>, TError, TData>>, }
+ params?: GetApiMonitorsAnalyticsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiMonitorsAnalytics>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -2985,7 +2987,7 @@ Provides latency time-series and filtered monitor lists hydrated with uptime for
  */
 
 export function useGetApiMonitorsAnalytics<TData = Awaited<ReturnType<typeof getApiMonitorsAnalytics>>, TError = unknown>(
- params?: GetApiMonitorsAnalyticsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiMonitorsAnalytics>>, TError, TData>>, }
+ params?: GetApiMonitorsAnalyticsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiMonitorsAnalytics>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -3065,16 +3067,16 @@ export const getGetApiMonitorsQueryKey = (params?: GetApiMonitorsParams,) => {
     }
 
 
-export const getGetApiMonitorsQueryOptions = <TData = Awaited<ReturnType<typeof getApiMonitors>>, TError = unknown>(params?: GetApiMonitorsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiMonitors>>, TError, TData>>, }
+export const getGetApiMonitorsQueryOptions = <TData = Awaited<ReturnType<typeof getApiMonitors>>, TError = unknown>(params?: GetApiMonitorsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiMonitors>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
 ) => {
 
-const {query: queryOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetApiMonitorsQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiMonitors>>> = ({ signal }) => getApiMonitors(params, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiMonitors>>> = ({ signal }) => getApiMonitors(params, { signal, ...requestOptions });
 
 
 
@@ -3094,7 +3096,7 @@ export function useGetApiMonitors<TData = Awaited<ReturnType<typeof getApiMonito
           TError,
           Awaited<ReturnType<typeof getApiMonitors>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiMonitors<TData = Awaited<ReturnType<typeof getApiMonitors>>, TError = unknown>(
@@ -3104,11 +3106,11 @@ export function useGetApiMonitors<TData = Awaited<ReturnType<typeof getApiMonito
           TError,
           Awaited<ReturnType<typeof getApiMonitors>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiMonitors<TData = Awaited<ReturnType<typeof getApiMonitors>>, TError = unknown>(
- params?: GetApiMonitorsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiMonitors>>, TError, TData>>, }
+ params?: GetApiMonitorsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiMonitors>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -3117,7 +3119,7 @@ Returns monitors hydrated with uptime for the specified timeframe (defaults to T
  */
 
 export function useGetApiMonitors<TData = Awaited<ReturnType<typeof getApiMonitors>>, TError = unknown>(
- params?: GetApiMonitorsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiMonitors>>, TError, TData>>, }
+ params?: GetApiMonitorsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiMonitors>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -3190,15 +3192,15 @@ export const postApiMonitors = async (createMonitorRequestDto?: CreateMonitorReq
 
 
 export const getPostApiMonitorsMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiMonitors>>, TError,{data?: CreateMonitorRequestDto;params?: PostApiMonitorsParams}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiMonitors>>, TError,{data?: CreateMonitorRequestDto;params?: PostApiMonitorsParams}, TContext>, request?: SecondParameter<typeof customClient>}
 ): UseMutationOptions<Awaited<ReturnType<typeof postApiMonitors>>, TError,{data?: CreateMonitorRequestDto;params?: PostApiMonitorsParams}, TContext> => {
 
 const mutationKey = ['postApiMonitors'];
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -3206,7 +3208,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiMonitors>>, {data?: CreateMonitorRequestDto;params?: PostApiMonitorsParams}> = (props) => {
           const {data,params} = props ?? {};
 
-          return  postApiMonitors(data,params,)
+          return  postApiMonitors(data,params,requestOptions)
         }
 
 
@@ -3224,7 +3226,7 @@ const {mutation: mutationOptions} = options ?
  * @summary Creates a new uptime monitor in UptimeRobot and registers it in the system.
  */
 export const usePostApiMonitors = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiMonitors>>, TError,{data?: CreateMonitorRequestDto;params?: PostApiMonitorsParams}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiMonitors>>, TError,{data?: CreateMonitorRequestDto;params?: PostApiMonitorsParams}, TContext>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof postApiMonitors>>,
         TError,
@@ -3296,16 +3298,16 @@ export const getGetApiMonitorsUnassignedQueryKey = (params?: GetApiMonitorsUnass
     }
 
 
-export const getGetApiMonitorsUnassignedQueryOptions = <TData = Awaited<ReturnType<typeof getApiMonitorsUnassigned>>, TError = unknown>(params?: GetApiMonitorsUnassignedParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiMonitorsUnassigned>>, TError, TData>>, }
+export const getGetApiMonitorsUnassignedQueryOptions = <TData = Awaited<ReturnType<typeof getApiMonitorsUnassigned>>, TError = unknown>(params?: GetApiMonitorsUnassignedParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiMonitorsUnassigned>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
 ) => {
 
-const {query: queryOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetApiMonitorsUnassignedQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiMonitorsUnassigned>>> = ({ signal }) => getApiMonitorsUnassigned(params, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiMonitorsUnassigned>>> = ({ signal }) => getApiMonitorsUnassigned(params, { signal, ...requestOptions });
 
 
 
@@ -3325,7 +3327,7 @@ export function useGetApiMonitorsUnassigned<TData = Awaited<ReturnType<typeof ge
           TError,
           Awaited<ReturnType<typeof getApiMonitorsUnassigned>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiMonitorsUnassigned<TData = Awaited<ReturnType<typeof getApiMonitorsUnassigned>>, TError = unknown>(
@@ -3335,11 +3337,11 @@ export function useGetApiMonitorsUnassigned<TData = Awaited<ReturnType<typeof ge
           TError,
           Awaited<ReturnType<typeof getApiMonitorsUnassigned>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiMonitorsUnassigned<TData = Awaited<ReturnType<typeof getApiMonitorsUnassigned>>, TError = unknown>(
- params?: GetApiMonitorsUnassignedParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiMonitorsUnassigned>>, TError, TData>>, }
+ params?: GetApiMonitorsUnassignedParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiMonitorsUnassigned>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -3347,7 +3349,7 @@ export function useGetApiMonitorsUnassigned<TData = Awaited<ReturnType<typeof ge
  */
 
 export function useGetApiMonitorsUnassigned<TData = Awaited<ReturnType<typeof getApiMonitorsUnassigned>>, TError = unknown>(
- params?: GetApiMonitorsUnassignedParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiMonitorsUnassigned>>, TError, TData>>, }
+ params?: GetApiMonitorsUnassignedParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiMonitorsUnassigned>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -3404,15 +3406,15 @@ export const patchApiMonitorsIdAssignTenantId = async (id: number,
 
 
 export const getPatchApiMonitorsIdAssignTenantIdMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiMonitorsIdAssignTenantId>>, TError,{id: number;tenantId: string}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiMonitorsIdAssignTenantId>>, TError,{id: number;tenantId: string}, TContext>, request?: SecondParameter<typeof customClient>}
 ): UseMutationOptions<Awaited<ReturnType<typeof patchApiMonitorsIdAssignTenantId>>, TError,{id: number;tenantId: string}, TContext> => {
 
 const mutationKey = ['patchApiMonitorsIdAssignTenantId'];
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -3420,7 +3422,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof patchApiMonitorsIdAssignTenantId>>, {id: number;tenantId: string}> = (props) => {
           const {id,tenantId} = props ?? {};
 
-          return  patchApiMonitorsIdAssignTenantId(id,tenantId,)
+          return  patchApiMonitorsIdAssignTenantId(id,tenantId,requestOptions)
         }
 
 
@@ -3438,7 +3440,7 @@ const {mutation: mutationOptions} = options ?
  * @summary Reassigns a monitor to a different tenant.
  */
 export const usePatchApiMonitorsIdAssignTenantId = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiMonitorsIdAssignTenantId>>, TError,{id: number;tenantId: string}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiMonitorsIdAssignTenantId>>, TError,{id: number;tenantId: string}, TContext>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof patchApiMonitorsIdAssignTenantId>>,
         TError,
@@ -3486,15 +3488,15 @@ export const patchApiMonitorsIdUnassign = async (id: number, options?: RequestIn
 
 
 export const getPatchApiMonitorsIdUnassignMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiMonitorsIdUnassign>>, TError,{id: number}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiMonitorsIdUnassign>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customClient>}
 ): UseMutationOptions<Awaited<ReturnType<typeof patchApiMonitorsIdUnassign>>, TError,{id: number}, TContext> => {
 
 const mutationKey = ['patchApiMonitorsIdUnassign'];
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -3502,7 +3504,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof patchApiMonitorsIdUnassign>>, {id: number}> = (props) => {
           const {id} = props ?? {};
 
-          return  patchApiMonitorsIdUnassign(id,)
+          return  patchApiMonitorsIdUnassign(id,requestOptions)
         }
 
 
@@ -3520,7 +3522,7 @@ const {mutation: mutationOptions} = options ?
  * @summary Moves a monitor to the unassigned (system) tenant.
  */
 export const usePatchApiMonitorsIdUnassign = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiMonitorsIdUnassign>>, TError,{id: number}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiMonitorsIdUnassign>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof patchApiMonitorsIdUnassign>>,
         TError,
@@ -3568,15 +3570,15 @@ export const postApiMonitorsIdPause = async (id: number, options?: RequestInit):
 
 
 export const getPostApiMonitorsIdPauseMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiMonitorsIdPause>>, TError,{id: number}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiMonitorsIdPause>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customClient>}
 ): UseMutationOptions<Awaited<ReturnType<typeof postApiMonitorsIdPause>>, TError,{id: number}, TContext> => {
 
 const mutationKey = ['postApiMonitorsIdPause'];
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -3584,7 +3586,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiMonitorsIdPause>>, {id: number}> = (props) => {
           const {id} = props ?? {};
 
-          return  postApiMonitorsIdPause(id,)
+          return  postApiMonitorsIdPause(id,requestOptions)
         }
 
 
@@ -3602,7 +3604,7 @@ const {mutation: mutationOptions} = options ?
  * @summary Pauses monitoring for a specific monitor in UptimeRobot.
  */
 export const usePostApiMonitorsIdPause = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiMonitorsIdPause>>, TError,{id: number}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiMonitorsIdPause>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof postApiMonitorsIdPause>>,
         TError,
@@ -3650,15 +3652,15 @@ export const postApiMonitorsIdStart = async (id: number, options?: RequestInit):
 
 
 export const getPostApiMonitorsIdStartMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiMonitorsIdStart>>, TError,{id: number}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiMonitorsIdStart>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customClient>}
 ): UseMutationOptions<Awaited<ReturnType<typeof postApiMonitorsIdStart>>, TError,{id: number}, TContext> => {
 
 const mutationKey = ['postApiMonitorsIdStart'];
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -3666,7 +3668,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiMonitorsIdStart>>, {id: number}> = (props) => {
           const {id} = props ?? {};
 
-          return  postApiMonitorsIdStart(id,)
+          return  postApiMonitorsIdStart(id,requestOptions)
         }
 
 
@@ -3684,7 +3686,7 @@ const {mutation: mutationOptions} = options ?
  * @summary Resumes monitoring for a specific monitor in UptimeRobot.
  */
 export const usePostApiMonitorsIdStart = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiMonitorsIdStart>>, TError,{id: number}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiMonitorsIdStart>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof postApiMonitorsIdStart>>,
         TError,
@@ -3741,15 +3743,15 @@ export const deleteApiMonitorsId = async (id: number,
 
 
 export const getDeleteApiMonitorsIdMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiMonitorsId>>, TError,{id: number;params?: DeleteApiMonitorsIdParams}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiMonitorsId>>, TError,{id: number;params?: DeleteApiMonitorsIdParams}, TContext>, request?: SecondParameter<typeof customClient>}
 ): UseMutationOptions<Awaited<ReturnType<typeof deleteApiMonitorsId>>, TError,{id: number;params?: DeleteApiMonitorsIdParams}, TContext> => {
 
 const mutationKey = ['deleteApiMonitorsId'];
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -3757,7 +3759,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteApiMonitorsId>>, {id: number;params?: DeleteApiMonitorsIdParams}> = (props) => {
           const {id,params} = props ?? {};
 
-          return  deleteApiMonitorsId(id,params,)
+          return  deleteApiMonitorsId(id,params,requestOptions)
         }
 
 
@@ -3775,7 +3777,7 @@ const {mutation: mutationOptions} = options ?
  * @summary Deletes a monitor from both the system and UptimeRobot.
  */
 export const useDeleteApiMonitorsId = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiMonitorsId>>, TError,{id: number;params?: DeleteApiMonitorsIdParams}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiMonitorsId>>, TError,{id: number;params?: DeleteApiMonitorsIdParams}, TContext>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof deleteApiMonitorsId>>,
         TError,
@@ -3834,15 +3836,15 @@ export const patchApiMonitorsId = async (id: number,
 
 
 export const getPatchApiMonitorsIdMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiMonitorsId>>, TError,{id: number;data?: UpdateMonitorRequestDto}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiMonitorsId>>, TError,{id: number;data?: UpdateMonitorRequestDto}, TContext>, request?: SecondParameter<typeof customClient>}
 ): UseMutationOptions<Awaited<ReturnType<typeof patchApiMonitorsId>>, TError,{id: number;data?: UpdateMonitorRequestDto}, TContext> => {
 
 const mutationKey = ['patchApiMonitorsId'];
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -3850,7 +3852,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof patchApiMonitorsId>>, {id: number;data?: UpdateMonitorRequestDto}> = (props) => {
           const {id,data} = props ?? {};
 
-          return  patchApiMonitorsId(id,data,)
+          return  patchApiMonitorsId(id,data,requestOptions)
         }
 
 
@@ -3868,7 +3870,7 @@ const {mutation: mutationOptions} = options ?
  * @summary Updates monitor properties, such as SLA.
  */
 export const usePatchApiMonitorsId = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiMonitorsId>>, TError,{id: number;data?: UpdateMonitorRequestDto}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiMonitorsId>>, TError,{id: number;data?: UpdateMonitorRequestDto}, TContext>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof patchApiMonitorsId>>,
         TError,
@@ -3944,16 +3946,16 @@ export const getGetApiMonitorsIdLatencyQueryKey = (id: number,
 
 
 export const getGetApiMonitorsIdLatencyQueryOptions = <TData = Awaited<ReturnType<typeof getApiMonitorsIdLatency>>, TError = unknown>(id: number,
-    params?: GetApiMonitorsIdLatencyParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiMonitorsIdLatency>>, TError, TData>>, }
+    params?: GetApiMonitorsIdLatencyParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiMonitorsIdLatency>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
 ) => {
 
-const {query: queryOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetApiMonitorsIdLatencyQueryKey(id,params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiMonitorsIdLatency>>> = ({ signal }) => getApiMonitorsIdLatency(id,params, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiMonitorsIdLatency>>> = ({ signal }) => getApiMonitorsIdLatency(id,params, { signal, ...requestOptions });
 
 
 
@@ -3974,7 +3976,7 @@ export function useGetApiMonitorsIdLatency<TData = Awaited<ReturnType<typeof get
           TError,
           Awaited<ReturnType<typeof getApiMonitorsIdLatency>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiMonitorsIdLatency<TData = Awaited<ReturnType<typeof getApiMonitorsIdLatency>>, TError = unknown>(
@@ -3985,12 +3987,12 @@ export function useGetApiMonitorsIdLatency<TData = Awaited<ReturnType<typeof get
           TError,
           Awaited<ReturnType<typeof getApiMonitorsIdLatency>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiMonitorsIdLatency<TData = Awaited<ReturnType<typeof getApiMonitorsIdLatency>>, TError = unknown>(
  id: number,
-    params?: GetApiMonitorsIdLatencyParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiMonitorsIdLatency>>, TError, TData>>, }
+    params?: GetApiMonitorsIdLatencyParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiMonitorsIdLatency>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -3999,7 +4001,7 @@ export function useGetApiMonitorsIdLatency<TData = Awaited<ReturnType<typeof get
 
 export function useGetApiMonitorsIdLatency<TData = Awaited<ReturnType<typeof getApiMonitorsIdLatency>>, TError = unknown>(
  id: number,
-    params?: GetApiMonitorsIdLatencyParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiMonitorsIdLatency>>, TError, TData>>, }
+    params?: GetApiMonitorsIdLatencyParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiMonitorsIdLatency>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -4078,16 +4080,16 @@ export const getGetApiSystemEventQueryKey = (params?: GetApiSystemEventParams,) 
     }
 
 
-export const getGetApiSystemEventQueryOptions = <TData = Awaited<ReturnType<typeof getApiSystemEvent>>, TError = unknown>(params?: GetApiSystemEventParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiSystemEvent>>, TError, TData>>, }
+export const getGetApiSystemEventQueryOptions = <TData = Awaited<ReturnType<typeof getApiSystemEvent>>, TError = unknown>(params?: GetApiSystemEventParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiSystemEvent>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
 ) => {
 
-const {query: queryOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetApiSystemEventQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiSystemEvent>>> = ({ signal }) => getApiSystemEvent(params, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiSystemEvent>>> = ({ signal }) => getApiSystemEvent(params, { signal, ...requestOptions });
 
 
 
@@ -4107,7 +4109,7 @@ export function useGetApiSystemEvent<TData = Awaited<ReturnType<typeof getApiSys
           TError,
           Awaited<ReturnType<typeof getApiSystemEvent>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiSystemEvent<TData = Awaited<ReturnType<typeof getApiSystemEvent>>, TError = unknown>(
@@ -4117,11 +4119,11 @@ export function useGetApiSystemEvent<TData = Awaited<ReturnType<typeof getApiSys
           TError,
           Awaited<ReturnType<typeof getApiSystemEvent>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiSystemEvent<TData = Awaited<ReturnType<typeof getApiSystemEvent>>, TError = unknown>(
- params?: GetApiSystemEventParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiSystemEvent>>, TError, TData>>, }
+ params?: GetApiSystemEventParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiSystemEvent>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -4129,7 +4131,7 @@ export function useGetApiSystemEvent<TData = Awaited<ReturnType<typeof getApiSys
  */
 
 export function useGetApiSystemEvent<TData = Awaited<ReturnType<typeof getApiSystemEvent>>, TError = unknown>(
- params?: GetApiSystemEventParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiSystemEvent>>, TError, TData>>, }
+ params?: GetApiSystemEventParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiSystemEvent>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -4191,15 +4193,15 @@ export const deleteApiSystemEventClear = async (params?: DeleteApiSystemEventCle
 
 
 export const getDeleteApiSystemEventClearMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiSystemEventClear>>, TError,{params?: DeleteApiSystemEventClearParams}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiSystemEventClear>>, TError,{params?: DeleteApiSystemEventClearParams}, TContext>, request?: SecondParameter<typeof customClient>}
 ): UseMutationOptions<Awaited<ReturnType<typeof deleteApiSystemEventClear>>, TError,{params?: DeleteApiSystemEventClearParams}, TContext> => {
 
 const mutationKey = ['deleteApiSystemEventClear'];
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -4207,7 +4209,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteApiSystemEventClear>>, {params?: DeleteApiSystemEventClearParams}> = (props) => {
           const {params} = props ?? {};
 
-          return  deleteApiSystemEventClear(params,)
+          return  deleteApiSystemEventClear(params,requestOptions)
         }
 
 
@@ -4225,7 +4227,7 @@ const {mutation: mutationOptions} = options ?
  * @summary Deletes system events older than a specified number of days.
  */
 export const useDeleteApiSystemEventClear = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiSystemEventClear>>, TError,{params?: DeleteApiSystemEventClearParams}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiSystemEventClear>>, TError,{params?: DeleteApiSystemEventClearParams}, TContext>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof deleteApiSystemEventClear>>,
         TError,
@@ -4290,16 +4292,16 @@ export const getGetApiSystemHealthQueryKey = () => {
     }
 
 
-export const getGetApiSystemHealthQueryOptions = <TData = Awaited<ReturnType<typeof getApiSystemHealth>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiSystemHealth>>, TError, TData>>, }
+export const getGetApiSystemHealthQueryOptions = <TData = Awaited<ReturnType<typeof getApiSystemHealth>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiSystemHealth>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
 ) => {
 
-const {query: queryOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetApiSystemHealthQueryKey();
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiSystemHealth>>> = ({ signal }) => getApiSystemHealth({ signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiSystemHealth>>> = ({ signal }) => getApiSystemHealth({ signal, ...requestOptions });
 
 
 
@@ -4319,7 +4321,7 @@ export function useGetApiSystemHealth<TData = Awaited<ReturnType<typeof getApiSy
           TError,
           Awaited<ReturnType<typeof getApiSystemHealth>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiSystemHealth<TData = Awaited<ReturnType<typeof getApiSystemHealth>>, TError = unknown>(
@@ -4329,11 +4331,11 @@ export function useGetApiSystemHealth<TData = Awaited<ReturnType<typeof getApiSy
           TError,
           Awaited<ReturnType<typeof getApiSystemHealth>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiSystemHealth<TData = Awaited<ReturnType<typeof getApiSystemHealth>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiSystemHealth>>, TError, TData>>, }
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiSystemHealth>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -4341,7 +4343,7 @@ export function useGetApiSystemHealth<TData = Awaited<ReturnType<typeof getApiSy
  */
 
 export function useGetApiSystemHealth<TData = Awaited<ReturnType<typeof getApiSystemHealth>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiSystemHealth>>, TError, TData>>, }
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiSystemHealth>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -4396,15 +4398,15 @@ export const postApiSystemHealthClearErrors = async ( options?: RequestInit): Pr
 
 
 export const getPostApiSystemHealthClearErrorsMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiSystemHealthClearErrors>>, TError,void, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiSystemHealthClearErrors>>, TError,void, TContext>, request?: SecondParameter<typeof customClient>}
 ): UseMutationOptions<Awaited<ReturnType<typeof postApiSystemHealthClearErrors>>, TError,void, TContext> => {
 
 const mutationKey = ['postApiSystemHealthClearErrors'];
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -4412,7 +4414,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiSystemHealthClearErrors>>, void> = () => {
 
 
-          return  postApiSystemHealthClearErrors()
+          return  postApiSystemHealthClearErrors(requestOptions)
         }
 
 
@@ -4430,7 +4432,7 @@ const {mutation: mutationOptions} = options ?
  * @summary Clears all stored sync errors from tenants, monitors, and global configuration.
  */
 export const usePostApiSystemHealthClearErrors = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiSystemHealthClearErrors>>, TError,void, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiSystemHealthClearErrors>>, TError,void, TContext>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof postApiSystemHealthClearErrors>>,
         TError,
@@ -4495,16 +4497,16 @@ export const getGetApiSystemHealthJobsQueryKey = () => {
     }
 
 
-export const getGetApiSystemHealthJobsQueryOptions = <TData = Awaited<ReturnType<typeof getApiSystemHealthJobs>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiSystemHealthJobs>>, TError, TData>>, }
+export const getGetApiSystemHealthJobsQueryOptions = <TData = Awaited<ReturnType<typeof getApiSystemHealthJobs>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiSystemHealthJobs>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
 ) => {
 
-const {query: queryOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetApiSystemHealthJobsQueryKey();
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiSystemHealthJobs>>> = ({ signal }) => getApiSystemHealthJobs({ signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiSystemHealthJobs>>> = ({ signal }) => getApiSystemHealthJobs({ signal, ...requestOptions });
 
 
 
@@ -4524,7 +4526,7 @@ export function useGetApiSystemHealthJobs<TData = Awaited<ReturnType<typeof getA
           TError,
           Awaited<ReturnType<typeof getApiSystemHealthJobs>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiSystemHealthJobs<TData = Awaited<ReturnType<typeof getApiSystemHealthJobs>>, TError = unknown>(
@@ -4534,11 +4536,11 @@ export function useGetApiSystemHealthJobs<TData = Awaited<ReturnType<typeof getA
           TError,
           Awaited<ReturnType<typeof getApiSystemHealthJobs>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiSystemHealthJobs<TData = Awaited<ReturnType<typeof getApiSystemHealthJobs>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiSystemHealthJobs>>, TError, TData>>, }
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiSystemHealthJobs>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -4546,7 +4548,7 @@ export function useGetApiSystemHealthJobs<TData = Awaited<ReturnType<typeof getA
  */
 
 export function useGetApiSystemHealthJobs<TData = Awaited<ReturnType<typeof getApiSystemHealthJobs>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiSystemHealthJobs>>, TError, TData>>, }
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiSystemHealthJobs>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -4625,16 +4627,16 @@ export const getGetApiTenantsQueryKey = (params?: GetApiTenantsParams,) => {
     }
 
 
-export const getGetApiTenantsQueryOptions = <TData = Awaited<ReturnType<typeof getApiTenants>>, TError = unknown>(params?: GetApiTenantsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTenants>>, TError, TData>>, }
+export const getGetApiTenantsQueryOptions = <TData = Awaited<ReturnType<typeof getApiTenants>>, TError = unknown>(params?: GetApiTenantsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTenants>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
 ) => {
 
-const {query: queryOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetApiTenantsQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiTenants>>> = ({ signal }) => getApiTenants(params, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiTenants>>> = ({ signal }) => getApiTenants(params, { signal, ...requestOptions });
 
 
 
@@ -4654,7 +4656,7 @@ export function useGetApiTenants<TData = Awaited<ReturnType<typeof getApiTenants
           TError,
           Awaited<ReturnType<typeof getApiTenants>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiTenants<TData = Awaited<ReturnType<typeof getApiTenants>>, TError = unknown>(
@@ -4664,11 +4666,11 @@ export function useGetApiTenants<TData = Awaited<ReturnType<typeof getApiTenants
           TError,
           Awaited<ReturnType<typeof getApiTenants>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiTenants<TData = Awaited<ReturnType<typeof getApiTenants>>, TError = unknown>(
- params?: GetApiTenantsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTenants>>, TError, TData>>, }
+ params?: GetApiTenantsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTenants>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -4676,7 +4678,7 @@ export function useGetApiTenants<TData = Awaited<ReturnType<typeof getApiTenants
  */
 
 export function useGetApiTenants<TData = Awaited<ReturnType<typeof getApiTenants>>, TError = unknown>(
- params?: GetApiTenantsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTenants>>, TError, TData>>, }
+ params?: GetApiTenantsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTenants>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -4731,15 +4733,15 @@ export const postApiTenants = async (createTenantRequestDto?: CreateTenantReques
 
 
 export const getPostApiTenantsMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiTenants>>, TError,{data?: CreateTenantRequestDto}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiTenants>>, TError,{data?: CreateTenantRequestDto}, TContext>, request?: SecondParameter<typeof customClient>}
 ): UseMutationOptions<Awaited<ReturnType<typeof postApiTenants>>, TError,{data?: CreateTenantRequestDto}, TContext> => {
 
 const mutationKey = ['postApiTenants'];
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -4747,7 +4749,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiTenants>>, {data?: CreateTenantRequestDto}> = (props) => {
           const {data} = props ?? {};
 
-          return  postApiTenants(data,)
+          return  postApiTenants(data,requestOptions)
         }
 
 
@@ -4765,7 +4767,7 @@ const {mutation: mutationOptions} = options ?
  * @summary Creates a new tenant.
  */
 export const usePostApiTenants = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiTenants>>, TError,{data?: CreateTenantRequestDto}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiTenants>>, TError,{data?: CreateTenantRequestDto}, TContext>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof postApiTenants>>,
         TError,
@@ -4813,15 +4815,15 @@ export const deleteApiTenantsId = async (id: string, options?: RequestInit): Pro
 
 
 export const getDeleteApiTenantsIdMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiTenantsId>>, TError,{id: string}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiTenantsId>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customClient>}
 ): UseMutationOptions<Awaited<ReturnType<typeof deleteApiTenantsId>>, TError,{id: string}, TContext> => {
 
 const mutationKey = ['deleteApiTenantsId'];
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -4829,7 +4831,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteApiTenantsId>>, {id: string}> = (props) => {
           const {id} = props ?? {};
 
-          return  deleteApiTenantsId(id,)
+          return  deleteApiTenantsId(id,requestOptions)
         }
 
 
@@ -4847,7 +4849,7 @@ const {mutation: mutationOptions} = options ?
  * @summary Deletes a tenant and reassigns its monitors to the system tenant.
  */
 export const useDeleteApiTenantsId = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiTenantsId>>, TError,{id: string}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiTenantsId>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof deleteApiTenantsId>>,
         TError,
@@ -4896,15 +4898,15 @@ export const patchApiTenantsId = async (id: string,
 
 
 export const getPatchApiTenantsIdMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiTenantsId>>, TError,{id: string;data?: UpdateTenantRequestDto}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiTenantsId>>, TError,{id: string;data?: UpdateTenantRequestDto}, TContext>, request?: SecondParameter<typeof customClient>}
 ): UseMutationOptions<Awaited<ReturnType<typeof patchApiTenantsId>>, TError,{id: string;data?: UpdateTenantRequestDto}, TContext> => {
 
 const mutationKey = ['patchApiTenantsId'];
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -4912,7 +4914,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof patchApiTenantsId>>, {id: string;data?: UpdateTenantRequestDto}> = (props) => {
           const {id,data} = props ?? {};
 
-          return  patchApiTenantsId(id,data,)
+          return  patchApiTenantsId(id,data,requestOptions)
         }
 
 
@@ -4930,7 +4932,7 @@ const {mutation: mutationOptions} = options ?
  * @summary Partially updates a tenant's configuration.
  */
 export const usePatchApiTenantsId = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiTenantsId>>, TError,{id: string;data?: UpdateTenantRequestDto}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiTenantsId>>, TError,{id: string;data?: UpdateTenantRequestDto}, TContext>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof patchApiTenantsId>>,
         TError,
@@ -4992,16 +4994,16 @@ export const getGetApiUsersQueryKey = () => {
     }
 
 
-export const getGetApiUsersQueryOptions = <TData = Awaited<ReturnType<typeof getApiUsers>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUsers>>, TError, TData>>, }
+export const getGetApiUsersQueryOptions = <TData = Awaited<ReturnType<typeof getApiUsers>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUsers>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
 ) => {
 
-const {query: queryOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetApiUsersQueryKey();
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiUsers>>> = ({ signal }) => getApiUsers({ signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiUsers>>> = ({ signal }) => getApiUsers({ signal, ...requestOptions });
 
 
 
@@ -5021,7 +5023,7 @@ export function useGetApiUsers<TData = Awaited<ReturnType<typeof getApiUsers>>, 
           TError,
           Awaited<ReturnType<typeof getApiUsers>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiUsers<TData = Awaited<ReturnType<typeof getApiUsers>>, TError = unknown>(
@@ -5031,16 +5033,16 @@ export function useGetApiUsers<TData = Awaited<ReturnType<typeof getApiUsers>>, 
           TError,
           Awaited<ReturnType<typeof getApiUsers>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiUsers<TData = Awaited<ReturnType<typeof getApiUsers>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUsers>>, TError, TData>>, }
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUsers>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
 export function useGetApiUsers<TData = Awaited<ReturnType<typeof getApiUsers>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUsers>>, TError, TData>>, }
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUsers>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -5106,15 +5108,15 @@ export const postApiUsers = async (createUserRequestDto?: CreateUserRequestDto, 
 
 
 export const getPostApiUsersMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiUsers>>, TError,{data?: CreateUserRequestDto}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiUsers>>, TError,{data?: CreateUserRequestDto}, TContext>, request?: SecondParameter<typeof customClient>}
 ): UseMutationOptions<Awaited<ReturnType<typeof postApiUsers>>, TError,{data?: CreateUserRequestDto}, TContext> => {
 
 const mutationKey = ['postApiUsers'];
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -5122,7 +5124,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiUsers>>, {data?: CreateUserRequestDto}> = (props) => {
           const {data} = props ?? {};
 
-          return  postApiUsers(data,)
+          return  postApiUsers(data,requestOptions)
         }
 
 
@@ -5141,7 +5143,7 @@ const {mutation: mutationOptions} = options ?
 Used for pre-provisioning users before EntraID sign-in.
  */
 export const usePostApiUsers = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiUsers>>, TError,{data?: CreateUserRequestDto}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiUsers>>, TError,{data?: CreateUserRequestDto}, TContext>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof postApiUsers>>,
         TError,
@@ -5203,16 +5205,16 @@ export const getGetApiUsersIdQueryKey = (id: string,) => {
     }
 
 
-export const getGetApiUsersIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiUsersId>>, TError = unknown>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUsersId>>, TError, TData>>, }
+export const getGetApiUsersIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiUsersId>>, TError = unknown>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUsersId>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
 ) => {
 
-const {query: queryOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetApiUsersIdQueryKey(id);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiUsersId>>> = ({ signal }) => getApiUsersId(id, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiUsersId>>> = ({ signal }) => getApiUsersId(id, { signal, ...requestOptions });
 
 
 
@@ -5232,7 +5234,7 @@ export function useGetApiUsersId<TData = Awaited<ReturnType<typeof getApiUsersId
           TError,
           Awaited<ReturnType<typeof getApiUsersId>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiUsersId<TData = Awaited<ReturnType<typeof getApiUsersId>>, TError = unknown>(
@@ -5242,16 +5244,16 @@ export function useGetApiUsersId<TData = Awaited<ReturnType<typeof getApiUsersId
           TError,
           Awaited<ReturnType<typeof getApiUsersId>>
         > , 'initialData'
-      >, }
+      >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiUsersId<TData = Awaited<ReturnType<typeof getApiUsersId>>, TError = unknown>(
- id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUsersId>>, TError, TData>>, }
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUsersId>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
 export function useGetApiUsersId<TData = Awaited<ReturnType<typeof getApiUsersId>>, TError = unknown>(
- id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUsersId>>, TError, TData>>, }
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUsersId>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -5314,15 +5316,15 @@ export const patchApiUsersId = async (id: string,
 
 
 export const getPatchApiUsersIdMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiUsersId>>, TError,{id: string;data?: UpdateUserRequestDto}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiUsersId>>, TError,{id: string;data?: UpdateUserRequestDto}, TContext>, request?: SecondParameter<typeof customClient>}
 ): UseMutationOptions<Awaited<ReturnType<typeof patchApiUsersId>>, TError,{id: string;data?: UpdateUserRequestDto}, TContext> => {
 
 const mutationKey = ['patchApiUsersId'];
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -5330,7 +5332,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof patchApiUsersId>>, {id: string;data?: UpdateUserRequestDto}> = (props) => {
           const {id,data} = props ?? {};
 
-          return  patchApiUsersId(id,data,)
+          return  patchApiUsersId(id,data,requestOptions)
         }
 
 
@@ -5345,7 +5347,7 @@ const {mutation: mutationOptions} = options ?
     export type PatchApiUsersIdMutationError = unknown
 
     export const usePatchApiUsersId = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiUsersId>>, TError,{id: string;data?: UpdateUserRequestDto}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiUsersId>>, TError,{id: string;data?: UpdateUserRequestDto}, TContext>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof patchApiUsersId>>,
         TError,
@@ -5390,15 +5392,15 @@ export const deleteApiUsersId = async (id: string, options?: RequestInit): Promi
 
 
 export const getDeleteApiUsersIdMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiUsersId>>, TError,{id: string}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiUsersId>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customClient>}
 ): UseMutationOptions<Awaited<ReturnType<typeof deleteApiUsersId>>, TError,{id: string}, TContext> => {
 
 const mutationKey = ['deleteApiUsersId'];
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -5406,7 +5408,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteApiUsersId>>, {id: string}> = (props) => {
           const {id} = props ?? {};
 
-          return  deleteApiUsersId(id,)
+          return  deleteApiUsersId(id,requestOptions)
         }
 
 
@@ -5421,7 +5423,7 @@ const {mutation: mutationOptions} = options ?
     export type DeleteApiUsersIdMutationError = unknown
 
     export const useDeleteApiUsersId = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiUsersId>>, TError,{id: string}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiUsersId>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof deleteApiUsersId>>,
         TError,

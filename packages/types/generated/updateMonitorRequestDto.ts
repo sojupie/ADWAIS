@@ -9,6 +9,24 @@
  * Request DTO updating a monitor.
  */
 export interface UpdateMonitorRequestDto {
-  /** SLA for the monitor. */
-  sla: number;
+  /**
+     * Friendly name for the monitor.
+     * @nullable
+     */
+  name?: string | null;
+  /**
+     * URL for the monitor.
+     * @nullable
+     */
+  url?: string | null;
+  /**
+     * SLA for the monitor.
+     * @nullable
+     */
+  sla?: number | null;
+  /**
+     * Tags associated with the monitor.
+     * @nullable
+     */
+  tags?: string[] | null;
 }

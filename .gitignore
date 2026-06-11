@@ -43,3 +43,8 @@ TEST*.xml
 # Git worktrees
 /.worktrees/
 
+# Temporary workspace profiling, patches and screenshots
+/*.png
+/*.patch
+/diff.txt
+

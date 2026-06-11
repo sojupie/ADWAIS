@@ -39,3 +39,7 @@ TEST*.xml
 *.wmv
 
 /*.sln.DotSettings.user
+
+# Git worktrees
+/.worktrees/
+

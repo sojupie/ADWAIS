@@ -25,18 +25,22 @@ function RootComponent() {
 
   const showProgressBar = isNavigating || isFetching > 0 || isMutating > 0;
 
-  const [debouncedShow, setDebouncedShow] = useState(false);
+  const [isProgressBarVisible, setIsProgressBarVisible] = useState(false);
 
   useEffect(() => {
     let timer: any;
+    
     if (showProgressBar) {
-      setDebouncedShow(true);
+      const defer = setTimeout(() => {
+        setIsProgressBarVisible(true);
+      }, 0);
+      return () => clearTimeout(defer);
     } else {
       timer = setTimeout(() => {
-        setDebouncedShow(false);
-      }, 800);
+        setIsProgressBarVisible(false);
+      }, 600);
+      return () => clearTimeout(timer);
     }
-    return () => clearTimeout(timer);
   }, [showProgressBar]);
 
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -130,25 +134,29 @@ function RootComponent() {
             <KioskControls />
           </div>
 
-          {debouncedShow && (
-            <>
-              <style>{`
-                @keyframes loading-bar {
-                  0% { left: -40%; width: 40%; }
-                  100% { left: 100%; width: 40%; }
-                }
-                .animate-loading-bar {
-                  animation: loading-bar 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-                  box-shadow: 0 0 16px 3px var(--color-brand-accent), 0 0 8px 1px var(--color-brand-accent), 0 0 4px var(--color-brand-accent);
-                }
-              `}</style>
-              <div 
-                className={`absolute bottom-0 left-0 right-0 h-[6px] translate-y-full z-50 overflow-hidden bg-brand-accent/10 pointer-events-none transition-opacity duration-300 ${showProgressBar ? 'opacity-100' : 'opacity-0'}`}
-              >
-                <div className="absolute top-0 bottom-0 bg-brand-accent animate-loading-bar rounded-full" style={{ left: '-40%', width: '40%' }} />
-              </div>
-            </>
-          )}
+          <style>{`
+            @keyframes loading-bar {
+              0% { left: -35%; width: 35%; }
+              100% { left: 100%; width: 35%; }
+            }
+            .animate-loading-bar {
+              animation: loading-bar 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            }
+          `}</style>
+          <div 
+            className="absolute bottom-0 left-0 right-0 h-[6px] translate-y-full z-50 overflow-hidden bg-brand-btn-primary/20 pointer-events-none transition-opacity duration-500"
+            style={{ opacity: isProgressBarVisible ? 1 : 0 }}
+          >
+            <div 
+              className="absolute top-0 bottom-0 animate-loading-bar rounded-full" 
+              style={{
+                left: '-35%',
+                width: '35%',
+                background: 'linear-gradient(90deg, color-mix(in srgb, var(--color-brand-accent) 0%, transparent) 0%, color-mix(in srgb, var(--color-brand-accent) 95%, transparent) 50%, var(--color-brand-accent) 100%)',
+                boxShadow: '0 0 16px 3px var(--color-brand-accent), 0 0 8px 1px var(--color-brand-accent), 0 0 4px var(--color-brand-accent)'
+              }}
+            />
+          </div>
         </header>
 
         {/* ── Main Area ── */}

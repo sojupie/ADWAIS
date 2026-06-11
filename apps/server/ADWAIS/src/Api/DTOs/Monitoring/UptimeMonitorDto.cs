@@ -9,7 +9,7 @@ public record UptimeMonitorDto(
     int UpdateInterval,
     int? LatencyDegradedFloor,
     double? UptimeSla,
-    double CurrentUptimePercentage,
+    double? CurrentUptimePercentage,
     double? CurrentLatency,
     bool UptimeMonitorEnabled, 
     string CurrentStatus, 
@@ -17,6 +17,7 @@ public record UptimeMonitorDto(
     DateTimeOffset? LastUptimeUpdate,
     DateTimeOffset? LastLatencyUpdate,
     DateTimeOffset CreatedDate,
-    string? LastSyncError);
+    string? LastSyncError,
+    List<string> Tags);
 
 

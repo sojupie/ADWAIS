@@ -45,7 +45,8 @@ public class GlobalConfigController(
             config.SystemEventRetentionDays,
             config.MonitorsCount,
             config.MonitorsLimit,
-            config.ActiveSubscription
+            config.ActiveSubscription,
+            config.DefaultUptimeSla
         ));
     }
 
@@ -66,6 +67,7 @@ public class GlobalConfigController(
         if (request.LatencyDegradedFloor.HasValue) config.LatencyDegradedFloor = request.LatencyDegradedFloor.Value;
         if (request.UptimeRobotApiKey != null) config.UptimeRobotApiKey = request.UptimeRobotApiKey;
         if (request.SystemEventRetentionDays.HasValue) config.SystemEventRetentionDays = request.SystemEventRetentionDays.Value;
+        if (request.DefaultUptimeSla.HasValue) config.DefaultUptimeSla = request.DefaultUptimeSla.Value;
 
         await db.SaveChangesAsync();
         await eventService.LogAsync(nameof(GlobalConfigController), "Global configuration updated.");
@@ -84,7 +86,8 @@ public class GlobalConfigController(
             config.SystemEventRetentionDays,
             config.MonitorsCount,
             config.MonitorsLimit,
-            config.ActiveSubscription
+            config.ActiveSubscription,
+            config.DefaultUptimeSla
         ));
     }
 

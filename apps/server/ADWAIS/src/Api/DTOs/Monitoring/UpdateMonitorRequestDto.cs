@@ -8,10 +8,24 @@ namespace Adwais.Api.DTOs.Monitoring;
 public class UpdateMonitorRequestDto
 {
     /// <summary>
+    /// Friendly name for the monitor.
+    /// </summary>
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// URL for the monitor.
+    /// </summary>
+    public string? Url { get; set; }
+
+    /// <summary>
     /// SLA for the monitor.
     /// </summary>
-    [Required]
-    public double Sla { get; set; } 
+    public double? Sla { get; set; }
+
+    /// <summary>
+    /// Tags associated with the monitor.
+    /// </summary>
+    public List<string>? Tags { get; set; }
 }
 
 

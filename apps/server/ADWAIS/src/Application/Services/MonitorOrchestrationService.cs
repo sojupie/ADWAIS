@@ -102,7 +102,7 @@ public class MonitorOrchestrationService(
         return new MonitorAnalyticsDto(globalAvgLatency, latencyPoints, monitors);
     }
 
-    private async Task<Dictionary<int, double>> GetPeriodUptimesAsync(DateTimeOffset start, DateTimeOffset end, Guid? tenantId, int? monitorId, CancellationToken ct = default)
+    private async Task<Dictionary<int, double?>> GetPeriodUptimesAsync(DateTimeOffset start, DateTimeOffset end, Guid? tenantId, int? monitorId, CancellationToken ct = default)
     {
         var yesterday = new DateTimeOffset(DateTimeOffset.UtcNow.Date);
         var viewEnd = yesterday < end ? yesterday : end;
@@ -120,7 +120,11 @@ public class MonitorOrchestrationService(
 
         var historicalDaily = await histQuery
             .GroupBy(r => r.MonitorId)
-            .Select(g => new { MonitorId = g.Key, Avg = g.Average(r => r.UptimePercentage ?? 0), Count = g.Count() })
+            .Select(g => new { 
+                MonitorId = g.Key, 
+                Avg = (double?)g.Average(r => r.UptimePercentage), 
+                Count = g.Count(r => r.UptimePercentage != null) 
+            })
             .ToListAsync(ct);
 
         var todayLive = new Dictionary<int, double>();
@@ -141,17 +145,28 @@ public class MonitorOrchestrationService(
                 .ToDictionaryAsync(ma => ma.MonitorId, ma => ma.UptimePercentage, ct);
         }
 
-        var results = new Dictionary<int, double>();
+        var results = new Dictionary<int, double?>();
         var allMonitorIds = historicalDaily.Select(x => x.MonitorId).Union(todayLive.Keys);
 
         foreach (var mid in allMonitorIds)
         {
             var hist = historicalDaily.FirstOrDefault(x => x.MonitorId == mid);
-            var histSum = (hist?.Avg ?? 0) * (hist?.Count ?? 0);
-            var today = todayLive.GetValueOrDefault(mid, 0);
+            var today = todayLive.TryGetValue(mid, out var todayVal) ? (double?)todayVal : null;
             
-            var count = (hist?.Count ?? 0) + (todayLive.ContainsKey(mid) ? 1 : 0);
-            results[mid] = count > 0 ? (histSum + today) / count : 0;
+            var histCount = hist?.Count ?? 0;
+            var todayCount = today.HasValue ? 1 : 0;
+            var totalCount = histCount + todayCount;
+            
+            if (totalCount == 0)
+            {
+                results[mid] = null;
+            }
+            else
+            {
+                var histSum = (hist?.Avg ?? 0) * histCount;
+                var todaySum = today ?? 0;
+                results[mid] = (histSum + todaySum) / totalCount;
+            }
         }
 
         return results;
@@ -388,14 +403,35 @@ public class MonitorOrchestrationService(
             .ToListAsync(ct);
     }
 
-    public async Task<UptimeMonitor> UpdateMonitorSlaAsync(int id, double? uptimeSla, CancellationToken ct = default)
+    public async Task<UptimeMonitor> UpdateMonitorAsync(int id, string? name, string? url, double? uptimeSla, List<string>? tags, CancellationToken ct = default)
     {
         var monitor = await dbContext.Monitors.SingleOrDefaultAsync(m => m.Id == id, ct);
-        if (monitor == null) throw new KeyNotFoundException();
-        
-        if (uptimeSla is not null)
+        if (monitor == null) throw new KeyNotFoundException($"Monitor {id} not found.");
+
+        bool nameChanged = name != null && name != monitor.Name;
+        bool urlChanged = url != null && url != monitor.Url;
+
+        if (nameChanged || urlChanged)
         {
-            monitor.UptimeSla = uptimeSla;
+            await uptimeRobotService.UpdateMonitorAsync(id, nameChanged ? name : null, urlChanged ? url : null);
+            if (nameChanged)
+            {
+                monitor.Name = name!;
+            }
+            if (urlChanged)
+            {
+                monitor.Url = url!;
+            }
+        }
+
+        monitor.UptimeSla = uptimeSla;
+
+        if (tags != null)
+        {
+            monitor.Tags = tags
+                .Where(t => !string.IsNullOrWhiteSpace(t))
+                .Select(t => t.Trim())
+                .ToList();
         }
 
         await dbContext.SaveChangesAsync(ct);

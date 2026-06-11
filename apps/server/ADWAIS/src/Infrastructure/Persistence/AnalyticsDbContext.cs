@@ -223,6 +223,7 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options)
             entity.Property(x => x.SystemEventRetentionDays).HasDefaultValue(30);
             entity.Property(x => x.LitiumFetchEnabled).HasDefaultValue(true);
             entity.Property(x => x.UptimeRobotFetchEnabled).HasDefaultValue(true);
+            entity.Property(x => x.DefaultUptimeSla);
         });
         
         // User
@@ -277,6 +278,7 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options)
                 .HasForeignKey(m => m.TenantId)
                 .OnDelete(DeleteBehavior.Restrict);
             entity.Property(m => m.UpdateInterval).HasDefaultValue(300);
+            entity.Property(m => m.Tags).HasDefaultValueSql("'{}'");
         });
             
         // intranät

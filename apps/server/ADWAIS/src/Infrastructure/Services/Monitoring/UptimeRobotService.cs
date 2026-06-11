@@ -58,8 +58,32 @@ public class UptimeRobotService(
             UpdateInterval: response.RootElement.GetProperty("interval").GetInt32()
         );
         return monitor;
-    }    
-    
+    }
+
+    public async Task UpdateMonitorAsync(int monitorId, string? name, string? url)
+    {
+        var payload = new Dictionary<string, string>();
+        if (name != null)
+        {
+            payload.Add("friendlyName", name);
+        }
+        if (url != null)
+        {
+            payload.Add("url", url);
+        }
+
+        if (payload.Count == 0)
+        {
+            return;
+        }
+
+        var request = new HttpRequestMessage(HttpMethod.Patch, $"https://api.uptimerobot.com/v3/monitors/{monitorId}")
+        {
+            Content = JsonContent.Create(payload)
+        };
+        using var response = await GetResponseAsync(request, $"Update: {name ?? "Unspecified"} ({monitorId})");
+    }
+
     public async Task<List<UptimeRobotMonitorDto>> GetMonitorsAsync(int[]? monitorIds = null)
     {
         var url = "https://api.uptimerobot.com/v3/monitors";

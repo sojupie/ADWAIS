@@ -58,7 +58,7 @@ public interface IMonitorOrchestrationService
     Task<IEnumerable<ResponseTime>> GetAggregatedLatencyAsync(Guid tenantId, int id, DateTimeOffset from, DateTimeOffset to, CancellationToken ct = default);
 
     /// <summary>
-    /// Updates the uptime SLA for a specific monitor.
+    /// Updates a specific monitor.
     /// </summary>
-    Task<UptimeMonitor> UpdateMonitorSlaAsync(int id, double? uptimeSla, CancellationToken ct = default);
+    Task<UptimeMonitor> UpdateMonitorAsync(int id, string? name, string? url, double? uptimeSla, List<string>? tags, CancellationToken ct = default);
 }

@@ -8,7 +8,9 @@ public class UpdateMonitorRequestDtoValidator : AbstractValidator<UpdateMonitorR
     public UpdateMonitorRequestDtoValidator()
     {
         RuleFor(x => x.Sla)
-            .InclusiveBetween(0, 1).WithMessage("Uptime SLA must be between 0 and 1.");
+            .InclusiveBetween(0, 100)
+            .When(x => x.Sla.HasValue)
+            .WithMessage("Uptime SLA must be between 0 and 100.");
     }
 }
 

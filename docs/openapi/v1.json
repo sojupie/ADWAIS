@@ -2290,6 +2290,11 @@
           "activeSubscription": {
             "type": "string",
             "nullable": true
+          },
+          "defaultUptimeSla": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -3036,20 +3041,41 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
+          },
+          "defaultUptimeSla": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
           }
         },
         "additionalProperties": false
       },
       "UpdateMonitorRequestDto": {
-        "required": [
-          "sla"
-        ],
         "type": "object",
         "properties": {
+          "name": {
+            "type": "string",
+            "description": "Friendly name for the monitor.",
+            "nullable": true
+          },
+          "url": {
+            "type": "string",
+            "description": "URL for the monitor.",
+            "nullable": true
+          },
           "sla": {
             "type": "number",
             "description": "SLA for the monitor.",
-            "format": "double"
+            "format": "double",
+            "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tags associated with the monitor.",
+            "nullable": true
           }
         },
         "additionalProperties": false,
@@ -3154,11 +3180,19 @@
           },
           "currentUptimePercentage": {
             "type": "number",
-            "format": "double"
+            "format": "double",
+            "nullable": true
           },
           "currentLatency": {
             "type": "number",
             "format": "double",
+            "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
             "nullable": true
           },
           "lastSyncError": {
@@ -3221,7 +3255,8 @@
           },
           "currentUptimePercentage": {
             "type": "number",
-            "format": "double"
+            "format": "double",
+            "nullable": true
           },
           "currentLatency": {
             "type": "number",
@@ -3256,6 +3291,13 @@
           },
           "lastSyncError": {
             "type": "string",
+            "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
             "nullable": true
           }
         },

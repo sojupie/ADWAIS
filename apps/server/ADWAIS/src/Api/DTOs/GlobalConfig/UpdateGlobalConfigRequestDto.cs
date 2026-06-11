@@ -5,7 +5,8 @@ public record UpdateGlobalConfigRequestDto(
     bool? UptimeRobotFetchEnabled = null,
     int? LatencyDegradedFloor = null,
     string? UptimeRobotApiKey = null,
-    int? SystemEventRetentionDays = null
+    int? SystemEventRetentionDays = null,
+    double? DefaultUptimeSla = null
 );
 
 

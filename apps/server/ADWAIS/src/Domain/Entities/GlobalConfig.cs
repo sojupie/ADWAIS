@@ -18,6 +18,7 @@ public class GlobalConfig
     public int? MonitorsLimit { get; set; }
     public string? ActiveSubscription { get; set; }
     public string? LastSyncError { get; set; }
+    public double? DefaultUptimeSla { get; set; }
 }
 
 

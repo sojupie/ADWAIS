@@ -16,7 +16,8 @@ public record GlobalConfigResponseDto(
     int SystemEventRetentionDays,
     int? MonitorsCount,
     int? MonitorsLimit,
-    string? ActiveSubscription
+    string? ActiveSubscription,
+    double? DefaultUptimeSla
 );
 
 

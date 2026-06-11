@@ -197,7 +197,7 @@ public class MonitorController(
     [HttpPatch("{id:int}")]
     public async Task<ActionResult<UptimeMonitorDto>> UpdateMonitor(int id, [FromBody] UpdateMonitorRequestDto request, CancellationToken ct = default)
     {
-        await monitorService.UpdateMonitorSlaAsync(id, request.Sla, ct);
+        await monitorService.UpdateMonitorAsync(id, request.Name, request.Url, request.Sla, request.Tags, ct);
         
         await using var db = await dbContextFactory.CreateDbContextAsync(ct);
         var tenantId = await db.Monitors.Where(m => m.Id == id).Select(m => (Guid?)m.TenantId).SingleOrDefaultAsync(ct);
@@ -226,7 +226,8 @@ public class MonitorController(
             LastUptimeUpdate: m.LastUptimeUpdate,
             LastLatencyUpdate: m.LastLatencyUpdate,
             CreatedDate: m.CreatedDate,
-            LastSyncError: m.LastSyncError);
+            LastSyncError: m.LastSyncError,
+            Tags: m.Tags);
     }
 }
 

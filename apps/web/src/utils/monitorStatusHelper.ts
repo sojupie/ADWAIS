@@ -1,4 +1,4 @@
-﻿export function normalizeStatus(status?: string | number): string {
+export function normalizeStatus(status?: string | number | null): string {
     if (status === undefined || status === null) return 'UNKNOWN';
     const s = status.toString().toUpperCase().trim();
     if (s === '2' || s === 'UP') return 'UP';

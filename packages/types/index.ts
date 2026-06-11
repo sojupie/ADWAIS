@@ -1,121 +1,41 @@
-export type ComparisonPeriod = 'Preceding' | 'YearOverYear';
+import * as Generated from './generated';
 
-export interface GlobalKpi {
-  currentRevenue: number;
-  previousRevenue: number;
-  revenueGrowthPercentage: number;
-  transactionVolume: number;
-  volumeGrowthPercentage: number;
-  averageOrderValue: number;
-  aovGrowthPercentage: number;
-  activeTenants: number;
-  activeTenantsGrowthPercentage: number;
-  averageRevenuePerTenant: number;
-  arptGrowthPercentage: number;
-}
+export type ComparisonPeriod = Generated.ComparisonType;
+export type GlobalKpi = Required<Generated.KpiResponseDto>;
+export type FinancialKpi = GlobalKpi; // Deprecated but maps to KpiResponseDto
+export type FinancialVelocityPoint = Required<Generated.VelocityPointResponseDto>;
+export type CumulativeGrowthDeltaPoint = Required<Generated.CumulativeGrowthDeltaPointResponseDto>;
+export type TransactionDensityPointDto = Required<Generated.TransactionDensityPointResponseDto>;
 
-/**
- * @deprecated Use GlobalKpi instead
- */
-export interface FinancialKpi extends GlobalKpi {}
-
-export interface FinancialVelocityPoint {
-  timestamp: string;
-  currentRevenue: number;
-  previousRevenue: number;
-  absoluteVariance: number;
-}
-
-export interface CumulativeGrowthDeltaPoint {
-  timestamp: string;
-  currentCumulative: number;
-  previousCumulative: number;
-  cumulativeGrowthDelta: number;
-}
-
-export interface TransactionDensityPointDto {
-  dayOfWeek: number;
-  hour: number;
-  count: number;
-  totalRevenue: number;
-}
-
-export interface OrderBin {
+export type OrderBin = Required<Omit<Generated.OrderBinResponseDto, 'binLabel'>> & {
   binLabel: string;
-  minValue: number;
-  maxValue: number;
-  orderCount: number;
-  cumulativePercentage: number;
-  kdeDensity: number;
-}
+};
 
-export interface GrowthExtreme {
-  tenantId: string;
+export type GrowthExtreme = Required<Omit<Generated.GrowthExtremeResponseDto, 'tenantName'>> & {
   tenantName: string;
-  currentRevenue: number;
-  previousRevenue: number;
-  growthPercentage: number;
-  absoluteVariance: number;
-}
+};
 
-export interface MomentumTenant {
-  tenantId: string;
+export type MomentumTenant = Required<Omit<Generated.MomentumTenantResponseDto, 'tenantName'>> & {
   tenantName: string;
-  type: string;
-  baselineRevenue: number;
-  growthPercentage: number;
-  currentRevenue: number;
-}
+};
 
-export interface MomentumResponse {
-  medianBaselineRevenue: number;
-  globalGrowthPercentage: number;
+export type MomentumResponse = Required<Omit<Generated.MomentumResponseDto, 'tenants'>> & {
   tenants: MomentumTenant[];
-}
+};
 
-export interface RevenueEfficiencyTenant {
-  tenantId: string;
+export type RevenueEfficiencyTenant = Required<Omit<Generated.RevenueEfficiencyTenantResponseDto, 'tenantName'>> & {
   tenantName: string;
-  type: string;
-  averageOrderValue: number;
-  portfolioSharePercentage: number;
-  growthVelocity: number;
-}
+};
 
-export interface RevenueEfficiencyResponse {
-  globalAverageOrderValue: number;
-  medianPortfolioShare: number;
+export type RevenueEfficiencyResponse = Required<Omit<Generated.RevenueEfficiencyResponseDto, 'tenants'>> & {
   tenants: RevenueEfficiencyTenant[];
-}
+};
 
-export interface VolumeAnomalyResponseDto {
-  tenantId: string;
+export type VolumeAnomalyResponseDto = Required<Omit<Generated.VolumeAnomalyResponseDto, 'tenantName'>> & {
   tenantName: string;
-  volumeDeviationPercentage: number;
-  currentVolume: number;
-  baselineVolume: number;
-}
+};
 
-export interface TenantDiagnostics {
-  tenantId: string;
-  tenantName: string;
-  days: number;
-  totalRevenue: number;
-  totalVolume: number;
-  aov: number;
-  previousRevenue: number;
-  previousVolume: number;
-  previousAov: number;
-  revenuePoP: number;
-  volumePoP: number;
-  aovPoP: number;
-  velocity: FinancialVelocityPoint[];
-  portfolioVelocity: FinancialVelocityPoint[];
-  cumulativeGrowthDelta: CumulativeGrowthDeltaPoint[];
-  orderDistribution: OrderBin[];
-}
-
-export interface UptimeMonitorDto {
+export type UptimeMonitorDto = {
   id: number;
   tenantId: string;
   tenantName?: string;
@@ -133,34 +53,12 @@ export interface UptimeMonitorDto {
   lastLatencyUpdate: string | null;
   createdDate: string;
   lastSyncError: string | null;
-}
+};
 
-export interface AccumulatedRevenuePointDto {
-  timestamp: string;
-  currentRevenue: number;
-  previousRevenue: number;
-  currentAccumulated: number;
-  previousAccumulated: number;
-}
-
-export interface LatencyPoint {
-  timestamp: string;
-  average: number;
-  previousAverage: number;
-  lowest: number;
-  highest: number;
-}
-
-export interface MonitorAnalyticsDto {
-  globalAverageLatency: number | null;
-  latencyPoints: LatencyPoint[];
-  monitors: UptimeMonitorDto[];
-}
-
-export interface TenantResponseDto {
+export type TenantResponseDto = {
   id: string;
   name: string;
-  type: 'Mixed' | 'B2B' | 'B2C';
+  type: Generated.TenantType;
   litiumBaseUrl: string;
   currentlyFetching: boolean;
   fetchedFrom: string | null;
@@ -170,30 +68,19 @@ export interface TenantResponseDto {
   monitorCount: number;
   lastSyncError: string | null;
   hasServiceAccountToken: boolean;
-}
+};
 
-export interface SystemHealthDto {
+export type SystemHealthDto = {
   databaseStatus: string;
-  hangfire: {
-    status: string;
-    failedCount: number;
-    processingCount: number;
-    enqueuedCount: number;
-    scheduledCount: number;
-  };
-  sync: {
-    status: string;
-    tenantsWithErrorsCount: number;
-    monitorsWithErrorsCount: number;
-    globalSyncError: string | null;
-  };
+  hangfire: Required<Omit<Generated.HangfireHealthDto, 'status'>> & { status: string };
+  sync: Required<Omit<Generated.SyncHealthDto, 'status' | 'globalSyncError'>> & { status: string; globalSyncError: string | null };
   lastLitiumSync: string | null;
   lastFleetUpdate: string | null;
   lastFleetUptimeUpdate: string | null;
   lastFleetLatencyUpdate: string | null;
-}
+};
 
-export interface BackgroundJobStatusDto {
+export type BackgroundJobStatusDto = Required<Omit<Generated.BackgroundJobStatusDto, 'jobId' | 'jobName' | 'jobArgs' | 'state' | 'createdAt' | 'durationSeconds' | 'exceptionMessage'>> & {
   jobId: string;
   jobName: string;
   jobArgs: string | null;
@@ -201,25 +88,36 @@ export interface BackgroundJobStatusDto {
   createdAt: string | null;
   durationSeconds: number | null;
   exceptionMessage: string | null;
-}
+};
 
-export interface UserResponseDto {
+export type UserResponseDto = {
   id: string;
   name: string;
   role: string;
-}
+};
 
-export interface GlobalConfigDto {
-  litiumFetchEnabled: boolean;
-  litiumFetchIntervalMinutes: number;
-  uptimeFetchIntervalMinutes: number;
-  latencyFetchIntervalMinutes: number;
-  userStatsFetchIntervalMinutes: number;
-  retentionDays: number;
+export type GlobalConfigDto = Required<Omit<Generated.GlobalConfigResponseDto, 'lastPolled' | 'latencyDegradedFloor' | 'uptimeRobotApiKey' | 'monitorsCount' | 'monitorsLimit' | 'activeSubscription'>> & {
   lastPolled: string | null;
+  latencyDegradedFloor?: number | null;
+  uptimeRobotApiKey?: string | null;
+  monitorsCount?: number | null;
+  monitorsLimit?: number | null;
+  activeSubscription?: string | null;
+  retentionDays: number;
   lastSyncError: string | null;
-}
+};
 
+// Added back for compatibility
+export type AccumulatedRevenuePointDto = Required<Generated.AccumulatedRevenuePointResponseDto>;
+export type LatencyPoint = Required<Generated.LatencyPointResponseDto>;
+export type MonitorAnalyticsDto = Required<Omit<Generated.MonitorAnalyticsResponseDto, 'latencyPoints' | 'monitors' | 'globalAverageLatency'>> & {
+  globalAverageLatency: number | null;
+  latencyPoints: LatencyPoint[];
+  monitors: UptimeMonitorDto[];
+};
+
+// Keeping original because it's returned as an anonymous object from Hangfire endpoints
+// and is not generated in the OpenAPI specs.
 export interface RecurringJobDto {
   id: string;
   cron: string;
@@ -228,3 +126,5 @@ export interface RecurringJobDto {
   lastJobState: string | null;
   lastJobDuration: number | null;
 }
+
+export * from './generated';

@@ -15,10 +15,5 @@
   },
   "dependencies": {
     "pg": "^8.20.0"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild"
-    ]
   }
 }

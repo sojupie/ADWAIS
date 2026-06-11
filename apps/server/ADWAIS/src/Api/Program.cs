@@ -21,6 +21,8 @@ var builder = WebApplication.CreateBuilder(args);
 Env.Load();
 builder.Configuration.AddEnvironmentVariables();
 
+var isBuildTime = System.Reflection.Assembly.GetEntryAssembly()?.GetName().Name == "GetDocument.Insider";
+
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add<Adwais.Api.Filters.ValidationFilter>();
@@ -50,17 +52,20 @@ builder.Services.AddMemoryCache();
 
 var connectionString = builder.Configuration.GetConnectionString("AnalyticsDb");
 
-builder.Services.AddHangfire(config =>
+if (!isBuildTime)
 {
-    config.UsePostgreSqlStorage(options =>
+    builder.Services.AddHangfire(config =>
     {
-        options.UseNpgsqlConnection(connectionString);
-        var storageOptions = new PostgreSqlStorageOptions();
-        storageOptions.SchemaName = "hangfire";
-        storageOptions.PrepareSchemaIfNecessary = true;
+        config.UsePostgreSqlStorage(options =>
+        {
+            options.UseNpgsqlConnection(connectionString);
+            var storageOptions = new PostgreSqlStorageOptions();
+            storageOptions.SchemaName = "hangfire";
+            storageOptions.PrepareSchemaIfNecessary = true;
+        });
     });
-});
-builder.Services.AddHangfireServer();
+    builder.Services.AddHangfireServer();
+}
 
 var app = builder.Build();
 
@@ -68,88 +73,94 @@ app.MapOpenApi();
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseExceptionHandler();
-app.UseHangfireDashboard();
+if (!isBuildTime)
+{
+    app.UseHangfireDashboard();
+}
 
 app.MapControllers();
 
-using (var scope = app.Services.CreateScope())
+if (!isBuildTime)
 {
-    var contextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<AnalyticsDbContext>>();
-    await using var context = await contextFactory.CreateDbContextAsync();
-    context.Database.Migrate();
-
-    // Ensure materialized views are in sync with the current schema and logic
-    await Adwais.Infrastructure.Helpers.MaterializedViewOrchestrator.SyncViewsAsync(context);
-
-    if (app.Environment.IsDevelopment())
-    {
-        await DatabaseSeeder.SeedSampleDataAsync(context);
-    }
-}
-
-using (var connection = JobStorage.Current.GetConnection())
-{
-    var recurringJobManager = app.Services.GetRequiredService<IRecurringJobManager>();
-    
-    recurringJobManager.AddOrUpdate<MonitorSynchronizationJob>(
-        "sync-uptimerobot-fleet", 
-        newJob => newJob.ExecuteAsync(), 
-        Cron.MinuteInterval(5));
-    
-    recurringJobManager.RemoveIfExists("dispatch-uptimerobot-metrics");
-
     using (var scope = app.Services.CreateScope())
     {
-        var dbFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<AnalyticsDbContext>>();
-        await using var context = dbFactory.CreateDbContext();
-        var config = context.GlobalConfigs.SingleOrDefault();
-        
-        var uptimeInterval = config?.UptimeFetchIntervalMinutes ?? 60;
-        var latencyInterval = config?.LatencyFetchIntervalMinutes ?? 10;
-        var litiumFetchInterval = Math.Max(1, config?.LitiumFetchIntervalMinutes ?? 10);
-        var userStatsInterval = config?.UserStatsFetchIntervalMinutes ?? 60;
-        
-        recurringJobManager.AddOrUpdate<UptimeDispatcherJob>(
-                "dispatch-uptimerobot-uptime",
-                newJob => newJob.ExecuteAsync(),
-                CronHelper.FromMinutes(uptimeInterval));
+        var contextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<AnalyticsDbContext>>();
+        await using var context = await contextFactory.CreateDbContextAsync();
+        context.Database.Migrate();
 
-        recurringJobManager.AddOrUpdate<LatencyDispatcherJob>(
-            "dispatch-uptimerobot-latency",
-            newJob => newJob.ExecuteAsync(),
-            CronHelper.FromMinutes(latencyInterval));
-
-        recurringJobManager.AddOrUpdate<LitiumOrderFetchJob>(
-            "dispatch-litium-orders",
-            newJob => newJob.ExecuteAsync(),
-            CronHelper.FromMinutes(litiumFetchInterval));
-
-        recurringJobManager.AddOrUpdate<UpdateGlobalUptimeRobotUserStatsJob>(
-            "sync-uptimerobot-account-stats",
-            newJob => newJob.ExecuteAsync(),
-            CronHelper.FromMinutes(userStatsInterval));
-
-        recurringJobManager.AddOrUpdate<RefreshMonitoringMaterializedViewJob>(
-            "refresh-monitoring-materialized-views",
-            newJob => newJob.ExecuteAsync(),
-            Cron.Daily);
-
-        recurringJobManager.AddOrUpdate<RefreshFinancialMaterializedViewJob>(
-            "refresh-financial-materialized-views",
-            newJob => newJob.ExecuteAsync(),
-            Cron.Daily);
-
-        recurringJobManager.AddOrUpdate<SystemEventCleanupJob>(
-            "system-event-cleanup",
-            newJob => newJob.ExecuteAsync(),
-            Cron.Daily(2));
+        // Ensure materialized views are in sync with the current schema and logic
+        await Adwais.Infrastructure.Helpers.MaterializedViewOrchestrator.SyncViewsAsync(context);
 
         if (app.Environment.IsDevelopment())
         {
-            recurringJobManager.AddOrUpdate<RuntimeDataSeederJob>(
-                "dev-runtime-data-seeder",
+            await DatabaseSeeder.SeedSampleDataAsync(context);
+        }
+    }
+
+    using (var connection = JobStorage.Current.GetConnection())
+    {
+        var recurringJobManager = app.Services.GetRequiredService<IRecurringJobManager>();
+        
+        recurringJobManager.AddOrUpdate<MonitorSynchronizationJob>(
+            "sync-uptimerobot-fleet", 
+            newJob => newJob.ExecuteAsync(), 
+            Cron.MinuteInterval(5));
+        
+        recurringJobManager.RemoveIfExists("dispatch-uptimerobot-metrics");
+
+        using (var scope = app.Services.CreateScope())
+        {
+            var dbFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<AnalyticsDbContext>>();
+            await using var context = dbFactory.CreateDbContext();
+            var config = context.GlobalConfigs.SingleOrDefault();
+            
+            var uptimeInterval = config?.UptimeFetchIntervalMinutes ?? 60;
+            var latencyInterval = config?.LatencyFetchIntervalMinutes ?? 10;
+            var litiumFetchInterval = Math.Max(1, config?.LitiumFetchIntervalMinutes ?? 10);
+            var userStatsInterval = config?.UserStatsFetchIntervalMinutes ?? 60;
+            
+            recurringJobManager.AddOrUpdate<UptimeDispatcherJob>(
+                    "dispatch-uptimerobot-uptime",
+                    newJob => newJob.ExecuteAsync(),
+                    CronHelper.FromMinutes(uptimeInterval));
+
+            recurringJobManager.AddOrUpdate<LatencyDispatcherJob>(
+                "dispatch-uptimerobot-latency",
                 newJob => newJob.ExecuteAsync(),
-                Cron.MinuteInterval(1));
+                CronHelper.FromMinutes(latencyInterval));
+
+            recurringJobManager.AddOrUpdate<LitiumOrderFetchJob>(
+                "dispatch-litium-orders",
+                newJob => newJob.ExecuteAsync(),
+                CronHelper.FromMinutes(litiumFetchInterval));
+
+            recurringJobManager.AddOrUpdate<UpdateGlobalUptimeRobotUserStatsJob>(
+                "sync-uptimerobot-account-stats",
+                newJob => newJob.ExecuteAsync(),
+                CronHelper.FromMinutes(userStatsInterval));
+
+            recurringJobManager.AddOrUpdate<RefreshMonitoringMaterializedViewJob>(
+                "refresh-monitoring-materialized-views",
+                newJob => newJob.ExecuteAsync(),
+                Cron.Daily);
+
+            recurringJobManager.AddOrUpdate<RefreshFinancialMaterializedViewJob>(
+                "refresh-financial-materialized-views",
+                newJob => newJob.ExecuteAsync(),
+                Cron.Daily);
+
+            recurringJobManager.AddOrUpdate<SystemEventCleanupJob>(
+                "system-event-cleanup",
+                newJob => newJob.ExecuteAsync(),
+                Cron.Daily(2));
+
+            if (app.Environment.IsDevelopment())
+            {
+                recurringJobManager.AddOrUpdate<RuntimeDataSeederJob>(
+                    "dev-runtime-data-seeder",
+                    newJob => newJob.ExecuteAsync(),
+                    Cron.MinuteInterval(1));
+            }
         }
     }
 }

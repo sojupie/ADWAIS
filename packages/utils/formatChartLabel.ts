@@ -19,7 +19,7 @@ export function formatChartLabel(
 
   switch (binSize) {
     case 'hour':
-      return date.toLocaleString('sv-SE', {
+      return date.toLocaleString('en-SE', {
         month: 'short',
         day: 'numeric',
         hour: '2-digit',
@@ -27,7 +27,7 @@ export function formatChartLabel(
         timeZone: TIMEZONE,
       });
     case 'day':
-      return date.toLocaleString('sv-SE', {
+      return date.toLocaleString('en-SE', {
         month: 'short',
         day: 'numeric',
         timeZone: TIMEZONE,
@@ -35,7 +35,7 @@ export function formatChartLabel(
     case 'week':
       return `W${(index ?? 0) + 1}`;
     case 'month':
-      return date.toLocaleString('sv-SE', {
+      return date.toLocaleString('en-SE', {
         month: 'short',
         year: '2-digit',
         timeZone: TIMEZONE,

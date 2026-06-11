@@ -30,8 +30,13 @@ public class MonitorOrchestrationService(
         var currentRows = await GetMergedLatencyDataAsync(dbContext, currentStart, currentEnd, isHourly, tenantId, monitorId, ct);
         var previousRows = await GetMergedLatencyDataAsync(dbContext, previousStart, period.PreviousEnd, isHourly, tenantId, monitorId, ct);
 
+        var roundedTotalHours = Math.Ceiling((currentEnd - currentStart).TotalHours);
+        var binSizeHours = isHourly 
+            ? roundedTotalHours / steps 
+            : 24;
+
         var currentByStep = currentRows
-            .GroupBy(r => isHourly ? (int)(r.Timestamp - currentStart.UtcDateTime).TotalHours : (int)(r.Timestamp - currentStart.UtcDateTime).TotalDays)
+            .GroupBy(r => (int)((r.Timestamp - currentStart.UtcDateTime).TotalHours / binSizeHours))
             .ToDictionary(
                 g => g.Key, 
                 g => new { 
@@ -41,13 +46,20 @@ public class MonitorOrchestrationService(
                 });
 
         var previousByStep = previousRows
-            .GroupBy(r => isHourly ? (int)(r.Timestamp - previousStart.UtcDateTime).TotalHours : (int)(r.Timestamp - previousStart.UtcDateTime).TotalDays)
+            .GroupBy(r => (int)((r.Timestamp - previousStart.UtcDateTime).TotalHours / binSizeHours))
             .ToDictionary(g => g.Key, g => g.Average(r => r.Average));
 
         var latencyPoints = new List<LatencyPointDto>(steps);
         for (var i = 0; i < steps; i++)
         {
-            var timestamp = isHourly ? currentStart.AddHours(i) : currentStart.AddDays(i);
+            var timestamp = isHourly 
+                ? currentStart.AddHours((i + 1) * binSizeHours) 
+                : currentStart.AddDays(i);
+
+            if (isHourly && i == steps - 1)
+            {
+                timestamp = currentEnd;
+            }
             
             var data = currentByStep.GetValueOrDefault(i);
             var prevAvg = previousByStep.GetValueOrDefault(i, 0.0);

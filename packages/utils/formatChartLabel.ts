@@ -20,6 +20,8 @@ export function formatChartLabel(
   switch (binSize) {
     case 'hour':
       return date.toLocaleString('sv-SE', {
+        month: 'short',
+        day: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
         timeZone: TIMEZONE,
@@ -55,5 +57,6 @@ export function inferBinSize(timestamps: string[], isHourly: boolean): BinSize {
 
   if (diffDays >= 28) return 'month';
   if (diffDays >= 7) return 'week';
-  return 'day';
+  if (diffDays >= 1) return 'day';
+  return 'hour';
 }

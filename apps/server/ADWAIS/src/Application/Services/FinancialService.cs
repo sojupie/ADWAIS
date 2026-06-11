@@ -43,30 +43,15 @@ public class FinancialService(IApplicationDbContextFactory contextFactory) : IFi
             else
                 query = query.Where(o => o.TenantId != IApplicationDbContext.SystemTenantGuid);
 
-            var grouped = await query
-                .GroupBy(o => new { 
-                    o.CreatedDate.Year,
-                    o.CreatedDate.Month,
-                    o.CreatedDate.Day,
-                    o.CreatedDate.Hour,
-                    o.TenantId 
-                })
-                .Select(g => new {
-                    g.Key.Year,
-                    g.Key.Month,
-                    g.Key.Day,
-                    g.Key.Hour,
-                    g.Key.TenantId,
-                    Revenue = g.Sum(o => o.TotalValueIncVat),
-                    Volume = g.Count()
-                })
+            var rows = await query
+                .Select(o => new { o.CreatedDate, o.TenantId, o.TotalValueIncVat })
                 .ToListAsync(ct);
 
-            return grouped.Select(x => new DataRow(
-                new DateTimeOffset(x.Year, x.Month, x.Day, x.Hour, 0, 0, TimeSpan.Zero),
+            return rows.Select(x => new DataRow(
+                x.CreatedDate,
                 x.TenantId,
-                x.Revenue,
-                x.Volume
+                x.TotalValueIncVat,
+                1
             )).ToList();
         }
 
@@ -127,26 +112,18 @@ public class FinancialService(IApplicationDbContextFactory contextFactory) : IFi
     {
         if (isHourly)
         {
-            var grouped = await context.Orders
+            var rows = await context.Orders
                 .AsNoTracking()
                 .Where(o => o.CreatedDate >= start && o.CreatedDate < end)
                 .Where(o => o.TenantId != IApplicationDbContext.SystemTenantGuid)
-                .GroupBy(o => new { o.CreatedDate.Year, o.CreatedDate.Month, o.CreatedDate.Day, o.CreatedDate.Hour })
-                .Select(g => new {
-                    g.Key.Year,
-                    g.Key.Month,
-                    g.Key.Day,
-                    g.Key.Hour,
-                    Revenue = g.Sum(o => o.TotalValueIncVat),
-                    Volume = g.Count()
-                })
+                .Select(o => new { o.CreatedDate, o.TotalValueIncVat })
                 .ToListAsync(ct);
 
-            return grouped.Select(x => new DataRow(
-                new DateTimeOffset(x.Year, x.Month, x.Day, x.Hour, 0, 0, TimeSpan.Zero),
+            return rows.Select(x => new DataRow(
+                x.CreatedDate,
                 null,
-                x.Revenue,
-                x.Volume
+                x.TotalValueIncVat,
+                1
             )).ToList();
         }
 
@@ -251,18 +228,31 @@ public class FinancialService(IApplicationDbContextFactory contextFactory) : IFi
             previousRows = await GetMergedGlobalDataAsync(context, previousStart, period.PreviousEnd, isHourly, ct);
         }
 
+        var roundedTotalHours = Math.Ceiling((currentEnd - currentStart).TotalHours);
+        var binSizeHours = isHourly 
+            ? roundedTotalHours / steps 
+            : 24;
+
         var currentByStep = currentRows
-            .GroupBy(r => isHourly ? (int)(r.Timestamp - currentStart).TotalHours : (int)(r.Timestamp - currentStart).TotalDays)
+            .GroupBy(r => (int)((r.Timestamp - currentStart).TotalHours / binSizeHours))
             .ToDictionary(g => g.Key, g => g.Sum(r => r.Revenue));
 
         var previousByStep = previousRows
-            .GroupBy(r => isHourly ? (int)(r.Timestamp - previousStart).TotalHours : (int)(r.Timestamp - previousStart).TotalDays)
+            .GroupBy(r => (int)((r.Timestamp - previousStart).TotalHours / binSizeHours))
             .ToDictionary(g => g.Key, g => g.Sum(r => r.Revenue));
 
         var points = new List<VelocityPointDto>(steps);
         for (var i = 0; i < steps; i++)
         {
-            var timestamp = isHourly ? currentStart.AddHours(i) : currentStart.AddDays(i);
+            var timestamp = isHourly 
+                ? currentStart.AddHours((i + 1) * binSizeHours) 
+                : currentStart.AddDays(i);
+
+            if (isHourly && i == steps - 1)
+            {
+                timestamp = currentEnd;
+            }
+
             var cur = currentByStep.GetValueOrDefault(i, 0m);
             var prev = previousByStep.GetValueOrDefault(i, 0m);
             points.Add(new VelocityPointDto(
@@ -308,17 +298,17 @@ public class FinancialService(IApplicationDbContextFactory contextFactory) : IFi
         }
 
         var binnedSteps = isHourly ? steps : (int)Math.Ceiling((double)steps / binSizeDays);
+        var roundedTotalHours = Math.Ceiling((currentEnd - currentStart).TotalHours);
+        var binSizeHours = isHourly 
+            ? roundedTotalHours / binnedSteps 
+            : binSizeDays * 24;
 
         var currentByStep = currentRows
-            .GroupBy(r => isHourly 
-                ? (int)(r.Timestamp - currentStart).TotalHours 
-                : (int)(r.Timestamp - currentStart).TotalDays / binSizeDays)
+            .GroupBy(r => (int)((r.Timestamp - currentStart).TotalHours / binSizeHours))
             .ToDictionary(g => g.Key, g => g.Sum(r => r.Revenue));
 
         var previousByStep = previousRows
-            .GroupBy(r => isHourly 
-                ? (int)(r.Timestamp - previousStart).TotalHours 
-                : (int)(r.Timestamp - previousStart).TotalDays / binSizeDays)
+            .GroupBy(r => (int)((r.Timestamp - previousStart).TotalHours / binSizeHours))
             .ToDictionary(g => g.Key, g => g.Sum(r => r.Revenue));
 
         var points = new List<AccumulatedRevenuePointDto>(binnedSteps);
@@ -327,7 +317,14 @@ public class FinancialService(IApplicationDbContextFactory contextFactory) : IFi
 
         for (var i = 0; i < binnedSteps; i++)
         {
-            var timestamp = isHourly ? currentStart.AddHours(i) : currentStart.AddDays(i * binSizeDays);
+            var timestamp = isHourly 
+                ? currentStart.AddHours((i + 1) * binSizeHours) 
+                : currentStart.AddDays(i * binSizeDays);
+
+            if (isHourly && i == binnedSteps - 1)
+            {
+                timestamp = currentEnd;
+            }
             
             var curRev = currentByStep.GetValueOrDefault(i, 0m);
             var prevRev = previousByStep.GetValueOrDefault(i, 0m);

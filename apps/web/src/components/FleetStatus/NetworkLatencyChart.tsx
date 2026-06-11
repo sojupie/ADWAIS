@@ -53,17 +53,19 @@ const GraphTooltip = ({ active, payload, label }: GraphTooltipProps) => {
   );
 };
 
-import { ChartSkeleton } from '../common/charts/ChartSkeleton';
+import { ChartPanel } from '../common/charts/ChartPanel';
 import { EmptyState } from '../common/ui/EmptyState';
 
 export const NetworkLatencyChart = memo(function NetworkLatencyChart({ 
   isLoading, 
+  isStale,
   points, 
   title = "Network Latency", 
   className,
   comparison = 'Preceding'
 }: { 
   isLoading?: boolean; 
+  isStale?: boolean;
   points: LatencyPoint[]; 
   title?: string; 
   className?: string;
@@ -76,80 +78,77 @@ export const NetworkLatencyChart = memo(function NetworkLatencyChart({
     label: formatChartLabel(p.timestamp, binSize, i)
   }));
 
+  const legend = (
+    <div className="flex gap-4 text-[10px] font-black text-slate-500 uppercase tracking-widest bg-slate-50 px-3 py-1 rounded-full border border-slate-100">
+      <div className="flex items-center gap-1.5">
+        <div className="w-2.5 h-2.5 rounded-full bg-brand-btn-primary"></div>
+        <span>Current</span>
+      </div>
+      <div className="flex items-center gap-1.5">
+        <div className="w-2.5 h-2.5 rounded-full border-2 border-slate-300 border-dashed bg-transparent"></div>
+        <span>Previous</span>
+      </div>
+    </div>
+  );
 
-  if (isLoading) {
-    return <ChartSkeleton />;
-  }
+  const isEmpty = points.length === 0;
 
   return (
-      <div className={`w-full h-full flex-1 min-h-0 flex flex-col ${className || ''}`}>
-        <div className="flex justify-between items-start mb-8">
-          <div className="flex flex-col gap-0.5">
-            <h2 className="text-sm font-black text-slate-500 uppercase tracking-[0.15em]">{title}</h2>
-            <span className="text-[10px] font-medium text-slate-400">
-              {comparison === 'YearOverYear' ? 'vs. Same Period Last Year' : 'vs. Preceding Period'}
-            </span>
-          </div>
-          <div className="flex gap-6 text-[11px] font-black text-slate-500 uppercase tracking-widest bg-slate-50 px-4 py-2 rounded-full border border-slate-100">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-brand-btn-primary"></div>
-              <span>Current</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full border-2 border-slate-300 border-dashed bg-transparent"></div>
-              <span>Previous</span>
-            </div>
-          </div>
-        </div>
-        
-        <div className="flex-1 w-full min-h-0">
-          {points.length === 0 ? (
-            <EmptyState message="No latency data available" variant="minimal" />
-          ) : (
-            <ResponsiveContainer width="100%" height="100%" debounce={150}>
-              <LineChart data={chartData} margin={{ top: 10, right: 20, left: -5, bottom: 10 }}>
-                <CartesianGrid vertical={false} stroke="var(--color-chart-grid)" strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="label" 
-                  fontSize={12} 
-                  tick={{ fill: 'var(--color-chart-tick)', fontWeight: 700, fontFamily: 'Manrope, sans-serif' }} 
-                  tickMargin={15} 
-                  axisLine={false} 
-                  tickLine={false} 
-                />
-                <YAxis 
-                  fontSize={12} 
-                  tick={{ fill: 'var(--color-chart-tick)', fontWeight: 700, fontFamily: 'Manrope, sans-serif' }} 
-                  axisLine={false} 
-                  tickLine={false}
-                  tickFormatter={(v) => `${v}ms`}
-                />
-                <Tooltip content={<GraphTooltip />} useTranslate3d={true} />
-                <Line 
-                  type="monotone" 
-                  dataKey="previousAverage" 
-                  name="Previous Period" 
-                  stroke="var(--color-chart-prev-line)" 
-                  strokeWidth={2} 
-                  strokeDasharray="6 6" 
-                  dot={false}
-                  activeDot={false}
-                  isAnimationActive={false}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="average" 
-                  name="Current Period" 
-                  stroke="var(--color-brand-btn-primary)" 
-                  strokeWidth={4} 
-                  dot={false}
-                  activeDot={{ r: 6, fill: 'var(--color-brand-btn-primary)', stroke: '#fff', strokeWidth: 3 }} 
-                  isAnimationActive={false}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          )}
-        </div>
-      </div>
+    <ChartPanel
+      isLoading={isLoading}
+      isStale={isStale}
+      title={title}
+      comparison={comparison}
+      legend={legend}
+      className={className}
+      bodyClassName={isEmpty ? "flex items-center justify-center" : "w-full h-full flex flex-col flex-1 min-h-0"}
+    >
+      {isEmpty ? (
+        <EmptyState message="No latency data available" variant="minimal" />
+      ) : (
+        <ResponsiveContainer width="100%" height="100%" debounce={150}>
+          <LineChart data={chartData} margin={{ top: 10, right: 20, left: -5, bottom: 10 }}>
+            <CartesianGrid vertical={false} stroke="var(--color-chart-grid)" strokeDasharray="3 3" />
+            <XAxis 
+              dataKey="label" 
+              fontSize={12} 
+              tick={{ fill: 'var(--color-chart-tick)', fontWeight: 700, fontFamily: 'Manrope, sans-serif' }} 
+              tickMargin={15} 
+              axisLine={false} 
+              tickLine={false} 
+            />
+            <YAxis 
+              fontSize={12} 
+              tick={{ fill: 'var(--color-chart-tick)', fontWeight: 700, fontFamily: 'Manrope, sans-serif' }} 
+              axisLine={false} 
+              tickLine={false}
+              tickFormatter={(v) => `${v}ms`}
+            />
+            <Tooltip content={<GraphTooltip />} useTranslate3d={true} />
+            <Line 
+              type="monotone" 
+              dataKey="previousAverage" 
+              name="Previous Period" 
+              stroke="var(--color-chart-prev-line)" 
+              strokeWidth={2} 
+              strokeDasharray="6 6" 
+              dot={false}
+              activeDot={false}
+              isAnimationActive={false}
+            />
+            <Line 
+              type="monotone" 
+              dataKey="average" 
+              name="Current Period" 
+              stroke="var(--color-brand-btn-primary)" 
+              strokeWidth={4} 
+              dot={false}
+              activeDot={{ r: 6, fill: 'var(--color-brand-btn-primary)', stroke: '#fff', strokeWidth: 3 }} 
+              isAnimationActive={false}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      )}
+    </ChartPanel>
   );
 });

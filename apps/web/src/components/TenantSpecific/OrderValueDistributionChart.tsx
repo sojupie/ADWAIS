@@ -43,9 +43,9 @@ const CustomTooltip = ({ active, payload, label }: { isLoading?: boolean;  activ
   );
 };
 
-export const OrderValueDistributionChart = memo(function OrderValueDistributionChart({ isLoading, bins, className }: { isLoading?: boolean;  bins: OrderBin[], className?: string }) {
+export const OrderValueDistributionChart = memo(function OrderValueDistributionChart({ isLoading, isStale, bins, className }: { isLoading?: boolean; isStale?: boolean; bins: OrderBin[], className?: string }) {
   return (
-    <ChartPanel isLoading={isLoading}
+    <ChartPanel isLoading={isLoading} isStale={isStale}
       title="Order Distribution & Shipping Threshold"
       className={className || ''}
       bodyClassName="w-full h-full flex flex-col flex-1 min-h-0"

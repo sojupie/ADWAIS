@@ -111,6 +111,7 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe,
         <AccumulatedRevenueChart 
           points={accumulatedQuery.data || EMPTY_ACCUMULATED} 
           isLoading={accumulatedQuery.isLoading} 
+          isStale={accumulatedQuery.isPlaceholderData}
           comparison="YearOverYear"
           className="h-full min-h-87.5"
         />
@@ -118,12 +119,14 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe,
         <TransactionDensityChart
           points={densityQuery.data || EMPTY_DENSITY}
           isLoading={densityQuery.isLoading}
+          isStale={densityQuery.isPlaceholderData}
           className="h-full min-h-87.5"
         />
 
         <CumulativeGrowthDeltaChart 
           points={deltaQuery.data || EMPTY_DELTA} 
           isLoading={deltaQuery.isLoading} 
+          isStale={deltaQuery.isPlaceholderData}
           comparison="YearOverYear"
           className="h-full min-h-87.5"
         />
@@ -131,6 +134,7 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe,
         <OrderValueDistributionChart 
           bins={orderQuery.data || EMPTY_BINS} 
           isLoading={orderQuery.isLoading} 
+          isStale={orderQuery.isPlaceholderData}
           className="h-full min-h-87.5"
         />
       </DashboardFlexRow>

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { createRootRoute, Outlet, useSearch } from '@tanstack/react-router';
+import { createRootRoute, Outlet, useSearch, useRouterState } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient, useIsFetching, useIsMutating } from '@tanstack/react-query';
 import { Settings, WifiOff, ServerCrash } from 'lucide-react';
 import { KioskControls } from '../components/common/dashboard/KioskControls';
 import { KioskProvider } from '../components/common/dashboard/KioskProvider';
@@ -19,6 +19,25 @@ function RootComponent() {
   const financialTf = getSavedTimeframe('/financial');
   const fleetTf = getSavedTimeframe('/fleet-status');
   const queryClient = useQueryClient();
+  const isFetching = useIsFetching();
+  const isMutating = useIsMutating();
+  const isNavigating = useRouterState({ select: (s) => s.status === 'pending' });
+
+  const showProgressBar = isNavigating || isFetching > 0 || isMutating > 0;
+
+  const [debouncedShow, setDebouncedShow] = useState(false);
+
+  useEffect(() => {
+    let timer: any;
+    if (showProgressBar) {
+      setDebouncedShow(true);
+    } else {
+      timer = setTimeout(() => {
+        setDebouncedShow(false);
+      }, 800);
+    }
+    return () => clearTimeout(timer);
+  }, [showProgressBar]);
 
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isBackendOnline, setIsBackendOnline] = useState(true);
@@ -73,7 +92,7 @@ function RootComponent() {
     <KioskProvider>
       <div className="flex flex-col h-screen w-screen bg-brand-bg-tertiary overflow-hidden select-none font-sans text-brand-text">
         {/* ── Header ── */}
-        <header className="flex flex-col xl:flex-row justify-between items-center px-6 py-3 shrink-0 bg-brand-bg-secondary border-b border-brand-bg-secondary/20 shadow-sm z-10 gap-4 xl:gap-0">
+        <header className="relative flex flex-col xl:flex-row justify-between items-center px-6 py-3 shrink-0 bg-brand-bg-secondary border-b border-brand-bg-secondary/20 shadow-sm z-10 gap-4 xl:gap-0">
           <div className="w-full xl:w-1/4 flex justify-center xl:justify-start">
             <img className="h-8 w-auto object-contain object-left brightness-0 invert" src={motilloLogo} alt="Motillo" height="32" />
           </div>
@@ -110,6 +129,26 @@ function RootComponent() {
             )}
             <KioskControls />
           </div>
+
+          {debouncedShow && (
+            <>
+              <style>{`
+                @keyframes loading-bar {
+                  0% { left: -40%; width: 40%; }
+                  100% { left: 100%; width: 40%; }
+                }
+                .animate-loading-bar {
+                  animation: loading-bar 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+                  box-shadow: 0 0 16px 3px var(--color-brand-accent), 0 0 8px 1px var(--color-brand-accent), 0 0 4px var(--color-brand-accent);
+                }
+              `}</style>
+              <div 
+                className={`absolute bottom-0 left-0 right-0 h-[6px] translate-y-full z-50 overflow-hidden bg-brand-accent/10 pointer-events-none transition-opacity duration-300 ${showProgressBar ? 'opacity-100' : 'opacity-0'}`}
+              >
+                <div className="absolute top-0 bottom-0 bg-brand-accent animate-loading-bar rounded-full" style={{ left: '-40%', width: '40%' }} />
+              </div>
+            </>
+          )}
         </header>
 
         {/* ── Main Area ── */}

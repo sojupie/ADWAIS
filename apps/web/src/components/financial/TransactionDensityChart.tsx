@@ -21,8 +21,8 @@ const getColor = (value: number, min: number, max: number) => {
 };
 
 export const TransactionDensityChart = memo(function TransactionDensityChart({
-  isLoading, points,
-  className }: { isLoading?: boolean; 
+  isLoading, isStale, points,
+  className }: { isLoading?: boolean; isStale?: boolean;
   points: TransactionDensityPointDto[];
   className?: string;
 }) {
@@ -50,7 +50,7 @@ export const TransactionDensityChart = memo(function TransactionDensityChart({
   });
 
   return (
-    <ChartPanel isLoading={isLoading}
+    <ChartPanel isLoading={isLoading} isStale={isStale}
       title="Transaction Density Matrix"
       className={className || "h-full relative"}
       bodyClassName={isEmpty ? 'flex items-center justify-center' : 'flex-1 min-h-0 flex flex-col p-4'}

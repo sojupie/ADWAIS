@@ -121,20 +121,14 @@ export function FleetStatus() {
              defaultDegradedFloor={vm.defaultDegradedFloor}
           />
 
-          <div className="flex-1 bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-3 flex flex-col min-h-0 relative overflow-hidden">
-              {vm.analyticsQuery.isPlaceholderData && !vm.analyticsQuery.isLoading && (
-                  <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-20 flex flex-col items-center justify-center animate-in fade-in duration-200">
-                     <div className="w-8 h-8 rounded-full border-2 border-brand-accent border-t-transparent animate-spin opacity-80" />
-                     <span className="text-[10px] font-bold text-brand uppercase tracking-widest mt-2 bg-white/80 px-2 py-1 rounded">Updating...</span>
-                  </div>
-              )}
-              <NetworkLatencyChart 
-                 points={vm.analyticsQuery.data?.latencyPoints || EMPTY_LATENCY}
-                 title={`Latency: ${vm.activeScopeName}`}
-                 isLoading={vm.analyticsQuery.isLoading}
-                 comparison="Preceding"
-              />
-          </div>
+          <NetworkLatencyChart 
+             points={vm.analyticsQuery.data?.latencyPoints || EMPTY_LATENCY}
+             title={`Latency: ${vm.activeScopeName}`}
+             isLoading={vm.analyticsQuery.isLoading}
+             isStale={vm.analyticsQuery.isPlaceholderData}
+             comparison="Preceding"
+             className="flex-1 min-h-0"
+          />
 
         </div>
       </DashboardFlexRow>

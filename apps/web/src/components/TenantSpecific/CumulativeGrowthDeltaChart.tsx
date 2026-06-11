@@ -40,7 +40,7 @@ const CustomTooltip = ({ active, payload, label }: { isLoading?: boolean;  activ
   );
 };
 
-export const CumulativeGrowthDeltaChart = memo(function CumulativeGrowthDeltaChart({ isLoading, points, comparison, className }: { isLoading?: boolean;  points: CumulativeGrowthDeltaPoint[], comparison?: ComparisonPeriod, className?: string }) {
+export const CumulativeGrowthDeltaChart = memo(function CumulativeGrowthDeltaChart({ isLoading, isStale, points, comparison, className }: { isLoading?: boolean; isStale?: boolean; points: CumulativeGrowthDeltaPoint[], comparison?: ComparisonPeriod, className?: string }) {
   const isHourly = points.length > 0 && points.length <= 24;
   const binSize = inferBinSize(points.map(p => p.timestamp), isHourly);
   const chartData = points.map((p, i) => ({
@@ -49,7 +49,7 @@ export const CumulativeGrowthDeltaChart = memo(function CumulativeGrowthDeltaCha
   }));
 
   return (
-    <ChartPanel isLoading={isLoading}
+    <ChartPanel isLoading={isLoading} isStale={isStale}
       title="Cumulative Growth Delta (Absolute)"
       comparison={comparison}
       className={className || ''}

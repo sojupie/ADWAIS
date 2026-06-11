@@ -1,4 +1,5 @@
 import { useState, Fragment, memo } from 'react';
+import { createPortal } from 'react-dom';
 import type { TransactionDensityPointDto } from '@types';
 import { formatCurrency } from '@utils';
 import { ChartPanel } from '../common/charts/ChartPanel';
@@ -107,7 +108,7 @@ export const TransactionDensityChart = memo(function TransactionDensityChart({
           </div>
 
           {/* Custom Tooltip */}
-          {hoverInfo && (
+          {hoverInfo && createPortal(
             <div 
               className="fixed z-50 bg-white border border-slate-100 rounded-lg shadow-lg p-4 text-sm pointer-events-none transform -translate-x-1/2 -translate-y-full w-48"
               style={{ left: hoverInfo.x, top: hoverInfo.y }}
@@ -125,7 +126,8 @@ export const TransactionDensityChart = memo(function TransactionDensityChart({
                   <strong className="text-slate-700">{formatCurrency(hoverInfo.revenue)}</strong>
                 </p>
               </div>
-            </div>
+            </div>,
+            document.body
           )}
 
         </div>

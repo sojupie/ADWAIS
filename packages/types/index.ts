@@ -44,7 +44,7 @@ export type UptimeMonitorDto = {
   updateInterval: number;
   latencyDegradedFloor: number | null;
   uptimeSla: number | null;
-  currentUptimePercentage: number;
+  currentUptimePercentage: number | null;
   currentLatency: number | null;
   uptimeMonitorEnabled: boolean;
   currentStatus: string;
@@ -53,6 +53,7 @@ export type UptimeMonitorDto = {
   lastLatencyUpdate: string | null;
   createdDate: string;
   lastSyncError: string | null;
+  tags?: string[] | null;
 };
 
 export type TenantResponseDto = {
@@ -96,13 +97,14 @@ export type UserResponseDto = {
   role: string;
 };
 
-export type GlobalConfigDto = Required<Omit<Generated.GlobalConfigResponseDto, 'lastPolled' | 'latencyDegradedFloor' | 'uptimeRobotApiKey' | 'monitorsCount' | 'monitorsLimit' | 'activeSubscription'>> & {
+export type GlobalConfigDto = Required<Omit<Generated.GlobalConfigResponseDto, 'lastPolled' | 'latencyDegradedFloor' | 'uptimeRobotApiKey' | 'monitorsCount' | 'monitorsLimit' | 'activeSubscription' | 'defaultUptimeSla'>> & {
   lastPolled: string | null;
   latencyDegradedFloor?: number | null;
   uptimeRobotApiKey?: string | null;
   monitorsCount?: number | null;
   monitorsLimit?: number | null;
   activeSubscription?: string | null;
+  defaultUptimeSla?: number | null;
   retentionDays: number;
   lastSyncError: string | null;
 };

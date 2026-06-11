@@ -21,8 +21,8 @@ export function ChartPanel({ title, subtitle, comparison, legend, bodyClassName 
       <div className={`bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-4 flex flex-col h-full min-h-0 relative overflow-hidden ${className}`} style={{ contain: 'layout style paint', contentVisibility: 'auto', containIntrinsicSize: 'auto 350px' }}>
         {isStale && !isLoading && (
             <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-20 flex flex-col items-center justify-center animate-in fade-in duration-200">
-               <Loader2 size={32} className="text-brand-accent animate-spin opacity-80" />
-               <span className="text-[10px] font-bold text-brand-accent uppercase tracking-widest mt-2 bg-white/80 px-2 py-1 rounded">Updating...</span>
+               <Loader2 size={32} className="text-brand animate-spin opacity-80" />
+               <span className="text-[10px] font-bold text-brand uppercase tracking-widest mt-2 bg-white/80 px-2 py-1 rounded">Updating...</span>
             </div>
         )}
         <div className="flex justify-between items-start mb-2 z-10">

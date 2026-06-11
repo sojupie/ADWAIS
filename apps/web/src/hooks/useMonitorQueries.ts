@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiFetch } from '../apiClient';
-import type { UptimeMonitorDto, ComparisonPeriod } from '@types';
+import type { UptimeMonitorDto, ComparisonPeriod, UpdateMonitorRequestDto } from '@types';
 import { buildUrl } from './useBuildUrl.ts';
 
 export function useMonitorsQuery(timeframe?: string, tenantId?: string | null, comparison?: ComparisonPeriod) {
@@ -47,7 +47,7 @@ export function useControlMonitorMutation() {
 export function useUpdateMonitorMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, payload }: { id: number; payload: Partial<UptimeMonitorDto> }) => 
+    mutationFn: ({ id, payload }: { id: number; payload: UpdateMonitorRequestDto }) => 
       apiFetch<UptimeMonitorDto>(`/api/monitors/${id}`, { 
         method: 'PATCH', 
         body: JSON.stringify(payload) 

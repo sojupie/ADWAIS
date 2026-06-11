@@ -1,9 +1,10 @@
-﻿import { useFleetAnalytics, useFleetMonitors } from "./useFleetQueries.ts";
+import { useFleetAnalytics, useFleetMonitors } from "./useFleetQueries.ts";
 import { useMemo, useState } from "react";
 import { normalizeStatus } from "../utils/monitorStatusHelper.ts";
 import type { UptimeMonitorDto } from "@types";
 import { useSearch } from "@tanstack/react-router";
 import type { Timeframe } from "../schemas";
+import { useGlobalConfigQuery } from "./useJobSettingsQueries.ts";
 
 export function useFleetStatusViewModel() {
     // Reactively subscribe to the URL state. 
@@ -15,6 +16,10 @@ export function useFleetStatusViewModel() {
 
     const analyticsQuery = useFleetAnalytics(timeframe, selection?.tenantId, selection?.monitorId);
     const globalMonitorsQuery = useFleetMonitors(timeframe);
+    const { data: config } = useGlobalConfigQuery();
+
+    const defaultSla = config?.defaultUptimeSla ?? null;
+    const defaultDegradedFloor = config?.latencyDegradedFloor ?? null;
 
     const allMonitorsInSystem = globalMonitorsQuery.data ?? [];
     const tenantMonitors = selection ? allMonitorsInSystem.filter(m => m.tenantId === selection.tenantId) : allMonitorsInSystem;
@@ -35,16 +40,18 @@ export function useFleetStatusViewModel() {
 
         const degraded = enabled.filter(m => {
             const s = normalizeStatus(m.currentStatus);
-            const isUp = s === 'UP' || s === 'OPERATIONAL' || s === 'UNKNOWN' || s === 'PAUSED';
-            return isUp && m.currentLatency && m.latencyDegradedFloor && m.currentLatency > m.latencyDegradedFloor;
+            const isUp = s === 'UP' || s === 'PAUSED' || s === 'STARTING' || s === 'UNKNOWN';
+            const floor = m.latencyDegradedFloor ?? defaultDegradedFloor;
+            return isUp && m.currentLatency !== null && m.currentLatency !== undefined && floor !== null && floor !== undefined && m.currentLatency > floor;
         });
 
-        const avgUptime = enabled.length > 0
-            ? enabled.reduce((acc, m) => acc + m.currentUptimePercentage, 0) / enabled.length
-            : 0;
+        const uptimeMonitors = enabled.filter(m => m.currentUptimePercentage !== null && m.currentUptimePercentage !== undefined);
+        const avgUptime = uptimeMonitors.length > 0
+            ? uptimeMonitors.reduce((acc, m) => acc + (m.currentUptimePercentage ?? 0), 0) / uptimeMonitors.length
+            : null;
 
         return { total: scopedMonitors.length, enabled, highestLatency, lowestLatency, avgLatency, down, degraded, avgUptime };
-    }, [scopedMonitors]);
+    }, [scopedMonitors, defaultDegradedFloor]);
 
     const handleMonitorSelect = (monitor: UptimeMonitorDto) => {
         if (!selection) {
@@ -82,6 +89,8 @@ export function useFleetStatusViewModel() {
         fleetStats,
         handleMonitorSelect,
         selectedTenantName,
-        activeScopeName
+        activeScopeName,
+        defaultSla,
+        defaultDegradedFloor
     }
 }

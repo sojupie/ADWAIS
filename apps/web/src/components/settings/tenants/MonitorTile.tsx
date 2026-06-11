@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Play, Pause, Link2, Unlink2, X } from 'lucide-react';
-import type { UptimeMonitorDto, TenantResponseDto } from '@types';
+import type { UptimeMonitorDto, TenantResponseDto, UpdateMonitorRequestDto } from '@types';
 import { TileCard } from '../../common/layout/TileCard';
 import { TileSaveBar } from '../../common/ui/TileSaveBar';
 
@@ -18,7 +18,7 @@ function normalizeStatus(status?: string | number): string {
 interface MonitorTileProps {
   m: UptimeMonitorDto;
   updateMonitor: {
-    mutate: (variables: { id: number; payload: Partial<UptimeMonitorDto> }) => void;
+    mutate: (variables: { id: number; payload: UpdateMonitorRequestDto }) => void;
     isPending: boolean;
   };
   toggleMonitor: {
@@ -51,25 +51,52 @@ export function MonitorTile({
 }: MonitorTileProps) {
   const isUnassigned = !m.tenantId || m.tenantId === SYSTEM_TENANT_ID;
 
-  const [draft, setDraft] = useState({
+  const [draft, setDraft] = useState<{
+    name: string;
+    url: string;
+    uptimeSla: number | '';
+    tags: string[];
+  }>({
     name: m.name || '',
-    url: m.url || ''
+    url: m.url || '',
+    uptimeSla: m.uptimeSla ?? '',
+    tags: m.tags || []
   });
 
-  const isDirty = draft.name !== (m.name || '') || draft.url !== (m.url || '');
+  const [tagInput, setTagInput] = useState('');
+
+  const tagsEqual = (a: string[], b: string[]) => {
+    if (a.length !== b.length) return false;
+    return a.every((val, index) => val === b[index]);
+  };
+
+  const isDirty =
+    draft.name !== (m.name || '') ||
+    draft.url !== (m.url || '') ||
+    draft.uptimeSla !== (m.uptimeSla ?? '') ||
+    !tagsEqual(draft.tags, m.tags || []);
 
   const handleSave = () => {
-    const payload: Partial<UptimeMonitorDto> = {};
+    const payload: UpdateMonitorRequestDto = {};
     if (draft.name !== (m.name || '')) payload.name = draft.name;
     if (draft.url !== (m.url || '')) payload.url = draft.url;
+    if (draft.uptimeSla !== (m.uptimeSla ?? '')) {
+      payload.sla = draft.uptimeSla === '' ? null : Number(draft.uptimeSla);
+    }
+    if (!tagsEqual(draft.tags, m.tags || [])) {
+      payload.tags = draft.tags;
+    }
     updateMonitor.mutate({ id: m.id, payload });
   };
 
   const handleCancel = () => {
     setDraft({
       name: m.name || '',
-      url: m.url || ''
+      url: m.url || '',
+      uptimeSla: m.uptimeSla ?? '',
+      tags: m.tags || []
     });
+    setTagInput('');
   };
 
   const assignableTenants = (tenants || []).filter(t => t.id !== SYSTEM_TENANT_ID);
@@ -111,6 +138,59 @@ export function MonitorTile({
           onChange={e => setDraft({...draft, url: e.target.value})}
           className="text-sm font-semibold text-slate-800 bg-transparent hover:bg-slate-50 focus:bg-white focus:ring-2 focus:ring-brand-link/20 border border-transparent hover:border-slate-200 focus:border-brand-link/30 rounded px-2 py-1 -ml-2 transition-all outline-none"
           placeholder="https://..."
+        />
+      </div>
+
+      <div className="flex gap-4 mt-2">
+        <div className="flex flex-col gap-1 flex-1">
+          <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Uptime SLA (%)</label>
+          <input
+            type="number"
+            step="0.01"
+            min="0"
+            max="100"
+            value={draft.uptimeSla}
+            onChange={e => setDraft({...draft, uptimeSla: e.target.value === '' ? '' : Number(e.target.value)})}
+            className="text-sm font-semibold text-slate-800 bg-transparent hover:bg-slate-50 focus:bg-white focus:ring-2 focus:ring-brand-link/20 border border-transparent hover:border-slate-200 focus:border-brand-link/30 rounded px-2 py-1 -ml-2 transition-all outline-none"
+            placeholder="e.g. 99.5"
+          />
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-1 mt-2">
+        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Tags</label>
+        <div className="flex flex-wrap gap-1 mb-1.5 items-center">
+          {draft.tags.map((tag) => (
+            <span
+              key={tag}
+              className="text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider bg-slate-100 border border-slate-200 text-slate-600 flex items-center gap-1"
+            >
+              {tag}
+              <button
+                type="button"
+                onClick={() => setDraft({ ...draft, tags: draft.tags.filter(t => t !== tag) })}
+                className="hover:text-red-600 focus:outline-none ml-0.5"
+              >
+                <X size={10} />
+              </button>
+            </span>
+          ))}
+        </div>
+        <input
+          value={tagInput}
+          onChange={e => setTagInput(e.target.value)}
+          onKeyDown={e => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              const trimmed = tagInput.trim().toUpperCase();
+              if (trimmed && !draft.tags.includes(trimmed)) {
+                setDraft({ ...draft, tags: [...draft.tags, trimmed] });
+                setTagInput('');
+              }
+            }
+          }}
+          className="text-xs font-semibold text-slate-800 bg-transparent hover:bg-slate-50 focus:bg-white focus:ring-2 focus:ring-brand-link/20 border border-transparent hover:border-slate-200 focus:border-brand-link/30 rounded px-2 py-1 -ml-2 transition-all outline-none"
+          placeholder="+ Add tag (Press Enter)"
         />
       </div>
 

@@ -54,7 +54,7 @@ export function FleetStatus() {
       <DashboardTopRow>
         <FactPanel
           label={`Uptime: ${vm.activeScopeName}`}
-          value={vm.globalMonitorsQuery.isLoading ? '...' : `${vm.fleetStats.avgUptime.toFixed(3)}%`}
+          value={vm.globalMonitorsQuery.isLoading ? '...' : (vm.fleetStats.avgUptime !== null && vm.fleetStats.avgUptime !== undefined ? `${vm.fleetStats.avgUptime.toFixed(3)}%` : 'N/A')}
           isLoading={vm.globalMonitorsQuery.isLoading}
         />
         
@@ -117,6 +117,8 @@ export function FleetStatus() {
           <SlaBreachWatchlist
              monitors={vm.scopedMonitors}
              onClearSelection={vm.selection ? () => vm.setSelection(null) : undefined}
+             defaultSla={vm.defaultSla}
+             defaultDegradedFloor={vm.defaultDegradedFloor}
           />
 
           <div className="flex-1 bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-3 flex flex-col min-h-0 relative overflow-hidden">

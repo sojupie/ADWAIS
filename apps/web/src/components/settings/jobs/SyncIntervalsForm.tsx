@@ -46,6 +46,12 @@ export function SyncIntervalsForm({ config, updateConfig }: SyncIntervalsFormPro
             onSave={(val) => updateConfig.mutate({ latencyDegradedFloor: val })}
           />
           <InlineEditField
+            label="Default Uptime SLA (%)"
+            value={config.defaultUptimeSla ?? 99.9}
+            type="number"
+            onSave={(val) => updateConfig.mutate({ defaultUptimeSla: val })}
+          />
+          <InlineEditField
             label="Event Retention (Days)"
             value={config.systemEventRetentionDays ?? 30}
             type="number"

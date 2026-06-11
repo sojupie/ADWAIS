@@ -8,7 +8,7 @@ interface MonitorIssue {
   tenantId: string;
   tenantName: string;
   monitorName: string;
-  uptime: number;
+  uptime: number | null;
   isDown: boolean;
   isDegraded: boolean;
   isSlaBreach: boolean;
@@ -25,38 +25,44 @@ function formatPercent(val: number): string {
   return val.toFixed(3);
 }
 
-function buildIssues(monitors: UptimeMonitorDto[]): MonitorIssue[] {
+function buildIssues(
+  monitors: UptimeMonitorDto[],
+  defaultSla?: number | null,
+  defaultDegradedFloor?: number | null
+): MonitorIssue[] {
   const issues: MonitorIssue[] = [];
 
   monitors
     .filter((m) => m.uptimeMonitorEnabled)
     .forEach((m) => {
       const isDown = ['8', '9', 'DOWN', 'SEEMS DOWN', 'CRITICAL'].includes(m.currentStatus?.toString().toUpperCase().trim() || '');
-      const isDegraded = m.latencyDegradedFloor !== null && m.currentLatency !== null && m.currentLatency > m.latencyDegradedFloor;
+      const degradedFloor = m.latencyDegradedFloor ?? defaultDegradedFloor;
+      const isDegraded = degradedFloor !== null && degradedFloor !== undefined && m.currentLatency !== null && m.currentLatency > degradedFloor;
       
-      let slaThreshold = m.uptimeSla;
-      if (slaThreshold !== null && slaThreshold <= 1) {
+      let slaThreshold = m.uptimeSla ?? defaultSla;
+      if (slaThreshold !== null && slaThreshold !== undefined && slaThreshold <= 1) {
         slaThreshold = slaThreshold * 100;
       }
       
-      const isSlaBreach = slaThreshold !== null && m.currentUptimePercentage < slaThreshold;
+      const uptime = m.currentUptimePercentage;
+      const isSlaBreach = uptime !== null && uptime !== undefined && slaThreshold !== null && slaThreshold !== undefined && uptime < slaThreshold;
       
       if (!isDown && !isDegraded && !isSlaBreach) return;
 
-      const tenantName = m.tenantName || m.name.split('-')[0]?.trim() || 'Unknown';
+      const tenantName = m.tenantName || m.name?.split('-')[0]?.trim() || 'Unknown';
 
       issues.push({
-        id: m.id,
-        tenantId: m.tenantId,
+        id: m.id ?? 0,
+        tenantId: m.tenantId || '',
         tenantName: tenantName,
-        monitorName: m.name,
-        uptime: m.currentUptimePercentage,
-        latency: m.currentLatency,
+        monitorName: m.name || '',
+        uptime: uptime ?? null,
+        latency: m.currentLatency ?? null,
         isDown,
         isDegraded,
         isSlaBreach,
         slaLimit: slaThreshold ?? undefined,
-        degradedFloor: m.latencyDegradedFloor ?? undefined,
+        degradedFloor: degradedFloor ?? undefined,
       });
     });
 
@@ -64,12 +70,26 @@ function buildIssues(monitors: UptimeMonitorDto[]): MonitorIssue[] {
     .sort((a, b) => {
        const weightA = (a.isDown ? 300 : 0) + (a.isSlaBreach ? 200 : 0) + (a.isDegraded ? 100 : 0);
        const weightB = (b.isDown ? 300 : 0) + (b.isSlaBreach ? 200 : 0) + (b.isDegraded ? 100 : 0);
-       return weightB - weightA || a.uptime - b.uptime;
+       const uptimeA = a.uptime != null ? a.uptime : 100;
+       const uptimeB = b.uptime != null ? b.uptime : 100;
+       return weightB - weightA || uptimeA - uptimeB;
     });
 }
 
-export function SlaBreachWatchlist({ isLoading, monitors, onClearSelection }: { isLoading?: boolean; monitors: UptimeMonitorDto[], onClearSelection?: () => void }) {
-  const issues = useMemo(() => buildIssues(monitors), [monitors]);
+export function SlaBreachWatchlist({ 
+  isLoading, 
+  monitors, 
+  onClearSelection,
+  defaultSla,
+  defaultDegradedFloor
+}: { 
+  isLoading?: boolean; 
+  monitors: UptimeMonitorDto[]; 
+  onClearSelection?: () => void;
+  defaultSla?: number | null;
+  defaultDegradedFloor?: number | null;
+}) {
+  const issues = useMemo(() => buildIssues(monitors, defaultSla, defaultDegradedFloor), [monitors, defaultSla, defaultDegradedFloor]);
 
   return (
     <ChartPanel 
@@ -111,8 +131,8 @@ export function SlaBreachWatchlist({ isLoading, monitors, onClearSelection }: { 
                 <div className="flex justify-between items-end">
                   <div className="flex flex-col">
                     <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Uptime</span>
-                    <span className={`text-base font-black ${issue.slaLimit && issue.uptime < issue.slaLimit ? 'text-red-600' : 'text-slate-900'}`}>
-                      {formatPercent(issue.uptime)}%
+                    <span className={`text-base font-black ${issue.slaLimit && issue.uptime !== null && issue.uptime < issue.slaLimit ? 'text-red-600' : 'text-slate-900'}`}>
+                      {issue.uptime !== null ? `${formatPercent(issue.uptime)}%` : 'N/A'}
                     </span>
                   </div>
                   <div className="flex flex-col items-end">

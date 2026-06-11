@@ -1,5 +1,5 @@
-﻿import { Building2, Activity, Plus, X } from 'lucide-react';
-import { useState } from 'react';
+import { Building2, Activity, Plus, X } from 'lucide-react';
+import { useState, useMemo } from 'react';
 import { useTenantsQuery, useCreateTenantMutation, useDeleteTenantMutation, useUpdateTenantMutation } from '../../hooks/useTenantQueries';
 import { useMonitorsQuery, useUnassignedMonitorsQuery, useCreateMonitorMutation, useControlMonitorMutation, useUpdateMonitorMutation, useAssignMonitorMutation, useUnassignMonitorMutation } from '../../hooks/useMonitorQueries';
 import { TenantTile } from '../../components/settings/tenants/TenantTile';
@@ -28,6 +28,7 @@ export function TenantsMonitorsView() {
     const [monitorSort, setMonitorSort] = useState<'asc' | 'desc'>('asc');
     const [monitorFilter, setMonitorFilter] = useState<'all' | 'assigned' | 'unassigned'>('all');
     const [monitorSearch, setMonitorSearch] = useState('');
+    const [selectedTag, setSelectedTag] = useState<string>('all');
 
     // Queries & Mutations from custom hooks
     const { data: tenants } = useTenantsQuery();
@@ -53,13 +54,27 @@ export function TenantsMonitorsView() {
     });
     const unassignMonitor = useUnassignMonitorMutation();
 
-    // Consolidate monitor list
     const allMonitors = [...(monitors || []), ...(unassignedMonitors || [])].reduce((acc, curr) => {
         if (!acc.find((m) => m.id === curr.id)) {
             acc.push(curr);
         }
         return acc;
     }, [] as UptimeMonitorDto[]);
+
+    const allUniqueTags = useMemo(() => {
+        const tagsSet = new Set<string>();
+        allMonitors.forEach((m) => {
+            if (m.tags && Array.isArray(m.tags)) {
+                m.tags.forEach((t) => {
+                    const trimmed = t.trim().toUpperCase();
+                    if (trimmed) {
+                        tagsSet.add(trimmed);
+                    }
+                });
+            }
+        });
+        return Array.from(tagsSet).sort();
+    }, [allMonitors]);
 
     const SYSTEM_TENANT_ID = '00000000-0000-0000-0000-000000000001';
 
@@ -94,6 +109,9 @@ export function TenantsMonitorsView() {
         if (monitorFilter === 'assigned') return m.tenantId != null && m.tenantId !== SYSTEM_TENANT_ID;
         if (monitorFilter === 'unassigned') return m.tenantId == null || m.tenantId === SYSTEM_TENANT_ID;
         return true;
+    }).filter((m) => {
+        if (selectedTag === 'all') return true;
+        return m.tags && m.tags.map(t => t.trim().toUpperCase()).includes(selectedTag);
     }).sort((a, b) => {
         const nameA = a.name || '';
         const nameB = b.name || '';
@@ -190,6 +208,16 @@ export function TenantsMonitorsView() {
                         onChange={setMonitorSearch}
                         placeholder="Search monitors..."
                     />
+                    <select
+                        value={selectedTag}
+                        onChange={e => setSelectedTag(e.target.value)}
+                        className="text-sm font-semibold border border-slate-200 rounded-lg px-2 py-1.5 bg-slate-50 hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-link/20 cursor-pointer text-slate-700"
+                    >
+                        <option value="all">All Tags</option>
+                        {allUniqueTags.map(tag => (
+                            <option key={tag} value={tag}>{tag}</option>
+                        ))}
+                    </select>
                     <select
                         value={monitorFilter}
                         onChange={e => setMonitorFilter(e.target.value as 'all' | 'assigned' | 'unassigned')}

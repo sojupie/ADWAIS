@@ -1,10 +1,12 @@
 import type { UptimeMonitorDto } from '@types';
 import {normalizeStatus} from "../../utils/monitorStatusHelper.ts";
 
-function getMonitorStatus(monitor: UptimeMonitorDto): 'operational' | 'degraded' | 'down' | 'unknown' | 'paused' {
+function getMonitorStatus(monitor: UptimeMonitorDto): 'operational' | 'degraded' | 'down' | 'unknown' | 'paused' | 'starting' {
   const status = normalizeStatus(monitor.currentStatus);
+  if (status === 'STARTING') return 'starting';
   if (status === 'DOWN' || status === 'CRITICAL') return 'down';
-  if (status === 'UNKNOWN' || status === 'PAUSED') return 'unknown';
+  if (status === 'PAUSED') return 'paused';
+  if (status === 'UNKNOWN') return 'unknown';
   
   if (monitor.currentLatency && monitor.latencyDegradedFloor && monitor.currentLatency > monitor.latencyDegradedFloor) {
     return 'degraded';
@@ -69,6 +71,14 @@ export function FleetMatrix({
             valueText: 'text-slate-500',
             mutedText: 'text-slate-500',
             dot: 'bg-slate-400'
+          },
+          starting: {
+            bg: 'bg-indigo-50/50',
+            border: 'border-indigo-200',
+            text: 'text-indigo-900',
+            valueText: 'text-indigo-600',
+            mutedText: 'text-indigo-500',
+            dot: 'bg-indigo-400'
           }
         };
 
@@ -86,29 +96,41 @@ export function FleetMatrix({
               ${!monitor.uptimeMonitorEnabled ? 'grayscale opacity-50' : ''}
             `}
           >
-            <div className="flex justify-between items-start mb-2">
-              <div className="flex flex-col overflow-hidden pr-2">
+            <div className="flex justify-between items-start mb-2 w-full">
+              <div className="flex flex-col overflow-hidden pr-2 w-full">
                 <span className={`text-sm font-black ${theme.text} truncate uppercase tracking-tight leading-tight`}>
                   {tenantDisplay}
                 </span>
                 <span className={`text-[9px] font-bold ${theme.mutedText} uppercase tracking-widest mt-0.5 truncate`}>
                   {monitor.name}
                 </span>
+                {monitor.tags && monitor.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {monitor.tags.map((tag) => (
+                      <span 
+                        key={tag} 
+                        className="text-[8px] font-semibold px-1 py-0.5 rounded uppercase tracking-wider bg-slate-100 border border-slate-200 text-slate-600"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
               <div className={`w-2.5 h-2.5 rounded-full shrink-0 mt-1 ${theme.dot}`} />
             </div>
             
-            <div className="grid grid-cols-2 gap-x-2 mt-auto">
+            <div className="grid grid-cols-2 gap-x-2 mt-auto w-full">
               <div className="flex flex-col gap-0">
                 <span className={`text-[9px] ${theme.mutedText} uppercase font-bold tracking-widest`}>Uptime</span>
                 <span className={`text-base font-black ${theme.valueText}`}>
-                  {monitor.currentUptimePercentage.toFixed(2)}%
+                  {monitor.currentUptimePercentage != null ? `${monitor.currentUptimePercentage.toFixed(2)}%` : 'N/A'}
                 </span>
               </div>
               <div className="flex flex-col gap-0">
                 <span className={`text-[9px] ${theme.mutedText} uppercase font-bold tracking-widest`}>Latency</span>
                 <span className={`text-base font-black ${theme.valueText}`}>
-                  {(status === 'down' || status === 'unknown' || !Number(monitor.currentLatency)) ? 'N/A' : `${Math.round(Number(monitor.currentLatency))}ms`}
+                  {(status === 'down' || status === 'unknown' || status === 'paused' || status === 'starting' || !Number(monitor.currentLatency)) ? 'N/A' : `${Math.round(Number(monitor.currentLatency))}ms`}
                 </span>
               </div>
             </div>

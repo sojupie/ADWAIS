@@ -125,7 +125,7 @@ export function FleetStatus() {
               {vm.analyticsQuery.isPlaceholderData && !vm.analyticsQuery.isLoading && (
                   <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-20 flex flex-col items-center justify-center animate-in fade-in duration-200">
                      <div className="w-8 h-8 rounded-full border-2 border-brand-accent border-t-transparent animate-spin opacity-80" />
-                     <span className="text-[10px] font-bold text-brand-accent uppercase tracking-widest mt-2 bg-white/80 px-2 py-1 rounded">Updating...</span>
+                     <span className="text-[10px] font-bold text-brand uppercase tracking-widest mt-2 bg-white/80 px-2 py-1 rounded">Updating...</span>
                   </div>
               )}
               <NetworkLatencyChart 

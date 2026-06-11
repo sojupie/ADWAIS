@@ -55,14 +55,15 @@ public class UptimeRobotService(
             Url: response.RootElement.GetProperty("url").GetString()!,
             Status: response.RootElement.GetProperty("status").GetString()!,
             CreatedDate: response.RootElement.GetProperty("createDateTime").GetDateTimeOffset(),
-            UpdateInterval: response.RootElement.GetProperty("interval").GetInt32()
+            UpdateInterval: response.RootElement.GetProperty("interval").GetInt32(),
+            Tags: ParseTags(response.RootElement)
         );
         return monitor;
     }
 
-    public async Task UpdateMonitorAsync(int monitorId, string? name, string? url)
+    public async Task UpdateMonitorAsync(int monitorId, string? name, string? url, List<string>? tags)
     {
-        var payload = new Dictionary<string, string>();
+        var payload = new Dictionary<string, object>();
         if (name != null)
         {
             payload.Add("friendlyName", name);
@@ -70,6 +71,10 @@ public class UptimeRobotService(
         if (url != null)
         {
             payload.Add("url", url);
+        }
+        if (tags != null)
+        {
+            payload.Add("tagNames", tags);
         }
 
         if (payload.Count == 0)
@@ -107,10 +112,31 @@ public class UptimeRobotService(
                 Url: monitor.GetProperty("url").GetString()!,
                 Status: monitor.GetProperty("status").GetString()!,
                 CreatedDate: monitor.GetProperty("createDateTime").GetDateTimeOffset(),
-                UpdateInterval: monitor.GetProperty("interval").GetInt32()
+                UpdateInterval: monitor.GetProperty("interval").GetInt32(),
+                Tags: ParseTags(monitor)
             ));
         }
         return monitors;
+    }
+
+    private static List<string> ParseTags(JsonElement monitorElement)
+    {
+        var tagsList = new List<string>();
+        if (monitorElement.TryGetProperty("tags", out var tagsElement) && tagsElement.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var tag in tagsElement.EnumerateArray())
+            {
+                if (tag.TryGetProperty("name", out var nameElement) && nameElement.ValueKind == JsonValueKind.String)
+                {
+                    var tagName = nameElement.GetString();
+                    if (!string.IsNullOrEmpty(tagName))
+                    {
+                        tagsList.Add(tagName);
+                    }
+                }
+            }
+        }
+        return tagsList;
     }
     
     public async Task<double> GetUptimeAsync(int monitorId, DateTimeOffset? startDate = null, DateTimeOffset? endDate = null, string? monitorName = null)

@@ -65,6 +65,7 @@ public class MonitorSynchronizationJob(
                 local.CreatedDate = remote.CreatedDate;
                 local.StatusStr = remote.Status;
                 local.LastUpdate = DateTimeOffset.UtcNow;
+                local.Tags = remote.Tags;
             }
             else
             {
@@ -79,7 +80,8 @@ public class MonitorSynchronizationJob(
                     UptimeMonitorEnabled = monitorState,
                     CreatedDate = remote.CreatedDate,
                     StatusStr = remote.Status,
-                    LastUpdate = DateTimeOffset.UtcNow
+                    LastUpdate = DateTimeOffset.UtcNow,
+                    Tags = remote.Tags
                 });
             }
         }

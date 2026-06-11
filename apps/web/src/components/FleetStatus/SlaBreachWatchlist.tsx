@@ -142,20 +142,20 @@ export function SlaBreachWatchlist({
                     </span>
                   </div>
                 </div>
-                {(issue.slaLimit || issue.degradedFloor) && (
+                {(issue.slaLimit !== undefined && issue.slaLimit !== null || issue.degradedFloor !== undefined && issue.degradedFloor !== null) && (
                    <div className="mt-1 pt-1 border-t border-slate-100 flex justify-between items-center gap-2">
-                      {issue.slaLimit ? (
+                      {(issue.slaLimit !== undefined && issue.slaLimit !== null) ? (
                         <div className="flex flex-col">
                           <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">SLA Limit</span>
                           <span className="text-[9px] font-black text-slate-600 uppercase">{formatPercent(issue.slaLimit)}%</span>
                         </div>
                       ) : <div />}
-                      {issue.degradedFloor && (
+                      {(issue.degradedFloor !== undefined && issue.degradedFloor !== null) ? (
                         <div className="flex flex-col items-end text-right">
                           <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Degraded</span>
                           <span className="text-[9px] font-black text-slate-600 uppercase">{issue.degradedFloor}ms</span>
                         </div>
-                      )}
+                      ) : <div />}
                    </div>
                 )}
               </div>

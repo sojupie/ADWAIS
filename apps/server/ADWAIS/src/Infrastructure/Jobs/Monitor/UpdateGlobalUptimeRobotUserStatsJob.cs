@@ -8,7 +8,8 @@ namespace Adwais.Infrastructure.Jobs.Monitor;
 public class UpdateGlobalUptimeRobotUserStatsJob(
     IDbContextFactory<AnalyticsDbContext> dbContextFactory,
     IUptimeRobotService uptimeRobotService,
-    ILogger<UpdateGlobalUptimeRobotUserStatsJob> logger)
+    ILogger<UpdateGlobalUptimeRobotUserStatsJob> logger,
+    ISystemEventService eventService)
 {
     public async Task ExecuteAsync()
     {
@@ -33,9 +34,25 @@ public class UpdateGlobalUptimeRobotUserStatsJob(
         }
         catch (Exception ex)
         {
-            config.LastSyncError = ex.Message;
-            await db.SaveChangesAsync();
-            logger.LogError(ex, "Failed to update UptimeRobot global user stats.");
+            var detailedErrorMessage = $"Failed to update UptimeRobot global user stats: {ex.Message}";
+            try
+            {
+                await eventService.LogErrorAsync(nameof(UpdateGlobalUptimeRobotUserStatsJob), detailedErrorMessage, ex);
+            }
+            catch
+            {
+                // Suppress logging service failure
+            }
+
+            try
+            {
+                config.LastSyncError = detailedErrorMessage;
+                await db.SaveChangesAsync();
+            }
+            catch
+            {
+                // Suppress nested DB update failure
+            }
             throw;
         }
     }

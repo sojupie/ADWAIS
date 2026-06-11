@@ -48,7 +48,7 @@ export function useBackfillMutation(onSuccessCallback?: () => void) {
 export function useUpdateConfigMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: Partial<GlobalConfigDto & { uptimeRobotApiKey?: string; latencyDegradedFloor?: number; systemEventRetentionDays?: number; uptimeRobotFetchEnabled?: boolean }>) => 
+    mutationFn: (payload: Partial<GlobalConfigDto & { uptimeRobotApiKey?: string; latencyDegradedFloor?: number | null; systemEventRetentionDays?: number; uptimeRobotFetchEnabled?: boolean }>) => 
       apiFetch('/api/global-config', {
         method: 'PATCH',
         body: JSON.stringify(payload)

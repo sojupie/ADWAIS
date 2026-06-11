@@ -3,19 +3,17 @@ import { Trash2 } from 'lucide-react';
 import type { TenantResponseDto } from '@types';
 import { TileCard } from '../../common/layout/TileCard';
 import { TileSaveBar } from '../../common/ui/TileSaveBar';
+import { useUpdateTenantMutation } from '../../../hooks/useTenantQueries';
 
 interface TenantTileProps {
   t: TenantResponseDto;
-  updateTenant: {
-    mutate: (variables: { id: string; payload: Partial<TenantResponseDto> & { serviceAccountToken?: string } }) => void;
-    isPending: boolean;
-  };
   deleteTenant: {
     mutate: (id: string) => void;
   };
 }
 
-export function TenantTile({ t, updateTenant, deleteTenant }: TenantTileProps) {
+export function TenantTile({ t, deleteTenant }: TenantTileProps) {
+  const updateTenant = useUpdateTenantMutation();
   const [draft, setDraft] = useState({
     name: t.name,
     type: t.type ?? 'Mixed',
@@ -38,7 +36,17 @@ export function TenantTile({ t, updateTenant, deleteTenant }: TenantTileProps) {
     if (draft.litiumBaseUrl !== (t.litiumBaseUrl || '')) payload.litiumBaseUrl = draft.litiumBaseUrl;
     if (draft.serviceAccountToken !== '') payload.serviceAccountToken = draft.serviceAccountToken;
     if (draft.orderFetchingEnabled !== (t.orderFetchingEnabled ?? false)) payload.orderFetchingEnabled = draft.orderFetchingEnabled;
-    updateTenant.mutate({ id: t.id, payload });
+    
+    updateTenant.mutate(
+      { id: t.id, payload },
+      {
+        onSuccess: () => {
+          setTimeout(() => {
+            updateTenant.reset();
+          }, 3000);
+        }
+      }
+    );
   };
 
   const handleCancel = () => {
@@ -129,6 +137,9 @@ export function TenantTile({ t, updateTenant, deleteTenant }: TenantTileProps) {
       <TileSaveBar
         isDirty={isDirty}
         isPending={updateTenant.isPending}
+        isSuccess={updateTenant.isSuccess}
+        isError={updateTenant.isError}
+        errorMsg={updateTenant.error ? (updateTenant.error as any).message || String(updateTenant.error) : null}
         onSave={handleSave}
         onCancel={handleCancel}
       />

@@ -408,12 +408,27 @@ public class MonitorOrchestrationService(
         var monitor = await dbContext.Monitors.SingleOrDefaultAsync(m => m.Id == id, ct);
         if (monitor == null) throw new KeyNotFoundException($"Monitor {id} not found.");
 
+        List<string>? cleanedTags = null;
+        if (tags != null)
+        {
+            cleanedTags = tags
+                .Where(t => !string.IsNullOrWhiteSpace(t))
+                .Select(t => t.Trim())
+                .ToList();
+        }
+
         bool nameChanged = name != null && name != monitor.Name;
         bool urlChanged = url != null && url != monitor.Url;
+        bool tagsChanged = cleanedTags != null && !cleanedTags.SequenceEqual(monitor.Tags);
 
-        if (nameChanged || urlChanged)
+        if (nameChanged || urlChanged || tagsChanged)
         {
-            await uptimeRobotService.UpdateMonitorAsync(id, nameChanged ? name : null, urlChanged ? url : null);
+            await uptimeRobotService.UpdateMonitorAsync(
+                id,
+                nameChanged ? name : null,
+                urlChanged ? url : null,
+                tagsChanged ? cleanedTags : null);
+
             if (nameChanged)
             {
                 monitor.Name = name!;
@@ -422,16 +437,15 @@ public class MonitorOrchestrationService(
             {
                 monitor.Url = url!;
             }
+            if (tagsChanged && cleanedTags != null)
+            {
+                monitor.Tags = cleanedTags;
+            }
         }
 
-        monitor.UptimeSla = uptimeSla;
-
-        if (tags != null)
+        if (uptimeSla != -1)
         {
-            monitor.Tags = tags
-                .Where(t => !string.IsNullOrWhiteSpace(t))
-                .Select(t => t.Trim())
-                .ToList();
+            monitor.UptimeSla = uptimeSla;
         }
 
         await dbContext.SaveChangesAsync(ct);

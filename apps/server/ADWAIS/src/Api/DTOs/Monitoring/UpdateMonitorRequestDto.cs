@@ -20,7 +20,7 @@ public class UpdateMonitorRequestDto
     /// <summary>
     /// SLA for the monitor.
     /// </summary>
-    public double? Sla { get; set; }
+    public double? Sla { get; set; } = -1;
 
     /// <summary>
     /// Tags associated with the monitor.

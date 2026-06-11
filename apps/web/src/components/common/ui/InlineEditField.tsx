@@ -10,6 +10,7 @@ type InlineEditFieldProps<T> = {
   required?: boolean;
   requiredCondition?: string;
   displayValue?: React.ReactNode;
+  placeholder?: string;
 };
 
 export function InlineEditField<T>({
@@ -21,6 +22,7 @@ export function InlineEditField<T>({
   required = false,
   requiredCondition,
   displayValue,
+  placeholder,
 }: InlineEditFieldProps<T>) {
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState(value);
@@ -145,9 +147,12 @@ export function InlineEditField<T>({
             <input
               ref={inputRef as React.RefObject<HTMLInputElement>}
               type={type}
-              value={draft as unknown as string}
-              placeholder={type === 'password' ? '••••••••••••' : ''}
-              onChange={(e) => setDraft((type === 'number' ? Number(e.target.value) : e.target.value) as unknown as T)}
+              value={(draft !== null && draft !== undefined) ? (draft as unknown as string) : ''}
+              placeholder={placeholder || (type === 'password' ? '••••••••••••' : '')}
+              onChange={(e) => {
+                const val = e.target.value;
+                setDraft((type === 'number' ? (val === '' ? null : Number(val)) : val) as unknown as T);
+              }}
               disabled={isSaving}
               onKeyDown={handleKeyDown}
               className={`flex-1 border border-slate-300 rounded-md px-2 py-1.5 text-sm font-semibold focus:ring-2 focus:ring-brand-btn-primary focus:outline-none ${type === 'password' ? 'font-mono' : ''}`}
@@ -179,7 +184,9 @@ export function InlineEditField<T>({
         <div className="flex items-center justify-between group/val">
           <span className={`text-sm font-semibold text-slate-800 ${type === 'password' || displayValue === 'Not set' ? 'italic text-slate-400' : ''}`}>
             {displayValue ? displayValue : (
-              type === 'password' ? (value ? '••••••••••••' : 'Not set') : ((value as React.ReactNode) || '—')
+              type === 'password' ? (value ? '••••••••••••' : 'Not set') : (
+                (value !== null && value !== undefined && value !== '') ? String(value) : '—'
+              )
             )}
           </span>
           <button

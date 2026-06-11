@@ -7,7 +7,7 @@ public interface IUptimeRobotService
 {
     Task<UptimeRobotMonitorDto> CreateMonitorAsync(string name, string url);
 
-    Task UpdateMonitorAsync(int monitorId, string? name, string? url);
+    Task UpdateMonitorAsync(int monitorId, string? name, string? url, List<string>? tags);
 
     Task<List<UptimeRobotMonitorDto>> GetMonitorsAsync(int[]? monitorIds = null);
 

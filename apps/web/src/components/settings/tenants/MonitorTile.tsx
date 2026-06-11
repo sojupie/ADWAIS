@@ -3,6 +3,7 @@ import { Play, Pause, Link2, Unlink2, X } from 'lucide-react';
 import type { UptimeMonitorDto, TenantResponseDto, UpdateMonitorRequestDto } from '@types';
 import { TileCard } from '../../common/layout/TileCard';
 import { TileSaveBar } from '../../common/ui/TileSaveBar';
+import { useUpdateMonitorMutation } from '../../../hooks/useMonitorQueries';
 
 const SYSTEM_TENANT_ID = '00000000-0000-0000-0000-000000000001';
 
@@ -17,10 +18,6 @@ function normalizeStatus(status?: string | number): string {
 
 interface MonitorTileProps {
   m: UptimeMonitorDto;
-  updateMonitor: {
-    mutate: (variables: { id: number; payload: UpdateMonitorRequestDto }) => void;
-    isPending: boolean;
-  };
   toggleMonitor: {
     mutate: (variables: { id: number; action: 'start' | 'pause' }) => void;
   };
@@ -39,7 +36,6 @@ interface MonitorTileProps {
 
 export function MonitorTile({
   m,
-  updateMonitor,
   toggleMonitor,
   assignMonitor,
   unassignMonitor,
@@ -49,6 +45,7 @@ export function MonitorTile({
   assignTenantId,
   setAssignTenantId
 }: MonitorTileProps) {
+  const updateMonitor = useUpdateMonitorMutation();
   const isUnassigned = !m.tenantId || m.tenantId === SYSTEM_TENANT_ID;
 
   const [draft, setDraft] = useState<{
@@ -86,7 +83,17 @@ export function MonitorTile({
     if (!tagsEqual(draft.tags, m.tags || [])) {
       payload.tags = draft.tags;
     }
-    updateMonitor.mutate({ id: m.id, payload });
+    
+    updateMonitor.mutate(
+      { id: m.id, payload },
+      {
+        onSuccess: () => {
+          setTimeout(() => {
+            updateMonitor.reset();
+          }, 3000);
+        }
+      }
+    );
   };
 
   const handleCancel = () => {
@@ -197,6 +204,9 @@ export function MonitorTile({
       <TileSaveBar
         isDirty={isDirty}
         isPending={updateMonitor.isPending}
+        isSuccess={updateMonitor.isSuccess}
+        isError={updateMonitor.isError}
+        errorMsg={updateMonitor.error ? (updateMonitor.error as any).message || String(updateMonitor.error) : null}
         onSave={handleSave}
         onCancel={handleCancel}
       />

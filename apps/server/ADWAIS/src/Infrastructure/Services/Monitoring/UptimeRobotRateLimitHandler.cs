@@ -1,16 +1,19 @@
 using System.Net;
+using System.Net.Http;
 using Adwais.Application.Common.Caching;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace Adwais.Infrastructure.Services.Monitoring;
 
 /// <summary>
-/// A delegating handler that implements client-side rate limiting for the UptimeRobot Adwais.Api.
+/// A delegating handler that implements client-side rate limiting for the UptimeRobot API.
 /// It monitors rate limit headers and status codes to delay requests when necessary.
 /// </summary>
 public class UptimeRobotRateLimitHandler(IMemoryCache cache) : DelegatingHandler
 {
     private const string RateLimitKey = GlobalCacheKeys.UptimeRobotRateLimit;
+    private const string RemainingLimitKey = "UptimeRobotRemainingLimit";
+    private const string RateLimitResetKey = "UptimeRobotRateLimitReset";
     private static readonly SemaphoreSlim Semaphore = new(1, 1);
 
     /// <summary>
@@ -19,6 +22,26 @@ public class UptimeRobotRateLimitHandler(IMemoryCache cache) : DelegatingHandler
     /// </summary>
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
+        if (request.Method == HttpMethod.Get)
+        {
+            if (cache.TryGetValue<int>(RemainingLimitKey, out var remaining) &&
+                cache.TryGetValue<DateTimeOffset>(RateLimitResetKey, out var resetTime))
+            {
+                var now = DateTimeOffset.UtcNow;
+                if (remaining <= 10 && resetTime > now)
+                {
+                    var delay = resetTime - now;
+                    var response429 = new HttpResponseMessage(HttpStatusCode.TooManyRequests)
+                    {
+                        Content = new StringContent("Rate limit budget preserved for edits."),
+                        ReasonPhrase = "Rate Limit Budget Preserved"
+                    };
+                    response429.Headers.Add("Retry-After", ((int)Math.Max(1, delay.TotalSeconds)).ToString());
+                    return response429;
+                }
+            }
+        }
+
         await Semaphore.WaitAsync(cancellationToken);
         try
         {
@@ -39,13 +62,17 @@ public class UptimeRobotRateLimitHandler(IMemoryCache cache) : DelegatingHandler
         var response = await base.SendAsync(request, cancellationToken);
 
         if (response.Headers.TryGetValues("X-RateLimit-Remaining", out var remainingVals) &&
-            int.TryParse(remainingVals.FirstOrDefault(), out var remaining))
+            int.TryParse(remainingVals.FirstOrDefault(), out var remainingCount))
         {
-            if (remaining <= 2 && response.Headers.TryGetValues("X-RateLimit-Reset", out var resetVals) &&
+            cache.Set(RemainingLimitKey, remainingCount);
+
+            if (response.Headers.TryGetValues("X-RateLimit-Reset", out var resetVals) &&
                 long.TryParse(resetVals.FirstOrDefault(), out var resetEpoch))
             {
                 var resetDate = DateTimeOffset.FromUnixTimeSeconds(resetEpoch);
-                if (resetDate > DateTimeOffset.UtcNow)
+                cache.Set(RateLimitResetKey, resetDate);
+
+                if (remainingCount <= 2 && resetDate > DateTimeOffset.UtcNow)
                 {
                     cache.Set(RateLimitKey, resetDate, resetDate);
                 }
@@ -67,6 +94,8 @@ public class UptimeRobotRateLimitHandler(IMemoryCache cache) : DelegatingHandler
 
             var resetDate = DateTimeOffset.UtcNow.Add(delay).AddSeconds(1);
             cache.Set(RateLimitKey, resetDate, resetDate);
+            cache.Set(RemainingLimitKey, 0);
+            cache.Set(RateLimitResetKey, resetDate);
 
             // Wait out the delay and retry the request
             await Task.Delay(delay.Add(TimeSpan.FromSeconds(1)), cancellationToken);

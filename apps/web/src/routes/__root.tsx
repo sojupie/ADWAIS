@@ -1,7 +1,9 @@
+import { useState, useEffect } from 'react';
 import { createRootRoute, Outlet, useSearch } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { Settings } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
+import { Settings, WifiOff, ServerCrash } from 'lucide-react';
 import { KioskControls } from '../components/common/dashboard/KioskControls';
 import { KioskProvider } from '../components/common/dashboard/KioskProvider';
 import motilloLogo from '../assets/motillo-logo.svg';
@@ -16,6 +18,56 @@ function RootComponent() {
   useSearch({ strict: false });
   const financialTf = getSavedTimeframe('/financial');
   const fleetTf = getSavedTimeframe('/fleet-status');
+  const queryClient = useQueryClient();
+
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [isBackendOnline, setIsBackendOnline] = useState(true);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  useEffect(() => {
+    const isConnectivityError = (err: unknown): boolean => {
+      if (!err) return false;
+      const msg = (err instanceof Error ? err.message : String(err)).toLowerCase();
+      return (
+        msg.includes('502') ||
+        msg.includes('bad gateway') ||
+        msg.includes('failed to fetch') ||
+        msg.includes('network error') ||
+        msg.includes('504') ||
+        msg.includes('gateway timeout') ||
+        msg.includes('connection refused') ||
+        msg.includes('load failed')
+      );
+    };
+
+    const checkCache = () => {
+      const queries = queryClient.getQueryCache().getAll();
+      const hasConnectionError = queries.some(q => isConnectivityError(q.state.error));
+      setIsBackendOnline(!hasConnectionError);
+    };
+
+    checkCache();
+
+    const unsubscribe = queryClient.getQueryCache().subscribe((event) => {
+      if (event.type === 'updated') {
+        checkCache();
+      }
+    });
+
+    return unsubscribe;
+  }, [queryClient]);
 
   return (
     <KioskProvider>
@@ -37,7 +89,25 @@ function RootComponent() {
             <NavLink to={"/settings"}> <Settings size={20}/> </NavLink>
           </nav>
 
-          <div className="w-full xl:w-1/4 flex justify-center xl:justify-end">
+          <div className="w-full xl:w-1/4 flex justify-center xl:justify-end items-center gap-4">
+            {!isOnline && (
+              <span 
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-extrabold text-red-600 bg-red-50 border border-red-200 uppercase tracking-wider animate-in fade-in duration-300"
+                title="Application is offline"
+              >
+                <WifiOff size={14} className="animate-pulse" />
+                Offline
+              </span>
+            )}
+            {isOnline && !isBackendOnline && (
+              <span 
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-extrabold text-amber-600 bg-amber-50 border border-amber-200 uppercase tracking-wider animate-in fade-in duration-300"
+                title="Backend server is unreachable (502 / bad gateway)"
+              >
+                <ServerCrash size={14} className="animate-pulse" />
+                Server Offline
+              </span>
+            )}
             <KioskControls />
           </div>
         </header>

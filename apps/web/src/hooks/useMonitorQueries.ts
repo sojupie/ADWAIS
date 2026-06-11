@@ -20,7 +20,7 @@ export function useUnassignedMonitorsQuery(timeframe?: string, comparison?: Comp
 export function useCreateMonitorMutation(onSuccessCallback?: () => void) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: { name: string; url: string; uptimeSla: number }) => 
+    mutationFn: (payload: { name: string; url: string; uptimeSla: number | null }) => 
       apiFetch<UptimeMonitorDto>('/api/monitors?tenantId=00000000-0000-0000-0000-000000000001', { 
         method: 'POST', 
         body: JSON.stringify(payload) 

@@ -4,9 +4,9 @@ import { InlineEditField } from '../../common/ui/InlineEditField';
 import type { GlobalConfigDto } from '@types';
 
 interface SyncIntervalsFormProps {
-  config: (GlobalConfigDto & { uptimeRobotApiKey?: string; latencyDegradedFloor?: number; systemEventRetentionDays?: number; uptimeRobotFetchEnabled?: boolean }) | undefined;
+  config: (GlobalConfigDto & { uptimeRobotApiKey?: string; latencyDegradedFloor?: number | null; systemEventRetentionDays?: number; uptimeRobotFetchEnabled?: boolean }) | undefined;
   updateConfig: {
-    mutate: (variables: Partial<GlobalConfigDto & { uptimeRobotApiKey?: string; latencyDegradedFloor?: number; systemEventRetentionDays?: number; uptimeRobotFetchEnabled?: boolean }>) => void;
+    mutate: (variables: Partial<GlobalConfigDto & { uptimeRobotApiKey?: string; latencyDegradedFloor?: number | null; systemEventRetentionDays?: number; uptimeRobotFetchEnabled?: boolean }>) => void;
   };
 }
 
@@ -41,14 +41,16 @@ export function SyncIntervalsForm({ config, updateConfig }: SyncIntervalsFormPro
           />
           <InlineEditField
             label="Latency Floor (ms)"
-            value={config.latencyDegradedFloor ?? 0}
+            value={config.latencyDegradedFloor !== null && config.latencyDegradedFloor !== undefined ? config.latencyDegradedFloor : null}
             type="number"
+            placeholder="e.g. 150"
             onSave={(val) => updateConfig.mutate({ latencyDegradedFloor: val })}
           />
           <InlineEditField
             label="Default Uptime SLA (%)"
-            value={config.defaultUptimeSla ?? 99.9}
+            value={config.defaultUptimeSla !== null && config.defaultUptimeSla !== undefined ? config.defaultUptimeSla : null}
             type="number"
+            placeholder="e.g. 99.9"
             onSave={(val) => updateConfig.mutate({ defaultUptimeSla: val })}
           />
           <InlineEditField

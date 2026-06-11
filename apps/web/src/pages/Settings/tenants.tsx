@@ -1,10 +1,11 @@
 import { Building2, Activity, Plus, X } from 'lucide-react';
 import { useState, useMemo } from 'react';
-import { useTenantsQuery, useCreateTenantMutation, useDeleteTenantMutation, useUpdateTenantMutation } from '../../hooks/useTenantQueries';
-import { useMonitorsQuery, useUnassignedMonitorsQuery, useCreateMonitorMutation, useControlMonitorMutation, useUpdateMonitorMutation, useAssignMonitorMutation, useUnassignMonitorMutation } from '../../hooks/useMonitorQueries';
+import { useTenantsQuery, useCreateTenantMutation, useDeleteTenantMutation } from '../../hooks/useTenantQueries';
+import { useMonitorsQuery, useUnassignedMonitorsQuery, useCreateMonitorMutation, useControlMonitorMutation, useAssignMonitorMutation, useUnassignMonitorMutation } from '../../hooks/useMonitorQueries';
 import { TenantTile } from '../../components/settings/tenants/TenantTile';
 import { MonitorTile } from '../../components/settings/tenants/MonitorTile';
 import { TenantFilterMenu } from '../../components/settings/tenants/TenantFilterMenu';
+import { MonitorFilterMenu } from '../../components/settings/tenants/MonitorFilterMenu';
 import { SectionHeader } from '../../components/common/layout/SectionHeader';
 import { SearchInput } from '../../components/common/ui/SearchInput';
 import { SettingsPanel } from '../../components/common/layout/SettingsPanel';
@@ -19,16 +20,15 @@ export function TenantsMonitorsView() {
     const [newTenantDraft, setNewTenantDraft] = useState({ name: '', litiumBaseUrl: '', serviceAccountToken: '' });
 
     const [isCreatingMonitor, setIsCreatingMonitor] = useState(false);
-    const [newMonitorDraft, setNewMonitorDraft] = useState({ name: '', url: '', uptimeSla: 99.9 });
+    const [newMonitorDraft, setNewMonitorDraft] = useState<{ name: string; url: string; uptimeSla: number | '' }>({ name: '', url: '', uptimeSla: '' });
 
     const [tenantSort, setTenantSort] = useState<'asc' | 'desc'>('asc');
     const [tenantSearch, setTenantSearch] = useState('');
     const [tenantFilters, setTenantFilters] = useState({ token: 'all', fetch: 'all' });
 
     const [monitorSort, setMonitorSort] = useState<'asc' | 'desc'>('asc');
-    const [monitorFilter, setMonitorFilter] = useState<'all' | 'assigned' | 'unassigned'>('all');
     const [monitorSearch, setMonitorSearch] = useState('');
-    const [selectedTag, setSelectedTag] = useState<string>('all');
+    const [monitorFilters, setMonitorFilters] = useState<{ assignment: 'all' | 'assigned' | 'unassigned'; tag: string }>({ assignment: 'all', tag: 'all' });
 
     // Queries & Mutations from custom hooks
     const { data: tenants } = useTenantsQuery();
@@ -40,14 +40,12 @@ export function TenantsMonitorsView() {
         setNewTenantDraft({ name: '', litiumBaseUrl: '', serviceAccountToken: '' });
     });
     const deleteTenant = useDeleteTenantMutation();
-    const updateTenant = useUpdateTenantMutation();
 
     const createMonitor = useCreateMonitorMutation(() => {
         setIsCreatingMonitor(false);
-        setNewMonitorDraft({ name: '', url: '', uptimeSla: 99.9 });
+        setNewMonitorDraft({ name: '', url: '', uptimeSla: '' });
     });
     const toggleMonitor = useControlMonitorMutation();
-    const updateMonitor = useUpdateMonitorMutation();
     const assignMonitor = useAssignMonitorMutation(() => {
         setAssigningMonitorId(null);
         setAssignTenantId('');
@@ -106,12 +104,12 @@ export function TenantsMonitorsView() {
             const matchTenant = m.tenantName?.toLowerCase().includes(q);
             if (!matchName && !matchUrl && !matchTenant) return false;
         }
-        if (monitorFilter === 'assigned') return m.tenantId != null && m.tenantId !== SYSTEM_TENANT_ID;
-        if (monitorFilter === 'unassigned') return m.tenantId == null || m.tenantId === SYSTEM_TENANT_ID;
+        if (monitorFilters.assignment === 'assigned') return m.tenantId != null && m.tenantId !== SYSTEM_TENANT_ID;
+        if (monitorFilters.assignment === 'unassigned') return m.tenantId == null || m.tenantId === SYSTEM_TENANT_ID;
         return true;
     }).filter((m) => {
-        if (selectedTag === 'all') return true;
-        return m.tags && m.tags.map(t => t.trim().toUpperCase()).includes(selectedTag);
+        if (monitorFilters.tag === 'all') return true;
+        return m.tags && m.tags.map(t => t.trim().toUpperCase()).includes(monitorFilters.tag);
     }).sort((a, b) => {
         const nameA = a.name || '';
         const nameB = b.name || '';
@@ -185,7 +183,6 @@ export function TenantsMonitorsView() {
                             <TenantTile
                                 key={t.id}
                                 t={t}
-                                updateTenant={updateTenant}
                                 deleteTenant={deleteTenant}
                             />
                         ))}
@@ -208,25 +205,11 @@ export function TenantsMonitorsView() {
                         onChange={setMonitorSearch}
                         placeholder="Search monitors..."
                     />
-                    <select
-                        value={selectedTag}
-                        onChange={e => setSelectedTag(e.target.value)}
-                        className="text-sm font-semibold border border-slate-200 rounded-lg px-2 py-1.5 bg-slate-50 hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-link/20 cursor-pointer text-slate-700"
-                    >
-                        <option value="all">All Tags</option>
-                        {allUniqueTags.map(tag => (
-                            <option key={tag} value={tag}>{tag}</option>
-                        ))}
-                    </select>
-                    <select
-                        value={monitorFilter}
-                        onChange={e => setMonitorFilter(e.target.value as 'all' | 'assigned' | 'unassigned')}
-                        className="text-sm font-semibold border border-slate-200 rounded-lg px-2 py-1.5 bg-slate-50 hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-link/20 cursor-pointer text-slate-700"
-                    >
-                        <option value="all">All Status</option>
-                        <option value="assigned">Assigned</option>
-                        <option value="unassigned">Unassigned</option>
-                    </select>
+                    <MonitorFilterMenu
+                        filters={monitorFilters}
+                        setFilters={setMonitorFilters}
+                        tags={allUniqueTags}
+                    />
                     <select
                         value={monitorSort}
                         onChange={e => setMonitorSort(e.target.value as 'asc' | 'desc')}
@@ -259,14 +242,18 @@ export function TenantsMonitorsView() {
                                     <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">URL</label>
                                     <input className="border border-slate-300 rounded-md px-2 py-1.5 text-sm" placeholder="https://example.com" value={newMonitorDraft.url} onChange={e => setNewMonitorDraft({...newMonitorDraft, url: e.target.value})} />
                                 </div>
-                                <div className="flex flex-col gap-1">
+                                 <div className="flex flex-col gap-1">
                                     <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Uptime SLA (%)</label>
-                                    <input type="number" step="0.1" className="border border-slate-300 rounded-md px-2 py-1.5 text-sm" value={newMonitorDraft.uptimeSla} onChange={e => setNewMonitorDraft({...newMonitorDraft, uptimeSla: parseFloat(e.target.value)})} />
+                                    <input type="number" step="0.1" className="border border-slate-300 rounded-md px-2 py-1.5 text-sm" value={newMonitorDraft.uptimeSla} onChange={e => setNewMonitorDraft({...newMonitorDraft, uptimeSla: e.target.value === '' ? '' : parseFloat(e.target.value)})} placeholder="e.g. 99.9" />
                                 </div>
                                 <button
                                     className="mt-2 bg-brand-link hover:bg-brand-link/90 text-white font-bold text-sm px-4 py-2 rounded-lg cursor-pointer disabled:opacity-50"
                                     disabled={!newMonitorDraft.name || !newMonitorDraft.url || createMonitor.isPending}
-                                    onClick={() => createMonitor.mutate(newMonitorDraft)}
+                                    onClick={() => createMonitor.mutate({
+                                        name: newMonitorDraft.name,
+                                        url: newMonitorDraft.url,
+                                        uptimeSla: newMonitorDraft.uptimeSla === '' ? null : newMonitorDraft.uptimeSla
+                                    })}
                                 >
                                     {createMonitor.isPending ? 'Saving...' : 'Save Monitor'}
                                 </button>
@@ -279,7 +266,6 @@ export function TenantsMonitorsView() {
                             <MonitorTile
                                 key={m.id}
                                 m={m}
-                                updateMonitor={updateMonitor}
                                 toggleMonitor={toggleMonitor}
                                 assignMonitor={assignMonitor}
                                 unassignMonitor={unassignMonitor}

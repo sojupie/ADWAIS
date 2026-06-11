@@ -1,6 +1,42 @@
 import type { UptimeMonitorDto } from '@types';
 import {normalizeStatus} from "../../utils/monitorStatusHelper.ts";
 
+const getTagColor = (tag: string) => {
+  const parts = tag.split(':');
+  if (parts.length > 1 && parts[1]) {
+    return parts[1].toLowerCase();
+  }
+  const tagName = parts[0].trim().toUpperCase();
+  const colors = ['blue', 'green', 'red', 'orange', 'yellow', 'purple'];
+  let hash = 0;
+  for (let i = 0; i < tagName.length; i++) {
+    hash = tagName.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const index = Math.abs(hash) % colors.length;
+  return colors[index];
+};
+
+const getTagStyle = (color: string) => {
+  switch (color?.toLowerCase()) {
+    case 'blue':
+      return 'bg-blue-50 text-blue-700 border-blue-200';
+    case 'green':
+      return 'bg-green-50 text-green-700 border-green-200';
+    case 'red':
+      return 'bg-red-50 text-red-700 border-red-200';
+    case 'orange':
+      return 'bg-orange-50 text-orange-700 border-orange-200';
+    case 'yellow':
+      return 'bg-yellow-50 text-yellow-700 border-yellow-200';
+    case 'purple':
+      return 'bg-purple-50 text-purple-700 border-purple-200';
+    case 'grey':
+    case 'slate':
+    default:
+      return 'bg-slate-50 text-slate-700 border-slate-200';
+  }
+};
+
 function getMonitorStatus(monitor: UptimeMonitorDto): 'operational' | 'degraded' | 'down' | 'unknown' | 'paused' | 'starting' {
   const status = normalizeStatus(monitor.currentStatus);
   if (status === 'STARTING') return 'starting';
@@ -104,21 +140,26 @@ export function FleetMatrix({
                 <span className={`text-[9px] font-bold ${theme.mutedText} uppercase tracking-widest mt-0.5 truncate`}>
                   {monitor.name}
                 </span>
-                {monitor.tags && monitor.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {monitor.tags.map((tag) => (
-                      <span 
-                        key={tag} 
-                        className="text-[8px] font-semibold px-1 py-0.5 rounded uppercase tracking-wider bg-slate-100 border border-slate-200 text-slate-600"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
               </div>
               <div className={`w-2.5 h-2.5 rounded-full shrink-0 mt-1 ${theme.dot}`} />
             </div>
+
+            {monitor.tags && monitor.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1 mb-3 w-full">
+                {monitor.tags.map((tag) => {
+                  const name = tag.split(':')[0].trim();
+                  const color = getTagColor(tag);
+                  return (
+                    <span 
+                      key={tag} 
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider border shadow-sm ${getTagStyle(color)}`}
+                    >
+                      {name}
+                    </span>
+                  );
+                })}
+              </div>
+            )}
             
             <div className="grid grid-cols-2 gap-x-2 mt-auto w-full">
               <div className="flex flex-col gap-0">

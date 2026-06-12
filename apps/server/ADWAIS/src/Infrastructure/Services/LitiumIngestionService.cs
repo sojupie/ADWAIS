@@ -95,7 +95,7 @@ public class LitiumIngestionService(
             var currentEnd = currentStart.AddDays(30);
             if (currentEnd > endDate) currentEnd = endDate;
 
-            var skip = 0;
+            var chunkStart = currentStart;
             var take = 500;
             var hasMoreOrders = true;
 
@@ -103,7 +103,7 @@ public class LitiumIngestionService(
             {
                 var sinceParam = Uri.EscapeDataString(currentStart.ToString("O"));
                 var untilParam = Uri.EscapeDataString(currentEnd.ToString("O"));
-                var requestUrl = $"{tenant.LitiumBaseUrl.TrimEnd('/')}/api/motasticadapter/sync?since={sinceParam}&until={untilParam}&skip={skip}&take={take}";
+                var requestUrl = $"{tenant.LitiumBaseUrl.TrimEnd('/')}/api/motasticadapter/sync?since={sinceParam}&until={untilParam}&skip=0&take={take}";
 
                 var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
                 request.Headers.Add("Authorization", tenant.ServiceAccountToken);
@@ -151,25 +151,19 @@ public class LitiumIngestionService(
                         pCurrencies[i] = o.Currency ?? "UNK";
                     }
 
-                    const string sql = @"
-                        INSERT INTO orders (id, tenant_id, order_state, litium_order_id, created_date, total_value_inc_vat, total_value_exc_vat, currency)
-                        SELECT * FROM UNNEST(@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7)
-                        ON CONFLICT (tenant_id, litium_order_id) 
-                        DO UPDATE SET 
-                            total_value_inc_vat = EXCLUDED.total_value_inc_vat,
-                            total_value_exc_vat = EXCLUDED.total_value_exc_vat,
-                            order_state = EXCLUDED.order_state";
-
-                    await dbContext.Database.ExecuteSqlRawAsync(sql, pIds, pTenantIds, pOrderStatus, pOrderIds, pDatesCreated, pIncVat, pExcVat, pCurrencies);
+                    await UpsertOrdersAsync(dbContext, pIds, pTenantIds, pOrderStatus, pOrderIds, pDatesCreated, pIncVat, pExcVat, pCurrencies);
                     totalIngested += count;
+
+                    // Advance cursor to the exact timestamp of the final order in this payload
+                    var nextCursor = litiumPayload.Orders!.Last()!.CreatedDate.ToUniversalTime();
+                    currentStart = nextCursor == currentStart ? currentStart.AddTicks(1) : nextCursor;
                 }
 
-                skip += take;
-                hasMoreOrders = litiumPayload != null && skip < litiumPayload.TotalOrders;
+                hasMoreOrders = litiumPayload?.Orders != null && litiumPayload.Orders.Count == take;
             }
 
             var t = await dbContext.Tenants.SingleAsync(x => x.Id == tenant.Id, cancellationToken: ct);
-            t.FetchedFrom = t.FetchedFrom == null ? currentStart : (currentStart < t.FetchedFrom ? currentStart : t.FetchedFrom);                                                                                  
+            t.FetchedFrom = t.FetchedFrom == null ? chunkStart : (chunkStart < t.FetchedFrom ? chunkStart : t.FetchedFrom);                                                                                  
             t.FetchedUntil = t.FetchedUntil == null ? currentEnd : (currentEnd > t.FetchedUntil ? currentEnd : t.FetchedUntil);                                                                                    
             await dbContext.SaveChangesAsync(ct);      
 
@@ -177,6 +171,47 @@ public class LitiumIngestionService(
         }
 
         return totalIngested;
+    }
+
+    public async Task IngestSingleOrderAsync(Guid tenantId, LitiumOrderDto order, CancellationToken ct = default)
+    {
+        await using var dbContext = await contextFactory.CreateDbContextAsync(ct);
+
+        if (!Enum.TryParse<OrderState>(order.OrderStatus, true, out var orderState))
+        {
+            orderState = OrderState.Unknown;
+        }
+
+        var pIds = new[] { order.Id };
+        var pTenantIds = new[] { tenantId };
+        var pOrderStatus = new[] { orderState.ToString() };
+        var pOrderIds = new[] { order.OrderNumber };
+        var pDatesCreated = new[] { order.CreatedDate.ToUniversalTime() };
+        var pIncVat = new[] { order.TotalValueIncludingVat };
+        var pExcVat = new[] { order.TotalValueExcludingVat };
+        var pCurrencies = new[] { order.Currency ?? "UNK" };
+
+        await UpsertOrdersAsync(dbContext, pIds, pTenantIds, pOrderStatus, pOrderIds, pDatesCreated, pIncVat, pExcVat, pCurrencies);
+    }
+
+    private async Task UpsertOrdersAsync(
+        AnalyticsDbContext dbContext,
+        Guid[] ids, Guid[] tenantIds, string[] orderStatuses,
+        string[] orderNumbers, DateTimeOffset[] datesCreated,
+        decimal?[] incVats, decimal?[] excVats, string[] currencies)
+    {
+        if (!dbContext.Database.IsRelational()) return;
+
+        const string sql = @"
+            INSERT INTO orders (id, tenant_id, order_state, litium_order_id, created_date, total_value_inc_vat, total_value_exc_vat, currency)
+            SELECT * FROM UNNEST(@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7)
+            ON CONFLICT (tenant_id, litium_order_id) 
+            DO UPDATE SET 
+                total_value_inc_vat = EXCLUDED.total_value_inc_vat,
+                total_value_exc_vat = EXCLUDED.total_value_exc_vat,
+                order_state = EXCLUDED.order_state";
+
+        await dbContext.Database.ExecuteSqlRawAsync(sql, ids, tenantIds, orderStatuses, orderNumbers, datesCreated, incVats, excVats, currencies);
     }
 }
 

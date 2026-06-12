@@ -36,7 +36,7 @@ public class LitiumIngestionServiceTests
             loggerMock.Object, 
             eventServiceMock.Object);
 
-        var orderDto = new LitiumOrderDto 
+        var orderDto = new LitiumSyncResponse.LitiumOrderDto 
         { 
             Id = Guid.NewGuid(),
             OrderNumber = "123",

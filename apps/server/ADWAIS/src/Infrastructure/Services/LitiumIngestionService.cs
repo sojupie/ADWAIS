@@ -173,7 +173,7 @@ public class LitiumIngestionService(
         return totalIngested;
     }
 
-    public async Task IngestSingleOrderAsync(Guid tenantId, LitiumOrderDto order, CancellationToken ct = default)
+    public async Task IngestSingleOrderAsync(Guid tenantId, LitiumSyncResponse.LitiumOrderDto order, CancellationToken ct = default)
     {
         await using var dbContext = await contextFactory.CreateDbContextAsync(ct);
 

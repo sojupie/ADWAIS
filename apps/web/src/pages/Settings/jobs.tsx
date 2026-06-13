@@ -1,4 +1,4 @@
-﻿import { Play, Activity } from 'lucide-react';
+import { Play, Activity } from 'lucide-react';
 import { useGlobalConfigQuery, useRecurringJobsQuery, useTriggerJobMutation, useBackfillMutation, useUpdateConfigMutation } from '../../hooks/useJobSettingsQueries';
 import { useTenantsQuery } from '../../hooks/useTenantQueries';
 import { RecurringJobsTable } from '../../components/settings/jobs/RecurringJobsTable';
@@ -9,7 +9,7 @@ import { SettingsPanel } from '../../components/common/layout/SettingsPanel';
 
 export function BackgroundJobsView() {
     // Queries & Mutations from custom hooks
-    const { data: config } = useGlobalConfigQuery();
+    const { data: config, error: configError } = useGlobalConfigQuery();
     const { data: recurring } = useRecurringJobsQuery();
     const { data: tenants } = useTenantsQuery();
 
@@ -55,7 +55,13 @@ export function BackgroundJobsView() {
                         </div>
 
                         <ManualBackfillPanel tenants={tenants} triggerBackfill={triggerBackfill} />
-                        <SyncIntervalsForm config={config} updateConfig={updateConfig} />
+                        {configError ? (
+                            <div className="bg-red-50 text-red-700 p-4 rounded-xl border border-red-200 text-sm flex items-center justify-center h-[180px]">
+                                {configError instanceof Error ? configError.message : 'Global config may not be set. Please check database.'}
+                            </div>
+                        ) : (
+                            <SyncIntervalsForm config={config} updateConfig={updateConfig} />
+                        )}
                     </div>
                 </div>
             </SettingsPanel>

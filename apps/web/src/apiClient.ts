@@ -14,7 +14,15 @@ export async function apiFetch<T>(url: string, options?: RequestInit): Promise<T
   if (!response.ok) {
     const errorBody = await response.text().catch(() => 'Unknown error');
     console.error(`API Fetch Error [${response.status}] ${url}:`, errorBody);
-    throw new Error(errorBody || `Request failed with status ${response.status}`);
+    let errorMessage = errorBody;
+    try {
+      const parsed = JSON.parse(errorBody);
+      if (parsed.error) errorMessage = parsed.error;
+      else if (parsed.message) errorMessage = parsed.message;
+    } catch (e) {
+      // Not JSON
+    }
+    throw new Error(errorMessage || `Request failed with status ${response.status}`);
   }
 
   const text = await response.text();

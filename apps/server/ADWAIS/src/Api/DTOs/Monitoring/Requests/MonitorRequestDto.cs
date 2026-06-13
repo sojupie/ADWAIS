@@ -7,14 +7,14 @@ namespace Adwais.Api.DTOs.Monitoring;
 /// <summary>
 /// Request parameters for monitor metrics.
 /// </summary>
-public class MonitorRequestDto
+public record MonitorRequestDto
 {
     /// <summary>
     /// Optional. Scopes the metrics to a specific tenant. 
     /// If null, metrics represent the global portfolio total.
     /// </summary>
     [FromQuery(Name = "tenantId")] 
-    public Guid? TenantId { get; set; }
+    public Guid? TenantId { get; init; }
     
     /// <summary>
     /// Optional. Scopes the metrics to a specific monitor. 
@@ -22,13 +22,13 @@ public class MonitorRequestDto
     /// Overrides tenantId parameter.
     /// </summary>
     [FromQuery(Name = "monitorId")] 
-    public int? MonitorId { get; set; }
+    public int? MonitorId { get; init; }
 
     /// <summary>
     /// The primary timeframe for the calculation (e.g., T7, T30). 
     /// Defaults to T30.
     /// </summary>
     [FromQuery(Name = "timeframe")] 
-    public Timeframe Timeframe { get; set; } = Timeframe.T30;
+    public Timeframe Timeframe { get; init; } = Timeframe.T30;
 }
 

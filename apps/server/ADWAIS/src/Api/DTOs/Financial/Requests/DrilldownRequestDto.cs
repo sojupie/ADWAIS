@@ -5,23 +5,22 @@ using Microsoft.AspNetCore.Mvc;
 namespace Adwais.Api.DTOs.Financial;
 
 /// <summary>
-/// Request parameters for standard financial metrics.
+/// Request parameters for tenant-specific (drilldown) metrics.
 /// </summary>
-public class FinancialRequestDto
+public record DrilldownRequestDto
 {
     /// <summary>
     /// The primary timeframe for the calculation (e.g., T7, T30). 
     /// Defaults to T30.
     /// </summary>
     [FromQuery(Name = "timeframe")]
-    public Timeframe Timeframe { get; set; } = Timeframe.T30;
+    public Timeframe Timeframe { get; init; } = Timeframe.T30;
 
     /// <summary>
-    /// Optional. Scopes the metrics to a specific tenant. 
-    /// If null, metrics represent the global portfolio total.
+    /// The unique identifier of the tenant.
     /// </summary>
     [FromQuery(Name = "tenantId")]
-    public Guid? TenantId { get; set; }
+    public required Guid TenantId { get; init; }
 }
 
 

@@ -5,7 +5,8 @@ import type { GlobalConfigDto, RecurringJobDto } from '@types';
 export function useGlobalConfigQuery() {
   return useQuery<GlobalConfigDto & { uptimeRobotApiKey?: string; latencyDegradedFloor?: number; systemEventRetentionDays?: number; uptimeRobotFetchEnabled?: boolean }>({
     queryKey: ['global-config'],
-    queryFn: () => apiFetch<GlobalConfigDto & { uptimeRobotApiKey?: string; latencyDegradedFloor?: number; systemEventRetentionDays?: number; uptimeRobotFetchEnabled?: boolean }>('/api/global-config')
+    queryFn: () => apiFetch<GlobalConfigDto & { uptimeRobotApiKey?: string; latencyDegradedFloor?: number; systemEventRetentionDays?: number; uptimeRobotFetchEnabled?: boolean }>('/api/global-config'),
+    retry: false
   });
 }
 

@@ -194,7 +194,7 @@ public class LitiumIngestionService(
         await UpsertOrdersAsync(dbContext, pIds, pTenantIds, pOrderStatus, pOrderIds, pDatesCreated, pIncVat, pExcVat, pCurrencies);
     }
 
-    private async Task UpsertOrdersAsync(
+    private static async Task UpsertOrdersAsync(
         AnalyticsDbContext dbContext,
         Guid[] ids, Guid[] tenantIds, string[] orderStatuses,
         string[] orderNumbers, DateTimeOffset[] datesCreated,

@@ -29,7 +29,7 @@ public class GlobalConfigController(
     {
         await using var db = await dbContextFactory.CreateDbContextAsync();
         var config = await db.GlobalConfigs.AsNoTracking().SingleOrDefaultAsync();
-        if (config == null) return NotFound();
+        if (config == null) return NotFound(new { error = "Global config may not be set" });
 
         return Ok(new GlobalConfigResponseDto(
             config.Id,
@@ -60,7 +60,7 @@ public class GlobalConfigController(
     {
         await using var db = await dbContextFactory.CreateDbContextAsync();
         var config = await db.GlobalConfigs.SingleOrDefaultAsync();
-        if (config == null) return NotFound();
+        if (config == null) return NotFound(new { error = "Global config may not be set" });
 
         if (request.LitiumFetchEnabled.HasValue) config.LitiumFetchEnabled = request.LitiumFetchEnabled.Value;
         if (request.UptimeRobotFetchEnabled.HasValue) config.UptimeRobotFetchEnabled = request.UptimeRobotFetchEnabled.Value;

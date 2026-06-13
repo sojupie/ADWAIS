@@ -7,27 +7,27 @@ namespace Adwais.Api.DTOs.Financial;
 /// <summary>
 /// Request parameters for order value distribution (histogram).
 /// </summary>
-public class OrderDistributionRequestDto
+public record OrderDistributionRequestDto
 {
     /// <summary>
     /// The primary timeframe for the calculation (e.g., T7, T30). 
     /// Defaults to T30.
     /// </summary>
     [FromQuery(Name = "timeframe")]
-    public Timeframe Timeframe { get; set; } = Timeframe.T30;
+    public Timeframe Timeframe { get; init; } = Timeframe.T30;
 
     /// <summary>
     /// The unique identifier of the tenant.
     /// </summary>
     [FromQuery(Name = "tenantId")]
-    public required Guid TenantId { get; set; }
+    public required Guid TenantId { get; init; }
 
     /// <summary>
     /// Optional. The number of bins to use for the histogram. 
     /// If null, an adaptive binning strategy is used.
     /// </summary>
     [FromQuery(Name = "binCount")]
-    public int? BinCount { get; set; }
+    public int? BinCount { get; init; }
 }
 
 

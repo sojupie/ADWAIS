@@ -22,6 +22,13 @@ public record FinancialRequestDto
     /// </summary>
     [FromQuery(Name = "tenantId")]
     public Guid? TenantId { get; init; }
+
+    /// <summary>
+    /// The comparison period for the timeframe.
+    /// Defaults to Preceding.
+    /// </summary>
+    [FromQuery(Name = "comparison")]
+    public ComparisonType Comparison { get; init; } = ComparisonType.Preceding;
 }
 
 

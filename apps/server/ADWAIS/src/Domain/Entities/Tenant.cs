@@ -9,8 +9,8 @@ public class Tenant
     public Guid Id { get; set; }
     public required string Name { get; set; }
     public TenantType Type { get; set; }
-    public required string LitiumBaseUrl { get; set; }
-    public required string ServiceAccountToken { get; set; }
+    public string? LitiumBaseUrl { get; set; }
+    public string? ServiceAccountToken { get; set; }
     public DateTimeOffset? FetchedFrom { get; set; }
     public DateTimeOffset? FetchedUntil { get; set; }
     public DateTimeOffset? LastPolled { get; set; }

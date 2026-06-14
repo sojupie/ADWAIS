@@ -14,6 +14,13 @@ public record PortfolioRequestDto
     /// </summary>
     [FromQuery(Name = "timeframe")]
     public Timeframe Timeframe { get; init; } = Timeframe.T30;
+
+    /// <summary>
+    /// The comparison period for the timeframe.
+    /// Defaults to Preceding.
+    /// </summary>
+    [FromQuery(Name = "comparison")]
+    public ComparisonType Comparison { get; init; } = ComparisonType.Preceding;
 }
 
 

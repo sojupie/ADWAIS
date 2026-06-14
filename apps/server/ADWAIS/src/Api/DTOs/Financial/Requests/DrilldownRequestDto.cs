@@ -21,6 +21,13 @@ public record DrilldownRequestDto
     /// </summary>
     [FromQuery(Name = "tenantId")]
     public required Guid TenantId { get; init; }
+
+    /// <summary>
+    /// The comparison period for the timeframe.
+    /// Defaults to Preceding.
+    /// </summary>
+    [FromQuery(Name = "comparison")]
+    public ComparisonType Comparison { get; init; } = ComparisonType.Preceding;
 }
 
 

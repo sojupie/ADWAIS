@@ -28,6 +28,13 @@ public record OrderDistributionRequestDto
     /// </summary>
     [FromQuery(Name = "binCount")]
     public int? BinCount { get; init; }
+
+    /// <summary>
+    /// The comparison period for the timeframe.
+    /// Defaults to Preceding.
+    /// </summary>
+    [FromQuery(Name = "comparison")]
+    public ComparisonType Comparison { get; init; } = ComparisonType.Preceding;
 }
 
 

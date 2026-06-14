@@ -14,6 +14,7 @@ using Adwais.Infrastructure.Helpers;
 using Adwais.Infrastructure.Jobs;
 using Adwais.Infrastructure.Jobs.MaterializedViews;
 using Adwais.Infrastructure.Jobs.Monitor;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -38,6 +39,9 @@ builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddScoped<IFinancialService, FinancialService>();
 builder.Services.AddScoped<IMonitorOrchestrationService, MonitorOrchestrationService>();
+
+builder.Services.AddDataProtection()
+    .SetApplicationName("ADWAIS");
 
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();

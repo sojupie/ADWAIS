@@ -240,6 +240,7 @@
           {
             "name": "comparison",
             "in": "query",
+            "description": "The comparison period for the timeframe.\r\nDefaults to Preceding.",
             "schema": {
               "$ref": "#/components/schemas/ComparisonType"
             }
@@ -296,6 +297,7 @@
           {
             "name": "comparison",
             "in": "query",
+            "description": "The comparison period for the timeframe.\r\nDefaults to Preceding.",
             "schema": {
               "$ref": "#/components/schemas/ComparisonType"
             }
@@ -361,6 +363,7 @@
           {
             "name": "comparison",
             "in": "query",
+            "description": "The comparison period for the timeframe.\r\nDefaults to Preceding.",
             "schema": {
               "$ref": "#/components/schemas/ComparisonType"
             }
@@ -417,6 +420,7 @@
           {
             "name": "comparison",
             "in": "query",
+            "description": "The comparison period for the timeframe.\r\nDefaults to Preceding.",
             "schema": {
               "$ref": "#/components/schemas/ComparisonType"
             }
@@ -473,6 +477,7 @@
           {
             "name": "comparison",
             "in": "query",
+            "description": "The comparison period for the timeframe.\r\nDefaults to Preceding.",
             "schema": {
               "$ref": "#/components/schemas/ComparisonType"
             }
@@ -520,6 +525,7 @@
           {
             "name": "comparison",
             "in": "query",
+            "description": "The comparison period for the timeframe.\r\nDefaults to Preceding.",
             "schema": {
               "$ref": "#/components/schemas/ComparisonType"
             }
@@ -576,6 +582,7 @@
           {
             "name": "comparison",
             "in": "query",
+            "description": "The comparison period for the timeframe.\r\nDefaults to Preceding.",
             "schema": {
               "$ref": "#/components/schemas/ComparisonType"
             }
@@ -633,6 +640,7 @@
           {
             "name": "comparison",
             "in": "query",
+            "description": "The comparison period for the timeframe.\r\nDefaults to Preceding.",
             "schema": {
               "$ref": "#/components/schemas/ComparisonType"
             }
@@ -708,6 +716,7 @@
           {
             "name": "comparison",
             "in": "query",
+            "description": "The comparison period for the timeframe.\r\nDefaults to Preceding.",
             "schema": {
               "$ref": "#/components/schemas/ComparisonType"
             }
@@ -773,6 +782,7 @@
           {
             "name": "comparison",
             "in": "query",
+            "description": "The comparison period for the timeframe.\r\nDefaults to Preceding.",
             "schema": {
               "$ref": "#/components/schemas/ComparisonType"
             }
@@ -838,6 +848,7 @@
           {
             "name": "comparison",
             "in": "query",
+            "description": "The comparison period for the timeframe.\r\nDefaults to Preceding.",
             "schema": {
               "$ref": "#/components/schemas/ComparisonType"
             }
@@ -1042,6 +1053,7 @@
           {
             "name": "comparison",
             "in": "query",
+            "description": "The comparison period for the timeframe.\r\nDefaults to Preceding.",
             "schema": {
               "$ref": "#/components/schemas/ComparisonType"
             }
@@ -1107,6 +1119,7 @@
           {
             "name": "comparison",
             "in": "query",
+            "description": "The comparison period for the timeframe.\r\nDefaults to Preceding.",
             "schema": {
               "$ref": "#/components/schemas/ComparisonType"
             }

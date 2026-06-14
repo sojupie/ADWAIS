@@ -25,9 +25,9 @@ public class MonitorController(
     /// Provides latency time-series and filtered monitor lists hydrated with uptime for the specified timeframe (defaults to T30).
     /// </summary>
     [HttpGet("analytics")]
-    public async Task<ActionResult<MonitorAnalyticsResponseDto>> GetAnalytics([FromQuery] MonitorRequestDto request, [FromQuery] ComparisonType comparison = ComparisonType.Preceding, CancellationToken ct = default)
+    public async Task<ActionResult<MonitorAnalyticsResponseDto>> GetAnalytics([FromQuery] MonitorRequestDto request, CancellationToken ct = default)
     {
-        var period = TimeframeResolver.Resolve(request.Timeframe, comparison);
+        var period = TimeframeResolver.Resolve(request.Timeframe, request.Comparison);
         var result = await monitorService.GetAnalyticsAsync(period, request.TenantId, request.MonitorId, ct);
 
         return Ok(new MonitorAnalyticsResponseDto(
@@ -48,9 +48,9 @@ public class MonitorController(
     /// </summary>
     /// <param name="request">The request containing query filters and timeframe.</param>
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<UptimeMonitorDto>>> GetMonitors([FromQuery] MonitorRequestDto request, [FromQuery] ComparisonType comparison = ComparisonType.Preceding, CancellationToken ct = default)
+    public async Task<ActionResult<IEnumerable<UptimeMonitorDto>>> GetMonitors([FromQuery] MonitorRequestDto request, CancellationToken ct = default)
     {
-        var period = TimeframeResolver.Resolve(request.Timeframe, comparison);
+        var period = TimeframeResolver.Resolve(request.Timeframe, request.Comparison);
 
         if (request.MonitorId.HasValue)
         {

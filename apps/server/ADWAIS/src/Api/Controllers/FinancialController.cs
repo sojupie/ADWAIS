@@ -16,9 +16,9 @@ public class FinancialController(IFinancialService financialService) : Controlle
     /// Scopes to a single tenant if tenantId is provided, otherwise portfolio-wide.
     /// </summary>
     [HttpGet("kpis")]
-    public async Task<ActionResult<KpiResponseDto>> GetKpis([FromQuery] FinancialRequestDto request, [FromQuery] ComparisonType comparison = ComparisonType.Preceding, CancellationToken ct = default)
+    public async Task<ActionResult<KpiResponseDto>> GetKpis([FromQuery] FinancialRequestDto request, CancellationToken ct = default)
     {
-        var period = TimeframeResolver.Resolve(request.Timeframe, comparison);
+        var period = TimeframeResolver.Resolve(request.Timeframe, request.Comparison);
         var result = await financialService.GetKpisAsync(period, request.TenantId, ct);
         return Ok(new KpiResponseDto(
             result.CurrentRevenue,
@@ -39,9 +39,9 @@ public class FinancialController(IFinancialService financialService) : Controlle
     /// Scopes to a single tenant if tenantId is provided, otherwise portfolio-wide.
     /// </summary>
     [HttpGet("accumulated-revenue")]
-    public async Task<ActionResult<IEnumerable<AccumulatedRevenuePointResponseDto>>> GetAccumulatedRevenue([FromQuery] FinancialRequestDto request, [FromQuery] ComparisonType comparison = ComparisonType.Preceding, CancellationToken ct = default)
+    public async Task<ActionResult<IEnumerable<AccumulatedRevenuePointResponseDto>>> GetAccumulatedRevenue([FromQuery] FinancialRequestDto request, CancellationToken ct = default)
     {
-        var period = TimeframeResolver.Resolve(request.Timeframe, comparison);
+        var period = TimeframeResolver.Resolve(request.Timeframe, request.Comparison);
         var result = await financialService.GetAccumulatedRevenueAsync(period, request.TenantId, ct);
         return Ok(result.Select(v => new AccumulatedRevenuePointResponseDto(
                 v.Timestamp,
@@ -56,9 +56,9 @@ public class FinancialController(IFinancialService financialService) : Controlle
     /// Scopes to a single tenant if tenantId is provided, otherwise portfolio-wide.
     /// </summary>
     [HttpGet("velocity")]
-    public async Task<ActionResult<IEnumerable<VelocityPointResponseDto>>> GetVelocity([FromQuery] FinancialRequestDto request, [FromQuery] ComparisonType comparison = ComparisonType.Preceding, CancellationToken ct = default)
+    public async Task<ActionResult<IEnumerable<VelocityPointResponseDto>>> GetVelocity([FromQuery] FinancialRequestDto request, CancellationToken ct = default)
     {
-        var period = TimeframeResolver.Resolve(request.Timeframe, comparison);
+        var period = TimeframeResolver.Resolve(request.Timeframe, request.Comparison);
         var result = await financialService.GetVelocityAsync(period, request.TenantId, ct);
         return Ok(result.Select(v => new VelocityPointResponseDto(
                 v.Timestamp,
@@ -71,9 +71,9 @@ public class FinancialController(IFinancialService financialService) : Controlle
     /// Per-tenant growth %, sorted descending. Portfolio view only.
     /// </summary>
     [HttpGet("growth-extremes")]
-    public async Task<ActionResult<IEnumerable<GrowthExtremeResponseDto>>> GetGrowthExtremes([FromQuery] PortfolioRequestDto request, [FromQuery] ComparisonType comparison = ComparisonType.Preceding, CancellationToken ct = default)
+    public async Task<ActionResult<IEnumerable<GrowthExtremeResponseDto>>> GetGrowthExtremes([FromQuery] PortfolioRequestDto request, CancellationToken ct = default)
     {
-        var period = TimeframeResolver.Resolve(request.Timeframe, comparison);
+        var period = TimeframeResolver.Resolve(request.Timeframe, request.Comparison);
         var result = await financialService.GetGrowthExtremesAsync(period, ct);
         return Ok(result.Select(g => new GrowthExtremeResponseDto(
             g.TenantId,
@@ -89,9 +89,9 @@ public class FinancialController(IFinancialService financialService) : Controlle
     /// Portfolio view only.
     /// </summary>
     [HttpGet("revenue-efficiency")]
-    public async Task<ActionResult<RevenueEfficiencyResponseDto>> GetRevenueEfficiency([FromQuery] PortfolioRequestDto request, [FromQuery] ComparisonType comparison = ComparisonType.Preceding, CancellationToken ct = default)
+    public async Task<ActionResult<RevenueEfficiencyResponseDto>> GetRevenueEfficiency([FromQuery] PortfolioRequestDto request, CancellationToken ct = default)
     {
-        var period = TimeframeResolver.Resolve(request.Timeframe, comparison);
+        var period = TimeframeResolver.Resolve(request.Timeframe, request.Comparison);
         var result = await financialService.GetRevenueEfficiencyAsync(period, ct);
         return Ok(new RevenueEfficiencyResponseDto(
             result.GlobalAverageOrderValue,
@@ -112,9 +112,9 @@ public class FinancialController(IFinancialService financialService) : Controlle
     /// Portfolio view only.
     /// </summary>
     [HttpGet("volume-anomaly")]
-    public async Task<ActionResult<IEnumerable<VolumeAnomalyResponseDto>>> GetVolumeAnomaly([FromQuery] PortfolioRequestDto request, [FromQuery] ComparisonType comparison = ComparisonType.Preceding, CancellationToken ct = default)
+    public async Task<ActionResult<IEnumerable<VolumeAnomalyResponseDto>>> GetVolumeAnomaly([FromQuery] PortfolioRequestDto request, CancellationToken ct = default)
     {
-        var period = TimeframeResolver.Resolve(request.Timeframe, comparison);
+        var period = TimeframeResolver.Resolve(request.Timeframe, request.Comparison);
         var result = await financialService.GetVolumeAnomalyAsync(period, ct);
         return Ok(result.Select(r => new VolumeAnomalyResponseDto
         {
@@ -130,9 +130,9 @@ public class FinancialController(IFinancialService financialService) : Controlle
     /// Scatter: baseline revenue × growth % × current volume. Portfolio view only.
     /// </summary>
     [HttpGet("momentum")]
-    public async Task<ActionResult<MomentumResponseDto>> GetMomentum([FromQuery] PortfolioRequestDto request, [FromQuery] ComparisonType comparison = ComparisonType.Preceding, CancellationToken ct = default)
+    public async Task<ActionResult<MomentumResponseDto>> GetMomentum([FromQuery] PortfolioRequestDto request, CancellationToken ct = default)
     {
-        var period = TimeframeResolver.Resolve(request.Timeframe, comparison);
+        var period = TimeframeResolver.Resolve(request.Timeframe, request.Comparison);
         var result = await financialService.GetMomentumAsync(period, ct);
         return Ok(new MomentumResponseDto(
             result.MedianBaselineRevenue,
@@ -150,9 +150,9 @@ public class FinancialController(IFinancialService financialService) : Controlle
     /// Step-line: running tally of daily growth delta. Drilldown view only.
     /// </summary>
     [HttpGet("daily-revenue-delta")]
-    public async Task<ActionResult<IEnumerable<NetGrowthAdditionPointResponseDto>>> GetNetGrowthAddition([FromQuery] DrilldownRequestDto request, [FromQuery] ComparisonType comparison = ComparisonType.Preceding, CancellationToken ct = default)
+    public async Task<ActionResult<IEnumerable<NetGrowthAdditionPointResponseDto>>> GetNetGrowthAddition([FromQuery] DrilldownRequestDto request, CancellationToken ct = default)
     {
-        var period = TimeframeResolver.Resolve(request.Timeframe, comparison);
+        var period = TimeframeResolver.Resolve(request.Timeframe, request.Comparison);
         var result = await financialService.GetNetGrowthAdditionAsync(period, request.TenantId, ct);
         return Ok(result.Select(n => new NetGrowthAdditionPointResponseDto(
                 n.Timestamp,
@@ -163,9 +163,9 @@ public class FinancialController(IFinancialService financialService) : Controlle
     /// Histogram of order values with adaptive binning. Drilldown view only.
     /// </summary>
     [HttpGet("order-distribution")]
-    public async Task<ActionResult<IEnumerable<OrderBinResponseDto>>> GetOrderDistribution([FromQuery] OrderDistributionRequestDto request, [FromQuery] ComparisonType comparison = ComparisonType.Preceding, CancellationToken ct = default)
+    public async Task<ActionResult<IEnumerable<OrderBinResponseDto>>> GetOrderDistribution([FromQuery] OrderDistributionRequestDto request, CancellationToken ct = default)
     {
-        var period = TimeframeResolver.Resolve(request.Timeframe, comparison);
+        var period = TimeframeResolver.Resolve(request.Timeframe, request.Comparison);
         var result = await financialService.GetOrderDistributionAsync(period, request.TenantId, request.BinCount, ct);
         return Ok(result.Select(b => new OrderBinResponseDto(
             b.BinLabel,
@@ -181,9 +181,9 @@ public class FinancialController(IFinancialService financialService) : Controlle
     /// Scopes to a single tenant if tenantId is provided, otherwise portfolio-wide.
     /// </summary>
     [HttpGet("transaction-density")]
-    public async Task<ActionResult<IEnumerable<TransactionDensityPointResponseDto>>> GetTransactionDensity([FromQuery] FinancialRequestDto request, [FromQuery] ComparisonType comparison = ComparisonType.Preceding, CancellationToken ct = default)
+    public async Task<ActionResult<IEnumerable<TransactionDensityPointResponseDto>>> GetTransactionDensity([FromQuery] FinancialRequestDto request, CancellationToken ct = default)
     {
-        var period = TimeframeResolver.Resolve(request.Timeframe, comparison);
+        var period = TimeframeResolver.Resolve(request.Timeframe, request.Comparison);
         var result = await financialService.GetTransactionDensityAsync(period, request.TenantId, ct);
         return Ok(result.Select(p => new TransactionDensityPointResponseDto(
             p.DayOfWeek,
@@ -197,9 +197,9 @@ public class FinancialController(IFinancialService financialService) : Controlle
     /// Scopes to a single tenant if tenantId is provided, otherwise portfolio-wide.
     /// </summary>
     [HttpGet("cumulative-growth-delta")]
-    public async Task<ActionResult<IEnumerable<CumulativeGrowthDeltaPointResponseDto>>> GetCumulativeGrowthDelta([FromQuery] FinancialRequestDto request, [FromQuery] ComparisonType comparison = ComparisonType.Preceding, CancellationToken ct = default)
+    public async Task<ActionResult<IEnumerable<CumulativeGrowthDeltaPointResponseDto>>> GetCumulativeGrowthDelta([FromQuery] FinancialRequestDto request, CancellationToken ct = default)
     {
-        var period = TimeframeResolver.Resolve(request.Timeframe, comparison);
+        var period = TimeframeResolver.Resolve(request.Timeframe, request.Comparison);
         var result = await financialService.GetCumulativeGrowthDeltaAsync(period, request.TenantId, ct);
         return Ok(result.Select(p => new CumulativeGrowthDeltaPointResponseDto(
                 p.Timestamp,

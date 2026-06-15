@@ -1,20 +1,11 @@
-- more PATCH options for monitor updates (sla, name, url, what else?)
 - authentication
 - entraid auth and device auth for kiosk mode
 - order anomaly monitor does not take time of day into account, same with revenue and momentum matrix i believe. maybe we should have a default averaged lookback window like order density matrix.
 - when using historic backfill, provide visual feedback of status/success/failure/errors
-- more info for "recent background jobs" likke tenant and monitor name
-- add a toggle for switching between vat and no vat
-- accumulated revenue tooltip seems incorrect, verify calculation.
+- more info for "recent background jobs" like tenant and monitor name
+- add a toggle for switching between vat and no vat, multiple materialized views or accept latency for the sake of simplicity?
 - intranet api
-- disconnect effect
-- sync endpoint
-- revise polling mechanism for litium?
+- make the frontend ping litium env for health checks.
 - provide error/warning when a litium job fails either due to an error or if the service is disabled, or dont even offer it as an option
 - add date to system logs
-- sthlm time over utc? let user choose or convert before sending to front-end? we still want to store data in UTC.
-- if monitor uptime% data is missing, dont return/show 0%, show N/A
-- why does kth storefront return "UP" when it's not? is it the db seeder logic that bypasses?
-- change 1D to 24h
-- 24h and 7D charts should have default bins of 48 (so like, 30min intervals for 24h, 3.5h for 7D). the x labels should still be per hour and per day, respectively. maybe change endpoints to allow control of how many bins to return (with defined rangelimits) rather than hardcoding them?
-- tooltip of order density matrix is broken
+- deploy

@@ -5,12 +5,13 @@ import type { GlobalConfigDto } from '@types';
 
 interface SyncIntervalsFormProps {
   config: (GlobalConfigDto & { uptimeRobotApiKey?: string; latencyDegradedFloor?: number | null; systemEventRetentionDays?: number; uptimeRobotFetchEnabled?: boolean }) | undefined;
+  error?: Error | null;
   updateConfig: {
     mutate: (variables: Partial<GlobalConfigDto & { uptimeRobotApiKey?: string; latencyDegradedFloor?: number | null; systemEventRetentionDays?: number; uptimeRobotFetchEnabled?: boolean }>) => void;
   };
 }
 
-export function SyncIntervalsForm({ config, updateConfig }: SyncIntervalsFormProps) {
+export function SyncIntervalsForm({ config, error, updateConfig }: SyncIntervalsFormProps) {
   return (
     <SettingsCard
       title="Global Configuration"
@@ -25,6 +26,7 @@ export function SyncIntervalsForm({ config, updateConfig }: SyncIntervalsFormPro
             type="password"
             required
             requiredCondition="if enabled"
+            allowClear
             onSave={(val) => updateConfig.mutate({ uptimeRobotApiKey: val })}
           />
           <InlineEditField
@@ -62,6 +64,10 @@ export function SyncIntervalsForm({ config, updateConfig }: SyncIntervalsFormPro
             onSave={(val) => updateConfig.mutate({ systemEventRetentionDays: val })}
           />
         </>
+      ) : error ? (
+        <div className="bg-red-50 text-red-700 p-4 rounded-xl border border-red-200 text-sm flex items-center justify-center min-h-[120px]">
+          {error.message || 'Global config may not be set. Please check database.'}
+        </div>
       ) : (
         <div className="animate-pulse flex flex-col gap-4">
           <div className="h-10 bg-slate-100 rounded-xl"></div>

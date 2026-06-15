@@ -31,7 +31,8 @@ public class LitiumOrderFetchJob(
         var now = DateTimeOffset.UtcNow;
 
         var tenants = await db.Tenants
-            .Where(t => t.OrderFetchingEnabled && t.Id != AnalyticsDbContext.SystemTenantGuid)
+            .Where(t => t.OrderFetchingEnabled && t.Id != AnalyticsDbContext.SystemTenantGuid
+                        && t.LitiumBaseUrl != null && t.ServiceAccountToken != null)
             .ToListAsync();
 
         var dispatched = 0;

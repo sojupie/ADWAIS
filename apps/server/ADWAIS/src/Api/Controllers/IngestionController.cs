@@ -40,6 +40,8 @@ public class IngestionController(
         var tenant = await context.Tenants.SingleOrDefaultAsync(t => t.Id == request.TenantId, ct);
         
         if (tenant == null) return NotFound("Tenant not found.");
+        if (string.IsNullOrWhiteSpace(tenant.LitiumBaseUrl) || string.IsNullOrWhiteSpace(tenant.ServiceAccountToken))
+            return BadRequest("Tenant is missing Litium integration credentials.");
         if (tenant.CurrentlyFetching) return Conflict(new { message = $"Tenant {request.TenantId} is currently fetching. Wait for the active job to complete." });
 
         tenant.CurrentlyFetching = true;

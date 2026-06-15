@@ -14,9 +14,9 @@ export interface Tenant {
   name: string | null;
   type?: TenantType;
   /** @nullable */
-  litiumBaseUrl: string | null;
+  litiumBaseUrl?: string | null;
   /** @nullable */
-  serviceAccountToken: string | null;
+  serviceAccountToken?: string | null;
   /** @nullable */
   fetchedFrom?: string | null;
   /** @nullable */

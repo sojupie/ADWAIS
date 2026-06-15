@@ -2077,6 +2077,13 @@
               "type": "string",
               "format": "uuid"
             }
+          },
+          {
+            "name": "X-Api-Key",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
@@ -2644,7 +2651,6 @@
       },
       "Order": {
         "required": [
-          "currency",
           "litiumOrderId"
         ],
         "type": "object",
@@ -2727,7 +2733,8 @@
           "Confirmed",
           "PendingProcessing",
           "Processing",
-          "Completed"
+          "Completed",
+          "Cancelled"
         ],
         "type": "string"
       },
@@ -2927,9 +2934,7 @@
       },
       "Tenant": {
         "required": [
-          "litiumBaseUrl",
-          "name",
-          "serviceAccountToken"
+          "name"
         ],
         "type": "object",
         "properties": {

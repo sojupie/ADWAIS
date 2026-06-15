@@ -17,5 +17,9 @@ timeframe?: Timeframe;
  * The unique identifier of the tenant.
  */
 tenantId: string;
+/**
+ * The comparison period for the timeframe.
+ * Defaults to Preceding.
+ */
 comparison?: ComparisonType;
 };

@@ -14,4 +14,5 @@ export const OrderState = {
   PendingProcessing: 'PendingProcessing',
   Processing: 'Processing',
   Completed: 'Completed',
+  Cancelled: 'Cancelled',
 } as const;

@@ -6,5 +6,6 @@ public enum OrderState
     Confirmed,
     PendingProcessing,
     Processing,
-    Completed
+    Completed,
+    Cancelled
 }

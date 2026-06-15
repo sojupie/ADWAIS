@@ -17,17 +17,18 @@ public class WebhooksController(
     [HttpPost("motastic/{tenantId}")]
     public async Task<IActionResult> ReceiveMotasticWebhook(
         [FromRoute] Guid tenantId,
+        [FromHeader(Name = "X-Api-Key")] string? apiKey,
         [FromBody] LitiumSyncResponse.LitiumOrderDto? payload,
         CancellationToken ct)
     {
-        if (!Request.Headers.TryGetValue("X-Api-Key", out var apiKey) || apiKey != configuration["Webhooks:MotasticApiKey"])
+        if (string.IsNullOrEmpty(apiKey) || apiKey != configuration["Webhooks:MotasticApiKey"])
         {
             return Unauthorized();
         }
 
-        if (string.IsNullOrWhiteSpace(payload?.OrderNumber))
+        if (payload == null)
         {
-            return BadRequest("Payload must contain an OrderNumber.");
+            return BadRequest(new { Error = "Payload cannot be null." });
         }
 
         try

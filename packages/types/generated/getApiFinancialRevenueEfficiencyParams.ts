@@ -13,5 +13,9 @@ export type GetApiFinancialRevenueEfficiencyParams = {
  * Defaults to T30.
  */
 timeframe?: Timeframe;
+/**
+ * The comparison period for the timeframe.
+ * Defaults to Preceding.
+ */
 comparison?: ComparisonType;
 };

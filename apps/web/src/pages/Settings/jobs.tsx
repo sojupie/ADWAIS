@@ -55,13 +55,7 @@ export function BackgroundJobsView() {
                         </div>
 
                         <ManualBackfillPanel tenants={tenants} triggerBackfill={triggerBackfill} />
-                        {configError ? (
-                            <div className="bg-red-50 text-red-700 p-4 rounded-xl border border-red-200 text-sm flex items-center justify-center h-[180px]">
-                                {configError instanceof Error ? configError.message : 'Global config may not be set. Please check database.'}
-                            </div>
-                        ) : (
-                            <SyncIntervalsForm config={config} updateConfig={updateConfig} />
-                        )}
+                        <SyncIntervalsForm config={config} error={configError as Error | null} updateConfig={updateConfig} />
                     </div>
                 </div>
             </SettingsPanel>

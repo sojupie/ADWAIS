@@ -19,6 +19,6 @@ export interface Order {
   totalValueIncVat?: number;
   totalValueExcVat?: number;
   /** @nullable */
-  currency: string | null;
+  currency?: string | null;
   tenant?: Tenant;
 }

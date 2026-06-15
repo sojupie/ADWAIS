@@ -11,12 +11,10 @@ public class CreateTenantRequestDtoValidator : AbstractValidator<CreateTenantReq
             WithMessage("Name is required.");
         
         RuleFor(x => x.LitiumBaseUrl).NotEmpty().
-            WithMessage("LitiumBaseUrl is required.");
+            WithMessage("LitiumBaseUrl is required when order fetching is enabled.")
+            .When(x => x.OrderFetchingEnabled);
         RuleFor(x => x.LitiumBaseUrl).Must(uri =>
-            Uri.TryCreate(uri, UriKind.Absolute, out _)).WithMessage("INVALID URL");
-        
-        RuleFor(x => x.ServiceAccountToken).NotEmpty()
-            .WithMessage("ServiceAccountToken is required.");
+            string.IsNullOrWhiteSpace(uri) || Uri.TryCreate(uri, UriKind.Absolute, out _)).WithMessage("INVALID URL");
     }
 
 }

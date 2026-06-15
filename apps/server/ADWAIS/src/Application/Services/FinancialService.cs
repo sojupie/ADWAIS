@@ -36,6 +36,7 @@ public class FinancialService(IApplicationDbContextFactory contextFactory) : IFi
         {
             var query = context.Orders
                 .AsNoTracking()
+                .Where(o => o.OrderState != OrderState.Cancelled)
                 .Where(o => o.CreatedDate >= start && o.CreatedDate < end);
 
             if (tenantId.HasValue)
@@ -77,6 +78,7 @@ public class FinancialService(IApplicationDbContextFactory contextFactory) : IFi
         {
             var freshQuery = context.Orders
                 .AsNoTracking()
+                .Where(o => o.OrderState != OrderState.Cancelled)
                 .Where(o => o.CreatedDate >= yesterday && o.CreatedDate < end);
 
             if (tenantId.HasValue)
@@ -114,6 +116,7 @@ public class FinancialService(IApplicationDbContextFactory contextFactory) : IFi
         {
             var rows = await context.Orders
                 .AsNoTracking()
+                .Where(o => o.OrderState != OrderState.Cancelled)
                 .Where(o => o.CreatedDate >= start && o.CreatedDate < end)
                 .Where(o => o.TenantId != IApplicationDbContext.SystemTenantGuid)
                 .Select(o => new { o.CreatedDate, o.TotalValueIncVat })
@@ -142,6 +145,7 @@ public class FinancialService(IApplicationDbContextFactory contextFactory) : IFi
         {
             var freshRows = await context.Orders
                 .AsNoTracking()
+                .Where(o => o.OrderState != OrderState.Cancelled)
                 .Where(o => o.CreatedDate >= yesterday && o.CreatedDate < end)
                 .Where(o => o.TenantId != IApplicationDbContext.SystemTenantGuid)
                 .GroupBy(o => new { o.CreatedDate.Year, o.CreatedDate.Month, o.CreatedDate.Day })

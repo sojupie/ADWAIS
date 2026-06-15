@@ -20,6 +20,12 @@ public class MonitorController(
     IDbContextFactory<AnalyticsDbContext> dbContextFactory,
     IMonitorOrchestrationService monitorService) : ControllerBase
 {
+    private async Task<bool> IsUptimeRobotConfiguredAsync(CancellationToken ct)
+    {
+        await using var db = await dbContextFactory.CreateDbContextAsync(ct);
+        var config = await db.GlobalConfigs.AsNoTracking().FirstOrDefaultAsync(ct);
+        return config != null && !string.IsNullOrWhiteSpace(config.UptimeRobotApiKey);
+    }
     /// <summary>
     /// Unified analytics endpoint for monitoring data.
     /// Provides latency time-series and filtered monitor lists hydrated with uptime for the specified timeframe (defaults to T30).
@@ -106,6 +112,7 @@ public class MonitorController(
         [FromBody] CreateMonitorRequestDto request,
         CancellationToken ct = default)
     {
+        if (!await IsUptimeRobotConfiguredAsync(ct)) return BadRequest("UptimeRobot API key is not configured.");
         var m = await monitorService.CreateMonitorAsync(tenantId, request.Name, request.Url, request.UptimeSla, ct);
         return CreatedAtAction(nameof(GetMonitors), new { id = m.Id }, ToDto(m));
     }
@@ -136,6 +143,7 @@ public class MonitorController(
     [HttpPost("{id:int}/pause")]
     public async Task<IActionResult> PauseMonitor(int id, CancellationToken ct = default)
     {
+        if (!await IsUptimeRobotConfiguredAsync(ct)) return BadRequest("UptimeRobot API key is not configured.");
         await monitorService.PauseMonitorAsync(id, ct);
         return Ok();
     }
@@ -146,6 +154,7 @@ public class MonitorController(
     [HttpPost("{id:int}/start")]
     public async Task<IActionResult> StartMonitor(int id, CancellationToken ct = default)
     {
+        if (!await IsUptimeRobotConfiguredAsync(ct)) return BadRequest("UptimeRobot API key is not configured.");
         await monitorService.StartMonitorAsync(id, ct);
         return Ok();
     }
@@ -156,6 +165,8 @@ public class MonitorController(
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteMonitor(int id, [FromQuery] Guid? tenantId, CancellationToken ct = default)
     {
+        if (!await IsUptimeRobotConfiguredAsync(ct)) return BadRequest("UptimeRobot API key is not configured.");
+
         if (!tenantId.HasValue)
         {
             await using var db = await dbContextFactory.CreateDbContextAsync(ct);
@@ -197,6 +208,7 @@ public class MonitorController(
     [HttpPatch("{id:int}")]
     public async Task<ActionResult<UptimeMonitorDto>> UpdateMonitor(int id, [FromBody] UpdateMonitorRequestDto request, CancellationToken ct = default)
     {
+        if (!await IsUptimeRobotConfiguredAsync(ct)) return BadRequest("UptimeRobot API key is not configured.");
         await monitorService.UpdateMonitorAsync(id, request.Name, request.Url, request.Sla, request.Tags, ct);
         
         await using var db = await dbContextFactory.CreateDbContextAsync(ct);

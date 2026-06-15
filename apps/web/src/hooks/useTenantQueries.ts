@@ -44,7 +44,11 @@ export function useUpdateTenantMutation() {
         method: 'PATCH', 
         body: JSON.stringify(payload) 
       }),
-    onSuccess: () => {
+    onSuccess: (data) => {
+      queryClient.setQueryData(['tenants'], (old: TenantResponseDto[] | undefined) => {
+        if (!old) return old;
+        return old.map(t => t.id === data.id ? data : t);
+      });
       queryClient.invalidateQueries({ queryKey: ['tenants'] });
     }
   });

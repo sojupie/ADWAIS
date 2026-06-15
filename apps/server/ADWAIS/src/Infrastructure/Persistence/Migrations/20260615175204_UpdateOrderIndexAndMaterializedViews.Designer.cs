@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Adwais.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Adwais.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AnalyticsDbContext))]
-    partial class AnalyticsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260615175204_UpdateOrderIndexAndMaterializedViews")]
+    partial class UpdateOrderIndexAndMaterializedViews
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -611,6 +614,7 @@ namespace Adwais.Infrastructure.Persistence.Migrations
                         .HasColumnName("created_date");
 
                     b.Property<string>("Currency")
+                        .IsRequired()
                         .HasMaxLength(10)
                         .HasColumnType("character varying(10)")
                         .HasColumnName("currency");

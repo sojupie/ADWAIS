@@ -19,6 +19,12 @@ public class MonitorSynchronizationJob(
     public async Task ExecuteAsync()
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        var globalConfig = await dbContext.GlobalConfigs.FirstOrDefaultAsync();
+        if (globalConfig == null || string.IsNullOrWhiteSpace(globalConfig.UptimeRobotApiKey) || !globalConfig.UptimeRobotFetchEnabled)
+        {
+            return;
+        }
+        
         var upStreamMonitors = await uptimeRobotService.GetMonitorsAsync();
         
         var lowestIntervalMins = upStreamMonitors.Any() 

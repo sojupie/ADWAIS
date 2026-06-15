@@ -10,6 +10,12 @@ public class UptimeDispatcherJob(IDbContextFactory<AnalyticsDbContext> dbContext
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         
+        var globalConfig = await dbContext.GlobalConfigs.FirstOrDefaultAsync();
+        if (globalConfig == null || string.IsNullOrWhiteSpace(globalConfig.UptimeRobotApiKey) || !globalConfig.UptimeRobotFetchEnabled)
+        {
+            return;
+        }
+        
         var monitors = await dbContext.Monitors
             .Where(m => m.UptimeMonitorEnabled)
             .Select(m => new { m.Id, m.LastUptimeUpdate })

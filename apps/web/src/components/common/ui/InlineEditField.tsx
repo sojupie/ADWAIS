@@ -11,6 +11,7 @@ type InlineEditFieldProps<T> = {
   requiredCondition?: string;
   displayValue?: React.ReactNode;
   placeholder?: string;
+  allowClear?: boolean;
 };
 
 export function InlineEditField<T>({
@@ -23,6 +24,7 @@ export function InlineEditField<T>({
   requiredCondition,
   displayValue,
   placeholder,
+  allowClear = false,
 }: InlineEditFieldProps<T>) {
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState(value);
@@ -159,6 +161,27 @@ export function InlineEditField<T>({
             />
           )}
           <div className="flex items-center gap-1">
+            {allowClear && (type === 'password' ? value : draft) && (
+              <button
+                onClick={async () => {
+                  setIsSaving(true);
+                  try {
+                    await onSave((type === 'number' ? null : '') as unknown as T);
+                    setIsEditing(false);
+                    if (type === 'password') setDraft('' as unknown as T);
+                  } catch (e) {
+                    console.error(e);
+                  } finally {
+                    setIsSaving(false);
+                  }
+                }}
+                disabled={isSaving}
+                className="p-1 text-red-500 hover:bg-red-50 rounded text-xs font-bold"
+                title="Clear"
+              >
+                Clear
+              </button>
+            )}
             <button
               onClick={handleSave}
               disabled={isSaving}

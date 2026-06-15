@@ -95,10 +95,10 @@ if (!isBuildTime)
         // Ensure materialized views are in sync with the current schema and logic
         await Adwais.Infrastructure.Helpers.MaterializedViewOrchestrator.SyncViewsAsync(context);
 
-        if (app.Environment.IsDevelopment())
-        {
-            await DatabaseSeeder.SeedSampleDataAsync(context);
-        }
+        // if (app.Environment.IsDevelopment())
+        // {
+        //     await DatabaseSeeder.SeedSampleDataAsync(context);
+        // }
     }
 
     using (var connection = JobStorage.Current.GetConnection())
@@ -158,13 +158,13 @@ if (!isBuildTime)
                 newJob => newJob.ExecuteAsync(),
                 Cron.Daily(2));
 
-            if (app.Environment.IsDevelopment())
-            {
-                recurringJobManager.AddOrUpdate<RuntimeDataSeederJob>(
-                    "dev-runtime-data-seeder",
-                    newJob => newJob.ExecuteAsync(),
-                    Cron.MinuteInterval(1));
-            }
+            // if (app.Environment.IsDevelopment())
+            // {
+            //     recurringJobManager.AddOrUpdate<RuntimeDataSeederJob>(
+            //         "dev-runtime-data-seeder",
+            //         newJob => newJob.ExecuteAsync(),
+            //         Cron.MinuteInterval(1));
+            // }
         }
     }
 }

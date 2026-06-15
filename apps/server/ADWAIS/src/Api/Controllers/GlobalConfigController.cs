@@ -65,7 +65,7 @@ public class GlobalConfigController(
         if (request.LitiumFetchEnabled.HasValue) config.LitiumFetchEnabled = request.LitiumFetchEnabled.Value;
         if (request.UptimeRobotFetchEnabled.HasValue) config.UptimeRobotFetchEnabled = request.UptimeRobotFetchEnabled.Value;
         if (request.LatencyDegradedFloor != -1) config.LatencyDegradedFloor = request.LatencyDegradedFloor;
-        if (request.UptimeRobotApiKey != null) config.UptimeRobotApiKey = request.UptimeRobotApiKey;
+        if (request.UptimeRobotApiKey != null) config.UptimeRobotApiKey = string.IsNullOrWhiteSpace(request.UptimeRobotApiKey) ? null : request.UptimeRobotApiKey;
         if (request.SystemEventRetentionDays.HasValue) config.SystemEventRetentionDays = request.SystemEventRetentionDays.Value;
         if (request.DefaultUptimeSla != -1) config.DefaultUptimeSla = request.DefaultUptimeSla;
 

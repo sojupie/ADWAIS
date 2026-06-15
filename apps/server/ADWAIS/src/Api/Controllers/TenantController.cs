@@ -156,11 +156,11 @@ public class TenantController(
         }
         if (request.LitiumBaseUrl is not null)
         {
-            tenant.LitiumBaseUrl = request.LitiumBaseUrl.Trim();
+            tenant.LitiumBaseUrl = string.IsNullOrWhiteSpace(request.LitiumBaseUrl) ? null : request.LitiumBaseUrl.Trim();
         }
         if (request.ServiceAccountToken is not null)
         {
-            tenant.ServiceAccountToken = request.ServiceAccountToken;
+            tenant.ServiceAccountToken = string.IsNullOrWhiteSpace(request.ServiceAccountToken) ? null : request.ServiceAccountToken;
         }
         if (request.OrderFetchingEnabled.HasValue)
         {

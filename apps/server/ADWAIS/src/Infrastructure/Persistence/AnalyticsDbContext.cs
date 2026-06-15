@@ -4,11 +4,13 @@ using Adwais.Domain.Entities.Office;
 using Adwais.Domain.Entities.OrderData;
 using Adwais.Domain.Enums;
 using Adwais.Application.Common.Interfaces;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
+using Adwais.Infrastructure.Persistence.Converters;
 
 namespace Adwais.Infrastructure.Persistence;
 
-public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options) 
+public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, IDataProtectionProvider? dataProtectionProvider = null) 
     : DbContext(options), IApplicationDbContext
 {
     public DbSet<GlobalConfig> GlobalConfigs => Set<GlobalConfig>();
@@ -102,6 +104,11 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options)
                 .HasDefaultValue(TenantType.Mixed);
             entity.Property(t => t.LitiumBaseUrl).HasMaxLength(2048);
             entity.Property(t => t.ServiceAccountToken).HasMaxLength(2048);
+            if (dataProtectionProvider != null)
+            {
+                entity.Property(t => t.ServiceAccountToken)
+                    .HasConversion(new EncryptedStringConverter(dataProtectionProvider));
+            }
             entity.Property(t => t.CurrentlyFetching).HasDefaultValue(false);
 
             // to catch unassigned monitors since TenantId is not nullable and a foreign key
@@ -111,8 +118,8 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options)
                     Id = SystemTenantGuid,
                     Name = "System (unassigned monitors)",
                     Type = TenantType.Mixed,
-                    LitiumBaseUrl = "N/A",
-                    ServiceAccountToken = "N/A",
+                    LitiumBaseUrl = null,
+                    ServiceAccountToken = null,
                     OrderFetchingEnabled = false
                 }
             );
@@ -129,9 +136,7 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options)
             entity.Property(o => o.LitiumOrderId).HasMaxLength(255);
             entity.Property(o => o.Currency).HasMaxLength(10);
             
-            entity.HasIndex(o => new { o.TenantId, o.LitiumOrderId })
-                .IsUnique()
-                .HasDatabaseName("uq_orders_tenant_litium");
+            entity.HasIndex(o => new { o.TenantId, o.CreatedDate, o.OrderState });
                 
             entity.HasIndex(o => new { o.CreatedDate, o.TenantId })
                 .HasDatabaseName("idx_orders_composite_dash")
@@ -217,6 +222,11 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options)
             entity.ToTable("global_config");
             entity.HasKey(x => x.Id);
             entity.Property(x => x.UptimeRobotApiKey).HasMaxLength(1024);
+            if (dataProtectionProvider != null)
+            {
+                entity.Property(x => x.UptimeRobotApiKey)
+                    .HasConversion(new EncryptedStringConverter(dataProtectionProvider));
+            }
             entity.Property(x => x.UptimeFetchIntervalMinutes).HasDefaultValue(60);
             entity.Property(x => x.LatencyFetchIntervalMinutes).HasDefaultValue(10);
             entity.Property(x => x.UserStatsFetchIntervalMinutes).HasDefaultValue(60);

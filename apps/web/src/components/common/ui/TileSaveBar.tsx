@@ -37,7 +37,7 @@ export function TileSaveBar({
         </div>
       )}
 
-      {isError && !isDirty && (
+      {isError && (
         <div className="flex items-center gap-2 text-xs font-bold text-red-600 bg-red-50 border border-red-100 rounded-lg px-2.5 py-1.5 animate-in slide-in-from-top-1 duration-200">
           <XCircle className="text-red-500 h-3.5 w-3.5 animate-pulse" />
           <span className="truncate">{errorMsg || "Failed to save updates."}</span>

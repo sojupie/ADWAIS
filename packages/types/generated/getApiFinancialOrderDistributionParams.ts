@@ -22,5 +22,9 @@ tenantId: string;
  * If null, an adaptive binning strategy is used.
  */
 binCount?: number;
+/**
+ * The comparison period for the timeframe.
+ * Defaults to Preceding.
+ */
 comparison?: ComparisonType;
 };

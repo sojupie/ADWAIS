@@ -54,6 +54,7 @@ import type {
   GrowthExtremeResponseDto,
   KpiResponseDto,
   LatencyMetricsDto,
+  LitiumOrderDto,
   MomentumResponseDto,
   MonitorAnalyticsResponseDto,
   NetGrowthAdditionPointResponseDto,
@@ -5431,5 +5432,82 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getDeleteApiUsersIdMutationOptions(options), queryClient);
+    }
+
+export type postApiWebhooksMotasticTenantIdResponse200 = {
+  data: void
+  status: 200
+}
+
+export type postApiWebhooksMotasticTenantIdResponseSuccess = (postApiWebhooksMotasticTenantIdResponse200) & {
+  headers: Headers;
+};
+;
+
+export type postApiWebhooksMotasticTenantIdResponse = (postApiWebhooksMotasticTenantIdResponseSuccess)
+
+export const getPostApiWebhooksMotasticTenantIdUrl = (tenantId: string,) => {
+
+
+
+
+  return `/api/webhooks/motastic/${tenantId}`
+}
+
+export const postApiWebhooksMotasticTenantId = async (tenantId: string,
+    litiumOrderDto?: LitiumOrderDto, options?: RequestInit): Promise<postApiWebhooksMotasticTenantIdResponse> => {
+
+  return customClient<postApiWebhooksMotasticTenantIdResponse>(getPostApiWebhooksMotasticTenantIdUrl(tenantId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(litiumOrderDto)
+  }
+);}
+
+
+
+
+export const getPostApiWebhooksMotasticTenantIdMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiWebhooksMotasticTenantId>>, TError,{tenantId: string;data?: LitiumOrderDto}, TContext>, request?: SecondParameter<typeof customClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiWebhooksMotasticTenantId>>, TError,{tenantId: string;data?: LitiumOrderDto}, TContext> => {
+
+const mutationKey = ['postApiWebhooksMotasticTenantId'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiWebhooksMotasticTenantId>>, {tenantId: string;data?: LitiumOrderDto}> = (props) => {
+          const {tenantId,data} = props ?? {};
+
+          return  postApiWebhooksMotasticTenantId(tenantId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiWebhooksMotasticTenantIdMutationResult = NonNullable<Awaited<ReturnType<typeof postApiWebhooksMotasticTenantId>>>
+    export type PostApiWebhooksMotasticTenantIdMutationBody = LitiumOrderDto | undefined
+    export type PostApiWebhooksMotasticTenantIdMutationError = unknown
+
+    export const usePostApiWebhooksMotasticTenantId = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiWebhooksMotasticTenantId>>, TError,{tenantId: string;data?: LitiumOrderDto}, TContext>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiWebhooksMotasticTenantId>>,
+        TError,
+        {tenantId: string;data?: LitiumOrderDto},
+        TContext
+      > => {
+      return useMutation(getPostApiWebhooksMotasticTenantIdMutationOptions(options), queryClient);
     }
 

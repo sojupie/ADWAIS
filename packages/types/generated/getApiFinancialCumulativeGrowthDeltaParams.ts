@@ -18,5 +18,9 @@ timeframe?: Timeframe;
  * If null, metrics represent the global portfolio total.
  */
 tenantId?: string;
+/**
+ * The comparison period for the timeframe.
+ * Defaults to Preceding.
+ */
 comparison?: ComparisonType;
 };

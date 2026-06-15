@@ -85,6 +85,9 @@ public class LitiumIngestionService(
 
     private async Task<int> ExecuteIngestionCoreAsync(Tenant tenant, DateTimeOffset startDate, DateTimeOffset endDate, CancellationToken ct)
     {
+        if (tenant.LitiumBaseUrl == null || tenant.ServiceAccountToken == null)
+            throw new InvalidOperationException("Litium credentials are missing.");
+
         var totalIngested = 0;
         var currentStart = startDate;
 
@@ -205,7 +208,7 @@ public class LitiumIngestionService(
         const string sql = @"
             INSERT INTO orders (id, tenant_id, order_state, litium_order_id, created_date, total_value_inc_vat, total_value_exc_vat, currency)
             SELECT * FROM UNNEST(@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7)
-            ON CONFLICT (tenant_id, litium_order_id) 
+            ON CONFLICT (id) 
             DO UPDATE SET 
                 total_value_inc_vat = EXCLUDED.total_value_inc_vat,
                 total_value_exc_vat = EXCLUDED.total_value_exc_vat,

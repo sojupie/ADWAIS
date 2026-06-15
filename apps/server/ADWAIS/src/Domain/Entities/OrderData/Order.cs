@@ -12,7 +12,7 @@ public class Order
     public DateTimeOffset CreatedDate { get; set; }
     public decimal TotalValueIncVat { get; set; }
     public decimal TotalValueExcVat { get; set; }
-    public required string Currency { get; set; }
+    public string? Currency { get; set; }
 
     public Tenant? Tenant { get; set; }
 }

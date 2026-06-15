@@ -19,6 +19,7 @@ export function TenantTile({ t, deleteTenant }: TenantTileProps) {
     type: t.type ?? 'Mixed',
     litiumBaseUrl: t.litiumBaseUrl || '',
     serviceAccountToken: '',
+    clearToken: false,
     orderFetchingEnabled: t.orderFetchingEnabled ?? false
   });
 
@@ -27,6 +28,7 @@ export function TenantTile({ t, deleteTenant }: TenantTileProps) {
     draft.type !== (t.type ?? 'Mixed') ||
     draft.litiumBaseUrl !== (t.litiumBaseUrl || '') ||
     draft.serviceAccountToken !== '' ||
+    draft.clearToken ||
     draft.orderFetchingEnabled !== (t.orderFetchingEnabled ?? false);
 
   const handleSave = () => {
@@ -34,13 +36,20 @@ export function TenantTile({ t, deleteTenant }: TenantTileProps) {
     if (draft.name !== t.name) payload.name = draft.name;
     if (draft.type !== (t.type ?? 'Mixed')) payload.type = draft.type;
     if (draft.litiumBaseUrl !== (t.litiumBaseUrl || '')) payload.litiumBaseUrl = draft.litiumBaseUrl;
-    if (draft.serviceAccountToken !== '') payload.serviceAccountToken = draft.serviceAccountToken;
+    
+    if (draft.clearToken) {
+      payload.serviceAccountToken = '';
+    } else if (draft.serviceAccountToken !== '') {
+      payload.serviceAccountToken = draft.serviceAccountToken;
+    }
+
     if (draft.orderFetchingEnabled !== (t.orderFetchingEnabled ?? false)) payload.orderFetchingEnabled = draft.orderFetchingEnabled;
     
     updateTenant.mutate(
       { id: t.id, payload },
       {
         onSuccess: () => {
+          setDraft(d => ({ ...d, serviceAccountToken: '', clearToken: false }));
           setTimeout(() => {
             updateTenant.reset();
           }, 3000);
@@ -55,6 +64,7 @@ export function TenantTile({ t, deleteTenant }: TenantTileProps) {
       type: t.type ?? 'Mixed',
       litiumBaseUrl: t.litiumBaseUrl || '',
       serviceAccountToken: '',
+      clearToken: false,
       orderFetchingEnabled: t.orderFetchingEnabled ?? false
     });
   };
@@ -110,14 +120,27 @@ export function TenantTile({ t, deleteTenant }: TenantTileProps) {
       <div className="flex flex-col gap-1 group">
         <div className="flex justify-between items-center">
           <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Service Account Token</label>
-          <span className="text-xs text-slate-400 italic">{t.hasServiceAccountToken ? 'Token is set' : 'Not set'}</span>
+          <div className="flex items-center gap-3">
+            {t.hasServiceAccountToken && !draft.clearToken && (
+               <button 
+                 onClick={() => setDraft({ ...draft, clearToken: true, serviceAccountToken: '' })}
+                 className="text-xs text-red-500 hover:text-red-600 font-bold hover:underline cursor-pointer"
+               >
+                 Clear Token
+               </button>
+            )}
+            <span className="text-xs text-slate-400 italic">
+               {draft.clearToken ? 'Pending clear' : t.hasServiceAccountToken ? 'Token is set' : 'Not set'}
+            </span>
+          </div>
         </div>
         <input
           type="password"
           value={draft.serviceAccountToken}
-          onChange={e => setDraft({...draft, serviceAccountToken: e.target.value})}
-          className="text-sm font-mono font-semibold text-slate-800 bg-transparent hover:bg-slate-50 focus:bg-white focus:ring-2 focus:ring-brand-accent/20 border border-transparent hover:border-slate-200 focus:border-brand-accent/30 rounded px-2 py-1 -ml-2 transition-all outline-none"
-          placeholder={t.hasServiceAccountToken ? '•••••••••••• (Type to change)' : 'Type to set new token'}
+          disabled={draft.clearToken}
+          onChange={e => setDraft({...draft, serviceAccountToken: e.target.value, clearToken: false})}
+          className="text-sm font-mono font-semibold text-slate-800 bg-transparent hover:bg-slate-50 focus:bg-white focus:ring-2 focus:ring-brand-accent/20 border border-transparent hover:border-slate-200 focus:border-brand-accent/30 rounded px-2 py-1 -ml-2 transition-all outline-none disabled:opacity-50"
+          placeholder={draft.clearToken ? 'Cleared' : (t.hasServiceAccountToken ? '•••••••••••• (Type to change)' : 'Type to set new token')}
         />
       </div>
 

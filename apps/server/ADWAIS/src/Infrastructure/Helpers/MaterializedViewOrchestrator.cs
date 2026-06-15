@@ -17,6 +17,11 @@ public static class MaterializedViewOrchestrator
         // 2. Create Views only if they are missing
         
         // --- Financial Domain ---
+        // Temporary drop to recreate with new WHERE clause
+        await context.Database.ExecuteSqlRawAsync("DROP MATERIALIZED VIEW IF EXISTS v_mat_financial_daily_global_rollup CASCADE; DROP MATERIALIZED VIEW IF EXISTS v_mat_financial_daily_tenant_rollup CASCADE;");
+        existingViews.Remove("v_mat_financial_daily_global_rollup");
+        existingViews.Remove("v_mat_financial_daily_tenant_rollup");
+
         if (!existingViews.Contains("v_mat_financial_daily_tenant_rollup"))
         {
             await context.Database.ExecuteSqlRawAsync(@"
@@ -28,6 +33,7 @@ public static class MaterializedViewOrchestrator
                 FROM orders
                 WHERE orders.created_date >= (CURRENT_DATE - '730 days'::interval)
                   AND orders.created_date < CURRENT_DATE
+                  AND orders.order_state != 'Cancelled'
                 GROUP BY 1, 2
                 ORDER BY 1 DESC, 2;
                 CREATE UNIQUE INDEX uq_v_mat_fin_tenant_rollup ON v_mat_financial_daily_tenant_rollup (created_date, tenant_id);

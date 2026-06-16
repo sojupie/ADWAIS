@@ -42,7 +42,8 @@ public static class DatabaseSeeder
 
         foreach (var tenant in tenants)
         {
-            var profile = profiles.First(p => p.Name == tenant.Name);
+            var baseName = tenant.Name.Replace(" [MOCK]", "");
+            var profile = profiles.First(p => p.Name == baseName);
             await BulkInsertOrdersForTenantAsync(context, tenant, profile, startDate, endDate, random);
         }
 
@@ -132,7 +133,6 @@ public static class DatabaseSeeder
 
     private static List<TenantProfile> GenerateProfiles()
     {
-        // Scaling up volumes by roughly 10x to ensure "significant" historical data (millions of rows)
         return new List<TenantProfile>
         {
             new("Nordic Fashion House", "B2C", 1200, 8000, 50, 15, 2.5m),
@@ -153,28 +153,6 @@ public static class DatabaseSeeder
             new("Music Masters", "Mixed", 200, 5000, 95, 25, 1.5m),
             new("Gardener's Choice", "B2C", 300, 4500, 115, 30, 1.2m),
             new("Fitness First", "B2B", 450, 4000, 165, 40, 1.4m),
-            new("Chef's Corner", "Mixed", 700, 5500, 75, 20, 1.5m),
-            new("The Stationery Shop", "B2B", 80, 600, 480, 100, 1.1m),
-            new("Artistic Soul", "B2C", 400, 7000, 55, 15, 1.6m),
-            new("Gadget Galaxy", "B2C", 300, 2000, 230, 60, 1.3m),
-            new("Luxe Jewelry", "Mixed", 5000, 50000, 15, 5, 1.8m),
-            new("Baby Steps", "B2C", 250, 3000, 210, 50, 1.4m),
-            new("Vintage Finds", "B2C", 400, 6000, 65, 15, 1.5m),
-            new("Outdoor Oasis", "Mixed", 1200, 10000, 45, 12, 1.9m),
-            new("Smart Home Solutions", "B2B", 600, 8000, 85, 20, 1.4m),
-            new("The Shoe Box", "B2C", 400, 3500, 150, 35, 1.6m),
-            new("Healthy Habits", "B2C", 200, 1200, 290, 70, 1.2m),
-            new("Auto Accessories", "Mixed", 350, 4500, 140, 35, 1.3m),
-            new("Crystal Skincare", "B2C", 500, 4000, 120, 30, 1.5m),
-            new("Nordic Outdoors", "B2C", 800, 7000, 70, 18, 1.7m),
-            new("Office Supply Hub", "B2B", 100, 900, 400, 90, 1.1m),
-            new("Craft Brewery Co", "B2C", 200, 1500, 250, 55, 1.3m),
-            new("Digital Print Shop", "B2B", 300, 3000, 180, 40, 1.2m),
-            new("Nordic Candles", "B2C", 150, 1200, 300, 65, 1.4m),
-            new("Vinyl Records", "Mixed", 250, 3500, 95, 22, 1.6m),
-            new("Organic Pantry", "B2C", 100, 800, 350, 75, 1.2m),
-            new("Workshop Tools", "B2B", 500, 6000, 60, 15, 1.5m),
-            new("Scandi Design Studio", "Mixed", 1500, 15000, 30, 8, 1.8m)
         };
     }
 
@@ -189,7 +167,7 @@ public static class DatabaseSeeder
                 tenant = new Tenant
                 {
                     Id = Guid.NewGuid(),
-                    Name = profile.Name,
+                    Name = $"{profile.Name} [MOCK]",
                     Type = Enum.Parse<Adwais.Domain.Enums.TenantType>(profile.Type),
                     LitiumBaseUrl = $"https://{profile.Name.Replace(" ", "").ToLower()}.mock",
                     ServiceAccountToken = $"mock-token-{profile.Name.GetHashCode()}",
@@ -229,7 +207,7 @@ public static class DatabaseSeeder
                 {
                     Id = nextId--,
                     TenantId = tenant.Id,
-                    Name = $"{tenant.Name} Storefront",
+                    Name = $"{tenant.Name.Replace(" [MOCK]", "")} Storefront [MOCK]",
                     Url = tenant.LitiumBaseUrl,
                     UptimeSla = sla,
                     LatencyDegradedFloor = degradedFloor,

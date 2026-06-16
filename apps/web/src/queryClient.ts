@@ -5,6 +5,8 @@ export const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: (error, query) => {
       const queryKey = query.queryKey[0];
+      if (queryKey === 'kiosk') return; // Suppress toasts for background kiosk polling
+
       let title = 'Failed to load data';
       if (typeof queryKey === 'string') {
         if (queryKey === 'global-config') title = 'Failed to load global configuration';

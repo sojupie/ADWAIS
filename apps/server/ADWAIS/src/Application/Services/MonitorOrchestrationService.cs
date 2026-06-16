@@ -7,6 +7,7 @@ using Adwais.Application.Common.Caching;
 using Adwais.Application.Common.Interfaces;
 using Adwais.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 
 namespace Adwais.Application.Services;
@@ -14,7 +15,8 @@ namespace Adwais.Application.Services;
 public class MonitorOrchestrationService(
     IApplicationDbContext dbContext,
     IUptimeRobotService uptimeRobotService,
-    ICacheService cache) : IMonitorOrchestrationService
+    ICacheService cache,
+    IConfiguration configuration) : IMonitorOrchestrationService
 {
     private record LatencyRow(DateTime Timestamp, double Average, double Lowest, double Highest);
 
@@ -336,10 +338,13 @@ public class MonitorOrchestrationService(
         }
         else
         {
-            // TODO: TEMPORARY — Remove this block when real UptimeRobot monitors are connected.
-            // Provides synthetic status/latency for seeded monitors that have no live cache entry.
-            monitor.StatusStr = "Up";
-            monitor.CurrentLatency = 200 + (monitor.Id % 400); // Deterministic fake latency 200-599ms
+            var mockConfig = configuration["FeatureToggles:MockUptimeRobotIntegrations"];
+            var isMockEnabled = bool.TryParse(mockConfig, out var parsed) && parsed;
+            if (isMockEnabled && monitor.Id <= 0)
+            {
+                monitor.StatusStr = "Up";
+                monitor.CurrentLatency = 200 + (monitor.Id % 400); // Deterministic fake latency 200-599ms
+            }
         }
     }
 

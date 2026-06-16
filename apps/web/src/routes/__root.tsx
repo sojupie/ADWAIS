@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { createRootRoute, Outlet, useSearch, useRouterState } from '@tanstack/react-router';
+import { createRootRoute, Outlet, useSearch, useRouterState, redirect } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { useQueryClient, useIsFetching, useIsMutating } from '@tanstack/react-query';
@@ -12,8 +12,24 @@ import {NavLink} from "../components/common/layout/NavLink.tsx";
 import { Toaster } from 'sonner';
 import { useMsal } from '@azure/msal-react';
 import { useCurrentUser } from '../hooks/useCurrentUser';
+import { msalInstance } from '../utils/msalConfig';
+import { getKioskToken } from '../utils/auth';
 
 export const Route = createRootRoute({
+  beforeLoad: ({ location }) => {
+    const isLoginRoute = location.pathname === '/login';
+    const isKioskRoute = location.pathname.startsWith('/kiosk');
+    
+    if (isLoginRoute || isKioskRoute) return;
+    if (getKioskToken()) return;
+
+    const accounts = msalInstance.getAllAccounts();
+    if (accounts.length === 0) {
+      throw redirect({
+        to: '/login'
+      });
+    }
+  },
   component: RootComponent
 });
 

@@ -6,12 +6,14 @@ using Adwais.Infrastructure.Persistence;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 
 namespace Adwais.Infrastructure.Helpers;
 
 public class RuntimeDataSeederJob(
     IDbContextFactory<AnalyticsDbContext> dbContextFactory,
-    ILogger<RuntimeDataSeederJob> logger)
+    ILogger<RuntimeDataSeederJob> logger,
+    IConfiguration configuration)
 {
     private record TenantProfile(string Name, int MinAov, int MaxAov, int DailyVolume);
 
@@ -66,7 +68,7 @@ public class RuntimeDataSeederJob(
         await using var db = await dbContextFactory.CreateDbContextAsync();
         
         var tenants = await db.Tenants
-            .Where(t => t.Id != AnalyticsDbContext.SystemTenantGuid)
+            .Where(t => t.Id != AnalyticsDbContext.SystemTenantGuid && t.Name.EndsWith(" [MOCK]"))
             .ToListAsync();
 
         if (!tenants.Any()) return;
@@ -77,7 +79,8 @@ public class RuntimeDataSeederJob(
 
         foreach (var tenant in tenants)
         {
-            var profile = Profiles.FirstOrDefault(p => p.Name == tenant.Name);
+            var baseName = tenant.Name.Replace(" [MOCK]", "");
+            var profile = Profiles.FirstOrDefault(p => p.Name == baseName);
             if (profile == null) continue;
 
             // Seed a small amount of orders proportional to their daily volume
@@ -103,9 +106,11 @@ public class RuntimeDataSeederJob(
             // await db.Database.ExecuteSqlRawAsync("REFRESH MATERIALIZED VIEW CONCURRENTLY v_mat_financial_daily_global_rollup;");
         }
 
-        // TODO: TEMPORARY — Seed mock ResponseTime ticks for seeded monitors (negative IDs).
-        // Remove this block when real UptimeRobot monitors are connected.
-        await SeedMockMonitorLatencyAsync(db, now, random);
+        var isMockEnabled = configuration.GetValue<bool>("FeatureToggles:MockUptimeRobotIntegrations", false);
+        if (isMockEnabled)
+        {
+            await SeedMockMonitorLatencyAsync(db, now, random);
+        }
     }
 
     /// <summary>

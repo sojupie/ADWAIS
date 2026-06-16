@@ -1,6 +1,6 @@
 import { createFileRoute, redirect, Navigate, Link } from '@tanstack/react-router';
-import type { QueryClient } from '@tanstack/react-query';
-import { Settings } from 'lucide-react';
+import { useQuery, type QueryClient } from '@tanstack/react-query';
+import { Settings, ServerCrash } from 'lucide-react';
 import { getOrCreateDeviceId, getKioskToken, setKioskToken } from '../utils/auth';
 import { useKioskTokenQuery, type RegisterKioskResponse } from '../hooks/useKioskAuth';
 import { customClient } from '../apiClient';
@@ -27,10 +27,11 @@ export const Route = createFileRoute('/kiosk')({
       throw redirect({ to: '/financial' });
     }
   },
-  loader: async ({ context }) => {
+  loader: ({ context }) => {
     const queryClient = (context as unknown as { queryClient: QueryClient }).queryClient;
     const deviceId = getOrCreateDeviceId();
-    const response = await queryClient.fetchQuery({
+    
+    queryClient.prefetchQuery({
       queryKey: ['kiosk', 'register', deviceId],
       queryFn: () => customClient<RegisterKioskResponse>({
         url: '/api/kiosk/register',
@@ -39,13 +40,27 @@ export const Route = createFileRoute('/kiosk')({
       }),
       staleTime: Infinity,
     });
-    return { deviceId, activationCode: response.activationCode };
+    return { deviceId };
   },
   component: KioskLanding,
 });
 
 function KioskLanding() {
-  const { deviceId, activationCode } = Route.useLoaderData();
+  const { deviceId } = Route.useLoaderData();
+  
+  const { data: registerData, isError } = useQuery({
+    queryKey: ['kiosk', 'register', deviceId],
+    queryFn: () => customClient<RegisterKioskResponse>({
+      url: '/api/kiosk/register',
+      method: 'POST',
+      data: { deviceId },
+    }),
+    staleTime: Infinity,
+    retry: true,
+    retryDelay: 5000,
+  });
+
+  const activationCode = registerData?.activationCode;
   const { data: tokenData } = useKioskTokenQuery(deviceId, !!activationCode);
 
   if (tokenData?.token) {
@@ -129,6 +144,14 @@ function KioskLanding() {
                   Staff Login
                 </Link>
               </div>
+            </div>
+          </div>
+        ) : isError ? (
+          <div className="flex-1 flex flex-col items-center justify-center gap-6 py-16 relative z-10 animate-in fade-in duration-300 text-center">
+            <ServerCrash className="w-16 h-16 text-rose-400 mx-auto opacity-80" />
+            <div>
+              <p className="text-brand-text text-lg font-bold">Server Unreachable</p>
+              <p className="text-slate-500 text-sm mt-2 max-w-xs mx-auto">The backend could not be reached. Retrying automatically when connectivity is restored.</p>
             </div>
           </div>
         ) : (

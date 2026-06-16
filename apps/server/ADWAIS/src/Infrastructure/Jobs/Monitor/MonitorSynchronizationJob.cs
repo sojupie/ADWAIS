@@ -6,6 +6,7 @@ using Hangfire.Storage;
 using Adwais.Application.Common.Caching;
 using Adwais.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace Adwais.Infrastructure.Jobs.Monitor;
@@ -14,7 +15,8 @@ public class MonitorSynchronizationJob(
     IDbContextFactory<AnalyticsDbContext> dbContextFactory,
     IUptimeRobotService uptimeRobotService,
     IMemoryCache cache,
-    IRecurringJobManager recurringJobManager)
+    IRecurringJobManager recurringJobManager,
+    IConfiguration configuration)
 {
     public async Task ExecuteAsync()
     {
@@ -93,9 +95,14 @@ public class MonitorSynchronizationJob(
         }
 
         var upStreamIds = upStreamMonitors.Select(m => m.Id).ToHashSet();
-        // TODO: TEMPORARY — Remove the `m.Id > 0` guard when real UptimeRobot monitors are connected.
-        // Seeded monitors use negative IDs and must not be deleted during sync.
-        var toDelete = localMonitors.Values.Where(m => m.Id > 0 && !upStreamIds.Contains(m.Id));
+        var isMockEnabled = configuration.GetValue<bool>("FeatureToggles:MockUptimeRobotIntegrations", false);
+        
+        var toDelete = localMonitors.Values.Where(m => !upStreamIds.Contains(m.Id));
+        if (isMockEnabled)
+        {
+            toDelete = toDelete.Where(m => m.Id > 0);
+        }
+        
         dbContext.Monitors.RemoveRange(toDelete);
 
         await dbContext.SaveChangesAsync();

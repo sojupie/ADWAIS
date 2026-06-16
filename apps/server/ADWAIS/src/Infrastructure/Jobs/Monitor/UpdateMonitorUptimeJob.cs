@@ -2,6 +2,7 @@ using Adwais.Infrastructure.Persistence;
 using Adwais.Domain.Entities.Monitoring;
 using Adwais.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,7 +12,8 @@ namespace Adwais.Infrastructure.Jobs.Monitor;
 public class UpdateMonitorUptimeJob(
     IDbContextFactory<AnalyticsDbContext> dbContextFactory,
     IUptimeRobotService uptimeRobotService,
-    ISystemEventService eventService)
+    ISystemEventService eventService,
+    IConfiguration configuration)
 {
     public async Task ExecuteAsync(int monitorId, DateTimeOffset startDate, DateTimeOffset endDate)
     {
@@ -25,8 +27,8 @@ public class UpdateMonitorUptimeJob(
 
             if (monitor == null || !monitor.UptimeMonitorEnabled) return;
 
-            //TODO: remove this block when we're no longer mocking UptimeRobot monitors
-            if (monitorId <= 0) return;
+            var isMockEnabled = configuration.GetValue<bool>("FeatureToggles:MockUptimeRobotIntegrations", false);
+            if (isMockEnabled && monitorId <= 0) return;
             currentStep = "Fetching uptime status from UptimeRobot API";
             var uptime = await uptimeRobotService.GetUptimeAsync(monitorId, startDate, endDate, monitor.Name);
 

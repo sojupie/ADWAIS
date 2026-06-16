@@ -32,12 +32,12 @@ const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() => import('./routes/login.lazy').then((d) => d.Route))
 const KioskRoute = KioskRouteImport.update({
   id: '/kiosk',
   path: '/kiosk',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() => import('./routes/kiosk.lazy').then((d) => d.Route))
 const IntranetRoute = IntranetRouteImport.update({
   id: '/intranet',
   path: '/intranet',

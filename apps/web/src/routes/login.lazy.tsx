@@ -1,6 +1,5 @@
 import { createLazyFileRoute, Link } from '@tanstack/react-router';
 import { useMsal } from '@azure/msal-react';
-import motilloLogo from '../assets/motillo-logo.svg';
 
 export const Route = createLazyFileRoute('/login')({
   component: LoginComponent,

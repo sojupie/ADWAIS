@@ -2,9 +2,7 @@ version: '3.8'
 
 services:
   web:
-    build:
-      context: .
-      dockerfile: apps/web/Dockerfile
+    image: ${DOCKER_HUB_USER}/adwais-web:latest
     container_name: adwais-web-prod
     ports:
       - "80:80"
@@ -17,9 +15,7 @@ services:
       - api
 
   api:
-    build:
-      context: .
-      dockerfile: apps/server/ADWAIS/src/Api/Dockerfile
+    image: ${DOCKER_HUB_USER}/adwais-api:latest
     container_name: adwais-api-prod
     ports:
       - "8080:8080"
@@ -29,8 +25,9 @@ services:
       - AzureAd__TenantId=${AZURE_TENANT_ID}
       - AzureAd__ClientId=${AZURE_CLIENT_ID}
       - Authentication__KioskJwtSecret=${KIOSK_JWT_SECRET}
-      - MasterEncryptionKey=${MASTER_ENCRYPTION_KEY}
       - ASPNETCORE_ENVIRONMENT=Production
+    volumes:
+      - dp-keys-prod:/app/dp-keys
     depends_on:
       - db
     restart: always
@@ -47,3 +44,4 @@ services:
 
 volumes:
   pgdata-prod:
+  dp-keys-prod:

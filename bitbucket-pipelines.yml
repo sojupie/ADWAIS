@@ -6,13 +6,22 @@ pipelines:
           services:
             - docker
           script:
-            - export IMAGE_NAME=$DOCKER_HUB_USER/adwais-api:latest
-            - docker build -t $IMAGE_NAME -f apps/server/Adwais/src/Api/Dockerfile .
+            - export API_IMAGE=$DOCKER_HUB_USER/adwais-api:latest
+            - export WEB_IMAGE=$DOCKER_HUB_USER/adwais-web:latest
+            - docker build -t $API_IMAGE -f apps/server/ADWAIS/src/Api/Dockerfile .
+            - docker build -t $WEB_IMAGE -f apps/web/Dockerfile .
             - docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
-            - docker push $IMAGE_NAME
+            - docker push $API_IMAGE
+            - docker push $WEB_IMAGE
       - step:
           name: Deploy to Hetzner
           script:
+            - pipe: atlassian/scp-deploy:1.5.0
+              variables:
+                USER: 'root'
+                SERVER: $SERVER_IP
+                REMOTE_PATH: '/opt/adwais'
+                LOCAL_PATH: 'docker-compose.prod.yml'
             - pipe: atlassian/ssh-run:0.6.0
               variables:
                 SSH_USER: 'root'
@@ -20,6 +29,6 @@ pipelines:
                 COMMANDS:
                   - 'mkdir -p /opt/adwais'
                   - 'cd /opt/adwais'
-                  - 'echo "DOCKER_HUB_USER=${DOCKER_HUB_USER}\nDB_PASSWORD=${DB_PASSWORD}\nAZURE_TENANT_ID=${AZURE_TENANT_ID}\nAZURE_CLIENT_ID=${AZURE_CLIENT_ID}\nMOTASTIC_API_KEY=${MOTASTIC_API_KEY}\nKIOSK_JWT_SECRET=${KIOSK_JWT_SECRET}\nMASTER_ENCRYPTION_KEY=${MASTER_ENCRYPTION_KEY}" > .env'
-                  - 'docker compose pull'
-                  - 'docker compose up -d'
+                  - 'echo "DOCKER_HUB_USER=${DOCKER_HUB_USER}\nDB_PASSWORD=${DB_PASSWORD}\nAZURE_TENANT_ID=${AZURE_TENANT_ID}\nAZURE_CLIENT_ID=${AZURE_CLIENT_ID}\nMOTASTIC_API_KEY=${MOTASTIC_API_KEY}\nKIOSK_JWT_SECRET=${KIOSK_JWT_SECRET}" > .env'
+                  - 'docker compose -f docker-compose.prod.yml pull'
+                  - 'docker compose -f docker-compose.prod.yml up -d'

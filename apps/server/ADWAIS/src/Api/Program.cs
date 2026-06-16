@@ -43,7 +43,8 @@ builder.Services.AddScoped<IFinancialService, FinancialService>();
 builder.Services.AddScoped<IMonitorOrchestrationService, MonitorOrchestrationService>();
 
 builder.Services.AddDataProtection()
-    .SetApplicationName("ADWAIS");
+    .SetApplicationName("ADWAIS")
+    .PersistKeysToFileSystem(new DirectoryInfo("/app/dp-keys"));
 
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();

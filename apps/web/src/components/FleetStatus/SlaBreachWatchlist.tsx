@@ -101,7 +101,7 @@ export function SlaBreachWatchlist({
         <button 
           onClick={onClearSelection}
           disabled={!onClearSelection}
-          className={`bg-brand-bg-secondary text-white px-3 py-1 rounded-sm text-[10px] font-black uppercase tracking-widest hover:bg-brand-text transition-all shadow-sm cursor-pointer ${
+          className={`bg-brand-bg-secondary text-white px-3 py-1 rounded-sm text-sm font-black uppercase tracking-widest hover:bg-brand-text transition-all shadow-sm cursor-pointer ${
             !onClearSelection ? 'opacity-0 pointer-events-none' : 'opacity-100'
           }`}
         >
@@ -120,23 +120,23 @@ export function SlaBreachWatchlist({
                 <div className="flex justify-between items-start mb-1 gap-2">
                   <div className="flex flex-col overflow-hidden">
                     <span className="text-sm font-black text-slate-900 uppercase tracking-tight leading-none truncate">{issue.tenantName}</span>
-                    <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-0.5 truncate">{issue.monitorName}</span>
+                    <span className="text-sm font-bold text-slate-500 uppercase tracking-widest mt-0.5 truncate">{issue.monitorName}</span>
                   </div>
                   <div className="flex gap-1 flex-wrap justify-end pl-2">
-                    {issue.isDown && <span className="bg-red-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest shrink-0">DOWN</span>}
-                    {issue.isDegraded && !issue.isDown && <span className="bg-amber-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest shrink-0">DEGRADED</span>}
-                    {issue.isSlaBreach && <span className="bg-slate-700 text-white text-[9px] font-black px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest shrink-0">SLA BREACH</span>}
+                    {issue.isDown && <span className="bg-red-500 text-white text-sm font-black px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest shrink-0">DOWN</span>}
+                    {issue.isDegraded && !issue.isDown && <span className="bg-amber-500 text-white text-sm font-black px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest shrink-0">DEGRADED</span>}
+                    {issue.isSlaBreach && <span className="bg-slate-700 text-white text-sm font-black px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest shrink-0">SLA BREACH</span>}
                   </div>
                 </div>
                 <div className="flex justify-between items-end">
                   <div className="flex flex-col">
-                    <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Uptime</span>
+                    <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">Uptime</span>
                     <span className={`text-base font-black ${issue.slaLimit && issue.uptime !== null && issue.uptime < issue.slaLimit ? 'text-red-600' : 'text-slate-900'}`}>
                       {issue.uptime !== null ? `${formatPercent(issue.uptime)}%` : 'N/A'}
                     </span>
                   </div>
                   <div className="flex flex-col items-end">
-                    <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Latency</span>
+                    <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">Latency</span>
                     <span className="text-base font-black text-slate-900">
                       {issue.isDown ? 'N/A' : `${Math.round(issue.latency ?? 0)}ms`}
                     </span>
@@ -146,14 +146,14 @@ export function SlaBreachWatchlist({
                    <div className="mt-1 pt-1 border-t border-slate-100 flex justify-between items-center gap-2">
                       {(issue.slaLimit !== undefined && issue.slaLimit !== null) ? (
                         <div className="flex flex-col">
-                          <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">SLA Limit</span>
-                          <span className="text-[9px] font-black text-slate-600 uppercase">{formatPercent(issue.slaLimit)}%</span>
+                          <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">SLA Limit</span>
+                          <span className="text-sm font-black text-slate-600 uppercase">{formatPercent(issue.slaLimit)}%</span>
                         </div>
                       ) : <div />}
                       {(issue.degradedFloor !== undefined && issue.degradedFloor !== null) ? (
                         <div className="flex flex-col items-end text-right">
-                          <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Degraded</span>
-                          <span className="text-[9px] font-black text-slate-600 uppercase">{issue.degradedFloor}ms</span>
+                          <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">Degraded</span>
+                          <span className="text-sm font-black text-slate-600 uppercase">{issue.degradedFloor}ms</span>
                         </div>
                       ) : <div />}
                    </div>

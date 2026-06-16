@@ -137,7 +137,7 @@ export function FleetMatrix({
                 <span className={`text-sm font-black ${theme.text} truncate uppercase tracking-tight leading-tight`}>
                   {tenantDisplay}
                 </span>
-                <span className={`text-[9px] font-bold ${theme.mutedText} uppercase tracking-widest mt-0.5 truncate`}>
+                <span className={`text-sm font-bold ${theme.mutedText} uppercase tracking-widest mt-0.5 truncate`}>
                   {monitor.name}
                 </span>
               </div>
@@ -152,7 +152,7 @@ export function FleetMatrix({
                   return (
                     <span 
                       key={tag} 
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider border shadow-sm ${getTagStyle(color)}`}
+                      className={`text-sm font-bold px-2 py-0.5 rounded uppercase tracking-wider border shadow-sm ${getTagStyle(color)}`}
                     >
                       {name}
                     </span>
@@ -163,13 +163,13 @@ export function FleetMatrix({
             
             <div className="grid grid-cols-2 gap-x-2 mt-auto w-full">
               <div className="flex flex-col gap-0">
-                <span className={`text-[9px] ${theme.mutedText} uppercase font-bold tracking-widest`}>Uptime</span>
+                <span className={`text-sm ${theme.mutedText} uppercase font-bold tracking-widest`}>Uptime</span>
                 <span className={`text-base font-black ${theme.valueText}`}>
                   {monitor.currentUptimePercentage != null ? `${monitor.currentUptimePercentage.toFixed(2)}%` : 'N/A'}
                 </span>
               </div>
               <div className="flex flex-col gap-0">
-                <span className={`text-[9px] ${theme.mutedText} uppercase font-bold tracking-widest`}>Latency</span>
+                <span className={`text-sm ${theme.mutedText} uppercase font-bold tracking-widest`}>Latency</span>
                 <span className={`text-base font-black ${theme.valueText}`}>
                   {(status === 'down' || status === 'unknown' || status === 'paused' || status === 'starting' || !Number(monitor.currentLatency)) ? 'N/A' : `${Math.round(Number(monitor.currentLatency))}ms`}
                 </span>

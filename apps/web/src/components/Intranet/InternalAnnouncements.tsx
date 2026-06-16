@@ -38,7 +38,7 @@ export function InternalAnnouncements() {
       actions={
         <button 
           onClick={() => setIsComposing(!isComposing)}
-          className={`${isComposing ? 'bg-slate-200 text-slate-700' : 'bg-brand-bg-secondary text-white'} px-3 py-1 rounded-[4px] text-[10px] font-black uppercase tracking-widest hover:bg-brand-text hover:text-white transition-all shadow-sm cursor-pointer`}
+          className={`${isComposing ? 'bg-slate-200 text-slate-700' : 'bg-brand-bg-secondary text-white'} px-3 py-1 rounded-[4px] text-sm font-black uppercase tracking-widest hover:bg-brand-text hover:text-white transition-all shadow-sm cursor-pointer`}
         >
           {isComposing ? 'Cancel' : '+ New Post'}
         </button>
@@ -66,7 +66,7 @@ export function InternalAnnouncements() {
             <button 
               type="submit"
               disabled={!title.trim() || !summary.trim()}
-              className="bg-brand-accent text-brand-bg-secondary px-4 py-1.5 rounded-[4px] text-xs font-black uppercase tracking-widest hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
+              className="bg-brand-accent text-brand-bg-secondary px-4 py-1.5 rounded-[4px] text-sm font-black uppercase tracking-widest hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
             >
               Post Announcement
             </button>
@@ -80,9 +80,9 @@ export function InternalAnnouncements() {
           <div key={a.id} className="pb-4 border-b border-slate-100 last:border-0 last:pb-0 animate-in fade-in slide-in-from-top-2 duration-300">
             <div className="flex justify-between items-baseline mb-1">
               <h3 className="text-sm font-bold text-slate-800">{a.title}</h3>
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest shrink-0 ml-2">{a.date}</span>
+              <span className="text-sm font-black text-slate-400 uppercase tracking-widest shrink-0 ml-2">{a.date}</span>
             </div>
-            <p className="text-xs text-slate-600 leading-relaxed">{a.summary}</p>
+            <p className="text-sm text-slate-600 leading-relaxed">{a.summary}</p>
           </div>
         ))}
       </div>

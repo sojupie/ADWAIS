@@ -66,7 +66,7 @@ export const VolumeAnomalyChart = memo(function VolumeAnomalyChart({
       comparison={comparison}
       className={className || "h-full"}
       bodyClassName={isEmpty ? 'flex items-center justify-center' : 'flex-1 min-h-0'}
-      legend={<span className="text-xs font-bold text-slate-500 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded">Deviation from baseline</span>}
+      legend={<span className="text-sm font-bold text-slate-500 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded">Deviation from baseline</span>}
     >
       {isEmpty ? (
         <EmptyState message={"No data available"} variant={"minimal"}/>

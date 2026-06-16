@@ -29,7 +29,7 @@ const CustomTooltip = ({ active, payload }: { isLoading?: boolean;  active?: boo
   return (
     <div className="bg-white border border-slate-100 rounded-lg shadow-lg p-4 text-sm animate-in fade-in zoom-in duration-200">
       <p className="font-bold text-slate-900 mb-3 border-b border-slate-50 pb-2">
-        {point.tenantName} <span className="text-slate-500 font-normal text-xs ml-2 uppercase tracking-wider">{point.type}</span>
+        {point.tenantName} <span className="text-slate-500 font-normal text-sm ml-2 uppercase tracking-wider">{point.type}</span>
       </p>
       <div className="space-y-2">
         <p className="flex justify-between gap-6">
@@ -69,7 +69,7 @@ export const RevenueEfficiencyChart = memo(function RevenueEfficiencyChart({
       comparison={comparison}
       className={className || "h-full"}
       bodyClassName={isEmpty ? 'flex items-center justify-center' : 'flex-1 min-h-0'}
-      legend={<span className="text-xs font-bold text-slate-500 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded">Size = Growth Velocity</span>}
+      legend={<span className="text-sm font-bold text-slate-500 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded">Size = Growth Velocity</span>}
     >
       {isEmpty ? (
         <EmptyState message={"No data available"} variant={"minimal"}/>

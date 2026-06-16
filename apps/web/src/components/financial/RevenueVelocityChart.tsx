@@ -20,7 +20,7 @@ export const RevenueVelocityChart = memo(function RevenueVelocityChart({ isLoadi
           comparison={comparison}
           className={className}
           legend={
-            <div className="flex items-center gap-6 text-xs font-bold text-slate-500 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded">
+            <div className="flex items-center gap-6 text-sm font-bold text-slate-500 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded">
               <div className="flex items-center gap-2">
                 <span className="w-3 h-3 rounded-full bg-brand-btn-primary" />
                 <span>Current Period</span>

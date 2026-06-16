@@ -21,7 +21,7 @@ export function RecurringJobsTable({ recurring }: RecurringJobsTableProps) {
       <div className="flex-1 overflow-y-auto bg-white custom-scrollbar">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm whitespace-nowrap">
-            <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase text-xs">
+            <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase text-sm">
               <tr>
                 <th className="px-6 py-4">Job ID</th>
                 <th className="px-6 py-4">Cron</th>
@@ -48,7 +48,7 @@ export function RecurringJobsTable({ recurring }: RecurringJobsTableProps) {
                   <tr key={job.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="px-6 py-4 font-bold text-slate-800">{job.id}</td>
                     <td className="px-6 py-4">
-                      <span className="px-2 py-0.5 bg-brand-accent/10 text-brand-text rounded text-xs font-mono font-bold tracking-widest">
+                      <span className="px-2 py-0.5 bg-brand-accent/10 text-brand-text rounded text-sm font-mono font-bold tracking-widest">
                         {job.cron}
                       </span>
                     </td>

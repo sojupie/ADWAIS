@@ -28,7 +28,7 @@ const CustomTooltip = ({ active, payload }: { isLoading?: boolean;  active?: boo
       <div className="border-b border-slate-50 pb-2 mb-3 flex justify-between items-center">
         <p className="font-bold text-slate-900">{point.tenantName}</p>
         <span 
-          className={`inline-flex items-center px-2 py-0.5 rounded-[3px] text-[9px] font-black uppercase tracking-widest text-white ${
+          className={`inline-flex items-center px-2 py-0.5 rounded-[3px] text-sm font-black uppercase tracking-widest text-white ${
             point.type === 'B2C' ? 'bg-[#0ea5e9]' : 
             point.type === 'Mixed' ? 'bg-[#8b5cf6]' : 
             'bg-[var(--color-brand-btn-primary)]'
@@ -138,7 +138,7 @@ momentum: MomentumResponse; comparison?: ComparisonPeriod; onTenantSelect?: (ten
       comparison={comparison}
       className={className || "h-full"}
       bodyClassName={isEmpty ? 'flex items-center justify-center' : 'flex-1 min-h-0'}
-      legend={<span className="text-xs font-bold text-slate-500 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded">Size = Total Rev Contribution</span>}
+      legend={<span className="text-sm font-bold text-slate-500 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded">Size = Total Rev Contribution</span>}
     >
       {isEmpty ? (
         <EmptyState message={"No previous-period baseline data"} variant={"minimal"}/>

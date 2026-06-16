@@ -22,8 +22,8 @@ export function SeoRssAggregator() {
         {news.map(n => (
           <div key={n.id} className="flex flex-col gap-1 border-l-2 border-brand-accent pl-3">
             <div className="flex justify-between items-center mb-0.5">
-              <span className="text-[10px] font-black text-brand-btn-primary uppercase tracking-widest">{n.source}</span>
-              <span className="text-[10px] text-slate-400 font-bold shrink-0">{n.time}</span>
+              <span className="text-sm font-black text-brand-btn-primary uppercase tracking-widest">{n.source}</span>
+              <span className="text-sm text-slate-400 font-bold shrink-0">{n.time}</span>
             </div>
             <span className="text-sm font-bold text-slate-700 leading-snug">{n.title}</span>
           </div>
@@ -31,8 +31,8 @@ export function SeoRssAggregator() {
         {news.map(n => (
           <div key={`dup-${n.id}`} className="flex flex-col gap-1 border-l-2 border-brand-accent pl-3">
             <div className="flex justify-between items-center mb-0.5">
-              <span className="text-[10px] font-black text-brand-btn-primary uppercase tracking-widest">{n.source}</span>
-              <span className="text-[10px] text-slate-400 font-bold shrink-0">{n.time}</span>
+              <span className="text-sm font-black text-brand-btn-primary uppercase tracking-widest">{n.source}</span>
+              <span className="text-sm text-slate-400 font-bold shrink-0">{n.time}</span>
             </div>
             <span className="text-sm font-bold text-slate-700 leading-snug">{n.title}</span>
           </div>

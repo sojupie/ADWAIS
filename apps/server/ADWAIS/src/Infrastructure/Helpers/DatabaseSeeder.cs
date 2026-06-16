@@ -161,7 +161,8 @@ public static class DatabaseSeeder
         var tenants = new List<Tenant>();
         foreach (var profile in profiles)
         {
-            var tenant = await context.Tenants.FirstOrDefaultAsync(t => t.Name == profile.Name);
+            var expectedName = $"{profile.Name} [MOCK]";
+            var tenant = await context.Tenants.FirstOrDefaultAsync(t => t.Name == expectedName);
             if (tenant == null)
             {
                 tenant = new Tenant

@@ -72,7 +72,7 @@ export function ManualBackfillPanel({ tenants, triggerBackfill, disabled }: Manu
       </SecureButton>
       <div className="bg-red-50 border border-red-100 rounded-lg p-3 flex items-start gap-2">
         <ShieldAlert size={16} className="text-red-500 shrink-0 mt-0.5" />
-        <p className="text-xs text-red-700 font-medium leading-relaxed">
+        <p className="text-sm text-red-700 font-medium leading-relaxed">
           Long backfills require multiple GET requests for pagination that are likely to get rate limited (although automatically managed by back-off and retry policies). <br />Triggering a backfill also drops existing materialized views. Expect performance degradation.
         </p>
       </div>

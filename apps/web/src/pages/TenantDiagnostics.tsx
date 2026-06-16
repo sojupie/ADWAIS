@@ -61,7 +61,7 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe,
           <div className="flex items-center gap-3 mb-1">
             <h1 className="text-2xl font-extrabold text-brand-text tracking-tight m-0">{tenantName} Diagnostics</h1>
             <span 
-              className={`inline-flex items-center px-3 py-1 rounded-sm text-xs font-black uppercase tracking-widest shadow-sm ${
+              className={`inline-flex items-center px-3 py-1 rounded-sm text-sm font-black uppercase tracking-widest shadow-sm ${
                 tenantType === 'B2C' ? 'bg-chart-1 text-white' : 
                 tenantType === 'Mixed' ? 'bg-chart-2 text-white' : 
                 'bg-(--color-brand-btn-primary) text-white'

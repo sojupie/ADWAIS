@@ -122,14 +122,14 @@ export function InlineEditField<T>({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex justify-between items-center">
+      <label className="text-sm font-bold text-slate-500 uppercase tracking-wider flex justify-between items-center">
         <span>{label}</span>
         {required ? (
-          <span className="text-red-500/70 lowercase font-medium text-[10px]">
+          <span className="text-red-500/70 lowercase font-medium text-sm">
             {requiredCondition ? `(Required ${requiredCondition})` : '(Required)'}
           </span>
         ) : (
-          <span className="text-slate-400 lowercase font-medium text-[10px]">(Optional)</span>
+          <span className="text-slate-400 lowercase font-medium text-sm">(Optional)</span>
         )}
       </label>
 
@@ -179,7 +179,7 @@ export function InlineEditField<T>({
                   }
                 }}
                 disabled={isSaving}
-                className="p-1 text-red-500 hover:bg-red-50 rounded text-xs font-bold"
+                className="p-1 text-red-500 hover:bg-red-50 rounded text-sm font-bold"
                 title="Clear"
               >
                 Clear
@@ -218,7 +218,7 @@ export function InlineEditField<T>({
           {disabled ? (
             <span className="p-1 text-slate-400 cursor-not-allowed opacity-60 flex items-center gap-1" title="Requires Admin privileges">
               <Lock size={12} />
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Admin</span>
+              <span className="text-sm font-bold uppercase tracking-wider text-slate-400">Admin</span>
             </span>
           ) : (
             <button

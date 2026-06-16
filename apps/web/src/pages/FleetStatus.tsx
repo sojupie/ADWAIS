@@ -22,12 +22,12 @@ export function FleetStatus() {
       {vm.selection && (
         <button 
           onClick={() => vm.setSelection(null)}
-          className="bg-brand-bg-secondary border border-brand-bg-secondary px-3 py-1.5 rounded-sm text-[11px] font-extrabold text-white hover:bg-brand-text hover:border-brand-text uppercase tracking-widest transition-all shadow-sm"
+          className="bg-brand-bg-secondary border border-brand-bg-secondary px-3 py-1.5 rounded-sm text-sm font-extrabold text-white hover:bg-brand-text hover:border-brand-text uppercase tracking-widest transition-all shadow-sm"
         >
           <ArrowLeft size={14} className="mr-1 inline-block -mt-0.5 stroke-[3px]" /> BACK TO GLOBAL
         </button>
       )}
-      <span className="text-[13px] font-bold text-[#64748b]">
+      <span className="text-sm font-bold text-[#64748b]">
         {vm.fleetStats.enabled.length} Online
       </span>
     </div>
@@ -79,15 +79,15 @@ export function FleetStatus() {
         />
 
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-3 flex flex-col justify-center min-h-22.5">
-          <h2 className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Active Incidents</h2>
+          <h2 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-1">Active Incidents</h2>
           <div className="flex items-baseline gap-6">
             <div className="flex items-baseline gap-2">
                <span className="text-4xl font-extrabold tracking-tight text-red-500">{vm.fleetStats.down.length}</span>
-               <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">DOWN</span>
+               <span className="text-sm font-black text-slate-500 uppercase tracking-widest">DOWN</span>
             </div>
             <div className="flex items-baseline gap-2">
                <span className="text-4xl font-extrabold tracking-tight text-amber-500">{vm.fleetStats.degraded.length}</span>
-               <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">DEGRADED</span>
+               <span className="text-sm font-black text-slate-500 uppercase tracking-widest">DEGRADED</span>
             </div>
           </div>
         </div>

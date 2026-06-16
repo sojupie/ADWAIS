@@ -88,7 +88,7 @@ function KioskLanding() {
               <span className="relative flex h-2.5 w-2.5">
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-slate-900"></span>
               </span>
-              <span className="text-xs font-black uppercase tracking-widest">Interactive</span>
+              <span className="text-sm font-black uppercase tracking-widest">Interactive</span>
             </div>
           </div>
         </header>
@@ -139,7 +139,7 @@ function KioskLanding() {
               <div className="mt-8 pt-4 border-t border-slate-900/5 flex justify-center">
                 <Link
                   to="/login"
-                  className="text-xs font-black text-brand-link hover:text-brand-accent transition-colors flex items-center gap-2 cursor-pointer uppercase tracking-widest"
+                  className="text-sm font-black text-brand-link hover:text-brand-accent transition-colors flex items-center gap-2 cursor-pointer uppercase tracking-widest"
                 >
                   Staff Login
                 </Link>

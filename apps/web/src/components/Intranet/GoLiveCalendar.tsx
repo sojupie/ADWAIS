@@ -47,7 +47,7 @@ export function GoLiveCalendar() {
       actions={
         <button 
           onClick={() => setIsAdding(!isAdding)}
-          className={`${isAdding ? 'bg-slate-200 text-slate-700' : 'bg-brand-bg-secondary text-white'} px-3 py-1 rounded-[4px] text-[10px] font-black uppercase tracking-widest hover:bg-brand-text hover:text-white transition-all shadow-sm cursor-pointer`}
+          className={`${isAdding ? 'bg-slate-200 text-slate-700' : 'bg-brand-bg-secondary text-white'} px-3 py-1 rounded-[4px] text-sm font-black uppercase tracking-widest hover:bg-brand-text hover:text-white transition-all shadow-sm cursor-pointer`}
         >
           {isAdding ? 'Cancel' : '+ Milestone'}
         </button>
@@ -61,8 +61,8 @@ export function GoLiveCalendar() {
             <input type="text" placeholder="Project / Scope" value={project} onChange={e => setProject(e.target.value)} className="w-full px-3 py-2 text-sm rounded border border-slate-300 focus:outline-none focus:border-brand-accent focus:ring-1 focus:ring-brand-accent" required />
             <input type="date" value={date} onChange={e => setDate(e.target.value)} className="w-full px-3 py-2 text-sm rounded border border-slate-300 focus:outline-none focus:border-brand-accent focus:ring-1 focus:ring-brand-accent text-slate-700" required />
             <div className="flex justify-end gap-3 mt-2">
-              <button type="button" onClick={() => setIsAdding(false)} className="text-slate-500 hover:text-slate-700 px-4 py-2 font-black uppercase tracking-widest text-xs transition-colors">Cancel</button>
-              <button type="submit" className="bg-brand-accent text-brand-bg-secondary px-4 py-2 rounded-[4px] text-xs font-black uppercase tracking-widest hover:brightness-110 transition-all shadow-sm">Save Milestone</button>
+              <button type="button" onClick={() => setIsAdding(false)} className="text-slate-500 hover:text-slate-700 px-4 py-2 font-black uppercase tracking-widest text-sm transition-colors">Cancel</button>
+              <button type="submit" className="bg-brand-accent text-brand-bg-secondary px-4 py-2 rounded-[4px] text-sm font-black uppercase tracking-widest hover:brightness-110 transition-all shadow-sm">Save Milestone</button>
             </div>
           </form>
         </div>
@@ -72,13 +72,13 @@ export function GoLiveCalendar() {
         {milestones.map(m => (
           <div key={m.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100 hover:border-brand-accent transition-colors">
             <div className="flex flex-col gap-0.5">
-              <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{m.client}</span>
+              <span className="text-sm font-black text-slate-500 uppercase tracking-widest">{m.client}</span>
               <span className="text-sm font-bold text-slate-800">{m.project}</span>
-              <span className="text-xs text-slate-400 font-medium">{m.date}</span>
+              <span className="text-sm text-slate-400 font-medium">{m.date}</span>
             </div>
             <div className="flex flex-col items-center justify-center bg-brand-bg-secondary text-white w-14 h-14 rounded-full shadow-sm shrink-0">
               <span className="text-lg font-black leading-none">{m.days}</span>
-              <span className="text-[8px] uppercase tracking-widest mt-0.5 opacity-80">Days</span>
+              <span className="text-sm uppercase tracking-widest mt-0.5 opacity-80">Days</span>
             </div>
           </div>
         ))}

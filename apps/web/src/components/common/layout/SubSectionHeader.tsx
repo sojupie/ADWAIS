@@ -17,7 +17,7 @@ export function SubSectionHeader({ title, subtitle, icon, children, className = 
         </div>
         <div>
           <h3 className="text-md font-bold text-brand-text leading-tight">{title}</h3>
-          <p className="text-xs font-semibold text-slate-500 mt-0.5">{subtitle}</p>
+          <p className="text-sm font-semibold text-slate-500 mt-0.5">{subtitle}</p>
         </div>
       </div>
       {children && (

@@ -125,7 +125,7 @@ export function SyncStatusWidget() {
             className={`${strokeColor} transition-all duration-1000 ease-linear`}
           />
         </svg>
-        <div className="absolute inset-0 flex items-center justify-center text-xs font-bold text-white/60 font-mono">
+        <div className="absolute inset-0 flex items-center justify-center text-sm font-bold text-white/60 font-mono">
           {countdown}
         </div>
       </div>
@@ -135,48 +135,48 @@ export function SyncStatusWidget() {
         {isDrillDown ? (
           <div className="flex flex-col gap-0.5">
             <div className="flex justify-between items-center gap-4">
-              <span className="text-xs font-black uppercase tracking-widest text-white/60">Dashboard UI</span>
-              <span className="text-xs font-bold text-white truncate min-w-10 text-right">{timeAgo(dashboardSyncTime)}</span>
+              <span className="text-sm font-black uppercase tracking-widest text-white/60">Dashboard UI</span>
+              <span className="text-sm font-bold text-white truncate min-w-10 text-right">{timeAgo(dashboardSyncTime)}</span>
             </div>
             <div className="flex justify-between items-center gap-4">
-              <span className="text-xs font-black uppercase tracking-widest text-white/60">Source Polled</span>
-              <span className="text-xs font-bold text-white truncate min-w-10 text-right">{timeAgo(tenant?.lastPolled)}</span>
+              <span className="text-sm font-black uppercase tracking-widest text-white/60">Source Polled</span>
+              <span className="text-sm font-bold text-white truncate min-w-10 text-right">{timeAgo(tenant?.lastPolled)}</span>
             </div>
           </div>
         ) : isFinancial ? (
           <div className="flex flex-col gap-0.5">
             <div className="flex justify-between items-center gap-4">
-              <span className="text-xs font-black uppercase tracking-widest text-white/60">Dashboard UI</span>
-              <span className="text-xs font-bold text-white truncate min-w-10 text-right">{timeAgo(dashboardSyncTime)}</span>
+              <span className="text-sm font-black uppercase tracking-widest text-white/60">Dashboard UI</span>
+              <span className="text-sm font-bold text-white truncate min-w-10 text-right">{timeAgo(dashboardSyncTime)}</span>
             </div>
             <div className="flex justify-between items-center gap-4">
-              <span className="text-xs font-black uppercase tracking-widest text-white/60">Litium Sync</span>
-              <span className="text-xs font-bold text-white truncate min-w-10 text-right">{timeAgo(health?.lastLitiumSync)}</span>
+              <span className="text-sm font-black uppercase tracking-widest text-white/60">Litium Sync</span>
+              <span className="text-sm font-bold text-white truncate min-w-10 text-right">{timeAgo(health?.lastLitiumSync)}</span>
             </div>
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-x-6 gap-y-1 items-center">
             <div className="flex justify-between items-center gap-2">
-              <span className="text-xs font-black uppercase tracking-widest text-white/60">Dash UI</span>
-              <span className="text-xs font-bold text-white truncate text-right">{timeAgo(dashboardSyncTime)}</span>
+              <span className="text-sm font-black uppercase tracking-widest text-white/60">Dash UI</span>
+              <span className="text-sm font-bold text-white truncate text-right">{timeAgo(dashboardSyncTime)}</span>
             </div>
             <div className="flex justify-between items-center gap-2">
-              <span className="text-xs font-black uppercase tracking-widest text-white/60">Meta</span>
-              <span className="text-xs font-bold text-white truncate text-right">{timeAgo(health?.lastFleetUpdate)}</span>
+              <span className="text-sm font-black uppercase tracking-widest text-white/60">Meta</span>
+              <span className="text-sm font-bold text-white truncate text-right">{timeAgo(health?.lastFleetUpdate)}</span>
             </div>
             <div className="flex justify-between items-center gap-2">
-              <span className="text-xs font-black uppercase tracking-widest text-white/60">Uptime</span>
-              <span className="text-xs font-bold text-white truncate text-right">{timeAgo(health?.lastFleetUptimeUpdate)}</span>
+              <span className="text-sm font-black uppercase tracking-widest text-white/60">Uptime</span>
+              <span className="text-sm font-bold text-white truncate text-right">{timeAgo(health?.lastFleetUptimeUpdate)}</span>
             </div>
             <div className="flex justify-between items-center gap-2">
-              <span className="text-xs font-black uppercase tracking-widest text-white/60">Latency</span>
-              <span className="text-xs font-bold text-white truncate text-right">{timeAgo(health?.lastFleetLatencyUpdate)}</span>
+              <span className="text-sm font-black uppercase tracking-widest text-white/60">Latency</span>
+              <span className="text-sm font-bold text-white truncate text-right">{timeAgo(health?.lastFleetLatencyUpdate)}</span>
             </div>
           </div>
         )}
         
         {syncError && (
-          <div className="mt-1 flex items-start gap-1 text-red-600 text-xs font-bold bg-red-50 p-1.5 rounded border border-red-100">
+          <div className="mt-1 flex items-start gap-1 text-red-600 text-sm font-bold bg-red-50 p-1.5 rounded border border-red-100">
             <AlertCircle size={12} className="shrink-0 mt-0.5" />
             <span className="leading-tight line-clamp-2" title={syncError}>{syncError}</span>
           </div>

@@ -36,20 +36,20 @@ function HealthStatusCard({ title, subtitle, status, children }: HealthStatusCar
             <div className="flex items-center justify-between">
                 <div className="flex flex-col">
                     <span className="text-sm font-bold text-slate-800">{title}</span>
-                    <span className="text-xs text-slate-400">{subtitle}</span>
+                    <span className="text-sm text-slate-400">{subtitle}</span>
                 </div>
                 {isHealthy && (
-                    <span className="flex items-center gap-1.5 px-2.5 py-1 bg-green-50 text-green-700 rounded-full text-xs font-bold border border-green-200">
+                    <span className="flex items-center gap-1.5 px-2.5 py-1 bg-green-50 text-green-700 rounded-full text-sm font-bold border border-green-200">
             <CheckCircle2 size={13} /> OK
           </span>
                 )}
                 {isWarning && (
-                    <span className="flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-bold border border-amber-200">
+                    <span className="flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-700 rounded-full text-sm font-bold border border-amber-200">
             <AlertTriangle size={13} /> WARN
           </span>
                 )}
                 {isFailed && (
-                    <span className="flex items-center gap-1.5 px-2.5 py-1 bg-red-50 text-red-700 rounded-full text-xs font-bold border border-red-200">
+                    <span className="flex items-center gap-1.5 px-2.5 py-1 bg-red-50 text-red-700 rounded-full text-sm font-bold border border-red-200">
             <AlertCircle size={13} /> ERR
           </span>
                 )}
@@ -96,12 +96,12 @@ export function SystemEventsView() {
                                 subtitle="Monitoring & order ingestion"
                                 status={health.sync?.status}
                             >
-                                <div className="grid grid-cols-2 gap-2 mt-1 text-xs border-t border-slate-100 pt-2 text-slate-500">
+                                <div className="grid grid-cols-2 gap-2 mt-1 text-sm border-t border-slate-100 pt-2 text-slate-500">
                                     <div>Tenants with errors: <span className="font-bold text-slate-800">{health.sync?.tenantsWithErrorsCount}</span></div>
                                     <div>Monitors with errors: <span className="font-bold text-slate-800">{health.sync?.monitorsWithErrorsCount}</span></div>
                                 </div>
                                 {health.sync?.globalSyncError && (
-                                    <div className="mt-1 p-2 bg-red-50 text-red-800 border border-red-100 rounded text-xs leading-tight font-medium">
+                                    <div className="mt-1 p-2 bg-red-50 text-red-800 border border-red-100 rounded text-sm leading-tight font-medium">
                                         {health.sync.globalSyncError}
                                     </div>
                                 )}
@@ -113,7 +113,7 @@ export function SystemEventsView() {
                                 subtitle="Scheduler worker queues"
                                 status={health.hangfire?.status}
                             >
-                                <div className="grid grid-cols-4 gap-1 mt-1 text-center border-t border-slate-100 pt-2 text-[10px] text-slate-500">
+                                <div className="grid grid-cols-4 gap-1 mt-1 text-center border-t border-slate-100 pt-2 text-sm text-slate-500">
                                     <div className="flex flex-col p-1.5 bg-slate-50 rounded">
                                         <span className="font-extrabold text-slate-850">{health.hangfire?.processingCount}</span>
                                         <span>Active</span>
@@ -140,7 +140,7 @@ export function SystemEventsView() {
                                 lockTitle="Requires Admin privileges"
                                 loading={clearErrorsMutation.isPending}
                                 loadingText="Clearing Diagnostics..."
-                                className="w-full py-2.5 px-4 bg-slate-150 hover:bg-slate-200 active:bg-slate-250 text-slate-700 font-bold rounded-xl text-xs shadow-sm transition-colors border border-slate-250 cursor-pointer flex items-center justify-center gap-2"
+                                className="w-full py-2.5 px-4 bg-slate-150 hover:bg-slate-200 active:bg-slate-250 text-slate-700 font-bold rounded-xl text-sm shadow-sm transition-colors border border-slate-250 cursor-pointer flex items-center justify-center gap-2"
                             >
                                 Clear Sync Errors
                             </SecureButton>
@@ -156,10 +156,10 @@ export function SystemEventsView() {
                     {/* Sync Dates Section */}
                     {health && (
                         <div className="flex flex-col border border-slate-200 rounded-xl bg-white shadow-sm overflow-hidden">
-                            <div className="p-3 bg-slate-50 border-b border-slate-200 font-bold text-xs text-slate-400 uppercase tracking-widest">
+                            <div className="p-3 bg-slate-50 border-b border-slate-200 font-bold text-sm text-slate-400 uppercase tracking-widest">
                                 Last Successful Syncs
                             </div>
-                            <div className="flex flex-col divide-y divide-slate-100 text-xs">
+                            <div className="flex flex-col divide-y divide-slate-100 text-sm">
                                 <div className="flex justify-between items-center p-3">
                                     <span className="font-semibold text-slate-600">Litium Ingestion</span>
                                     <span className="font-bold text-slate-800">{timeAgo(health.lastLitiumSync)}</span>
@@ -212,32 +212,32 @@ export function SystemEventsView() {
                                                     {isSucceeded && <span className="h-2.5 w-2.5 rounded-full bg-green-500 shrink-0"></span>}
                                                     {isFailed && <span className="h-2.5 w-2.5 rounded-full bg-red-500 shrink-0"></span>}
                                                     <span
-                                                        className="text-xs font-bold text-slate-700 truncate"
+                                                        className="text-sm font-bold text-slate-700 truncate"
                                                         title={`${job.jobName}${job.jobArgs ? `(${job.jobArgs})` : ''}`}
                                                     >
                             {job.jobName}
                                                         {job.jobArgs && (
-                                                            <span className="ml-1.5 text-[9px] font-mono text-slate-400 font-normal bg-slate-50 border border-slate-200/60 rounded px-1.5 py-0.5">
+                                                            <span className="ml-1.5 text-sm font-mono text-slate-400 font-normal bg-slate-50 border border-slate-200/60 rounded px-1.5 py-0.5">
                                 {job.jobArgs}
                               </span>
                                                         )}
                           </span>
                                                 </div>
-                                                <div className="flex items-center gap-2 text-[10px] font-bold shrink-0">
+                                                <div className="flex items-center gap-2 text-sm font-bold shrink-0">
                                                     {isProcessing && <span className="text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded uppercase tracking-wider">Active</span>}
                                                     {isSucceeded && <span className="text-green-600 bg-green-50 px-1.5 py-0.5 rounded uppercase tracking-wider">Success</span>}
                                                     {isFailed && <span className="text-red-600 bg-red-50 px-1.5 py-0.5 rounded uppercase tracking-wider">Failed</span>}
                                                     <span className="text-slate-400">{timeAgo(job.createdAt)}</span>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center justify-between text-[10px] text-slate-400 font-medium">
-                                                <span>ID: <code className="font-mono bg-slate-100 text-slate-600 px-1 py-0.5 rounded text-[9px]">{job.jobId}</code></span>
+                                            <div className="flex items-center justify-between text-sm text-slate-400 font-medium">
+                                                <span>ID: <code className="font-mono bg-slate-100 text-slate-600 px-1 py-0.5 rounded text-sm">{job.jobId}</code></span>
                                                 {job.durationSeconds !== null && (
                                                     <span>Duration: <span className="font-bold text-slate-650">{job.durationSeconds.toFixed(1)}s</span></span>
                                                 )}
                                             </div>
                                             {isFailed && job.exceptionMessage && (
-                                                <div className="mt-1.5 p-2.5 bg-red-950/5 border border-red-200/50 text-[10px] text-red-700 font-mono rounded leading-tight whitespace-pre-wrap max-h-[70px] overflow-y-auto custom-scrollbar">
+                                                <div className="mt-1.5 p-2.5 bg-red-950/5 border border-red-200/50 text-sm text-red-700 font-mono rounded leading-tight whitespace-pre-wrap max-h-[70px] overflow-y-auto custom-scrollbar">
                                                     {job.exceptionMessage}
                                                 </div>
                                             )}
@@ -246,7 +246,7 @@ export function SystemEventsView() {
                                 })}
                             </div>
                         ) : (
-                            <div className="h-full flex items-center justify-center text-slate-400 text-xs font-semibold">
+                            <div className="h-full flex items-center justify-center text-slate-400 text-sm font-semibold">
                                 No recent background jobs found
                             </div>
                         )}
@@ -266,7 +266,7 @@ export function SystemEventsView() {
                             <div className="w-3 h-3 rounded-full bg-slate-700"></div>
                         </div>
                     </div>
-                    <div className="flex-1 overflow-y-auto p-4 custom-scrollbar flex flex-col gap-2 bg-[#0d1117] font-mono text-xs">
+                    <div className="flex-1 overflow-y-auto p-4 custom-scrollbar flex flex-col gap-2 bg-[#0d1117] font-mono text-sm">
                         {(events || []).map((e: SystemEvent, i: number) => (
                             <LogEventRow key={e.id || i} e={e} />
                         ))}
@@ -302,7 +302,7 @@ function LogEventRow({ e }: { e: SystemEvent }) {
 
     return (
         <div className="flex items-start gap-4 p-1.5 rounded hover:bg-white/5 transition-colors group text-slate-300 relative">
-      <span className="text-slate-500 shrink-0 mt-0.5 text-[10px]">
+      <span className="text-slate-500 shrink-0 mt-0.5 text-sm">
         {new Date(e.timestamp).toLocaleTimeString([], { hour12: false })}
       </span>
             <div className="flex flex-col gap-1 w-full min-w-0">
@@ -310,13 +310,13 @@ function LogEventRow({ e }: { e: SystemEvent }) {
                     {isError ? <AlertCircle size={13} className="text-red-400 shrink-0" /> :
                         isWarn ? <AlertTriangle size={13} className="text-amber-455 shrink-0" /> :
                             <Info size={13} className="text-blue-400 shrink-0" />}
-                    <span className={`font-bold text-[10px] shrink-0 ${isError ? 'text-red-400' : isWarn ? 'text-amber-455' : 'text-blue-400'}`}>
+                    <span className={`font-bold text-sm shrink-0 ${isError ? 'text-red-400' : isWarn ? 'text-amber-455' : 'text-blue-400'}`}>
             [{(e.level || 'info').toUpperCase()}]
           </span>
                     <span className="break-words leading-tight text-slate-200 select-text">{displayMessage}</span>
                 </div>
                 {e.exception && (
-                    <div className="mt-1.5 p-2 bg-red-950/30 border border-red-900/50 rounded text-red-200/80 text-[10px] overflow-x-auto custom-scrollbar select-text">
+                    <div className="mt-1.5 p-2 bg-red-950/30 border border-red-900/50 rounded text-red-200/80 text-sm overflow-x-auto custom-scrollbar select-text">
                         <pre className="whitespace-pre-wrap">{e.exception}</pre>
                     </div>
                 )}

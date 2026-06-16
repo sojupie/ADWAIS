@@ -31,7 +31,6 @@ function LoginComponent() {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center font-sans text-brand-text select-none overflow-hidden bg-brand-bg-tertiary z-50">
-      {/* Blurred decorative ambient light sources for premium aesthetic */}
       <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-brand-accent/10 blur-[120px] rounded-full pointer-events-none animate-pulse duration-[8000ms]"></div>
       <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-emerald-500/5 blur-[100px] rounded-full pointer-events-none"></div>
 
@@ -64,14 +63,14 @@ function LoginComponent() {
           <div className="pt-4 border-t border-slate-900/5 flex justify-center">
             <Link
               to="/kiosk"
-              className="text-xs font-black text-brand-link hover:text-brand-accent transition-colors flex items-center gap-2 cursor-pointer uppercase tracking-widest"
+              className="text-sm font-black text-brand-link hover:text-brand-accent transition-colors flex items-center gap-2 cursor-pointer uppercase tracking-widest"
             >
               Kiosk Activation
             </Link>
           </div>
         </div>
 
-        <div className="pt-4 border-t border-white/5 flex justify-between items-center text-[10px] text-slate-500 font-extrabold tracking-widest uppercase relative z-10 w-full">
+        <div className="pt-4 border-t border-white/5 flex justify-between items-center text-sm text-slate-500 font-extrabold tracking-widest uppercase relative z-10 w-full">
           <span>ADWAIS Platform</span>
           <span className="text-slate-600">v1.0.0</span>
         </div>

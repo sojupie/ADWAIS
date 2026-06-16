@@ -1,9 +1,15 @@
 import { createFileRoute, redirect } from '@tanstack/react-router';
-import { financialSearchSchema } from '../schemas';
+import { financialSearchSchema, type Timeframe } from '../schemas';
 import { getSavedTimeframe } from '../utils/timeframeStorage';
 
+export interface FinancialSearch {
+  timeframe?: Timeframe;
+  tenantId?: string;
+}
+
 export const Route = createFileRoute('/financial')({
-  validateSearch: (search) => financialSearchSchema.parse(search),
+  validateSearch: (search: Record<string, unknown>): FinancialSearch => 
+    financialSearchSchema.parse(search) as FinancialSearch,
   beforeLoad: ({ search }) => {
     if (!search.timeframe) {
       throw redirect({

@@ -55,7 +55,7 @@ export const TransactionDensityChart = memo(function TransactionDensityChart({
       title="Transaction Density Matrix"
       className={className || "h-full relative"}
       bodyClassName={isEmpty ? 'flex items-center justify-center' : 'flex-1 min-h-0 flex flex-col p-4'}
-      legend={<span className="text-xs font-bold text-slate-500 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded">30-Day Rolling Density</span>}
+      legend={<span className="text-sm font-bold text-slate-500 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded">30-Day Rolling Density</span>}
     >
       {isEmpty ? (
         <EmptyState message={"No data available"} variant={"minimal"}/>
@@ -66,7 +66,7 @@ export const TransactionDensityChart = memo(function TransactionDensityChart({
             {/* Header row for Hours */}
             <div className="col-span-1"></div>
             {Array.from({ length: 24 }).map((_, h) => (
-              <div key={h} className="text-center text-[10px] text-slate-500 font-bold self-end pb-1">
+              <div key={h} className="text-center text-sm text-slate-500 font-bold self-end pb-1">
                 {h.toString().padStart(2, '0')}
               </div>
             ))}
@@ -75,7 +75,7 @@ export const TransactionDensityChart = memo(function TransactionDensityChart({
             {DAYS.map((day, dayIndex) => (
               <Fragment key={day}>
                 {/* Day Label */}
-                <div className="flex items-center justify-end pr-2 text-[11px] text-slate-500 font-bold">
+                <div className="flex items-center justify-end pr-2 text-sm text-slate-500 font-bold">
                   {day}
                 </div>
                 {/* 24 Hour Cells for the Day */}

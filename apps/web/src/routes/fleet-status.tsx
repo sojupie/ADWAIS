@@ -1,9 +1,14 @@
 import { createFileRoute, redirect } from '@tanstack/react-router';
-import { fleetSearchSchema } from '../schemas';
+import { fleetSearchSchema, type Timeframe } from '../schemas';
 import { getSavedTimeframe } from '../utils/timeframeStorage';
 
+export interface FleetSearch {
+  timeframe?: Timeframe;
+}
+
 export const Route = createFileRoute('/fleet-status')({
-  validateSearch: (search) => fleetSearchSchema.parse(search),
+  validateSearch: (search: Record<string, unknown>): FleetSearch => 
+    fleetSearchSchema.parse(search) as FleetSearch,
   beforeLoad: ({ search }) => {
     if (!search.timeframe) {
       throw redirect({

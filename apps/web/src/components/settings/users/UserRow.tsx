@@ -28,7 +28,7 @@ export function UserRow({ u, updateUser, deleteUser }: UserRowProps) {
                displayValue={
                  <div className="flex flex-col">
                    <span className="font-bold text-slate-800 text-sm">{u.name}</span>
-                   <span className="text-xs text-slate-400 font-mono mt-0.5">{u.id}</span>
+                   <span className="text-sm text-slate-400 font-mono mt-0.5">{u.id}</span>
                  </div>
                }
                onSave={(val) => updateUser.mutate({ id: u.id, payload: { name: val }})}
@@ -47,7 +47,7 @@ export function UserRow({ u, updateUser, deleteUser }: UserRowProps) {
              { label: 'Employee', value: 'Employee' },
            ]}
            displayValue={
-             <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${
+             <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-bold border ${
                u.role === 'Admin' ? 'bg-purple-50 text-purple-700 border-purple-200' : 
                u.role === 'Employee' ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-slate-100 text-slate-600 border-slate-200'
              }`}>

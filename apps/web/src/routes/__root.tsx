@@ -159,12 +159,12 @@ function RootComponent() {
             )}
             {hasMsalAccount && (
               <div className="flex items-center gap-3 bg-brand-bg-primary/45 border border-white/10 px-3.5 py-1.5 rounded-lg shadow-sm">
-                <span className="text-xs font-bold text-slate-300">
+                <span className="text-sm font-bold text-slate-300">
                   {user?.name || accounts[0]?.name || accounts[0]?.username}
                 </span>
                 <button
                   onClick={() => instance.logoutRedirect()}
-                  className="text-[10px] text-rose-400 hover:text-rose-300 font-extrabold uppercase tracking-widest cursor-pointer transition-colors duration-150"
+                  className="text-sm text-rose-400 hover:text-rose-300 font-extrabold uppercase tracking-widest cursor-pointer transition-colors duration-150"
                   title="Sign Out"
                 >
                   Sign Out

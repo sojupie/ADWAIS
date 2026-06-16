@@ -42,7 +42,7 @@ export function FactPanel({ label, value, isLoading, valueColor, extra }: FactPa
 
     return (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-3 flex flex-col justify-between min-h-[90px] transition-all hover:shadow-md animate-in fade-in duration-300 min-w-0 overflow-hidden">
-            <h2 className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1 truncate">{label}</h2>
+            <h2 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-1 truncate">{label}</h2>
             {isLoading ? (
                 <div className="flex items-center gap-2 mt-1">
                     <Skeleton className="h-8 w-24 bg-slate-200" />

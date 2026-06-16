@@ -27,7 +27,7 @@ export function ProvisionUserPanel({ createUser }: ProvisionUserPanelProps) {
         </div>
         <div>
           <h3 className="font-bold text-brand-text text-lg">Provision New User</h3>
-          <p className="text-xs text-slate-500 font-medium mt-0.5">Add a new administrator or user to the system</p>
+          <p className="text-sm text-slate-500 font-medium mt-0.5">Add a new administrator or user to the system</p>
         </div>
       </div>
       <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto items-end">

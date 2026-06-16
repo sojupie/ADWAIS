@@ -62,10 +62,10 @@ export function BackgroundJobsView() {
                                             )}
                                             <span className="text-sm font-bold text-slate-800">{job.name}</span>
                                             {isRestricted && (
-                                                <span className="text-xs font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded ml-auto">Admin</span>
+                                                <span className="text-sm font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded ml-auto">Admin</span>
                                             )}
                                         </div>
-                                        <span className="text-xs text-slate-500 font-medium">{job.desc}</span>
+                                        <span className="text-sm text-slate-500 font-medium">{job.desc}</span>
                                     </button>
                                 );
                             })}

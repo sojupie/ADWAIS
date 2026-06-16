@@ -28,24 +28,24 @@ const GraphTooltip = ({ active, payload, label }: GraphTooltipProps) => {
 
   return (
     <div className="bg-white border border-slate-100 rounded-lg shadow-lg p-4 text-sm animate-in fade-in zoom-in duration-200">
-      <p className="font-bold text-brand-text mb-3 border-b border-slate-50 pb-2 uppercase tracking-widest text-xs">{label}</p>
+      <p className="font-bold text-brand-text mb-3 border-b border-slate-50 pb-2 uppercase tracking-widest text-sm">{label}</p>
       <div className="space-y-2">
         <p className="flex justify-between gap-8">
-          <span className="text-slate-500 font-bold uppercase text-[10px] tracking-widest">Current Avg</span> 
+          <span className="text-slate-500 font-bold uppercase text-sm tracking-widest">Current Avg</span> 
           <strong className="text-brand-btn-primary">{formatLatency(point.average)}</strong>
         </p>
         <p className="flex justify-between gap-8">
-          <span className="text-slate-500 font-bold uppercase text-[10px] tracking-widest">Previous Avg</span> 
+          <span className="text-slate-500 font-bold uppercase text-sm tracking-widest">Previous Avg</span> 
           <strong className="text-slate-500">{formatLatency(point.previousAverage)}</strong>
         </p>
         <div className="pt-2 border-t border-slate-50 mt-2 space-y-1">
           <p className="flex justify-between gap-8">
-            <span className="text-slate-500 font-bold uppercase text-[10px] tracking-widest">Highest</span> 
-            <strong className="text-red-500 text-xs">{formatLatency(point.highest)}</strong>
+            <span className="text-slate-500 font-bold uppercase text-sm tracking-widest">Highest</span> 
+            <strong className="text-red-500 text-sm">{formatLatency(point.highest)}</strong>
           </p>
           <p className="flex justify-between gap-8">
-            <span className="text-slate-500 font-bold uppercase text-[10px] tracking-widest">Lowest</span> 
-            <strong className="text-emerald-500 text-xs">{formatLatency(point.lowest)}</strong>
+            <span className="text-slate-500 font-bold uppercase text-sm tracking-widest">Lowest</span> 
+            <strong className="text-emerald-500 text-sm">{formatLatency(point.lowest)}</strong>
           </p>
         </div>
       </div>
@@ -79,7 +79,7 @@ export const NetworkLatencyChart = memo(function NetworkLatencyChart({
   }));
 
   const legend = (
-    <div className="flex gap-4 text-[10px] font-black text-slate-500 uppercase tracking-widest bg-slate-50 px-3 py-1 rounded-full border border-slate-100">
+    <div className="flex gap-4 text-sm font-black text-slate-500 uppercase tracking-widest bg-slate-50 px-3 py-1 rounded-full border border-slate-100">
       <div className="flex items-center gap-1.5">
         <div className="w-2.5 h-2.5 rounded-full bg-brand-btn-primary"></div>
         <span>Current</span>

@@ -14,7 +14,7 @@ export function KioskControls() {
               ${mode === 'kiosk' ? 'bg-emerald-500 kiosk-pulse' : 
                 mode === 'interactive' ? 'bg-amber-500' : 'bg-slate-400'}`} 
             />
-            <span className={`text-xs font-black tracking-widest
+            <span className={`text-sm font-black tracking-widest
               ${mode === 'kiosk' ? 'text-emerald-700' : 
                 mode === 'interactive' ? 'text-amber-700' : 'text-slate-600'}`}>
               {mode.toUpperCase()}

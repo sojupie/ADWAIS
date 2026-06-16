@@ -37,7 +37,7 @@ export function TenantFilterMenu({ filters, setFilters }: TenantFilterMenuProps)
       >
         <Filter size={14} />
         Filters 
-        {activeCount > 0 && <span className="bg-brand-accent text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full ml-1">{activeCount}</span>}
+        {activeCount > 0 && <span className="bg-brand-accent text-white text-sm w-4 h-4 flex items-center justify-center rounded-full ml-1">{activeCount}</span>}
       </button>
 
       {isOpen && (
@@ -45,8 +45,8 @@ export function TenantFilterMenu({ filters, setFilters }: TenantFilterMenuProps)
           
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Service Token</span>
-              <label className="flex items-center gap-1.5 text-xs font-semibold cursor-pointer select-none">
+              <span className="text-sm font-bold text-slate-500 uppercase tracking-wider">Service Token</span>
+              <label className="flex items-center gap-1.5 text-sm font-semibold cursor-pointer select-none">
                 <input type="checkbox" checked={filters.token === 'all'} onChange={e => setFilters({...filters, token: e.target.checked ? 'all' : 'set'})} className="rounded border-slate-300 w-3.5 h-3.5" />
                 All
               </label>
@@ -54,13 +54,13 @@ export function TenantFilterMenu({ filters, setFilters }: TenantFilterMenuProps)
             <div className={`flex items-center bg-slate-100 rounded-lg p-1 transition-opacity ${filters.token === 'all' ? 'opacity-70' : ''}`}>
               <button 
                 onClick={() => setFilters({...filters, token: 'set'})} 
-                className={`flex-1 py-1 text-xs font-bold uppercase rounded-md transition-all cursor-pointer ${filters.token === 'set' ? 'bg-white shadow-sm text-brand-accent' : 'text-slate-500 hover:text-slate-700'}`}
+                className={`flex-1 py-1 text-sm font-bold uppercase rounded-md transition-all cursor-pointer ${filters.token === 'set' ? 'bg-white shadow-sm text-brand-accent' : 'text-slate-500 hover:text-slate-700'}`}
               >
                 Set
               </button>
               <button 
                 onClick={() => setFilters({...filters, token: 'missing'})} 
-                className={`flex-1 py-1 text-xs font-bold uppercase rounded-md transition-all cursor-pointer ${filters.token === 'missing' ? 'bg-white shadow-sm text-brand-accent' : 'text-slate-500 hover:text-slate-700'}`}
+                className={`flex-1 py-1 text-sm font-bold uppercase rounded-md transition-all cursor-pointer ${filters.token === 'missing' ? 'bg-white shadow-sm text-brand-accent' : 'text-slate-500 hover:text-slate-700'}`}
               >
                 Missing
               </button>
@@ -69,8 +69,8 @@ export function TenantFilterMenu({ filters, setFilters }: TenantFilterMenuProps)
 
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Order Fetching</span>
-              <label className="flex items-center gap-1.5 text-xs font-semibold cursor-pointer select-none">
+              <span className="text-sm font-bold text-slate-500 uppercase tracking-wider">Order Fetching</span>
+              <label className="flex items-center gap-1.5 text-sm font-semibold cursor-pointer select-none">
                 <input type="checkbox" checked={filters.fetch === 'all'} onChange={e => setFilters({...filters, fetch: e.target.checked ? 'all' : 'on'})} className="rounded border-slate-300 w-3.5 h-3.5" />
                 All
               </label>
@@ -78,13 +78,13 @@ export function TenantFilterMenu({ filters, setFilters }: TenantFilterMenuProps)
             <div className={`flex items-center bg-slate-100 rounded-lg p-1 transition-opacity ${filters.fetch === 'all' ? 'opacity-70' : ''}`}>
               <button 
                 onClick={() => setFilters({...filters, fetch: 'on'})} 
-                className={`flex-1 py-1 text-xs font-bold uppercase rounded-md transition-all cursor-pointer ${filters.fetch === 'on' ? 'bg-white shadow-sm text-brand-accent' : 'text-slate-500 hover:text-slate-700'}`}
+                className={`flex-1 py-1 text-sm font-bold uppercase rounded-md transition-all cursor-pointer ${filters.fetch === 'on' ? 'bg-white shadow-sm text-brand-accent' : 'text-slate-500 hover:text-slate-700'}`}
               >
                 Enabled
               </button>
               <button 
                 onClick={() => setFilters({...filters, fetch: 'off'})} 
-                className={`flex-1 py-1 text-xs font-bold uppercase rounded-md transition-all cursor-pointer ${filters.fetch === 'off' ? 'bg-white shadow-sm text-brand-accent' : 'text-slate-500 hover:text-slate-700'}`}
+                className={`flex-1 py-1 text-sm font-bold uppercase rounded-md transition-all cursor-pointer ${filters.fetch === 'off' ? 'bg-white shadow-sm text-brand-accent' : 'text-slate-500 hover:text-slate-700'}`}
               >
                 Disabled
               </button>
@@ -95,7 +95,7 @@ export function TenantFilterMenu({ filters, setFilters }: TenantFilterMenuProps)
             <button 
               onClick={reset} 
               disabled={activeCount === 0} 
-              className="text-xs font-bold text-slate-500 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
+              className="text-sm font-bold text-slate-500 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
             >
               Reset Filters
             </button>

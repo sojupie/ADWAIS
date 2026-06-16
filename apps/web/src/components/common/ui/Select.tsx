@@ -16,7 +16,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     return (
       <div className={`flex flex-col gap-1 ${widthClass} ${containerClassName}`}>
         {label && (
-          <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+          <label className="text-sm font-bold text-slate-500 uppercase tracking-wider">
             {label}
           </label>
         )}

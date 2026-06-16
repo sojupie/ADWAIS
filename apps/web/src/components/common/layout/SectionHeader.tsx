@@ -23,7 +23,7 @@ export function SectionHeader({ title, subtitle, icon, children, className = '',
         </div>
         <div>
           <h2 className={`text-lg font-extrabold ${textClass}`}>{title}</h2>
-          <p className={`text-xs font-semibold ${subtitleClass}`}>{subtitle}</p>
+          <p className={`text-sm font-semibold ${subtitleClass}`}>{subtitle}</p>
         </div>
       </div>
       {children && (

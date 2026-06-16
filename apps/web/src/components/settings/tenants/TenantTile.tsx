@@ -85,7 +85,7 @@ export function TenantTile({ t, deleteTenant, isAdmin = false }: TenantTileProps
           value={draft.type}
           onChange={e => setDraft({...draft, type: e.target.value as 'Mixed' | 'B2B' | 'B2C'})}
           disabled={!isAdmin}
-          className={`px-1.5 py-0.5 rounded-[4px] text-xs uppercase font-bold tracking-widest shadow-sm text-white outline-none shrink-0 ${
+          className={`px-1.5 py-0.5 rounded-[4px] text-sm uppercase font-bold tracking-widest shadow-sm text-white outline-none shrink-0 ${
             isAdmin ? 'cursor-pointer hover:opacity-90' : 'cursor-not-allowed opacity-50'
           } ${
             draft.type === 'B2B' ? 'bg-[var(--color-brand-btn-primary)]' :
@@ -98,7 +98,7 @@ export function TenantTile({ t, deleteTenant, isAdmin = false }: TenantTileProps
           <option value="B2C" className="text-slate-800 bg-white">B2C</option>
         </select>
       </span>
-      <span className="text-xs text-slate-400 font-mono font-medium select-text cursor-text truncate">{t.id}</span>
+      <span className="text-sm text-slate-400 font-mono font-medium select-text cursor-text truncate">{t.id}</span>
     </>
   );
 
@@ -119,7 +119,7 @@ export function TenantTile({ t, deleteTenant, isAdmin = false }: TenantTileProps
   return (
     <TileCard header={header} headerActions={headerActions}>
       <div className="flex flex-col gap-1 group">
-        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Litium Base URL</label>
+        <label className="text-sm font-bold text-slate-500 uppercase tracking-wider">Litium Base URL</label>
         <input
           value={draft.litiumBaseUrl}
           onChange={e => setDraft({...draft, litiumBaseUrl: e.target.value})}
@@ -133,17 +133,17 @@ export function TenantTile({ t, deleteTenant, isAdmin = false }: TenantTileProps
 
       <div className="flex flex-col gap-1 group">
         <div className="flex justify-between items-center">
-          <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Service Account Token</label>
+          <label className="text-sm font-bold text-slate-500 uppercase tracking-wider">Service Account Token</label>
           <div className="flex items-center gap-3">
             {isAdmin && t.hasServiceAccountToken && !draft.clearToken && (
                <button 
                  onClick={() => setDraft({ ...draft, clearToken: true, serviceAccountToken: '' })}
-                 className="text-xs text-red-500 hover:text-red-600 font-bold hover:underline cursor-pointer"
+                 className="text-sm text-red-500 hover:text-red-600 font-bold hover:underline cursor-pointer"
                >
                  Clear Token
                </button>
             )}
-            <span className="text-xs text-slate-400 italic">
+            <span className="text-sm text-slate-400 italic">
                {draft.clearToken ? 'Pending clear' : t.hasServiceAccountToken ? 'Token is set' : 'Not set'}
             </span>
           </div>

@@ -45,7 +45,7 @@ export function AgencySocialWall() {
       title="Agency Social Wall" 
       className="h-full relative"
       actions={
-        <button className="bg-[#0077b5] text-white px-3 py-1 rounded-[4px] text-[10px] font-black uppercase tracking-widest hover:bg-[#005e93] transition-all shadow-sm cursor-pointer">
+        <button className="bg-[#0077b5] text-white px-3 py-1 rounded-[4px] text-sm font-black uppercase tracking-widest hover:bg-[#005e93] transition-all shadow-sm cursor-pointer">
           + Share Update
         </button>
       }
@@ -62,12 +62,12 @@ export function AgencySocialWall() {
                 className={`flex flex-col text-left p-4 border-b border-slate-100 transition-colors cursor-pointer hover:bg-white ${isSelected ? 'bg-white border-l-4 border-l-brand-accent shadow-sm' : 'border-l-4 border-l-transparent'}`}
               >
                 <div className="flex items-center gap-2 mb-2">
-                  <div className={`w-5 h-5 rounded text-white flex items-center justify-center font-bold text-[9px] ${post.platform === 'LinkedIn' ? 'bg-[#0077b5]' : 'bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500'}`}>
+                  <div className={`w-5 h-5 rounded text-white flex items-center justify-center font-bold text-sm ${post.platform === 'LinkedIn' ? 'bg-[#0077b5]' : 'bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500'}`}>
                     {post.platform === 'LinkedIn' ? 'in' : 'ig'}
                   </div>
-                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{post.time}</span>
+                  <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">{post.time}</span>
                 </div>
-                <p className="text-xs text-slate-700 font-medium line-clamp-2 leading-relaxed">
+                <p className="text-sm text-slate-700 font-medium line-clamp-2 leading-relaxed">
                   {post.content}
                 </p>
               </button>
@@ -83,7 +83,7 @@ export function AgencySocialWall() {
             </div>
             <div className="flex flex-col">
               <span className="text-sm font-black text-slate-900">{selectedPost.author}</span>
-              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{selectedPost.time} &bull; {selectedPost.platform}</span>
+              <span className="text-sm text-slate-500 font-bold uppercase tracking-widest">{selectedPost.time} &bull; {selectedPost.platform}</span>
             </div>
           </div>
           
@@ -97,7 +97,7 @@ export function AgencySocialWall() {
              </div>
           </div>
           
-          <div className="flex gap-6 mt-6 text-xs font-bold text-slate-500 border-t border-slate-100 pt-4 shrink-0">
+          <div className="flex gap-6 mt-6 text-sm font-bold text-slate-500 border-t border-slate-100 pt-4 shrink-0">
             <span className="flex items-center gap-1.5"><span className="text-base">👍</span> {selectedPost.likes} Likes</span>
             <span className="flex items-center gap-1.5"><span className="text-base">💬</span> {selectedPost.comments} Comments</span>
             <span className="flex items-center gap-1.5"><span className="text-base">🔄</span> {selectedPost.reposts} {selectedPost.platform === 'LinkedIn' ? 'Reposts' : 'Shares'}</span>

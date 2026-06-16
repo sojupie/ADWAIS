@@ -50,8 +50,8 @@ export function OfficeContext() {
             </div>
             <input type="text" placeholder="Location (optional)" value={eventLocation} onChange={e => setEventLocation(e.target.value)} className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-accent placeholder:text-white/40" />
             <div className="flex justify-end gap-3 mt-2">
-              <button type="button" onClick={() => setIsAdding(false)} className="text-white/60 hover:text-white px-4 py-2 font-black uppercase tracking-widest text-xs transition-colors">Cancel</button>
-              <button type="submit" className="bg-brand-accent text-brand-bg-secondary px-4 py-2 rounded font-black uppercase tracking-widest text-xs hover:brightness-110 transition-all">Add Event</button>
+              <button type="button" onClick={() => setIsAdding(false)} className="text-white/60 hover:text-white px-4 py-2 font-black uppercase tracking-widest text-sm transition-colors">Cancel</button>
+              <button type="submit" className="bg-brand-accent text-brand-bg-secondary px-4 py-2 rounded font-black uppercase tracking-widest text-sm hover:brightness-110 transition-all">Add Event</button>
             </div>
           </form>
         </div>
@@ -66,7 +66,7 @@ export function OfficeContext() {
       <div className="p-6 flex flex-col h-full relative z-10">
         <div className="flex justify-between items-start mb-8">
           <div className="flex flex-col">
-            <span className="text-xs font-black text-brand-accent uppercase tracking-widest mb-1">{dateString}</span>
+            <span className="text-sm font-black text-brand-accent uppercase tracking-widest mb-1">{dateString}</span>
             <div className="flex items-baseline gap-1">
               <span className="text-5xl lg:text-6xl font-black tracking-tighter">{timeString}</span>
               <span className="text-xl font-bold text-white/50">:{secondsString}</span>
@@ -75,21 +75,21 @@ export function OfficeContext() {
           <div className="flex flex-col items-end">
             <span className="text-3xl lg:text-4xl">🌤️</span>
             <span className="text-lg font-bold mt-1">18°C</span>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-white/60">Karlstad</span>
+            <span className="text-sm font-bold uppercase tracking-widest text-white/60">Karlstad</span>
           </div>
         </div>
 
         <div className="mt-auto">
           <div className="flex items-center justify-between border-b border-white/10 pb-2 mb-3">
-            <h3 className="text-[10px] font-black text-white/50 uppercase tracking-widest">Today's Schedule</h3>
+            <h3 className="text-sm font-black text-white/50 uppercase tracking-widest">Today's Schedule</h3>
             <div className="flex items-center gap-3">
-               <span className="text-[10px] font-bold text-white/40">{events.length} Events</span>
+               <span className="text-sm font-bold text-white/40">{events.length} Events</span>
                <button 
                  onClick={() => {
                    if (!isAdding) setEventTime(new Date().toTimeString().slice(0, 5));
                    setIsAdding(!isAdding);
                  }}
-                 className="bg-white/10 text-white hover:bg-white/20 border border-white/20 px-2 py-0.5 rounded-[4px] text-[9px] font-black uppercase tracking-widest transition-all shadow-sm cursor-pointer"
+                 className="bg-white/10 text-white hover:bg-white/20 border border-white/20 px-2 py-0.5 rounded-[4px] text-sm font-black uppercase tracking-widest transition-all shadow-sm cursor-pointer"
                >
                  {isAdding ? 'Cancel' : '+ Add Event'}
                </button>
@@ -101,7 +101,7 @@ export function OfficeContext() {
                 <span className="text-sm font-black text-brand-accent w-12 shrink-0 text-right">{e.time}</span>
                 <div className="flex flex-col">
                   <span className="text-sm font-bold text-white leading-tight">{e.title}</span>
-                  <span className="text-[9px] font-bold text-white/50 uppercase tracking-widest mt-0.5">{e.location}</span>
+                  <span className="text-sm font-bold text-white/50 uppercase tracking-widest mt-0.5">{e.location}</span>
                 </div>
               </div>
             ))}

@@ -6,8 +6,8 @@ export type Timeframe = z.infer<typeof timeframeSchema>;
 export const financialSearchSchema = z.object({
   timeframe: timeframeSchema.optional(),
   tenantId: z.string().optional(),
-}).passthrough();
+});
 
 export const fleetSearchSchema = z.object({
   timeframe: timeframeSchema.optional(),
-}).passthrough();
+});

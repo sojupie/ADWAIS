@@ -28,9 +28,9 @@ export function UsersView() {
                         <table className="w-full text-left text-sm whitespace-nowrap">
                             <thead className="bg-white text-slate-500 border-b border-slate-200">
                             <tr>
-                                <th className="px-6 py-4 font-bold text-xs uppercase tracking-wider w-[40%]">User</th>
-                                <th className="px-6 py-4 font-bold text-xs uppercase tracking-wider w-[30%]">Role Level</th>
-                                <th className="px-6 py-4 font-bold text-xs uppercase tracking-wider text-right">Actions</th>
+                                <th className="px-6 py-4 font-bold text-sm uppercase tracking-wider w-[40%]">User</th>
+                                <th className="px-6 py-4 font-bold text-sm uppercase tracking-wider w-[30%]">Role Level</th>
+                                <th className="px-6 py-4 font-bold text-sm uppercase tracking-wider text-right">Actions</th>
                             </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">

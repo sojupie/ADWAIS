@@ -38,7 +38,7 @@ export function MonitorFilterMenu({ filters, setFilters, tags }: MonitorFilterMe
       >
         <Filter size={14} />
         Filters 
-        {activeCount > 0 && <span className="bg-brand-accent text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full ml-1">{activeCount}</span>}
+        {activeCount > 0 && <span className="bg-brand-accent text-white text-sm w-4 h-4 flex items-center justify-center rounded-full ml-1">{activeCount}</span>}
       </button>
 
       {isOpen && (
@@ -46,8 +46,8 @@ export function MonitorFilterMenu({ filters, setFilters, tags }: MonitorFilterMe
           
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Assignment</span>
-              <label className="flex items-center gap-1.5 text-xs font-semibold cursor-pointer select-none">
+              <span className="text-sm font-bold text-slate-500 uppercase tracking-wider">Assignment</span>
+              <label className="flex items-center gap-1.5 text-sm font-semibold cursor-pointer select-none">
                 <input 
                   type="checkbox" 
                   checked={filters.assignment === 'all'} 
@@ -60,13 +60,13 @@ export function MonitorFilterMenu({ filters, setFilters, tags }: MonitorFilterMe
             <div className={`flex items-center bg-slate-100 rounded-lg p-1 transition-opacity ${filters.assignment === 'all' ? 'opacity-70' : ''}`}>
               <button 
                 onClick={() => setFilters({...filters, assignment: 'assigned'})} 
-                className={`flex-1 py-1 text-xs font-bold uppercase rounded-md transition-all cursor-pointer ${filters.assignment === 'assigned' ? 'bg-white shadow-sm text-brand-accent' : 'text-slate-500 hover:text-slate-700'}`}
+                className={`flex-1 py-1 text-sm font-bold uppercase rounded-md transition-all cursor-pointer ${filters.assignment === 'assigned' ? 'bg-white shadow-sm text-brand-accent' : 'text-slate-500 hover:text-slate-700'}`}
               >
                 Assigned
               </button>
               <button 
                 onClick={() => setFilters({...filters, assignment: 'unassigned'})} 
-                className={`flex-1 py-1 text-xs font-bold uppercase rounded-md transition-all cursor-pointer ${filters.assignment === 'unassigned' ? 'bg-white shadow-sm text-brand-accent' : 'text-slate-500 hover:text-slate-700'}`}
+                className={`flex-1 py-1 text-sm font-bold uppercase rounded-md transition-all cursor-pointer ${filters.assignment === 'unassigned' ? 'bg-white shadow-sm text-brand-accent' : 'text-slate-500 hover:text-slate-700'}`}
               >
                 Unassigned
               </button>
@@ -75,8 +75,8 @@ export function MonitorFilterMenu({ filters, setFilters, tags }: MonitorFilterMe
 
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Tag</span>
-              <label className="flex items-center gap-1.5 text-xs font-semibold cursor-pointer select-none">
+              <span className="text-sm font-bold text-slate-500 uppercase tracking-wider">Tag</span>
+              <label className="flex items-center gap-1.5 text-sm font-semibold cursor-pointer select-none">
                 <input 
                   type="checkbox" 
                   checked={filters.tag === 'all'} 
@@ -90,7 +90,7 @@ export function MonitorFilterMenu({ filters, setFilters, tags }: MonitorFilterMe
               value={filters.tag}
               disabled={filters.tag === 'all'}
               onChange={e => setFilters({...filters, tag: e.target.value})}
-              className={`text-xs font-semibold border border-slate-200 rounded-lg px-2 py-1.5 bg-slate-50 hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-link/20 cursor-pointer text-slate-700 ${filters.tag === 'all' ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`text-sm font-semibold border border-slate-200 rounded-lg px-2 py-1.5 bg-slate-50 hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-link/20 cursor-pointer text-slate-700 ${filters.tag === 'all' ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <option value="all">All Tags</option>
               {tags.map(tag => (
@@ -103,7 +103,7 @@ export function MonitorFilterMenu({ filters, setFilters, tags }: MonitorFilterMe
             <button 
               onClick={reset} 
               disabled={activeCount === 0} 
-              className="text-xs font-bold text-slate-500 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
+              className="text-sm font-bold text-slate-500 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
             >
               Reset Filters
             </button>

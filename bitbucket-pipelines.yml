@@ -6,29 +6,52 @@ pipelines:
           services:
             - docker
           script:
+            # Build API Image
             - export API_IMAGE=$DOCKER_HUB_USER/adwais-api:latest
-            - export WEB_IMAGE=$DOCKER_HUB_USER/adwais-web:latest
             - docker build -t $API_IMAGE -f apps/server/ADWAIS/src/Api/Dockerfile .
-            - docker build -t $WEB_IMAGE -f apps/web/Dockerfile .
             - docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
             - docker push $API_IMAGE
-            - docker push $WEB_IMAGE
+            
+            # Build Frontend Web App
+            - pnpm install
+            - pnpm --filter web build
       - step:
           name: Deploy to Hetzner
           script:
+            # Transfer Compose file
             - pipe: atlassian/scp-deploy:1.5.0
               variables:
-                USER: 'root'
+                USER: 'motillo'
                 SERVER: $SERVER_IP
                 REMOTE_PATH: '/opt/adwais'
                 LOCAL_PATH: 'docker-compose.prod.yml'
+                
+            # Transfer Nginx config template
+            - pipe: atlassian/scp-deploy:1.5.0
+              variables:
+                USER: 'motillo'
+                SERVER: $SERVER_IP
+                REMOTE_PATH: '/opt/adwais'
+                LOCAL_PATH: 'infrastructure/nginx/kpi.motillo.com.conf'
+                
+            # Transfer React build artifacts
+            - pipe: atlassian/scp-deploy:1.5.0
+              variables:
+                USER: 'motillo'
+                SERVER: $SERVER_IP
+                REMOTE_PATH: '/var/www/kpi.motillo.com'
+                LOCAL_PATH: 'apps/web/dist/*'
+                
+            # Execute Service Orchestration
             - pipe: atlassian/ssh-run:0.6.0
               variables:
-                SSH_USER: 'root'
+                SSH_USER: 'motillo'
                 REMOTE_HOST: $SERVER_IP
                 COMMANDS:
-                  - 'mkdir -p /opt/adwais'
                   - 'cd /opt/adwais'
                   - 'echo "DOCKER_HUB_USER=${DOCKER_HUB_USER}\nDB_PASSWORD=${DB_PASSWORD}\nAZURE_TENANT_ID=${AZURE_TENANT_ID}\nAZURE_CLIENT_ID=${AZURE_CLIENT_ID}\nMOTASTIC_API_KEY=${MOTASTIC_API_KEY}\nKIOSK_JWT_SECRET=${KIOSK_JWT_SECRET}" > .env'
                   - 'docker compose -f docker-compose.prod.yml pull'
                   - 'docker compose -f docker-compose.prod.yml up -d'
+                  - 'sudo cp /opt/adwais/kpi.motillo.com.conf /etc/nginx/sites-available/'
+                  - 'sudo ln -sf /etc/nginx/sites-available/kpi.motillo.com.conf /etc/nginx/sites-enabled/'
+                  - 'sudo systemctl reload nginx'

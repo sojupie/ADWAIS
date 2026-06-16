@@ -1,3 +1,5 @@
+import { msalInstance } from './utils/msalConfig';
+
 export async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
   const isBodyRequest = options?.method && ['POST', 'PUT', 'PATCH'].includes(options.method.toUpperCase());
   const headers = new Headers(options?.headers);
@@ -6,12 +8,37 @@ export async function apiFetch<T>(url: string, options?: RequestInit): Promise<T
     headers.set('Content-Type', 'application/json');
   }
 
+  const kioskToken = localStorage.getItem('kiosk_token');
+  if (kioskToken && !headers.has('Authorization')) {
+    headers.set('Authorization', `Bearer ${kioskToken}`);
+  } else if (!headers.has('Authorization')) {
+    const account = msalInstance.getActiveAccount() || msalInstance.getAllAccounts()[0];
+    if (account) {
+      try {
+        const response = await msalInstance.acquireTokenSilent({
+          scopes: [import.meta.env?.VITE_AZURE_API_SCOPE || 'api://PLACEHOLDER/.default'],
+          account: account
+        });
+        headers.set('Authorization', `Bearer ${response.accessToken}`);
+      } catch (e) {
+        console.warn('Failed to acquire silent token', e);
+      }
+    }
+  }
+
   const response = await fetch(url, {
     ...options,
     headers,
   });
 
   if (!response.ok) {
+    if (response.status === 401) {
+      const bypass = headers.get('X-Bypass-Global-401');
+      if (bypass !== 'true' && window.location.pathname !== '/kiosk') {
+        window.location.href = '/kiosk';
+      }
+    }
+
     const errorBody = await response.text().catch(() => 'Unknown error');
     console.error(`API Fetch Error [${response.status}] ${url}:`, errorBody);
     let errorMessage = errorBody;
@@ -19,7 +46,7 @@ export async function apiFetch<T>(url: string, options?: RequestInit): Promise<T
       const parsed = JSON.parse(errorBody);
       if (parsed.error) errorMessage = parsed.error;
       else if (parsed.message) errorMessage = parsed.message;
-    } catch (e) {
+    } catch {
       // Not JSON
     }
     throw new Error(errorMessage || `Request failed with status ${response.status}`);
@@ -35,9 +62,9 @@ export async function apiFetch<T>(url: string, options?: RequestInit): Promise<T
 export interface MutatorConfig {
   url: string;
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
-  params?: any;
-  data?: any;
-  headers?: any;
+  params?: Record<string, unknown>;
+  data?: unknown;
+  headers?: HeadersInit;
   signal?: AbortSignal;
 }
 

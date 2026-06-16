@@ -15,12 +15,39 @@ namespace Adwais.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/users")]
-[Authorize(Policy = "AdminOnly")]
+[Authorize]
 public class UserController(IUserService userService) : ControllerBase
 {
     private readonly IUserService _userService = userService;
 
+    [HttpGet("me")]
+    [Authorize(Policy = "KioskOrStaffAccess")]
+    public async Task<ActionResult<UserResponseDto>> GetMe(CancellationToken ct)
+    {
+        var oidClaim = User.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier")?.Value 
+                       ?? User.FindFirst("oid")?.Value;
+
+        if (!string.IsNullOrEmpty(oidClaim) && Guid.TryParse(oidClaim, out var entraOid))
+        {
+            var user = await _userService.GetUserByEntraObjectIdAsync(entraOid, ct);
+            if (user != null)
+            {
+                return Ok(new UserResponseDto(user.Id, user.Name, user.Role));
+            }
+        }
+
+        var role = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+        if (role == "Viewer")
+        {
+            var name = User.Identity?.Name ?? "Kiosk Device";
+            return Ok(new UserResponseDto(Guid.Empty, name, Adwais.Domain.Enums.UserRole.Viewer));
+        }
+
+        return Unauthorized("User context is invalid or not registered.");
+    }
+
     [HttpGet]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<ActionResult<IEnumerable<UserResponseDto>>> GetUsers(CancellationToken ct)
     {
         var users = await _userService.GetUsersAsync(ct);
@@ -29,6 +56,7 @@ public class UserController(IUserService userService) : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<ActionResult<UserResponseDto>> GetUser(Guid id, CancellationToken ct)
     {
         var user = await _userService.GetUserByIdAsync(id, ct);
@@ -44,6 +72,7 @@ public class UserController(IUserService userService) : ControllerBase
     /// Used for pre-provisioning users before EntraID sign-in.
     /// </summary>
     [HttpPost]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<ActionResult<UserResponseDto>> CreateUser([FromBody] CreateUserRequestDto request, CancellationToken ct)
     {
         var user = await _userService.CreateUserAsync(request.Name, request.Role, ct);
@@ -51,6 +80,7 @@ public class UserController(IUserService userService) : ControllerBase
     }
 
     [HttpPatch("{id:guid}")]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<ActionResult<UserResponseDto>> UpdateUser(Guid id, [FromBody] UpdateUserRequestDto request, CancellationToken ct)
     {
         var user = await _userService.UpdateUserAsync(id, request.Name, request.Role, ct);
@@ -62,6 +92,7 @@ public class UserController(IUserService userService) : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> DeleteUser(Guid id, CancellationToken ct)
     {
         var success = await _userService.DeleteUserAsync(id, ct);

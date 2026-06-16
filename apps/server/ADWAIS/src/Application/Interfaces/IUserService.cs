@@ -28,6 +28,14 @@ public interface IUserService
     Task<User?> GetUserByIdAsync(Guid id, CancellationToken ct);
 
     /// <summary>
+    /// Retrieves a single user by their Entra ID Object Identifier.
+    /// </summary>
+    /// <param name="entraObjectId">The unique Entra ID object identifier of the user.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>The user record, or null if not found.</returns>
+    Task<User?> GetUserByEntraObjectIdAsync(Guid entraObjectId, CancellationToken ct);
+
+    /// <summary>
     /// Creates a new user record.
     /// </summary>
     /// <param name="name">The name of the user.</param>

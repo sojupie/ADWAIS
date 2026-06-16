@@ -36,6 +36,15 @@ public class UserService(IDbContextFactory<AnalyticsDbContext> contextFactory) :
     }
 
     /// <inheritdoc />
+    public async Task<User?> GetUserByEntraObjectIdAsync(Guid entraObjectId, CancellationToken ct)
+    {
+        await using var db = await _contextFactory.CreateDbContextAsync(ct);
+        return await db.Users
+            .AsNoTracking()
+            .SingleOrDefaultAsync(u => u.EntraObjectId == entraObjectId, ct);
+    }
+
+    /// <inheritdoc />
     public async Task<User> CreateUserAsync(string name, UserRole role, CancellationToken ct)
     {
         await using var db = await _contextFactory.CreateDbContextAsync(ct);

@@ -172,4 +172,35 @@ public class UserServiceTests
         // Assert
         Assert.False(result);
     }
+
+    [Fact]
+    public async Task GetUserByEntraObjectIdAsync_ShouldReturnCorrectUser_WhenExists()
+    {
+        // Arrange
+        var entraId = Guid.NewGuid();
+        var user = new User { Id = Guid.NewGuid(), EntraObjectId = entraId, Name = "Entra User", Role = UserRole.Employee };
+        await using (var db = new AnalyticsDbContext(_dbOptions))
+        {
+            db.Users.Add(user);
+            await db.SaveChangesAsync();
+        }
+
+        // Act
+        var result = await _userService.GetUserByEntraObjectIdAsync(entraId, CancellationToken.None);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(entraId, result.EntraObjectId);
+        Assert.Equal("Entra User", result.Name);
+    }
+
+    [Fact]
+    public async Task GetUserByEntraObjectIdAsync_ShouldReturnNull_WhenNotExists()
+    {
+        // Act
+        var result = await _userService.GetUserByEntraObjectIdAsync(Guid.NewGuid(), CancellationToken.None);
+
+        // Assert
+        Assert.Null(result);
+    }
 }

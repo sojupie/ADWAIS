@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Xunit;
@@ -175,5 +176,83 @@ public class UserControllerTests
         // Assert
         Assert.IsType<NotFoundResult>(result);
         _userServiceMock.Verify(s => s.DeleteUserAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetMe_ShouldReturnOkWithUser_WhenEntraUserExists()
+    {
+        // Arrange
+        var entraId = Guid.NewGuid();
+        var user = new User { Id = Guid.NewGuid(), EntraObjectId = entraId, Name = "Entra User", Role = UserRole.Employee };
+        
+        _userServiceMock.Setup(s => s.GetUserByEntraObjectIdAsync(entraId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(user);
+
+        var claims = new List<System.Security.Claims.Claim>
+        {
+            new("oid", entraId.ToString())
+        };
+        var identity = new System.Security.Claims.ClaimsIdentity(claims, "Test");
+        var principal = new System.Security.Claims.ClaimsPrincipal(identity);
+
+        _controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = principal }
+        };
+
+        // Act
+        var result = await _controller.GetMe(CancellationToken.None);
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var returnedUser = Assert.IsType<UserResponseDto>(okResult.Value);
+        Assert.Equal(user.Id, returnedUser.Id);
+        Assert.Equal("Entra User", returnedUser.Name);
+        Assert.Equal(UserRole.Employee, returnedUser.Role);
+    }
+
+    [Fact]
+    public async Task GetMe_ShouldReturnOkWithKioskDevice_WhenKioskRoleIsViewer()
+    {
+        // Arrange
+        var claims = new List<System.Security.Claims.Claim>
+        {
+            new(System.Security.Claims.ClaimTypes.Role, "Viewer"),
+            new(System.Security.Claims.ClaimTypes.Name, "Kiosk-Device-123")
+        };
+        var identity = new System.Security.Claims.ClaimsIdentity(claims, "Test");
+        var principal = new System.Security.Claims.ClaimsPrincipal(identity);
+
+        _controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = principal }
+        };
+
+        // Act
+        var result = await _controller.GetMe(CancellationToken.None);
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var returnedUser = Assert.IsType<UserResponseDto>(okResult.Value);
+        Assert.Equal(Guid.Empty, returnedUser.Id);
+        Assert.Equal("Kiosk-Device-123", returnedUser.Name);
+        Assert.Equal(UserRole.Viewer, returnedUser.Role);
+    }
+
+    [Fact]
+    public async Task GetMe_ShouldReturnUnauthorized_WhenClaimsAreInvalid()
+    {
+        // Arrange
+        var principal = new System.Security.Claims.ClaimsPrincipal(new System.Security.Claims.ClaimsIdentity());
+        _controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = principal }
+        };
+
+        // Act
+        var result = await _controller.GetMe(CancellationToken.None);
+
+        // Assert
+        Assert.IsType<UnauthorizedObjectResult>(result.Result);
     }
 }

@@ -8,6 +8,9 @@ using Adwais.Infrastructure.Persistence;
 
 namespace Adwais.Infrastructure.Services;
 
+/// <summary>
+/// Service implementation managing kiosk registration, activation, and token retrieval flows.
+/// </summary>
 public class KioskService(
     IDbContextFactory<AnalyticsDbContext> contextFactory,
     ITokenService tokenService)
@@ -16,7 +19,7 @@ public class KioskService(
     private readonly IDbContextFactory<AnalyticsDbContext> _contextFactory = contextFactory;
     private readonly ITokenService _tokenService = tokenService;
 
-    
+    /// <inheritdoc />
     public async Task<string> RegisterDeviceAsync(string deviceId, CancellationToken ct = default)
     {
         await using var db = await _contextFactory.CreateDbContextAsync(ct);
@@ -57,6 +60,7 @@ public class KioskService(
         return code;
     }
 
+    /// <inheritdoc />
     public async Task<bool> ActivateDeviceAsync(string activationCode, CancellationToken ct = default)
     {
         await using var db = await _contextFactory.CreateDbContextAsync(ct);
@@ -78,7 +82,7 @@ public class KioskService(
         return true;
     }
 
-
+    /// <inheritdoc />
     public async Task<string?> GetTokenAsync(string deviceId, CancellationToken ct = default)
     {
         await using var db = await _contextFactory.CreateDbContextAsync(ct);

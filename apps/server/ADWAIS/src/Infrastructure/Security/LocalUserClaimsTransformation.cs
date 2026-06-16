@@ -10,10 +10,14 @@ using Microsoft.Identity.Web;
 
 namespace Adwais.Infrastructure.Security;
 
+/// <summary>
+/// Intercepts incoming ClaimsPrincipals to auto-provision new users and map external Entra ID users to system database roles.
+/// </summary>
 public class LocalUserClaimsTransformation(IDbContextFactory<AnalyticsDbContext> dbContextFactory) : IClaimsTransformation
 {
     private readonly IDbContextFactory<AnalyticsDbContext> _dbContextFactory = dbContextFactory;
 
+    /// <inheritdoc />
     public async Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
     {
         if (principal.Identity == null || !principal.Identity.IsAuthenticated)

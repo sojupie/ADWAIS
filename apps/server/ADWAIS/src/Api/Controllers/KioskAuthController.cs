@@ -7,10 +7,20 @@ using Adwais.Application.Interfaces;
 
 namespace Adwais.Api.Controllers;
 
+/// <summary>
+/// Handles authentication lifecycle for kiosk display devices, including registration,
+/// activation (authorization by staff), and JWT token retrieval.
+/// </summary>
 [ApiController]
 [Route("api/kiosk")]
 public class KioskAuthController(IKioskService kioskService) : ControllerBase
 {
+    /// <summary>
+    /// Registers a new kiosk device and generates a temporary case-insensitive activation code.
+    /// </summary>
+    /// <param name="request">The registration request containing the device identifier.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>A DTO containing the generated activation code.</returns>
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterKioskRequestDto request, CancellationToken ct)
     {
@@ -18,6 +28,12 @@ public class KioskAuthController(IKioskService kioskService) : ControllerBase
         return Ok(new RegisterKioskResponseDto { ActivationCode = code });
     }
 
+    /// <summary>
+    /// Authorizes a registered kiosk device using its pending activation code.
+    /// Restricted to administrators and employees.
+    /// </summary>
+    /// <param name="request">The activation request containing the code to authorize.</param>
+    /// <returns>HTTP 200 OK on success, or HTTP 400 Bad Request if the code is invalid or expired.</returns>
     [HttpPost("activate")]
     [Authorize(Policy = "StaffAccess")]
     public async Task<IActionResult> Activate([FromBody] ActivateKioskRequestDto request)
@@ -30,6 +46,11 @@ public class KioskAuthController(IKioskService kioskService) : ControllerBase
         return Ok();
     }
 
+    /// <summary>
+    /// Retrieves a valid 30-day JWT local token for an authorized kiosk device.
+    /// </summary>
+    /// <param name="deviceId">The unique device identifier.</param>
+    /// <returns>The kiosk token response containing the JWT bearer token.</returns>
     [HttpGet("token")]
     public async Task<IActionResult> GetToken([FromQuery] string deviceId)
     {

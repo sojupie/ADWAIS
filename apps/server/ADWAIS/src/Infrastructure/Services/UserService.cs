@@ -10,10 +10,14 @@ using Adwais.Infrastructure.Persistence;
 
 namespace Adwais.Infrastructure.Services;
 
+/// <summary>
+/// Service managing system users database interactions.
+/// </summary>
 public class UserService(IDbContextFactory<AnalyticsDbContext> contextFactory) : IUserService
 {
     private readonly IDbContextFactory<AnalyticsDbContext> _contextFactory = contextFactory;
 
+    /// <inheritdoc />
     public async Task<IEnumerable<User>> GetUsersAsync(CancellationToken ct)
     {
         await using var db = await _contextFactory.CreateDbContextAsync(ct);
@@ -22,6 +26,7 @@ public class UserService(IDbContextFactory<AnalyticsDbContext> contextFactory) :
             .ToListAsync(ct);
     }
 
+    /// <inheritdoc />
     public async Task<User?> GetUserByIdAsync(Guid id, CancellationToken ct)
     {
         await using var db = await _contextFactory.CreateDbContextAsync(ct);
@@ -30,6 +35,7 @@ public class UserService(IDbContextFactory<AnalyticsDbContext> contextFactory) :
             .SingleOrDefaultAsync(u => u.Id == id, ct);
     }
 
+    /// <inheritdoc />
     public async Task<User> CreateUserAsync(string name, UserRole role, CancellationToken ct)
     {
         await using var db = await _contextFactory.CreateDbContextAsync(ct);
@@ -45,6 +51,7 @@ public class UserService(IDbContextFactory<AnalyticsDbContext> contextFactory) :
         return user;
     }
 
+    /// <inheritdoc />
     public async Task<User?> UpdateUserAsync(Guid id, string? name, UserRole? role, CancellationToken ct)
     {
         await using var db = await _contextFactory.CreateDbContextAsync(ct);
@@ -68,6 +75,7 @@ public class UserService(IDbContextFactory<AnalyticsDbContext> contextFactory) :
         return user;
     }
 
+    /// <inheritdoc />
     public async Task<bool> DeleteUserAsync(Guid id, CancellationToken ct)
     {
         await using var db = await _contextFactory.CreateDbContextAsync(ct);

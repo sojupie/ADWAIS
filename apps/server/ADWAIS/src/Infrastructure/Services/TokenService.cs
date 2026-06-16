@@ -8,10 +8,14 @@ using Adwais.Application.Interfaces;
 
 namespace Adwais.Infrastructure.Services;
 
+/// <summary>
+/// Service implementation for generating locally signed JWT tokens for kiosk display devices.
+/// </summary>
 public class TokenService(IConfiguration configuration) : ITokenService
 {
     private readonly IConfiguration _configuration = configuration;
 
+    /// <inheritdoc />
     public string GenerateKioskToken(string deviceId)
     {
         var secret = _configuration["Authentication:KioskJwtSecret"];

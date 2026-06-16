@@ -1022,7 +1022,9 @@
         "tags": [
           "KioskAuth"
         ],
+        "summary": "Registers a new kiosk device and generates a temporary case-insensitive activation code.",
         "requestBody": {
+          "description": "The registration request containing the device identifier.",
           "content": {
             "application/json": {
               "schema": {
@@ -1053,7 +1055,9 @@
         "tags": [
           "KioskAuth"
         ],
+        "summary": "Authorizes a registered kiosk device using its pending activation code.\r\nRestricted to administrators and employees.",
         "requestBody": {
+          "description": "The activation request containing the code to authorize.",
           "content": {
             "application/json": {
               "schema": {
@@ -1084,10 +1088,12 @@
         "tags": [
           "KioskAuth"
         ],
+        "summary": "Retrieves a valid 30-day JWT local token for an authorized kiosk device.",
         "parameters": [
           {
             "name": "deviceId",
             "in": "query",
+            "description": "The unique device identifier.",
             "schema": {
               "type": "string"
             }

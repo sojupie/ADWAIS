@@ -6,6 +6,9 @@ import { queryClient } from './queryClient';
 import { routeTree } from './routeTree.gen';
 import './index.css';
 
+import { MsalProvider } from '@azure/msal-react';
+import { msalInstance } from './utils/msalConfig';
+
 const router = createRouter({
   routeTree,
   context: {
@@ -19,10 +22,14 @@ declare module '@tanstack/react-router' {
   }
 }
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
-  </StrictMode>,
-);
+msalInstance.initialize().then(() => {
+  createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+      <MsalProvider instance={msalInstance}>
+        <QueryClientProvider client={queryClient}>
+          <RouterProvider router={router} />
+        </QueryClientProvider>
+      </MsalProvider>
+    </StrictMode>,
+  );
+});

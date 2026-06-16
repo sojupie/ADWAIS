@@ -6,6 +6,7 @@ using Adwais.Infrastructure.Jobs;
 using Adwais.Infrastructure.Jobs.Monitor;
 using Adwais.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Hangfire;
 
@@ -16,6 +17,7 @@ namespace Adwais.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/global-config")]
+[Authorize(Policy = "AdminOnly")]
 public class GlobalConfigController(
     IDbContextFactory<AnalyticsDbContext> dbContextFactory,
     ISystemEventService eventService) : ControllerBase

@@ -7,6 +7,7 @@ using Adwais.Application.Common.Interfaces;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Adwais.Infrastructure.Persistence.Converters;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Adwais.Infrastructure.Persistence;
 
@@ -16,6 +17,7 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
     public DbSet<GlobalConfig> GlobalConfigs => Set<GlobalConfig>();
     public DbSet<User> Users => Set<User>();
     public DbSet<Tenant> Tenants => Set<Tenant>();
+    public DbSet<KioskDevice> KioskDevices => Set<KioskDevice>();
     public static readonly Guid SystemTenantGuid = new Guid("00000000-0000-0000-0000-000000000001");
     
     public DbSet<Order> Orders => Set<Order>();
@@ -241,11 +243,59 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
         {
             entity.ToTable("users");
             entity.HasKey(u => u.Id);
-            entity.Property(u => u.Id).HasDefaultValueSql("uuid_generate_v4()");
-            entity.Property(u => u.Name).HasMaxLength(255);
+            entity.Property(u => u.Id)
+                .HasDefaultValueSql("uuid_generate_v4()");
+            
+            entity.Property(u => u.Name)
+                .HasMaxLength(255)
+                .IsRequired();
+
             entity.Property(u => u.Role)
                 .HasConversion<string>()
-                .HasMaxLength(50);
+                .HasMaxLength(50)
+                .IsRequired();
+
+            entity.Property(u => u.Email)
+                .HasMaxLength(255)
+                .IsRequired(false);
+
+            entity.Property(u => u.EntraObjectId)
+                .IsRequired(false);
+
+            entity.HasIndex(u => u.EntraObjectId)
+                .IsUnique();
+        });
+        
+        modelBuilder.Entity<KioskDevice>(entity =>
+        {
+            entity.ToTable("kiosk_devices");
+            entity.HasKey(kd => kd.Id);
+            entity.Property(kd => kd.Id)
+                .HasDefaultValueSql("uuid_generate_v4()");
+
+            entity.Property(kd => kd.DeviceId)
+                .HasMaxLength(255)
+                .IsRequired();
+
+            entity.Property(kd => kd.ActivationCode)
+                .HasMaxLength(6)
+                .IsRequired();
+
+            entity.Property(kd => kd.ActivationCodeExpires)
+                .IsRequired();
+
+            entity.Property(kd => kd.IsAuthorized)
+                .HasDefaultValue(false)
+                .IsRequired();
+
+            entity.Property(kd => kd.AuthorizedAt)
+                .IsRequired(false);
+
+            entity.Property(kd => kd.CreatedDate)
+                .IsRequired();
+            
+            entity.HasIndex(kd => kd.DeviceId).IsUnique();
+            entity.HasIndex(kd => kd.ActivationCode);
         });
             
         // ResponseTime

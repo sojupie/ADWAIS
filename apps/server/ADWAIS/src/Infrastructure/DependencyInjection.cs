@@ -32,6 +32,9 @@ public static class DependencyInjection
 
         services.AddScoped<ISystemEventService, SystemEventService>();
         services.AddScoped<ICacheService, MemoryCacheService>();
+        services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<IKioskService, KioskService>();
+        services.AddScoped<IUserService, UserService>();
 
         // Register Typed HTTP Clients with resilience policies
         services.AddTransient<UptimeRobotRateLimitHandler>();

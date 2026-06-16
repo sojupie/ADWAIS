@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -17,6 +17,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
 
@@ -24,6 +28,7 @@
     <ProjectReference Include="..\..\src\Application\Adwais.Application.csproj" />
     <ProjectReference Include="..\..\src\Infrastructure\Adwais.Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\Domain\Adwais.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Api\Adwais.Api.csproj" />
   </ItemGroup>
 
 </Project>

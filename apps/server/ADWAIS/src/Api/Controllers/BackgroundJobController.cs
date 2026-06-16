@@ -5,6 +5,7 @@ using Hangfire.Storage;
 using Adwais.Infrastructure.Jobs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Adwais.Infrastructure.Persistence;
 using Adwais.Infrastructure.Helpers;
 using Adwais.Infrastructure.Jobs.Monitor;
@@ -26,6 +27,7 @@ public class BackgroundJobController(
     /// Triggers the UptimeRobot monitor synchronization job immediately.
     /// </summary>
     [HttpPost("trigger/monitor-sync")]
+    [Authorize(Policy = "AdminOnly")]
     public ActionResult TriggerMonitorSync()
     {
         RecurringJob.TriggerJob("sync-uptimerobot-fleet");
@@ -36,6 +38,7 @@ public class BackgroundJobController(
     /// Triggers the UptimeRobot uptime metrics collection job immediately.
     /// </summary>
     [HttpPost("trigger/uptime-sync")]
+    [Authorize(Policy = "AdminOnly")]
     public ActionResult TriggerUptimeSync()
     {
         RecurringJob.TriggerJob("dispatch-uptimerobot-uptime");
@@ -46,6 +49,7 @@ public class BackgroundJobController(
     /// Triggers the UptimeRobot latency metrics collection job immediately.
     /// </summary>
     [HttpPost("trigger/latency-sync")]
+    [Authorize(Policy = "AdminOnly")]
     public ActionResult TriggerLatencySync()
     {
         RecurringJob.TriggerJob("dispatch-uptimerobot-latency");
@@ -56,6 +60,7 @@ public class BackgroundJobController(
     /// Triggers the UptimeRobot account statistics synchronization job immediately.
     /// </summary>
     [HttpPost("trigger/user-stats-sync")]
+    [Authorize(Policy = "AdminOnly")]
     public ActionResult TriggerUserStatsSync()
     {
         RecurringJob.TriggerJob("sync-uptimerobot-account-stats");
@@ -66,6 +71,7 @@ public class BackgroundJobController(
     /// Triggers the Litium order data ingestion job immediately.
     /// </summary>
     [HttpPost("trigger/litium-sync")]
+    [Authorize(Policy = "AdminOnly")]
     public ActionResult TriggerLitiumSync()
     {
         RecurringJob.TriggerJob("dispatch-litium-orders");
@@ -76,6 +82,7 @@ public class BackgroundJobController(
     /// Triggers a refresh of the financial materialized views.
     /// </summary>
     [HttpPost("trigger/refresh-historic-order-data")]
+    [Authorize(Policy = "KioskOrStaffAccess")]
     public ActionResult TriggerMaterialViewRefresh()
     {
         RecurringJob.TriggerJob("refresh-financial-materialized-views");
@@ -86,6 +93,7 @@ public class BackgroundJobController(
     /// Triggers a refresh of all monitoring materialized views (latency and availability).
     /// </summary>
     [HttpPost("trigger/refresh-monitoring-data")]
+    [Authorize(Policy = "KioskOrStaffAccess")]
     public ActionResult TriggerMonitoringMaterialViewRefresh()
     {
         RecurringJob.TriggerJob("refresh-monitoring-materialized-views");
@@ -98,6 +106,7 @@ public class BackgroundJobController(
     /// </summary>
     /// <param name="request">The request containing the new intervals to set.</param>
     [HttpPatch("update/intervals")]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<ActionResult<FetchIntervalsDto>> UpdateFetchIntervals([FromBody] UpdateFetchIntervalsRequestDto? request)
     {
         if (request == null) return BadRequest("Request body cannot be null.");
@@ -143,6 +152,7 @@ public class BackgroundJobController(
     /// Retrieves the current global fetch intervals for all background jobs.
     /// </summary>
     [HttpGet("metrics/fetch-intervals")]
+    [Authorize(Policy = "KioskOrStaffAccess")]
     public async Task<ActionResult<FetchIntervalsDto>> GetFetchIntervals()
     {
         await using var db = await dbContextFactory.CreateDbContextAsync();
@@ -182,6 +192,7 @@ public class BackgroundJobController(
     /// Retrieves a list of all registered recurring jobs and their current schedules.
     /// </summary>
     [HttpGet("recurring")]
+    [Authorize(Policy = "KioskOrStaffAccess")]
     public async Task<ActionResult> GetRecurringJobs()
     {
         var recurringJobs = await Task.Run(() => JobStorage.Current.GetConnection().GetRecurringJobs());
@@ -201,6 +212,7 @@ public class BackgroundJobController(
     /// </summary>
     /// <param name="jobId">The Hangfire Job ID.</param>
     [HttpGet("status/{jobId}")]
+    [Authorize(Policy = "KioskOrStaffAccess")]
     public async Task<ActionResult> GetJobStatus(string jobId)
     {
         var monitoringApi = JobStorage.Current.GetMonitoringApi();

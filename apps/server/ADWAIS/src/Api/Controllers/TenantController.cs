@@ -5,6 +5,7 @@ using FluentValidation;
 using Adwais.Infrastructure.Persistence;
 using Adwais.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
 namespace Adwais.Api.Controllers;
@@ -23,6 +24,7 @@ public class TenantController(
     /// </summary>
     /// <param name="id">Optional tenant ID to retrieve a single tenant.</param>
     [HttpGet]
+    [Authorize(Policy = "KioskOrStaffAccess")]
     public async Task<ActionResult<IEnumerable<TenantResponseDto>>> GetTenants([FromQuery] Guid? id)
     {
         await using var context = await contextFactory.CreateDbContextAsync();
@@ -80,6 +82,7 @@ public class TenantController(
     /// Creates a new tenant.
     /// </summary>
     [HttpPost]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> CreateTenant([FromBody] CreateTenantRequestDto request)
     {
         await using var context = await contextFactory.CreateDbContextAsync();
@@ -116,6 +119,7 @@ public class TenantController(
     /// Deletes a tenant and reassigns its monitors to the system tenant.
     /// </summary>
     [HttpDelete("{id:guid}")]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> DeleteTenant(Guid id)
     {
         if (id == AnalyticsDbContext.SystemTenantGuid)
@@ -141,6 +145,7 @@ public class TenantController(
     /// Partially updates a tenant's configuration.
     /// </summary>
     [HttpPatch("{id:guid}")]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> UpdateTenant(Guid id, [FromBody] UpdateTenantRequestDto request)
     {
         await using var context = await contextFactory.CreateDbContextAsync();

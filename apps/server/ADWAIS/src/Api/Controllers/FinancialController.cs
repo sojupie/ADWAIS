@@ -4,11 +4,13 @@ using Adwais.Domain.Enums;
 using Adwais.Application.Interfaces;
 using Adwais.Application.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Adwais.Api.Controllers;
 
 [ApiController]
 [Route("api/financial")]
+[Authorize(Policy = "KioskOrStaffAccess")]
 public class FinancialController(IFinancialService financialService) : ControllerBase
 {
     /// <summary>

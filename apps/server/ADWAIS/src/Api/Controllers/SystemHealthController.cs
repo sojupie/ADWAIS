@@ -2,6 +2,7 @@ using Adwais.Api.DTOs.System;
 using Hangfire;
 using Adwais.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -21,6 +22,7 @@ public class SystemHealthController(IDbContextFactory<AnalyticsDbContext> dbCont
     /// Retrieves an aggregated health report of the entire application pipeline.
     /// </summary>
     [HttpGet]
+    [Authorize(Policy = "KioskOrStaffAccess")]
     public async Task<ActionResult<SystemHealthDto>> GetHealth()
     {
         await using var db = await dbContextFactory.CreateDbContextAsync();
@@ -123,6 +125,7 @@ public class SystemHealthController(IDbContextFactory<AnalyticsDbContext> dbCont
     /// Clears all stored sync errors from tenants, monitors, and global configuration.
     /// </summary>
     [HttpPost("clear-errors")]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> ClearErrors()
     {
         await using var db = await dbContextFactory.CreateDbContextAsync();
@@ -143,6 +146,7 @@ public class SystemHealthController(IDbContextFactory<AnalyticsDbContext> dbCont
     /// Retrieves a list of recent background job executions and their status.
     /// </summary>
     [HttpGet("jobs")]
+    [Authorize(Policy = "KioskOrStaffAccess")]
     public async Task<ActionResult<IEnumerable<BackgroundJobStatusDto>>> GetRecentJobs()
     {
         var monitorApi = JobStorage.Current.GetMonitoringApi();

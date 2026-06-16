@@ -1017,6 +1017,89 @@
         }
       }
     },
+    "/api/kiosk/register": {
+      "post": {
+        "tags": [
+          "KioskAuth"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterKioskRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterKioskRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterKioskRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/kiosk/activate": {
+      "post": {
+        "tags": [
+          "KioskAuth"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActivateKioskRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActivateKioskRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActivateKioskRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/kiosk/token": {
+      "get": {
+        "tags": [
+          "KioskAuth"
+        ],
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/monitors/analytics": {
       "get": {
         "tags": [
@@ -2141,6 +2224,19 @@
         },
         "additionalProperties": false
       },
+      "ActivateKioskRequestDto": {
+        "required": [
+          "activationCode"
+        ],
+        "type": "object",
+        "properties": {
+          "activationCode": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "BackgroundJobStatusDto": {
         "type": "object",
         "properties": {
@@ -2737,6 +2833,19 @@
           "Cancelled"
         ],
         "type": "string"
+      },
+      "RegisterKioskRequestDto": {
+        "required": [
+          "deviceId"
+        ],
+        "type": "object",
+        "properties": {
+          "deviceId": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
       },
       "ResponseTime": {
         "type": "object",
@@ -3478,8 +3587,21 @@
         },
         "additionalProperties": false
       }
+    },
+    "securitySchemes": {
+      "Bearer": {
+        "type": "apiKey",
+        "description": "Enter 'Bearer' [space] and then your valid token in the text input below.\r\n\r\nExample: \"Bearer eyJhbGciOiJIUzI1Ni...\"",
+        "name": "Authorization",
+        "in": "header"
+      }
     }
   },
+  "security": [
+    {
+      "Bearer": [ ]
+    }
+  ],
   "tags": [
     {
       "name": "BackgroundJob"
@@ -3492,6 +3614,9 @@
     },
     {
       "name": "Ingestion"
+    },
+    {
+      "name": "KioskAuth"
     },
     {
       "name": "Monitor"

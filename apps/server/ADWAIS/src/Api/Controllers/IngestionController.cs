@@ -3,6 +3,7 @@ using Hangfire;
 using Adwais.Infrastructure.Persistence;
 using Adwais.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
 namespace Adwais.Api.Controllers;
@@ -12,6 +13,7 @@ namespace Adwais.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Policy = "AdminOnly")]
 public class IngestionController(
     IDbContextFactory<AnalyticsDbContext> contextFactory,
     IBackgroundJobClient backgroundJobClient)

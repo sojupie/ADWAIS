@@ -8,4 +8,5 @@
 - make the frontend ping litium env for health checks.
 - provide error/warning when a litium job fails either due to an error or if the service is disabled, or dont even offer it as an option
 - add date to system logs
+- correct dbcontext factory implementation in controllers and services
 - deploy

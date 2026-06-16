@@ -16,6 +16,7 @@ using Adwais.Infrastructure.Jobs.MaterializedViews;
 using Adwais.Infrastructure.Jobs.Monitor;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
+using Adwais.Api.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,6 +37,7 @@ builder.Services.AddControllers(options =>
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddHttpClient();
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddAppAuthentication(builder.Configuration);
 
 builder.Services.AddScoped<IFinancialService, FinancialService>();
 builder.Services.AddScoped<IMonitorOrchestrationService, MonitorOrchestrationService>();
@@ -49,6 +51,24 @@ builder.Services.AddSwaggerGen(options =>
 {
     var xmlFilename = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+
+    options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = Microsoft.OpenApi.SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = Microsoft.OpenApi.ParameterLocation.Header,
+        Description = "Enter 'Bearer' [space] and then your valid token in the text input below.\r\n\r\nExample: \"Bearer eyJhbGciOiJIUzI1Ni...\""
+    });
+
+    options.AddSecurityRequirement(doc => new Microsoft.OpenApi.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.OpenApiSecuritySchemeReference("Bearer", doc, null),
+            new List<string>()
+        }
+    });
 });
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
@@ -81,6 +101,9 @@ if (!isBuildTime)
 {
     app.UseHangfireDashboard();
 }
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 

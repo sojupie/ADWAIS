@@ -7,6 +7,7 @@ using Adwais.Infrastructure.Persistence;
 using Adwais.Application.Interfaces;
 using Adwais.Application.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
 namespace Adwais.Api.Controllers;
@@ -31,6 +32,7 @@ public class MonitorController(
     /// Provides latency time-series and filtered monitor lists hydrated with uptime for the specified timeframe (defaults to T30).
     /// </summary>
     [HttpGet("analytics")]
+    [Authorize(Policy = "KioskOrStaffAccess")]
     public async Task<ActionResult<MonitorAnalyticsResponseDto>> GetAnalytics([FromQuery] MonitorRequestDto request, CancellationToken ct = default)
     {
         var period = TimeframeResolver.Resolve(request.Timeframe, request.Comparison);
@@ -54,6 +56,7 @@ public class MonitorController(
     /// </summary>
     /// <param name="request">The request containing query filters and timeframe.</param>
     [HttpGet]
+    [Authorize(Policy = "KioskOrStaffAccess")]
     public async Task<ActionResult<IEnumerable<UptimeMonitorDto>>> GetMonitors([FromQuery] MonitorRequestDto request, CancellationToken ct = default)
     {
         var period = TimeframeResolver.Resolve(request.Timeframe, request.Comparison);
@@ -96,6 +99,7 @@ public class MonitorController(
     /// </summary>
     /// <param name="timeframe">The timeframe for calculating uptime percentage.</param>
     [HttpGet("unassigned")]
+    [Authorize(Policy = "KioskOrStaffAccess")]
     public async Task<ActionResult<IEnumerable<UptimeMonitorDto>>> GetUnassignedMonitors([FromQuery] Timeframe timeframe = Timeframe.T30, [FromQuery] ComparisonType comparison = ComparisonType.Preceding, CancellationToken ct = default)
     {
         var period = TimeframeResolver.Resolve(timeframe, comparison);
@@ -107,6 +111,7 @@ public class MonitorController(
     /// Creates a new uptime monitor in UptimeRobot and registers it in the system.
     /// </summary>
     [HttpPost]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<ActionResult<UptimeMonitorDto>> CreateMonitor(
         [FromQuery] Guid tenantId,
         [FromBody] CreateMonitorRequestDto request,
@@ -121,6 +126,7 @@ public class MonitorController(
     /// Reassigns a monitor to a different tenant.
     /// </summary>
     [HttpPatch("{id:int}/assign/{tenantId:guid}")]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> AssignMonitor(int id, Guid tenantId, CancellationToken ct = default)
     {
         await monitorService.AssignMonitorAsync(id, tenantId, ct);
@@ -131,6 +137,7 @@ public class MonitorController(
     /// Moves a monitor to the unassigned (system) tenant.
     /// </summary>
     [HttpPatch("{id:int}/unassign")]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> UnassignMonitor(int id, CancellationToken ct = default)
     {
         await monitorService.AssignMonitorAsync(id, AnalyticsDbContext.SystemTenantGuid, ct);
@@ -141,6 +148,7 @@ public class MonitorController(
     /// Pauses monitoring for a specific monitor in UptimeRobot.
     /// </summary>
     [HttpPost("{id:int}/pause")]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> PauseMonitor(int id, CancellationToken ct = default)
     {
         if (!await IsUptimeRobotConfiguredAsync(ct)) return BadRequest("UptimeRobot API key is not configured.");
@@ -152,6 +160,7 @@ public class MonitorController(
     /// Resumes monitoring for a specific monitor in UptimeRobot.
     /// </summary>
     [HttpPost("{id:int}/start")]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> StartMonitor(int id, CancellationToken ct = default)
     {
         if (!await IsUptimeRobotConfiguredAsync(ct)) return BadRequest("UptimeRobot API key is not configured.");
@@ -163,6 +172,7 @@ public class MonitorController(
     /// Deletes a monitor from both the system and UptimeRobot.
     /// </summary>
     [HttpDelete("{id:int}")]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> DeleteMonitor(int id, [FromQuery] Guid? tenantId, CancellationToken ct = default)
     {
         if (!await IsUptimeRobotConfiguredAsync(ct)) return BadRequest("UptimeRobot API key is not configured.");
@@ -183,6 +193,7 @@ public class MonitorController(
     /// Retrieves aggregated latency metrics for a specific monitor.
     /// </summary>
     [HttpGet("{id:int}/latency")]
+    [Authorize(Policy = "KioskOrStaffAccess")]
     public async Task<ActionResult<IEnumerable<LatencyMetricsDto>>> GetLatencyMetrics(
         int id,
         [FromQuery] DateTimeOffset from,
@@ -206,6 +217,7 @@ public class MonitorController(
     /// Updates monitor properties, such as SLA.
     /// </summary>
     [HttpPatch("{id:int}")]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<ActionResult<UptimeMonitorDto>> UpdateMonitor(int id, [FromBody] UpdateMonitorRequestDto request, CancellationToken ct = default)
     {
         if (!await IsUptimeRobotConfiguredAsync(ct)) return BadRequest("UptimeRobot API key is not configured.");

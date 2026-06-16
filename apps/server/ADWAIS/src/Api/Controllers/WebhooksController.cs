@@ -1,6 +1,7 @@
 using Adwais.Application.DTOs.Financial.Upstream;
 using Adwais.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -8,6 +9,7 @@ namespace Adwais.Api.Controllers;
 
 [ApiController]
 [Route("api/webhooks")]
+[AllowAnonymous]
 public class WebhooksController(
     ILitiumIngestionService ingestionService,
     IConfiguration configuration,

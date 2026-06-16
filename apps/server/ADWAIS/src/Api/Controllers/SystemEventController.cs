@@ -1,6 +1,7 @@
 using Adwais.Domain.Entities;
 using Adwais.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
 namespace Adwais.Api.Controllers;
@@ -20,6 +21,7 @@ public class SystemEventController(IDbContextFactory<AnalyticsDbContext> dbConte
     /// <param name="tenantId">Filter events related to a specific tenant.</param>
     /// <returns>A list of system events.</returns>
     [HttpGet]
+    [Authorize(Policy = "KioskOrStaffAccess")]
     public async Task<ActionResult<IEnumerable<SystemEvent>>> GetEvents(
         [FromQuery] int take = 50, 
         [FromQuery] SystemEventLevel? minLevel = null,
@@ -53,6 +55,7 @@ public class SystemEventController(IDbContextFactory<AnalyticsDbContext> dbConte
     /// <param name="olderThanDays">Delete events older than this many days (default 30).</param>
     /// <returns>The number of deleted events.</returns>
     [HttpDelete("clear")]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> ClearEvents([FromQuery] int olderThanDays = 30)
     {
         await using var db = await dbContextFactory.CreateDbContextAsync();

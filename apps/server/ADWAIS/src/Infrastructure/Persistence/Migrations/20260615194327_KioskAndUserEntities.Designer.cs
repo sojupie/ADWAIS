@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Adwais.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Adwais.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AnalyticsDbContext))]
-    partial class AnalyticsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260615194327_KioskAndUserEntities")]
+    partial class KioskAndUserEntities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -117,13 +120,11 @@ namespace Adwais.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
-                        .HasColumnName("id")
-                        .HasDefaultValueSql("uuid_generate_v4()");
+                        .HasColumnName("id");
 
                     b.Property<string>("ActivationCode")
                         .IsRequired()
-                        .HasMaxLength(6)
-                        .HasColumnType("character varying(6)")
+                        .HasColumnType("text")
                         .HasColumnName("activation_code");
 
                     b.Property<DateTimeOffset>("ActivationCodeExpires")
@@ -140,25 +141,15 @@ namespace Adwais.Infrastructure.Persistence.Migrations
 
                     b.Property<string>("DeviceId")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasColumnType("text")
                         .HasColumnName("device_id");
 
                     b.Property<bool>("IsAuthorized")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
-                        .HasDefaultValue(false)
                         .HasColumnName("is_authorized");
 
                     b.HasKey("Id")
                         .HasName("pk_kiosk_devices");
-
-                    b.HasIndex("ActivationCode")
-                        .HasDatabaseName("ix_kiosk_devices_activation_code");
-
-                    b.HasIndex("DeviceId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_kiosk_devices_device_id");
 
                     b.ToTable("kiosk_devices", (string)null);
                 });
@@ -848,8 +839,7 @@ namespace Adwais.Infrastructure.Persistence.Migrations
                         .HasDefaultValueSql("uuid_generate_v4()");
 
                     b.Property<string>("Email")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasColumnType("text")
                         .HasColumnName("email");
 
                     b.Property<Guid?>("EntraObjectId")
@@ -870,10 +860,6 @@ namespace Adwais.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_users");
-
-                    b.HasIndex("EntraObjectId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_users_entra_object_id");
 
                     b.ToTable("users", (string)null);
                 });

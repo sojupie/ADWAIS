@@ -1,42 +1,42 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Adwais.Api.DTOs.Users;
-using Adwais.Domain.Entities;
-using Adwais.Infrastructure.Persistence;
+using Adwais.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Adwais.Api.Controllers;
 
 /// <summary>
 /// Manages system users and their database-assigned roles.
-/// Preparing for EntraID integration where auth is external but authorization is local.
 /// </summary>
 [ApiController]
 [Route("api/users")]
-public class UserController(IDbContextFactory<AnalyticsDbContext> dbContextFactory) : ControllerBase
+[Authorize(Policy = "AdminOnly")]
+public class UserController(IUserService userService) : ControllerBase
 {
+    private readonly IUserService _userService = userService;
+
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<UserResponseDto>>> GetUsers()
+    public async Task<ActionResult<IEnumerable<UserResponseDto>>> GetUsers(CancellationToken ct)
     {
-        await using var db = await dbContextFactory.CreateDbContextAsync();
-        var users = await db.Users
-            .AsNoTracking()
-            .Select(u => new UserResponseDto(u.Id, u.Name, u.Role))
-            .ToListAsync();
-        return Ok(users);
+        var users = await _userService.GetUsersAsync(ct);
+        var response = users.Select(u => new UserResponseDto(u.Id, u.Name, u.Role));
+        return Ok(response);
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<UserResponseDto>> GetUser(Guid id)
+    public async Task<ActionResult<UserResponseDto>> GetUser(Guid id, CancellationToken ct)
     {
-        await using var db = await dbContextFactory.CreateDbContextAsync();
-        var user = await db.Users
-            .AsNoTracking()
-            .Where(u => u.Id == id)
-            .Select(u => new UserResponseDto(u.Id, u.Name, u.Role))
-            .SingleOrDefaultAsync();
-
-        if (user == null) return NotFound();
-        return Ok(user);
+        var user = await _userService.GetUserByIdAsync(id, ct);
+        if (user == null)
+        {
+            return NotFound();
+        }
+        return Ok(new UserResponseDto(user.Id, user.Name, user.Role));
     }
 
     /// <summary>
@@ -44,48 +44,31 @@ public class UserController(IDbContextFactory<AnalyticsDbContext> dbContextFacto
     /// Used for pre-provisioning users before EntraID sign-in.
     /// </summary>
     [HttpPost]
-    public async Task<ActionResult<UserResponseDto>> CreateUser([FromBody] CreateUserRequestDto request)
+    public async Task<ActionResult<UserResponseDto>> CreateUser([FromBody] CreateUserRequestDto request, CancellationToken ct)
     {
-        await using var db = await dbContextFactory.CreateDbContextAsync();
-        var user = new User
-        {
-            Id = Guid.NewGuid(),
-            Name = request.Name,
-            Role = request.Role
-        };
-
-        db.Users.Add(user);
-        await db.SaveChangesAsync();
-
+        var user = await _userService.CreateUserAsync(request.Name, request.Role, ct);
         return CreatedAtAction(nameof(GetUser), new { id = user.Id }, new UserResponseDto(user.Id, user.Name, user.Role));
     }
 
     [HttpPatch("{id:guid}")]
-    public async Task<ActionResult<UserResponseDto>> UpdateUser(Guid id, [FromBody] UpdateUserRequestDto request)
+    public async Task<ActionResult<UserResponseDto>> UpdateUser(Guid id, [FromBody] UpdateUserRequestDto request, CancellationToken ct)
     {
-        await using var db = await dbContextFactory.CreateDbContextAsync();
-        var user = await db.Users.SingleOrDefaultAsync(u => u.Id == id);
-        if (user == null) return NotFound();
-
-        if (request.Name != null) user.Name = request.Name;
-        if (request.Role.HasValue) user.Role = request.Role.Value;
-
-        await db.SaveChangesAsync();
+        var user = await _userService.UpdateUserAsync(id, request.Name, request.Role, ct);
+        if (user == null)
+        {
+            return NotFound();
+        }
         return Ok(new UserResponseDto(user.Id, user.Name, user.Role));
     }
 
     [HttpDelete("{id:guid}")]
-    public async Task<IActionResult> DeleteUser(Guid id)
+    public async Task<IActionResult> DeleteUser(Guid id, CancellationToken ct)
     {
-        await using var db = await dbContextFactory.CreateDbContextAsync();
-        var user = await db.Users.SingleOrDefaultAsync(u => u.Id == id);
-        if (user == null) return NotFound();
-
-        db.Users.Remove(user);
-        await db.SaveChangesAsync();
+        var success = await _userService.DeleteUserAsync(id, ct);
+        if (!success)
+        {
+            return NotFound();
+        }
         return NoContent();
     }
 }
-
-
-

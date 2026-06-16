@@ -25,6 +25,7 @@ import type {
 
 import type {
   AccumulatedRevenuePointResponseDto,
+  ActivateKioskRequestDto,
   BackgroundJobStatusDto,
   CreateMonitorRequestDto,
   CreateTenantRequestDto,
@@ -44,6 +45,7 @@ import type {
   GetApiFinancialTransactionDensityParams,
   GetApiFinancialVelocityParams,
   GetApiFinancialVolumeAnomalyParams,
+  GetApiKioskTokenParams,
   GetApiMonitorsAnalyticsParams,
   GetApiMonitorsIdLatencyParams,
   GetApiMonitorsParams,
@@ -61,6 +63,7 @@ import type {
   OrderBinResponseDto,
   PostApiIngestionBackfillParams,
   PostApiMonitorsParams,
+  RegisterKioskRequestDto,
   RevenueEfficiencyResponseDto,
   SystemEvent,
   SystemHealthDto,
@@ -2872,6 +2875,292 @@ export const usePostApiIngestionBackfill = <TError = void,
       > => {
       return useMutation(getPostApiIngestionBackfillMutationOptions(options), queryClient);
     }
+
+export type postApiKioskRegisterResponse200 = {
+  data: void
+  status: 200
+}
+
+export type postApiKioskRegisterResponseSuccess = (postApiKioskRegisterResponse200) & {
+  headers: Headers;
+};
+;
+
+export type postApiKioskRegisterResponse = (postApiKioskRegisterResponseSuccess)
+
+export const getPostApiKioskRegisterUrl = () => {
+
+
+
+
+  return `/api/kiosk/register`
+}
+
+/**
+ * @summary Registers a new kiosk device and generates a temporary case-insensitive activation code.
+ */
+export const postApiKioskRegister = async (registerKioskRequestDto?: RegisterKioskRequestDto, options?: RequestInit): Promise<postApiKioskRegisterResponse> => {
+
+  return customClient<postApiKioskRegisterResponse>(getPostApiKioskRegisterUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(registerKioskRequestDto)
+  }
+);}
+
+
+
+
+export const getPostApiKioskRegisterMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiKioskRegister>>, TError,{data?: RegisterKioskRequestDto}, TContext>, request?: SecondParameter<typeof customClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiKioskRegister>>, TError,{data?: RegisterKioskRequestDto}, TContext> => {
+
+const mutationKey = ['postApiKioskRegister'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiKioskRegister>>, {data?: RegisterKioskRequestDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiKioskRegister(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiKioskRegisterMutationResult = NonNullable<Awaited<ReturnType<typeof postApiKioskRegister>>>
+    export type PostApiKioskRegisterMutationBody = RegisterKioskRequestDto | undefined
+    export type PostApiKioskRegisterMutationError = unknown
+
+    /**
+ * @summary Registers a new kiosk device and generates a temporary case-insensitive activation code.
+ */
+export const usePostApiKioskRegister = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiKioskRegister>>, TError,{data?: RegisterKioskRequestDto}, TContext>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiKioskRegister>>,
+        TError,
+        {data?: RegisterKioskRequestDto},
+        TContext
+      > => {
+      return useMutation(getPostApiKioskRegisterMutationOptions(options), queryClient);
+    }
+
+export type postApiKioskActivateResponse200 = {
+  data: void
+  status: 200
+}
+
+export type postApiKioskActivateResponseSuccess = (postApiKioskActivateResponse200) & {
+  headers: Headers;
+};
+;
+
+export type postApiKioskActivateResponse = (postApiKioskActivateResponseSuccess)
+
+export const getPostApiKioskActivateUrl = () => {
+
+
+
+
+  return `/api/kiosk/activate`
+}
+
+/**
+ * @summary Authorizes a registered kiosk device using its pending activation code.
+Restricted to administrators and employees.
+ */
+export const postApiKioskActivate = async (activateKioskRequestDto?: ActivateKioskRequestDto, options?: RequestInit): Promise<postApiKioskActivateResponse> => {
+
+  return customClient<postApiKioskActivateResponse>(getPostApiKioskActivateUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(activateKioskRequestDto)
+  }
+);}
+
+
+
+
+export const getPostApiKioskActivateMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiKioskActivate>>, TError,{data?: ActivateKioskRequestDto}, TContext>, request?: SecondParameter<typeof customClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiKioskActivate>>, TError,{data?: ActivateKioskRequestDto}, TContext> => {
+
+const mutationKey = ['postApiKioskActivate'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiKioskActivate>>, {data?: ActivateKioskRequestDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiKioskActivate(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiKioskActivateMutationResult = NonNullable<Awaited<ReturnType<typeof postApiKioskActivate>>>
+    export type PostApiKioskActivateMutationBody = ActivateKioskRequestDto | undefined
+    export type PostApiKioskActivateMutationError = unknown
+
+    /**
+ * @summary Authorizes a registered kiosk device using its pending activation code.
+Restricted to administrators and employees.
+ */
+export const usePostApiKioskActivate = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiKioskActivate>>, TError,{data?: ActivateKioskRequestDto}, TContext>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiKioskActivate>>,
+        TError,
+        {data?: ActivateKioskRequestDto},
+        TContext
+      > => {
+      return useMutation(getPostApiKioskActivateMutationOptions(options), queryClient);
+    }
+
+export type getApiKioskTokenResponse200 = {
+  data: void
+  status: 200
+}
+
+export type getApiKioskTokenResponseSuccess = (getApiKioskTokenResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getApiKioskTokenResponse = (getApiKioskTokenResponseSuccess)
+
+export const getGetApiKioskTokenUrl = (params?: GetApiKioskTokenParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/kiosk/token?${stringifiedParams}` : `/api/kiosk/token`
+}
+
+/**
+ * @summary Retrieves a valid 30-day JWT local token for an authorized kiosk device.
+ */
+export const getApiKioskToken = async (params?: GetApiKioskTokenParams, options?: RequestInit): Promise<getApiKioskTokenResponse> => {
+
+  return customClient<getApiKioskTokenResponse>(getGetApiKioskTokenUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiKioskTokenQueryKey = (params?: GetApiKioskTokenParams,) => {
+    return [
+    `/api/kiosk/token`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetApiKioskTokenQueryOptions = <TData = Awaited<ReturnType<typeof getApiKioskToken>>, TError = unknown>(params?: GetApiKioskTokenParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiKioskToken>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiKioskTokenQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiKioskToken>>> = ({ signal }) => getApiKioskToken(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiKioskToken>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiKioskTokenQueryResult = NonNullable<Awaited<ReturnType<typeof getApiKioskToken>>>
+export type GetApiKioskTokenQueryError = unknown
+
+
+export function useGetApiKioskToken<TData = Awaited<ReturnType<typeof getApiKioskToken>>, TError = unknown>(
+ params: undefined |  GetApiKioskTokenParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiKioskToken>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiKioskToken>>,
+          TError,
+          Awaited<ReturnType<typeof getApiKioskToken>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiKioskToken<TData = Awaited<ReturnType<typeof getApiKioskToken>>, TError = unknown>(
+ params?: GetApiKioskTokenParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiKioskToken>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiKioskToken>>,
+          TError,
+          Awaited<ReturnType<typeof getApiKioskToken>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiKioskToken<TData = Awaited<ReturnType<typeof getApiKioskToken>>, TError = unknown>(
+ params?: GetApiKioskTokenParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiKioskToken>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Retrieves a valid 30-day JWT local token for an authorized kiosk device.
+ */
+
+export function useGetApiKioskToken<TData = Awaited<ReturnType<typeof getApiKioskToken>>, TError = unknown>(
+ params?: GetApiKioskTokenParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiKioskToken>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiKioskTokenQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
 
 export type getApiMonitorsAnalyticsResponse200TextPlain = {
   data: MonitorAnalyticsResponseDto

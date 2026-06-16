@@ -2,6 +2,7 @@ import { Clock, CheckCircle2, Activity } from 'lucide-react';
 import { SectionHeader } from '../../common/layout/SectionHeader';
 import { SettingsPanel } from '../../common/layout/SettingsPanel';
 import { EmptyState } from '../../common/ui/EmptyState';
+import { Skeleton } from '../../common/ui/Skeleton';
 import type { RecurringJobDto } from '@types';
 
 interface RecurringJobsTableProps {
@@ -31,31 +32,44 @@ export function RecurringJobsTable({ recurring }: RecurringJobsTableProps) {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {(recurring || []).map((job) => (
-                <tr key={job.id} className="hover:bg-slate-50/50 transition-colors">
-                  <td className="px-6 py-4 font-bold text-slate-800">{job.id}</td>
-                  <td className="px-6 py-4">
-                    <span className="px-2 py-0.5 bg-brand-accent/10 text-brand-text rounded text-xs font-mono font-bold tracking-widest">
-                      {job.cron}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-slate-500">{(job as RecurringJobDto & { queue?: string }).queue || 'default'}</td>
-                  <td className="px-6 py-4 text-slate-700 font-bold">
-                    {job.lastExecution ? new Date(job.lastExecution).toLocaleString() : 'Never'}
-                  </td>
-                  <td className="px-6 py-4 text-slate-500">
-                    {job.nextExecution ? new Date(job.nextExecution).toLocaleString() : 'Never'}
-                  </td>
-                  <td className="px-6 py-4">
-                    {job.lastJobState === 'Succeeded' ? (
-                      <span className="text-green-500 flex items-center gap-1.5 font-bold"><CheckCircle2 size={14} /> Succeeded</span>
-                    ) : (
-                      <span className="text-orange-500 flex items-center gap-1.5 font-bold"><Activity size={14} /> {job.lastJobState || 'Pending'}</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-              {(!recurring || recurring.length === 0) && (
+              {recurring === undefined ? (
+                Array.from({ length: 4 }).map((_, idx) => (
+                  <tr key={idx}>
+                    <td className="px-6 py-4"><Skeleton className="h-4 w-28" /></td>
+                    <td className="px-6 py-4"><Skeleton className="h-4 w-16" /></td>
+                    <td className="px-6 py-4"><Skeleton className="h-4 w-16" /></td>
+                    <td className="px-6 py-4"><Skeleton className="h-4 w-32" /></td>
+                    <td className="px-6 py-4"><Skeleton className="h-4 w-32" /></td>
+                    <td className="px-6 py-4"><Skeleton className="h-4 w-20" /></td>
+                  </tr>
+                ))
+              ) : (
+                recurring.map((job) => (
+                  <tr key={job.id} className="hover:bg-slate-50/50 transition-colors">
+                    <td className="px-6 py-4 font-bold text-slate-800">{job.id}</td>
+                    <td className="px-6 py-4">
+                      <span className="px-2 py-0.5 bg-brand-accent/10 text-brand-text rounded text-xs font-mono font-bold tracking-widest">
+                        {job.cron}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-slate-500">{(job as RecurringJobDto & { queue?: string }).queue || 'default'}</td>
+                    <td className="px-6 py-4 text-slate-700 font-bold">
+                      {job.lastExecution ? new Date(job.lastExecution).toLocaleString() : 'Never'}
+                    </td>
+                    <td className="px-6 py-4 text-slate-500">
+                      {job.nextExecution ? new Date(job.nextExecution).toLocaleString() : 'Never'}
+                    </td>
+                    <td className="px-6 py-4">
+                      {job.lastJobState === 'Succeeded' ? (
+                        <span className="text-green-500 flex items-center gap-1.5 font-bold"><CheckCircle2 size={14} /> Succeeded</span>
+                      ) : (
+                        <span className="text-orange-500 flex items-center gap-1.5 font-bold"><Activity size={14} /> {job.lastJobState || 'Pending'}</span>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
+              {recurring !== undefined && recurring.length === 0 && (
                 <EmptyState message="No recurring jobs configured." isTableRow colSpan={6} />
               )}
             </tbody>

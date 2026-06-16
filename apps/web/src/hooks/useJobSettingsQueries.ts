@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiFetch } from '../apiClient';
 import type { GlobalConfigDto, RecurringJobDto } from '@types';
+import { toast } from 'sonner';
 
 export function useGlobalConfigQuery() {
   return useQuery<GlobalConfigDto & { uptimeRobotApiKey?: string; latencyDegradedFloor?: number; systemEventRetentionDays?: number; uptimeRobotFetchEnabled?: boolean }>({
@@ -20,7 +21,14 @@ export function useRecurringJobsQuery() {
 export function useTriggerJobMutation() {
   return useMutation({
     mutationFn: (endpoint: string) => apiFetch(endpoint, { method: 'POST' }),
-    onSuccess: () => alert('Job triggered successfully.')
+    onSuccess: () => {
+      toast.success('Job triggered successfully.');
+    },
+    onError: (err: Error) => {
+      toast.error('Failed to trigger job', {
+        description: err.message || String(err)
+      });
+    }
   });
 }
 
@@ -40,8 +48,13 @@ export function useBackfillMutation(onSuccessCallback?: () => void) {
       });
     },
     onSuccess: () => {
-      alert('Backfill initiated.');
+      toast.success('Backfill initiated.');
       if (onSuccessCallback) onSuccessCallback();
+    },
+    onError: (err: Error) => {
+      toast.error('Backfill failed', {
+        description: err.message || String(err)
+      });
     }
   });
 }
@@ -55,10 +68,13 @@ export function useUpdateConfigMutation() {
         body: JSON.stringify(payload)
       }),
     onSuccess: () => {
+      toast.success('Configuration updated.');
       queryClient.invalidateQueries({ queryKey: ['global-config'] });
+    },
+    onError: (err: Error) => {
+      toast.error('Failed to update configuration', {
+        description: err.message || String(err)
+      });
     }
   });
 }
-
-// Second test comment for verifying permission prompt
-

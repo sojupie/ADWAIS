@@ -17,7 +17,7 @@ namespace Adwais.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/global-config")]
-[Authorize(Policy = "AdminOnly")]
+[Authorize]
 public class GlobalConfigController(
     IDbContextFactory<AnalyticsDbContext> dbContextFactory,
     ISystemEventService eventService) : ControllerBase
@@ -27,6 +27,7 @@ public class GlobalConfigController(
     /// Sensitive values like API keys are masked.
     /// </summary>
     [HttpGet]
+    [Authorize(Policy = "KioskOrStaffAccess")]
     public async Task<ActionResult<GlobalConfigResponseDto>> GetConfig()
     {
         await using var db = await dbContextFactory.CreateDbContextAsync();
@@ -58,6 +59,7 @@ public class GlobalConfigController(
     /// </summary>
     /// <param name="request">The request containing the settings to update.</param>
     [HttpPatch]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<ActionResult<GlobalConfigResponseDto>> UpdateConfig([FromBody] UpdateGlobalConfigRequestDto request)
     {
         await using var db = await dbContextFactory.CreateDbContextAsync();

@@ -1,6 +1,6 @@
 - authentication
 - entraid auth and device auth for kiosk mode
-- order anomaly monitor does not take time of day into account, same with revenue and momentum matrix i believe. maybe we should have a default averaged lookback window like order density matrix.
+- order anomaly monitor does not take time of day into account, same with revenue and momentum matrix i believe. maybe we should have a default averaged lookback window like order density matrix. increase from 0 is not 100% anomaly.
 - when using historic backfill, provide visual feedback of status/success/failure/errors
 - more info for "recent background jobs" like tenant and monitor name
 - add a toggle for switching between vat and no vat, multiple materialized views or accept latency for the sake of simplicity?

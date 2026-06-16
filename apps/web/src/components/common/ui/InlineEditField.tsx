@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Edit3, Check, X, Loader2 } from 'lucide-react';
+import { Edit3, Check, X, Loader2, Lock } from 'lucide-react';
 
 type InlineEditFieldProps<T> = {
   label: string;
@@ -12,6 +12,7 @@ type InlineEditFieldProps<T> = {
   displayValue?: React.ReactNode;
   placeholder?: string;
   allowClear?: boolean;
+  disabled?: boolean;
 };
 
 export function InlineEditField<T>({
@@ -25,6 +26,7 @@ export function InlineEditField<T>({
   displayValue,
   placeholder,
   allowClear = false,
+  disabled = false,
 }: InlineEditFieldProps<T>) {
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState(value);
@@ -91,8 +93,9 @@ export function InlineEditField<T>({
         <input
           type="checkbox"
           checked={(isEditing ? draft : value) as unknown as boolean}
-          disabled={isSaving}
+          disabled={disabled || isSaving}
           onChange={(e) => {
+            if (disabled) return;
             if (!isEditing) {
               // Direct save on toggle if not in edit mode
               setIsSaving(true);
@@ -103,9 +106,9 @@ export function InlineEditField<T>({
               setDraft(e.target.checked as unknown as T);
             }
           }}
-          className="w-4 h-4 text-brand-link cursor-pointer rounded border-slate-300 disabled:opacity-50"
+          className={`w-4 h-4 text-brand-link rounded border-slate-300 disabled:opacity-50 ${disabled ? 'cursor-not-allowed text-slate-400' : 'cursor-pointer'}`}
         />
-        <label className="text-sm font-semibold text-slate-700 cursor-pointer select-none">
+        <label className={`text-sm font-semibold select-none ${disabled ? 'text-slate-400 cursor-not-allowed' : 'text-slate-700 cursor-pointer'}`}>
           {label}
         </label>
         {isSaving && <Loader2 size={12} className="animate-spin text-slate-400" />}
@@ -212,16 +215,23 @@ export function InlineEditField<T>({
               )
             )}
           </span>
-          <button
-            onClick={() => {
-              setDraft((type === 'password' ? '' : value) as unknown as T);
-              setIsEditing(true);
-            }}
-            className={`p-1 text-slate-400 hover:text-brand-link hover:bg-brand-bg-secondary rounded cursor-pointer transition-all ${isHovered ? 'opacity-100' : 'opacity-0'}`}
-            title="Edit"
-          >
-            <Edit3 size={14} />
-          </button>
+          {disabled ? (
+            <span className="p-1 text-slate-400 cursor-not-allowed opacity-60 flex items-center gap-1" title="Requires Admin privileges">
+              <Lock size={12} />
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Admin</span>
+            </span>
+          ) : (
+            <button
+              onClick={() => {
+                setDraft((type === 'password' ? '' : value) as unknown as T);
+                setIsEditing(true);
+              }}
+              className={`p-1 text-slate-400 hover:text-brand-link hover:bg-brand-bg-secondary rounded cursor-pointer transition-all ${isHovered ? 'opacity-100' : 'opacity-0'}`}
+              title="Edit"
+            >
+              <Edit3 size={14} />
+            </button>
+          )}
         </div>
       )}
     </div>

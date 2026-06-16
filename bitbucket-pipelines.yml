@@ -20,6 +20,6 @@ pipelines:
                 COMMANDS:
                   - 'mkdir -p /opt/adwais'
                   - 'cd /opt/adwais'
-                  #- 'echo "DOCKER_HUB_USER=${DOCKER_HUB_USER}\nDB_PASSWORD=${DB_PASSWORD}\nAZURE_TENANT_ID=${AZURE_TENANT_ID}\nAZURE_CLIENT_ID=${AZURE_CLIENT_ID}" > .env'
+                  - 'echo "DOCKER_HUB_USER=${DOCKER_HUB_USER}\nDB_PASSWORD=${DB_PASSWORD}\nAZURE_TENANT_ID=${AZURE_TENANT_ID}\nAZURE_CLIENT_ID=${AZURE_CLIENT_ID}\nMOTASTIC_API_KEY=${MOTASTIC_API_KEY}\nKIOSK_JWT_SECRET=${KIOSK_JWT_SECRET}\nMASTER_ENCRYPTION_KEY=${MASTER_ENCRYPTION_KEY}" > .env'
                   - 'docker compose pull'
                   - 'docker compose up -d'

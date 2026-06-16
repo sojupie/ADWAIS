@@ -34,7 +34,7 @@ export async function apiFetch<T>(url: string, options?: RequestInit): Promise<T
   if (!response.ok) {
     if (response.status === 401) {
       const bypass = headers.get('X-Bypass-Global-401');
-      if (bypass !== 'true' && window.location.pathname !== '/kiosk') {
+      if (bypass !== 'true' && window.location.pathname !== '/kiosk' && window.location.pathname !== '/login') {
         window.location.href = '/kiosk';
       }
     }

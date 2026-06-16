@@ -8,6 +8,8 @@ node_modules/
 # Environment and Logs
 .env
 *.log
+appsettings.json
+appsettings.*.json
 
 # OS files
 .DS_Store
@@ -48,3 +50,10 @@ TEST*.xml
 /*.patch
 /diff.txt
 
+# Secrets & Environment Overrides
+.env.production
+.env.local
+.env.*.local
+
+# Docker override
+docker-compose.override.yml

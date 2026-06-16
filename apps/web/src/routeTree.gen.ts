@@ -10,6 +10,8 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as KioskRouteImport } from './routes/kiosk'
 import { Route as IntranetRouteImport } from './routes/intranet'
 import { Route as FleetStatusRouteImport } from './routes/fleet-status'
 import { Route as FinancialRouteImport } from './routes/financial'
@@ -17,6 +19,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as SettingsIndexRouteImport } from './routes/settings/index'
 import { Route as SettingsUsersRouteImport } from './routes/settings/users'
 import { Route as SettingsTenantsRouteImport } from './routes/settings/tenants'
+import { Route as SettingsKiosksRouteImport } from './routes/settings/kiosks'
 import { Route as SettingsJobsRouteImport } from './routes/settings/jobs'
 import { Route as SettingsEventsRouteImport } from './routes/settings/events'
 
@@ -25,6 +28,16 @@ const SettingsRoute = SettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any).lazy(() => import('./routes/settings.lazy').then((d) => d.Route))
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KioskRoute = KioskRouteImport.update({
+  id: '/kiosk',
+  path: '/kiosk',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IntranetRoute = IntranetRouteImport.update({
   id: '/intranet',
   path: '/intranet',
@@ -60,6 +73,11 @@ const SettingsTenantsRoute = SettingsTenantsRouteImport.update({
   path: '/tenants',
   getParentRoute: () => SettingsRoute,
 } as any)
+const SettingsKiosksRoute = SettingsKiosksRouteImport.update({
+  id: '/kiosks',
+  path: '/kiosks',
+  getParentRoute: () => SettingsRoute,
+} as any)
 const SettingsJobsRoute = SettingsJobsRouteImport.update({
   id: '/jobs',
   path: '/jobs',
@@ -76,9 +94,12 @@ export interface FileRoutesByFullPath {
   '/financial': typeof FinancialRoute
   '/fleet-status': typeof FleetStatusRoute
   '/intranet': typeof IntranetRoute
+  '/kiosk': typeof KioskRoute
+  '/login': typeof LoginRoute
   '/settings': typeof SettingsRouteWithChildren
   '/settings/events': typeof SettingsEventsRoute
   '/settings/jobs': typeof SettingsJobsRoute
+  '/settings/kiosks': typeof SettingsKiosksRoute
   '/settings/tenants': typeof SettingsTenantsRoute
   '/settings/users': typeof SettingsUsersRoute
   '/settings/': typeof SettingsIndexRoute
@@ -88,8 +109,11 @@ export interface FileRoutesByTo {
   '/financial': typeof FinancialRoute
   '/fleet-status': typeof FleetStatusRoute
   '/intranet': typeof IntranetRoute
+  '/kiosk': typeof KioskRoute
+  '/login': typeof LoginRoute
   '/settings/events': typeof SettingsEventsRoute
   '/settings/jobs': typeof SettingsJobsRoute
+  '/settings/kiosks': typeof SettingsKiosksRoute
   '/settings/tenants': typeof SettingsTenantsRoute
   '/settings/users': typeof SettingsUsersRoute
   '/settings': typeof SettingsIndexRoute
@@ -100,9 +124,12 @@ export interface FileRoutesById {
   '/financial': typeof FinancialRoute
   '/fleet-status': typeof FleetStatusRoute
   '/intranet': typeof IntranetRoute
+  '/kiosk': typeof KioskRoute
+  '/login': typeof LoginRoute
   '/settings': typeof SettingsRouteWithChildren
   '/settings/events': typeof SettingsEventsRoute
   '/settings/jobs': typeof SettingsJobsRoute
+  '/settings/kiosks': typeof SettingsKiosksRoute
   '/settings/tenants': typeof SettingsTenantsRoute
   '/settings/users': typeof SettingsUsersRoute
   '/settings/': typeof SettingsIndexRoute
@@ -114,9 +141,12 @@ export interface FileRouteTypes {
     | '/financial'
     | '/fleet-status'
     | '/intranet'
+    | '/kiosk'
+    | '/login'
     | '/settings'
     | '/settings/events'
     | '/settings/jobs'
+    | '/settings/kiosks'
     | '/settings/tenants'
     | '/settings/users'
     | '/settings/'
@@ -126,8 +156,11 @@ export interface FileRouteTypes {
     | '/financial'
     | '/fleet-status'
     | '/intranet'
+    | '/kiosk'
+    | '/login'
     | '/settings/events'
     | '/settings/jobs'
+    | '/settings/kiosks'
     | '/settings/tenants'
     | '/settings/users'
     | '/settings'
@@ -137,9 +170,12 @@ export interface FileRouteTypes {
     | '/financial'
     | '/fleet-status'
     | '/intranet'
+    | '/kiosk'
+    | '/login'
     | '/settings'
     | '/settings/events'
     | '/settings/jobs'
+    | '/settings/kiosks'
     | '/settings/tenants'
     | '/settings/users'
     | '/settings/'
@@ -150,6 +186,8 @@ export interface RootRouteChildren {
   FinancialRoute: typeof FinancialRoute
   FleetStatusRoute: typeof FleetStatusRoute
   IntranetRoute: typeof IntranetRoute
+  KioskRoute: typeof KioskRoute
+  LoginRoute: typeof LoginRoute
   SettingsRoute: typeof SettingsRouteWithChildren
 }
 
@@ -160,6 +198,20 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/kiosk': {
+      id: '/kiosk'
+      path: '/kiosk'
+      fullPath: '/kiosk'
+      preLoaderRoute: typeof KioskRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/intranet': {
@@ -211,6 +263,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsTenantsRouteImport
       parentRoute: typeof SettingsRoute
     }
+    '/settings/kiosks': {
+      id: '/settings/kiosks'
+      path: '/kiosks'
+      fullPath: '/settings/kiosks'
+      preLoaderRoute: typeof SettingsKiosksRouteImport
+      parentRoute: typeof SettingsRoute
+    }
     '/settings/jobs': {
       id: '/settings/jobs'
       path: '/jobs'
@@ -231,6 +290,7 @@ declare module '@tanstack/react-router' {
 interface SettingsRouteChildren {
   SettingsEventsRoute: typeof SettingsEventsRoute
   SettingsJobsRoute: typeof SettingsJobsRoute
+  SettingsKiosksRoute: typeof SettingsKiosksRoute
   SettingsTenantsRoute: typeof SettingsTenantsRoute
   SettingsUsersRoute: typeof SettingsUsersRoute
   SettingsIndexRoute: typeof SettingsIndexRoute
@@ -239,6 +299,7 @@ interface SettingsRouteChildren {
 const SettingsRouteChildren: SettingsRouteChildren = {
   SettingsEventsRoute: SettingsEventsRoute,
   SettingsJobsRoute: SettingsJobsRoute,
+  SettingsKiosksRoute: SettingsKiosksRoute,
   SettingsTenantsRoute: SettingsTenantsRoute,
   SettingsUsersRoute: SettingsUsersRoute,
   SettingsIndexRoute: SettingsIndexRoute,
@@ -253,6 +314,8 @@ const rootRouteChildren: RootRouteChildren = {
   FinancialRoute: FinancialRoute,
   FleetStatusRoute: FleetStatusRoute,
   IntranetRoute: IntranetRoute,
+  KioskRoute: KioskRoute,
+  LoginRoute: LoginRoute,
   SettingsRoute: SettingsRouteWithChildren,
 }
 export const routeTree = rootRouteImport

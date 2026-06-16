@@ -1,0 +1,59 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiFetch } from '../apiClient';
+import { useCurrentUser } from './useCurrentUser';
+import type { SystemHealthDto, BackgroundJobStatusDto } from '@types';
+
+export interface SystemEvent {
+    id?: string | number;
+    timestamp: string;
+    level?: string;
+    message: string;
+    exception?: string;
+    tenantId?: string | null;
+    tenant?: {
+        id: string;
+        name: string;
+    } | null;
+}
+
+export function useSystemEventsViewModel() {
+    const queryClient = useQueryClient();
+    const { role } = useCurrentUser();
+    const isAdmin = role === 'Admin';
+
+    const healthQuery = useQuery<SystemHealthDto>({
+        queryKey: ['system-health'],
+        queryFn: () => apiFetch<SystemHealthDto>('/api/system/health'),
+        refetchInterval: 30000
+    });
+
+    const eventsQuery = useQuery<SystemEvent[]>({
+        queryKey: ['system-events'],
+        queryFn: () => apiFetch<SystemEvent[]>('/api/SystemEvent?take=30'),
+        refetchInterval: 30000
+    });
+
+    const jobsQuery = useQuery<BackgroundJobStatusDto[]>({
+        queryKey: ['system-jobs'],
+        queryFn: () => apiFetch<BackgroundJobStatusDto[]>('/api/system/health/jobs'),
+        refetchInterval: 15000
+    });
+
+    const clearErrorsMutation = useMutation({
+        mutationFn: () => apiFetch('/api/system/health/clear-errors', { method: 'POST' }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['system-health'] });
+        }
+    });
+
+    return {
+        isAdmin,
+        health: healthQuery.data,
+        isLoadingHealth: healthQuery.isLoading,
+        events: eventsQuery.data,
+        isLoadingEvents: eventsQuery.isLoading,
+        jobs: jobsQuery.data,
+        isLoadingJobs: jobsQuery.isLoading,
+        clearErrorsMutation
+    };
+}

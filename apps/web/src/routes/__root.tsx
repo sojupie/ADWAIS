@@ -9,6 +9,9 @@ import { KioskProvider } from '../components/common/dashboard/KioskProvider';
 import motilloLogo from '../assets/motillo-logo.svg';
 import { getSavedTimeframe } from '../utils/timeframeStorage';
 import {NavLink} from "../components/common/layout/NavLink.tsx";
+import { Toaster } from 'sonner';
+import { useMsal } from '@azure/msal-react';
+import { useCurrentUser } from '../hooks/useCurrentUser';
 
 export const Route = createRootRoute({
   component: RootComponent
@@ -16,19 +19,25 @@ export const Route = createRootRoute({
 
 function RootComponent() {
   useSearch({ strict: false });
+  const { instance, accounts } = useMsal();
+  const { user } = useCurrentUser();
+  const hasMsalAccount = accounts.length > 0;
+
   const financialTf = getSavedTimeframe('/financial');
   const fleetTf = getSavedTimeframe('/fleet-status');
   const queryClient = useQueryClient();
   const isFetching = useIsFetching();
   const isMutating = useIsMutating();
   const isNavigating = useRouterState({ select: (s) => s.status === 'pending' });
+  const location = useRouterState({ select: (s) => s.location });
+  const isKioskRoute = location.pathname.startsWith('/kiosk');
 
   const showProgressBar = isNavigating || isFetching > 0 || isMutating > 0;
 
   const [isProgressBarVisible, setIsProgressBarVisible] = useState(false);
 
   useEffect(() => {
-    let timer: any;
+    let timer: ReturnType<typeof setTimeout>;
     
     if (showProgressBar) {
       const defer = setTimeout(() => {
@@ -96,10 +105,11 @@ function RootComponent() {
     <KioskProvider>
       <div className="flex flex-col h-screen w-screen bg-brand-bg-tertiary overflow-hidden select-none font-sans text-brand-text">
         {/* ── Header ── */}
-        <header className="relative flex flex-col xl:flex-row justify-between items-center px-6 py-3 shrink-0 bg-brand-bg-secondary border-b border-brand-bg-secondary/20 shadow-sm z-10 gap-4 xl:gap-0">
-          <div className="w-full xl:w-1/4 flex justify-center xl:justify-start">
-            <img className="h-8 w-auto object-contain object-left brightness-0 invert" src={motilloLogo} alt="Motillo" height="32" />
-          </div>
+        {!isKioskRoute && (
+          <header className="relative flex flex-col xl:flex-row justify-between items-center px-6 py-3 shrink-0 bg-brand-bg-secondary border-b border-brand-bg-secondary/20 shadow-sm z-10 gap-4 xl:gap-0">
+            <div className="w-full xl:w-1/4 flex justify-center xl:justify-start">
+              <img className="h-8 w-auto object-contain object-left brightness-0 invert" src={motilloLogo} alt="Motillo" height="32" />
+            </div>
 
           <nav className="flex-1 flex flex-wrap justify-center items-center gap-4 md:gap-8 w-full xl:w-auto">
             <NavLink to={"/financial"} search={{ timeframe: financialTf }}>
@@ -131,6 +141,20 @@ function RootComponent() {
                 Server Offline
               </span>
             )}
+            {hasMsalAccount && (
+              <div className="flex items-center gap-3 bg-brand-bg-primary/45 border border-white/10 px-3.5 py-1.5 rounded-lg shadow-sm">
+                <span className="text-xs font-bold text-slate-300">
+                  {user?.name || accounts[0]?.name || accounts[0]?.username}
+                </span>
+                <button
+                  onClick={() => instance.logoutRedirect()}
+                  className="text-[10px] text-rose-400 hover:text-rose-300 font-extrabold uppercase tracking-widest cursor-pointer transition-colors duration-150"
+                  title="Sign Out"
+                >
+                  Sign Out
+                </button>
+              </div>
+            )}
             <KioskControls />
           </div>
 
@@ -158,6 +182,7 @@ function RootComponent() {
             />
           </div>
         </header>
+        )}
 
         {/* ── Main Area ── */}
         <main className="flex-1 min-h-0 relative flex flex-col">
@@ -170,6 +195,7 @@ function RootComponent() {
 
         {import.meta.env.DEV && <TanStackRouterDevtools position="bottom-right" />}
         {import.meta.env.DEV && <ReactQueryDevtools buttonPosition="bottom-left" />}
+        <Toaster closeButton richColors theme="light" />
       </div>
     </KioskProvider>
   );

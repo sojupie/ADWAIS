@@ -6,6 +6,7 @@
  */
 
 export * from './accumulatedRevenuePointResponseDto';
+export * from './activateKioskRequestDto';
 export * from './backgroundJobStatusDto';
 export * from './comparisonType';
 export * from './createMonitorRequestDto';
@@ -26,6 +27,7 @@ export * from './getApiFinancialRevenueEfficiencyParams';
 export * from './getApiFinancialTransactionDensityParams';
 export * from './getApiFinancialVelocityParams';
 export * from './getApiFinancialVolumeAnomalyParams';
+export * from './getApiKioskTokenParams';
 export * from './getApiMonitorsAnalyticsParams';
 export * from './getApiMonitorsIdLatencyParams';
 export * from './getApiMonitorsParams';
@@ -48,6 +50,7 @@ export * from './orderBinResponseDto';
 export * from './orderState';
 export * from './postApiIngestionBackfillParams';
 export * from './postApiMonitorsParams';
+export * from './registerKioskRequestDto';
 export * from './responseTime';
 export * from './revenueEfficiencyResponseDto';
 export * from './revenueEfficiencyTenantResponseDto';

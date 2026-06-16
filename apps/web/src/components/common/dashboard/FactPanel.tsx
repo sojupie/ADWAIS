@@ -1,4 +1,4 @@
-// import { LoadingIcon } from '../ui/LoadingIcon';
+import { Skeleton } from '../ui/Skeleton';
 
 type Extra =
     | 
@@ -44,9 +44,9 @@ export function FactPanel({ label, value, isLoading, valueColor, extra }: FactPa
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-3 flex flex-col justify-between min-h-[90px] transition-all hover:shadow-md animate-in fade-in duration-300 min-w-0 overflow-hidden">
             <h2 className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1 truncate">{label}</h2>
             {isLoading ? (
-                <div className="flex items-center gap-2 mt-1 animate-pulse">
-                    <div className="h-8 w-24 bg-slate-200 rounded"></div>
-                    <div className="h-5 w-16 bg-slate-100 rounded"></div>
+                <div className="flex items-center gap-2 mt-1">
+                    <Skeleton className="h-8 w-24 bg-slate-200" />
+                    <Skeleton className="h-5 w-16 bg-slate-100" />
                 </div>
             ) : (
                 <div className="flex flex-col mt-auto">

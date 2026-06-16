@@ -5,15 +5,19 @@ import { useState } from 'react';
 import {DashboardLayout} from "../components/common/layout/DashboardLayout.tsx";
 import {DashboardFlexRow} from "../components/common/layout/DashboardFlexRow.tsx";
 
+import { useCurrentUser } from "../hooks/useCurrentUser";
+
 export function Settings() {
     const queryClient = useQueryClient();
     const [isRefreshing, setIsRefreshing] = useState(false);
+    const { role } = useCurrentUser();
 
     const tabs = [
         { id: 'jobs', label: 'Background Jobs', path: '/settings/jobs' },
         { id: 'tenants', label: 'Tenants & Monitors', path: '/settings/tenants' },
         { id: 'events', label: 'Events & Health', path: '/settings/events' },
-        { id: 'users', label: 'Users', path: '/settings/users' },
+        ...(role === 'Admin' ? [{ id: 'users', label: 'Users', path: '/settings/users' }] : []),
+        { id: 'kiosks', label: 'Kiosks', path: '/settings/kiosks' },
     ];
 
     return (
@@ -38,12 +42,12 @@ export function Settings() {
 
             <DashboardFlexRow weight={"flex-1"}>
                 <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 flex-1 flex flex-col min-h-0">
-                    <div className="flex border-b border-slate-200 mb-4 gap-6 shrink-0">
+                    <div className="flex flex-wrap border-b border-slate-200 mb-4 gap-x-6 gap-y-2 shrink-0">
                         {tabs.map((t) => (
                             <Link
                                 key={t.id}
                                 to={t.path}
-                                className="pb-2 text-sm font-bold tracking-wider uppercase transition-colors text-slate-500 hover:text-slate-800"
+                                className="pb-2 text-sm font-bold tracking-wider uppercase transition-colors text-slate-500 hover:text-slate-800 whitespace-nowrap"
                                 activeProps={{ className: '!text-brand-link border-b-2 !border-brand-link' }}
                             >
                                 {t.label}

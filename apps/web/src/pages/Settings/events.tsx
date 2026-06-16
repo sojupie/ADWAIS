@@ -1,24 +1,11 @@
-﻿import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 import { HeartPulse, TerminalSquare, AlertCircle, CheckCircle2, Info, AlertTriangle, Activity, Copy, Check } from 'lucide-react';
-import { apiFetch } from '../../apiClient';
-import type { SystemHealthDto, BackgroundJobStatusDto } from '@types';
 import { SettingsPanel } from '../../components/common/layout/SettingsPanel';
 import { SectionHeader } from '../../components/common/layout/SectionHeader';
 import { SubSectionHeader } from '../../components/common/layout/SubSectionHeader';
-
-interface SystemEvent {
-    id?: string | number;
-    timestamp: string;
-    level?: string;
-    message: string;
-    exception?: string;
-    tenantId?: string | null;
-    tenant?: {
-        id: string;
-        name: string;
-    } | null;
-}
+import { SecureButton } from '../../components/common/ui/SecureButton';
+import { Skeleton } from '../../components/common/ui/Skeleton';
+import { useSystemEventsViewModel, type SystemEvent } from '../../hooks/useSystemEventsViewModel';
 
 function timeAgo(date: string | number | null | undefined): string {
     if (!date) return 'Never';
@@ -73,33 +60,13 @@ function HealthStatusCard({ title, subtitle, status, children }: HealthStatusCar
 }
 
 export function SystemEventsView() {
-    const queryClient = useQueryClient();
-
-    const { data: health } = useQuery<SystemHealthDto>({
-        queryKey: ['system-health'],
-        queryFn: () => apiFetch<SystemHealthDto>('/api/system/health'),
-        refetchInterval: 30000
-    });
-
-    const { data: events } = useQuery<SystemEvent[]>({
-        queryKey: ['system-events'],
-        queryFn: () => apiFetch<SystemEvent[]>('/api/SystemEvent?take=30'),
-        refetchInterval: 30000
-    });
-
-    const { data: jobs } = useQuery<BackgroundJobStatusDto[]>({
-        queryKey: ['system-jobs'],
-        queryFn: () => apiFetch<BackgroundJobStatusDto[]>('/api/system/health/jobs'),
-        refetchInterval: 15000
-    });
-
-    const clearErrorsMutation = useMutation({
-        mutationFn: () => apiFetch('/api/system/health/clear-errors', { method: 'POST' }),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['system-health'] });
-        }
-    });
-
+    const {
+        isAdmin,
+        health,
+        events,
+        jobs,
+        clearErrorsMutation
+    } = useSystemEventsViewModel();
     return (
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 h-full min-h-0">
 
@@ -167,19 +134,22 @@ export function SystemEventsView() {
                             </HealthStatusCard>
 
                             {/* Clear Errors Action */}
-                            <button
+                            <SecureButton
                                 onClick={() => clearErrorsMutation.mutate()}
-                                disabled={clearErrorsMutation.isPending}
-                                className="w-full py-2.5 px-4 bg-slate-150 hover:bg-slate-200 active:bg-slate-250 text-slate-700 font-bold rounded-xl text-xs shadow-sm transition-colors border border-slate-250 disabled:opacity-50 cursor-pointer"
+                                locked={!isAdmin}
+                                lockTitle="Requires Admin privileges"
+                                loading={clearErrorsMutation.isPending}
+                                loadingText="Clearing Diagnostics..."
+                                className="w-full py-2.5 px-4 bg-slate-150 hover:bg-slate-200 active:bg-slate-250 text-slate-700 font-bold rounded-xl text-xs shadow-sm transition-colors border border-slate-250 cursor-pointer flex items-center justify-center gap-2"
                             >
-                                {clearErrorsMutation.isPending ? 'Clearing Diagnostics...' : 'Clear Sync Errors'}
-                            </button>
+                                Clear Sync Errors
+                            </SecureButton>
                         </div>
                     ) : (
-                        <div className="animate-pulse flex flex-col gap-4">
-                            <div className="h-16 bg-slate-200/70 rounded-xl"></div>
-                            <div className="h-28 bg-slate-200/70 rounded-xl"></div>
-                            <div className="h-28 bg-slate-200/70 rounded-xl"></div>
+                        <div className="flex flex-col gap-4">
+                            <Skeleton.Card className="h-16" />
+                            <Skeleton.Card className="h-28" />
+                            <Skeleton.Card className="h-28" />
                         </div>
                     )}
 

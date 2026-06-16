@@ -1,5 +1,8 @@
 import { useState } from 'react';
 import { UserPlus, Shield } from 'lucide-react';
+import { Input } from '../../common/ui/Input';
+import { Select } from '../../common/ui/Select';
+import { SecureButton } from '../../common/ui/SecureButton';
 
 interface ProvisionUserPanelProps {
   createUser: {
@@ -27,35 +30,33 @@ export function ProvisionUserPanel({ createUser }: ProvisionUserPanelProps) {
           <p className="text-xs text-slate-500 font-medium mt-0.5">Add a new administrator or user to the system</p>
         </div>
       </div>
-      <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-        <input 
-          type="text" 
-          placeholder="Full Name" 
-          value={newUser.name} 
-          onChange={e => setNewUser({ ...newUser, name: e.target.value })} 
-          className="border border-slate-300 px-4 py-2.5 text-sm font-medium rounded-xl bg-white focus:ring-2 focus:ring-brand-link/20 focus:border-brand-link/30 focus:outline-none min-w-[200px]" 
+      <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto items-end">
+        <Input
+          type="text"
+          placeholder="Full Name"
+          value={newUser.name}
+          onChange={e => setNewUser({ ...newUser, name: e.target.value })}
+          containerClassName="min-w-[200px] sm:w-auto"
         />
-        <div className="relative">
-           <select 
-             value={newUser.role} 
-             onChange={e => setNewUser({ ...newUser, role: e.target.value })} 
-             className="appearance-none border border-slate-300 pl-4 pr-10 py-2.5 text-sm font-bold text-slate-700 rounded-xl bg-white w-full sm:w-36 focus:ring-2 focus:ring-brand-link/20 focus:border-brand-link/30 focus:outline-none cursor-pointer"
-           >
-             <option value="Admin">Admin</option>
-             <option value="Viewer">Viewer</option>
-             <option value="Employee">Employee</option>
-           </select>
-           <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
-              <Shield size={14} />
-           </div>
-        </div>
-        <button 
-          onClick={handleCreate} 
-          disabled={!newUser.name || createUser.isPending} 
-          className="bg-brand-link text-white px-6 py-2.5 text-sm font-bold rounded-xl hover:bg-brand-link/90 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        <Select
+          value={newUser.role}
+          onChange={e => setNewUser({ ...newUser, role: e.target.value })}
+          icon={<Shield size={14} />}
+          containerClassName="w-full sm:w-36"
         >
-          {createUser.isPending ? 'Creating...' : 'Create'}
-        </button>
+          <option value="Admin">Admin</option>
+          <option value="Viewer">Viewer</option>
+          <option value="Employee">Employee</option>
+        </Select>
+        <SecureButton
+          onClick={handleCreate}
+          disabled={!newUser.name}
+          loading={createUser.isPending}
+          loadingText="Creating..."
+          className="bg-brand-link text-white px-6 py-2.5 text-sm font-bold rounded-xl hover:bg-brand-link/90 transition-all cursor-pointer flex items-center justify-center gap-2 h-10 w-full sm:w-auto shrink-0"
+        >
+          Create
+        </SecureButton>
       </div>
     </section>
   );

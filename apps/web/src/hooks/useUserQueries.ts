@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiFetch } from '../apiClient';
 import type { UserResponseDto } from '@types';
+import { toast } from 'sonner';
 
 export function useUsersQuery() {
   return useQuery<UserResponseDto[]>({
@@ -18,8 +19,14 @@ export function useCreateUserMutation(onSuccessCallback?: () => void) {
         body: JSON.stringify(user)
       }),
     onSuccess: () => {
+      toast.success('User created successfully.');
       queryClient.invalidateQueries({ queryKey: ['users'] });
       if (onSuccessCallback) onSuccessCallback();
+    },
+    onError: (err: Error) => {
+      toast.error('Failed to create user', {
+        description: err.message || String(err)
+      });
     }
   });
 }
@@ -33,7 +40,13 @@ export function useUpdateUserMutation() {
         body: JSON.stringify(payload)
       }),
     onSuccess: () => {
+      toast.success('User updated successfully.');
       queryClient.invalidateQueries({ queryKey: ['users'] });
+    },
+    onError: (err: Error) => {
+      toast.error('Failed to update user', {
+        description: err.message || String(err)
+      });
     }
   });
 }
@@ -43,7 +56,13 @@ export function useDeleteUserMutation() {
   return useMutation({
     mutationFn: (id: string) => apiFetch(`/api/users/${id}`, { method: 'DELETE' }),
     onSuccess: () => {
+      toast.success('User deleted successfully.');
       queryClient.invalidateQueries({ queryKey: ['users'] });
+    },
+    onError: (err: Error) => {
+      toast.error('Failed to delete user', {
+        description: err.message || String(err)
+      });
     }
   });
 }

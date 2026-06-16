@@ -39,3 +39,5 @@ TEST*.xml
 *.wmv
 
 /*.sln.DotSettings.user
+appsettings.json
+appsettings.Development.json

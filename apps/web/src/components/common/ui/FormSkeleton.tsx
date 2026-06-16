@@ -1,0 +1,32 @@
+import React from 'react';
+
+interface FormSkeletonProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+export function FormSkeleton({ children, className = '' }: FormSkeletonProps) {
+  return (
+    <div className={`animate-pulse flex flex-col gap-5 py-2 ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+FormSkeleton.Input = function FormSkeletonInput({ labelWidth = 'w-28' }: { labelWidth?: string }) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <div className={`h-3 bg-slate-250 rounded ${labelWidth}`} />
+      <div className="h-9 bg-slate-100 rounded-lg" />
+    </div>
+  );
+};
+
+FormSkeleton.Checkbox = function FormSkeletonCheckbox({ textWidth = 'w-36' }: { textWidth?: string }) {
+  return (
+    <div className="flex items-center gap-3 py-1">
+      <div className="h-4 bg-slate-250 rounded w-4" />
+      <div className={`h-4 bg-slate-100 rounded ${textWidth}`} />
+    </div>
+  );
+};

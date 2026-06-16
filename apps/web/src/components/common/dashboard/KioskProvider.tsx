@@ -18,7 +18,7 @@ export function KioskProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const ticker = setInterval(() => {
-      if (currentRoute?.startsWith('/settings')) {
+      if (currentRoute?.startsWith('/settings') || currentRoute === '/kiosk') {
         if (mode !== 'paused') {
            setMode('paused');
         }

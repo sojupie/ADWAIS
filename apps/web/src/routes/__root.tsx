@@ -14,6 +14,8 @@ import { useMsal } from '@azure/msal-react';
 import { useCurrentUser } from '../hooks/useCurrentUser';
 import { msalInstance } from '../utils/msalConfig';
 import { getKioskToken } from '../utils/auth';
+import { AuthLayout } from '../components/common/layout/AuthLayout';
+import { AuthCard } from '../components/common/layout/AuthCard';
 
 export const Route = createRootRoute({
   beforeLoad: ({ location }) => {
@@ -116,6 +118,25 @@ function RootComponent() {
 
     return unsubscribe;
   }, [queryClient]);
+
+  const isAuthRoute = location.pathname === '/login' || location.pathname.startsWith('/kiosk');
+
+  if (isAuthRoute) {
+    return (
+      <KioskProvider>
+        <AuthLayout>
+          <AuthCard>
+            <div key={location.pathname} className="flex-1 flex flex-col justify-between min-h-full">
+              <Outlet />
+            </div>
+          </AuthCard>
+        </AuthLayout>
+        {import.meta.env.DEV && <TanStackRouterDevtools position="bottom-right" />}
+        {import.meta.env.DEV && <ReactQueryDevtools buttonPosition="bottom-left" />}
+        <Toaster closeButton richColors theme="light" />
+      </KioskProvider>
+    );
+  }
 
   return (
     <KioskProvider>

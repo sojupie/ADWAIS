@@ -27,6 +27,8 @@ export const Route = createFileRoute('/kiosk')({
         data: { deviceId },
       }),
       staleTime: Infinity,
+      retry: Infinity,
+      retryDelay: 5000,
     });
     return { deviceId };
   },

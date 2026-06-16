@@ -135,16 +135,6 @@ public static class DatabaseSeeder
     {
         return new List<TenantProfile>
         {
-            new("Nordic Fashion House", "B2C", 1200, 8000, 50, 15, 2.5m),
-            new("Tech Gadgets Plus", "B2B", 400, 1500, 150, 40, 1.2m),
-            new("Daily Grocery Express", "B2C", 150, 1200, 450, 80, 1.1m),
-            new("Urban Style Co", "B2C", 800, 4500, 80, 20, 1.8m),
-            new("Home & Hearth", "Mixed", 1500, 12000, 35, 10, 2.2m),
-            new("Pet Paradise", "B2C", 200, 1500, 220, 50, 1.3m),
-            new("Sporting Goods Pro", "Mixed", 600, 6000, 110, 30, 1.6m),
-            new("Beauty & Bliss", "B2C", 300, 2500, 190, 45, 1.4m),
-            new("The Coffee Beanery", "B2B", 50, 400, 650, 120, 1.1m),
-            new("Gourmet Delights", "Mixed", 500, 3500, 130, 35, 1.5m),
             new("Adventure Gear", "B2C", 1000, 9000, 65, 15, 2.0m),
             new("Modern Furniture", "B2B", 2500, 25000, 25, 8, 1.7m),
             new("Eco Living", "B2C", 400, 3000, 145, 35, 1.3m),

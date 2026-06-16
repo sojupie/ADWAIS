@@ -1,8 +1,6 @@
 import { createLazyFileRoute, Link } from '@tanstack/react-router';
 import { useMsal } from '@azure/msal-react';
 import motilloLogo from '../assets/motillo-logo.svg';
-import { AuthCard } from '../components/common/layout/AuthCard';
-import { AuthLayout } from '../components/common/layout/AuthLayout';
 
 export const Route = createLazyFileRoute('/login')({
   component: LoginComponent,
@@ -20,20 +18,15 @@ function LoginComponent() {
   };
 
   return (
-    <AuthLayout>
-      <AuthCard>
-        <div className="flex flex-col items-center">
-          <div className="flex justify-center mb-6 relative z-10">
-            <img className="h-10 w-auto object-contain" src={motilloLogo} alt="Motillo Logo" />
-          </div>
-
-          <h1 className="text-4xl font-extrabold mb-3 text-brand-text tracking-tight relative z-10">Staff Portal</h1>
-          <p className="text-slate-400 text-sm mb-0 font-semibold tracking-wide uppercase relative z-10">
-            Sign In to Access Dashboard
+    <>
+        <div className="flex flex-col items-center animate-stagger delay-100">
+          <h1 className="text-7xl font-extrabold mb-3 text-brand-text tracking-tight relative z-10"><i>ADWAIS</i></h1>
+          <p className="text-brand-text text-xl mb-0 font-semibold tracking-wide uppercase relative z-10">
+            A Dashboard Without AI Summaries
           </p>
         </div>
 
-        <div className="max-w-md mx-auto w-full relative z-10 flex flex-col gap-6">
+        <div className="max-w-md mx-auto w-full relative z-10 flex flex-col gap-6 animate-stagger delay-200">
           <button
             onClick={handleLogin}
             className="w-full py-4 bg-brand-btn-primary hover:bg-brand-btn-primary-hover text-white font-extrabold rounded-xl transition-all duration-300 shadow-md hover:shadow-brand-accent/25 active:scale-[0.98] cursor-pointer flex items-center justify-center gap-3.5 group text-sm tracking-widest uppercase border border-brand-accent/20"
@@ -57,11 +50,10 @@ function LoginComponent() {
           </div>
         </div>
 
-        <div className="pt-4 border-t border-white/5 flex justify-between items-center text-sm text-slate-500 font-extrabold tracking-widest uppercase relative z-10 w-full">
+        <div className="pt-4 border-t border-white/5 flex justify-between items-center text-sm text-slate-500 font-extrabold tracking-widest uppercase relative z-10 w-full animate-stagger delay-300">
           <span>ADWAIS Platform</span>
           <span className="text-slate-600">v1.0.0</span>
         </div>
-      </AuthCard>
-    </AuthLayout>
+    </>
   );
 }

@@ -61,6 +61,7 @@ export function useKioskTokenQuery(deviceId: string, isRegistered: boolean) {
       if (query.state.data) return false;
       return 5000;
     },
-    retry: false,
+    retry: Infinity,
+    retryDelay: 5000,
   });
 }

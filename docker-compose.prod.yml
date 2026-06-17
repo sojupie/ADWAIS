@@ -15,6 +15,8 @@ services:
       - AzureAd__ClientId=${AZURE_CLIENT_ID}
       - Authentication__KioskJwtSecret=${KIOSK_JWT_SECRET}
       - ASPNETCORE_ENVIRONMENT=Production
+      - FeatureToggles__EnableRuntimeDataSeeding=true
+      - FeatureToggles__MockUptimeRobotIntegrations=true
     volumes:
       - dp-keys-prod:/app/dp-keys
     depends_on:

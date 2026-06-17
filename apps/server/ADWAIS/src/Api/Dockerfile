@@ -3,6 +3,7 @@ WORKDIR /src
 
 COPY ["apps/server/ADWAIS/src/Api/Adwais.Api.csproj", "apps/server/ADWAIS/src/Api/"]
 COPY ["apps/server/ADWAIS/src/Infrastructure/Adwais.Infrastructure.csproj", "apps/server/ADWAIS/src/Infrastructure/"]
+COPY ["apps/server/ADWAIS/src/Application/Adwais.Application.csproj", "apps/server/ADWAIS/src/Application/"]
 COPY ["apps/server/ADWAIS/src/Domain/Adwais.Domain.csproj", "apps/server/ADWAIS/src/Domain/"]
 RUN dotnet restore "apps/server/ADWAIS/src/Api/Adwais.Api.csproj"
 

@@ -19,6 +19,8 @@ pipelines:
           script:
             - corepack enable
             - corepack prepare pnpm@11.5.0 --activate
+            - export VITE_AZURE_CLIENT_ID=$AZURE_CLIENT_ID
+            - export VITE_AZURE_TENANT_ID=$AZURE_TENANT_ID
             - pnpm install
             - pnpm --filter web build
           artifacts:

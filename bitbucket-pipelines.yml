@@ -13,11 +13,16 @@ pipelines:
             - docker build -t $API_IMAGE -f apps/server/ADWAIS/src/Api/Dockerfile .
             - echo "$DOCKER_HUB_PASSWORD" | docker login -u $DOCKER_HUB_USER --password-stdin
             - docker push $API_IMAGE
-            
-            # Build Frontend Web App
-            - npm install -g pnpm
+      - step:
+          name: Build Frontend Web App
+          image: node:24.15.0
+          script:
+            - corepack enable
+            - corepack prepare pnpm@11.5.0 --activate
             - pnpm install
             - pnpm --filter web build
+          artifacts:
+            - apps/web/dist/**
       - step:
           name: Deploy to Hetzner
           script:

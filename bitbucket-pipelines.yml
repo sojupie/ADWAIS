@@ -30,7 +30,7 @@ pipelines:
             - pipe: atlassian/scp-deploy:1.6.0
               variables:
                 USER: "motillo"
-                SERVER: '$SERVER_IP'
+                SERVER: $SERVER_IP
                 REMOTE_PATH: "/opt/adwais"
                 LOCAL_PATH: "docker-compose.prod.yml"
 
@@ -38,7 +38,7 @@ pipelines:
             - pipe: atlassian/scp-deploy:1.6.0
               variables:
                 USER: "motillo"
-                SERVER: '$SERVER_IP'
+                SERVER: $SERVER_IP
                 REMOTE_PATH: "/opt/adwais"
                 LOCAL_PATH: "infrastructure/nginx/kpi.motillo.com.conf"
 
@@ -46,18 +46,18 @@ pipelines:
             - pipe: atlassian/scp-deploy:1.6.0
               variables:
                 USER: "motillo"
-                SERVER: '$SERVER_IP'
+                SERVER: $SERVER_IP
                 REMOTE_PATH: "/var/www/kpi.motillo.com"
                 LOCAL_PATH: "apps/web/dist/*"
 
             # Execute Service Orchestration
             - pipe: atlassian/ssh-run:0.6.0
               variables:
-                SSH_USER: "motillo"
-                REMOTE_HOST: '$SERVER_IP'
+                USER: "motillo"
+                SERVER: $SERVER_IP
                 COMMANDS:
                   - "cd /opt/adwais"
-                  - 'echo "DASHBOARD_USER=${DASHBOARD_USER}\nDASHBOARD_PASS=${DASHBOARD_PASS}\nDOCKER_HUB_USER=${DOCKER_HUB_USER}\nDB_PASSWORD=${DB_PASSWORD}\nAZURE_TENANT_ID=${AZURE_TENANT_ID}\nAZURE_CLIENT_ID=${AZURE_CLIENT_ID}\nMOTASTIC_API_KEY=${MOTASTIC_API_KEY}\nKIOSK_JWT_SECRET=${KIOSK_JWT_SECRET}" > .env'
+                  - 'echo -e "DASHBOARD_USER=${DASHBOARD_USER}\nDASHBOARD_PASS=${DASHBOARD_PASS}\nDOCKER_HUB_USER=${DOCKER_HUB_USER}\nDB_PASSWORD=${DB_PASSWORD}\nAZURE_TENANT_ID=${AZURE_TENANT_ID}\nAZURE_CLIENT_ID=${AZURE_CLIENT_ID}\nMOTASTIC_API_KEY=${MOTASTIC_API_KEY}\nKIOSK_JWT_SECRET=${KIOSK_JWT_SECRET}" > .env'
                   - "docker compose -f docker-compose.prod.yml pull"
                   - "docker compose -f docker-compose.prod.yml up -d"
                   - "sudo cp /opt/adwais/kpi.motillo.com.conf /etc/nginx/sites-available/"

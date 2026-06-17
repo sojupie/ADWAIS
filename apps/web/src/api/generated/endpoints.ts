@@ -5232,6 +5232,123 @@ export const usePatchApiTenantsId = <TError = unknown,
       return useMutation(getPatchApiTenantsIdMutationOptions(options), queryClient);
     }
 
+export type getApiUsersMeResponse200TextPlain = {
+  data: UserResponseDto
+  status: 200
+}
+
+export type getApiUsersMeResponse200ApplicationJson = {
+  data: UserResponseDto
+  status: 200
+}
+
+export type getApiUsersMeResponse200TextJson = {
+  data: UserResponseDto
+  status: 200
+}
+
+export type getApiUsersMeResponseSuccess = (getApiUsersMeResponse200TextPlain | getApiUsersMeResponse200ApplicationJson | getApiUsersMeResponse200TextJson) & {
+  headers: Headers;
+};
+;
+
+export type getApiUsersMeResponse = (getApiUsersMeResponseSuccess)
+
+export const getGetApiUsersMeUrl = () => {
+
+
+
+
+  return `/api/users/me`
+}
+
+export const getApiUsersMe = async ( options?: RequestInit): Promise<getApiUsersMeResponse> => {
+
+  return customClient<getApiUsersMeResponse>(getGetApiUsersMeUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiUsersMeQueryKey = () => {
+    return [
+    `/api/users/me`
+    ] as const;
+    }
+
+
+export const getGetApiUsersMeQueryOptions = <TData = Awaited<ReturnType<typeof getApiUsersMe>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUsersMe>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiUsersMeQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiUsersMe>>> = ({ signal }) => getApiUsersMe({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiUsersMe>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiUsersMeQueryResult = NonNullable<Awaited<ReturnType<typeof getApiUsersMe>>>
+export type GetApiUsersMeQueryError = unknown
+
+
+export function useGetApiUsersMe<TData = Awaited<ReturnType<typeof getApiUsersMe>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUsersMe>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiUsersMe>>,
+          TError,
+          Awaited<ReturnType<typeof getApiUsersMe>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiUsersMe<TData = Awaited<ReturnType<typeof getApiUsersMe>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUsersMe>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiUsersMe>>,
+          TError,
+          Awaited<ReturnType<typeof getApiUsersMe>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiUsersMe<TData = Awaited<ReturnType<typeof getApiUsersMe>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUsersMe>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiUsersMe<TData = Awaited<ReturnType<typeof getApiUsersMe>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUsersMe>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiUsersMeQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
 export type getApiUsersResponse200TextPlain = {
   data: UserResponseDto[]
   status: 200

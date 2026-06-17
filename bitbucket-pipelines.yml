@@ -53,13 +53,13 @@ pipelines:
             # Execute Service Orchestration
             - pipe: atlassian/ssh-run:0.6.0
               variables:
-                USER: "motillo"
+                SSH_USER: "motillo"
                 SERVER: $SERVER_IP
-                COMMANDS:
-                  - "cd /opt/adwais"
-                  - 'echo -e "DASHBOARD_USER=${DASHBOARD_USER}\nDASHBOARD_PASS=${DASHBOARD_PASS}\nDOCKER_HUB_USER=${DOCKER_HUB_USER}\nDB_PASSWORD=${DB_PASSWORD}\nAZURE_TENANT_ID=${AZURE_TENANT_ID}\nAZURE_CLIENT_ID=${AZURE_CLIENT_ID}\nMOTASTIC_API_KEY=${MOTASTIC_API_KEY}\nKIOSK_JWT_SECRET=${KIOSK_JWT_SECRET}" > .env'
-                  - "docker compose -f docker-compose.prod.yml pull"
-                  - "docker compose -f docker-compose.prod.yml up -d"
-                  - "sudo cp /opt/adwais/kpi.motillo.com.conf /etc/nginx/sites-available/"
-                  - "sudo ln -sf /etc/nginx/sites-available/kpi.motillo.com.conf /etc/nginx/sites-enabled/"
-                  - "sudo systemctl reload nginx"
+                COMMAND: |
+                  cd /opt/adwais
+                  echo -e "DASHBOARD_USER=${DASHBOARD_USER}\nDASHBOARD_PASS=${DASHBOARD_PASS}\nDOCKER_HUB_USER=${DOCKER_HUB_USER}\nDB_PASSWORD=${DB_PASSWORD}\nAZURE_TENANT_ID=${AZURE_TENANT_ID}\nAZURE_CLIENT_ID=${AZURE_CLIENT_ID}\nMOTASTIC_API_KEY=${MOTASTIC_API_KEY}\nKIOSK_JWT_SECRET=${KIOSK_JWT_SECRET}" > .env
+                  docker compose -f docker-compose.prod.yml pull
+                  docker compose -f docker-compose.prod.yml up -d
+                  sudo cp /opt/adwais/kpi.motillo.com.conf /etc/nginx/sites-available/
+                  sudo ln -sf /etc/nginx/sites-available/kpi.motillo.com.conf /etc/nginx/sites-enabled/
+                  sudo systemctl reload nginx

@@ -9,10 +9,11 @@ pipelines:
             # Build API Image
             - export API_IMAGE=$DOCKER_HUB_USER/adwais-api:latest
             - docker build -t $API_IMAGE -f apps/server/ADWAIS/src/Api/Dockerfile .
-            - docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
+            - echo "$DOCKER_HUB_PASSWORD" | docker login -u $DOCKER_HUB_USER --password-stdin
             - docker push $API_IMAGE
             
             # Build Frontend Web App
+            - npm install -g pnpm
             - pnpm install
             - pnpm --filter web build
       - step:

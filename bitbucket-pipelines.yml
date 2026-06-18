@@ -61,8 +61,8 @@ pipelines:
                   set -e
                   cd /opt/adwais
                   echo -e "DASHBOARD_USER=${DASHBOARD_USER}\nDASHBOARD_PASS=${DASHBOARD_PASS}\nDOCKER_HUB_USER=${DOCKER_HUB_USER}\nDB_PASSWORD=${DB_PASSWORD}\nAZURE_TENANT_ID=${AZURE_TENANT_ID}\nAZURE_CLIENT_ID=${AZURE_CLIENT_ID}\nMOTASTIC_API_KEY=${MOTASTIC_API_KEY}\nKIOSK_JWT_SECRET=${KIOSK_JWT_SECRET}" > .env
-                  sudo docker compose -f docker-compose.prod.yml pull
-                  sudo docker compose -f docker-compose.prod.yml up -d
-                  sudo cp /opt/adwais/kpi.motillo.com.conf /etc/nginx/sites-available/
-                  sudo ln -sf /etc/nginx/sites-available/kpi.motillo.com.conf /etc/nginx/sites-enabled/
-                  sudo systemctl reload nginx
+                  sudo -n docker compose -f docker-compose.prod.yml pull
+                  sudo -n docker compose -f docker-compose.prod.yml up -d
+                  sudo -n cp /opt/adwais/kpi.motillo.com.conf /etc/nginx/sites-available/
+                  sudo -n ln -sf /etc/nginx/sites-available/kpi.motillo.com.conf /etc/nginx/sites-enabled/
+                  sudo -n systemctl reload nginx

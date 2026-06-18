@@ -3162,6 +3162,90 @@ export function useGetApiKioskToken<TData = Awaited<ReturnType<typeof getApiKios
 
 
 
+export type postApiKioskSwaggerAdminTokenResponse200 = {
+  data: void
+  status: 200
+}
+
+export type postApiKioskSwaggerAdminTokenResponseSuccess = (postApiKioskSwaggerAdminTokenResponse200) & {
+  headers: Headers;
+};
+;
+
+export type postApiKioskSwaggerAdminTokenResponse = (postApiKioskSwaggerAdminTokenResponseSuccess)
+
+export const getPostApiKioskSwaggerAdminTokenUrl = () => {
+
+
+
+
+  return `/api/kiosk/swagger-admin-token`
+}
+
+/**
+ * @summary Developer endpoint to generate an Admin token directly via Swagger.
+Requires the exact KioskJwtSecret to be provided.
+ */
+export const postApiKioskSwaggerAdminToken = async (postApiKioskSwaggerAdminTokenBody?: string, options?: RequestInit): Promise<postApiKioskSwaggerAdminTokenResponse> => {
+
+  return customClient<postApiKioskSwaggerAdminTokenResponse>(getPostApiKioskSwaggerAdminTokenUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(postApiKioskSwaggerAdminTokenBody)
+  }
+);}
+
+
+
+
+export const getPostApiKioskSwaggerAdminTokenMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiKioskSwaggerAdminToken>>, TError,{data?: string}, TContext>, request?: SecondParameter<typeof customClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiKioskSwaggerAdminToken>>, TError,{data?: string}, TContext> => {
+
+const mutationKey = ['postApiKioskSwaggerAdminToken'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiKioskSwaggerAdminToken>>, {data?: string}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiKioskSwaggerAdminToken(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiKioskSwaggerAdminTokenMutationResult = NonNullable<Awaited<ReturnType<typeof postApiKioskSwaggerAdminToken>>>
+    export type PostApiKioskSwaggerAdminTokenMutationBody = string | undefined
+    export type PostApiKioskSwaggerAdminTokenMutationError = unknown
+
+    /**
+ * @summary Developer endpoint to generate an Admin token directly via Swagger.
+Requires the exact KioskJwtSecret to be provided.
+ */
+export const usePostApiKioskSwaggerAdminToken = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiKioskSwaggerAdminToken>>, TError,{data?: string}, TContext>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiKioskSwaggerAdminToken>>,
+        TError,
+        {data?: string},
+        TContext
+      > => {
+      return useMutation(getPostApiKioskSwaggerAdminTokenMutationOptions(options), queryClient);
+    }
+
 export type getApiMonitorsAnalyticsResponse200TextPlain = {
   data: MonitorAnalyticsResponseDto
   status: 200

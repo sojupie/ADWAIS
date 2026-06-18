@@ -61,7 +61,7 @@ export function FleetMatrix({
   selectedMonitorId?: number | null
 }) {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 portrait:lg:grid-cols-4 landscape:lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3">
       {monitors.map((monitor) => {
         const status = getMonitorStatus(monitor);
         const isActive = selectedMonitorId === monitor.id;
@@ -134,10 +134,10 @@ export function FleetMatrix({
           >
             <div className="flex justify-between items-start mb-2 w-full">
               <div className="flex flex-col overflow-hidden pr-2 w-full">
-                <span className={`text-sm font-black ${theme.text} truncate uppercase tracking-tight leading-tight`}>
+                <span className={`text-xs font-black ${theme.text} line-clamp-2 uppercase tracking-tight leading-tight`}>
                   {tenantDisplay}
                 </span>
-                <span className={`text-sm font-bold ${theme.mutedText} uppercase tracking-widest mt-0.5 truncate`}>
+                <span className={`text-[10px] font-bold ${theme.mutedText} uppercase tracking-wider mt-0.5 truncate`}>
                   {monitor.name}
                 </span>
               </div>
@@ -152,7 +152,7 @@ export function FleetMatrix({
                   return (
                     <span 
                       key={tag} 
-                      className={`text-sm font-bold px-2 py-0.5 rounded uppercase tracking-wider border shadow-sm ${getTagStyle(color)}`}
+                      className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider border shadow-sm ${getTagStyle(color)}`}
                     >
                       {name}
                     </span>
@@ -162,15 +162,15 @@ export function FleetMatrix({
             )}
             
             <div className="grid grid-cols-2 gap-x-2 mt-auto w-full">
-              <div className="flex flex-col gap-0">
-                <span className={`text-sm ${theme.mutedText} uppercase font-bold tracking-widest`}>Uptime</span>
-                <span className={`text-base font-black ${theme.valueText}`}>
+              <div className="flex flex-col gap-0 min-w-0">
+                <span className={`text-[10px] ${theme.mutedText} uppercase font-bold tracking-wider truncate`}>Uptime</span>
+                <span className={`text-sm font-black ${theme.valueText} truncate`}>
                   {monitor.currentUptimePercentage != null ? `${monitor.currentUptimePercentage.toFixed(2)}%` : 'N/A'}
                 </span>
               </div>
-              <div className="flex flex-col gap-0">
-                <span className={`text-sm ${theme.mutedText} uppercase font-bold tracking-widest`}>Latency</span>
-                <span className={`text-base font-black ${theme.valueText}`}>
+              <div className="flex flex-col gap-0 min-w-0">
+                <span className={`text-[10px] ${theme.mutedText} uppercase font-bold tracking-wider truncate`}>Latency</span>
+                <span className={`text-sm font-black ${theme.valueText} truncate`}>
                   {(status === 'down' || status === 'unknown' || status === 'paused' || status === 'starting' || !Number(monitor.currentLatency)) ? 'N/A' : `${Math.round(Number(monitor.currentLatency))}ms`}
                 </span>
               </div>

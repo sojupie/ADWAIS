@@ -32,8 +32,8 @@ public class TokenService(IConfiguration configuration) : ITokenService
         {
             Subject = new ClaimsIdentity(new[]
             {
-                new Claim(ClaimTypes.Name, $"Kiosk-Device-{deviceId}"),
-                new Claim(ClaimTypes.Role, role)
+                new Claim("name", $"Kiosk-Device-{deviceId}"),
+                new Claim("role", role)
             }),
             Expires = DateTime.UtcNow.AddDays(30),
             Issuer = "ADWAIS",

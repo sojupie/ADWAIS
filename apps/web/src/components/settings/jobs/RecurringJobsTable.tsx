@@ -9,47 +9,44 @@ interface RecurringJobsTableProps {
 
 export function RecurringJobsTable({ recurring }: RecurringJobsTableProps) {
   return (
-    <div className="w-full text-left text-sm whitespace-nowrap overflow-x-auto">
+    <div className="w-full text-left text-sm overflow-x-auto">
       <table className="w-full">
-        <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase text-sm">
+        <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase text-xs">
           <tr>
-            <th className="px-6 py-4">Job ID</th>
-            <th className="px-6 py-4">Cron</th>
-            <th className="px-6 py-4">Queue</th>
-            <th className="px-6 py-4">Last Execution</th>
-            <th className="px-6 py-4">Next Execution</th>
-            <th className="px-6 py-4">Status</th>
+            <th className="px-3 py-2">Job ID</th>
+            <th className="px-3 py-2">Cron</th>
+            <th className="px-3 py-2">Last Execution</th>
+            <th className="px-3 py-2">Next Execution</th>
+            <th className="px-3 py-2">Status</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100">
           {recurring === undefined ? (
             Array.from({ length: 4 }).map((_, idx) => (
               <tr key={idx}>
-                <td className="px-6 py-4"><Skeleton className="h-4 w-28" /></td>
-                <td className="px-6 py-4"><Skeleton className="h-4 w-16" /></td>
-                <td className="px-6 py-4"><Skeleton className="h-4 w-16" /></td>
-                <td className="px-6 py-4"><Skeleton className="h-4 w-32" /></td>
-                <td className="px-6 py-4"><Skeleton className="h-4 w-32" /></td>
-                <td className="px-6 py-4"><Skeleton className="h-4 w-20" /></td>
+                <td className="px-3 py-2"><Skeleton className="h-4 w-28" /></td>
+                <td className="px-3 py-2"><Skeleton className="h-4 w-16" /></td>
+                <td className="px-3 py-2"><Skeleton className="h-4 w-32" /></td>
+                <td className="px-3 py-2"><Skeleton className="h-4 w-32" /></td>
+                <td className="px-3 py-2"><Skeleton className="h-4 w-20" /></td>
               </tr>
             ))
           ) : (
             recurring.map((job) => (
               <tr key={job.id} className="hover:bg-slate-50/50 transition-colors">
-                <td className="px-6 py-4 font-bold text-slate-800">{job.id}</td>
-                <td className="px-6 py-4">
-                  <span className="px-2 py-0.5 bg-brand-accent/10 text-brand-text rounded text-sm font-mono font-bold tracking-widest">
+                <td className="px-3 py-2 font-bold text-slate-800 break-words max-w-[150px]">{job.id}</td>
+                <td className="px-3 py-2">
+                  <span className="px-1 py-0.5 bg-brand-accent/10 text-brand-text rounded text-xs font-mono font-bold tracking-widest break-words max-w-[100px] inline-block">
                     {job.cron}
                   </span>
                 </td>
-                <td className="px-6 py-4 text-slate-500">{(job as RecurringJobDto & { queue?: string }).queue || 'default'}</td>
-                <td className="px-6 py-4 text-slate-700 font-bold">
+                <td className="px-3 py-2 text-slate-700 font-bold whitespace-nowrap">
                   {job.lastExecution ? new Date(job.lastExecution).toLocaleString() : 'Never'}
                 </td>
-                <td className="px-6 py-4 text-slate-500">
+                <td className="px-3 py-2 text-slate-500 whitespace-nowrap">
                   {job.nextExecution ? new Date(job.nextExecution).toLocaleString() : 'Never'}
                 </td>
-                <td className="px-6 py-4">
+                <td className="px-3 py-2">
                   {job.lastJobState === 'Succeeded' ? (
                     <span className="text-green-500 flex items-center gap-1.5 font-bold"><CheckCircle2 size={14} /> Succeeded</span>
                   ) : (
@@ -60,7 +57,7 @@ export function RecurringJobsTable({ recurring }: RecurringJobsTableProps) {
             ))
           )}
           {recurring !== undefined && recurring.length === 0 && (
-            <EmptyState message="No recurring jobs configured." isTableRow colSpan={6} />
+            <EmptyState message="No recurring jobs configured." isTableRow colSpan={5} />
           )}
         </tbody>
       </table>

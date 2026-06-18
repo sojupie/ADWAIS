@@ -20,6 +20,7 @@ public static class AuthenticationExtensions
         authBuilder.AddMicrosoftIdentityWebApi(configuration, "AzureAd");
         authBuilder.AddJwtBearer("KioskJwt", options =>
         {
+            options.MapInboundClaims = false;
             var secret = configuration["Authentication:KioskJwtSecret"];
             var key = Encoding.UTF8.GetBytes(string.IsNullOrEmpty(secret) ? "SuperSecretKeyForTestingKioskTokens32CharsMinimum!" : secret);
 
@@ -32,7 +33,9 @@ public static class AuthenticationExtensions
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(key),
                 ValidateLifetime = true,
-                ClockSkew = TimeSpan.Zero
+                ClockSkew = TimeSpan.Zero,
+                NameClaimType = "name",
+                RoleClaimType = "role"
             };
         });
 

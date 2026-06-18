@@ -61,4 +61,22 @@ public class KioskAuthController(IKioskService kioskService) : ControllerBase
         }
         return Ok(new KioskTokenResponseDto { Token = token, ExpiresInDays = 30 });
     }
+
+    /// <summary>
+    /// Developer endpoint to generate an Admin token directly via Swagger.
+    /// Requires the exact KioskJwtSecret to be provided.
+    /// </summary>
+    [HttpPost("swagger-admin-token")]
+    [AllowAnonymous]
+    public IActionResult GenerateSwaggerAdminToken([FromBody] string secret, [FromServices] Microsoft.Extensions.Configuration.IConfiguration config, [FromServices] ITokenService tokenService)
+    {
+        var configuredSecret = config["Authentication:KioskJwtSecret"];
+        if (string.IsNullOrEmpty(secret) || secret != configuredSecret)
+        {
+            return Unauthorized("Invalid secret.");
+        }
+        
+        var token = tokenService.GenerateKioskToken("swagger-admin", "Admin");
+        return Ok(new KioskTokenResponseDto { Token = token, ExpiresInDays = 30 });
+    }
 }

@@ -16,7 +16,7 @@ public class TokenService(IConfiguration configuration) : ITokenService
     private readonly IConfiguration _configuration = configuration;
 
     /// <inheritdoc />
-    public string GenerateKioskToken(string deviceId)
+    public string GenerateKioskToken(string deviceId, string role = "Viewer")
     {
         var secret = _configuration["Authentication:KioskJwtSecret"];
         if (string.IsNullOrEmpty(secret) || secret.Length < 32)
@@ -33,7 +33,7 @@ public class TokenService(IConfiguration configuration) : ITokenService
             Subject = new ClaimsIdentity(new[]
             {
                 new Claim(ClaimTypes.Name, $"Kiosk-Device-{deviceId}"),
-                new Claim(ClaimTypes.Role, "Viewer")
+                new Claim(ClaimTypes.Role, role)
             }),
             Expires = DateTime.UtcNow.AddDays(30),
             Issuer = "ADWAIS",

@@ -1106,6 +1106,38 @@
         }
       }
     },
+    "/api/kiosk/swagger-admin-token": {
+      "post": {
+        "tags": [
+          "KioskAuth"
+        ],
+        "summary": "Developer endpoint to generate an Admin token directly via Swagger.\r\nRequires the exact KioskJwtSecret to be provided.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "type": "string"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/monitors/analytics": {
       "get": {
         "tags": [

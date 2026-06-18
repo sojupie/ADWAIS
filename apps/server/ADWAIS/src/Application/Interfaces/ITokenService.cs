@@ -10,5 +10,6 @@ public interface ITokenService
     /// </summary>
     /// <param name="deviceId">The unique identifier of the kiosk device.</param>
     /// <returns>A signed JWT token string.</returns>
-    string GenerateKioskToken(string deviceId);
+    /// <param name="role">The role claim to assign to the token.</param>
+    string GenerateKioskToken(string deviceId, string role = "Viewer");
 }

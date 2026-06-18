@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiFetch } from '../apiClient';
 import { useCurrentUser } from './useCurrentUser';
-import type { SystemHealthDto, BackgroundJobStatusDto } from '@types';
+import type { SystemHealthDto } from '@types';
 
 export interface SystemEvent {
     id?: string | number;
@@ -33,12 +33,6 @@ export function useSystemEventsViewModel() {
         refetchInterval: 30000
     });
 
-    const jobsQuery = useQuery<BackgroundJobStatusDto[]>({
-        queryKey: ['system-jobs'],
-        queryFn: () => apiFetch<BackgroundJobStatusDto[]>('/api/system/health/jobs'),
-        refetchInterval: 15000
-    });
-
     const clearErrorsMutation = useMutation({
         mutationFn: () => apiFetch('/api/system/health/clear-errors', { method: 'POST' }),
         onSuccess: () => {
@@ -52,8 +46,6 @@ export function useSystemEventsViewModel() {
         isLoadingHealth: healthQuery.isLoading,
         events: eventsQuery.data,
         isLoadingEvents: eventsQuery.isLoading,
-        jobs: jobsQuery.data,
-        isLoadingJobs: jobsQuery.isLoading,
         clearErrorsMutation
     };
 }

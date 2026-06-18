@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiFetch } from '../apiClient';
-import type { GlobalConfigDto, RecurringJobDto } from '@types';
+import type { GlobalConfigDto, RecurringJobDto, BackgroundJobStatusDto } from '@types';
 import { toast } from 'sonner';
 
 export function useGlobalConfigQuery() {
@@ -15,6 +15,14 @@ export function useRecurringJobsQuery() {
   return useQuery<RecurringJobDto[]>({
     queryKey: ['job-recurring'],
     queryFn: () => apiFetch<RecurringJobDto[]>('/api/job/recurring')
+  });
+}
+
+export function useRecentJobsQuery() {
+  return useQuery<BackgroundJobStatusDto[]>({
+    queryKey: ['system-jobs'],
+    queryFn: () => apiFetch<BackgroundJobStatusDto[]>('/api/system/health/jobs'),
+    refetchInterval: 15000
   });
 }
 
@@ -73,6 +81,42 @@ export function useUpdateConfigMutation() {
     },
     onError: (err: Error) => {
       toast.error('Failed to update configuration', {
+        description: err.message || String(err)
+      });
+    }
+  });
+}
+
+export interface FetchIntervalsDto {
+  latencyFetchIntervalMinutes: number;
+  uptimeFetchIntervalMinutes: number;
+  statusFetchIntervalMinutes: number;
+  litiumFetchIntervalMinutes: number;
+  userStatsFetchIntervalMinutes: number;
+}
+
+export function useFetchIntervalsQuery() {
+  return useQuery<FetchIntervalsDto>({
+    queryKey: ['fetch-intervals'],
+    queryFn: () => apiFetch<FetchIntervalsDto>('/api/job/metrics/fetch-intervals'),
+  });
+}
+
+export function useUpdateFetchIntervalsMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: Partial<FetchIntervalsDto>) => 
+      apiFetch('/api/job/update/intervals', {
+        method: 'PATCH',
+        body: JSON.stringify(payload)
+      }),
+    onSuccess: () => {
+      toast.success('Fetch intervals updated.');
+      queryClient.invalidateQueries({ queryKey: ['fetch-intervals'] });
+      queryClient.invalidateQueries({ queryKey: ['job-recurring'] });
+    },
+    onError: (err: Error) => {
+      toast.error('Failed to update intervals', {
         description: err.message || String(err)
       });
     }

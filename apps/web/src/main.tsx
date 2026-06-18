@@ -23,6 +23,8 @@ declare module '@tanstack/react-router' {
 }
 
 msalInstance.initialize().then(() => {
+  return msalInstance.handleRedirectPromise();
+}).then(() => {
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
       <MsalProvider instance={msalInstance}>

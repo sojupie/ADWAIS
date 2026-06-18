@@ -1,4 +1,4 @@
-﻿import type {ReactNode} from "react";
+﻿import type { ReactNode } from "react";
 
 interface FlexRowProps {
     children: ReactNode;
@@ -7,12 +7,12 @@ interface FlexRowProps {
     className?: string;
 }
 
-export function DashboardFlexRow({ children, weight = 'flex-1', gridCols = '1', className = ''}: FlexRowProps) {
+export function DashboardFlexRow({ children, weight = 'flex-1', gridCols = '1', className = '' }: FlexRowProps) {
     const gridClass = {
-        '1' : 'grid-cols-1',
-        '2' : 'grid-cols-1 lg:grid-cols-2',
-        '3' : 'grid-cols-1 md:grid-cols-3',
-        '5' : 'grid-cols-1 lg:grid-cols-5',
+        '1': 'grid-cols-1',
+        '2': 'grid-cols-1 lg:grid-cols-2',
+        '3': 'grid-cols-1 md:grid-cols-3',
+        '5': 'grid-cols-1 lg:grid-cols-5',
     }[gridCols];
 
     return (

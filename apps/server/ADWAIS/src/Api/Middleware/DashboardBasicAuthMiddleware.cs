@@ -31,10 +31,23 @@ public class DashboardBasicAuthMiddleware
 
             try
             {
-                var authHeader = AuthenticationHeaderValue.Parse(context.Request.Headers["Authorization"]);
-                var credentialBytes = Convert.FromBase64String(authHeader.Parameter ?? string.Empty);
+                var authHeaderStr = context.Request.Headers.Authorization.ToString();
+                if (!AuthenticationHeaderValue.TryParse(authHeaderStr, out var authHeader) || 
+                    string.IsNullOrEmpty(authHeader.Parameter))
+                {
+                    ReturnUnauthorized(context);
+                    return;
+                }
+
+                var credentialBytes = Convert.FromBase64String(authHeader.Parameter);
                 var credentials = Encoding.UTF8.GetString(credentialBytes).Split(':', 2);
                 
+                if (credentials.Length != 2)
+                {
+                    ReturnUnauthorized(context);
+                    return;
+                }
+
                 var username = credentials[0];
                 var password = credentials[1];
 

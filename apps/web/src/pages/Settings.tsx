@@ -2,8 +2,8 @@ import { Link, Outlet } from "@tanstack/react-router";
 import { useQueryClient } from '@tanstack/react-query';
 import { RefreshCw } from 'lucide-react';
 import { useState } from 'react';
-import {DashboardLayout} from "../components/common/layout/DashboardLayout.tsx";
-import {DashboardFlexRow} from "../components/common/layout/DashboardFlexRow.tsx";
+import { DashboardLayout } from "../components/common/layout/DashboardLayout.tsx";
+import { DashboardFlexRow } from "../components/common/layout/DashboardFlexRow.tsx";
 
 import { useCurrentUser } from "../hooks/useCurrentUser";
 
@@ -14,10 +14,11 @@ export function Settings() {
 
     const tabs = [
         { id: 'jobs', label: 'Background Jobs', path: '/settings/jobs' },
+        { id: 'configuration', label: 'Configuration', path: '/settings/configuration' },
         { id: 'tenants', label: 'Tenants & Monitors', path: '/settings/tenants' },
         { id: 'events', label: 'Events & Health', path: '/settings/events' },
         ...(role === 'Admin' ? [{ id: 'users', label: 'Users', path: '/settings/users' }] : []),
-        { id: 'kiosks', label: 'Kiosks', path: '/settings/kiosks' },
+        { id: 'authentication', label: 'Authentication', path: '/settings/authentication' },
     ];
 
     return (
@@ -42,7 +43,7 @@ export function Settings() {
 
             <DashboardFlexRow weight={"flex-1"}>
                 <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 flex-1 flex flex-col min-h-0">
-                    <div className="flex flex-wrap border-b border-slate-200 mb-4 gap-x-6 gap-y-2 shrink-0">
+                    <div className="flex flex-wrap border-b border-slate-200 gap-x-6 gap-y-2 shrink-0">
                         {tabs.map((t) => (
                             <Link
                                 key={t.id}

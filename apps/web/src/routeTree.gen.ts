@@ -19,9 +19,10 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as SettingsIndexRouteImport } from './routes/settings/index'
 import { Route as SettingsUsersRouteImport } from './routes/settings/users'
 import { Route as SettingsTenantsRouteImport } from './routes/settings/tenants'
-import { Route as SettingsKiosksRouteImport } from './routes/settings/kiosks'
 import { Route as SettingsJobsRouteImport } from './routes/settings/jobs'
 import { Route as SettingsEventsRouteImport } from './routes/settings/events'
+import { Route as SettingsConfigurationRouteImport } from './routes/settings/configuration'
+import { Route as SettingsAuthenticationRouteImport } from './routes/settings/authentication'
 
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
@@ -67,27 +68,42 @@ const SettingsUsersRoute = SettingsUsersRouteImport.update({
   id: '/users',
   path: '/users',
   getParentRoute: () => SettingsRoute,
-} as any)
+} as any).lazy(() =>
+  import('./routes/settings/users.lazy').then((d) => d.Route),
+)
 const SettingsTenantsRoute = SettingsTenantsRouteImport.update({
   id: '/tenants',
   path: '/tenants',
   getParentRoute: () => SettingsRoute,
-} as any)
-const SettingsKiosksRoute = SettingsKiosksRouteImport.update({
-  id: '/kiosks',
-  path: '/kiosks',
-  getParentRoute: () => SettingsRoute,
-} as any)
+} as any).lazy(() =>
+  import('./routes/settings/tenants.lazy').then((d) => d.Route),
+)
 const SettingsJobsRoute = SettingsJobsRouteImport.update({
   id: '/jobs',
   path: '/jobs',
   getParentRoute: () => SettingsRoute,
-} as any)
+} as any).lazy(() => import('./routes/settings/jobs.lazy').then((d) => d.Route))
 const SettingsEventsRoute = SettingsEventsRouteImport.update({
   id: '/events',
   path: '/events',
   getParentRoute: () => SettingsRoute,
-} as any)
+} as any).lazy(() =>
+  import('./routes/settings/events.lazy').then((d) => d.Route),
+)
+const SettingsConfigurationRoute = SettingsConfigurationRouteImport.update({
+  id: '/configuration',
+  path: '/configuration',
+  getParentRoute: () => SettingsRoute,
+} as any).lazy(() =>
+  import('./routes/settings/configuration.lazy').then((d) => d.Route),
+)
+const SettingsAuthenticationRoute = SettingsAuthenticationRouteImport.update({
+  id: '/authentication',
+  path: '/authentication',
+  getParentRoute: () => SettingsRoute,
+} as any).lazy(() =>
+  import('./routes/settings/authentication.lazy').then((d) => d.Route),
+)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -97,9 +113,10 @@ export interface FileRoutesByFullPath {
   '/kiosk': typeof KioskRoute
   '/login': typeof LoginRoute
   '/settings': typeof SettingsRouteWithChildren
+  '/settings/authentication': typeof SettingsAuthenticationRoute
+  '/settings/configuration': typeof SettingsConfigurationRoute
   '/settings/events': typeof SettingsEventsRoute
   '/settings/jobs': typeof SettingsJobsRoute
-  '/settings/kiosks': typeof SettingsKiosksRoute
   '/settings/tenants': typeof SettingsTenantsRoute
   '/settings/users': typeof SettingsUsersRoute
   '/settings/': typeof SettingsIndexRoute
@@ -111,9 +128,10 @@ export interface FileRoutesByTo {
   '/intranet': typeof IntranetRoute
   '/kiosk': typeof KioskRoute
   '/login': typeof LoginRoute
+  '/settings/authentication': typeof SettingsAuthenticationRoute
+  '/settings/configuration': typeof SettingsConfigurationRoute
   '/settings/events': typeof SettingsEventsRoute
   '/settings/jobs': typeof SettingsJobsRoute
-  '/settings/kiosks': typeof SettingsKiosksRoute
   '/settings/tenants': typeof SettingsTenantsRoute
   '/settings/users': typeof SettingsUsersRoute
   '/settings': typeof SettingsIndexRoute
@@ -127,9 +145,10 @@ export interface FileRoutesById {
   '/kiosk': typeof KioskRoute
   '/login': typeof LoginRoute
   '/settings': typeof SettingsRouteWithChildren
+  '/settings/authentication': typeof SettingsAuthenticationRoute
+  '/settings/configuration': typeof SettingsConfigurationRoute
   '/settings/events': typeof SettingsEventsRoute
   '/settings/jobs': typeof SettingsJobsRoute
-  '/settings/kiosks': typeof SettingsKiosksRoute
   '/settings/tenants': typeof SettingsTenantsRoute
   '/settings/users': typeof SettingsUsersRoute
   '/settings/': typeof SettingsIndexRoute
@@ -144,9 +163,10 @@ export interface FileRouteTypes {
     | '/kiosk'
     | '/login'
     | '/settings'
+    | '/settings/authentication'
+    | '/settings/configuration'
     | '/settings/events'
     | '/settings/jobs'
-    | '/settings/kiosks'
     | '/settings/tenants'
     | '/settings/users'
     | '/settings/'
@@ -158,9 +178,10 @@ export interface FileRouteTypes {
     | '/intranet'
     | '/kiosk'
     | '/login'
+    | '/settings/authentication'
+    | '/settings/configuration'
     | '/settings/events'
     | '/settings/jobs'
-    | '/settings/kiosks'
     | '/settings/tenants'
     | '/settings/users'
     | '/settings'
@@ -173,9 +194,10 @@ export interface FileRouteTypes {
     | '/kiosk'
     | '/login'
     | '/settings'
+    | '/settings/authentication'
+    | '/settings/configuration'
     | '/settings/events'
     | '/settings/jobs'
-    | '/settings/kiosks'
     | '/settings/tenants'
     | '/settings/users'
     | '/settings/'
@@ -263,13 +285,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsTenantsRouteImport
       parentRoute: typeof SettingsRoute
     }
-    '/settings/kiosks': {
-      id: '/settings/kiosks'
-      path: '/kiosks'
-      fullPath: '/settings/kiosks'
-      preLoaderRoute: typeof SettingsKiosksRouteImport
-      parentRoute: typeof SettingsRoute
-    }
     '/settings/jobs': {
       id: '/settings/jobs'
       path: '/jobs'
@@ -284,22 +299,38 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsEventsRouteImport
       parentRoute: typeof SettingsRoute
     }
+    '/settings/configuration': {
+      id: '/settings/configuration'
+      path: '/configuration'
+      fullPath: '/settings/configuration'
+      preLoaderRoute: typeof SettingsConfigurationRouteImport
+      parentRoute: typeof SettingsRoute
+    }
+    '/settings/authentication': {
+      id: '/settings/authentication'
+      path: '/authentication'
+      fullPath: '/settings/authentication'
+      preLoaderRoute: typeof SettingsAuthenticationRouteImport
+      parentRoute: typeof SettingsRoute
+    }
   }
 }
 
 interface SettingsRouteChildren {
+  SettingsAuthenticationRoute: typeof SettingsAuthenticationRoute
+  SettingsConfigurationRoute: typeof SettingsConfigurationRoute
   SettingsEventsRoute: typeof SettingsEventsRoute
   SettingsJobsRoute: typeof SettingsJobsRoute
-  SettingsKiosksRoute: typeof SettingsKiosksRoute
   SettingsTenantsRoute: typeof SettingsTenantsRoute
   SettingsUsersRoute: typeof SettingsUsersRoute
   SettingsIndexRoute: typeof SettingsIndexRoute
 }
 
 const SettingsRouteChildren: SettingsRouteChildren = {
+  SettingsAuthenticationRoute: SettingsAuthenticationRoute,
+  SettingsConfigurationRoute: SettingsConfigurationRoute,
   SettingsEventsRoute: SettingsEventsRoute,
   SettingsJobsRoute: SettingsJobsRoute,
-  SettingsKiosksRoute: SettingsKiosksRoute,
   SettingsTenantsRoute: SettingsTenantsRoute,
   SettingsUsersRoute: SettingsUsersRoute,
   SettingsIndexRoute: SettingsIndexRoute,

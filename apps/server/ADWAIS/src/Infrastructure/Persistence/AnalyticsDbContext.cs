@@ -221,8 +221,9 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
         // GlobalConfig
         modelBuilder.Entity<GlobalConfig>(entity => 
         {
-            entity.ToTable("global_config");
-            entity.HasCheckConstraint("CK_GlobalConfig_SingleRow", "\"Id\" = 1");
+            entity.ToTable("global_config", t =>
+                t.HasCheckConstraint("CK_GlobalConfig_SingleRow", 
+                    "\"id\" = 1"));
             entity.HasKey(x => x.Id);
             entity.Property(x => x.UptimeRobotApiKey).HasMaxLength(1024);
             if (dataProtectionProvider != null)

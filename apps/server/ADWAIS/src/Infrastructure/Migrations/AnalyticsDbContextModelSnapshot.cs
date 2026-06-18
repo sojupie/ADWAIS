@@ -109,7 +109,23 @@ namespace Adwais.Infrastructure.Migrations
                     b.HasKey("Id")
                         .HasName("pk_global_config");
 
-                    b.ToTable("global_config", (string)null);
+                    b.ToTable("global_config", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_GlobalConfig_SingleRow", "\"id\" = 1");
+                        });
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            LatencyFetchIntervalMinutes = 10,
+                            LitiumFetchEnabled = true,
+                            LitiumFetchIntervalMinutes = 60,
+                            SystemEventRetentionDays = 30,
+                            UptimeFetchIntervalMinutes = 60,
+                            UptimeRobotFetchEnabled = true,
+                            UserStatsFetchIntervalMinutes = 60
+                        });
                 });
 
             modelBuilder.Entity("Adwais.Domain.Entities.KioskDevice", b =>

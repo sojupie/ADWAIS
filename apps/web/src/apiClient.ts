@@ -1,9 +1,9 @@
-import { msalInstance } from './utils/msalConfig';
+import { msalInstance, AZURE_API_SCOPE } from './utils/msalConfig';
 
 export async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
   const isBodyRequest = options?.method && ['POST', 'PUT', 'PATCH'].includes(options.method.toUpperCase());
   const headers = new Headers(options?.headers);
-  
+
   if (isBodyRequest && !headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json');
   }
@@ -16,7 +16,7 @@ export async function apiFetch<T>(url: string, options?: RequestInit): Promise<T
     if (account) {
       try {
         const response = await msalInstance.acquireTokenSilent({
-          scopes: [import.meta.env?.VITE_AZURE_API_SCOPE || 'api://PLACEHOLDER/.default'],
+          scopes: [AZURE_API_SCOPE],
           account: account
         });
         headers.set('Authorization', `Bearer ${response.accessToken}`);
@@ -35,7 +35,14 @@ export async function apiFetch<T>(url: string, options?: RequestInit): Promise<T
     if (response.status === 401) {
       const bypass = headers.get('X-Bypass-Global-401');
       if (bypass !== 'true' && window.location.pathname !== '/kiosk' && window.location.pathname !== '/login') {
-        window.location.href = '/kiosk';
+        const hasMsal = msalInstance.getAllAccounts().length > 0;
+        if (hasMsal) {
+          sessionStorage.clear();
+          window.location.href = '/login';
+        } else {
+          localStorage.removeItem('kiosk_token');
+          window.location.href = '/kiosk';
+        }
       }
     }
 

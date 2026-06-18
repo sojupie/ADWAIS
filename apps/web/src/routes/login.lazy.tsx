@@ -1,5 +1,6 @@
 import { createLazyFileRoute, Link } from '@tanstack/react-router';
 import { useMsal } from '@azure/msal-react';
+import { AZURE_API_SCOPE } from '../utils/msalConfig';
 
 export const Route = createLazyFileRoute('/login')({
   component: LoginComponent,
@@ -10,7 +11,7 @@ function LoginComponent() {
 
   const handleLogin = () => {
     instance.loginRedirect({
-      scopes: [import.meta.env?.VITE_AZURE_API_SCOPE || 'api://d8d5f73a-79c5-4b95-81bd-87616daf6de4/.default'],
+      scopes: [AZURE_API_SCOPE],
     }).catch((err) => {
       console.error('MSAL Login error:', err);
     });

@@ -13,6 +13,7 @@ services:
       - Webhooks__MotasticApiKey=${MOTASTIC_API_KEY}
       - AzureAd__TenantId=${AZURE_TENANT_ID}
       - AzureAd__ClientId=${AZURE_CLIENT_ID}
+      - AzureAd__AppIdUri=api://${AZURE_CLIENT_ID}
       - Authentication__KioskJwtSecret=${KIOSK_JWT_SECRET}
       - ASPNETCORE_ENVIRONMENT=Production
       - FeatureToggles__EnableRuntimeDataSeeding=true

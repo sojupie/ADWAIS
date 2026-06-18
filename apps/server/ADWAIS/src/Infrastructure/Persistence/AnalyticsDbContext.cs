@@ -222,6 +222,7 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
         modelBuilder.Entity<GlobalConfig>(entity => 
         {
             entity.ToTable("global_config");
+            entity.HasCheckConstraint("CK_GlobalConfig_SingleRow", "\"Id\" = 1");
             entity.HasKey(x => x.Id);
             entity.Property(x => x.UptimeRobotApiKey).HasMaxLength(1024);
             if (dataProtectionProvider != null)
@@ -236,6 +237,18 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
             entity.Property(x => x.LitiumFetchEnabled).HasDefaultValue(true);
             entity.Property(x => x.UptimeRobotFetchEnabled).HasDefaultValue(true);
             entity.Property(x => x.DefaultUptimeSla);
+
+            entity.HasData(new GlobalConfig
+            {
+                Id = 1,
+                LitiumFetchEnabled = true,
+                UptimeRobotFetchEnabled = true,
+                LitiumFetchIntervalMinutes = 60,
+                UptimeFetchIntervalMinutes = 60,
+                LatencyFetchIntervalMinutes = 10,
+                UserStatsFetchIntervalMinutes = 60,
+                SystemEventRetentionDays = 30
+            });
         });
         
         // User

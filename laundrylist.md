@@ -1,12 +1,14 @@
-- authentication
-- entraid auth and device auth for kiosk mode
+- change out order anomaly chart?
 - order anomaly monitor does not take time of day into account, same with revenue and momentum matrix i believe. maybe we should have a default averaged lookback window like order density matrix. increase from 0 is not 100% anomaly.
 - when using historic backfill, provide visual feedback of status/success/failure/errors
 - more info for "recent background jobs" like tenant and monitor name
+- can we make it return info after triggering?
 - add a toggle for switching between vat and no vat, multiple materialized views or accept latency for the sake of simplicity?
 - intranet api
+  - calendar component that "todays events" pull from.
+  - integrate calendar from msuite?
+  - rss feeds; which ones?
 - make the frontend ping litium env for health checks.
 - provide error/warning when a litium job fails either due to an error or if the service is disabled, or dont even offer it as an option
 - add date to system logs
 - correct dbcontext factory implementation in controllers and services
-- deploy

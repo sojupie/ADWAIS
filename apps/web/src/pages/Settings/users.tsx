@@ -1,4 +1,4 @@
-﻿import { Users } from 'lucide-react';
+import { Users } from 'lucide-react';
 import { useUsersQuery, useCreateUserMutation, useUpdateUserMutation, useDeleteUserMutation } from '../../hooks/useUserQueries';
 import { UserRow } from '../../components/settings/users/UserRow';
 import { ProvisionUserPanel } from '../../components/settings/users/ProvisionUserPanel';
@@ -23,28 +23,28 @@ export function UsersView() {
                     subtitle="Manage directory"
                     icon={<Users size={24} />}
                 />
-                <div className="flex-1 overflow-y-auto custom-scrollbar">
+                <div className="flex-1 overflow-y-auto custom-scrollbar bg-white rounded-xl shadow-sm border border-slate-200/60">
                     <div className="overflow-x-auto">
                         <table className="w-full text-left text-sm whitespace-nowrap">
                             <thead className="bg-white text-slate-500 border-b border-slate-200">
-                            <tr>
-                                <th className="px-6 py-4 font-bold text-sm uppercase tracking-wider w-[40%]">User</th>
-                                <th className="px-6 py-4 font-bold text-sm uppercase tracking-wider w-[30%]">Role Level</th>
-                                <th className="px-6 py-4 font-bold text-sm uppercase tracking-wider text-right">Actions</th>
-                            </tr>
+                                <tr>
+                                    <th className="px-6 py-4 font-bold text-sm uppercase tracking-wider w-[40%]">User</th>
+                                    <th className="px-6 py-4 font-bold text-sm uppercase tracking-wider w-[30%]">Role Level</th>
+                                    <th className="px-6 py-4 font-bold text-sm uppercase tracking-wider text-right">Actions</th>
+                                </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
-                            {(users || []).map((u) => (
-                                <UserRow
-                                    key={u.id}
-                                    u={u}
-                                    updateUser={updateUser}
-                                    deleteUser={deleteUser}
-                                />
-                            ))}
-                            {(!users || users.length === 0) && (
-                                <EmptyState message="No active users registered." isTableRow colSpan={3} />
-                            )}
+                                {(users || []).map((u) => (
+                                    <UserRow
+                                        key={u.id}
+                                        u={u}
+                                        updateUser={updateUser}
+                                        deleteUser={deleteUser}
+                                    />
+                                ))}
+                                {(!users || users.length === 0) && (
+                                    <EmptyState message="No active users registered." isTableRow colSpan={3} />
+                                )}
                             </tbody>
                         </table>
                     </div>

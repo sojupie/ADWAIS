@@ -55,6 +55,7 @@ public class MonitorController(
     /// Returns monitors hydrated with uptime for the specified timeframe (defaults to T30).
     /// </summary>
     /// <param name="request">The request containing query filters and timeframe.</param>
+    /// <param name="ct">Cancellation token</param>
     [HttpGet]
     [Authorize(Policy = "KioskOrStaffAccess")]
     public async Task<ActionResult<IEnumerable<UptimeMonitorDto>>> GetMonitors([FromQuery] MonitorRequestDto request, CancellationToken ct = default)
@@ -98,6 +99,8 @@ public class MonitorController(
     /// Retrieves monitors that are not assigned to any specific tenant.
     /// </summary>
     /// <param name="timeframe">The timeframe for calculating uptime percentage.</param>
+    /// <param name="ct">Cancellation token</param>
+    /// <param name="comparison">The comparision period type.</param>
     [HttpGet("unassigned")]
     [Authorize(Policy = "KioskOrStaffAccess")]
     public async Task<ActionResult<IEnumerable<UptimeMonitorDto>>> GetUnassignedMonitors([FromQuery] Timeframe timeframe = Timeframe.T30, [FromQuery] ComparisonType comparison = ComparisonType.Preceding, CancellationToken ct = default)

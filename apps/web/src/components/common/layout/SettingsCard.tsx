@@ -25,11 +25,11 @@ export function SettingsCard({
   className = '',
 }: SettingsCardProps) {
   return (
-    <div className={`bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col break-inside-avoid animate-in fade-in ${className}`}>
+    <div className={`bg-white sm:border sm:border-slate-200 sm:rounded-2xl sm:shadow-sm border-b sm:border-b-0 border-slate-200 overflow-hidden flex flex-col break-inside-avoid animate-in fade-in ${className}`}>
       <SubSectionHeader title={title} subtitle={subtitle} icon={icon}>
         {headerActions}
       </SubSectionHeader>
-      <div className="p-4 flex flex-col gap-4">
+      <div className="px-2 py-3 sm:p-4 flex flex-col gap-2 sm:gap-4">
         {children}
       </div>
     </div>

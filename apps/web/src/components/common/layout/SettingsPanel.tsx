@@ -7,7 +7,7 @@ interface SettingsPanelProps {
 
 export function SettingsPanel({ children, className = '' }: SettingsPanelProps) {
   return (
-    <section className={`flex flex-col h-full bg-slate-50/50 rounded-2xl border border-slate-200 shadow-sm overflow-hidden max-h-[800px] xl:max-h-none ${className}`}>
+    <section className={`flex flex-col h-full bg-slate-100 sm:bg-slate-100/80 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-inner max-h-[800px] xl:max-h-none p-2 sm:p-3 gap-2 sm:gap-3 ${className}`}>
       {children}
     </section>
   );

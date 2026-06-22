@@ -68,10 +68,10 @@ export function SystemEventsView() {
         clearErrorsMutation
     } = useSystemEventsViewModel();
     return (
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 h-full min-h-0">
+        <div className="flex flex-col xl:grid xl:grid-cols-3 gap-6 h-full min-h-0">
 
             {/* Diagnostics / Health Panel */}
-            <SettingsPanel className="col-span-1 bg-white">
+            <SettingsPanel className="col-span-1">
                 <SectionHeader
                     title="Pipeline Health"
                     subtitle="Live connectivity"
@@ -79,7 +79,7 @@ export function SystemEventsView() {
                     dark={true}
                 />
 
-                <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-5 custom-scrollbar bg-slate-50/50">
+                <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-5 custom-scrollbar bg-white rounded-xl shadow-sm border border-slate-200/60">
                     {health ? (
                         <div className="flex flex-col gap-4">
 
@@ -113,7 +113,7 @@ export function SystemEventsView() {
                                 subtitle="Scheduler worker queues"
                                 status={health.hangfire?.status}
                             >
-                                <div className="grid grid-cols-4 gap-1 mt-1 text-center border-t border-slate-100 pt-2 text-sm text-slate-500">
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2 text-center border-t border-slate-100 pt-3 text-sm text-slate-500">
                                     <div className="flex flex-col p-1.5 bg-slate-50 rounded">
                                         <span className="font-extrabold text-slate-850">{health.hangfire?.processingCount}</span>
                                         <span>Active</span>
@@ -183,7 +183,7 @@ export function SystemEventsView() {
             </SettingsPanel>
 
             {/* System Logs console */}
-            <section className="flex flex-col col-span-1 xl:col-span-2 bg-slate-900 rounded-2xl shadow-lg border border-slate-800 overflow-hidden h-full min-h-0">
+            <section className="flex flex-col flex-1 xl:flex-none col-span-1 xl:col-span-2 bg-slate-900 rounded-2xl shadow-lg border border-slate-800 overflow-hidden h-full min-h-0">
                 <div className="flex items-center justify-between shrink-0 p-4 border-b border-slate-800 bg-slate-900 z-10">
                     <div className="flex items-center gap-3">
                         <TerminalSquare size={18} className="text-brand-accent" />

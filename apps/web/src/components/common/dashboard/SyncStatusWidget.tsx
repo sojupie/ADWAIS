@@ -106,8 +106,8 @@ export function SyncStatusWidget() {
     <div 
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`flex items-center gap-2 sm:gap-4 px-2 sm:px-3 h-[46px] border rounded-sm shadow-sm bg-brand-bg-secondary border-brand-bg-secondary/20 w-full md:w-auto max-w-100 md:max-w-none transition-all duration-350 ease-out
-        ${isExpanded ? 'xl:w-auto xl:opacity-100 xl:shadow-lg' : 'xl:w-[46px] xl:opacity-40 xl:overflow-hidden xl:px-2'}
+      className={`flex items-center gap-2 sm:gap-4 px-2 sm:px-3 min-h-[46px] py-1.5 xl:py-0 border rounded-sm shadow-sm bg-brand-bg-secondary border-brand-bg-secondary/20 w-full xl:w-auto transition-all duration-350 ease-out
+        ${isExpanded ? 'xl:opacity-100 xl:shadow-lg' : 'xl:w-[46px] xl:h-[46px] xl:opacity-40 xl:overflow-hidden xl:px-2'}
       `}
     >
       {/* Timer Wheel */}
@@ -155,22 +155,22 @@ export function SyncStatusWidget() {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-x-6 gap-y-1 items-center">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 items-center">
             <div className="flex justify-between items-center gap-2">
               <span className="text-sm font-black uppercase tracking-widest text-white/60">Dash UI</span>
-              <span className="text-sm font-bold text-white truncate text-right">{timeAgo(dashboardSyncTime)}</span>
+              <span className="text-sm font-bold text-white text-right">{timeAgo(dashboardSyncTime)}</span>
             </div>
             <div className="flex justify-between items-center gap-2">
               <span className="text-sm font-black uppercase tracking-widest text-white/60">Meta</span>
-              <span className="text-sm font-bold text-white truncate text-right">{timeAgo(health?.lastFleetUpdate)}</span>
+              <span className="text-sm font-bold text-white text-right">{timeAgo(health?.lastFleetUpdate)}</span>
             </div>
             <div className="flex justify-between items-center gap-2">
               <span className="text-sm font-black uppercase tracking-widest text-white/60">Uptime</span>
-              <span className="text-sm font-bold text-white truncate text-right">{timeAgo(health?.lastFleetUptimeUpdate)}</span>
+              <span className="text-sm font-bold text-white text-right">{timeAgo(health?.lastFleetUptimeUpdate)}</span>
             </div>
             <div className="flex justify-between items-center gap-2">
               <span className="text-sm font-black uppercase tracking-widest text-white/60">Latency</span>
-              <span className="text-sm font-bold text-white truncate text-right">{timeAgo(health?.lastFleetLatencyUpdate)}</span>
+              <span className="text-sm font-bold text-white text-right">{timeAgo(health?.lastFleetLatencyUpdate)}</span>
             </div>
           </div>
         )}

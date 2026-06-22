@@ -37,7 +37,7 @@ export function BackgroundJobsView() {
                     subtitle="Force execution & settings"
                     icon={<Activity size={24} />}
                 />
-                <div className="flex-1 overflow-y-auto p-4 custom-scrollbar bg-slate-50/50">
+                <div className="flex-1 overflow-y-auto px-2 py-3 sm:p-4 custom-scrollbar bg-white rounded-xl shadow-sm border border-slate-200/60">
                     <div className="grid grid-cols-1 gap-6">
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                             {manualJobs.map(job => {
@@ -81,7 +81,7 @@ export function BackgroundJobsView() {
                     subtitle="Recurring intervals & recent executions"
                     icon={<Clock size={24} />}
                 />
-                <div className="flex-1 overflow-y-auto custom-scrollbar p-4 bg-slate-50/50">
+                <div className="flex-1 overflow-y-auto px-2 py-3 sm:p-4 custom-scrollbar bg-white rounded-xl shadow-sm border border-slate-200/60">
                     <div className="flex flex-col gap-6 h-full">
                         {/* Recurring Table */}
                         <div className="flex flex-col bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden shrink-0 max-h-[250px]">

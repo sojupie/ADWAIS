@@ -10,7 +10,7 @@ interface SubSectionHeaderProps {
 
 export function SubSectionHeader({ title, subtitle, icon, children, className = '' }: SubSectionHeaderProps) {
   return (
-    <div className={`flex items-center justify-between p-4 border-b border-slate-100 bg-slate-50/50 ${className}`}>
+    <div className={`flex items-center justify-between px-3 py-2 sm:p-4 border-b border-slate-100 bg-slate-50/50 ${className}`}>
       <div className="flex items-center gap-3">
         <div className="p-2 bg-brand-link/10 text-brand-link rounded-lg shadow-sm">
           {icon}

@@ -87,7 +87,7 @@ export function TenantsMonitorsView() {
                     </SecureButton>
                 </SectionHeader>
 
-                <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 custom-scrollbar bg-slate-50/50">
+                <div className="flex-1 overflow-y-auto px-2 py-3 sm:p-4 flex flex-col gap-4 custom-scrollbar bg-white rounded-xl shadow-sm border border-slate-200/60">
                     {isCreatingTenant && (
                         <div className="border-2 border-brand-link/20 rounded-xl overflow-hidden bg-brand-link/5 shadow-sm shrink-0 flex flex-col">
                             <div className="flex items-center justify-between p-3 border-b border-brand-link/10">
@@ -95,9 +95,9 @@ export function TenantsMonitorsView() {
                                 <button onClick={() => setIsCreatingTenant(false)} className="text-slate-400 hover:text-slate-600 cursor-pointer"><X size={16} /></button>
                             </div>
                             <div className="p-4 flex flex-col gap-3">
-                                <Input label="Name" placeholder="Tenant Name" value={newTenantDraft.name} onChange={e => setNewTenantDraft({...newTenantDraft, name: e.target.value})} />
-                                <Input label="Litium Base URL" placeholder="https://example.com" value={newTenantDraft.litiumBaseUrl} onChange={e => setNewTenantDraft({...newTenantDraft, litiumBaseUrl: e.target.value})} />
-                                <Input label="Service Account Token" type="password" className="font-mono" placeholder="Secret Token" value={newTenantDraft.serviceAccountToken} onChange={e => setNewTenantDraft({...newTenantDraft, serviceAccountToken: e.target.value})} />
+                                <Input label="Name" placeholder="Tenant Name" value={newTenantDraft.name} onChange={e => setNewTenantDraft({ ...newTenantDraft, name: e.target.value })} />
+                                <Input label="Litium Base URL" placeholder="https://example.com" value={newTenantDraft.litiumBaseUrl} onChange={e => setNewTenantDraft({ ...newTenantDraft, litiumBaseUrl: e.target.value })} />
+                                <Input label="Service Account Token" type="password" className="font-mono" placeholder="Secret Token" value={newTenantDraft.serviceAccountToken} onChange={e => setNewTenantDraft({ ...newTenantDraft, serviceAccountToken: e.target.value })} />
                                 <SecureButton
                                     className="mt-2 bg-brand-link hover:bg-brand-link/90 text-white font-bold text-sm px-4 py-2 rounded-lg cursor-pointer flex items-center justify-center gap-2 w-full"
                                     disabled={!newTenantDraft.name || !newTenantDraft.litiumBaseUrl}
@@ -163,7 +163,7 @@ export function TenantsMonitorsView() {
                     </SecureButton>
                 </SectionHeader>
 
-                <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 custom-scrollbar bg-slate-50/50">
+                <div className="flex-1 overflow-y-auto px-2 py-3 sm:p-4 flex flex-col gap-4 custom-scrollbar bg-white rounded-xl shadow-sm border border-slate-200/60">
                     {isCreatingMonitor && (
                         <div className="border-2 border-brand-link/20 rounded-xl overflow-hidden bg-brand-link/5 shadow-sm shrink-0 flex flex-col">
                             <div className="flex items-center justify-between p-3 border-b border-brand-link/10">
@@ -171,9 +171,9 @@ export function TenantsMonitorsView() {
                                 <button onClick={() => setIsCreatingMonitor(false)} className="text-slate-400 hover:text-slate-600 cursor-pointer"><X size={16} /></button>
                             </div>
                             <div className="p-4 flex flex-col gap-3">
-                                <Input label="Name" placeholder="Monitor Name" value={newMonitorDraft.name} onChange={e => setNewMonitorDraft({...newMonitorDraft, name: e.target.value})} />
-                                <Input label="URL" placeholder="https://example.com" value={newMonitorDraft.url} onChange={e => setNewMonitorDraft({...newMonitorDraft, url: e.target.value})} />
-                                <Input label="Uptime SLA (%)" type="number" step="0.1" value={newMonitorDraft.uptimeSla} onChange={e => setNewMonitorDraft({...newMonitorDraft, uptimeSla: e.target.value === '' ? '' : parseFloat(e.target.value)})} placeholder="e.g. 99.9" />
+                                <Input label="Name" placeholder="Monitor Name" value={newMonitorDraft.name} onChange={e => setNewMonitorDraft({ ...newMonitorDraft, name: e.target.value })} />
+                                <Input label="URL" placeholder="https://example.com" value={newMonitorDraft.url} onChange={e => setNewMonitorDraft({ ...newMonitorDraft, url: e.target.value })} />
+                                <Input label="Uptime SLA (%)" type="number" step="0.1" value={newMonitorDraft.uptimeSla} onChange={e => setNewMonitorDraft({ ...newMonitorDraft, uptimeSla: e.target.value === '' ? '' : parseFloat(e.target.value) })} placeholder="e.g. 99.9" />
                                 <SecureButton
                                     className="mt-2 bg-brand-link hover:bg-brand-link/90 text-white font-bold text-sm px-4 py-2 rounded-lg cursor-pointer flex items-center justify-center gap-2 w-full"
                                     disabled={!newMonitorDraft.name || !newMonitorDraft.url}

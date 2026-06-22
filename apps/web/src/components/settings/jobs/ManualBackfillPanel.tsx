@@ -42,7 +42,7 @@ export function ManualBackfillPanel({ tenants, triggerBackfill, disabled }: Manu
           ))}
         </Select>
       </div>
-      <div className="flex gap-3">
+      <div className="flex flex-col sm:flex-row gap-3">
         <Input
           label="Start Date"
           type="datetime-local"

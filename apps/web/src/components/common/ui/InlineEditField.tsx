@@ -226,7 +226,7 @@ export function InlineEditField<T>({
                 setDraft((type === 'password' ? '' : value) as unknown as T);
                 setIsEditing(true);
               }}
-              className={`p-1 text-slate-400 hover:text-brand-link hover:bg-brand-bg-secondary rounded cursor-pointer transition-all ${isHovered ? 'opacity-100' : 'opacity-0'}`}
+              className="p-1 text-slate-400 hover:text-brand-link hover:bg-brand-bg-secondary rounded cursor-pointer transition-all opacity-100 sm:opacity-0 sm:group-hover/val:opacity-100"
               title="Edit"
             >
               <Edit3 size={14} />

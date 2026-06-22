@@ -234,7 +234,7 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
             entity.Property(x => x.UptimeFetchIntervalMinutes).HasDefaultValue(60);
             entity.Property(x => x.LatencyFetchIntervalMinutes).HasDefaultValue(10);
             entity.Property(x => x.UserStatsFetchIntervalMinutes).HasDefaultValue(60);
-            entity.Property(x => x.SystemEventRetentionDays).HasDefaultValue(30);
+            entity.Property(x => x.SystemEventRetentionDays).HasDefaultValue(2);
             entity.Property(x => x.LitiumFetchEnabled).HasDefaultValue(true);
             entity.Property(x => x.UptimeRobotFetchEnabled).HasDefaultValue(true);
             entity.Property(x => x.DefaultUptimeSla);

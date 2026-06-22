@@ -1,6 +1,7 @@
 param (
     [switch]$Frontend,
     [switch]$Backend,
+    [switch]$RestartContainers,
     [switch]$Permissions,
     [switch]$RestartNginx,
     [switch]$All
@@ -10,10 +11,11 @@ $ServerIp = "62.238.23.122"
 $SshUser = "motillo"
 $WebRoot = "/var/www/kpi.motillo.com"
 $ApiImage = "sojupie/adwais-api:latest"
+$LocalComposePath = "docker-compose.prod.yml" 
 
-if (-not ($Frontend -or $Backend -or $Permissions -or $RestartNginx -or $All)) {
+if (-not ($Frontend -or $Backend -or $RestartContainers -or $Permissions -or $RestartNginx -or $All)) {
     Write-Host "Please specify a deployment target." -ForegroundColor Red
-    Write-Host "Usage: .\deploy.ps1 -Frontend | -Backend | -Permissions | -RestartNginx | -All" -ForegroundColor Yellow
+    Write-Host "Usage: .\deploy.ps1 -Frontend | -Backend | -RestartContainers | -Permissions | -RestartNginx | -All" -ForegroundColor Yellow
     exit
 }
 
@@ -21,8 +23,15 @@ if ($All -or $Backend) {
     Write-Host "`n[Deploying Backend API]" -ForegroundColor Cyan
     docker build --no-cache -t $ApiImage -f apps/server/ADWAIS/src/Api/Dockerfile .
     docker push $ApiImage
+    $RestartContainers = $true
+}
 
-    Write-Host "--> Updating containers on Hetzner VPS..." -ForegroundColor DarkGray
+if ($RestartContainers) {
+    Write-Host "`n[Syncing & Restarting Containers]" -ForegroundColor Cyan
+    Write-Host "--> Syncing docker-compose config to Hetzner VPS..." -ForegroundColor DarkGray
+    scp $LocalComposePath ${SshUser}@${ServerIp}:/opt/adwais/docker-compose.prod.yml
+
+    Write-Host "--> Pulling images and recreating containers on Hetzner VPS..." -ForegroundColor DarkGray
     ssh ${SshUser}@${ServerIp} "cd /opt/adwais && sudo docker compose -f docker-compose.prod.yml pull && sudo docker compose -f docker-compose.prod.yml up -d --force-recreate"
 }
 

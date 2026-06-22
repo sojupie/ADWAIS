@@ -80,7 +80,7 @@ namespace Adwais.Infrastructure.Migrations
                     b.Property<int>("SystemEventRetentionDays")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
-                        .HasDefaultValue(30)
+                        .HasDefaultValue(2)
                         .HasColumnName("system_event_retention_days");
 
                     b.Property<int>("UptimeFetchIntervalMinutes")

@@ -107,6 +107,85 @@ public class LocalUserClaimsTransformationTests
         Assert.False(result.HasClaim(c => c.Type == ClaimTypes.Role));
     }
 
+    [Fact]
+    public async Task TransformAsync_ShouldLinkPreProvisionedUserByEmail_WhenUserPreProvisionedWithoutOid()
+    {
+        // Arrange
+        var preProvisionedEmail = "pre@example.com";
+        var preProvisionedRole = UserRole.Admin;
+        
+        await using (var db = new AnalyticsDbContext(_dbOptions))
+        {
+            db.Users.Add(new User
+            {
+                Id = Guid.NewGuid(),
+                EntraObjectId = null,
+                Name = preProvisionedEmail,
+                Email = preProvisionedEmail,
+                Role = preProvisionedRole
+            });
+            await db.SaveChangesAsync();
+        }
+
+        var entraOid = Guid.NewGuid();
+        var nameClaim = "Pre Linked User";
+        var principal = CreatePrincipal(entraOid.ToString(), preProvisionedEmail, nameClaim);
+
+        // Act
+        var result = await _transformation.TransformAsync(principal);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.True(result.IsInRole("Admin"));
+
+        // Verify linked fields in DB
+        await using var dbVerify = new AnalyticsDbContext(_dbOptions);
+        var user = await dbVerify.Users.SingleOrDefaultAsync(u => u.EntraObjectId == entraOid);
+        Assert.NotNull(user);
+        Assert.Equal(nameClaim, user.Name);
+        Assert.Equal(preProvisionedEmail, user.Email);
+        Assert.Equal(UserRole.Admin, user.Role);
+    }
+
+    [Fact]
+    public async Task TransformAsync_ShouldSyncNameAndEmail_WhenOidMatchesButClaimsDiffer()
+    {
+        // Arrange
+        var entraOid = Guid.NewGuid();
+        var originalName = "Old Name";
+        var originalEmail = "old@example.com";
+
+        await using (var db = new AnalyticsDbContext(_dbOptions))
+        {
+            db.Users.Add(new User
+            {
+                Id = Guid.NewGuid(),
+                EntraObjectId = entraOid,
+                Name = originalName,
+                Email = originalEmail,
+                Role = UserRole.Employee
+            });
+            await db.SaveChangesAsync();
+        }
+
+        var newName = "New Name";
+        var newEmail = "new@example.com";
+        var principal = CreatePrincipal(entraOid.ToString(), newEmail, newName);
+
+        // Act
+        var result = await _transformation.TransformAsync(principal);
+
+        // Assert
+        Assert.NotNull(result);
+
+        // Verify database updated
+        await using var dbVerify = new AnalyticsDbContext(_dbOptions);
+        var user = await dbVerify.Users.SingleOrDefaultAsync(u => u.EntraObjectId == entraOid);
+        Assert.NotNull(user);
+        Assert.Equal(newName, user.Name);
+        Assert.Equal(newEmail, user.Email);
+    }
+
     private static ClaimsPrincipal CreatePrincipal(string oid, string email, string name)
     {
         var identity = new ClaimsIdentity("FederatedAuthentication");

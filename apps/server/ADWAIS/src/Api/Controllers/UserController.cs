@@ -32,7 +32,7 @@ public class UserController(IUserService userService) : ControllerBase
             var user = await _userService.GetUserByEntraObjectIdAsync(entraOid, ct);
             if (user != null)
             {
-                return Ok(new UserResponseDto(user.Id, user.Name, user.Role));
+                return Ok(new UserResponseDto(user.Id, user.Name, user.Email, user.Role));
             }
         }
 
@@ -40,7 +40,7 @@ public class UserController(IUserService userService) : ControllerBase
         if (role == "Viewer")
         {
             var name = User.Identity?.Name ?? "Kiosk Device";
-            return Ok(new UserResponseDto(Guid.Empty, name, Adwais.Domain.Enums.UserRole.Viewer));
+            return Ok(new UserResponseDto(Guid.Empty, name, null, Adwais.Domain.Enums.UserRole.Viewer));
         }
 
         return Unauthorized("User context is invalid or not registered.");
@@ -51,7 +51,7 @@ public class UserController(IUserService userService) : ControllerBase
     public async Task<ActionResult<IEnumerable<UserResponseDto>>> GetUsers(CancellationToken ct)
     {
         var users = await _userService.GetUsersAsync(ct);
-        var response = users.Select(u => new UserResponseDto(u.Id, u.Name, u.Role));
+        var response = users.Select(u => new UserResponseDto(u.Id, u.Name, u.Email, u.Role));
         return Ok(response);
     }
 
@@ -64,7 +64,7 @@ public class UserController(IUserService userService) : ControllerBase
         {
             return NotFound();
         }
-        return Ok(new UserResponseDto(user.Id, user.Name, user.Role));
+        return Ok(new UserResponseDto(user.Id, user.Name, user.Email, user.Role));
     }
 
     /// <summary>
@@ -75,8 +75,8 @@ public class UserController(IUserService userService) : ControllerBase
     [Authorize(Policy = "AdminOnly")]
     public async Task<ActionResult<UserResponseDto>> CreateUser([FromBody] CreateUserRequestDto request, CancellationToken ct)
     {
-        var user = await _userService.CreateUserAsync(request.Name, request.Role, ct);
-        return CreatedAtAction(nameof(GetUser), new { id = user.Id }, new UserResponseDto(user.Id, user.Name, user.Role));
+        var user = await _userService.CreateUserAsync(request.Email, request.Role, ct);
+        return CreatedAtAction(nameof(GetUser), new { id = user.Id }, new UserResponseDto(user.Id, user.Name, user.Email, user.Role));
     }
 
     [HttpPatch("{id:guid}")]
@@ -88,7 +88,7 @@ public class UserController(IUserService userService) : ControllerBase
         {
             return NotFound();
         }
-        return Ok(new UserResponseDto(user.Id, user.Name, user.Role));
+        return Ok(new UserResponseDto(user.Id, user.Name, user.Email, user.Role));
     }
 
     [HttpDelete("{id:guid}")]

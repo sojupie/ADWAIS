@@ -7,9 +7,10 @@ public class CreateUserRequestDtoValidator : AbstractValidator<CreateUserRequest
 {
     public CreateUserRequestDtoValidator()
     {
-        RuleFor(x => x.Name)
-            .NotEmpty().WithMessage("User name is required.")
-            .MaximumLength(100).WithMessage("User name must not exceed 100 characters.");
+        RuleFor(x => x.Email)
+            .NotEmpty().WithMessage("User email is required.")
+            .EmailAddress().WithMessage("A valid email address is required.")
+            .MaximumLength(255).WithMessage("User email must not exceed 255 characters.");
 
         RuleFor(x => x.Role)
             .IsInEnum().WithMessage("A valid user role is required.");

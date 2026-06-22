@@ -87,13 +87,13 @@ public class UserControllerTests
     }
 
     [Fact]
-    public async Task CreateUser_ShouldReturnCreatedWithUser()
+    public async Task CreateUser_ShouldReturnCreatedWithUser_WhenRequestContainsEmail()
     {
         // Arrange
-        var request = new CreateUserRequestDto("New User", UserRole.Employee);
-        var createdUser = new User { Id = Guid.NewGuid(), Name = "New User", Role = UserRole.Employee };
+        var request = new CreateUserRequestDto("new@example.com", UserRole.Employee);
+        var createdUser = new User { Id = Guid.NewGuid(), Name = "new@example.com", Email = "new@example.com", Role = UserRole.Employee };
 
-        _userServiceMock.Setup(s => s.CreateUserAsync(request.Name, request.Role, It.IsAny<CancellationToken>()))
+        _userServiceMock.Setup(s => s.CreateUserAsync(request.Email, request.Role, It.IsAny<CancellationToken>()))
             .ReturnsAsync(createdUser);
 
         // Act
@@ -102,9 +102,10 @@ public class UserControllerTests
         // Assert
         var createdResult = Assert.IsType<CreatedAtActionResult>(result.Result);
         var returnedUser = Assert.IsType<UserResponseDto>(createdResult.Value);
-        Assert.Equal("New User", returnedUser.Name);
+        Assert.Equal("new@example.com", returnedUser.Name);
+        Assert.Equal("new@example.com", returnedUser.Email);
         Assert.Equal(UserRole.Employee, returnedUser.Role);
-        _userServiceMock.Verify(s => s.CreateUserAsync(request.Name, request.Role, It.IsAny<CancellationToken>()), Times.Once);
+        _userServiceMock.Verify(s => s.CreateUserAsync(request.Email, request.Role, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]

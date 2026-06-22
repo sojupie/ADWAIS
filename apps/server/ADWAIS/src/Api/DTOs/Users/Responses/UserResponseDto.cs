@@ -5,6 +5,7 @@ namespace Adwais.Api.DTOs.Users;
 public record UserResponseDto(
     Guid Id,
     string Name,
+    string? Email,
     UserRole Role
 );
 

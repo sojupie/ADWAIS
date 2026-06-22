@@ -45,13 +45,14 @@ public class UserService(IDbContextFactory<AnalyticsDbContext> contextFactory) :
     }
 
     /// <inheritdoc />
-    public async Task<User> CreateUserAsync(string name, UserRole role, CancellationToken ct)
+    public async Task<User> CreateUserAsync(string email, UserRole role, CancellationToken ct)
     {
         await using var db = await _contextFactory.CreateDbContextAsync(ct);
         var user = new User
         {
             Id = Guid.NewGuid(),
-            Name = name,
+            Email = email,
+            Name = email, // Set Name to Email initially as placeholder
             Role = role
         };
 

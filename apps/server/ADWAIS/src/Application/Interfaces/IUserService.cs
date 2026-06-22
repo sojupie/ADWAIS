@@ -38,11 +38,11 @@ public interface IUserService
     /// <summary>
     /// Creates a new user record.
     /// </summary>
-    /// <param name="name">The name of the user.</param>
+    /// <param name="email">The email of the user.</param>
     /// <param name="role">The access role assigned to the user.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns>The newly created user record.</returns>
-    Task<User> CreateUserAsync(string name, UserRole role, CancellationToken ct);
+    Task<User> CreateUserAsync(string email, UserRole role, CancellationToken ct);
 
     /// <summary>
     /// Updates an existing user record.

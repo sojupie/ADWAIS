@@ -97,22 +97,24 @@ public class UserServiceTests
     }
 
     [Fact]
-    public async Task CreateUserAsync_ShouldAddUserToDatabase()
+    public async Task CreateUserAsync_ShouldAddUserToDatabase_WithEmailAsNamePlaceholder()
     {
         // Act
-        var user = await _userService.CreateUserAsync("New User", UserRole.Admin, CancellationToken.None);
+        var user = await _userService.CreateUserAsync("newuser@example.com", UserRole.Admin, CancellationToken.None);
 
         // Assert
         Assert.NotNull(user);
         Assert.NotEqual(Guid.Empty, user.Id);
-        Assert.Equal("New User", user.Name);
+        Assert.Equal("newuser@example.com", user.Email);
+        Assert.Equal("newuser@example.com", user.Name);
         Assert.Equal(UserRole.Admin, user.Role);
 
         // Verify in DB
         await using var db = new AnalyticsDbContext(_dbOptions);
         var dbUser = await db.Users.SingleOrDefaultAsync(u => u.Id == user.Id);
         Assert.NotNull(dbUser);
-        Assert.Equal("New User", dbUser.Name);
+        Assert.Equal("newuser@example.com", dbUser.Email);
+        Assert.Equal("newuser@example.com", dbUser.Name);
     }
 
     [Fact]

@@ -121,7 +121,7 @@ namespace Adwais.Infrastructure.Migrations
                             LatencyFetchIntervalMinutes = 10,
                             LitiumFetchEnabled = true,
                             LitiumFetchIntervalMinutes = 60,
-                            SystemEventRetentionDays = 30,
+                            SystemEventRetentionDays = 2,
                             UptimeFetchIntervalMinutes = 60,
                             UptimeRobotFetchEnabled = true,
                             UserStatsFetchIntervalMinutes = 60

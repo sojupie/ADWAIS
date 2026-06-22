@@ -31,7 +31,6 @@ export function InlineEditField<T>({
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState(value);
   const [isSaving, setIsSaving] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
   const inputRef = useRef<HTMLInputElement | HTMLSelectElement>(null);
 
   const [prevValue, setPrevValue] = useState(value);
@@ -119,8 +118,6 @@ export function InlineEditField<T>({
   return (
     <div 
       className={`flex flex-col gap-1 py-1 px-2 -mx-2 rounded-lg transition-colors ${isEditing ? 'bg-slate-50 border border-slate-200' : 'hover:bg-slate-50 border border-transparent'}`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
     >
       <label className="text-sm font-bold text-slate-500 uppercase tracking-wider flex justify-between items-center">
         <span>{label}</span>

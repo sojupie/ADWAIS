@@ -1354,6 +1354,7 @@
           {
             "name": "comparison",
             "in": "query",
+            "description": "The comparision period type.",
             "schema": {
               "$ref": "#/components/schemas/ComparisonType"
             }

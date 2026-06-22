@@ -41,8 +41,8 @@ public class TokenServiceTests
         Assert.Equal("ADWAIS", jwtToken.Issuer);
         Assert.Equal("ADWAIS-Kiosk", jwtToken.Audiences.First());
         
-        var nameClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
-        var roleClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+        var nameClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name || c.Type == "name")?.Value;
+        var roleClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role || c.Type == "role")?.Value;
 
         Assert.Equal($"Kiosk-Device-{deviceId}", nameClaim);
         Assert.Equal("Viewer", roleClaim);

@@ -74,8 +74,8 @@ export const RevenueEfficiencyChart = memo(function RevenueEfficiencyChart({
       {isEmpty ? (
         <EmptyState message={"No data available"} variant={"minimal"}/>
       ) : (
-        <ResponsiveContainer width="100%" height="100%" debounce={150}>
-          <ScatterChart margin={{ top: 10, right: 24, left: 12, bottom: 14 }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <ScatterChart margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
             <XAxis
               type="number"
               dataKey="averageOrderValue"
@@ -102,7 +102,6 @@ export const RevenueEfficiencyChart = memo(function RevenueEfficiencyChart({
               tick={{ fill: 'var(--color-chart-tick)', fontSize: 13, fontWeight: 600, fontFamily: 'Manrope, sans-serif' }}
               axisLine={false}
               tickLine={false}
-              width={52}
             />
             {/* We map growthVelocity to bubble area. We take absolute value to ensure sizes are positive,
                 but users still see negative growth via tooltip. */}

@@ -50,8 +50,8 @@ export const OrderValueDistributionChart = memo(function OrderValueDistributionC
       className={className || ''}
       bodyClassName="w-full h-full flex flex-col flex-1 min-h-0"
     >
-      <ResponsiveContainer width="100%" height="100%" debounce={150}>
-        <ComposedChart data={bins} margin={{ top: 16, right: 10, left: 8, bottom: 42 }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <ComposedChart data={bins} margin={{ top: 16, right: 10, left: 10, bottom: 20 }}>
           <CartesianGrid stroke="var(--color-chart-grid)" strokeDasharray="3 4" vertical={false} />
           <XAxis
             dataKey="binLabel"
@@ -60,7 +60,7 @@ export const OrderValueDistributionChart = memo(function OrderValueDistributionC
             tickLine={false}
             angle={-45}
             textAnchor="end"
-            height={58}
+            height={70}
             interval={0}
           />
           <YAxis
@@ -68,7 +68,6 @@ export const OrderValueDistributionChart = memo(function OrderValueDistributionC
             tick={{ fill: 'var(--color-chart-tick)', fontSize: 11, fontWeight: 700, fontFamily: 'Manrope, sans-serif' }}
             axisLine={false}
             tickLine={false}
-            width={46}
           />
           <YAxis
             yAxisId="right"
@@ -78,7 +77,6 @@ export const OrderValueDistributionChart = memo(function OrderValueDistributionC
             tickFormatter={(value) => `${value}%`}
             axisLine={false}
             tickLine={false}
-            width={46}
           />
           <Tooltip content={<CustomTooltip />} useTranslate3d={true} />
           <Legend wrapperStyle={{ bottom: 0, fontSize: '12px', fontWeight: 600, fontFamily: 'Manrope, sans-serif' }} />

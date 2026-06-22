@@ -8,8 +8,8 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import type { FinancialVelocityPoint, ComparisonPeriod } from '@types';
-import { formatCompact, formatChartLabel, inferBinSize } from '@utils';
+import type { RevenueVelocityPointDto, ComparisonPeriod } from '@types';
+import { formatCurrency, formatChartLabel, inferBinSize, formatCompact } from '@utils';
 import { ChartPanel } from '../common/charts/ChartPanel';
 
 const CustomTooltip = ({ active, payload, label }: { isLoading?: boolean;  active?: boolean; payload?: { dataKey?: string | number; value: number }[]; label?: string }) => {
@@ -59,8 +59,8 @@ export const TenantRevenueVelocityChart = memo(function TenantRevenueVelocityCha
         </div>
       }
     >
-      <ResponsiveContainer width="100%" height="100%" debounce={150}>
-        <LineChart data={chartData} margin={{ top: 8, right: 10, left: 8, bottom: 20 }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={chartData} margin={{ top: 8, right: 10, left: 10, bottom: 10 }}>
           <CartesianGrid stroke="var(--color-chart-grid)" strokeDasharray="3 4" vertical={false} />
           <XAxis
             dataKey="label"
@@ -71,10 +71,10 @@ export const TenantRevenueVelocityChart = memo(function TenantRevenueVelocityCha
           />
           <YAxis
             tickFormatter={(value) => formatCompact(value)}
-            tick={{ fill: 'var(--color-chart-tick)', fontSize: 11, fontWeight: 700, fontFamily: 'Manrope, sans-serif' }}
+            tick={{ fill: 'var(--color-chart-tick)', fontSize: 12, fontWeight: 700, fontFamily: 'Manrope, sans-serif' }}
             axisLine={false}
             tickLine={false}
-            width={56}
+            minTickGap={20}
           />
           <Tooltip content={<CustomTooltip />} useTranslate3d={true} />
           <Line

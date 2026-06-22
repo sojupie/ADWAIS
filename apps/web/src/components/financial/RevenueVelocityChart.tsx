@@ -67,8 +67,8 @@ function RevenueVelocityGraphJSX({ points }: { isLoading?: boolean;  points: Fin
   }));
 
   return (
-    <ResponsiveContainer width="100%" height="100%" debounce={150}>
-      <LineChart data={chartData} margin={{ top: 12, right: 8, left: 0, bottom: 0 }}>
+    <ResponsiveContainer width="100%" height="100%">
+      <LineChart data={chartData} margin={{ top: 12, right: 10, left: 10, bottom: 10 }}>
         <CartesianGrid stroke="var(--color-chart-grid)" vertical={false} />
         <XAxis
           dataKey="label"
@@ -78,11 +78,11 @@ function RevenueVelocityGraphJSX({ points }: { isLoading?: boolean;  points: Fin
           interval="preserveStartEnd"
         />
         <YAxis
-          tickFormatter={(revenue) => formatCompact(revenue)}
-          tick={{ fill: 'var(--color-chart-tick)', fontSize: 14, fontWeight: 600, fontFamily: 'Manrope, sans-serif' }}
+          tickFormatter={(value) => formatCompact(value)}
+          tick={{ fill: 'var(--color-chart-tick)', fontSize: 12 }}
+          minTickGap={20}
           axisLine={false}
           tickLine={false}
-          width={64}
         />
         <Tooltip content={<GraphTooltip />} useTranslate3d={true} />
         <Line

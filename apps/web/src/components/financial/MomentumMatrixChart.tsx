@@ -57,8 +57,8 @@ function MomentumScatterPlot({ points, medianBaselineRevenue, globalGrowthPercen
 points: MomentumTenant[]; medianBaselineRevenue: number; globalGrowthPercentage: number; onTenantSelect?: (tenantId: string) => void;
 }) {
   return (
-    <ResponsiveContainer width="100%" height="100%" debounce={150}>
-      <ScatterChart margin={{ top: 10, right: 24, left: 12, bottom: 14 }}>
+    <ResponsiveContainer width="100%" height="100%">
+      <ScatterChart margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
         <CartesianGrid stroke="var(--color-chart-grid)" strokeDasharray="3 4" />
         <XAxis
           type="number"
@@ -86,7 +86,6 @@ points: MomentumTenant[]; medianBaselineRevenue: number; globalGrowthPercentage:
           tick={{ fill: 'var(--color-chart-tick)', fontSize: 13, fontWeight: 600, fontFamily: 'Manrope, sans-serif' }}
           axisLine={false}
           tickLine={false}
-          width={52}
         />
         <ZAxis type="number" dataKey="currentRevenue" range={[120, 1200]} />
         <ReferenceLine x={medianBaselineRevenue} stroke="var(--color-chart-prev-line)" strokeWidth={2} strokeDasharray="5 5" />

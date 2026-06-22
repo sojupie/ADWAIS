@@ -35,7 +35,7 @@ export function Financial() {
   }
 
   return (
-    <DashboardLayout scrollable={true}>
+    <DashboardLayout>
       {/* KPI Section */}
       <DashboardTopRow>
         <FactPanel

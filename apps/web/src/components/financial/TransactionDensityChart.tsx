@@ -60,13 +60,13 @@ export const TransactionDensityChart = memo(function TransactionDensityChart({
       {isEmpty ? (
         <EmptyState message={"No data available"} variant={"minimal"}/>
       ) : (
-        <div className="flex-1 flex flex-col h-full w-full relative">
+        <div className="flex-1 flex flex-col h-full w-full relative overflow-x-auto custom-scrollbar">
           
-          <div className="flex-1 grid grid-cols-[40px_repeat(24,_1fr)] gap-0.5">
+          <div className="flex-1 grid grid-cols-[40px_repeat(24,_1fr)] gap-0.5 min-w-[600px] lg:min-w-0 pb-2">
             {/* Header row for Hours */}
             <div className="col-span-1"></div>
             {Array.from({ length: 24 }).map((_, h) => (
-              <div key={h} className="text-center text-sm text-slate-500 font-bold self-end pb-1">
+              <div key={h} className="text-center text-xs lg:text-sm text-slate-500 font-bold self-end pb-1">
                 {h.toString().padStart(2, '0')}
               </div>
             ))}

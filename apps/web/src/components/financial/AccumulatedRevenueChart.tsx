@@ -2,7 +2,7 @@ import { memo } from 'react';
 import { ComposedChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import type { AccumulatedRevenuePointDto, ComparisonPeriod } from '@types';
 import { ChartPanel } from '../common/charts/ChartPanel';
-import { formatCurrency, formatChartLabel, inferBinSize } from '@utils';
+import { formatCurrency, formatChartLabel, inferBinSize, formatCompact } from '@utils';
 import { EmptyState } from '../common/ui/EmptyState';
 
 interface AccumulatedRevenueChartProps {
@@ -45,8 +45,8 @@ export const AccumulatedRevenueChart = memo(function AccumulatedRevenueChart({ i
       {points.length === 0 ? (
         <EmptyState message="No revenue data available" variant="minimal" />
       ) : (
-        <ResponsiveContainer width="100%" height="100%" debounce={150}>
-          <ComposedChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <ComposedChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-chart-grid)" />
             <XAxis 
               dataKey="label" 
@@ -60,7 +60,7 @@ export const AccumulatedRevenueChart = memo(function AccumulatedRevenueChart({ i
               axisLine={false} 
               tickLine={false} 
               tick={{ fill: 'var(--color-chart-tick)', fontSize: 12 }}
-              tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
+              tickFormatter={(value) => formatCompact(value)}
             />
             <YAxis 
               yAxisId="right"
@@ -68,10 +68,11 @@ export const AccumulatedRevenueChart = memo(function AccumulatedRevenueChart({ i
               axisLine={false} 
               tickLine={false} 
               tick={{ fill: 'var(--color-chart-tick)', fontSize: 12 }}
-              tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
+              tickFormatter={(value) => formatCompact(value)}
+              width={45}
             />
             <Tooltip content={<CustomTooltip />} cursor={{ fill: 'var(--color-chart-grid)', opacity: 0.4 }} useTranslate3d={true} />
-            <Legend wrapperStyle={{ fontSize: 12, paddingTop: 10 }} />
+            <Legend wrapperStyle={{ fontSize: 12, paddingTop: 5 }} />
             
             {/* Discrete Revenue (Bars) */}
             <Bar 

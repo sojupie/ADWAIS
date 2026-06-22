@@ -106,8 +106,8 @@ export const NetworkLatencyChart = memo(function NetworkLatencyChart({
       {isEmpty ? (
         <EmptyState message="No latency data available" variant="minimal" />
       ) : (
-        <ResponsiveContainer width="100%" height="100%" debounce={150}>
-          <LineChart data={chartData} margin={{ top: 10, right: 20, left: -5, bottom: 10 }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
             <CartesianGrid vertical={false} stroke="var(--color-chart-grid)" strokeDasharray="3 3" />
             <XAxis 
               dataKey="label" 
@@ -118,11 +118,11 @@ export const NetworkLatencyChart = memo(function NetworkLatencyChart({
               tickLine={false} 
             />
             <YAxis 
-              fontSize={12} 
-              tick={{ fill: 'var(--color-chart-tick)', fontWeight: 700, fontFamily: 'Manrope, sans-serif' }} 
-              axisLine={false} 
-              tickLine={false}
-              tickFormatter={(v) => `${v}ms`}
+              tickLine={false} 
+              tick={{ fill: 'var(--color-chart-tick)', fontSize: 12 }} 
+              axisLine={false}
+              minTickGap={30}
+              tickFormatter={(value) => `${value}ms`}
             />
             <Tooltip content={<GraphTooltip />} useTranslate3d={true} />
             <Line 

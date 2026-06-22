@@ -48,7 +48,7 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe,
     : undefined;
 
   return (
-    <DashboardLayout scrollable={true}>
+    <DashboardLayout>
       <header className="flex items-center gap-6 shrink-0">
         <button
           className="w-10 h-10 rounded-full border border-slate-200 bg-white flex items-center justify-center text-xl font-extrabold text-slate-700 hover:text-brand-text hover:bg-slate-100 hover:border-slate-300 transition-all shadow-sm cursor-pointer"

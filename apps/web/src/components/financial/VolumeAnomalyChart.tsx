@@ -71,8 +71,8 @@ export const VolumeAnomalyChart = memo(function VolumeAnomalyChart({
       {isEmpty ? (
         <EmptyState message={"No data available"} variant={"minimal"}/>
       ) : (
-        <ResponsiveContainer width="100%" height="100%" debounce={150}>
-          <BarChart data={sortedEntries} margin={{ top: 10, right: 24, left: 12, bottom: 14 }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={sortedEntries} margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-chart-grid)" />
             <XAxis
               dataKey="tenantName"
@@ -82,7 +82,7 @@ export const VolumeAnomalyChart = memo(function VolumeAnomalyChart({
               interval={0}
               angle={-45}
               textAnchor="end"
-              height={60}
+              height={70}
             />
             <YAxis
               axisLine={false}

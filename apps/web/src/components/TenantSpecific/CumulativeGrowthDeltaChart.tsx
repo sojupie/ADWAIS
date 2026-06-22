@@ -9,7 +9,12 @@ import {
   YAxis,
 } from 'recharts';
 import type { CumulativeGrowthDeltaPoint, ComparisonPeriod } from '@types';
-import { formatCompact, formatChartLabel, inferBinSize } from '@utils';
+import {
+  formatCurrency,
+  formatChartLabel,
+  inferBinSize,
+  formatCompact
+} from '@utils';
 import { ChartPanel } from '../common/charts/ChartPanel';
 
 const CustomTooltip = ({ active, payload, label }: { isLoading?: boolean;  active?: boolean; payload?: { payload: unknown }[]; label?: string }) => {
@@ -55,8 +60,8 @@ export const CumulativeGrowthDeltaChart = memo(function CumulativeGrowthDeltaCha
       className={className || ''}
       bodyClassName="w-full h-full flex flex-col flex-1 min-h-0"
     >
-      <ResponsiveContainer width="100%" height="100%" debounce={150}>
-        <LineChart data={chartData} margin={{ top: 8, right: 10, left: 8, bottom: 20 }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={chartData} margin={{ top: 8, right: 10, left: 10, bottom: 10 }}>
           <CartesianGrid stroke="var(--color-chart-grid)" strokeDasharray="3 4" vertical={false} />
           <XAxis
             dataKey="label"
@@ -66,11 +71,11 @@ export const CumulativeGrowthDeltaChart = memo(function CumulativeGrowthDeltaCha
             interval="preserveStartEnd"
           />
           <YAxis
-            tickFormatter={(value) => formatCompact(value)}
-            tick={{ fill: 'var(--color-chart-tick)', fontSize: 11, fontWeight: 700, fontFamily: 'Manrope, sans-serif' }}
+            tickFormatter={(value) => `${value > 0 ? '+' : ''}${formatCompact(Math.abs(value))}`}
+            tick={{ fill: 'var(--color-chart-tick)', fontSize: 12 }}
+            minTickGap={20}
             axisLine={false}
             tickLine={false}
-            width={56}
           />
           <Tooltip content={<CustomTooltip />} useTranslate3d={true} />
           <Line

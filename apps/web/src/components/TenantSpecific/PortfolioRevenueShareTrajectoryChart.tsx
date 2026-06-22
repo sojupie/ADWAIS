@@ -55,8 +55,8 @@ export const PortfolioRevenueShareTrajectoryChart = memo(function PortfolioReven
       className={className || ''}
       bodyClassName="w-full h-full flex flex-col flex-1 min-h-0"
     >
-      <ResponsiveContainer width="100%" height="100%" debounce={150}>
-        <AreaChart data={rows} margin={{ top: 8, right: 10, left: 8, bottom: 20 }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart data={rows} margin={{ top: 8, right: 10, left: 10, bottom: 10 }}>
           <CartesianGrid stroke="var(--color-chart-grid)" strokeDasharray="3 4" vertical={false} />
           <XAxis
             dataKey="label"
@@ -66,11 +66,11 @@ export const PortfolioRevenueShareTrajectoryChart = memo(function PortfolioReven
             interval="preserveStartEnd"
           />
           <YAxis
-            tickFormatter={(value) => `${value.toFixed(2)}%`}
-            tick={{ fill: 'var(--color-chart-tick)', fontSize: 11, fontWeight: 700, fontFamily: 'Manrope, sans-serif' }}
+            tickFormatter={(val) => `${val}%`}
+            tick={{ fill: 'var(--color-chart-tick)', fontSize: 12 }}
+            minTickGap={20}
             axisLine={false}
             tickLine={false}
-            width={56}
             domain={['dataMin', 'dataMax']}
           />
           <Tooltip content={<CustomTooltip />} useTranslate3d={true} />

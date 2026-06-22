@@ -217,7 +217,7 @@ function RootComponent() {
         {/* ── Main Area ── */}
         <main className="flex-1 min-h-0 relative flex flex-col">
           <div className="flex-1 w-full px-6 pt-6 relative flex flex-col min-h-0 overflow-y-auto custom-scrollbar">
-            <div className="flex-1 pb-6 flex flex-col min-h-0">
+            <div className="flex-1 pb-6 flex flex-col">
               <Outlet />
             </div>
           </div>

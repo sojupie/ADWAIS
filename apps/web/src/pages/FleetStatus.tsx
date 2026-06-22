@@ -96,7 +96,7 @@ export function FleetStatus() {
       </DashboardTopRow>
 
       {/* Main Content Grid: Matrix on Left, Watchlist & Latency on Right */}
-      <DashboardFlexRow weight="flex-1" gridCols="5">
+      <DashboardFlexRow weight="flex-1" gridCols="5" className="landscape:lg:min-h-0">
 
         {/* Left Column: Fleet Matrix (Takes 60% of width on landscape lg screens) */}
         <div className="landscape:lg:col-span-3 flex flex-col min-h-[500px] landscape:lg:min-h-0 landscape:lg:h-full">

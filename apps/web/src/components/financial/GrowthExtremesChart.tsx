@@ -57,11 +57,11 @@ export const GrowthExtremesChart = memo(function GrowthExtremesChart({ isLoading
 
   return (
     <ChartPanel isLoading={isLoading} title="Growth Extremes (Relative & Absolute)" bodyClassName="extremes-chart">
-      <ResponsiveContainer width="100%" height={chartHeight} debounce={150}>
+      <ResponsiveContainer width="100%" height={chartHeight}>
         <BarChart
           data={tenants}
           layout="vertical"
-          margin={{ top: 6, right: 28, left: 8, bottom: 18 }}
+          margin={{ top: 6, right: 20, left: 20, bottom: 10 }}
         >
           <CartesianGrid stroke="var(--color-chart-grid)" strokeDasharray="3 4" horizontal={false} />
           <XAxis

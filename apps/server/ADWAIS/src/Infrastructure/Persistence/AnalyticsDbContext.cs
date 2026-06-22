@@ -278,6 +278,9 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
 
             entity.HasIndex(u => u.EntraObjectId)
                 .IsUnique();
+
+            entity.HasIndex(u => u.Email)
+                .IsUnique();
         });
         
         modelBuilder.Entity<KioskDevice>(entity =>

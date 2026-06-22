@@ -83,6 +83,20 @@ public class UserServiceTests
     }
 
     [Fact]
+    public void AnalyticsDbContext_ShouldHaveUniqueIndexOnUserEmail()
+    {
+        // Arrange & Act
+        using var db = new AnalyticsDbContext(_dbOptions);
+        var entityType = db.Model.FindEntityType(typeof(User));
+        var emailProperty = entityType?.FindProperty(nameof(User.Email));
+        var index = entityType?.GetIndexes().FirstOrDefault(i => i.Properties.Contains(emailProperty));
+
+        // Assert
+        Assert.NotNull(index);
+        Assert.True(index.IsUnique);
+    }
+
+    [Fact]
     public async Task CreateUserAsync_ShouldAddUserToDatabase()
     {
         // Act

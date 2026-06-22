@@ -95,13 +95,56 @@ public class MonitorOrchestrationService(
             }
         }
 
+        var previousPeriodUptimes = await GetPeriodUptimesAsync(previousStart, period.PreviousEnd, tenantId, monitorId, ct);
+
+        var currentEnabledUptimes = monitors
+            .Where(m => m.UptimeMonitorEnabled && periodUptimes.TryGetValue(m.Id, out var u) && u.HasValue)
+            .Select(m => periodUptimes[m.Id]!.Value)
+            .ToList();
+
+        var previousEnabledUptimes = monitors
+            .Where(m => m.UptimeMonitorEnabled && previousPeriodUptimes.TryGetValue(m.Id, out var u) && u.HasValue)
+            .Select(m => previousPeriodUptimes[m.Id]!.Value)
+            .ToList();
+
+        double avgUptime = currentEnabledUptimes.Count > 0 ? currentEnabledUptimes.Average() : 0.0;
+        double previousAvgUptime = previousEnabledUptimes.Count > 0 ? previousEnabledUptimes.Average() : 0.0;
+        double uptimeGrowth = CalculateGrowthPercentage(avgUptime, previousAvgUptime);
+
+        double avgLatency = currentRows.Count > 0 ? currentRows.Average(r => r.Average) : 0.0;
+        double prevAvgLatency = previousRows.Count > 0 ? previousRows.Average(r => r.Average) : 0.0;
+        double latencyGrowth = CalculateGrowthPercentage(avgLatency, prevAvgLatency);
+
+        double highestLatency = currentRows.Count > 0 ? currentRows.Max(r => r.Highest) : 0.0;
+        double prevHighestLatency = previousRows.Count > 0 ? previousRows.Max(r => r.Highest) : 0.0;
+        double highestLatencyGrowth = CalculateGrowthPercentage(highestLatency, prevHighestLatency);
+
+        double lowestLatency = currentRows.Count > 0 ? currentRows.Min(r => r.Lowest) : 0.0;
+        double prevLowestLatency = previousRows.Count > 0 ? previousRows.Min(r => r.Lowest) : 0.0;
+        double lowestLatencyGrowth = CalculateGrowthPercentage(lowestLatency, prevLowestLatency);
+
+        var kpis = new MonitorKpiDto(
+            avgUptime,
+            previousAvgUptime,
+            uptimeGrowth,
+            avgLatency,
+            prevAvgLatency,
+            latencyGrowth,
+            highestLatency,
+            prevHighestLatency,
+            highestLatencyGrowth,
+            lowestLatency,
+            prevLowestLatency,
+            lowestLatencyGrowth
+        );
+
         double? globalAvgLatency = null;
         if (monitors.Any(m => m.CurrentLatency.HasValue))
         {
             globalAvgLatency = monitors.Where(m => m.CurrentLatency.HasValue).Average(m => m.CurrentLatency!.Value);
         }
 
-        return new MonitorAnalyticsDto(globalAvgLatency, latencyPoints, monitors);
+        return new MonitorAnalyticsDto(globalAvgLatency, latencyPoints, monitors, kpis);
     }
 
     private async Task<Dictionary<int, double?>> GetPeriodUptimesAsync(DateTimeOffset start, DateTimeOffset end, Guid? tenantId, int? monitorId, CancellationToken ct = default)
@@ -457,6 +500,14 @@ public class MonitorOrchestrationService(
 
         HydrateLiveStatus(monitor);
         return monitor;
+    }
+
+    private static double CalculateGrowthPercentage(double current, double previous)
+    {
+        if (previous == 0)
+            return 0.0;
+
+        return Math.Round((current - previous) / previous * 100, 2);
     }
 }
 

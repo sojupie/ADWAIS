@@ -11,26 +11,29 @@ interface FactPanelProps {
     value: string;
     isLoading?: boolean;
     valueColor?: "green" | "red" | "yellow"; 
-    extra?: Extra
+    extra?: Extra;
+    hasExtra?: boolean;
+    inverseTrend?: boolean;
 }
 
-export function FactPanel({ label, value, isLoading, valueColor, extra }: FactPanelProps) {
+export function FactPanel({ label, value, isLoading, valueColor, extra, hasExtra, inverseTrend }: FactPanelProps) {
     let valueColorClass = 'text-slate-800';
     let extraColor = '';
     let extraText = '';
 
     if (valueColor === 'green') valueColorClass = 'text-growth';
-    if (valueColor === 'red') valueColorClass = 'text-[#c92a2a]';
+    if (valueColor === 'red') valueColorClass = 'text-decline';
     if (valueColor === 'yellow') valueColorClass = 'text-decline-warning';
 
     if (extra !== undefined && extra.type === "PoP") {
         if (extra.value > 0) {
-            extraColor = 'text-growth';
+            extraColor = inverseTrend ? 'text-decline' : 'text-growth';
             extraText = `▲ ${extra.value.toFixed(2)}% PoP`;
         } else if (extra.value < 0) {
-            extraColor = 'text-[#c92a2a]';
+            extraColor = inverseTrend ? 'text-growth' : 'text-decline';
             extraText = `▼ ${Math.abs(extra.value).toFixed(2)}% PoP`;
         } else {
+            extraColor = 'text-slate-500';
             extraText = `${extra.value.toFixed(2)}% PoP`;
         }
     }
@@ -40,13 +43,15 @@ export function FactPanel({ label, value, isLoading, valueColor, extra }: FactPa
         extraColor = 'text-slate-500';
     }
 
+    const showExtra = hasExtra || extra !== undefined;
+
     return (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-3 flex flex-col justify-between min-h-[90px] transition-all hover:shadow-md animate-in fade-in duration-300 min-w-0 overflow-hidden">
             <h2 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-1 truncate">{label}</h2>
             {isLoading ? (
-                <div className="flex items-center gap-2 mt-1">
-                    <Skeleton className="h-8 w-24 bg-slate-200" />
-                    <Skeleton className="h-5 w-16 bg-slate-100" />
+                <div className="flex flex-col mt-auto">
+                    <Skeleton className="h-8 lg:h-9 xl:h-8 2xl:h-10 w-28 bg-slate-200" />
+                    {showExtra && <Skeleton className="h-5 2xl:h-6 w-20 bg-slate-100" />}
                 </div>
             ) : (
                 <div className="flex flex-col mt-auto">
@@ -55,7 +60,7 @@ export function FactPanel({ label, value, isLoading, valueColor, extra }: FactPa
                     </span>
 
                     {extraText !== '' && (
-                        <span className={`text-sm 2xl:text-base font-bold uppercase tracking-wider ${extraColor} whitespace-nowrap`}>
+                        <span className={`text-sm 2xl:text-base font-bold tracking-wider ${extraColor} whitespace-nowrap`}>
                             {extraText}
                         </span>
                     )}

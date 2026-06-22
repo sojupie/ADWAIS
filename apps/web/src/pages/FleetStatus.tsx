@@ -28,7 +28,7 @@ export function FleetStatus() {
           <ArrowLeft size={14} className="mr-1 inline-block -mt-0.5 stroke-[3px]" /> BACK TO GLOBAL
         </button>
       )}
-      <span className="text-sm font-bold text-[#64748b]">
+      <span className="text-sm font-bold text-slate-500">
         {vm.fleetStats.enabled.length} Online
       </span>
     </div>
@@ -56,13 +56,22 @@ export function FleetStatus() {
         <FactPanel
           label={`Uptime: ${vm.activeScopeName}`}
           value={vm.globalMonitorsQuery.isLoading ? '...' : (vm.fleetStats.avgUptime !== null && vm.fleetStats.avgUptime !== undefined ? `${vm.fleetStats.avgUptime.toFixed(3)}%` : 'N/A')}
-          isLoading={vm.globalMonitorsQuery.isLoading}
+          isLoading={vm.globalMonitorsQuery.isLoading || vm.analyticsQuery.isLoading}
+          extra={vm.fleetStats.avgUptime !== null && vm.fleetStats.avgUptime !== undefined
+            ? { type: 'PoP', value: vm.fleetStats.uptimeGrowth }
+            : undefined}
+          hasExtra={true}
         />
 
         <FactPanel
           label={`Latency: ${vm.activeScopeName}`}
           value={vm.analyticsQuery.isLoading ? '...' : `${Math.round(vm.fleetStats.avgLatency)}ms`}
           isLoading={vm.analyticsQuery.isLoading}
+          extra={vm.fleetStats.avgLatency > 0
+            ? { type: 'PoP', value: vm.fleetStats.latencyGrowth }
+            : undefined}
+          hasExtra={true}
+          inverseTrend={true}
         />
 
         <FactPanel
@@ -70,6 +79,11 @@ export function FleetStatus() {
           value={vm.analyticsQuery.isLoading ? '...' : `${Math.round(vm.fleetStats.highestLatency)}ms`}
           isLoading={vm.analyticsQuery.isLoading}
           valueColor="red"
+          extra={vm.fleetStats.highestLatency > 0
+            ? { type: 'PoP', value: vm.fleetStats.highestLatencyGrowth }
+            : undefined}
+          hasExtra={true}
+          inverseTrend={true}
         />
 
         <FactPanel
@@ -77,6 +91,11 @@ export function FleetStatus() {
           value={vm.analyticsQuery.isLoading ? '...' : `${Math.round(vm.fleetStats.lowestLatency)}ms`}
           isLoading={vm.analyticsQuery.isLoading}
           valueColor="green"
+          extra={vm.fleetStats.lowestLatency > 0
+            ? { type: 'PoP', value: vm.fleetStats.lowestLatencyGrowth }
+            : undefined}
+          hasExtra={true}
+          inverseTrend={true}
         />
 
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-3 flex flex-col justify-center min-h-22.5">

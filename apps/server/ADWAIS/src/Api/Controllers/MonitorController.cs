@@ -46,7 +46,20 @@ public class MonitorController(
                 p.PreviousAverage,
                 p.Lowest,
                 p.Highest)).ToList(),
-            result.Monitors.Select(ToDto).ToList()
+            result.Monitors.Select(ToDto).ToList(),
+            new MonitorKpiResponseDto(
+                result.Kpis.AverageUptime,
+                result.Kpis.PreviousAverageUptime,
+                result.Kpis.UptimeGrowthPercentage,
+                result.Kpis.AverageLatency,
+                result.Kpis.PreviousAverageLatency,
+                result.Kpis.LatencyGrowthPercentage,
+                result.Kpis.HighestLatency,
+                result.Kpis.PreviousHighestLatency,
+                result.Kpis.HighestLatencyGrowthPercentage,
+                result.Kpis.LowestLatency,
+                result.Kpis.PreviousLowestLatency,
+                result.Kpis.LowestLatencyGrowthPercentage)
         ));
     }
 

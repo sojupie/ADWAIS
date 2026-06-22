@@ -12,5 +12,8 @@ export type GetApiMonitorsUnassignedParams = {
  * The timeframe for calculating uptime percentage.
  */
 timeframe?: Timeframe;
+/**
+ * The comparision period type.
+ */
 comparison?: ComparisonType;
 };

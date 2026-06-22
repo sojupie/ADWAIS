@@ -25,13 +25,10 @@ export function useFleetStatusViewModel() {
     const tenantMonitors = selection ? allMonitorsInSystem.filter(m => m.tenantId === selection.tenantId) : allMonitorsInSystem;
     const scopedMonitors = selection?.monitorId ? tenantMonitors.filter(m => m.id === selection.monitorId) : tenantMonitors;
 
+    const kpis = analyticsQuery.data?.kpis;
+
     const fleetStats = useMemo(() => {
         const enabled = scopedMonitors.filter(m => m.uptimeMonitorEnabled);
-
-        const latencies = enabled.map(m => m.currentLatency).filter((l): l is number => l !== null && l !== undefined);
-        const highestLatency = latencies.length > 0 ? Math.max(...latencies) : 0;
-        const lowestLatency = latencies.length > 0 ? Math.min(...latencies) : 0;
-        const avgLatency = latencies.length > 0 ? latencies.reduce((a, b) => a + b, 0) / latencies.length : 0;
 
         const down = enabled.filter(m => {
             const s = normalizeStatus(m.currentStatus);
@@ -45,13 +42,26 @@ export function useFleetStatusViewModel() {
             return isUp && m.currentLatency !== null && m.currentLatency !== undefined && floor !== null && floor !== undefined && m.currentLatency > floor;
         });
 
-        const uptimeMonitors = enabled.filter(m => m.currentUptimePercentage !== null && m.currentUptimePercentage !== undefined);
-        const avgUptime = uptimeMonitors.length > 0
-            ? uptimeMonitors.reduce((acc, m) => acc + (m.currentUptimePercentage ?? 0), 0) / uptimeMonitors.length
-            : null;
+        const avgUptime = kpis?.averageUptime !== undefined ? kpis.averageUptime : null;
+        const avgLatency = kpis?.averageLatency ?? 0;
+        const highestLatency = kpis?.highestLatency ?? 0;
+        const lowestLatency = kpis?.lowestLatency ?? 0;
 
-        return { total: scopedMonitors.length, enabled, highestLatency, lowestLatency, avgLatency, down, degraded, avgUptime };
-    }, [scopedMonitors, defaultDegradedFloor]);
+        return { 
+            total: scopedMonitors.length, 
+            enabled, 
+            highestLatency, 
+            lowestLatency, 
+            avgLatency, 
+            down, 
+            degraded, 
+            avgUptime,
+            uptimeGrowth: kpis?.uptimeGrowthPercentage ?? 0,
+            latencyGrowth: kpis?.latencyGrowthPercentage ?? 0,
+            highestLatencyGrowth: kpis?.highestLatencyGrowthPercentage ?? 0,
+            lowestLatencyGrowth: kpis?.lowestLatencyGrowthPercentage ?? 0
+        };
+    }, [scopedMonitors, defaultDegradedFloor, kpis]);
 
     const handleMonitorSelect = (monitor: UptimeMonitorDto) => {
         if (!selection) {

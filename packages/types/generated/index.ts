@@ -44,6 +44,7 @@ export * from './litiumOrderDto';
 export * from './momentumResponseDto';
 export * from './momentumTenantResponseDto';
 export * from './monitorAnalyticsResponseDto';
+export * from './monitorKpiResponseDto';
 export * from './netGrowthAdditionPointResponseDto';
 export * from './order';
 export * from './orderBinResponseDto';

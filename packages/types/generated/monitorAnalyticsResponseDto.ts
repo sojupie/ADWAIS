@@ -5,6 +5,7 @@
  * OpenAPI spec version: 1.0
  */
 import type { LatencyPointResponseDto } from './latencyPointResponseDto';
+import type { MonitorKpiResponseDto } from './monitorKpiResponseDto';
 import type { UptimeMonitorDto } from './uptimeMonitorDto';
 
 export interface MonitorAnalyticsResponseDto {
@@ -14,4 +15,5 @@ export interface MonitorAnalyticsResponseDto {
   latencyPoints?: LatencyPointResponseDto[] | null;
   /** @nullable */
   monitors?: UptimeMonitorDto[] | null;
+  kpis?: MonitorKpiResponseDto;
 }

@@ -83,12 +83,14 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe,
           extra={kpis?.revenueGrowthPercentage !== undefined
             ? { type: 'PoP', value: kpis.revenueGrowthPercentage }
             : undefined}
+          hasExtra={true}
         />
         <FactPanel
           label="Share of Revenue"
           value={shareOfRevenue !== undefined ? `${shareOfRevenue.toFixed(1)}%` : '\u2014'}
           isLoading={kpiQuery.isLoading || globalKpiQuery.isLoading}
           extra={{ type: 'Desc', value: 'of Global Portfolio' }}
+          hasExtra={true}
         />
         <FactPanel
           label="Transaction Volume"
@@ -97,6 +99,7 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe,
           extra={kpis?.volumeGrowthPercentage !== undefined
             ? { type: 'PoP', value: kpis.volumeGrowthPercentage }
             : undefined}
+          hasExtra={true}
         />
         <FactPanel
           label="Average Order Value"
@@ -105,6 +108,7 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe,
           extra={kpis?.aovGrowthPercentage !== undefined
             ? { type: 'PoP', value: kpis.aovGrowthPercentage }
             : undefined}
+          hasExtra={true}
         />
       </DashboardTopRow>
 

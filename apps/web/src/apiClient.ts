@@ -1,13 +1,7 @@
 import { msalInstance, AZURE_API_SCOPE } from './utils/msalConfig';
 
-export async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
-  const isBodyRequest = options?.method && ['POST', 'PUT', 'PATCH'].includes(options.method.toUpperCase());
-  const headers = new Headers(options?.headers);
-
-  if (isBodyRequest && !headers.has('Content-Type')) {
-    headers.set('Content-Type', 'application/json');
-  }
-
+export async function getAuthHeaders(customHeaders?: HeadersInit): Promise<Headers> {
+  const headers = new Headers(customHeaders);
   const kioskToken = localStorage.getItem('kiosk_token');
   if (kioskToken && !headers.has('Authorization')) {
     headers.set('Authorization', `Bearer ${kioskToken}`);
@@ -25,6 +19,48 @@ export async function apiFetch<T>(url: string, options?: RequestInit): Promise<T
       }
     }
   }
+  return headers;
+}
+
+export function handleSessionInvalidation() {
+  if (window.location.pathname === '/kiosk' || window.location.pathname === '/login') {
+    return;
+  }
+  const hasMsal = msalInstance.getAllAccounts().length > 0;
+  if (hasMsal) {
+    sessionStorage.clear();
+    window.location.href = '/login';
+  } else {
+    localStorage.removeItem('kiosk_token');
+    window.location.href = '/kiosk';
+  }
+}
+
+let isCheckingSession = false;
+
+export async function checkSessionValidity() {
+  if (isCheckingSession) return;
+  isCheckingSession = true;
+  try {
+    const headers = await getAuthHeaders();
+    const response = await fetch('/api/users/me', { headers });
+    if (response.status === 401 || response.status === 403) {
+      handleSessionInvalidation();
+    }
+  } catch (e) {
+    console.error('Failed to verify session validity:', e);
+  } finally {
+    isCheckingSession = false;
+  }
+}
+
+export async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
+  const isBodyRequest = options?.method && ['POST', 'PUT', 'PATCH'].includes(options.method.toUpperCase());
+  const headers = await getAuthHeaders(options?.headers);
+
+  if (isBodyRequest && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
+  }
 
   const response = await fetch(url, {
     ...options,
@@ -32,18 +68,16 @@ export async function apiFetch<T>(url: string, options?: RequestInit): Promise<T
   });
 
   if (!response.ok) {
-    if (response.status === 401) {
+    const isProfileUrl = url.includes('/api/users/me');
+    if (response.status === 401 || (response.status === 403 && isProfileUrl)) {
       const bypass = headers.get('X-Bypass-Global-401');
-      if (bypass !== 'true' && window.location.pathname !== '/kiosk' && window.location.pathname !== '/login') {
-        const hasMsal = msalInstance.getAllAccounts().length > 0;
-        if (hasMsal) {
-          sessionStorage.clear();
-          window.location.href = '/login';
-        } else {
-          localStorage.removeItem('kiosk_token');
-          window.location.href = '/kiosk';
-        }
+      if (bypass !== 'true') {
+        handleSessionInvalidation();
       }
+    } else if (response.status === 403) {
+      checkSessionValidity().catch((err) => {
+        console.error('Error during session validity check:', err);
+      });
     }
 
     const errorBody = await response.text().catch(() => 'Unknown error');

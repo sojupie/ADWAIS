@@ -2795,6 +2795,63 @@
               "$ref": "#/components/schemas/UptimeMonitorDto"
             },
             "nullable": true
+          },
+          "kpis": {
+            "$ref": "#/components/schemas/MonitorKpiResponseDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "MonitorKpiResponseDto": {
+        "type": "object",
+        "properties": {
+          "averageUptime": {
+            "type": "number",
+            "format": "double"
+          },
+          "previousAverageUptime": {
+            "type": "number",
+            "format": "double"
+          },
+          "uptimeGrowthPercentage": {
+            "type": "number",
+            "format": "double"
+          },
+          "averageLatency": {
+            "type": "number",
+            "format": "double"
+          },
+          "previousAverageLatency": {
+            "type": "number",
+            "format": "double"
+          },
+          "latencyGrowthPercentage": {
+            "type": "number",
+            "format": "double"
+          },
+          "highestLatency": {
+            "type": "number",
+            "format": "double"
+          },
+          "previousHighestLatency": {
+            "type": "number",
+            "format": "double"
+          },
+          "highestLatencyGrowthPercentage": {
+            "type": "number",
+            "format": "double"
+          },
+          "lowestLatency": {
+            "type": "number",
+            "format": "double"
+          },
+          "previousLowestLatency": {
+            "type": "number",
+            "format": "double"
+          },
+          "lowestLatencyGrowthPercentage": {
+            "type": "number",
+            "format": "double"
           }
         },
         "additionalProperties": false

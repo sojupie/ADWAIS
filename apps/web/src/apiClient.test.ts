@@ -8,7 +8,8 @@ vi.mock('./utils/msalConfig', () => ({
     getActiveAccount: vi.fn(),
     getAllAccounts: vi.fn(),
     acquireTokenSilent: vi.fn(),
-  }
+  },
+  AZURE_API_SCOPE: 'api://mock-scope/.default',
 }));
 
 beforeEach(() => {
@@ -22,11 +23,20 @@ beforeEach(() => {
   };
   vi.stubGlobal('localStorage', mockLocalStorage);
 
+  const mockSessionStorage = {
+    clear: vi.fn(),
+  };
+  vi.stubGlobal('sessionStorage', mockSessionStorage);
+
+  vi.mocked(msalInstance.getAllAccounts).mockReturnValue([]);
+  vi.mocked(msalInstance.getActiveAccount).mockReturnValue(null);
+
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
     ok: true,
     text: async () => JSON.stringify({ success: true }),
   }));
 });
+
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -105,3 +115,119 @@ test('apiFetch redirects to /kiosk on 401 when on non-bypass route', async () =>
 
   expect(mockLocation.href).toBe('/kiosk');
 });
+
+test('apiFetch redirects to /kiosk on 403 for /api/users/me when no MSAL accounts exist', async () => {
+  const mockLocation = {
+    pathname: '/financial',
+    href: 'http://localhost/financial',
+  };
+  vi.stubGlobal('window', { location: mockLocation });
+
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+    ok: false,
+    status: 403,
+    text: async () => 'Forbidden',
+  }));
+
+  await expect(apiFetch('http://test.local/api/users/me')).rejects.toThrow();
+
+  expect(mockLocation.href).toBe('/kiosk');
+});
+
+test('apiFetch redirects to /login on 403 for /api/users/me when MSAL accounts exist', async () => {
+  const mockLocation = {
+    pathname: '/financial',
+    href: 'http://localhost/financial',
+  };
+  vi.stubGlobal('window', { location: mockLocation });
+  
+  const mockAccount = {
+    homeAccountId: '1',
+    localAccountId: '1',
+    environment: 'login',
+    tenantId: '1',
+    username: 'test@example.com',
+    name: 'Test',
+  };
+  vi.mocked(msalInstance.getAllAccounts).mockReturnValue([mockAccount]);
+
+  const mockSessionStorage = {
+    clear: vi.fn(),
+  };
+  vi.stubGlobal('sessionStorage', mockSessionStorage);
+
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+    ok: false,
+    status: 403,
+    text: async () => 'Forbidden',
+  }));
+
+  await expect(apiFetch('http://test.local/api/users/me')).rejects.toThrow();
+
+  expect(mockSessionStorage.clear).toHaveBeenCalled();
+  expect(mockLocation.href).toBe('/login');
+});
+
+test('apiFetch does not redirect on 403 for non-profile routes if session is still valid', async () => {
+  const mockLocation = {
+    pathname: '/financial',
+    href: 'http://localhost/financial',
+  };
+  vi.stubGlobal('window', { location: mockLocation });
+
+  const fetchMock = vi.fn().mockImplementation((url: string) => {
+    if (url.includes('/api/users/me')) {
+      return Promise.resolve({
+        ok: true,
+        status: 200,
+        text: async () => JSON.stringify({ role: 'Employee' }),
+      });
+    }
+    return Promise.resolve({
+      ok: false,
+      status: 403,
+      text: async () => 'Forbidden',
+    });
+  });
+  vi.stubGlobal('fetch', fetchMock);
+
+  await expect(apiFetch('http://test.local/api/financial/summary')).rejects.toThrow();
+
+  await new Promise((resolve) => setTimeout(resolve, 10));
+
+  expect(fetchMock).toHaveBeenCalledWith('/api/users/me', expect.any(Object));
+  expect(mockLocation.href).toBe('http://localhost/financial');
+});
+
+test('apiFetch redirects on 403 for non-profile routes if session is stale/unauthorized', async () => {
+  const mockLocation = {
+    pathname: '/financial',
+    href: 'http://localhost/financial',
+  };
+  vi.stubGlobal('window', { location: mockLocation });
+
+  const fetchMock = vi.fn().mockImplementation((url: string) => {
+    if (url.includes('/api/users/me')) {
+      return Promise.resolve({
+        ok: false,
+        status: 403,
+        text: async () => 'Forbidden',
+      });
+    }
+    return Promise.resolve({
+      ok: false,
+      status: 403,
+      text: async () => 'Forbidden',
+    });
+  });
+  vi.stubGlobal('fetch', fetchMock);
+
+  await expect(apiFetch('http://test.local/api/financial/summary')).rejects.toThrow();
+
+  await new Promise((resolve) => setTimeout(resolve, 10));
+
+  expect(fetchMock).toHaveBeenCalledWith('/api/users/me', expect.any(Object));
+  expect(mockLocation.href).toBe('/kiosk');
+});
+
+

@@ -5,6 +5,7 @@ namespace Adwais.Application.DTOs.Monitoring;
 public record MonitorAnalyticsDto(
     double? GlobalAverageLatency,
     IReadOnlyList<LatencyPointDto> LatencyPoints,
-    IEnumerable<UptimeMonitor> Monitors);
+    IEnumerable<UptimeMonitor> Monitors,
+    MonitorKpiDto Kpis);
 
 

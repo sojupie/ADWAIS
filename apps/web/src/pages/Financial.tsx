@@ -45,6 +45,7 @@ export function Financial() {
           extra={vm.kpiQuery.data?.revenueGrowthPercentage !== undefined
             ? { type: 'PoP', value: vm.kpiQuery.data.revenueGrowthPercentage }
             : undefined}
+          hasExtra={true}
         />
         <FactPanel
           label="Transaction Volume"
@@ -53,6 +54,7 @@ export function Financial() {
           extra={vm.kpiQuery.data?.volumeGrowthPercentage !== undefined
             ? { type: 'PoP', value: vm.kpiQuery.data.volumeGrowthPercentage }
             : undefined}
+          hasExtra={true}
         />
         <FactPanel
           label="Portfolio AOV"
@@ -61,6 +63,7 @@ export function Financial() {
           extra={vm.kpiQuery.data?.aovGrowthPercentage !== undefined
             ? { type: 'PoP', value: vm.kpiQuery.data.aovGrowthPercentage }
             : undefined}
+          hasExtra={true}
         />
         <FactPanel
           label="Active Tenants"
@@ -69,6 +72,7 @@ export function Financial() {
           extra={vm.kpiQuery.data?.activeTenantsGrowthPercentage !== undefined
             ? { type: 'PoP', value: vm.kpiQuery.data.activeTenantsGrowthPercentage }
             : undefined}
+          hasExtra={true}
         />
         <FactPanel
           label="Avg Revenue Per Tenant"
@@ -77,6 +81,7 @@ export function Financial() {
           extra={vm.kpiQuery.data?.arptGrowthPercentage !== undefined
             ? { type: 'PoP', value: vm.kpiQuery.data.arptGrowthPercentage }
             : undefined}
+          hasExtra={true}
         />
       </DashboardTopRow>
 

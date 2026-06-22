@@ -1,5 +1,5 @@
 import type { UptimeMonitorDto } from '@types';
-import {normalizeStatus} from "../../utils/monitorStatusHelper.ts";
+import { normalizeStatus } from "../../utils/monitorStatusHelper.ts";
 
 const getTagColor = (tag: string) => {
   const parts = tag.split(':');
@@ -43,20 +43,20 @@ function getMonitorStatus(monitor: UptimeMonitorDto): 'operational' | 'degraded'
   if (status === 'DOWN' || status === 'CRITICAL') return 'down';
   if (status === 'PAUSED') return 'paused';
   if (status === 'UNKNOWN') return 'unknown';
-  
+
   if (monitor.currentLatency && monitor.latencyDegradedFloor && monitor.currentLatency > monitor.latencyDegradedFloor) {
     return 'degraded';
   }
-  
+
   return 'operational';
 }
 
-export function FleetMatrix({ 
-  monitors, 
+export function FleetMatrix({
+  monitors,
   onMonitorSelect,
-  selectedMonitorId 
-}: { 
-  monitors: UptimeMonitorDto[], 
+  selectedMonitorId
+}: {
+  monitors: UptimeMonitorDto[],
   onMonitorSelect?: (monitor: UptimeMonitorDto) => void,
   selectedMonitorId?: number | null
 }) {
@@ -68,33 +68,33 @@ export function FleetMatrix({
         const tenantDisplay = monitor.tenantName || monitor.name.split('-')[0]?.trim() || "Tenant";
 
         const statusThemes = {
-          down: { 
-            bg: 'bg-red-50', 
-            border: 'border-red-200', 
+          down: {
+            bg: 'bg-red-50',
+            border: 'border-red-200',
             text: 'text-slate-900',
             valueText: 'text-red-600',
             mutedText: 'text-slate-500',
             dot: 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)] animate-pulse'
           },
-          degraded: { 
-            bg: 'bg-amber-50', 
-            border: 'border-amber-200', 
+          degraded: {
+            bg: 'bg-amber-50',
+            border: 'border-amber-200',
             text: 'text-slate-900',
             valueText: 'text-amber-600',
             mutedText: 'text-slate-500',
             dot: 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]'
           },
-          operational: { 
-            bg: 'bg-white', 
-            border: 'border-slate-200', 
+          operational: {
+            bg: 'bg-white',
+            border: 'border-slate-200',
             text: 'text-slate-900',
             valueText: 'text-slate-900',
             mutedText: 'text-slate-500',
             dot: 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]'
           },
-          unknown: { 
-            bg: 'bg-slate-100', 
-            border: 'border-slate-300', 
+          unknown: {
+            bg: 'bg-slate-100',
+            border: 'border-slate-300',
             text: 'text-slate-500',
             valueText: 'text-slate-500',
             mutedText: 'text-slate-500',
@@ -134,10 +134,10 @@ export function FleetMatrix({
           >
             <div className="flex justify-between items-start mb-2 w-full">
               <div className="flex flex-col overflow-hidden pr-2 w-full">
-                <span className={`text-xs font-black ${theme.text} line-clamp-2 uppercase tracking-tight leading-tight`}>
+                <span className={`text-sm font-black ${theme.text} line-clamp-2 uppercase tracking-tight leading-tight`}>
                   {tenantDisplay}
                 </span>
-                <span className={`text-[10px] font-bold ${theme.mutedText} uppercase tracking-wider mt-0.5 truncate`}>
+                <span className={`text-xs font-bold ${theme.mutedText} uppercase tracking-wider mt-0.5 truncate`}>
                   {monitor.name}
                 </span>
               </div>
@@ -150,9 +150,9 @@ export function FleetMatrix({
                   const name = tag.split(':')[0].trim();
                   const color = getTagColor(tag);
                   return (
-                    <span 
-                      key={tag} 
-                      className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider border shadow-sm ${getTagStyle(color)}`}
+                    <span
+                      key={tag}
+                      className={`text-xs font-bold px-1.5 py-0.5 rounded uppercase tracking-wider border shadow-sm ${getTagStyle(color)}`}
                     >
                       {name}
                     </span>
@@ -160,16 +160,16 @@ export function FleetMatrix({
                 })}
               </div>
             )}
-            
+
             <div className="grid grid-cols-2 gap-x-2 mt-auto w-full">
               <div className="flex flex-col gap-0 min-w-0">
-                <span className={`text-[10px] ${theme.mutedText} uppercase font-bold tracking-wider truncate`}>Uptime</span>
+                <span className={`text-xs ${theme.mutedText} uppercase font-bold tracking-wider truncate`}>Uptime</span>
                 <span className={`text-sm font-black ${theme.valueText} truncate`}>
                   {monitor.currentUptimePercentage != null ? `${monitor.currentUptimePercentage.toFixed(2)}%` : 'N/A'}
                 </span>
               </div>
               <div className="flex flex-col gap-0 min-w-0">
-                <span className={`text-[10px] ${theme.mutedText} uppercase font-bold tracking-wider truncate`}>Latency</span>
+                <span className={`text-xs ${theme.mutedText} uppercase font-bold tracking-wider truncate`}>Latency</span>
                 <span className={`text-sm font-black ${theme.valueText} truncate`}>
                   {(status === 'down' || status === 'unknown' || status === 'paused' || status === 'starting' || !Number(monitor.currentLatency)) ? 'N/A' : `${Math.round(Number(monitor.currentLatency))}ms`}
                 </span>

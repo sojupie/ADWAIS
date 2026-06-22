@@ -6,7 +6,7 @@ export function KioskControls() {
 
   return (
     <div className="flex items-center gap-4">
-      <div className={`flex items-center gap-4 px-3 py-1.5 border rounded-sm shadow-sm transition-colors duration-500
+      <div className={`flex items-center gap-4 px-3 py-1.5 border rounded-sm shadow-sm transition-colors duration-500 whitespace-nowrap shrink-0
         ${mode === 'kiosk' ? 'bg-emerald-50 border-emerald-200' : 
           mode === 'interactive' ? 'bg-amber-50 border-amber-200' : 'bg-slate-50 border-slate-200'}`}>
           <div className="flex items-center gap-3">

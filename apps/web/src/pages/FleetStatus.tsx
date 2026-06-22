@@ -7,6 +7,7 @@ import { SlaBreachWatchlist } from '../components/FleetStatus/SlaBreachWatchlist
 import { DashboardLayout } from "../components/common/layout/DashboardLayout.tsx";
 import { DashboardTopRow } from "../components/common/layout/DashboardTopRow.tsx";
 import { DashboardFlexRow } from "../components/common/layout/DashboardFlexRow.tsx";
+import { DashboardFooter } from "../components/common/layout/DashboardFooter.tsx";
 import { SyncStatusWidget } from '../components/common/dashboard/SyncStatusWidget';
 import { PeriodSelector } from '../components/common/charts/PeriodSelector';
 import { useFleetStatusViewModel } from "../hooks/useFleetStatusViewModel.ts";
@@ -97,8 +98,8 @@ export function FleetStatus() {
       {/* Main Content Grid: Matrix on Left, Watchlist & Latency on Right */}
       <DashboardFlexRow weight="flex-1" gridCols="5">
 
-        {/* Left Column: Fleet Matrix (Takes 60% of width on xl screens) */}
-        <div className="xl:col-span-3 flex flex-col min-h-[500px] xl:min-h-0 xl:h-full">
+        {/* Left Column: Fleet Matrix (Takes 60% of width on landscape lg screens) */}
+        <div className="landscape:lg:col-span-3 flex flex-col min-h-[500px] landscape:lg:min-h-0 landscape:lg:h-full">
           <CollectionPanel
             title={vm.selection ? `${vm.selectedTenantName} Monitors` : "Fleet Status Matrix"}
             className="h-full min-h-0"
@@ -112,7 +113,7 @@ export function FleetStatus() {
         </div>
 
         {/* Right Column: Watchlist (Top) & Latency Chart (Bottom) (Takes 40% of width) */}
-        <div className="xl:col-span-2 flex flex-col gap-4 min-h-[500px] xl:min-h-0 xl:h-full">
+        <div className="landscape:lg:col-span-2 flex flex-col gap-4 min-h-[500px] landscape:lg:min-h-0 landscape:lg:h-full">
 
           <SlaBreachWatchlist
             monitors={vm.scopedMonitors}
@@ -133,19 +134,11 @@ export function FleetStatus() {
         </div>
       </DashboardFlexRow>
 
-      {/* ── Inline Widgets (Mobile/Tablet) ── */}
-      <div className="xl:hidden flex flex-col md:flex-row justify-center gap-6 items-center w-full pb-6 shrink-0">
+      {/* ── Footer Widgets (All Resolutions) ── */}
+      <DashboardFooter>
         <SyncStatusWidget />
         <PeriodSelector from="/fleet-status" />
-      </div>
-
-      {/* ── Floating Widgets (Desktop Wide) ── */}
-      <div className="hidden xl:block fixed bottom-6 left-8 z-50 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <SyncStatusWidget />
-      </div>
-      <div className="hidden xl:block fixed bottom-6 right-8 z-50 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <PeriodSelector from="/fleet-status" />
-      </div>
+      </DashboardFooter>
     </DashboardLayout>
   );
 }

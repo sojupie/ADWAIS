@@ -122,9 +122,9 @@ export function SlaBreachWatchlist({
                   <span className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-0.5 truncate">{issue.monitorName}</span>
                 </div>
                 <div className="flex gap-1 flex-wrap justify-end shrink-0">
-                  {issue.isDown && <span className="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest shrink-0">DOWN</span>}
-                  {issue.isDegraded && !issue.isDown && <span className="bg-amber-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest shrink-0">DEGRADED</span>}
-                  {issue.isSlaBreach && <span className="bg-slate-700 text-white text-[10px] font-black px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest shrink-0">SLA BREACH</span>}
+                  {issue.isDown && <span className="bg-red-500 text-white text-xs font-black px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest shrink-0">DOWN</span>}
+                  {issue.isDegraded && !issue.isDown && <span className="bg-amber-500 text-white text-xs font-black px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest shrink-0">DEGRADED</span>}
+                  {issue.isSlaBreach && <span className="bg-slate-700 text-white text-xs font-black px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest shrink-0">SLA BREACH</span>}
                 </div>
               </div>
               <div className="flex justify-between items-end">

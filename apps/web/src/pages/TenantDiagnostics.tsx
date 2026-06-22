@@ -15,6 +15,7 @@ import {
 import {DashboardLayout} from "../components/common/layout/DashboardLayout.tsx";
 import {DashboardTopRow} from "../components/common/layout/DashboardTopRow.tsx";
 import {DashboardFlexRow} from "../components/common/layout/DashboardFlexRow.tsx";
+import { DashboardFooter } from "../components/common/layout/DashboardFooter.tsx";
 import { SyncStatusWidget } from '../components/common/dashboard/SyncStatusWidget';
 import { PeriodSelector } from '../components/common/charts/PeriodSelector';
 
@@ -47,7 +48,7 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe,
     : undefined;
 
   return (
-    <DashboardLayout>
+    <DashboardLayout scrollable={true}>
       <header className="flex items-center gap-6 shrink-0">
         <button
           className="w-10 h-10 rounded-full border border-slate-200 bg-white flex items-center justify-center text-xl font-extrabold text-slate-700 hover:text-brand-text hover:bg-slate-100 hover:border-slate-300 transition-all shadow-sm cursor-pointer"
@@ -139,19 +140,11 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe,
         />
       </DashboardFlexRow>
 
-      {/* ── Inline Widgets (Mobile/Tablet) ── */}
-      <div className="xl:hidden flex flex-col md:flex-row justify-center gap-6 items-center w-full pb-6 shrink-0">
+      {/* ── Footer Widgets (All Resolutions) ── */}
+      <DashboardFooter>
         <SyncStatusWidget />
         <PeriodSelector from="/financial" />
-      </div>
-
-      {/* ── Floating Widgets (Desktop Wide) ── */}
-      <div className="hidden xl:block fixed bottom-6 left-8 z-50 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <SyncStatusWidget />
-      </div>
-      <div className="hidden xl:block fixed bottom-6 right-8 z-50 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <PeriodSelector from="/financial" />
-      </div>
+      </DashboardFooter>
     </DashboardLayout>
   );
 }

@@ -1,9 +1,13 @@
 import type { ReactNode } from 'react';
 
-export function DashboardFooter({ children }: { children: ReactNode }) {
+interface DashboardFooterProps {
+  children: ReactNode;
+}
+
+export function DashboardFooter({ children }: DashboardFooterProps) {
   return (
-    <div className="flex flex-col md:flex-row justify-between items-center gap-6 mt-2 shrink-0 animate-in fade-in duration-500 z-20 relative">
+    <footer className="flex flex-col md:flex-row justify-between items-center gap-4 w-full shrink-0">
       {children}
-    </div>
+    </footer>
   );
 }

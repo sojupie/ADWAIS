@@ -8,6 +8,7 @@ import { TenantDiagnostics } from './TenantDiagnostics';
 import { DashboardLayout } from "../components/common/layout/DashboardLayout.tsx";
 import { DashboardTopRow } from "../components/common/layout/DashboardTopRow.tsx";
 import { DashboardFlexRow } from "../components/common/layout/DashboardFlexRow.tsx";
+import { DashboardFooter } from "../components/common/layout/DashboardFooter.tsx";
 import { SyncStatusWidget } from '../components/common/dashboard/SyncStatusWidget';
 import { PeriodSelector } from '../components/common/charts/PeriodSelector';
 import { useFinancialViewModel } from "../hooks/useFinancialViewModel.ts";
@@ -34,7 +35,7 @@ export function Financial() {
   }
 
   return (
-    <DashboardLayout>
+    <DashboardLayout scrollable={true}>
       {/* KPI Section */}
       <DashboardTopRow>
         <FactPanel
@@ -86,7 +87,7 @@ export function Financial() {
           isLoading={vm.velocityQuery.isLoading} 
           isStale={vm.velocityQuery.isPlaceholderData}
           comparison="YearOverYear"
-          className="h-full min-h-87.5 portrait:lg:min-h-0"
+          className="h-full min-h-87.5"
         />
 
         <VolumeAnomalyChart 
@@ -95,7 +96,7 @@ export function Financial() {
           onTenantSelect={vm.handleTenantSelect} 
           isLoading={vm.anomalyQuery.isLoading} 
           isStale={vm.anomalyQuery.isPlaceholderData}
-          className="h-full min-h-87.5 portrait:lg:min-h-0"
+          className="h-full min-h-87.5"
         />
 
         <RevenueEfficiencyChart 
@@ -104,7 +105,7 @@ export function Financial() {
           onTenantSelect={vm.handleTenantSelect} 
           isLoading={vm.efficiencyQuery.isLoading} 
           isStale={vm.efficiencyQuery.isPlaceholderData}
-          className="h-full min-h-87.5 portrait:lg:min-h-0"
+          className="h-full min-h-87.5"
         />
 
         <MomentumMatrixChart 
@@ -113,23 +114,15 @@ export function Financial() {
           onTenantSelect={vm.handleTenantSelect} 
           isLoading={vm.momentumQuery.isLoading} 
           isStale={vm.momentumQuery.isPlaceholderData}
-          className="h-full min-h-87.5 portrait:lg:min-h-0"
+          className="h-full min-h-87.5"
         />
       </DashboardFlexRow>
 
-      {/* ── Inline Widgets (Mobile/Tablet) ── */}
-      <div className="xl:hidden flex flex-col md:flex-row justify-center gap-6 items-center w-full pb-6 shrink-0">
+      {/* ── Footer Widgets (All Resolutions) ── */}
+      <DashboardFooter>
         <SyncStatusWidget />
         <PeriodSelector from="/financial" />
-      </div>
-
-      {/* ── Floating Widgets (Desktop Wide) ── */}
-      <div className="hidden xl:block fixed bottom-6 left-8 z-50 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <SyncStatusWidget />
-      </div>
-      <div className="hidden xl:block fixed bottom-6 right-8 z-50 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <PeriodSelector from="/financial" />
-      </div>
+      </DashboardFooter>
     </DashboardLayout>
   );
 }

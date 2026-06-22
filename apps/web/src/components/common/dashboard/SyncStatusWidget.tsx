@@ -4,7 +4,6 @@ import { useSearch, useParams, useRouterState } from '@tanstack/react-router';
 import { apiFetch } from '../../../apiClient';
 import type { SystemHealthDto, TenantResponseDto } from '@types';
 import { RefreshCw, AlertCircle } from 'lucide-react';
-import { useKiosk } from './KioskContext';
 
 function timeAgo(date: string | number | null | undefined): string {
   if (!date) return 'Never';
@@ -23,22 +22,20 @@ export function SyncStatusWidget() {
   const search = useSearch({ strict: false }) as { tenantId?: string };
   const params = useParams({ strict: false }) as { tenantId?: string };
   const matches = useRouterState({ select: (s) => s.matches });
-  const { mode } = useKiosk();
-  const isKiosk = mode === 'kiosk';
   
   const isFinancial = matches.some((m) => m.routeId === '/financial' || m.pathname.includes('/financial'));
   const isFleet = matches.some((m) => m.routeId === '/fleet-status' || m.pathname.includes('/fleet-status'));
   
   const tenantId = search?.tenantId || params?.tenantId;
 
-  const { data: health } = useQuery<SystemHealthDto>({
+  const { data: health, isLoading: isHealthLoading } = useQuery<SystemHealthDto>({
     queryKey: ['system-health'],
     queryFn: () => apiFetch<SystemHealthDto>('/api/system/health'),
     refetchInterval: 60000,
     enabled: isFinancial || isFleet,
   });
 
-  const { data: tenants } = useQuery<TenantResponseDto[]>({
+  const { data: tenants, isLoading: isTenantsLoading } = useQuery<TenantResponseDto[]>({
     queryKey: ['tenant', tenantId],
     queryFn: () => apiFetch<TenantResponseDto[]>(`/api/tenants?id=${tenantId}`),
     enabled: !!tenantId && (isFinancial || isFleet),
@@ -49,8 +46,19 @@ export function SyncStatusWidget() {
 
   const isFetchingCount = useIsFetching({ queryKey: isFinancial ? ['financial'] : isFleet ? ['fleet'] : ['disabled-key'] });
   const isFetching = isFetchingCount > 0;
+
+  const isDrillDown = !!tenantId;
+  const isHealthLoadingActual = isHealthLoading && (isFinancial || isFleet);
+  const isTenantsLoadingActual = isTenantsLoading && isDrillDown;
+  const isLoading = isDrillDown ? isTenantsLoadingActual : isHealthLoadingActual;
+
+  const renderTime = (time: string | number | null | undefined, isTimeLoading: boolean) => {
+    if (isTimeLoading || (!time && isFetching)) {
+      return <div className="h-3.5 w-12 bg-white/15 rounded animate-pulse inline-block" />;
+    }
+    return timeAgo(time);
+  };
   
-  const [isHovered, setIsHovered] = useState(false);
   const [dashboardSyncTime, setDashboardSyncTime] = useState<number | null>(null);
   const [countdown, setCountdown] = useState(60);
 
@@ -93,22 +101,16 @@ export function SyncStatusWidget() {
     if (tenantId) queryClient.invalidateQueries({ queryKey: ['tenant', tenantId] });
   };
 
-  const isDrillDown = !!tenantId;
   const syncError = isDrillDown ? tenant?.lastSyncError : health?.sync?.globalSyncError;
   const strokeColor = syncError ? 'text-red-500' : 'text-[#51B5B9]';
 
   const progress = ((60 - countdown) / 60) * 100;
-  const isExpanded = !isKiosk || isHovered;
 
   if (!isFinancial && !isFleet) return null;
 
   return (
     <div 
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className={`flex items-center gap-2 sm:gap-4 px-2 sm:px-3 min-h-[46px] py-1.5 xl:py-0 border rounded-sm shadow-sm bg-brand-bg-secondary border-brand-bg-secondary/20 w-full xl:w-auto transition-all duration-350 ease-out
-        ${isExpanded ? 'xl:opacity-100 xl:shadow-lg' : 'xl:w-[46px] xl:h-[46px] xl:opacity-40 xl:overflow-hidden xl:px-2'}
-      `}
+      className="flex items-center gap-3 px-4 py-2 border rounded-xl shadow-sm bg-brand-bg-secondary border-brand-bg-secondary/20 w-full md:w-auto min-h-14"
     >
       {/* Timer Wheel */}
       <div className="relative w-6 h-6 shrink-0">
@@ -125,7 +127,7 @@ export function SyncStatusWidget() {
             className={`${strokeColor} transition-all duration-1000 ease-linear`}
           />
         </svg>
-        <div className="absolute inset-0 flex items-center justify-center text-sm font-bold text-white/60 font-mono">
+        <div className="absolute inset-0 flex items-center justify-center text-xs font-bold text-white/60 font-mono">
           {countdown}
         </div>
       </div>
@@ -135,42 +137,42 @@ export function SyncStatusWidget() {
         {isDrillDown ? (
           <div className="flex flex-col gap-0.5">
             <div className="flex justify-between items-center gap-4">
-              <span className="text-sm font-black uppercase tracking-widest text-white/60">Dashboard UI</span>
-              <span className="text-sm font-bold text-white truncate min-w-10 text-right">{timeAgo(dashboardSyncTime)}</span>
+              <span className="text-xs font-black uppercase tracking-widest text-white/60">Dashboard UI</span>
+              <span className="text-sm font-bold text-white truncate min-w-10 text-right">{renderTime(dashboardSyncTime, isFetching)}</span>
             </div>
             <div className="flex justify-between items-center gap-4">
-              <span className="text-sm font-black uppercase tracking-widest text-white/60">Source Polled</span>
-              <span className="text-sm font-bold text-white truncate min-w-10 text-right">{timeAgo(tenant?.lastPolled)}</span>
+              <span className="text-xs font-black uppercase tracking-widest text-white/60">Source Polled</span>
+              <span className="text-sm font-bold text-white truncate min-w-10 text-right">{renderTime(tenant?.lastPolled, isLoading)}</span>
             </div>
           </div>
         ) : isFinancial ? (
           <div className="flex flex-col gap-0.5">
             <div className="flex justify-between items-center gap-4">
-              <span className="text-sm font-black uppercase tracking-widest text-white/60">Dashboard UI</span>
-              <span className="text-sm font-bold text-white truncate min-w-10 text-right">{timeAgo(dashboardSyncTime)}</span>
+              <span className="text-xs font-black uppercase tracking-widest text-white/60">Dashboard UI</span>
+              <span className="text-sm font-bold text-white truncate min-w-10 text-right">{renderTime(dashboardSyncTime, isFetching)}</span>
             </div>
             <div className="flex justify-between items-center gap-4">
-              <span className="text-sm font-black uppercase tracking-widest text-white/60">Litium Sync</span>
-              <span className="text-sm font-bold text-white truncate min-w-10 text-right">{timeAgo(health?.lastLitiumSync)}</span>
+              <span className="text-xs font-black uppercase tracking-widest text-white/60">Litium Sync</span>
+              <span className="text-sm font-bold text-white truncate min-w-10 text-right">{renderTime(health?.lastLitiumSync, isLoading)}</span>
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 items-center">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-0.5 items-center">
             <div className="flex justify-between items-center gap-2">
-              <span className="text-sm font-black uppercase tracking-widest text-white/60">Dash UI</span>
-              <span className="text-sm font-bold text-white text-right">{timeAgo(dashboardSyncTime)}</span>
+              <span className="text-xs font-black uppercase tracking-widest text-white/60">Dash UI</span>
+              <span className="text-sm font-bold text-white text-right">{renderTime(dashboardSyncTime, isFetching)}</span>
             </div>
             <div className="flex justify-between items-center gap-2">
-              <span className="text-sm font-black uppercase tracking-widest text-white/60">Meta</span>
-              <span className="text-sm font-bold text-white text-right">{timeAgo(health?.lastFleetUpdate)}</span>
+              <span className="text-xs font-black uppercase tracking-widest text-white/60">Meta</span>
+              <span className="text-sm font-bold text-white text-right">{renderTime(health?.lastFleetUpdate, isLoading)}</span>
             </div>
             <div className="flex justify-between items-center gap-2">
-              <span className="text-sm font-black uppercase tracking-widest text-white/60">Uptime</span>
-              <span className="text-sm font-bold text-white text-right">{timeAgo(health?.lastFleetUptimeUpdate)}</span>
+              <span className="text-xs font-black uppercase tracking-widest text-white/60">Uptime</span>
+              <span className="text-sm font-bold text-white text-right">{renderTime(health?.lastFleetUptimeUpdate, isLoading)}</span>
             </div>
             <div className="flex justify-between items-center gap-2">
-              <span className="text-sm font-black uppercase tracking-widest text-white/60">Latency</span>
-              <span className="text-sm font-bold text-white text-right">{timeAgo(health?.lastFleetLatencyUpdate)}</span>
+              <span className="text-xs font-black uppercase tracking-widest text-white/60">Latency</span>
+              <span className="text-sm font-bold text-white text-right">{renderTime(health?.lastFleetLatencyUpdate, isLoading)}</span>
             </div>
           </div>
         )}

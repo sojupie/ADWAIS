@@ -37,7 +37,7 @@ export const Route = createRootRoute({
 
 function RootComponent() {
   useSearch({ strict: false });
-  const { instance, accounts } = useMsal();
+  const { accounts } = useMsal();
   const { user } = useCurrentUser();
   const hasMsalAccount = accounts.length > 0;
 
@@ -162,7 +162,7 @@ function RootComponent() {
           <div className="w-full xl:w-1/4 flex justify-center xl:justify-end items-center gap-4">
             {!isOnline && (
               <span 
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-extrabold text-red-600 bg-red-50 border border-red-200 uppercase tracking-wider animate-in fade-in duration-300"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-extrabold text-red-600 bg-red-50 border border-red-200 uppercase tracking-wider animate-in fade-in duration-300 whitespace-nowrap shrink-0"
                 title="Application is offline"
               >
                 <WifiOff size={14} className="animate-pulse" />
@@ -171,7 +171,7 @@ function RootComponent() {
             )}
             {isOnline && !isBackendOnline && (
               <span 
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-extrabold text-amber-600 bg-amber-50 border border-amber-200 uppercase tracking-wider animate-in fade-in duration-300"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-extrabold text-amber-600 bg-amber-50 border border-amber-200 uppercase tracking-wider animate-in fade-in duration-300 whitespace-nowrap shrink-0"
                 title="Backend server is unreachable (502 / bad gateway)"
               >
                 <ServerCrash size={14} className="animate-pulse" />
@@ -179,17 +179,10 @@ function RootComponent() {
               </span>
             )}
             {hasMsalAccount && (
-              <div className="flex items-center gap-3 bg-brand-bg-primary/45 border border-white/10 px-3.5 py-1.5 rounded-lg shadow-sm">
+              <div className="flex items-center gap-3 bg-brand-bg-primary/45 border border-white/10 px-3.5 py-1.5 rounded-lg shadow-sm whitespace-nowrap shrink-0">
                 <span className="text-sm font-bold text-slate-300">
                   {user?.name || accounts[0]?.name || accounts[0]?.username}
                 </span>
-                <button
-                  onClick={() => instance.logoutRedirect()}
-                  className="text-sm text-rose-400 hover:text-rose-300 font-extrabold uppercase tracking-widest cursor-pointer transition-colors duration-150"
-                  title="Sign Out"
-                >
-                  Sign Out
-                </button>
               </div>
             )}
             <KioskControls />

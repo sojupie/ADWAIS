@@ -68,7 +68,7 @@ export function SystemEventsView() {
         clearErrorsMutation
     } = useSystemEventsViewModel();
     return (
-        <div className="flex flex-col xl:grid xl:grid-cols-3 gap-6 h-full min-h-0">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 h-full min-h-0">
 
             {/* Diagnostics / Health Panel */}
             <SettingsPanel className="col-span-1">
@@ -183,7 +183,7 @@ export function SystemEventsView() {
             </SettingsPanel>
 
             {/* System Logs console */}
-            <section className="flex flex-col flex-1 xl:flex-none col-span-1 xl:col-span-2 bg-slate-900 rounded-2xl shadow-lg border border-slate-800 overflow-hidden h-full min-h-0">
+            <section className="flex flex-col col-span-1 xl:col-span-2 bg-slate-900 rounded-2xl shadow-lg border border-slate-800 overflow-hidden h-full min-h-0 max-h-[500px] sm:max-h-[800px] xl:max-h-[calc(100vh-230px)] min-w-[285px] sm:min-w-[320px] min-w-0">
                 <div className="flex items-center justify-between shrink-0 p-4 border-b border-slate-800 bg-slate-900 z-10">
                     <div className="flex items-center gap-3">
                         <TerminalSquare size={18} className="text-brand-accent" />

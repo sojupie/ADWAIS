@@ -143,12 +143,12 @@ function RootComponent() {
       <div className="flex flex-col h-screen w-screen bg-brand-bg-tertiary overflow-hidden select-none font-sans text-brand-text">
         {/* ── Header ── */}
         {!isKioskRoute && (
-          <header className="relative flex flex-col xl:flex-row justify-between items-center px-6 py-3 shrink-0 bg-brand-bg-secondary border-b border-brand-bg-secondary/20 shadow-sm z-10 gap-4 xl:gap-0">
-            <div className="w-full xl:w-1/4 flex justify-center xl:justify-start">
+          <header className="relative flex flex-col md:flex-row md:flex-wrap xl:flex-nowrap xl:flex-row justify-between items-center px-6 py-3 shrink-0 bg-brand-bg-secondary border-b border-brand-bg-secondary/20 shadow-sm z-10 gap-4 md:gap-y-3 xl:gap-0">
+            <div className="w-full md:w-auto xl:w-1/4 flex justify-center md:justify-start">
               <img className="h-8 w-auto object-contain object-left brightness-0 invert" src={motilloLogo} alt="Motillo" height="32" />
             </div>
 
-          <nav className="flex-1 flex flex-wrap justify-center items-center gap-4 md:gap-8 w-full xl:w-auto">
+          <nav className="flex flex-wrap justify-center items-center gap-4 md:gap-8 w-full md:w-auto xl:flex-1 xl:justify-center">
             <NavLink to={"/financial"} search={{ timeframe: financialTf }}>
               Financial
             </NavLink>
@@ -159,32 +159,34 @@ function RootComponent() {
             <NavLink to={"/settings"}> <Settings size={20}/> </NavLink>
           </nav>
 
-          <div className="w-full xl:w-1/4 flex justify-center xl:justify-end items-center gap-4">
-            {!isOnline && (
-              <span 
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-extrabold text-red-600 bg-red-50 border border-red-200 uppercase tracking-wider animate-in fade-in duration-300 whitespace-nowrap shrink-0"
-                title="Application is offline"
-              >
-                <WifiOff size={14} className="animate-pulse" />
-                Offline
-              </span>
-            )}
-            {isOnline && !isBackendOnline && (
-              <span 
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-extrabold text-amber-600 bg-amber-50 border border-amber-200 uppercase tracking-wider animate-in fade-in duration-300 whitespace-nowrap shrink-0"
-                title="Backend server is unreachable (502 / bad gateway)"
-              >
-                <ServerCrash size={14} className="animate-pulse" />
-                Server Offline
-              </span>
-            )}
-            {hasMsalAccount && (
-              <div className="flex items-center gap-3 bg-brand-bg-primary/45 border border-white/10 px-3.5 py-1.5 rounded-lg shadow-sm whitespace-nowrap shrink-0">
-                <span className="text-sm font-bold text-slate-300">
-                  {user?.name || accounts[0]?.name || accounts[0]?.username}
+          <div className="w-full md:w-full xl:w-1/4 flex justify-between md:justify-between xl:justify-end items-center gap-4">
+            <div className="flex items-center gap-4">
+              {!isOnline && (
+                <span 
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-extrabold text-red-600 bg-red-50 border border-red-200 uppercase tracking-wider animate-in fade-in duration-300 whitespace-nowrap shrink-0"
+                  title="Application is offline"
+                >
+                  <WifiOff size={14} className="animate-pulse" />
+                  Offline
                 </span>
-              </div>
-            )}
+              )}
+              {isOnline && !isBackendOnline && (
+                <span 
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-extrabold text-amber-600 bg-amber-50 border border-amber-200 uppercase tracking-wider animate-in fade-in duration-300 whitespace-nowrap shrink-0"
+                  title="Backend server is unreachable (502 / bad gateway)"
+                >
+                  <ServerCrash size={14} className="animate-pulse" />
+                  Server Offline
+                </span>
+              )}
+              {hasMsalAccount && (
+                <div className="flex items-center gap-3 bg-brand-bg-primary/45 border border-white/10 px-3.5 py-1.5 rounded-lg shadow-sm whitespace-nowrap shrink-0">
+                  <span className="text-sm font-bold text-slate-300">
+                    {user?.name || accounts[0]?.name || accounts[0]?.username}
+                  </span>
+                </div>
+              )}
+            </div>
             <KioskControls />
           </div>
 

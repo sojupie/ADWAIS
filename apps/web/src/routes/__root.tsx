@@ -159,7 +159,7 @@ function RootComponent() {
             <NavLink to={"/settings"}> <Settings size={20}/> </NavLink>
           </nav>
 
-          <div className="w-full md:w-full xl:w-1/4 flex justify-between md:justify-between xl:justify-end items-center gap-4">
+          <div className="w-full md:w-auto xl:w-1/4 flex justify-between md:justify-end xl:justify-end items-center gap-4">
             <div className="flex items-center gap-4">
               {!isOnline && (
                 <span 

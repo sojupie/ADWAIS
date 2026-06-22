@@ -2398,7 +2398,7 @@
       "CreateUserRequestDto": {
         "type": "object",
         "properties": {
-          "name": {
+          "email": {
             "type": "string",
             "nullable": true
           },
@@ -3647,6 +3647,10 @@
             "format": "uuid"
           },
           "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
             "type": "string",
             "nullable": true
           },

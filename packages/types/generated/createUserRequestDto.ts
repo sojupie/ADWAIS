@@ -8,6 +8,6 @@ import type { UserRole } from './userRole';
 
 export interface CreateUserRequestDto {
   /** @nullable */
-  name?: string | null;
+  email?: string | null;
   role?: UserRole;
 }

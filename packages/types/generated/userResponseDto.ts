@@ -10,5 +10,7 @@ export interface UserResponseDto {
   id?: string;
   /** @nullable */
   name?: string | null;
+  /** @nullable */
+  email?: string | null;
   role?: UserRole;
 }

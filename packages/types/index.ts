@@ -94,6 +94,7 @@ export type BackgroundJobStatusDto = Required<Omit<Generated.BackgroundJobStatus
 export type UserResponseDto = {
   id: string;
   name: string;
+  email: string | null;
   role: string;
 };
 

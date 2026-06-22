@@ -13,7 +13,7 @@ export function useUsersQuery() {
 export function useCreateUserMutation(onSuccessCallback?: () => void) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (user: { name: string; role: string }) => 
+    mutationFn: (user: { email: string; role: string }) => 
       apiFetch<UserResponseDto>('/api/users', {
         method: 'POST',
         body: JSON.stringify(user)

@@ -6,17 +6,17 @@ import { SecureButton } from '../../common/ui/SecureButton';
 
 interface ProvisionUserPanelProps {
   createUser: {
-    mutate: (user: { name: string; role: string }) => void;
+    mutate: (user: { email: string; role: string }) => void;
     isPending: boolean;
   };
 }
 
 export function ProvisionUserPanel({ createUser }: ProvisionUserPanelProps) {
-  const [newUser, setNewUser] = useState({ name: '', role: 'Admin' });
+  const [newUser, setNewUser] = useState({ email: '', role: 'Admin' });
 
   const handleCreate = () => {
     createUser.mutate(newUser);
-    setNewUser({ name: '', role: 'Admin' });
+    setNewUser({ email: '', role: 'Admin' });
   };
 
   return (
@@ -32,10 +32,10 @@ export function ProvisionUserPanel({ createUser }: ProvisionUserPanelProps) {
       </div>
       <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto items-end">
         <Input
-          type="text"
-          placeholder="Full Name"
-          value={newUser.name}
-          onChange={e => setNewUser({ ...newUser, name: e.target.value })}
+          type="email"
+          placeholder="Email Address"
+          value={newUser.email}
+          onChange={e => setNewUser({ ...newUser, email: e.target.value })}
           containerClassName="min-w-[200px] sm:w-auto"
         />
         <Select
@@ -50,7 +50,7 @@ export function ProvisionUserPanel({ createUser }: ProvisionUserPanelProps) {
         </Select>
         <SecureButton
           onClick={handleCreate}
-          disabled={!newUser.name}
+          disabled={!newUser.email}
           loading={createUser.isPending}
           loadingText="Creating..."
           className="bg-brand-link text-white px-6 py-2.5 text-sm font-bold rounded-xl hover:bg-brand-link/90 transition-all cursor-pointer flex items-center justify-center gap-2 h-10 w-full sm:w-auto shrink-0"

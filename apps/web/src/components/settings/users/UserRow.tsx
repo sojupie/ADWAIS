@@ -22,13 +22,17 @@ export function UserRow({ u, updateUser, deleteUser }: UserRowProps) {
           </div>
           <div className="flex flex-col w-full max-w-[250px]">
             <InlineEditField
+               hideLabel={true}
                label="Full Name"
                value={u.name}
                required
                displayValue={
                  <div className="flex flex-col">
                    <span className="font-bold text-slate-800 text-sm">{u.name}</span>
-                   <span className="text-sm text-slate-400 font-mono mt-0.5">{u.id}</span>
+                   {u.email && u.email !== u.name && (
+                     <span className="text-xs text-slate-500 font-medium mt-0.5">{u.email}</span>
+                   )}
+                   <span className="text-xs text-slate-400 font-mono mt-0.5">{u.id}</span>
                  </div>
                }
                onSave={(val) => updateUser.mutate({ id: u.id, payload: { name: val }})}
@@ -38,6 +42,7 @@ export function UserRow({ u, updateUser, deleteUser }: UserRowProps) {
       </td>
       <td className="px-6 py-4 align-top pt-5 w-48">
         <InlineEditField
+           hideLabel={true}
            label="Role Level"
            type="select"
            value={u.role}

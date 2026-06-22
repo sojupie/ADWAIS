@@ -13,6 +13,7 @@ type InlineEditFieldProps<T> = {
   placeholder?: string;
   allowClear?: boolean;
   disabled?: boolean;
+  hideLabel?: boolean;
 };
 
 export function InlineEditField<T>({
@@ -27,6 +28,7 @@ export function InlineEditField<T>({
   placeholder,
   allowClear = false,
   disabled = false,
+  hideLabel = false,
 }: InlineEditFieldProps<T>) {
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState(value);
@@ -117,21 +119,27 @@ export function InlineEditField<T>({
 
   return (
     <div 
-      className={`flex flex-col gap-1 py-1 px-2 -mx-2 rounded-lg transition-colors ${isEditing ? 'bg-slate-50 border border-slate-200' : 'hover:bg-slate-50 border border-transparent'}`}
+      className={`flex flex-col gap-1 w-full transition-colors ${
+        hideLabel
+          ? 'py-0.5'
+          : `py-1 px-2 -mx-2 rounded-lg ${isEditing ? 'bg-slate-50/50' : 'hover:bg-slate-50/50'}`
+      }`}
     >
-      <label className="text-sm font-bold text-slate-500 uppercase tracking-wider flex justify-between items-center">
-        <span>{label}</span>
-        {required ? (
-          <span className="text-red-500/70 lowercase font-medium text-sm">
-            {requiredCondition ? `(Required ${requiredCondition})` : '(Required)'}
-          </span>
-        ) : (
-          <span className="text-slate-400 lowercase font-medium text-sm">(Optional)</span>
-        )}
-      </label>
+      {!hideLabel && (
+        <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex justify-between items-center select-none mb-0.5">
+          <span>{label}</span>
+          {required ? (
+            <span className="text-red-500/70 lowercase font-medium text-xs">
+              {requiredCondition ? `(Required ${requiredCondition})` : '(Required)'}
+            </span>
+          ) : (
+            <span className="text-slate-400 lowercase font-medium text-xs">(Optional)</span>
+          )}
+        </label>
+      )}
 
       {isEditing ? (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full">
           {type === 'select' ? (
             <select
               ref={inputRef as React.RefObject<HTMLSelectElement>}
@@ -139,7 +147,7 @@ export function InlineEditField<T>({
               onChange={(e) => setDraft(e.target.value as unknown as T)}
               disabled={isSaving}
               onKeyDown={handleKeyDown}
-              className="flex-1 border border-slate-300 rounded-md px-2 py-1.5 text-sm font-semibold focus:ring-2 focus:ring-brand-btn-primary focus:outline-none"
+              className="flex-1 border border-slate-300 bg-white rounded-md px-2 py-1.5 text-sm font-semibold focus:ring-2 focus:ring-brand-btn-primary focus:outline-none"
             >
               {options.map((opt) => (
                 <option key={opt.value as React.Key} value={opt.value as unknown as string}>{opt.label}</option>
@@ -157,10 +165,10 @@ export function InlineEditField<T>({
               }}
               disabled={isSaving}
               onKeyDown={handleKeyDown}
-              className={`flex-1 border border-slate-300 rounded-md px-2 py-1.5 text-sm font-semibold focus:ring-2 focus:ring-brand-btn-primary focus:outline-none ${type === 'password' ? 'font-mono' : ''}`}
+              className={`flex-1 border border-slate-300 bg-white rounded-md px-2 py-1.5 text-sm font-semibold focus:ring-2 focus:ring-brand-btn-primary focus:outline-none ${type === 'password' ? 'font-mono' : ''}`}
             />
           )}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 shrink-0">
             {allowClear && (type === 'password' ? value : draft) && (
               <button
                 onClick={async () => {
@@ -176,7 +184,7 @@ export function InlineEditField<T>({
                   }
                 }}
                 disabled={isSaving}
-                className="p-1 text-red-500 hover:bg-red-50 rounded text-sm font-bold"
+                className="p-1 text-red-500 hover:bg-red-50 rounded text-sm font-bold cursor-pointer"
                 title="Clear"
               >
                 Clear
@@ -185,7 +193,7 @@ export function InlineEditField<T>({
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="p-1 text-brand-link hover:bg-brand-btn-primary/10 rounded"
+              className="p-1 text-brand-link hover:bg-brand-btn-primary/10 rounded cursor-pointer"
               title="Save"
             >
               {isSaving ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
@@ -196,7 +204,7 @@ export function InlineEditField<T>({
                 setIsEditing(false);
               }}
               disabled={isSaving}
-              className="p-1 text-slate-500 hover:bg-slate-100 rounded"
+              className="p-1 text-slate-500 hover:bg-slate-100 rounded cursor-pointer"
               title="Cancel"
             >
               <X size={14} />
@@ -204,18 +212,18 @@ export function InlineEditField<T>({
           </div>
         </div>
       ) : (
-        <div className="flex items-center justify-between group/val">
-          <span className={`text-sm font-semibold text-slate-800 ${type === 'password' || displayValue === 'Not set' ? 'italic text-slate-400' : ''}`}>
+        <div className="flex items-center justify-between group/val w-full min-h-[28px]">
+          <div className={`text-sm font-semibold text-slate-800 ${type === 'password' || displayValue === 'Not set' ? 'italic text-slate-400' : ''}`}>
             {displayValue ? displayValue : (
               type === 'password' ? (value ? '••••••••••••' : 'Not set') : (
                 (value !== null && value !== undefined && value !== '') ? String(value) : '—'
               )
             )}
-          </span>
+          </div>
           {disabled ? (
-            <span className="p-1 text-slate-400 cursor-not-allowed opacity-60 flex items-center gap-1" title="Requires Admin privileges">
+            <span className="p-1 text-slate-400 cursor-not-allowed opacity-60 flex items-center gap-1 shrink-0" title="Requires Admin privileges">
               <Lock size={12} />
-              <span className="text-sm font-bold uppercase tracking-wider text-slate-400">Admin</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Admin</span>
             </span>
           ) : (
             <button
@@ -223,7 +231,7 @@ export function InlineEditField<T>({
                 setDraft((type === 'password' ? '' : value) as unknown as T);
                 setIsEditing(true);
               }}
-              className="p-1 text-slate-400 hover:text-brand-link hover:bg-brand-bg-secondary rounded cursor-pointer transition-all opacity-100 sm:opacity-0 sm:group-hover/val:opacity-100"
+              className="p-1 text-slate-400 hover:text-brand-link hover:bg-brand-bg-secondary rounded cursor-pointer transition-all opacity-100 sm:opacity-0 sm:group-hover/val:opacity-100 shrink-0 ml-2"
               title="Edit"
             >
               <Edit3 size={14} />

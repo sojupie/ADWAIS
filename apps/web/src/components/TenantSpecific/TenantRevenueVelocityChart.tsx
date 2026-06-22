@@ -8,8 +8,8 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import type { RevenueVelocityPointDto, ComparisonPeriod } from '@types';
-import { formatCurrency, formatChartLabel, inferBinSize, formatCompact } from '@utils';
+import type { FinancialVelocityPoint, ComparisonPeriod } from '@types';
+import { formatChartLabel, inferBinSize, formatCompact } from '@utils';
 import { ChartPanel } from '../common/charts/ChartPanel';
 
 const CustomTooltip = ({ active, payload, label }: { isLoading?: boolean;  active?: boolean; payload?: { dataKey?: string | number; value: number }[]; label?: string }) => {

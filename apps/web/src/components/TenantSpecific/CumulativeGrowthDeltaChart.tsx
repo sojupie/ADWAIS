@@ -10,7 +10,6 @@ import {
 } from 'recharts';
 import type { CumulativeGrowthDeltaPoint, ComparisonPeriod } from '@types';
 import {
-  formatCurrency,
   formatChartLabel,
   inferBinSize,
   formatCompact

@@ -1,4 +1,5 @@
 using Adwais.Domain.Entities;
+using Adwais.Domain.Entities.Intranet;
 using Adwais.Domain.Entities.Monitoring;
 using Adwais.Domain.Entities.OrderData;
 using Adwais.Infrastructure.Persistence;
@@ -16,6 +17,18 @@ public static class DatabaseSeeder
         var random = new Random(42);
         var profiles = GenerateProfiles();
         var tenants = await SeedTenantsAsync(context, profiles);
+
+        // Seed default FeedSources for Intranet
+        if (!await context.FeedSources.AnyAsync())
+        {
+            context.FeedSources.AddRange(
+                new FeedSource { Id = Guid.NewGuid(), Name = "Litium Blog", Url = "https://www.litium.com/blog", IsActive = true },
+                new FeedSource { Id = Guid.NewGuid(), Name = "Litium Reports & Guides", Url = "https://www.litium.com/reports-and-guides", IsActive = true },
+                new FeedSource { Id = Guid.NewGuid(), Name = "Litium Cision News", Url = "https://news.cision.com/se/litium/ListItems?format=rss", IsActive = true },
+                new FeedSource { Id = Guid.NewGuid(), Name = "Motillo Aktuellt", Url = "https://www.motillo.com/sv/aktuellt", IsActive = true }
+            );
+            await context.SaveChangesAsync();
+        }
 
         var forceReSeed = Environment.GetEnvironmentVariable("RESEED") == "true";
         if (forceReSeed)

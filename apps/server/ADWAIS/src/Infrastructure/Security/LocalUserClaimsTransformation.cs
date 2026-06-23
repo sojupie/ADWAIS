@@ -41,7 +41,11 @@ public class LocalUserClaimsTransformation(IDbContextFactory<AnalyticsDbContext>
                    ?? principal.FindFirst(ClaimTypes.Name)?.Value 
                    ?? "New User";
         var email = principal.FindFirst("preferred_username")?.Value 
-                    ?? principal.FindFirst(ClaimTypes.Email)?.Value;
+                    ?? principal.FindFirst("email")?.Value
+                    ?? principal.FindFirst("upn")?.Value
+                    ?? principal.FindFirst("unique_name")?.Value
+                    ?? principal.FindFirst(ClaimTypes.Email)?.Value
+                    ?? principal.FindFirst(ClaimTypes.Upn)?.Value;
 
         if (user != null)
         {

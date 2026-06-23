@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Adwais.Application.DTOs.Financial.Upstream;
+using Adwais.Application.DTOs.Intranet;
 using Adwais.Application.Interfaces;
 using Adwais.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Mvc;
@@ -10,13 +11,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace Adwais.Api.Controllers;
-
-public record CreateNewsletterDto
-{
-    public required string Title { get; set; }
-    public required string Body { get; set; }
-    public required string Category { get; set; }
-}
 
 [ApiController]
 [Route("api/webhooks")]

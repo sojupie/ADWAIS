@@ -1,10 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using Adwais.Api.Controllers;
+using Adwais.Application.DTOs.Intranet;
 using Adwais.Application.DTOs.System;
 using Adwais.Application.Interfaces;
+using Adwais.Domain.Entities;
+using Adwais.Domain.Entities.Intranet;
+using Adwais.Domain.Enums;
 using Adwais.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -126,5 +131,74 @@ public class IntranetControllerTests
 
         // Assert
         Assert.IsType<UnauthorizedResult>(result);
+    }
+
+    [Fact]
+    public async Task Posts_CreatePost_ShouldReturnCreated_AndSaveToDb()
+    {
+        // Arrange
+        var entraOid = Guid.NewGuid();
+        var user = new User { Id = Guid.NewGuid(), Name = "Employee User", Email = "emp@motillo.com", EntraObjectId = entraOid, Role = UserRole.Employee };
+        
+        var userServiceMock = new Mock<IUserService>();
+        userServiceMock.Setup(s => s.GetUserByEntraObjectIdAsync(entraOid, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(user);
+
+        var post = new CommunityPost
+        {
+            Id = Guid.NewGuid(),
+            UserId = user.Id,
+            Title = "Announcing Intranet",
+            Body = "Exciting news!",
+            CreatedAt = DateTime.UtcNow
+        };
+
+        var postServiceMock = new Mock<ICommunityPostService>();
+        postServiceMock.Setup(s => s.CreatePostAsync(user.Id, "Announcing Intranet", "Exciting news!", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(post);
+
+        var controller = new CommunityPostController(postServiceMock.Object, userServiceMock.Object);
+        
+        var claims = new List<Claim> { new("oid", entraOid.ToString()) };
+        var identity = new ClaimsIdentity(claims, "TestAuth");
+        controller.ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal(identity) } };
+
+        var dto = new CreatePostDto { Title = "Announcing Intranet", Body = "Exciting news!" };
+
+        // Act
+        var result = await controller.CreatePost(dto, CancellationToken.None);
+
+        // Assert
+        var createdResult = Assert.IsType<CreatedAtActionResult>(result);
+        var returned = Assert.IsType<CommunityPost>(createdResult.Value);
+        Assert.Equal(user.Id, returned.UserId);
+        Assert.Equal("Announcing Intranet", returned.Title);
+        postServiceMock.Verify(s => s.CreatePostAsync(user.Id, "Announcing Intranet", "Exciting news!", It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task Posts_CreatePost_ShouldReturnUnauthorized_WhenUserIsNotRegistered()
+    {
+        // Arrange
+        var entraOid = Guid.NewGuid();
+        
+        var userServiceMock = new Mock<IUserService>();
+        userServiceMock.Setup(s => s.GetUserByEntraObjectIdAsync(entraOid, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((User?)null);
+
+        var postServiceMock = new Mock<ICommunityPostService>();
+        var controller = new CommunityPostController(postServiceMock.Object, userServiceMock.Object);
+        
+        var claims = new List<Claim> { new("oid", entraOid.ToString()) };
+        var identity = new ClaimsIdentity(claims, "TestAuth");
+        controller.ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal(identity) } };
+
+        var dto = new CreatePostDto { Title = "Announcing Intranet", Body = "Exciting news!" };
+
+        // Act
+        var result = await controller.CreatePost(dto, CancellationToken.None);
+
+        // Assert
+        Assert.IsType<UnauthorizedObjectResult>(result);
     }
 }

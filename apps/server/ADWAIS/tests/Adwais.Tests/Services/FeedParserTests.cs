@@ -82,4 +82,34 @@ public class FeedParserTests
         Assert.Equal("https://www.litium.com/blog/customer-pricing", item.Link);
         Assert.Equal("https://litium.com/image.jpg", item.ImageUrl);
     }
+
+    [Fact]
+    public async Task MotilloAktuelltParser_CanParse_MotilloUrl_AndScrapesItems()
+    {
+        // Arrange
+        var parser = new MotilloAktuelltParser();
+        var source = new FeedSource { Id = Guid.NewGuid(), Name = "Motillo", Url = "https://www.motillo.com/sv/aktuellt", IsActive = true };
+        
+        var html = @"
+        <html>
+          <body>
+            <a class=""group"" href=""/aktuellt/next-gen"">
+              <h3>Next Gen Commerce</h3>
+              <p>Scraped summary content</p>
+              <img src=""/image-path.jpg"" />
+            </a>
+          </body>
+        </html>";
+        var handler = new MockHttpMessageHandler(req => new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(html, Encoding.UTF8, "text/html") });
+        var client = new HttpClient(handler);
+
+        // Act & Assert
+        Assert.True(parser.CanParse(source.Url));
+        var items = await parser.ParseAsync(source, client, CancellationToken.None);
+        var item = Assert.Single(items);
+        Assert.Equal("Next Gen Commerce", item.Title);
+        Assert.Equal("https://www.motillo.com/aktuellt/next-gen", item.Link);
+        Assert.Equal("https://www.motillo.com/image-path.jpg", item.ImageUrl);
+        Assert.Equal("Scraped summary content", item.Content);
+    }
 }

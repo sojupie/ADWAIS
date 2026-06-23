@@ -64,6 +64,7 @@ public static class DependencyInjection
         services.AddTransient<IFeedParser, Services.Parsers.RssFeedParser>();
         services.AddTransient<IFeedParser, Services.Parsers.LitiumBlogParser>();
         services.AddTransient<IFeedParser, Services.Parsers.MotilloAktuelltParser>();
+        services.AddTransient<ISystemHealthService, SystemHealthService>();
 
         return services;
     }

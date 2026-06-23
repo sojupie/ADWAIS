@@ -3073,6 +3073,10 @@
             "type": "integer",
             "format": "int32"
           },
+          "feedsWithErrorsCount": {
+            "type": "integer",
+            "format": "int32"
+          },
           "globalSyncError": {
             "type": "string",
             "nullable": true
@@ -3144,6 +3148,11 @@
             "$ref": "#/components/schemas/SyncHealthDto"
           },
           "lastLitiumSync": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastBlogSync": {
             "type": "string",
             "format": "date-time",
             "nullable": true

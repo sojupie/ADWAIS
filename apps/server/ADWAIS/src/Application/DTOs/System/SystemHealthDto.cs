@@ -1,6 +1,6 @@
 using System;
 
-namespace Adwais.Api.DTOs.System;
+namespace Adwais.Application.DTOs.System;
 
 public record SystemHealthDto(
     string DatabaseStatus,
@@ -14,7 +14,7 @@ public record SystemHealthDto(
 );
 
 public record HangfireHealthDto(
-    string Status, // "Healthy", "Warning", "Failed"
+    string Status,
     long FailedCount,
     long ProcessingCount,
     long EnqueuedCount,
@@ -22,7 +22,7 @@ public record HangfireHealthDto(
 );
 
 public record SyncHealthDto(
-    string Status, // "Healthy", "Degraded", "Failed"
+    string Status,
     int TenantsWithErrorsCount,
     int MonitorsWithErrorsCount,
     int FeedsWithErrorsCount,

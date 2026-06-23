@@ -15,6 +15,6 @@ public class OfficeEvent
     public bool IsRecurring { get; set; }
     public bool IsSpecial { get; set; }
     public required string Recurrence { get; set; }
-    public Guid? CreatedByUserId { get; set; }
-    public User? CreatedByUser { get; set; }
+    public Guid? UserId { get; set; }
+    public User? User { get; set; }
 }

@@ -390,9 +390,9 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
             entity.Property(oe => oe.Location).HasMaxLength(255).IsRequired(false);
             entity.Property(oe => oe.EventType).HasMaxLength(50).IsRequired();
             entity.Property(oe => oe.Recurrence).HasMaxLength(50).IsRequired().HasDefaultValue("None");
-            entity.HasOne(oe => oe.CreatedByUser)
+            entity.HasOne(oe => oe.User)
                 .WithMany()
-                .HasForeignKey(oe => oe.CreatedByUserId)
+                .HasForeignKey(oe => oe.UserId)
                 .OnDelete(DeleteBehavior.SetNull);
             entity.HasIndex(oe => oe.StartTime);
             entity.HasIndex(oe => oe.EndTime);

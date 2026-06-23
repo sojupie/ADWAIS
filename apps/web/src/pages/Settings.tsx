@@ -5,12 +5,9 @@ import { useState } from 'react';
 import { DashboardLayout } from "../components/common/layout/DashboardLayout.tsx";
 import { DashboardFlexRow } from "../components/common/layout/DashboardFlexRow.tsx";
 
-import { useCurrentUser } from "../hooks/useCurrentUser";
-
 export function Settings() {
     const queryClient = useQueryClient();
     const [isRefreshing, setIsRefreshing] = useState(false);
-    const { role } = useCurrentUser();
     const navigate = useNavigate();
     const location = useLocation();
     const currentPath = location.pathname;
@@ -20,7 +17,7 @@ export function Settings() {
         { id: 'configuration', label: 'Configuration', path: '/settings/configuration' },
         { id: 'tenants', label: 'Tenants & Monitors', path: '/settings/tenants' },
         { id: 'events', label: 'Events & Health', path: '/settings/events' },
-        ...(role === 'Admin' ? [{ id: 'users', label: 'Users', path: '/settings/users' }] : []),
+        { id: 'users', label: 'Users', path: '/settings/users' },
         { id: 'authentication', label: 'Authentication', path: '/settings/authentication' },
     ];
 

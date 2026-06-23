@@ -7,13 +7,9 @@ using Adwais.Api.Controllers;
 using Adwais.Application.DTOs.Intranet;
 using Adwais.Application.DTOs.System;
 using Adwais.Application.Interfaces;
-using Adwais.Domain.Entities;
 using Adwais.Domain.Entities.Intranet;
-using Adwais.Domain.Enums;
-using Adwais.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -75,18 +71,19 @@ public class IntranetControllerTests
     public async Task Webhooks_ReceiveNewsletter_ShouldReturnOk_AndSaveToDb_WhenApiKeyIsValid()
     {
         // Arrange
-        var dbName = Guid.NewGuid().ToString();
-        var options = new DbContextOptionsBuilder<AnalyticsDbContext>().UseInMemoryDatabase(dbName).Options;
-        var dbContext = new AnalyticsDbContext(options);
-
         var configMock = new Mock<IConfiguration>();
         configMock.Setup(c => c["Webhooks:NewsletterApiKey"]).Returns("valid-secret-key");
+
+        var newsletterId = Guid.NewGuid();
+        var webhookServiceMock = new Mock<INewsletterWebhookService>();
+        webhookServiceMock.Setup(s => s.IngestNewsletterAsync(It.IsAny<CreateNewsletterDto>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(newsletterId);
 
         var controller = new WebhooksController(
             new Mock<ILitiumIngestionService>().Object,
             configMock.Object,
             new Mock<ILogger<WebhooksController>>().Object,
-            dbContext);
+            webhookServiceMock.Object);
 
         var payload = new CreateNewsletterDto { Title = "Weekly News", Body = "Content", Category = "General" };
 
@@ -99,27 +96,24 @@ public class IntranetControllerTests
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);
-        var newsletter = await dbContext.Newsletters.SingleOrDefaultAsync();
-        Assert.NotNull(newsletter);
-        Assert.Equal("Weekly News", newsletter.Title);
+        var returnedData = okResult.Value;
+        Assert.NotNull(returnedData);
+        webhookServiceMock.Verify(s => s.IngestNewsletterAsync(payload, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
     public async Task Webhooks_ReceiveNewsletter_ShouldReturnUnauthorized_WhenApiKeyIsInvalid()
     {
         // Arrange
-        var dbName = Guid.NewGuid().ToString();
-        var options = new DbContextOptionsBuilder<AnalyticsDbContext>().UseInMemoryDatabase(dbName).Options;
-        var dbContext = new AnalyticsDbContext(options);
-
         var configMock = new Mock<IConfiguration>();
         configMock.Setup(c => c["Webhooks:NewsletterApiKey"]).Returns("valid-secret-key");
 
+        var webhookServiceMock = new Mock<INewsletterWebhookService>();
         var controller = new WebhooksController(
             new Mock<ILitiumIngestionService>().Object,
             configMock.Object,
             new Mock<ILogger<WebhooksController>>().Object,
-            dbContext);
+            webhookServiceMock.Object);
 
         var payload = new CreateNewsletterDto { Title = "Weekly News", Body = "Content", Category = "General" };
         var httpContext = new DefaultHttpContext();
@@ -137,29 +131,23 @@ public class IntranetControllerTests
     public async Task Posts_CreatePost_ShouldReturnCreated_AndSaveToDb()
     {
         // Arrange
-        var entraOid = Guid.NewGuid();
-        var user = new User { Id = Guid.NewGuid(), Name = "Employee User", Email = "emp@motillo.com", EntraObjectId = entraOid, Role = UserRole.Employee };
-        
-        var userServiceMock = new Mock<IUserService>();
-        userServiceMock.Setup(s => s.GetUserByEntraObjectIdAsync(entraOid, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(user);
-
+        var userId = Guid.NewGuid();
         var post = new CommunityPost
         {
             Id = Guid.NewGuid(),
-            UserId = user.Id,
+            UserId = userId,
             Title = "Announcing Intranet",
             Body = "Exciting news!",
             CreatedAt = DateTime.UtcNow
         };
 
         var postServiceMock = new Mock<ICommunityPostService>();
-        postServiceMock.Setup(s => s.CreatePostAsync(user.Id, "Announcing Intranet", "Exciting news!", It.IsAny<CancellationToken>()))
+        postServiceMock.Setup(s => s.CreatePostAsync(userId, "Announcing Intranet", "Exciting news!", It.IsAny<CancellationToken>()))
             .ReturnsAsync(post);
 
-        var controller = new CommunityPostController(postServiceMock.Object, userServiceMock.Object);
+        var controller = new CommunityPostController(postServiceMock.Object);
         
-        var claims = new List<Claim> { new("oid", entraOid.ToString()) };
+        var claims = new List<Claim> { new(ClaimTypes.NameIdentifier, userId.ToString()) };
         var identity = new ClaimsIdentity(claims, "TestAuth");
         controller.ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal(identity) } };
 
@@ -171,25 +159,19 @@ public class IntranetControllerTests
         // Assert
         var createdResult = Assert.IsType<CreatedAtActionResult>(result);
         var returned = Assert.IsType<CommunityPost>(createdResult.Value);
-        Assert.Equal(user.Id, returned.UserId);
+        Assert.Equal(userId, returned.UserId);
         Assert.Equal("Announcing Intranet", returned.Title);
-        postServiceMock.Verify(s => s.CreatePostAsync(user.Id, "Announcing Intranet", "Exciting news!", It.IsAny<CancellationToken>()), Times.Once);
+        postServiceMock.Verify(s => s.CreatePostAsync(userId, "Announcing Intranet", "Exciting news!", It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
-    public async Task Posts_CreatePost_ShouldReturnUnauthorized_WhenUserIsNotRegistered()
+    public async Task Posts_CreatePost_ShouldReturnUnauthorized_WhenUserContextIsInvalid()
     {
         // Arrange
-        var entraOid = Guid.NewGuid();
-        
-        var userServiceMock = new Mock<IUserService>();
-        userServiceMock.Setup(s => s.GetUserByEntraObjectIdAsync(entraOid, It.IsAny<CancellationToken>()))
-            .ReturnsAsync((User?)null);
-
         var postServiceMock = new Mock<ICommunityPostService>();
-        var controller = new CommunityPostController(postServiceMock.Object, userServiceMock.Object);
+        var controller = new CommunityPostController(postServiceMock.Object);
         
-        var claims = new List<Claim> { new("oid", entraOid.ToString()) };
+        var claims = new List<Claim>(); // No claims
         var identity = new ClaimsIdentity(claims, "TestAuth");
         controller.ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal(identity) } };
 

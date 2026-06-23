@@ -101,6 +101,7 @@ public class LocalUserClaimsTransformation(IDbContextFactory<AnalyticsDbContext>
         var clone = principal.Clone();
         var localIdentity = new ClaimsIdentity();
         localIdentity.AddClaim(new Claim(ClaimTypes.Role, user.Role.ToString()));
+        localIdentity.AddClaim(new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()));
         clone.AddIdentity(localIdentity);
 
         return clone;

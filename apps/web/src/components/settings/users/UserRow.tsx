@@ -16,9 +16,9 @@ interface UserRowProps {
 export function UserRow({ u, updateUser, deleteUser, disabled = false }: UserRowProps) {
   return (
     <tr className="transition-colors group hover:bg-slate-50/80">
-      <td className="px-6 py-4">
+      <td className="px-6 py-3 align-middle">
         <div className="flex items-center gap-4">
-          <div className="w-10 h-10 rounded-full bg-brand-accent/10 flex items-center justify-center text-brand-accent font-bold text-lg">
+          <div className="w-10 h-10 rounded-full bg-brand-accent/10 flex items-center justify-center text-brand-accent font-bold text-lg shrink-0">
             {u.name?.charAt(0).toUpperCase()}
           </div>
           <div className="flex flex-col w-full max-w-[250px]">
@@ -42,7 +42,7 @@ export function UserRow({ u, updateUser, deleteUser, disabled = false }: UserRow
           </div>
         </div>
       </td>
-      <td className="px-6 py-4 align-top pt-5 w-44">
+      <td className="px-6 py-3 align-middle w-44">
         <InlineEditField
            hideLabel={true}
            label="Role Level"
@@ -66,16 +66,14 @@ export function UserRow({ u, updateUser, deleteUser, disabled = false }: UserRow
            onSave={(val) => updateUser.mutate({ id: u.id, payload: { role: val }})}
         />
       </td>
-      <td className="px-6 py-4 text-right align-top pt-7 w-28">
+      <td className="px-6 py-3 align-middle text-right w-28">
         {!disabled && (
-          <div className="flex justify-end items-center gap-2">
-            <button 
-              onClick={() => { if(confirm('Revoke access for this user?')) deleteUser.mutate(u.id); }} 
-              className="inline-flex items-center gap-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 px-3 py-2 rounded-lg text-sm font-bold transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
-            >
-              <Trash2 size={16} /> Revoke
-            </button>
-          </div>
+          <button 
+            onClick={() => { if(confirm('Revoke access for this user?')) deleteUser.mutate(u.id); }} 
+            className="inline-flex items-center gap-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 px-3 py-2 rounded-lg text-sm font-bold transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
+          >
+            <Trash2 size={16} /> Revoke
+          </button>
         )}
       </td>
     </tr>

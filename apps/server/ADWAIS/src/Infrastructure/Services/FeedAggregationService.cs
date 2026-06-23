@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Adwais.Application.Interfaces;
+using Adwais.Domain.Entities.Intranet;
 using Adwais.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -24,6 +26,79 @@ public class FeedAggregationService(
     private readonly ILogger<FeedAggregationService> _logger = logger;
     private readonly ISystemEventService _eventService = eventService;
 
-    public Task AggregateAllFeedsAsync(CancellationToken ct = default) => Task.CompletedTask;
-    public Task AggregateSourceAsync(Guid sourceId, CancellationToken ct = default) => Task.CompletedTask;
+    public async Task AggregateAllFeedsAsync(CancellationToken ct = default)
+    {
+        List<FeedSource> sources;
+        await using (var context = await _contextFactory.CreateDbContextAsync(ct))
+        {
+            sources = await context.FeedSources.Where(s => s.IsActive).ToListAsync(ct);
+        }
+
+        foreach (var source in sources)
+        {
+            try
+            {
+                await AggregateSourceAsync(source.Id, ct);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to aggregate feed source {Name}", source.Name);
+                await _eventService.LogErrorAsync(nameof(FeedAggregationService), $"Feed aggregation failed for {source.Name}: {ex.Message}", ex);
+            }
+        }
+    }
+
+    public async Task AggregateSourceAsync(Guid sourceId, CancellationToken ct = default)
+    {
+        FeedSource? source;
+        await using (var context = await _contextFactory.CreateDbContextAsync(ct))
+        {
+            source = await context.FeedSources.SingleOrDefaultAsync(s => s.Id == sourceId, ct);
+        }
+
+        if (source == null || !source.IsActive) return;
+
+        try
+        {
+            var parser = _parsers.FirstOrDefault(p => p.CanParse(source.Url));
+            if (parser == null)
+            {
+                throw new NotSupportedException($"No registered parser could parse the URL: {source.Url}");
+            }
+
+            var items = await parser.ParseAsync(source, _httpClient, ct);
+            if (items.Count > 0)
+            {
+                await using var context = await _contextFactory.CreateDbContextAsync(ct);
+                foreach (var item in items)
+                {
+                    var exists = await context.FeedItems.AnyAsync(fi => fi.Link == item.Link, ct);
+                    if (exists) continue;
+
+                    context.FeedItems.Add(item);
+                }
+                await context.SaveChangesAsync(ct);
+            }
+
+            await using (var context = await _contextFactory.CreateDbContextAsync(ct))
+            {
+                var src = await context.FeedSources.SingleAsync(s => s.Id == sourceId, ct);
+                src.LastPolledAt = DateTime.UtcNow;
+                src.LastSuccessAt = DateTime.UtcNow;
+                src.LastSyncError = null;
+                await context.SaveChangesAsync(ct);
+            }
+        }
+        catch (Exception ex)
+        {
+            await using (var context = await _contextFactory.CreateDbContextAsync(ct))
+            {
+                var src = await context.FeedSources.SingleAsync(s => s.Id == sourceId, ct);
+                src.LastPolledAt = DateTime.UtcNow;
+                src.LastSyncError = ex.Message;
+                await context.SaveChangesAsync(ct);
+            }
+            await _eventService.LogErrorAsync(nameof(FeedAggregationService), $"Feed aggregation failed for {source.Name}: {ex.Message}", ex);
+        }
+    }
 }

@@ -7,5 +7,7 @@ public class FeedSource
     public required string Url { get; set; }
     public bool IsActive { get; set; } = true;
     public DateTime? LastPolledAt { get; set; }
+    public DateTime? LastSuccessAt { get; set; }
+    public string? LastSyncError { get; set; }
     public ICollection<FeedItem> FeedItems { get; set; } = new List<FeedItem>();
 }

@@ -61,6 +61,10 @@ public static class DependencyInjection
                         TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)) + TimeSpan.FromMilliseconds(new Random().Next(0, 1000))
                 ));
 
+        services.AddTransient<IFeedParser, Services.Parsers.RssFeedParser>();
+        services.AddTransient<IFeedParser, Services.Parsers.LitiumBlogParser>();
+        services.AddTransient<IFeedParser, Services.Parsers.MotilloAktuelltParser>();
+
         return services;
     }
 }

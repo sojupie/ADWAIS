@@ -40,11 +40,41 @@ If you need a local override (e.g., a different tenant), create `apps/web/.env.l
 
 ---
 
+## API Codegen (Orval)
+
+Frontend API hooks and TypeScript types are **generated** from the backend OpenAPI spec — do not hand-edit them.
+
+### What gets generated
+
+| Output | Contains |
+|---|---|
+| `packages/types/generated/` | TypeScript interfaces for all backend DTOs |
+| `src/api/generated/endpoints.ts` | React Query hooks (`useXxxQuery`, `useXxxMutation`) |
+
+Both are committed. Re-run codegen whenever the backend API changes.
+
+### Pipeline
+
+```
+dotnet build (API)  →  docs/openapi/v1.json  →  pnpm codegen  →  generated files
+```
+
+1. The .NET build emits an updated `docs/openapi/v1.json` automatically on each build.
+2. Run codegen from the repo root:
+   ```bash
+   pnpm --filter web codegen
+   ```
+
+> The backend must have been **built** (not necessarily running) before codegen so the spec reflects the latest controllers and DTOs.
+
+---
+
 ## Local Development
 
 All commands should ideally be run from the repository root:
 
-*   **Start dev server**: `pnpm --filter web dev`
+*   **Start dev server**: `pnpm dev:web` (from root) or `pnpm dev` (from this directory)
+*   **Regenerate API types**: `pnpm --filter web codegen`
 *   **Build production bundle**: `pnpm --filter web build`
 *   **Lint codebase**: `pnpm --filter web lint`
 

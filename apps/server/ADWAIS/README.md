@@ -119,6 +119,16 @@ All commands run from the **repository root** via pnpm shortcuts:
 
 > **Note**: `migration:add` builds the startup project to inspect the model. Stop `dev:api` first if it is already running, otherwise the build will fail on a port conflict.
 
+### After changing the API
+
+Any time you add, remove, or rename a controller endpoint or DTO, regenerate the frontend types:
+
+```bash
+pnpm --filter web codegen
+```
+
+This reads `docs/openapi/v1.json` (updated on each `dotnet build`) and regenerates the React Query hooks and TypeScript interfaces in `packages/types/generated/` and `apps/web/src/api/generated/`. See [`apps/web/README.md`](../../../web/README.md) for details.
+
 If you need to run raw `dotnet` commands directly (e.g. from `apps/server/ADWAIS`):
 
 ```bash

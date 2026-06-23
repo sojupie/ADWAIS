@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { createRootRoute, Outlet, useSearch, useRouterState, redirect } from '@tanstack/react-router';
+import { createRootRoute, Outlet, useSearch, useRouterState, redirect, Link } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { useQueryClient, useIsFetching, useIsMutating } from '@tanstack/react-query';
@@ -179,12 +179,13 @@ function RootComponent() {
                   Server Offline
                 </span>
               )}
-              {hasMsalAccount && (
-                <div className="flex items-center gap-3 bg-brand-bg-primary/45 border border-white/10 px-3.5 py-1.5 rounded-lg shadow-sm whitespace-nowrap shrink-0">
-                  <span className="text-sm font-bold text-slate-300">
-                    {user?.name || accounts[0]?.name || accounts[0]?.username}
-                  </span>
-                </div>
+              {(hasMsalAccount || !!getKioskToken()) && (
+                <Link
+                  to="/settings/authentication"
+                  className="flex items-center gap-3 bg-brand-bg-primary/45 hover:bg-brand-bg-primary/60 border border-white/10 hover:border-white/20 px-3.5 py-1.5 rounded-lg shadow-sm whitespace-nowrap shrink-0 text-sm font-bold text-slate-300 transition-colors cursor-pointer"
+                >
+                  {getKioskToken() ? 'Kiosk' : (user?.name || accounts[0]?.name || accounts[0]?.username)}
+                </Link>
               )}
             </div>
             <KioskControls />

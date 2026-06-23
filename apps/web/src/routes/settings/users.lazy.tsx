@@ -4,7 +4,7 @@ import { RoleBoundary } from '../../components/common/ui/RoleBoundary';
 
 export const Route = createLazyFileRoute('/settings/users')({
   component: () => (
-    <RoleBoundary requiredRole="Admin">
+    <RoleBoundary requiredRole="Viewer">
       <UsersView />
     </RoleBoundary>
   ),

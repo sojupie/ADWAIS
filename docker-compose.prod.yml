@@ -11,6 +11,7 @@ services:
       - DashboardAuth__Password=${DASHBOARD_PASS}
       - ConnectionStrings__AnalyticsDb=Host=db;Database=analyticsdb;Username=postgres;Password=${DB_PASSWORD}
       - Webhooks__MotasticApiKey=${MOTASTIC_API_KEY}
+      - AzureAd__Instance=https://login.microsoftonline.com/
       - AzureAd__TenantId=${AZURE_TENANT_ID}
       - AzureAd__ClientId=${AZURE_CLIENT_ID}
       - AzureAd__AppIdUri=api://${AZURE_CLIENT_ID}

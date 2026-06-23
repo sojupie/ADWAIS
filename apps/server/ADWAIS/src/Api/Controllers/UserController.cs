@@ -47,7 +47,7 @@ public class UserController(IUserService userService) : ControllerBase
     }
 
     [HttpGet]
-    [Authorize(Policy = "AdminOnly")]
+    [Authorize(Policy = "KioskOrStaffAccess")]
     public async Task<ActionResult<IEnumerable<UserResponseDto>>> GetUsers(CancellationToken ct)
     {
         var users = await _userService.GetUsersAsync(ct);
@@ -56,7 +56,7 @@ public class UserController(IUserService userService) : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
-    [Authorize(Policy = "AdminOnly")]
+    [Authorize(Policy = "KioskOrStaffAccess")]
     public async Task<ActionResult<UserResponseDto>> GetUser(Guid id, CancellationToken ct)
     {
         var user = await _userService.GetUserByIdAsync(id, ct);

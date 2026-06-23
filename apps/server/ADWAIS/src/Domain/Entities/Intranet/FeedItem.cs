@@ -1,6 +1,4 @@
-using System;
-
-namespace Adwais.Domain.Entities;
+namespace Adwais.Domain.Entities.Intranet;
 
 public class FeedItem
 {

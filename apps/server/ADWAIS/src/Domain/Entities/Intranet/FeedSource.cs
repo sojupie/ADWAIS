@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
-
-namespace Adwais.Domain.Entities;
+namespace Adwais.Domain.Entities.Intranet;
 
 public class FeedSource
 {

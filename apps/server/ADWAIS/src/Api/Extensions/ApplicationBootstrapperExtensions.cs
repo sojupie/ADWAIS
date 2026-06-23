@@ -91,6 +91,11 @@ public static class ApplicationBootstrapperExtensions
                     newJob => newJob.ExecuteAsync(),
                     Cron.Daily(2));
 
+                recurringJobManager.AddOrUpdate<FeedAggregationJob>(
+                    "aggregate-intranet-feeds",
+                    newJob => newJob.ExecuteAsync(CancellationToken.None),
+                    Cron.HourInterval(2));
+
                 if (enableSeeding)
                 {
                     recurringJobManager.AddOrUpdate<RuntimeDataSeederJob>(

@@ -3,6 +3,7 @@ using Adwais.Domain.Entities.Monitoring;
 using Adwais.Domain.Entities.OrderData;
 using Adwais.Domain.Enums;
 using Adwais.Application.Common.Interfaces;
+using Adwais.Domain.Entities.Intranet;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Adwais.Infrastructure.Persistence.Converters;

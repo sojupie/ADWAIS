@@ -37,6 +37,7 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
 
     public DbSet<SystemEvent> SystemEvents => Set<SystemEvent>();
     public DbSet<CommunityPost> CommunityPosts => Set<CommunityPost>();
+    public DbSet<Newsletter> Newsletters => Set<Newsletter>();
     public DbSet<OfficeEvent> OfficeEvents => Set<OfficeEvent>();
     public DbSet<FeedSource> FeedSources => Set<FeedSource>();
     public DbSet<FeedItem> FeedItems => Set<FeedItem>();
@@ -408,6 +409,21 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
             entity.Property(fs => fs.Name).HasMaxLength(255).IsRequired();
             entity.Property(fs => fs.Url).HasMaxLength(2048).IsRequired();
             entity.HasIndex(fs => fs.Url).IsUnique();
+            entity.Property(fs => fs.LastSuccessAt);
+            entity.Property(fs => fs.LastSyncError).HasMaxLength(4000);
+        });
+
+        // Newsletter
+        modelBuilder.Entity<Newsletter>(entity =>
+        {
+            entity.ToTable("newsletter");
+            entity.HasKey(n => n.Id);
+            entity.Property(n => n.Id).HasDefaultValueSql("uuid_generate_v4()");
+            entity.Property(n => n.Title).HasMaxLength(512).IsRequired();
+            entity.Property(n => n.Body).IsRequired();
+            entity.Property(n => n.Category).HasMaxLength(100).IsRequired();
+            entity.Property(n => n.CreatedAt).IsRequired();
+            entity.HasIndex(n => n.CreatedAt);
         });
 
         // FeedItem

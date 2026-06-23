@@ -6,11 +6,8 @@ node_modules/
 **/obj/
 
 # Environment and Logs
-# Root .env (service account tokens) — ignored
-.env
-# Web .env is non-secret dev config — explicitly tracked
-!apps/web/.env
-# Server src/.env contains real secrets — remains ignored (see apps/server/ADWAIS/src/.env.example)
+# Server src/.env contains only public Azure AD identifiers — tracked
+# Use .env.local files for machine-specific overrides (gitignored)
 *.log
 # .NET config — ignore production secrets, track Development defaults
 appsettings.json

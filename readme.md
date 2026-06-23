@@ -51,23 +51,15 @@ pnpm install
 
 ### 2. Configure Environment
 
-Several config files are needed. Most are tracked in git; only the backend secrets file must be created manually.
+All config files are tracked in git — no manual setup required after cloning.
 
-| File | Status | Contains |
-|---|---|---|
-| `apps/web/.env` | ✅ tracked | Public Azure client/tenant IDs for MSAL |
-| `apps/server/ADWAIS/src/Api/appsettings.Development.json` | ✅ tracked | Local DB connection string + feature toggles |
-| `apps/server/ADWAIS/src/.env` | ❌ gitignored — **must create** | Azure credentials + UptimeRobot API key |
+| File | Contains |
+|---|---|
+| `apps/web/.env` | Public Azure client/tenant IDs for MSAL |
+| `apps/server/ADWAIS/src/.env` | Public Azure AD identifiers (tenant ID, client ID) |
+| `apps/server/ADWAIS/src/Api/appsettings.Development.json` | Local DB connection string + feature toggles |
 
-To create the backend secrets file:
-```bash
-cp apps/server/ADWAIS/src/.env.example apps/server/ADWAIS/src/.env
-# Then fill in AZURE_TENANT_ID, AZURE_CLIENT_ID, APP_ID_URI, uptime_robot_api_key
-```
-
-See [`apps/server/ADWAIS/README.md`](apps/server/ADWAIS/README.md) for the full variable reference.
-
-> **Local dev with mock data**: set `MockUptimeRobotIntegrations: true` in `appsettings.Development.json` (already the default) — no UptimeRobot key required.
+> **Local dev with mock data**: `MockUptimeRobotIntegrations: true` is already set in `appsettings.Development.json` — no external API keys required.
 
 ### 3. Spin up the Database
 If using Docker, run from the root:
@@ -80,12 +72,15 @@ pnpm db:up
 pnpm migration:update
 ```
 
-### 5. Start Development Servers
+### 5. Start Frontend
 ```bash
 pnpm dev:web   # React frontend (Vite)
-pnpm dev:api   # ASP.NET Core backend
 ```
 
+### 6. Start Backend
+```bash
+pnpm dev:api   # ASP.NET Core backend
+```
 ---
 
 ## All pnpm Scripts
@@ -99,4 +94,4 @@ pnpm dev:api   # ASP.NET Core backend
 | `pnpm migration:add <Name>` | Create a new EF Core migration (stop `dev:api` first) |
 | `pnpm migration:update` | Apply pending migrations to the local database |
 | `pnpm migration:remove` | Remove the last unapplied migration |
-| `pnpm migration:list` | List all migrations and their applied status |
+| `pnpm migration:list` | List all migrations and their applied status |

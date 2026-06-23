@@ -6,7 +6,8 @@ node_modules/
 **/obj/
 
 # Environment and Logs
-.env
+# src/.env is tracked — contains only public Azure AD identifiers (tenant ID, client ID)
+# Use .env.local for machine-specific overrides
 *.log
 
 # OS files

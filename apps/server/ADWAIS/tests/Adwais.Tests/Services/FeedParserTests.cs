@@ -51,4 +51,35 @@ public class FeedParserTests
         Assert.Equal("Test RSS Title", item.Title);
         Assert.Equal("https://news.cision.com/rss-test", item.Link);
     }
+
+    [Fact]
+    public async Task LitiumBlogParser_CanParse_LitiumBlog_AndScrapesItems()
+    {
+        // Arrange
+        var parser = new LitiumBlogParser();
+        var source = new FeedSource { Id = Guid.NewGuid(), Name = "Litium Blog", Url = "https://www.litium.com/blog", IsActive = true };
+        
+        var html = @"
+        <html>
+          <body>
+            <article class=""blog-index-container"">
+              <a class=""blog-index-link"" href=""/blog/customer-pricing"">
+                <div class=""blog-item-top-container"" style=""background-image: url(https://litium.com/image.jpg);""></div>
+              </a>
+              <h3>Customer Pricing</h3>
+              <span class=""publish-date"">23/06/2026</span>
+            </article>
+          </body>
+        </html>";
+        var handler = new MockHttpMessageHandler(req => new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(html, Encoding.UTF8, "text/html") });
+        var client = new HttpClient(handler);
+
+        // Act & Assert
+        Assert.True(parser.CanParse(source.Url));
+        var items = await parser.ParseAsync(source, client, CancellationToken.None);
+        var item = Assert.Single(items);
+        Assert.Equal("Customer Pricing", item.Title);
+        Assert.Equal("https://www.litium.com/blog/customer-pricing", item.Link);
+        Assert.Equal("https://litium.com/image.jpg", item.ImageUrl);
+    }
 }

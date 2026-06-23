@@ -1,5 +1,9 @@
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Adwais.Application.DTOs.Financial.Upstream;
 using Adwais.Application.Interfaces;
+using Adwais.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
@@ -7,13 +11,21 @@ using Microsoft.Extensions.Logging;
 
 namespace Adwais.Api.Controllers;
 
+public record CreateNewsletterDto
+{
+    public required string Title { get; set; }
+    public required string Body { get; set; }
+    public required string Category { get; set; }
+}
+
 [ApiController]
 [Route("api/webhooks")]
 [AllowAnonymous]
 public class WebhooksController(
     ILitiumIngestionService ingestionService,
     IConfiguration configuration,
-    ILogger<WebhooksController> logger)
+    ILogger<WebhooksController> logger,
+    AnalyticsDbContext dbContext)
     : ControllerBase
 {
     [HttpPost("motastic/{tenantId}")]
@@ -43,5 +55,36 @@ public class WebhooksController(
             logger.LogError(ex, "Failed to ingest webhook for tenant {TenantId}", tenantId);
             return StatusCode(500, "Internal server error during webhook ingestion");
         }
+    }
+
+    [HttpPost("newsletter")]
+    public async Task<IActionResult> ReceiveNewsletter(
+        [FromBody] CreateNewsletterDto? payload,
+        CancellationToken ct)
+    {
+        var apiKey = Request.Headers["X-Api-Key"].ToString();
+        if (string.IsNullOrEmpty(apiKey) || apiKey != configuration["Webhooks:NewsletterApiKey"])
+        {
+            return Unauthorized();
+        }
+
+        if (payload == null)
+        {
+            return BadRequest(new { Error = "Payload cannot be null." });
+        }
+
+        var newsletter = new Adwais.Domain.Entities.Intranet.Newsletter
+        {
+            Id = Guid.NewGuid(),
+            Title = payload.Title,
+            Body = payload.Body,
+            Category = payload.Category,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        dbContext.Newsletters.Add(newsletter);
+        await dbContext.SaveChangesAsync(ct);
+
+        return Ok(new { Id = newsletter.Id });
     }
 }

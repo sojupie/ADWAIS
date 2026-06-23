@@ -1,9 +1,16 @@
+using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Adwais.Api.Controllers;
 using Adwais.Application.DTOs.System;
 using Adwais.Application.Interfaces;
+using Adwais.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -57,5 +64,67 @@ public class IntranetControllerTests
         // Assert
         Assert.IsType<NoContentResult>(result);
         _healthServiceMock.Verify(s => s.ClearErrorsAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task Webhooks_ReceiveNewsletter_ShouldReturnOk_AndSaveToDb_WhenApiKeyIsValid()
+    {
+        // Arrange
+        var dbName = Guid.NewGuid().ToString();
+        var options = new DbContextOptionsBuilder<AnalyticsDbContext>().UseInMemoryDatabase(dbName).Options;
+        var dbContext = new AnalyticsDbContext(options);
+
+        var configMock = new Mock<IConfiguration>();
+        configMock.Setup(c => c["Webhooks:NewsletterApiKey"]).Returns("valid-secret-key");
+
+        var controller = new WebhooksController(
+            new Mock<ILitiumIngestionService>().Object,
+            configMock.Object,
+            new Mock<ILogger<WebhooksController>>().Object,
+            dbContext);
+
+        var payload = new CreateNewsletterDto { Title = "Weekly News", Body = "Content", Category = "General" };
+
+        var httpContext = new DefaultHttpContext();
+        httpContext.Request.Headers["X-Api-Key"] = "valid-secret-key";
+        controller.ControllerContext = new ControllerContext { HttpContext = httpContext };
+
+        // Act
+        var result = await controller.ReceiveNewsletter(payload, CancellationToken.None);
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        var newsletter = await dbContext.Newsletters.SingleOrDefaultAsync();
+        Assert.NotNull(newsletter);
+        Assert.Equal("Weekly News", newsletter.Title);
+    }
+
+    [Fact]
+    public async Task Webhooks_ReceiveNewsletter_ShouldReturnUnauthorized_WhenApiKeyIsInvalid()
+    {
+        // Arrange
+        var dbName = Guid.NewGuid().ToString();
+        var options = new DbContextOptionsBuilder<AnalyticsDbContext>().UseInMemoryDatabase(dbName).Options;
+        var dbContext = new AnalyticsDbContext(options);
+
+        var configMock = new Mock<IConfiguration>();
+        configMock.Setup(c => c["Webhooks:NewsletterApiKey"]).Returns("valid-secret-key");
+
+        var controller = new WebhooksController(
+            new Mock<ILitiumIngestionService>().Object,
+            configMock.Object,
+            new Mock<ILogger<WebhooksController>>().Object,
+            dbContext);
+
+        var payload = new CreateNewsletterDto { Title = "Weekly News", Body = "Content", Category = "General" };
+        var httpContext = new DefaultHttpContext();
+        httpContext.Request.Headers["X-Api-Key"] = "wrong-key";
+        controller.ControllerContext = new ControllerContext { HttpContext = httpContext };
+
+        // Act
+        var result = await controller.ReceiveNewsletter(payload, CancellationToken.None);
+
+        // Assert
+        Assert.IsType<UnauthorizedResult>(result);
     }
 }

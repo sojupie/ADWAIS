@@ -40,4 +40,7 @@ TEST*.xml
 
 /*.sln.DotSettings.user
 appsettings.json
-appsettings.Development.json
+# appsettings.Development.json is tracked — contains only non-secret dev defaults
+# appsettings.Production.json and appsettings.Staging.json must never be committed
+appsettings.Production.json
+appsettings.Staging.json

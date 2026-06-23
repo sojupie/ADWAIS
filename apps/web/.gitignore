@@ -14,8 +14,10 @@ dist-ssr
 *.local
 
 # Environment variables
-.env
-.env.*
+# .env is tracked — contains only non-secret VITE_AZURE_* dev defaults
+# Local overrides and secrets must NOT be committed
+.env.local
+.env.*.local
 !.env.example
 !.env.test
 

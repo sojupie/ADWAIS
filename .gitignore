@@ -6,10 +6,16 @@ node_modules/
 **/obj/
 
 # Environment and Logs
+# Root .env (service account tokens) — ignored
 .env
+# Web .env is non-secret dev config — explicitly tracked
+!apps/web/.env
+# Server src/.env contains real secrets — remains ignored (see apps/server/ADWAIS/src/.env.example)
 *.log
+# .NET config — ignore production secrets, track Development defaults
 appsettings.json
-appsettings.*.json
+appsettings.Production.json
+appsettings.Staging.json
 
 # OS files
 .DS_Store

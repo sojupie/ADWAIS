@@ -26,7 +26,17 @@ The user-facing dashboard displaying daily order rollups, financial stats, site 
 
 ## Configuration
 
-The API client assumes the backend API is running locally. You can customize the fetch target inside [`src/apiClient.ts`](file:///c:/Users/ollem/Git/motillo%20project/dashboard/apps/web/src/apiClient.ts).
+`apps/web/.env` is **tracked in git** — it contains only public Azure app registration IDs (non-secret):
+
+```env
+VITE_AZURE_CLIENT_ID=<your-client-id>
+VITE_AZURE_TENANT_ID=<your-tenant-id>
+VITE_AZURE_API_SCOPE=api://<your-client-id>/.default
+```
+
+These values come from the same Azure App Registration used by the backend. After cloning, the file is already present. If the app registration changes, update these values to match `AZURE_CLIENT_ID` / `AZURE_TENANT_ID` in the backend `src/.env`.
+
+If you need a local override (e.g., a different tenant), create `apps/web/.env.local` — it is gitignored and takes precedence.
 
 ---
 

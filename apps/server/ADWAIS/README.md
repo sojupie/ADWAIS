@@ -7,7 +7,7 @@ The analytics and monitoring server that aggregates data from external resources
 *   **Architecture**: Clean Architecture structure with loose coupling and clear separation of concerns.
 *   **Target Runtime**: .NET 10.0
 *   **Database Integration**: PostgreSQL (via Entity Framework Core with Snake Case naming convention).
-    *   *Convention*: Database schema configurations, attributes, and model mappings are managed **strictly** using Fluent API inside [`AnalyticsDbContext.cs`](file:///c:/Users/ollem/Git/motillo%20project/dashboard/apps/server/Adwais/src/Infrastructure/Persistence/AnalyticsDbContext.cs). Do **not** use EF Core data annotations on the domain entity models.
+    *   *Convention*: Database schema configurations, attributes, and model mappings are managed **strictly** using Fluent API inside `AnalyticsDbContext.cs`. Do **not** use EF Core data annotations on the domain entity models.
 *   **Background Ingestion Processing**: Hangfire (configured with PostgreSQL storage) executes scheduled syncing jobs.
 
 ---
@@ -53,33 +53,77 @@ The analytics and monitoring server that aggregates data from external resources
 
 ## Local Setup
 
-### 1. Prerequisites
-*   .NET 10.0 SDK
-*   A running PostgreSQL instance
+### Prerequisites
+*   .NET 10 SDK
+*   PostgreSQL running locally (default: `localhost:5432`, database `analyticsdb`, user `postgres`, password `development_password`)
 
-### 2. Configuration
-The API relies on environmental configurations. Populate your `.env` or `appsettings.json` file in the API project with:
-*   `AnalyticsDb`: The connection string for PostgreSQL.
+### Configuration files
+
+Two config files are needed. One is tracked in git; one must be created from the example.
+
+#### `src/Api/appsettings.Development.json` — tracked in git
+
+Already present after cloning. Contains non-secret dev defaults:
+
+```json
+{
+  "ConnectionStrings": {
+    "AnalyticsDb": "Host=localhost;Database=analyticsdb;Username=postgres;Password=development_password"
+  },
+  "AzureAd": {
+    "Instance": "https://login.microsoftonline.com/",
+    "Domain": "localhost",
+    "TenantId": "common",
+    "ClientId": "00000000-0000-0000-0000-000000000000"
+  },
+  "FeatureToggles": {
+    "EnableRuntimeDataSeeding": true,
+    "MockUptimeRobotIntegrations": true
+  }
+}
+```
+
+`EnableRuntimeDataSeeding` — registers `RuntimeDataSeederJob` in Hangfire (every minute, seeds mock order + latency data).  
+`MockUptimeRobotIntegrations` — makes mock monitors (negative IDs) show `"Up"` status without a real UptimeRobot API key.
+
+#### `src/.env` — gitignored, must be created
+
+Copy from the example and fill in real values:
+
+```bash
+cp src/.env.example src/.env
+```
+
+| Variable | Where to find it |
+|---|---|
+| `AZURE_TENANT_ID` | Azure Portal → Azure Active Directory → Overview |
+| `AZURE_CLIENT_ID` | Azure Portal → App Registrations → your app → Application (client) ID |
+| `APP_ID_URI` | Azure Portal → App Registrations → your app → Expose an API |
+| `uptime_robot_api_key` | UptimeRobot → My Settings → API Settings → Main API Key |
+| `SYNC_TARGET_URL` | Local: `https://localhost:5001/api/motasticadapter/sync` |
+| `SYNC_AUTH_HEADER` | Ask team for the service account credentials |
+
+> For local dev with mock data, only the AzureAd values are strictly required for auth. The UptimeRobot key is only needed if `MockUptimeRobotIntegrations: false`.
 
 ---
 
 ## Development Commands
 
-Run these commands from the `apps/server/Adwais` directory:
+Run from `apps/server/ADWAIS`:
 
-*   **Build the API**:
+*   **Build**:
     ```bash
     dotnet build
     ```
-*   **Run the Web API**:
+*   **Run**:
     ```bash
     dotnet run --project src/Api/Adwais.Api.csproj
     ```
-*   **Add database migration**:
+*   **Add migration**:
     ```bash
     dotnet ef migrations add <MigrationName> --project src/Infrastructure/Adwais.Infrastructure.csproj --startup-project src/Api/Adwais.Api.csproj
     ```
-*   **Apply migrations to database**:
+*   **Apply migrations**:
     ```bash
     dotnet ef database update --project src/Infrastructure/Adwais.Infrastructure.csproj --startup-project src/Api/Adwais.Api.csproj
     ```

@@ -50,7 +50,24 @@ pnpm install
 ```
 
 ### 2. Configure Environment
-Create a `.env` file in the root based on `.env.example` (if present) or add configuration required by the API.
+
+Several config files are needed. Most are tracked in git; only the backend secrets file must be created manually.
+
+| File | Status | Contains |
+|---|---|---|
+| `apps/web/.env` | ✅ tracked | Public Azure client/tenant IDs for MSAL |
+| `apps/server/ADWAIS/src/Api/appsettings.Development.json` | ✅ tracked | Local DB connection string + feature toggles |
+| `apps/server/ADWAIS/src/.env` | ❌ gitignored — **must create** | Azure credentials + UptimeRobot API key |
+
+To create the backend secrets file:
+```bash
+cp apps/server/ADWAIS/src/.env.example apps/server/ADWAIS/src/.env
+# Then fill in AZURE_TENANT_ID, AZURE_CLIENT_ID, APP_ID_URI, uptime_robot_api_key
+```
+
+See [`apps/server/ADWAIS/README.md`](apps/server/ADWAIS/README.md) for the full variable reference.
+
+> **Local dev with mock data**: set `MockUptimeRobotIntegrations: true` in `appsettings.Development.json` (already the default) — no UptimeRobot key required.
 
 ### 3. Spin up the Database
 If using Docker, run from the root:

@@ -76,22 +76,27 @@ pnpm db:up
 ```
 
 ### 4. Apply Database Migrations
-Navigate to `/apps/server/Adwais/src` and update the database:
 ```bash
-dotnet ef database update --project Infrastructure/Adwais.Infrastructure.csproj --startup-project Api/Adwais.Api.csproj
-```
-Or run from the repository root:
-```bash
-dotnet ef database update --project apps/server/Adwais/src/Infrastructure/Adwais.Infrastructure.csproj --startup-project apps/server/Adwais/src/Api/Adwais.Api.csproj
+pnpm migration:update
 ```
 
 ### 5. Start Development Servers
-To run both the frontend and backend, execute these commands from the repository root:
-
 ```bash
-# Start frontend dev server
-pnpm dev:web
-
-# Start C# API backend
-dotnet run --project apps/server/Adwais/src/Api/Adwais.Api.csproj
+pnpm dev:web   # React frontend (Vite)
+pnpm dev:api   # ASP.NET Core backend
 ```
+
+---
+
+## All pnpm Scripts
+
+| Script | What it does |
+|---|---|
+| `pnpm dev:web` | Start the React frontend dev server |
+| `pnpm dev:api` | Start the .NET backend API |
+| `pnpm db:up` | Start the local PostgreSQL container |
+| `pnpm db:down` | Stop the local PostgreSQL container |
+| `pnpm migration:add <Name>` | Create a new EF Core migration (stop `dev:api` first) |
+| `pnpm migration:update` | Apply pending migrations to the local database |
+| `pnpm migration:remove` | Remove the last unapplied migration |
+| `pnpm migration:list` | List all migrations and their applied status |

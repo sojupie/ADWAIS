@@ -107,21 +107,21 @@ cp src/.env.example src/.env
 
 ## Development Commands
 
-Run from `apps/server/ADWAIS`:
+All commands run from the **repository root** via pnpm shortcuts:
 
-*   **Build**:
-    ```bash
-    dotnet build
-    ```
-*   **Run**:
-    ```bash
-    dotnet run --project src/Api/Adwais.Api.csproj
-    ```
-*   **Add migration**:
-    ```bash
-    dotnet ef migrations add <MigrationName> --project src/Infrastructure/Adwais.Infrastructure.csproj --startup-project src/Api/Adwais.Api.csproj
-    ```
-*   **Apply migrations**:
-    ```bash
-    dotnet ef database update --project src/Infrastructure/Adwais.Infrastructure.csproj --startup-project src/Api/Adwais.Api.csproj
-    ```
+| Command | What it does |
+|---|---|
+| `pnpm dev:api` | Start the backend API (hot-reload via dotnet watch not included) |
+| `pnpm migration:add <Name>` | Create a new EF Core migration |
+| `pnpm migration:update` | Apply pending migrations to the local database |
+| `pnpm migration:remove` | Remove the last unapplied migration |
+| `pnpm migration:list` | List all migrations and their applied status |
+
+> **Note**: `migration:add` builds the startup project to inspect the model. Stop `dev:api` first if it is already running, otherwise the build will fail on a port conflict.
+
+If you need to run raw `dotnet` commands directly (e.g. from `apps/server/ADWAIS`):
+
+```bash
+dotnet build
+dotnet run --project src/Api/Adwais.Api.csproj
+```

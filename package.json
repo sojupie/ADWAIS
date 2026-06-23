@@ -11,7 +11,12 @@
     "preinstall": "npx only-allow pnpm",
     "db:up": "docker compose -f apps/server/docker-compose.yml up -d",
     "db:down": "docker compose -f apps/server/docker-compose.yml down",
-    "dev:web": "pnpm --filter web dev"
+    "dev:web": "pnpm --filter web dev",
+    "dev:api": "dotnet run --project apps/server/ADWAIS/src/Api/Adwais.Api.csproj",
+    "migration:add": "pwsh -File scripts/migration-add.ps1",
+    "migration:update": "dotnet ef database update --project apps/server/ADWAIS/src/Infrastructure/Adwais.Infrastructure.csproj --startup-project apps/server/ADWAIS/src/Api/Adwais.Api.csproj",
+    "migration:remove": "dotnet ef migrations remove --project apps/server/ADWAIS/src/Infrastructure/Adwais.Infrastructure.csproj --startup-project apps/server/ADWAIS/src/Api/Adwais.Api.csproj",
+    "migration:list": "dotnet ef migrations list --project apps/server/ADWAIS/src/Infrastructure/Adwais.Infrastructure.csproj --startup-project apps/server/ADWAIS/src/Api/Adwais.Api.csproj"
   },
   "dependencies": {
     "pg": "^8.20.0"

@@ -99,11 +99,9 @@ cp src/.env.example src/.env
 | `AZURE_TENANT_ID` | Azure Portal → Azure Active Directory → Overview |
 | `AZURE_CLIENT_ID` | Azure Portal → App Registrations → your app → Application (client) ID |
 | `APP_ID_URI` | Azure Portal → App Registrations → your app → Expose an API |
-| `uptime_robot_api_key` | UptimeRobot → My Settings → API Settings → Main API Key |
-| `SYNC_TARGET_URL` | Local: `https://localhost:5001/api/motasticadapter/sync` |
-| `SYNC_AUTH_HEADER` | Ask team for the service account credentials |
 
-> For local dev with mock data, only the AzureAd values are strictly required for auth. The UptimeRobot key is only needed if `MockUptimeRobotIntegrations: false`.
+> For local dev with mock data, `AzureAd` values are the only ones strictly required for auth.
+
 
 ---
 

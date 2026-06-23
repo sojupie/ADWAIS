@@ -1,6 +1,5 @@
 using Adwais.Domain.Entities;
 using Adwais.Domain.Entities.Monitoring;
-using Adwais.Domain.Entities.Office;
 using Adwais.Domain.Entities.OrderData;
 using Adwais.Domain.Enums;
 using Adwais.Application.Common.Interfaces;
@@ -14,6 +13,7 @@ namespace Adwais.Infrastructure.Persistence;
 public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, IDataProtectionProvider? dataProtectionProvider = null) 
     : DbContext(options), IApplicationDbContext
 {
+    private IApplicationDbContext _applicationDbContextImplementation;
     public DbSet<GlobalConfig> GlobalConfigs => Set<GlobalConfig>();
     public DbSet<User> Users => Set<User>();
     public DbSet<Tenant> Tenants => Set<Tenant>();
@@ -34,11 +34,14 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
     public DbSet<DailyAvailabilityTenantRollup> DailyAvailabilityTenantRollups => Set<DailyAvailabilityTenantRollup>();
     public DbSet<DailyAvailabilityGlobalRollup> DailyAvailabilityGlobalRollups => Set<DailyAvailabilityGlobalRollup>();
 
-    // intranät
-    public DbSet<OfficeEvent> OfficeEvents => Set<OfficeEvent>();
-    public DbSet<OfficeVisit> OfficeVisits => Set<OfficeVisit>();
-    public DbSet<OfficeMessage> OfficeMessages => Set<OfficeMessage>();
     public DbSet<SystemEvent> SystemEvents => Set<SystemEvent>();
+    public DbSet<CommunityPost> CommunityPosts => Set<CommunityPost>();
+    public DbSet<OfficeEvent> OfficeEvents => Set<OfficeEvent>();
+    public DbSet<FeedSource> FeedSources => Set<FeedSource>();
+    public DbSet<FeedItem> FeedItems => Set<FeedItem>();
+    
+    // intranät
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -359,53 +362,70 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
         });
             
         // intranät
-        // OfficeEvent
-        modelBuilder.Entity<OfficeEvent>(entity => 
-        {
-            entity.ToTable("office_event");
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Id).HasDefaultValueSql("uuid_generate_v4()");
-            entity.Property(e => e.Title).HasMaxLength(255);
-            entity.Property(e => e.Location).HasMaxLength(255);
-            entity.Property(e => e.EventType)
-                .HasConversion<string>()
-                .HasMaxLength(50);
-            entity.Property(e => e.Recurrence)
-                .HasConversion<string>()
-                .HasMaxLength(50);
-            
-            // om user raderas så sätts det till null och eventet bevaras
-            entity.HasOne(e => e.CreatedBy)
-                .WithMany()
-                .HasForeignKey(e => e.CreatedByUserId)
-                .OnDelete(DeleteBehavior.SetNull);
-        });
         
-        // OfficeVisit
-        modelBuilder.Entity<OfficeVisit>(entity => 
+        // CommunityPost
+        modelBuilder.Entity<CommunityPost>(entity =>
         {
-            entity.ToTable("office_visit");
-            entity.HasKey(v => v.Id);
-            entity.Property(v => v.Id).HasDefaultValueSql("uuid_generate_v4()");
-            entity.Property(v => v.GuestName).HasMaxLength(255);
-            entity.Property(v => v.Company).HasMaxLength(255);
-            entity.Property(v => v.LogoUrl).HasMaxLength(2048);
-            entity.HasOne(v => v.CreatedBy)
+            entity.ToTable("community_post");
+            entity.HasKey(cp => cp.Id);
+            entity.Property(cp => cp.Id).HasDefaultValueSql("uuid_generate_v4()");
+            entity.Property(cp => cp.Title).HasMaxLength(255).IsRequired();
+            entity.Property(cp => cp.Body).IsRequired();
+            entity.HasOne(cp => cp.User)
                 .WithMany()
-                .HasForeignKey(v => v.CreatedByUserId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .HasForeignKey(cp => cp.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasIndex(cp => cp.UserId);
+            entity.HasIndex(cp => cp.CreatedAt);
         });
 
-        // OfficeMessage
-        modelBuilder.Entity<OfficeMessage>(entity => 
+        // OfficeEvent
+        modelBuilder.Entity<OfficeEvent>(entity =>
         {
-            entity.ToTable("office_message");
-            entity.HasKey(m => m.Id);
-            entity.Property(m => m.Id).HasDefaultValueSql("uuid_generate_v4()");
-            entity.HasOne(m => m.CreatedBy)
+            entity.ToTable("office_event");
+            entity.HasKey(oe => oe.Id);
+            entity.Property(oe => oe.Id).HasDefaultValueSql("uuid_generate_v4()");
+            entity.Property(oe => oe.Title).HasMaxLength(255).IsRequired();
+            entity.Property(oe => oe.Description).IsRequired(false);
+            entity.Property(oe => oe.Location).HasMaxLength(255).IsRequired(false);
+            entity.Property(oe => oe.EventType).HasMaxLength(50).IsRequired();
+            entity.Property(oe => oe.Recurrence).HasMaxLength(50).IsRequired().HasDefaultValue("None");
+            entity.HasOne(oe => oe.CreatedByUser)
                 .WithMany()
-                .HasForeignKey(m => m.CreatedByUserId)
+                .HasForeignKey(oe => oe.CreatedByUserId)
                 .OnDelete(DeleteBehavior.SetNull);
+            entity.HasIndex(oe => oe.StartTime);
+            entity.HasIndex(oe => oe.EndTime);
+        });
+
+        // FeedSource
+        modelBuilder.Entity<FeedSource>(entity =>
+        {
+            entity.ToTable("feed_source");
+            entity.HasKey(fs => fs.Id);
+            entity.Property(fs => fs.Id).HasDefaultValueSql("uuid_generate_v4()");
+            entity.Property(fs => fs.Name).HasMaxLength(255).IsRequired();
+            entity.Property(fs => fs.Url).HasMaxLength(2048).IsRequired();
+            entity.HasIndex(fs => fs.Url).IsUnique();
+        });
+
+        // FeedItem
+        modelBuilder.Entity<FeedItem>(entity =>
+        {
+            entity.ToTable("feed_item");
+            entity.HasKey(fi => fi.Id);
+            entity.Property(fi => fi.Id).HasDefaultValueSql("uuid_generate_v4()");
+            entity.Property(fi => fi.Title).HasMaxLength(512).IsRequired();
+            entity.Property(fi => fi.Content).IsRequired(false);
+            entity.Property(fi => fi.Link).HasMaxLength(2048).IsRequired();
+            entity.Property(fi => fi.Author).HasMaxLength(255).IsRequired(false);
+            entity.Property(fi => fi.ImageUrl).HasMaxLength(2048).IsRequired(false);
+            entity.HasOne(fi => fi.FeedSource)
+                .WithMany(fs => fs.FeedItems)
+                .HasForeignKey(fi => fi.FeedSourceId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasIndex(fi => fi.Link).IsUnique();
+            entity.HasIndex(fi => fi.PublishDate);
         });
     }
 }

@@ -1,6 +1,6 @@
-using Adwais.Domain.Enums;
+using System;
 
-namespace Adwais.Domain.Entities.Office;
+namespace Adwais.Domain.Entities;
 
 public class OfficeEvent
 {
@@ -8,15 +8,13 @@ public class OfficeEvent
     public required string Title { get; set; }
     public string? Description { get; set; }
     public string? Location { get; set; }
-    public DateTimeOffset? StartTime { get; set; }
-    public DateTimeOffset? EndTime { get; set; }
-    public EventType EventType { get; set; }
+    public DateTime StartTime { get; set; }
+    public DateTime EndTime { get; set; }
+    public required string EventType { get; set; }
     public bool IsImportant { get; set; }
     public bool IsRecurring { get; set; }
     public bool IsSpecial { get; set; }
-    public RecurrenceType Recurrence { get; set; }
+    public required string Recurrence { get; set; }
     public Guid? CreatedByUserId { get; set; }
-    public User? CreatedBy { get; set; }
+    public User? CreatedByUser { get; set; }
 }
-
-

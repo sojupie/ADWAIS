@@ -1,6 +1,5 @@
 using Adwais.Domain.Entities;
 using Adwais.Domain.Entities.Monitoring;
-using Adwais.Domain.Entities.Office;
 using Adwais.Domain.Entities.OrderData;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,9 +24,10 @@ public interface IApplicationDbContext : IDisposable, IAsyncDisposable
     DbSet<DailyAvailabilityMonitorRollup> DailyAvailabilityMonitorRollups { get; }
     DbSet<DailyAvailabilityTenantRollup> DailyAvailabilityTenantRollups { get; }
     DbSet<DailyAvailabilityGlobalRollup> DailyAvailabilityGlobalRollups { get; }
+    DbSet<CommunityPost> CommunityPosts { get; }
     DbSet<OfficeEvent> OfficeEvents { get; }
-    DbSet<OfficeVisit> OfficeVisits { get; }
-    DbSet<OfficeMessage> OfficeMessages { get; }
+    DbSet<FeedSource> FeedSources { get; }
+    DbSet<FeedItem> FeedItems { get; }
     DbSet<SystemEvent> SystemEvents { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);

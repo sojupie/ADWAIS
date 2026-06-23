@@ -237,6 +237,16 @@
       }
     },
     "/api/intranet/posts": {
+      "get": {
+        "tags": [
+          "CommunityPost"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
       "post": {
         "tags": [
           "CommunityPost"
@@ -260,6 +270,44 @@
             }
           }
         },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/intranet/feeds": {
+      "get": {
+        "tags": [
+          "Feed"
+        ],
+        "parameters": [
+          {
+            "name": "FeedSourceId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -1712,6 +1760,27 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/intranet/newsletters": {
+      "get": {
+        "tags": [
+          "Newsletter"
+        ],
+        "parameters": [
+          {
+            "name": "category",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -3874,6 +3943,9 @@
       "name": "CommunityPost"
     },
     {
+      "name": "Feed"
+    },
+    {
       "name": "Financial"
     },
     {
@@ -3887,6 +3959,9 @@
     },
     {
       "name": "Monitor"
+    },
+    {
+      "name": "Newsletter"
     },
     {
       "name": "SystemEvent"

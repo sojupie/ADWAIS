@@ -24,6 +24,13 @@ public class CommunityPostController(ICommunityPostService postService) : Contro
         return Ok(post);
     }
 
+    [HttpGet]
+    public async Task<IActionResult> GetPosts(CancellationToken ct)
+    {
+        var posts = await _postService.GetPostsAsync(ct);
+        return Ok(posts);
+    }
+
     [HttpPost]
     public async Task<IActionResult> CreatePost([FromBody] CreatePostDto dto, CancellationToken ct)
     {

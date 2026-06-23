@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Adwais.Application.Interfaces;
@@ -32,5 +33,15 @@ public class CommunityPostService(IDbContextFactory<AnalyticsDbContext> dbContex
         db.CommunityPosts.Add(post);
         await db.SaveChangesAsync(ct);
         return post;
+    }
+
+    public async Task<IEnumerable<CommunityPost>> GetPostsAsync(CancellationToken ct = default)
+    {
+        await using var db = await _dbContextFactory.CreateDbContextAsync(ct);
+        return await db.CommunityPosts
+            .Include(p => p.User)
+            .AsNoTracking()
+            .OrderByDescending(p => p.CreatedAt)
+            .ToListAsync(ct);
     }
 }

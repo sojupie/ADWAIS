@@ -67,6 +67,8 @@ public static class DependencyInjection
         services.AddTransient<ISystemHealthService, SystemHealthService>();
         services.AddTransient<ICommunityPostService, CommunityPostService>();
         services.AddTransient<INewsletterWebhookService, NewsletterWebhookService>();
+        services.AddTransient<IFeedService, FeedService>();
+        services.AddTransient<INewsletterService, NewsletterService>();
 
         return services;
     }

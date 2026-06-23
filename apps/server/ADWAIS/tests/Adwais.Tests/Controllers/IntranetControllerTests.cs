@@ -183,4 +183,76 @@ public class IntranetControllerTests
         // Assert
         Assert.IsType<UnauthorizedObjectResult>(result);
     }
+
+    [Fact]
+    public async Task Posts_GetPosts_ShouldReturnOkWithList()
+    {
+        // Arrange
+        var posts = new List<CommunityPost>
+        {
+            new() { Id = Guid.NewGuid(), Title = "Post 1", Body = "Body 1", CreatedAt = DateTime.UtcNow }
+        };
+        var postServiceMock = new Mock<ICommunityPostService>();
+        postServiceMock.Setup(s => s.GetPostsAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(posts);
+
+        var controller = new CommunityPostController(postServiceMock.Object);
+
+        // Act
+        var result = await controller.GetPosts(CancellationToken.None);
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        var returned = Assert.IsType<List<CommunityPost>>(okResult.Value);
+        Assert.Single(returned);
+        postServiceMock.Verify(s => s.GetPostsAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task FeedController_GetFeeds_ShouldReturnOkWithList()
+    {
+        // Arrange
+        var feeds = new List<FeedItem>
+        {
+            new() { Id = Guid.NewGuid(), Title = "Feed 1", Link = "https://link" }
+        };
+        var feedServiceMock = new Mock<IFeedService>();
+        feedServiceMock.Setup(s => s.GetFeedsAsync(null, 1, 10, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(feeds);
+
+        var controller = new FeedController(feedServiceMock.Object);
+
+        // Act
+        var result = await controller.GetFeeds(new GetFeedsRequest { FeedSourceId = null, Page = 1, PageSize = 10 }, CancellationToken.None);
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        var returned = Assert.IsType<List<FeedItem>>(okResult.Value);
+        Assert.Single(returned);
+        feedServiceMock.Verify(s => s.GetFeedsAsync(null, 1, 10, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task NewsletterController_GetNewsletters_ShouldReturnOkWithList()
+    {
+        // Arrange
+        var newsletters = new List<Newsletter>
+        {
+            new() { Id = Guid.NewGuid(), Title = "Newsletter 1", Body = "Body 1", Category = "General", CreatedAt = DateTime.UtcNow }
+        };
+        var newsletterServiceMock = new Mock<INewsletterService>();
+        newsletterServiceMock.Setup(s => s.GetNewslettersAsync("General", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(newsletters);
+
+        var controller = new NewsletterController(newsletterServiceMock.Object);
+
+        // Act
+        var result = await controller.GetNewsletters("General", CancellationToken.None);
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        var returned = Assert.IsType<List<Newsletter>>(okResult.Value);
+        Assert.Single(returned);
+        newsletterServiceMock.Verify(s => s.GetNewslettersAsync("General", It.IsAny<CancellationToken>()), Times.Once);
+    }
 }

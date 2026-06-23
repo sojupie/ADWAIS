@@ -55,7 +55,7 @@ export function ProvisionUserPanel({ createUser }: ProvisionUserPanelProps) {
           disabled={!newUser.email}
           loading={createUser.isPending}
           loadingText="Creating..."
-          className="h-10 bg-brand-link text-white px-6 text-sm font-bold rounded-xl hover:bg-brand-link/90 transition-all cursor-pointer flex items-center justify-center gap-2 w-full sm:w-auto shrink-0"
+          className="h-10 bg-brand-link text-white px-6 text-sm font-semibold rounded-xl hover:bg-brand-link/90 transition-all cursor-pointer flex items-center justify-center gap-2 w-full sm:w-auto shrink-0"
         >
           Create
         </SecureButton>

@@ -12,7 +12,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     const widthClass = containerClassName.includes('w-') ? '' : 'w-full';
     const paddingClasses = className.includes('p-') || className.includes('px-') || className.includes('pl-') || className.includes('pr-') || className.includes('py-')
       ? ''
-      : 'pl-4 pr-10 py-2.5';
+      : 'pl-3 pr-10 py-2.5 text-sm font-semibold';
     return (
       <div className={`flex flex-col gap-1 ${widthClass} ${containerClassName}`}>
         {label && (

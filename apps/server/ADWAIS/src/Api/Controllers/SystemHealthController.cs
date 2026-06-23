@@ -29,6 +29,7 @@ public class SystemHealthController(IDbContextFactory<AnalyticsDbContext> dbCont
         
         string dbStatus = "Healthy";
         DateTimeOffset? lastLitiumSync = null;
+        DateTimeOffset? lastBlogSync = null;
         DateTimeOffset? lastFleetUpdate = null;
         DateTimeOffset? lastFleetUptimeUpdate = null;
         DateTimeOffset? lastFleetLatencyUpdate = null;
@@ -37,6 +38,7 @@ public class SystemHealthController(IDbContextFactory<AnalyticsDbContext> dbCont
         int totalMonitors = 0;
         int monitorsWithErrors = 0;
         int tenantsWithErrors = 0;
+        int feedsWithErrors = 0;
 
         try
         {
@@ -51,6 +53,17 @@ public class SystemHealthController(IDbContextFactory<AnalyticsDbContext> dbCont
             totalMonitors = await db.Monitors.CountAsync(m => m.UptimeMonitorEnabled);
             monitorsWithErrors = await db.Monitors.CountAsync(m => m.LastSyncError != null && m.UptimeMonitorEnabled);
             tenantsWithErrors = await db.Tenants.CountAsync(t => t.LastSyncError != null && t.Id != AnalyticsDbContext.SystemTenantGuid);
+
+            var activeFeeds = await db.FeedSources.AsNoTracking().Where(fs => fs.IsActive).ToListAsync();
+            if (activeFeeds.Any())
+            {
+                var successDates = activeFeeds.Where(fs => fs.LastSuccessAt.HasValue).Select(fs => fs.LastSuccessAt!.Value).ToList();
+                if (successDates.Any())
+                {
+                    lastBlogSync = successDates.Max();
+                }
+                feedsWithErrors = activeFeeds.Count(fs => fs.LastSyncError != null);
+            }
         }
         catch
         {
@@ -63,7 +76,7 @@ public class SystemHealthController(IDbContextFactory<AnalyticsDbContext> dbCont
         {
             syncStatus = "Failed";
         }
-        else if (tenantsWithErrors > 0)
+        else if (tenantsWithErrors > 0 || feedsWithErrors > 0)
         {
             syncStatus = "Degraded";
         }
@@ -110,9 +123,11 @@ public class SystemHealthController(IDbContextFactory<AnalyticsDbContext> dbCont
                 Status: syncStatus,
                 TenantsWithErrorsCount: tenantsWithErrors,
                 MonitorsWithErrorsCount: monitorsWithErrors,
+                FeedsWithErrorsCount: feedsWithErrors,
                 GlobalSyncError: globalSyncError
             ),
             LastLitiumSync: lastLitiumSync,
+            LastBlogSync: lastBlogSync,
             LastFleetUpdate: lastFleetUpdate,
             LastFleetUptimeUpdate: lastFleetUptimeUpdate,
             LastFleetLatencyUpdate: lastFleetLatencyUpdate
@@ -138,6 +153,9 @@ public class SystemHealthController(IDbContextFactory<AnalyticsDbContext> dbCont
             
         await db.GlobalConfigs
             .ExecuteUpdateAsync(s => s.SetProperty(c => c.LastSyncError, (string?)null));
+
+        await db.FeedSources
+            .ExecuteUpdateAsync(s => s.SetProperty(fs => fs.LastSyncError, (string?)null));
             
         return NoContent();
     }

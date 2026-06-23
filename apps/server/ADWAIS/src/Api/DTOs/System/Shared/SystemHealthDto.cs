@@ -7,6 +7,7 @@ public record SystemHealthDto(
     HangfireHealthDto Hangfire,
     SyncHealthDto Sync,
     DateTimeOffset? LastLitiumSync,
+    DateTimeOffset? LastBlogSync,
     DateTimeOffset? LastFleetUpdate,
     DateTimeOffset? LastFleetUptimeUpdate,
     DateTimeOffset? LastFleetLatencyUpdate
@@ -24,6 +25,7 @@ public record SyncHealthDto(
     string Status, // "Healthy", "Degraded", "Failed"
     int TenantsWithErrorsCount,
     int MonitorsWithErrorsCount,
+    int FeedsWithErrorsCount,
     string? GlobalSyncError
 );
 

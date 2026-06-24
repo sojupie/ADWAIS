@@ -36,8 +36,16 @@ public class GetFeedsRequestValidatorTests
     [Fact]
     public void Validator_ShouldNotHaveError_WhenModelIsValid()
     {
-        var model = new GetFeedsRequest { Page = 1, PageSize = 25 };
+        var model = new GetFeedsRequest { Page = 1, PageSize = 25, AuthorName = "litium" };
         var result = _validator.TestValidate(model);
         result.ShouldNotHaveAnyValidationErrors();
+    }
+
+    [Fact]
+    public void Validator_ShouldHaveError_WhenAuthorNameExceedsMaxLength()
+    {
+        var model = new GetFeedsRequest { AuthorName = new string('a', 256) };
+        var result = _validator.TestValidate(model);
+        result.ShouldHaveValidationErrorFor(x => x.AuthorName);
     }
 }

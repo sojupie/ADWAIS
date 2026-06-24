@@ -77,7 +77,9 @@ public static class DatabaseSeeder
 
         foreach (var view in views)
         {
+#pragma warning disable EF1003 // Safe hardcoded view names
             await context.Database.ExecuteSqlRawAsync("REFRESH MATERIALIZED VIEW " + view + ";");
+#pragma warning restore EF1003
         }
 
         Console.WriteLine($"Seeding completed in {sw.Elapsed.TotalMinutes:F2} minutes.");
@@ -214,7 +216,7 @@ public static class DatabaseSeeder
                     Id = nextId--,
                     TenantId = tenant.Id,
                     Name = $"{tenant.Name.Replace(" [MOCK]", "")} Storefront [MOCK]",
-                    Url = tenant.LitiumBaseUrl,
+                    Url = tenant.LitiumBaseUrl ?? "",
                     UptimeSla = sla,
                     LatencyDegradedFloor = degradedFloor,
                     UptimeMonitorEnabled = true,

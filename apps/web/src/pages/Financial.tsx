@@ -2,7 +2,7 @@ import { formatCurrency, formatCompact, formatNumber } from '@utils';
 import { FactPanel } from '../components/common/dashboard/FactPanel';
 import { MomentumMatrixChart } from '../components/financial/MomentumMatrixChart';
 import { RevenueEfficiencyChart } from '../components/financial/RevenueEfficiencyChart';
-import { VolumeAnomalyChart } from '../components/financial/VolumeAnomalyChart';
+import { TransactionDensityChart } from '../components/financial/TransactionDensityChart';
 import { AccumulatedRevenueChart } from '../components/financial/AccumulatedRevenueChart';
 import { TenantDiagnostics } from './TenantDiagnostics';
 import { DashboardLayout } from "../components/common/layout/DashboardLayout.tsx";
@@ -15,7 +15,7 @@ import { useFinancialViewModel } from "../hooks/useFinancialViewModel.ts";
 import type { RevenueEfficiencyResponse, MomentumResponse } from '@types';
 
 const EMPTY_VELOCITY: never[] = [];
-const EMPTY_ANOMALY: never[] = [];
+const EMPTY_DENSITY: never[] = [];
 const EMPTY_EFFICIENCY: RevenueEfficiencyResponse = { tenants: [], globalAverageOrderValue: 0, medianPortfolioShare: 0 };
 const EMPTY_MOMENTUM: MomentumResponse = { tenants: [], medianBaselineRevenue: 0, globalGrowthPercentage: 0 };
 
@@ -95,12 +95,10 @@ export function Financial() {
           className="h-full min-h-87.5 lg:min-h-0"
         />
 
-        <VolumeAnomalyChart 
-          entries={vm.anomalyQuery.data || EMPTY_ANOMALY}
-          comparison="YearOverYear"
-          onTenantSelect={vm.handleTenantSelect} 
-          isLoading={vm.anomalyQuery.isLoading} 
-          isStale={vm.anomalyQuery.isPlaceholderData}
+        <TransactionDensityChart 
+          points={vm.densityQuery.data || EMPTY_DENSITY}
+          isLoading={vm.densityQuery.isLoading} 
+          isStale={vm.densityQuery.isPlaceholderData}
           className="h-full min-h-87.5 lg:min-h-0"
         />
 

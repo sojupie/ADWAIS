@@ -65,10 +65,10 @@ import type {
   MomentumResponseDto,
   MonitorAnalyticsResponseDto,
   NetGrowthAdditionPointResponseDto,
+  Newsletter,
   OrderBinResponseDto,
   PostApiIngestionBackfillParams,
   PostApiMonitorsParams,
-  PutApiGlobalConfigFeedsIntervalParams,
   RegisterKioskRequestDto,
   RevenueEfficiencyResponseDto,
   SystemEvent,
@@ -3052,95 +3052,6 @@ export const usePostApiGlobalConfigFeedsFetch = <TError = unknown,
       return useMutation(getPostApiGlobalConfigFeedsFetchMutationOptions(options), queryClient);
     }
 
-export type putApiGlobalConfigFeedsIntervalResponse200 = {
-  data: void
-  status: 200
-}
-
-export type putApiGlobalConfigFeedsIntervalResponseSuccess = (putApiGlobalConfigFeedsIntervalResponse200) & {
-  headers: Headers;
-};
-;
-
-export type putApiGlobalConfigFeedsIntervalResponse = (putApiGlobalConfigFeedsIntervalResponseSuccess)
-
-export const getPutApiGlobalConfigFeedsIntervalUrl = (params?: PutApiGlobalConfigFeedsIntervalParams,) => {
-  const normalizedParams = new URLSearchParams();
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : String(value))
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0 ? `/api/global-config/feeds/interval?${stringifiedParams}` : `/api/global-config/feeds/interval`
-}
-
-/**
- * @summary Alters the intranet feed aggregation interval.
- */
-export const putApiGlobalConfigFeedsInterval = async (params?: PutApiGlobalConfigFeedsIntervalParams, options?: RequestInit): Promise<putApiGlobalConfigFeedsIntervalResponse> => {
-
-  return customClient<putApiGlobalConfigFeedsIntervalResponse>(getPutApiGlobalConfigFeedsIntervalUrl(params),
-  {
-    ...options,
-    method: 'PUT'
-
-
-  }
-);}
-
-
-
-
-export const getPutApiGlobalConfigFeedsIntervalMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiGlobalConfigFeedsInterval>>, TError,{params?: PutApiGlobalConfigFeedsIntervalParams}, TContext>, request?: SecondParameter<typeof customClient>}
-): UseMutationOptions<Awaited<ReturnType<typeof putApiGlobalConfigFeedsInterval>>, TError,{params?: PutApiGlobalConfigFeedsIntervalParams}, TContext> => {
-
-const mutationKey = ['putApiGlobalConfigFeedsInterval'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiGlobalConfigFeedsInterval>>, {params?: PutApiGlobalConfigFeedsIntervalParams}> = (props) => {
-          const {params} = props ?? {};
-
-          return  putApiGlobalConfigFeedsInterval(params,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PutApiGlobalConfigFeedsIntervalMutationResult = NonNullable<Awaited<ReturnType<typeof putApiGlobalConfigFeedsInterval>>>
-
-    export type PutApiGlobalConfigFeedsIntervalMutationError = unknown
-
-    /**
- * @summary Alters the intranet feed aggregation interval.
- */
-export const usePutApiGlobalConfigFeedsInterval = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiGlobalConfigFeedsInterval>>, TError,{params?: PutApiGlobalConfigFeedsIntervalParams}, TContext>, request?: SecondParameter<typeof customClient>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof putApiGlobalConfigFeedsInterval>>,
-        TError,
-        {params?: PutApiGlobalConfigFeedsIntervalParams},
-        TContext
-      > => {
-      return useMutation(getPutApiGlobalConfigFeedsIntervalMutationOptions(options), queryClient);
-    }
-
 export type getApiGlobalConfigIntervalsResponse200TextPlain = {
   data: FetchIntervalsDto
   status: 200
@@ -4981,12 +4892,22 @@ export function useGetApiMonitorsIdLatency<TData = Awaited<ReturnType<typeof get
 
 
 
-export type getApiIntranetNewslettersResponse200 = {
-  data: void
+export type getApiIntranetNewslettersResponse200TextPlain = {
+  data: Newsletter[]
   status: 200
 }
 
-export type getApiIntranetNewslettersResponseSuccess = (getApiIntranetNewslettersResponse200) & {
+export type getApiIntranetNewslettersResponse200ApplicationJson = {
+  data: Newsletter[]
+  status: 200
+}
+
+export type getApiIntranetNewslettersResponse200TextJson = {
+  data: Newsletter[]
+  status: 200
+}
+
+export type getApiIntranetNewslettersResponseSuccess = (getApiIntranetNewslettersResponse200TextPlain | getApiIntranetNewslettersResponse200ApplicationJson | getApiIntranetNewslettersResponse200TextJson) & {
   headers: Headers;
 };
 ;

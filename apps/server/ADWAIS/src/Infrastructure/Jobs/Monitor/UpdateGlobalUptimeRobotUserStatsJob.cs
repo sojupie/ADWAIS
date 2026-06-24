@@ -14,7 +14,7 @@ public class UpdateGlobalUptimeRobotUserStatsJob(
     public async Task ExecuteAsync()
     {
         await using var db = await dbContextFactory.CreateDbContextAsync();
-        var config = await db.GlobalConfigs.FirstOrDefaultAsync();
+        var config = await db.GlobalConfigs.SingleOrDefaultAsync();
 
         if (config == null || string.IsNullOrWhiteSpace(config.UptimeRobotApiKey) || !config.UptimeRobotFetchEnabled)
         {

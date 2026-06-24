@@ -24,7 +24,7 @@ public class MonitorController(
     private async Task<bool> IsUptimeRobotConfiguredAsync(CancellationToken ct)
     {
         await using var db = await dbContextFactory.CreateDbContextAsync(ct);
-        var config = await db.GlobalConfigs.AsNoTracking().FirstOrDefaultAsync(ct);
+        var config = await db.GlobalConfigs.AsNoTracking().SingleOrDefaultAsync(ct);
         return config != null && !string.IsNullOrWhiteSpace(config.UptimeRobotApiKey);
     }
     /// <summary>

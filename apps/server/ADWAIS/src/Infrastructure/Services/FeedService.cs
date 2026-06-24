@@ -31,6 +31,12 @@ public class FeedService(IDbContextFactory<AnalyticsDbContext> dbContextFactory)
             query = query.Where(fi => fi.FeedSourceId == request.FeedSourceId.Value);
         }
 
+        if (!string.IsNullOrWhiteSpace(request.AuthorName))
+        {
+            var authorLower = request.AuthorName.ToLower();
+            query = query.Where(fi => fi.Author != null && fi.Author.ToLower().Contains(authorLower));
+        }
+
         return await query
             .OrderByDescending(fi => fi.PublishDate)
             .Skip((page - 1) * pageSize)

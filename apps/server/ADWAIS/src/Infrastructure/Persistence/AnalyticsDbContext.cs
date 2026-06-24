@@ -14,7 +14,6 @@ namespace Adwais.Infrastructure.Persistence;
 public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, IDataProtectionProvider? dataProtectionProvider = null) 
     : DbContext(options), IApplicationDbContext
 {
-    private IApplicationDbContext _applicationDbContextImplementation;
     public DbSet<GlobalConfig> GlobalConfigs => Set<GlobalConfig>();
     public DbSet<User> Users => Set<User>();
     public DbSet<Tenant> Tenants => Set<Tenant>();

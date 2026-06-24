@@ -26,9 +26,9 @@ public class FeedServiceTests
         var source1 = new FeedSource { Id = Guid.NewGuid(), Name = "Source 1", Url = "https://source1" };
         var source2 = new FeedSource { Id = Guid.NewGuid(), Name = "Source 2", Url = "https://source2" };
 
-        var item1 = new FeedItem { Id = Guid.NewGuid(), FeedSourceId = source1.Id, Title = "Title 1", Link = "https://link1", PublishDate = DateTime.UtcNow.AddHours(-1) };
-        var item2 = new FeedItem { Id = Guid.NewGuid(), FeedSourceId = source2.Id, Title = "Title 2", Link = "https://link2", PublishDate = DateTime.UtcNow.AddHours(-2) };
-        var item3 = new FeedItem { Id = Guid.NewGuid(), FeedSourceId = source1.Id, Title = "Title 3", Link = "https://link3", PublishDate = DateTime.UtcNow };
+        var item1 = new FeedItem { Id = Guid.NewGuid(), FeedSourceId = source1.Id, Title = "Title 1", Link = "https://link1", PublishDate = DateTime.UtcNow.AddHours(-1), Author = "Litium Blog" };
+        var item2 = new FeedItem { Id = Guid.NewGuid(), FeedSourceId = source2.Id, Title = "Title 2", Link = "https://link2", PublishDate = DateTime.UtcNow.AddHours(-2), Author = "Motillo Aktuellt" };
+        var item3 = new FeedItem { Id = Guid.NewGuid(), FeedSourceId = source1.Id, Title = "Title 3", Link = "https://link3", PublishDate = DateTime.UtcNow, Author = "Litium Press" };
 
         dbContext.FeedSources.AddRange(source1, source2);
         dbContext.FeedItems.AddRange(item1, item2, item3);
@@ -55,5 +55,14 @@ public class FeedServiceTests
         var paginatedItems = (await service.GetFeedsAsync(new GetFeedsRequest { FeedSourceId = null, Page = 2, PageSize = 2 }, CancellationToken.None)).ToList();
         Assert.Single(paginatedItems);
         Assert.Equal("Title 2", paginatedItems[0].Title);
+
+        // Act & Assert 4: Filter by AuthorName (case-insensitive contains)
+        var litiumItems = (await service.GetFeedsAsync(new GetFeedsRequest { AuthorName = "litium", Page = 1, PageSize = 10 }, CancellationToken.None)).ToList();
+        Assert.Equal(2, litiumItems.Count);
+        Assert.All(litiumItems, i => Assert.Contains("litium", i.Author, StringComparison.OrdinalIgnoreCase));
+
+        var motilloItems = (await service.GetFeedsAsync(new GetFeedsRequest { AuthorName = "MOTILLO", Page = 1, PageSize = 10 }, CancellationToken.None)).ToList();
+        Assert.Single(motilloItems);
+        Assert.Equal("Motillo Aktuellt", motilloItems[0].Author);
     }
 }

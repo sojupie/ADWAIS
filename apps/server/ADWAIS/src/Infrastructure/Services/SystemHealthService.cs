@@ -34,7 +34,7 @@ public class SystemHealthService(IDbContextFactory<AnalyticsDbContext> dbContext
 
         try
         {
-            var config = await db.GlobalConfigs.AsNoTracking().FirstOrDefaultAsync(ct);
+            var config = await db.GlobalConfigs.AsNoTracking().SingleOrDefaultAsync(ct);
             lastLitiumSync = config?.LastPolled;
             globalSyncError = config?.LastSyncError;
 

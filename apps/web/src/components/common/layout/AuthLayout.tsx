@@ -5,11 +5,11 @@ import { DashboardTopRow } from './DashboardTopRow';
 import { DashboardFlexRow } from './DashboardFlexRow';
 import { FactPanel } from '../dashboard/FactPanel';
 import { AccumulatedRevenueChart } from '../../financial/AccumulatedRevenueChart';
-import { VolumeAnomalyChart } from '../../financial/VolumeAnomalyChart';
+import { TransactionDensityChart } from '../../financial/TransactionDensityChart';
 import { RevenueEfficiencyChart } from '../../financial/RevenueEfficiencyChart';
 import { MomentumMatrixChart } from '../../financial/MomentumMatrixChart';
 import motilloLogo from '../../../assets/motillo-logo.svg';
-import { MOCK_ACCUMULATED_REVENUE, MOCK_ANOMALIES, MOCK_EFFICIENCY, MOCK_MOMENTUM } from '../../../utils/mockKioskData';
+import { MOCK_ACCUMULATED_REVENUE, MOCK_TRANSACTION_DENSITY, MOCK_EFFICIENCY, MOCK_MOMENTUM } from '../../../utils/mockKioskData';
 
 interface AuthLayoutProps {
   children: ReactNode;
@@ -56,7 +56,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
             {/* Mock Charts Grid */}
             <DashboardFlexRow weight="flex-1" gridCols="2">
               <AccumulatedRevenueChart points={MOCK_ACCUMULATED_REVENUE} className="h-full min-h-87.5" />
-              <VolumeAnomalyChart entries={MOCK_ANOMALIES} onTenantSelect={() => { }} className="h-full min-h-87.5" />
+              <TransactionDensityChart points={MOCK_TRANSACTION_DENSITY} className="h-full min-h-87.5" />
               <RevenueEfficiencyChart response={MOCK_EFFICIENCY} onTenantSelect={() => { }} className="h-full min-h-87.5" />
               <MomentumMatrixChart momentum={MOCK_MOMENTUM} onTenantSelect={() => { }} className="h-full min-h-87.5" />
             </DashboardFlexRow>

@@ -7,6 +7,7 @@
 
 export type GetApiIntranetFeedsParams = {
 FeedSourceId?: string;
+AuthorName?: string;
 Page?: number;
 PageSize?: number;
 };

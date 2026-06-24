@@ -10,7 +10,7 @@ public class UptimeDispatcherJob(IDbContextFactory<AnalyticsDbContext> dbContext
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         
-        var globalConfig = await dbContext.GlobalConfigs.FirstOrDefaultAsync();
+        var globalConfig = await dbContext.GlobalConfigs.SingleOrDefaultAsync();
         if (globalConfig == null || string.IsNullOrWhiteSpace(globalConfig.UptimeRobotApiKey) || !globalConfig.UptimeRobotFetchEnabled)
         {
             return;

@@ -2,6 +2,7 @@ import type {
   AccumulatedRevenuePointDto, 
   MomentumResponse, 
   RevenueEfficiencyResponse, 
+  TransactionDensityPointDto,
   VolumeAnomalyResponseDto 
 } from '@types';
 
@@ -57,3 +58,18 @@ export const MOCK_ANOMALIES: VolumeAnomalyResponseDto[] = Array.from({ length: 4
   vertical: 'Retail',
   status: 'Active'
 }));
+
+export const MOCK_TRANSACTION_DENSITY: TransactionDensityPointDto[] = Array.from({ length: 7 * 24 }).map((_, i) => {
+  const dayOfWeek = Math.floor(i / 24) + 1;
+  const hour = i % 24;
+  const timeFactor = Math.sin((hour - 6) / 24 * 2 * Math.PI) + 1.2;
+  const dayFactor = dayOfWeek >= 5 ? 1.3 : 0.9;
+  const count = Math.floor((10 + Math.random() * 50) * timeFactor * dayFactor);
+  const totalRevenue = count * (500 + Math.random() * 400);
+  return {
+    dayOfWeek,
+    hour,
+    count,
+    totalRevenue,
+  };
+});

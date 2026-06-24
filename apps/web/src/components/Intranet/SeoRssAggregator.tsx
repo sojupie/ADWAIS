@@ -2,11 +2,11 @@ import { CollectionPanel } from '../common/dashboard/CollectionPanel';
 import { useGetApiIntranetFeeds } from '../../api/generated/endpoints';
 
 export function SeoRssAggregator() {
-  const { data: response, isLoading } = useGetApiIntranetFeeds({ PageSize: 10 });
+  const { data: response, isLoading } = useGetApiIntranetFeeds({ PageSize: 10, AuthorName: 'litium' });
   const feedItems = response?.data || [];
 
   return (
-    <CollectionPanel title="SEO & Tech Radar" className="h-full relative overflow-hidden">
+    <CollectionPanel title="Litium News" className="h-full relative overflow-hidden">
       {isLoading ? (
         <div className="p-4 flex flex-col gap-5 animate-pulse">
           {[1, 2, 3].map((i) => (

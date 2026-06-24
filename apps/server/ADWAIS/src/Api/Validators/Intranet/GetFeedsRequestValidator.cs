@@ -12,5 +12,8 @@ public class GetFeedsRequestValidator : AbstractValidator<GetFeedsRequest>
 
         RuleFor(x => x.PageSize)
             .InclusiveBetween(1, 100).WithMessage("Page size must be between 1 and 100.");
+
+        RuleFor(x => x.AuthorName)
+            .MaximumLength(255).WithMessage("Author name must not exceed 255 characters.");
     }
 }

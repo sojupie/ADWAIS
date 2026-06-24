@@ -17,9 +17,7 @@ namespace Adwais.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/job")]
-public class BackgroundJobController(
-    IDbContextFactory<AnalyticsDbContext> dbContextFactory,
-    ISystemEventService eventService) : ControllerBase
+public class BackgroundJobController : ControllerBase
 {
     /// <summary>
     /// Triggers the UptimeRobot monitor synchronization job immediately.

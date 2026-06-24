@@ -11,7 +11,7 @@ public class SystemEventCleanupJob(
     public async Task ExecuteAsync()
     {
         await using var db = await dbContextFactory.CreateDbContextAsync();
-        var config = await db.GlobalConfigs.AsNoTracking().FirstOrDefaultAsync();
+        var config = await db.GlobalConfigs.AsNoTracking().SingleOrDefaultAsync();
         
         var retentionDays = config?.SystemEventRetentionDays ?? 30;
         var cutoff = DateTimeOffset.UtcNow.AddDays(-retentionDays);

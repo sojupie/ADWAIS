@@ -19,7 +19,7 @@ public class LitiumOrderFetchJob(
     public async Task ExecuteAsync()
     {
         await using var db = await dbContextFactory.CreateDbContextAsync();
-        var config = await db.GlobalConfigs.FirstOrDefaultAsync();
+        var config = await db.GlobalConfigs.SingleOrDefaultAsync();
 
         if (config is null || !config.LitiumFetchEnabled)
         {

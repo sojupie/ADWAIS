@@ -1,7 +1,7 @@
 import { InternalAnnouncements } from '../components/Intranet/InternalAnnouncements';
 import { GoLiveCalendar } from '../components/Intranet/GoLiveCalendar';
 import { SeoRssAggregator } from '../components/Intranet/SeoRssAggregator';
-import { AgencySocialWall } from '../components/Intranet/AgencySocialWall';
+import { MotilloNews } from '../components/Intranet/MotilloNews';
 import { OfficeContext } from '../components/Intranet/OfficeContext';
 import { DashboardLayout } from '../components/common/layout/DashboardLayout';
 
@@ -28,7 +28,7 @@ export function Intranet() {
         </div>
         
         <div className="col-span-1 portrait:lg:col-span-2 landscape:lg:col-span-2 lg:min-h-0 lg:h-full flex flex-col [&>*]:flex-1 [&>*]:min-h-0">
-          <AgencySocialWall />
+          <MotilloNews />
         </div>
       </div>
     </DashboardLayout>

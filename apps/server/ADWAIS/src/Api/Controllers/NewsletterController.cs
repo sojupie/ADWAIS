@@ -1,6 +1,8 @@
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Adwais.Application.Interfaces;
+using Adwais.Domain.Entities.Intranet;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,7 +16,7 @@ public class NewsletterController(INewsletterService newsletterService) : Contro
     private readonly INewsletterService _newsletterService = newsletterService;
 
     [HttpGet]
-    public async Task<IActionResult> GetNewsletters(
+    public async Task<ActionResult<IEnumerable<Newsletter>>> GetNewsletters(
         [FromQuery] string? category,
         CancellationToken ct = default)
     {

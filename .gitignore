@@ -54,6 +54,7 @@ TEST*.xml
 /diff.txt
 
 # Secrets & Environment Overrides
+.env
 .env.production
 .env.local
 .env.*.local

@@ -96,86 +96,6 @@
         }
       }
     },
-    "/api/job/update/intervals": {
-      "patch": {
-        "tags": [
-          "BackgroundJob"
-        ],
-        "summary": "Updates the global fetch intervals for all background jobs.\r\nReturns the updated list of intervals.",
-        "requestBody": {
-          "description": "The request containing the new intervals to set.",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateFetchIntervalsRequestDto"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateFetchIntervalsRequestDto"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateFetchIntervalsRequestDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/FetchIntervalsDto"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FetchIntervalsDto"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FetchIntervalsDto"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/job/metrics/fetch-intervals": {
-      "get": {
-        "tags": [
-          "BackgroundJob"
-        ],
-        "summary": "Retrieves the current global fetch intervals for all background jobs.",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/FetchIntervalsDto"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FetchIntervalsDto"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FetchIntervalsDto"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/job/recurring": {
       "get": {
         "tags": [
@@ -310,7 +230,33 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FeedItem"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FeedItem"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FeedItem"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -1060,6 +1006,96 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GlobalConfigResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/global-config/feeds/fetch": {
+      "post": {
+        "tags": [
+          "GlobalConfig"
+        ],
+        "summary": "Triggers the intranet feed aggregation job immediately.",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/global-config/intervals": {
+      "get": {
+        "tags": [
+          "GlobalConfig"
+        ],
+        "summary": "Retrieves the current global fetch intervals for all background jobs.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/FetchIntervalsDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FetchIntervalsDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FetchIntervalsDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "GlobalConfig"
+        ],
+        "summary": "Updates the global fetch intervals for background jobs.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateFetchIntervalsRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateFetchIntervalsRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateFetchIntervalsRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/FetchIntervalsDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FetchIntervalsDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FetchIntervalsDto"
                 }
               }
             }
@@ -2625,6 +2661,91 @@
         },
         "additionalProperties": false
       },
+      "FeedItem": {
+        "required": [
+          "link",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "feedSourceId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "feedSource": {
+            "$ref": "#/components/schemas/FeedSource"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "content": {
+            "type": "string",
+            "nullable": true
+          },
+          "link": {
+            "type": "string",
+            "nullable": true
+          },
+          "publishDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "author": {
+            "type": "string",
+            "nullable": true
+          },
+          "imageUrl": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "FeedSource": {
+        "required": [
+          "name",
+          "url"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "url": {
+            "type": "string",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "lastPolledAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastSuccessAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastSyncError": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "FetchIntervalsDto": {
         "type": "object",
         "properties": {
@@ -2645,6 +2766,10 @@
             "format": "int32"
           },
           "userStatsFetchIntervalMinutes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "feedFetchIntervalHours": {
             "type": "integer",
             "format": "int32"
           }
@@ -2716,6 +2841,10 @@
             "type": "number",
             "format": "double",
             "nullable": true
+          },
+          "feedFetchIntervalHours": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -3553,6 +3682,11 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
+          },
+          "feedFetchIntervalHours": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -3585,6 +3719,11 @@
           "defaultUptimeSla": {
             "type": "number",
             "format": "double",
+            "nullable": true
+          },
+          "feedFetchIntervalHours": {
+            "type": "integer",
+            "format": "int32",
             "nullable": true
           }
         },

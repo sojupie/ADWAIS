@@ -1,34 +1,49 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiFetch } from '../apiClient';
+import { useQueryClient, useMutation } from '@tanstack/react-query';
+import { 
+  useGetApiGlobalConfig,
+  useGetApiJobRecurring,
+  useGetApiSystemHealthJobs,
+  usePatchApiGlobalConfig,
+  useGetApiGlobalConfigIntervals,
+  usePatchApiGlobalConfigIntervals,
+  usePostApiIngestionBackfill
+} from '../api/generated/endpoints';
+import { customClient } from '../apiClient';
 import type { GlobalConfigDto, RecurringJobDto, BackgroundJobStatusDto } from '@types';
 import { toast } from 'sonner';
 
 export function useGlobalConfigQuery() {
-  return useQuery<GlobalConfigDto & { uptimeRobotApiKey?: string; latencyDegradedFloor?: number; systemEventRetentionDays?: number; uptimeRobotFetchEnabled?: boolean }>({
-    queryKey: ['global-config'],
-    queryFn: () => apiFetch<GlobalConfigDto & { uptimeRobotApiKey?: string; latencyDegradedFloor?: number; systemEventRetentionDays?: number; uptimeRobotFetchEnabled?: boolean }>('/api/global-config'),
-    retry: false
+  return useGetApiGlobalConfig<GlobalConfigDto, Error>({
+    query: {
+      queryKey: ['global-config'],
+      select: (res) => res.data,
+      retry: false
+    }
   });
 }
 
 export function useRecurringJobsQuery() {
-  return useQuery<RecurringJobDto[]>({
-    queryKey: ['job-recurring'],
-    queryFn: () => apiFetch<RecurringJobDto[]>('/api/job/recurring')
+  return useGetApiJobRecurring<RecurringJobDto[], Error>({
+    query: {
+      queryKey: ['job-recurring'],
+      select: (res) => (res as unknown as { data: RecurringJobDto[] }).data
+    }
   });
 }
 
 export function useRecentJobsQuery() {
-  return useQuery<BackgroundJobStatusDto[]>({
-    queryKey: ['system-jobs'],
-    queryFn: () => apiFetch<BackgroundJobStatusDto[]>('/api/system/health/jobs'),
-    refetchInterval: 15000
+  return useGetApiSystemHealthJobs<BackgroundJobStatusDto[], Error>({
+    query: {
+      queryKey: ['system-jobs'],
+      select: (res) => res.data as BackgroundJobStatusDto[],
+      refetchInterval: 15000
+    }
   });
 }
 
 export function useTriggerJobMutation() {
-  return useMutation({
-    mutationFn: (endpoint: string) => apiFetch(endpoint, { method: 'POST' }),
+  return useMutation<unknown, Error, string>({
+    mutationFn: (endpoint: string) => customClient<unknown>(endpoint, { method: 'POST' }),
     onSuccess: () => {
       toast.success('Job triggered successfully.');
     },
@@ -41,50 +56,54 @@ export function useTriggerJobMutation() {
 }
 
 export function useBackfillMutation(onSuccessCallback?: () => void) {
-  return useMutation({
-    mutationFn: (payload: { tenantId: string; startDate: string; endDate: string }) => {
-      const params = new URLSearchParams();
-      params.append('tenantId', payload.tenantId);
-      if (payload.startDate) {
-        params.append('startDate', new Date(payload.startDate).toISOString());
+  const mutation = usePostApiIngestionBackfill<Error>({
+    mutation: {
+      onSuccess: () => {
+        toast.success('Backfill initiated.');
+        if (onSuccessCallback) onSuccessCallback();
+      },
+      onError: (err: Error) => {
+        toast.error('Backfill failed', {
+          description: err.message || String(err)
+        });
       }
-      if (payload.endDate) {
-        params.append('endDate', new Date(payload.endDate).toISOString());
-      }
-      return apiFetch(`/api/Ingestion/backfill?${params.toString()}`, {
-        method: 'POST'
-      });
-    },
-    onSuccess: () => {
-      toast.success('Backfill initiated.');
-      if (onSuccessCallback) onSuccessCallback();
-    },
-    onError: (err: Error) => {
-      toast.error('Backfill failed', {
-        description: err.message || String(err)
-      });
     }
   });
+
+  return {
+    ...mutation,
+    mutate: (payload: { tenantId: string; startDate: string; endDate: string }) =>
+      mutation.mutate({
+        params: {
+          TenantId: payload.tenantId,
+          StartDate: payload.startDate ? new Date(payload.startDate).toISOString() : undefined,
+          EndDate: payload.endDate ? new Date(payload.endDate).toISOString() : undefined
+        }
+      })
+  };
 }
 
 export function useUpdateConfigMutation() {
   const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (payload: Partial<GlobalConfigDto & { uptimeRobotApiKey?: string; latencyDegradedFloor?: number | null; systemEventRetentionDays?: number; uptimeRobotFetchEnabled?: boolean }>) => 
-      apiFetch('/api/global-config', {
-        method: 'PATCH',
-        body: JSON.stringify(payload)
-      }),
-    onSuccess: () => {
-      toast.success('Configuration updated.');
-      queryClient.invalidateQueries({ queryKey: ['global-config'] });
-    },
-    onError: (err: Error) => {
-      toast.error('Failed to update configuration', {
-        description: err.message || String(err)
-      });
+  const mutation = usePatchApiGlobalConfig<Error>({
+    mutation: {
+      onSuccess: () => {
+        toast.success('Configuration updated.');
+        queryClient.invalidateQueries({ queryKey: ['global-config'] });
+      },
+      onError: (err: Error) => {
+        toast.error('Failed to update configuration', {
+          description: err.message || String(err)
+        });
+      }
     }
   });
+
+  return {
+    ...mutation,
+    mutate: (payload: Partial<GlobalConfigDto>) =>
+      mutation.mutate({ data: payload })
+  };
 }
 
 export interface FetchIntervalsDto {
@@ -93,32 +112,38 @@ export interface FetchIntervalsDto {
   statusFetchIntervalMinutes: number;
   litiumFetchIntervalMinutes: number;
   userStatsFetchIntervalMinutes: number;
+  feedFetchIntervalHours: number;
 }
 
 export function useFetchIntervalsQuery() {
-  return useQuery<FetchIntervalsDto>({
-    queryKey: ['fetch-intervals'],
-    queryFn: () => apiFetch<FetchIntervalsDto>('/api/job/metrics/fetch-intervals'),
+  return useGetApiGlobalConfigIntervals<FetchIntervalsDto, Error>({
+    query: {
+      queryKey: ['fetch-intervals'],
+      select: (res) => res.data as FetchIntervalsDto
+    }
   });
 }
 
 export function useUpdateFetchIntervalsMutation() {
   const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (payload: Partial<FetchIntervalsDto>) => 
-      apiFetch('/api/job/update/intervals', {
-        method: 'PATCH',
-        body: JSON.stringify(payload)
-      }),
-    onSuccess: () => {
-      toast.success('Fetch intervals updated.');
-      queryClient.invalidateQueries({ queryKey: ['fetch-intervals'] });
-      queryClient.invalidateQueries({ queryKey: ['job-recurring'] });
-    },
-    onError: (err: Error) => {
-      toast.error('Failed to update intervals', {
-        description: err.message || String(err)
-      });
+  const mutation = usePatchApiGlobalConfigIntervals<Error>({
+    mutation: {
+      onSuccess: () => {
+        toast.success('Fetch intervals updated.');
+        queryClient.invalidateQueries({ queryKey: ['fetch-intervals'] });
+        queryClient.invalidateQueries({ queryKey: ['job-recurring'] });
+      },
+      onError: (err: Error) => {
+        toast.error('Failed to update intervals', {
+          description: err.message || String(err)
+        });
+      }
     }
   });
+
+  return {
+    ...mutation,
+    mutate: (payload: Partial<FetchIntervalsDto>) =>
+      mutation.mutate({ data: payload })
+  };
 }

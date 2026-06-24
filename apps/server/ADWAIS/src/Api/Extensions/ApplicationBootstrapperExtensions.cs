@@ -55,6 +55,7 @@ public static class ApplicationBootstrapperExtensions
                 var latencyInterval = config?.LatencyFetchIntervalMinutes ?? 10;
                 var litiumFetchInterval = Math.Max(1, config?.LitiumFetchIntervalMinutes ?? 10);
                 var userStatsInterval = config?.UserStatsFetchIntervalMinutes ?? 60;
+                var feedInterval = Math.Max(1, config?.FeedFetchIntervalHours ?? 2);
                 
                 recurringJobManager.AddOrUpdate<UptimeDispatcherJob>(
                         "dispatch-uptimerobot-uptime",
@@ -94,7 +95,7 @@ public static class ApplicationBootstrapperExtensions
                 recurringJobManager.AddOrUpdate<FeedAggregationJob>(
                     "aggregate-intranet-feeds",
                     newJob => newJob.ExecuteAsync(CancellationToken.None),
-                    Cron.HourInterval(2));
+                    Cron.HourInterval(feedInterval));
 
                 if (enableSeeding)
                 {

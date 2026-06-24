@@ -19,6 +19,7 @@ public class GlobalConfig
     public string? ActiveSubscription { get; set; }
     public string? LastSyncError { get; set; }
     public double? DefaultUptimeSla { get; set; }
+    public int FeedFetchIntervalHours { get; set; } = 2;
 }
 
 

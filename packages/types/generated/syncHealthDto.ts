@@ -10,6 +10,7 @@ export interface SyncHealthDto {
   status?: string | null;
   tenantsWithErrorsCount?: number;
   monitorsWithErrorsCount?: number;
+  feedsWithErrorsCount?: number;
   /** @nullable */
   globalSyncError?: string | null;
 }

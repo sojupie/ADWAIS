@@ -28,4 +28,5 @@ export interface GlobalConfigResponseDto {
   activeSubscription?: string | null;
   /** @nullable */
   defaultUptimeSla?: number | null;
+  feedFetchIntervalHours?: number;
 }

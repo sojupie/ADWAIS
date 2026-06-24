@@ -1,7 +1,7 @@
-using Adwais.Api.DTOs.BackgroundJob;
+using Adwais.Application.DTOs.GlobalConfig;
 using FluentValidation;
 
-namespace Adwais.Api.Validators.BackgroundJob;
+namespace Adwais.Api.Validators.GlobalConfig;
 
 public class UpdateFetchIntervalsRequestDtoValidator : AbstractValidator<UpdateFetchIntervalsRequestDto>
 {
@@ -26,7 +26,10 @@ public class UpdateFetchIntervalsRequestDtoValidator : AbstractValidator<UpdateF
             .GreaterThan(0)
             .When(x => x.LatencyFetchIntervalMinutes.HasValue)
             .WithMessage("Latency fetch interval must be at least 1 minute.");
+
+        RuleFor(x => x.FeedFetchIntervalHours)
+            .GreaterThan(0)
+            .When(x => x.FeedFetchIntervalHours.HasValue)
+            .WithMessage("Feed fetch interval must be at least 1 hour.");
     }
 }
-
-

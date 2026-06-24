@@ -64,6 +64,15 @@ export function FetchIntervalsForm({ intervals, updateIntervals, disabled }: Fet
             disabled={disabled}
             onSave={(val) => updateIntervals.mutate({ userStatsFetchIntervalMinutes: val })}
           />
+          <InlineEditField
+            label="Feed Fetch Interval (hours)"
+            value={intervals.feedFetchIntervalHours}
+            type="number"
+            required
+            requiredCondition="> 0"
+            disabled={disabled}
+            onSave={(val) => updateIntervals.mutate({ feedFetchIntervalHours: val })}
+          />
         </div>
       ) : (
         <FormSkeleton>
@@ -71,6 +80,7 @@ export function FetchIntervalsForm({ intervals, updateIntervals, disabled }: Fet
           <FormSkeleton.Input labelWidth="w-48" />
           <FormSkeleton.Input labelWidth="w-48" />
           <FormSkeleton.Input labelWidth="w-56" />
+          <FormSkeleton.Input labelWidth="w-48" />
         </FormSkeleton>
       )}
     </SettingsCard>

@@ -14,4 +14,6 @@ export interface UpdateFetchIntervalsRequestDto {
   userStatsFetchIntervalMinutes?: number | null;
   /** @nullable */
   latencyFetchIntervalMinutes?: number | null;
+  /** @nullable */
+  feedFetchIntervalHours?: number | null;
 }

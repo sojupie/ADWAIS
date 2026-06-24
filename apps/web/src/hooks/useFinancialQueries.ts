@@ -1,5 +1,16 @@
-import { useQuery, keepPreviousData } from '@tanstack/react-query';
-import { apiFetch } from '../apiClient';
+import { keepPreviousData } from '@tanstack/react-query';
+import { 
+  useGetApiFinancialKpis,
+  useGetApiFinancialVelocity,
+  useGetApiFinancialAccumulatedRevenue,
+  useGetApiFinancialGrowthExtremes,
+  useGetApiFinancialMomentum,
+  useGetApiFinancialRevenueEfficiency,
+  useGetApiFinancialVolumeAnomaly,
+  useGetApiFinancialCumulativeGrowthDelta,
+  useGetApiFinancialOrderDistribution,
+  useGetApiFinancialTransactionDensity
+} from '../api/generated/endpoints';
 import type { 
   ComparisonPeriod,
   GlobalKpi, 
@@ -11,9 +22,10 @@ import type {
   CumulativeGrowthDeltaPoint,
   OrderBin,
   AccumulatedRevenuePointDto,
-  TransactionDensityPointDto
+  TransactionDensityPointDto,
+  Timeframe,
+  ComparisonType
 } from '@types';
-import {buildUrl} from "./useBuildUrl.ts";
 
 export const financialKeys = {
   all: ['financial'] as const,
@@ -32,93 +44,143 @@ export const financialKeys = {
 const REFETCH_INTERVAL = 60000;
 
 export function useGlobalKpis(timeframe: string, tenantId?: string | null, comparison?: ComparisonPeriod) {
-  return useQuery({
-    queryKey: financialKeys.kpis(timeframe, tenantId, comparison),
-    queryFn: () => apiFetch<GlobalKpi>(buildUrl('/api/financial/kpis', { timeframe, tenantId, comparison })),
-    refetchInterval: REFETCH_INTERVAL,
-    placeholderData: keepPreviousData,
-  });
+  return useGetApiFinancialKpis<GlobalKpi, Error>(
+    { timeframe: timeframe as Timeframe, tenantId: tenantId || undefined, comparison: comparison as ComparisonType },
+    {
+      query: {
+        queryKey: financialKeys.kpis(timeframe, tenantId, comparison),
+        refetchInterval: REFETCH_INTERVAL,
+        placeholderData: keepPreviousData,
+        select: (res) => res.data as GlobalKpi
+      }
+    }
+  );
 }
 
 export function useFinancialVelocity(timeframe: string, tenantId?: string | null, comparison?: ComparisonPeriod) {
-  return useQuery({
-    queryKey: financialKeys.velocity(timeframe, tenantId, comparison),
-    queryFn: () => apiFetch<FinancialVelocityPoint[]>(buildUrl('/api/financial/velocity', { timeframe, tenantId, comparison })),
-    refetchInterval: REFETCH_INTERVAL,
-    placeholderData: keepPreviousData,
-  });
+  return useGetApiFinancialVelocity<FinancialVelocityPoint[], Error>(
+    { timeframe: timeframe as Timeframe, tenantId: tenantId || undefined, comparison: comparison as ComparisonType },
+    {
+      query: {
+        queryKey: financialKeys.velocity(timeframe, tenantId, comparison),
+        refetchInterval: REFETCH_INTERVAL,
+        placeholderData: keepPreviousData,
+        select: (res) => res.data as FinancialVelocityPoint[]
+      }
+    }
+  );
 }
 
 export function useAccumulatedRevenue(timeframe: string, tenantId?: string, comparison?: ComparisonPeriod) {
-  return useQuery({
-    queryKey: financialKeys.accumulatedRevenue(timeframe, tenantId, comparison),
-    queryFn: () => apiFetch<AccumulatedRevenuePointDto[]>(buildUrl('/api/financial/accumulated-revenue', { timeframe, tenantId, comparison })),
-    refetchInterval: REFETCH_INTERVAL,
-    placeholderData: keepPreviousData,
-  });
+  return useGetApiFinancialAccumulatedRevenue<AccumulatedRevenuePointDto[], Error>(
+    { timeframe: timeframe as Timeframe, tenantId, comparison: comparison as ComparisonType },
+    {
+      query: {
+        queryKey: financialKeys.accumulatedRevenue(timeframe, tenantId, comparison),
+        refetchInterval: REFETCH_INTERVAL,
+        placeholderData: keepPreviousData,
+        select: (res) => res.data as AccumulatedRevenuePointDto[]
+      }
+    }
+  );
 }
 
 export function useGrowthExtremes(timeframe: string, comparison?: ComparisonPeriod) {
-  return useQuery({
-    queryKey: financialKeys.extremes(timeframe, comparison),
-    queryFn: () => apiFetch<GrowthExtreme[]>(buildUrl('/api/financial/growth-extremes', { timeframe, comparison })),
-    refetchInterval: REFETCH_INTERVAL,
-    placeholderData: keepPreviousData,
-  });
+  return useGetApiFinancialGrowthExtremes<GrowthExtreme[], Error>(
+    { timeframe: timeframe as Timeframe, comparison: comparison as ComparisonType },
+    {
+      query: {
+        queryKey: financialKeys.extremes(timeframe, comparison),
+        refetchInterval: REFETCH_INTERVAL,
+        placeholderData: keepPreviousData,
+        select: (res) => res.data as GrowthExtreme[]
+      }
+    }
+  );
 }
 
 export function useMomentum(timeframe: string, comparison?: ComparisonPeriod) {
-  return useQuery({
-    queryKey: financialKeys.momentum(timeframe, comparison),
-    queryFn: () => apiFetch<MomentumResponse>(buildUrl('/api/financial/momentum', { timeframe, comparison })),
-    refetchInterval: REFETCH_INTERVAL,
-    placeholderData: keepPreviousData,
-  });
+  return useGetApiFinancialMomentum<MomentumResponse, Error>(
+    { timeframe: timeframe as Timeframe, comparison: comparison as ComparisonType },
+    {
+      query: {
+        queryKey: financialKeys.momentum(timeframe, comparison),
+        refetchInterval: REFETCH_INTERVAL,
+        placeholderData: keepPreviousData,
+        select: (res) => res.data as MomentumResponse
+      }
+    }
+  );
 }
 
 export function useRevenueEfficiency(timeframe: string, comparison?: ComparisonPeriod) {
-  return useQuery({
-    queryKey: financialKeys.revenueEfficiency(timeframe, comparison),
-    queryFn: () => apiFetch<RevenueEfficiencyResponse>(buildUrl('/api/financial/revenue-efficiency', { timeframe, comparison })),
-    refetchInterval: REFETCH_INTERVAL,
-    placeholderData: keepPreviousData,
-  });
+  return useGetApiFinancialRevenueEfficiency<RevenueEfficiencyResponse, Error>(
+    { timeframe: timeframe as Timeframe, comparison: comparison as ComparisonType },
+    {
+      query: {
+        queryKey: financialKeys.revenueEfficiency(timeframe, comparison),
+        refetchInterval: REFETCH_INTERVAL,
+        placeholderData: keepPreviousData,
+        select: (res) => res.data as RevenueEfficiencyResponse
+      }
+    }
+  );
 }
 
 export function useVolumeAnomaly(timeframe: string, comparison?: ComparisonPeriod) {
-  return useQuery({
-    queryKey: financialKeys.volumeAnomaly(timeframe, comparison),
-    queryFn: () => apiFetch<VolumeAnomalyResponseDto[]>(buildUrl('/api/financial/volume-anomaly', { timeframe, comparison })),
-    refetchInterval: REFETCH_INTERVAL,
-    placeholderData: keepPreviousData,
-  });
+  return useGetApiFinancialVolumeAnomaly<VolumeAnomalyResponseDto[], Error>(
+    { timeframe: timeframe as Timeframe, comparison: comparison as ComparisonType },
+    {
+      query: {
+        queryKey: financialKeys.volumeAnomaly(timeframe, comparison),
+        refetchInterval: REFETCH_INTERVAL,
+        placeholderData: keepPreviousData,
+        select: (res) => res.data as VolumeAnomalyResponseDto[]
+      }
+    }
+  );
 }
 
 export function useCumulativeGrowthDelta(timeframe: string, tenantId: string, comparison?: ComparisonPeriod) {
-  return useQuery({
-    queryKey: financialKeys.delta(timeframe, tenantId, comparison),
-    queryFn: () => apiFetch<CumulativeGrowthDeltaPoint[]>(buildUrl('/api/financial/cumulative-growth-delta', { timeframe, tenantId, comparison })),
-    enabled: !!tenantId,
-    refetchInterval: REFETCH_INTERVAL,
-    placeholderData: keepPreviousData,
-  });
+  return useGetApiFinancialCumulativeGrowthDelta<CumulativeGrowthDeltaPoint[], Error>(
+    { timeframe: timeframe as Timeframe, tenantId, comparison: comparison as ComparisonType },
+    {
+      query: {
+        queryKey: financialKeys.delta(timeframe, tenantId, comparison),
+        enabled: !!tenantId,
+        refetchInterval: REFETCH_INTERVAL,
+        placeholderData: keepPreviousData,
+        select: (res) => res.data as CumulativeGrowthDeltaPoint[]
+      }
+    }
+  );
 }
 
 export function useOrderDistribution(timeframe: string, tenantId: string, comparison?: ComparisonPeriod) {
-  return useQuery({
-    queryKey: financialKeys.orders(timeframe, tenantId, comparison),
-    queryFn: () => apiFetch<OrderBin[]>(buildUrl('/api/financial/order-distribution', { timeframe, tenantId, comparison })),
-    enabled: !!tenantId,
-    refetchInterval: REFETCH_INTERVAL,
-    placeholderData: keepPreviousData,
-  });
+  return useGetApiFinancialOrderDistribution<OrderBin[], Error>(
+    { timeframe: timeframe as Timeframe, tenantId, comparison: comparison as ComparisonType },
+    {
+      query: {
+        queryKey: financialKeys.orders(timeframe, tenantId, comparison),
+        enabled: !!tenantId,
+        refetchInterval: REFETCH_INTERVAL,
+        placeholderData: keepPreviousData,
+        select: (res) => res.data as OrderBin[]
+      }
+    }
+  );
 }
 
 export function useTransactionDensity(timeframe: string, tenantId?: string | null, comparison?: ComparisonPeriod) {
-  return useQuery({
-    queryKey: financialKeys.transactionDensity(timeframe, tenantId, comparison),
-    queryFn: () => apiFetch<TransactionDensityPointDto[]>(buildUrl('/api/financial/transaction-density', { timeframe, tenantId, comparison })),
-    refetchInterval: REFETCH_INTERVAL,
-    placeholderData: keepPreviousData,
-  });
+  return useGetApiFinancialTransactionDensity<TransactionDensityPointDto[], Error>(
+    { timeframe: timeframe as Timeframe, tenantId: tenantId || undefined, comparison: comparison as ComparisonType },
+    {
+      query: {
+        queryKey: financialKeys.transactionDensity(timeframe, tenantId, comparison),
+        refetchInterval: REFETCH_INTERVAL,
+        placeholderData: keepPreviousData,
+        select: (res) => res.data as TransactionDensityPointDto[]
+      }
+    }
+  );
 }

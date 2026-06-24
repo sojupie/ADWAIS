@@ -217,7 +217,7 @@ public class IntranetControllerTests
             new() { Id = Guid.NewGuid(), Title = "Feed 1", Link = "https://link" }
         };
         var feedServiceMock = new Mock<IFeedService>();
-        feedServiceMock.Setup(s => s.GetFeedsAsync(null, 1, 10, It.IsAny<CancellationToken>()))
+        feedServiceMock.Setup(s => s.GetFeedsAsync(It.IsAny<GetFeedsRequest>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(feeds);
 
         var controller = new FeedController(feedServiceMock.Object);
@@ -226,10 +226,10 @@ public class IntranetControllerTests
         var result = await controller.GetFeeds(new GetFeedsRequest { FeedSourceId = null, Page = 1, PageSize = 10 }, CancellationToken.None);
 
         // Assert
-        var okResult = Assert.IsType<OkObjectResult>(result);
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
         var returned = Assert.IsType<List<FeedItem>>(okResult.Value);
         Assert.Single(returned);
-        feedServiceMock.Verify(s => s.GetFeedsAsync(null, 1, 10, It.IsAny<CancellationToken>()), Times.Once);
+        feedServiceMock.Verify(s => s.GetFeedsAsync(It.Is<GetFeedsRequest>(r => r.FeedSourceId == null && r.Page == 1 && r.PageSize == 10), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]

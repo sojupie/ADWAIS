@@ -19,13 +19,14 @@ export function BackgroundJobsView() {
     const triggerBackfill = useBackfillMutation();
 
     const manualJobs = [
-        { id: 'monitor-sync', name: 'Monitor Sync', desc: 'Syncs monitor states from external providers.', isAdminOnly: true },
-        { id: 'uptime-sync', name: 'Uptime Sync', desc: 'Fetches latest uptime ping data.', isAdminOnly: true },
-        { id: 'latency-sync', name: 'Latency Sync', desc: 'Fetches latency metrics for all monitors.', isAdminOnly: true },
-        { id: 'user-stats-sync', name: 'User Stats', desc: 'Calculates active user statistics.', isAdminOnly: true },
-        { id: 'litium-sync', name: 'Litium Sync', desc: 'Synchronizes order data from Litium.', isAdminOnly: true },
-        { id: 'refresh-historic-order-data', name: 'Refresh Historic Orders', desc: 'Rebuilds materialized views for old orders.', isAdminOnly: false },
-        { id: 'refresh-monitoring-data', name: 'Refresh Monitoring', desc: 'Rebuilds monitoring materialized views.', isAdminOnly: false },
+        { id: 'monitor-sync', name: 'Monitor Sync', desc: 'Syncs monitor states from external providers.', isAdminOnly: true, url: '/api/job/trigger/monitor-sync' },
+        { id: 'uptime-sync', name: 'Uptime Sync', desc: 'Fetches latest uptime ping data.', isAdminOnly: true, url: '/api/job/trigger/uptime-sync' },
+        { id: 'latency-sync', name: 'Latency Sync', desc: 'Fetches latency metrics for all monitors.', isAdminOnly: true, url: '/api/job/trigger/latency-sync' },
+        { id: 'user-stats-sync', name: 'User Stats', desc: 'Calculates active user statistics.', isAdminOnly: true, url: '/api/job/trigger/user-stats-sync' },
+        { id: 'litium-sync', name: 'Litium Sync', desc: 'Synchronizes order data from Litium.', isAdminOnly: true, url: '/api/job/trigger/litium-sync' },
+        { id: 'feed-fetch', name: 'Feed Fetch', desc: 'Triggers aggregation of RSS, blogs, and newsrooms immediately.', isAdminOnly: true, url: '/api/global-config/feeds/fetch' },
+        { id: 'refresh-historic-order-data', name: 'Refresh Historic Orders', desc: 'Rebuilds materialized views for old orders.', isAdminOnly: false, url: '/api/job/trigger/refresh-historic-order-data' },
+        { id: 'refresh-monitoring-data', name: 'Refresh Monitoring', desc: 'Rebuilds monitoring materialized views.', isAdminOnly: false, url: '/api/job/trigger/refresh-monitoring-data' },
     ];
 
     return (
@@ -45,7 +46,7 @@ export function BackgroundJobsView() {
                                 return (
                                     <button
                                         key={job.id}
-                                        onClick={() => !isRestricted && triggerJob.mutate(`/api/job/trigger/${job.id}`)}
+                                        onClick={() => !isRestricted && triggerJob.mutate(job.url)}
                                         disabled={isRestricted}
                                         className={`group flex flex-col text-left p-3 border rounded-xl transition-all relative overflow-hidden bg-slate-50/50 ${isRestricted
                                             ? 'border-slate-250 opacity-40 cursor-not-allowed'

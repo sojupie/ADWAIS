@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Adwais.Application.DTOs.Intranet;
 using Adwais.Application.Interfaces;
 using Adwais.Domain.Entities.Intranet;
 using Adwais.Infrastructure.Persistence;
@@ -14,11 +15,10 @@ public class FeedService(IDbContextFactory<AnalyticsDbContext> dbContextFactory)
 {
     private readonly IDbContextFactory<AnalyticsDbContext> _dbContextFactory = dbContextFactory;
 
-    public async Task<IEnumerable<FeedItem>> GetFeedsAsync(Guid? feedSourceId, int page, int pageSize, CancellationToken ct = default)
+    public async Task<IEnumerable<FeedItem>> GetFeedsAsync(GetFeedsRequest request, CancellationToken ct = default)
     {
-        if (page < 1) page = 1;
-        if (pageSize < 1) pageSize = 10;
-        if (pageSize > 100) pageSize = 100;
+        var page = request.Page < 1 ? 1 : request.Page;
+        var pageSize = request.PageSize < 1 ? 10 : (request.PageSize > 100 ? 100 : request.PageSize);
 
         await using var db = await _dbContextFactory.CreateDbContextAsync(ct);
 
@@ -26,9 +26,9 @@ public class FeedService(IDbContextFactory<AnalyticsDbContext> dbContextFactory)
             .Include(fi => fi.FeedSource)
             .AsNoTracking();
 
-        if (feedSourceId.HasValue)
+        if (request.FeedSourceId.HasValue)
         {
-            query = query.Where(fi => fi.FeedSourceId == feedSourceId.Value);
+            query = query.Where(fi => fi.FeedSourceId == request.FeedSourceId.Value);
         }
 
         return await query

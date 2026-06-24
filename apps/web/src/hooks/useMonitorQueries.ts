@@ -1,117 +1,199 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiFetch } from '../apiClient';
-import type { UptimeMonitorDto, ComparisonPeriod, UpdateMonitorRequestDto } from '@types';
-import { buildUrl } from './useBuildUrl.ts';
+import { useQueryClient } from '@tanstack/react-query';
+import { 
+  useGetApiMonitors, 
+  useGetApiMonitorsUnassigned, 
+  usePostApiMonitors, 
+  usePostApiMonitorsIdStart, 
+  usePostApiMonitorsIdPause, 
+  usePatchApiMonitorsId, 
+  usePatchApiMonitorsIdAssignTenantId, 
+  usePatchApiMonitorsIdUnassign 
+} from '../api/generated/endpoints';
+import type { UptimeMonitorDto, ComparisonPeriod, UpdateMonitorRequestDto, Timeframe, ComparisonType } from '@types';
 import { toast } from 'sonner';
 
 export function useMonitorsQuery(timeframe?: string, tenantId?: string | null, comparison?: ComparisonPeriod) {
-  return useQuery<UptimeMonitorDto[]>({
-    queryKey: ['monitors', timeframe, tenantId, comparison],
-    queryFn: () => apiFetch<UptimeMonitorDto[]>(buildUrl('/api/monitors', { timeframe, tenantId, comparison }))
-  });
+  return useGetApiMonitors<UptimeMonitorDto[], Error>(
+    {
+      timeframe: timeframe as Timeframe,
+      tenantId: tenantId || undefined,
+      comparison: comparison as ComparisonType
+    },
+    {
+      query: {
+        queryKey: ['monitors', timeframe, tenantId, comparison],
+        select: (res) => res.data as UptimeMonitorDto[]
+      }
+    }
+  );
 }
 
 export function useUnassignedMonitorsQuery(timeframe?: string, comparison?: ComparisonPeriod) {
-  return useQuery<UptimeMonitorDto[]>({
-    queryKey: ['unassigned-monitors', timeframe, comparison],
-    queryFn: () => apiFetch<UptimeMonitorDto[]>(buildUrl('/api/monitors/unassigned', { timeframe, comparison }))
-  });
+  return useGetApiMonitorsUnassigned<UptimeMonitorDto[], Error>(
+    {
+      timeframe: timeframe as Timeframe,
+      comparison: comparison as ComparisonType
+    },
+    {
+      query: {
+        queryKey: ['unassigned-monitors', timeframe, comparison],
+        select: (res) => res.data as UptimeMonitorDto[]
+      }
+    }
+  );
 }
 
 export function useCreateMonitorMutation(onSuccessCallback?: () => void) {
   const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (payload: { name: string; url: string; uptimeSla: number | null }) => 
-      apiFetch<UptimeMonitorDto>('/api/monitors?tenantId=00000000-0000-0000-0000-000000000001', { 
-        method: 'POST', 
-        body: JSON.stringify(payload) 
-      }),
-    onSuccess: () => {
-      toast.success('Monitor created successfully.');
-      queryClient.invalidateQueries({ queryKey: ['monitors'] });
-      queryClient.invalidateQueries({ queryKey: ['unassigned-monitors'] });
-      if (onSuccessCallback) onSuccessCallback();
-    },
-    onError: (err: Error) => {
-      toast.error('Failed to create monitor', {
-        description: err.message || String(err)
-      });
+  const mutation = usePostApiMonitors<Error>({
+    mutation: {
+      onSuccess: () => {
+        toast.success('Monitor created successfully.');
+        queryClient.invalidateQueries({ queryKey: ['monitors'] });
+        queryClient.invalidateQueries({ queryKey: ['unassigned-monitors'] });
+        if (onSuccessCallback) onSuccessCallback();
+      },
+      onError: (err: Error) => {
+        toast.error('Failed to create monitor', {
+          description: err.message || String(err)
+        });
+      }
     }
   });
+
+  return {
+    ...mutation,
+    mutate: (
+      payload: { name: string; url: string; uptimeSla: number | null },
+      options?: Parameters<typeof mutation.mutate>[1]
+    ) => 
+      mutation.mutate({ 
+        params: { tenantId: '00000000-0000-0000-0000-000000000001' }, 
+        data: payload 
+      }, options)
+  };
 }
 
 export function useControlMonitorMutation() {
   const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ id, action }: { id: number; action: 'start' | 'pause' }) => 
-      apiFetch(`/api/monitors/${id}/${action}`, { method: 'POST' }),
-    onSuccess: (_, variables) => {
-      toast.success(`Monitor ${variables.action === 'start' ? 'started' : 'paused'} successfully.`);
-      queryClient.invalidateQueries({ queryKey: ['monitors'] });
-    },
-    onError: (err: Error) => {
-      toast.error('Failed to control monitor', {
-        description: err.message || String(err)
-      });
-    }
-  });
+  
+  const startMutation = usePostApiMonitorsIdStart<Error>();
+  const pauseMutation = usePostApiMonitorsIdPause<Error>();
+
+  const isPending = startMutation.isPending || pauseMutation.isPending;
+
+  const mutate = (
+    { id, action }: { id: number; action: 'start' | 'pause' },
+    options?: Parameters<typeof startMutation.mutate>[1]
+  ) => {
+    const activeMutation = action === 'start' ? startMutation : pauseMutation;
+    activeMutation.mutate(
+      { id },
+      {
+        ...options,
+        onSuccess: (...args) => {
+          toast.success(`Monitor ${action === 'start' ? 'started' : 'paused'} successfully.`);
+          queryClient.invalidateQueries({ queryKey: ['monitors'] });
+          if (options?.onSuccess) {
+            options.onSuccess(...args);
+          }
+        },
+        onError: (...args) => {
+          const err = args[0] as Error;
+          toast.error('Failed to control monitor', {
+            description: err.message || String(err)
+          });
+          if (options?.onError) {
+            options.onError(...args);
+          }
+        }
+      }
+    );
+  };
+
+  return {
+    isPending,
+    mutate
+  };
 }
 
 export function useUpdateMonitorMutation() {
   const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ id, payload }: { id: number; payload: UpdateMonitorRequestDto }) => 
-      apiFetch<UptimeMonitorDto>(`/api/monitors/${id}`, { 
-        method: 'PATCH', 
-        body: JSON.stringify(payload) 
-      }),
-    onSuccess: () => {
-      toast.success('Monitor updated successfully.');
-      queryClient.invalidateQueries({ queryKey: ['monitors'] });
-      queryClient.invalidateQueries({ queryKey: ['unassigned-monitors'] });
-    },
-    onError: (err: Error) => {
-      toast.error('Failed to update monitor', {
-        description: err.message || String(err)
-      });
+  const mutation = usePatchApiMonitorsId<Error>({
+    mutation: {
+      onSuccess: () => {
+        toast.success('Monitor updated successfully.');
+        queryClient.invalidateQueries({ queryKey: ['monitors'] });
+        queryClient.invalidateQueries({ queryKey: ['unassigned-monitors'] });
+      },
+      onError: (err: Error) => {
+        toast.error('Failed to update monitor', {
+          description: err.message || String(err)
+        });
+      }
     }
   });
+
+  return {
+    ...mutation,
+    mutate: (
+      variables: { id: number; payload: UpdateMonitorRequestDto },
+      options?: Parameters<typeof mutation.mutate>[1]
+    ) =>
+      mutation.mutate({ id: variables.id, data: variables.payload }, options)
+  };
 }
 
 export function useAssignMonitorMutation(onSuccessCallback?: () => void) {
   const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ id, tenantId }: { id: number; tenantId: string }) => 
-      apiFetch(`/api/monitors/${id}/assign/${tenantId}`, { method: 'PATCH' }),
-    onSuccess: () => {
-      toast.success('Monitor assigned successfully.');
-      queryClient.invalidateQueries({ queryKey: ['monitors'] });
-      queryClient.invalidateQueries({ queryKey: ['unassigned-monitors'] });
-      queryClient.invalidateQueries({ queryKey: ['tenants'] });
-      if (onSuccessCallback) onSuccessCallback();
-    },
-    onError: (err: Error) => {
-      toast.error('Failed to assign monitor', {
-        description: err.message || String(err)
-      });
+  const mutation = usePatchApiMonitorsIdAssignTenantId<Error>({
+    mutation: {
+      onSuccess: () => {
+        toast.success('Monitor assigned successfully.');
+        queryClient.invalidateQueries({ queryKey: ['monitors'] });
+        queryClient.invalidateQueries({ queryKey: ['unassigned-monitors'] });
+        queryClient.invalidateQueries({ queryKey: ['tenants'] });
+        if (onSuccessCallback) onSuccessCallback();
+      },
+      onError: (err: Error) => {
+        toast.error('Failed to assign monitor', {
+          description: err.message || String(err)
+        });
+      }
     }
   });
+
+  return {
+    ...mutation,
+    mutate: (
+      variables: { id: number; tenantId: string },
+      options?: Parameters<typeof mutation.mutate>[1]
+    ) =>
+      mutation.mutate({ id: variables.id, tenantId: variables.tenantId }, options)
+  };
 }
 
 export function useUnassignMonitorMutation() {
   const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (id: number) => apiFetch(`/api/monitors/${id}/unassign`, { method: 'PATCH' }),
-    onSuccess: () => {
-      toast.success('Monitor unassigned successfully.');
-      queryClient.invalidateQueries({ queryKey: ['monitors'] });
-      queryClient.invalidateQueries({ queryKey: ['unassigned-monitors'] });
-      queryClient.invalidateQueries({ queryKey: ['tenants'] });
-    },
-    onError: (err: Error) => {
-      toast.error('Failed to unassign monitor', {
-        description: err.message || String(err)
-      });
+  const mutation = usePatchApiMonitorsIdUnassign<Error>({
+    mutation: {
+      onSuccess: () => {
+        toast.success('Monitor unassigned successfully.');
+        queryClient.invalidateQueries({ queryKey: ['monitors'] });
+        queryClient.invalidateQueries({ queryKey: ['unassigned-monitors'] });
+        queryClient.invalidateQueries({ queryKey: ['tenants'] });
+      },
+      onError: (err: Error) => {
+        toast.error('Failed to unassign monitor', {
+          description: err.message || String(err)
+        });
+      }
     }
   });
+
+  return {
+    ...mutation,
+    mutate: (id: number, options?: Parameters<typeof mutation.mutate>[1]) => 
+      mutation.mutate({ id }, options)
+  };
 }

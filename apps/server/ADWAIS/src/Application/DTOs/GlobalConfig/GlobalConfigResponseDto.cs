@@ -1,6 +1,6 @@
 using System;
 
-namespace Adwais.Api.DTOs.GlobalConfig;
+namespace Adwais.Application.DTOs.GlobalConfig;
 
 public record GlobalConfigResponseDto(
     int Id,
@@ -17,7 +17,6 @@ public record GlobalConfigResponseDto(
     int? MonitorsCount,
     int? MonitorsLimit,
     string? ActiveSubscription,
-    double? DefaultUptimeSla
+    double? DefaultUptimeSla,
+    int FeedFetchIntervalHours
 );
-
-

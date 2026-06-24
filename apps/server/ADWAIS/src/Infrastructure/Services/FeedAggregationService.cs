@@ -70,14 +70,44 @@ public class FeedAggregationService(
             if (items.Count > 0)
             {
                 await using var context = await _contextFactory.CreateDbContextAsync(ct);
-                foreach (var item in items)
-                {
-                    var exists = await context.FeedItems.AnyAsync(fi => fi.Link == item.Link, ct);
-                    if (exists) continue;
 
-                    context.FeedItems.Add(item);
+                var uniqueItems = items
+                    .Where(item => !string.IsNullOrWhiteSpace(item.Link))
+                    .Select(item =>
+                    {
+                        item.Link = NormalizeFeedLink(item.Link);
+                        return item;
+                    })
+                    .GroupBy(item => item.Link, StringComparer.OrdinalIgnoreCase)
+                    .Select(group => group.First())
+                    .ToList();
+
+                foreach (var item in uniqueItems)
+                {
+                    await context.Database.ExecuteSqlInterpolatedAsync($"""
+                        INSERT INTO feed_item (
+                            id,
+                            author,
+                            content,
+                            feed_source_id,
+                            image_url,
+                            link,
+                            publish_date,
+                            title
+                        )
+                        VALUES (
+                            {item.Id},
+                            {item.Author},
+                            {item.Content},
+                            {item.FeedSourceId},
+                            {item.ImageUrl},
+                            {item.Link},
+                            {item.PublishDate},
+                            {item.Title}
+                        )
+                        ON CONFLICT (link) DO NOTHING
+                        """, ct);
                 }
-                await context.SaveChangesAsync(ct);
             }
 
             await using (var context = await _contextFactory.CreateDbContextAsync(ct))
@@ -100,5 +130,22 @@ public class FeedAggregationService(
             }
             await _eventService.LogErrorAsync(nameof(FeedAggregationService), $"Feed aggregation failed for {source.Name}: {ex.Message}", ex);
         }
+    }
+
+    private static string NormalizeFeedLink(string link)
+    {
+        var normalized = link.Trim();
+
+        if (Uri.TryCreate(normalized, UriKind.Absolute, out var uri))
+        {
+            var builder = new UriBuilder(uri)
+            {
+                Fragment = string.Empty
+            };
+
+            normalized = builder.Uri.ToString();
+        }
+
+        return normalized.TrimEnd('/');
     }
 }

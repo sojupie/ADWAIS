@@ -1,4 +1,4 @@
-namespace Adwais.Api.DTOs.BackgroundJob;
+namespace Adwais.Application.DTOs.GlobalConfig;
 
 public record FetchIntervalsDto
 {
@@ -7,5 +7,5 @@ public record FetchIntervalsDto
     public int StatusFetchIntervalMinutes { get; init; }
     public int LitiumFetchIntervalMinutes { get; init; }
     public int UserStatsFetchIntervalMinutes { get; init; }
+    public int FeedFetchIntervalHours { get; init; }
 }
-

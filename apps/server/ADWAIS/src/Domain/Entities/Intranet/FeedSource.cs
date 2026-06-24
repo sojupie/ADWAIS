@@ -9,5 +9,6 @@ public class FeedSource
     public DateTime? LastPolledAt { get; set; }
     public DateTime? LastSuccessAt { get; set; }
     public string? LastSyncError { get; set; }
+    [System.Text.Json.Serialization.JsonIgnore]
     public ICollection<FeedItem> FeedItems { get; set; } = new List<FeedItem>();
 }

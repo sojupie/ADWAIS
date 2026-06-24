@@ -116,7 +116,53 @@ export async function customClient<T>(
   second?: RequestInit
 ): Promise<T> {
   if (typeof first === 'string') {
-    return apiFetch<T>(first, second);
+    const url = first;
+    const options = second;
+    const isBodyRequest = options?.method && ['POST', 'PUT', 'PATCH'].includes(options.method.toUpperCase());
+    const headers = await getAuthHeaders(options?.headers);
+
+    if (isBodyRequest && !headers.has('Content-Type')) {
+      headers.set('Content-Type', 'application/json');
+    }
+
+    const response = await fetch(url, {
+      ...options,
+      headers,
+    });
+
+    if (!response.ok) {
+      const isProfileUrl = url.includes('/api/users/me');
+      if (response.status === 401 || (response.status === 403 && isProfileUrl)) {
+        const bypass = headers.get('X-Bypass-Global-401');
+        if (bypass !== 'true') {
+          handleSessionInvalidation();
+        }
+      } else if (response.status === 403) {
+        checkSessionValidity().catch((err) => {
+          console.error('Error during session validity check:', err);
+        });
+      }
+
+      const errorBody = await response.text().catch(() => 'Unknown error');
+      console.error(`API Fetch Error [${response.status}] ${url}:`, errorBody);
+      let errorMessage = errorBody;
+      try {
+        const parsed = JSON.parse(errorBody);
+        if (parsed.error) errorMessage = parsed.error;
+        else if (parsed.message) errorMessage = parsed.message;
+      } catch {
+        // Not JSON
+      }
+      throw new Error(errorMessage || `Request failed with status ${response.status}`);
+    }
+
+    const text = await response.text();
+    const data = text ? JSON.parse(text) : null;
+    return {
+      data,
+      status: response.status,
+      headers: response.headers,
+    } as unknown as T;
   }
 
   const { url, method, params, data, headers, signal } = first;

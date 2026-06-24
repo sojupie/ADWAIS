@@ -28,11 +28,14 @@ import type {
   ActivateKioskRequestDto,
   BackgroundJobStatusDto,
   CreateMonitorRequestDto,
+  CreateNewsletterDto,
+  CreatePostDto,
   CreateTenantRequestDto,
   CreateUserRequestDto,
   CumulativeGrowthDeltaPointResponseDto,
   DeleteApiMonitorsIdParams,
   DeleteApiSystemEventClearParams,
+  FeedItem,
   FetchIntervalsDto,
   GetApiFinancialAccumulatedRevenueParams,
   GetApiFinancialCumulativeGrowthDeltaParams,
@@ -45,6 +48,8 @@ import type {
   GetApiFinancialTransactionDensityParams,
   GetApiFinancialVelocityParams,
   GetApiFinancialVolumeAnomalyParams,
+  GetApiIntranetFeedsParams,
+  GetApiIntranetNewslettersParams,
   GetApiKioskTokenParams,
   GetApiMonitorsAnalyticsParams,
   GetApiMonitorsIdLatencyParams,
@@ -63,6 +68,7 @@ import type {
   OrderBinResponseDto,
   PostApiIngestionBackfillParams,
   PostApiMonitorsParams,
+  PutApiGlobalConfigFeedsIntervalParams,
   RegisterKioskRequestDto,
   RevenueEfficiencyResponseDto,
   SystemEvent,
@@ -661,223 +667,6 @@ export const usePostApiJobTriggerRefreshMonitoringData = <TError = unknown,
       return useMutation(getPostApiJobTriggerRefreshMonitoringDataMutationOptions(options), queryClient);
     }
 
-export type patchApiJobUpdateIntervalsResponse200TextPlain = {
-  data: FetchIntervalsDto
-  status: 200
-}
-
-export type patchApiJobUpdateIntervalsResponse200ApplicationJson = {
-  data: FetchIntervalsDto
-  status: 200
-}
-
-export type patchApiJobUpdateIntervalsResponse200TextJson = {
-  data: FetchIntervalsDto
-  status: 200
-}
-
-export type patchApiJobUpdateIntervalsResponseSuccess = (patchApiJobUpdateIntervalsResponse200TextPlain | patchApiJobUpdateIntervalsResponse200ApplicationJson | patchApiJobUpdateIntervalsResponse200TextJson) & {
-  headers: Headers;
-};
-;
-
-export type patchApiJobUpdateIntervalsResponse = (patchApiJobUpdateIntervalsResponseSuccess)
-
-export const getPatchApiJobUpdateIntervalsUrl = () => {
-
-
-
-
-  return `/api/job/update/intervals`
-}
-
-/**
- * @summary Updates the global fetch intervals for all background jobs.
-Returns the updated list of intervals.
- */
-export const patchApiJobUpdateIntervals = async (updateFetchIntervalsRequestDto?: UpdateFetchIntervalsRequestDto, options?: RequestInit): Promise<patchApiJobUpdateIntervalsResponse> => {
-
-  return customClient<patchApiJobUpdateIntervalsResponse>(getPatchApiJobUpdateIntervalsUrl(),
-  {
-    ...options,
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(updateFetchIntervalsRequestDto)
-  }
-);}
-
-
-
-
-export const getPatchApiJobUpdateIntervalsMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiJobUpdateIntervals>>, TError,{data?: UpdateFetchIntervalsRequestDto}, TContext>, request?: SecondParameter<typeof customClient>}
-): UseMutationOptions<Awaited<ReturnType<typeof patchApiJobUpdateIntervals>>, TError,{data?: UpdateFetchIntervalsRequestDto}, TContext> => {
-
-const mutationKey = ['patchApiJobUpdateIntervals'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof patchApiJobUpdateIntervals>>, {data?: UpdateFetchIntervalsRequestDto}> = (props) => {
-          const {data} = props ?? {};
-
-          return  patchApiJobUpdateIntervals(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PatchApiJobUpdateIntervalsMutationResult = NonNullable<Awaited<ReturnType<typeof patchApiJobUpdateIntervals>>>
-    export type PatchApiJobUpdateIntervalsMutationBody = UpdateFetchIntervalsRequestDto | undefined
-    export type PatchApiJobUpdateIntervalsMutationError = unknown
-
-    /**
- * @summary Updates the global fetch intervals for all background jobs.
-Returns the updated list of intervals.
- */
-export const usePatchApiJobUpdateIntervals = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiJobUpdateIntervals>>, TError,{data?: UpdateFetchIntervalsRequestDto}, TContext>, request?: SecondParameter<typeof customClient>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof patchApiJobUpdateIntervals>>,
-        TError,
-        {data?: UpdateFetchIntervalsRequestDto},
-        TContext
-      > => {
-      return useMutation(getPatchApiJobUpdateIntervalsMutationOptions(options), queryClient);
-    }
-
-export type getApiJobMetricsFetchIntervalsResponse200TextPlain = {
-  data: FetchIntervalsDto
-  status: 200
-}
-
-export type getApiJobMetricsFetchIntervalsResponse200ApplicationJson = {
-  data: FetchIntervalsDto
-  status: 200
-}
-
-export type getApiJobMetricsFetchIntervalsResponse200TextJson = {
-  data: FetchIntervalsDto
-  status: 200
-}
-
-export type getApiJobMetricsFetchIntervalsResponseSuccess = (getApiJobMetricsFetchIntervalsResponse200TextPlain | getApiJobMetricsFetchIntervalsResponse200ApplicationJson | getApiJobMetricsFetchIntervalsResponse200TextJson) & {
-  headers: Headers;
-};
-;
-
-export type getApiJobMetricsFetchIntervalsResponse = (getApiJobMetricsFetchIntervalsResponseSuccess)
-
-export const getGetApiJobMetricsFetchIntervalsUrl = () => {
-
-
-
-
-  return `/api/job/metrics/fetch-intervals`
-}
-
-/**
- * @summary Retrieves the current global fetch intervals for all background jobs.
- */
-export const getApiJobMetricsFetchIntervals = async ( options?: RequestInit): Promise<getApiJobMetricsFetchIntervalsResponse> => {
-
-  return customClient<getApiJobMetricsFetchIntervalsResponse>(getGetApiJobMetricsFetchIntervalsUrl(),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getGetApiJobMetricsFetchIntervalsQueryKey = () => {
-    return [
-    `/api/job/metrics/fetch-intervals`
-    ] as const;
-    }
-
-
-export const getGetApiJobMetricsFetchIntervalsQueryOptions = <TData = Awaited<ReturnType<typeof getApiJobMetricsFetchIntervals>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiJobMetricsFetchIntervals>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetApiJobMetricsFetchIntervalsQueryKey();
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiJobMetricsFetchIntervals>>> = ({ signal }) => getApiJobMetricsFetchIntervals({ signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiJobMetricsFetchIntervals>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetApiJobMetricsFetchIntervalsQueryResult = NonNullable<Awaited<ReturnType<typeof getApiJobMetricsFetchIntervals>>>
-export type GetApiJobMetricsFetchIntervalsQueryError = unknown
-
-
-export function useGetApiJobMetricsFetchIntervals<TData = Awaited<ReturnType<typeof getApiJobMetricsFetchIntervals>>, TError = unknown>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiJobMetricsFetchIntervals>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiJobMetricsFetchIntervals>>,
-          TError,
-          Awaited<ReturnType<typeof getApiJobMetricsFetchIntervals>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customClient>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiJobMetricsFetchIntervals<TData = Awaited<ReturnType<typeof getApiJobMetricsFetchIntervals>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiJobMetricsFetchIntervals>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiJobMetricsFetchIntervals>>,
-          TError,
-          Awaited<ReturnType<typeof getApiJobMetricsFetchIntervals>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customClient>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiJobMetricsFetchIntervals<TData = Awaited<ReturnType<typeof getApiJobMetricsFetchIntervals>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiJobMetricsFetchIntervals>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-/**
- * @summary Retrieves the current global fetch intervals for all background jobs.
- */
-
-export function useGetApiJobMetricsFetchIntervals<TData = Awaited<ReturnType<typeof getApiJobMetricsFetchIntervals>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiJobMetricsFetchIntervals>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetApiJobMetricsFetchIntervalsQueryOptions(options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-
-
-
-
 export type getApiJobRecurringResponse200 = {
   data: void
   status: 200
@@ -1092,6 +881,420 @@ export function useGetApiJobStatusJobId<TData = Awaited<ReturnType<typeof getApi
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetApiJobStatusJobIdQueryOptions(jobId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export type getApiIntranetPostsIdResponse200 = {
+  data: void
+  status: 200
+}
+
+export type getApiIntranetPostsIdResponseSuccess = (getApiIntranetPostsIdResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getApiIntranetPostsIdResponse = (getApiIntranetPostsIdResponseSuccess)
+
+export const getGetApiIntranetPostsIdUrl = (id: string,) => {
+
+
+
+
+  return `/api/intranet/posts/${id}`
+}
+
+export const getApiIntranetPostsId = async (id: string, options?: RequestInit): Promise<getApiIntranetPostsIdResponse> => {
+
+  return customClient<getApiIntranetPostsIdResponse>(getGetApiIntranetPostsIdUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiIntranetPostsIdQueryKey = (id: string,) => {
+    return [
+    `/api/intranet/posts/${id}`
+    ] as const;
+    }
+
+
+export const getGetApiIntranetPostsIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiIntranetPostsId>>, TError = unknown>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetPostsId>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiIntranetPostsIdQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiIntranetPostsId>>> = ({ signal }) => getApiIntranetPostsId(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetPostsId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiIntranetPostsIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiIntranetPostsId>>>
+export type GetApiIntranetPostsIdQueryError = unknown
+
+
+export function useGetApiIntranetPostsId<TData = Awaited<ReturnType<typeof getApiIntranetPostsId>>, TError = unknown>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetPostsId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiIntranetPostsId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiIntranetPostsId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiIntranetPostsId<TData = Awaited<ReturnType<typeof getApiIntranetPostsId>>, TError = unknown>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetPostsId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiIntranetPostsId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiIntranetPostsId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiIntranetPostsId<TData = Awaited<ReturnType<typeof getApiIntranetPostsId>>, TError = unknown>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetPostsId>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiIntranetPostsId<TData = Awaited<ReturnType<typeof getApiIntranetPostsId>>, TError = unknown>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetPostsId>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiIntranetPostsIdQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export type getApiIntranetPostsResponse200 = {
+  data: void
+  status: 200
+}
+
+export type getApiIntranetPostsResponseSuccess = (getApiIntranetPostsResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getApiIntranetPostsResponse = (getApiIntranetPostsResponseSuccess)
+
+export const getGetApiIntranetPostsUrl = () => {
+
+
+
+
+  return `/api/intranet/posts`
+}
+
+export const getApiIntranetPosts = async ( options?: RequestInit): Promise<getApiIntranetPostsResponse> => {
+
+  return customClient<getApiIntranetPostsResponse>(getGetApiIntranetPostsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiIntranetPostsQueryKey = () => {
+    return [
+    `/api/intranet/posts`
+    ] as const;
+    }
+
+
+export const getGetApiIntranetPostsQueryOptions = <TData = Awaited<ReturnType<typeof getApiIntranetPosts>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetPosts>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiIntranetPostsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiIntranetPosts>>> = ({ signal }) => getApiIntranetPosts({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetPosts>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiIntranetPostsQueryResult = NonNullable<Awaited<ReturnType<typeof getApiIntranetPosts>>>
+export type GetApiIntranetPostsQueryError = unknown
+
+
+export function useGetApiIntranetPosts<TData = Awaited<ReturnType<typeof getApiIntranetPosts>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetPosts>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiIntranetPosts>>,
+          TError,
+          Awaited<ReturnType<typeof getApiIntranetPosts>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiIntranetPosts<TData = Awaited<ReturnType<typeof getApiIntranetPosts>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetPosts>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiIntranetPosts>>,
+          TError,
+          Awaited<ReturnType<typeof getApiIntranetPosts>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiIntranetPosts<TData = Awaited<ReturnType<typeof getApiIntranetPosts>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetPosts>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiIntranetPosts<TData = Awaited<ReturnType<typeof getApiIntranetPosts>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetPosts>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiIntranetPostsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export type postApiIntranetPostsResponse200 = {
+  data: void
+  status: 200
+}
+
+export type postApiIntranetPostsResponseSuccess = (postApiIntranetPostsResponse200) & {
+  headers: Headers;
+};
+;
+
+export type postApiIntranetPostsResponse = (postApiIntranetPostsResponseSuccess)
+
+export const getPostApiIntranetPostsUrl = () => {
+
+
+
+
+  return `/api/intranet/posts`
+}
+
+export const postApiIntranetPosts = async (createPostDto?: CreatePostDto, options?: RequestInit): Promise<postApiIntranetPostsResponse> => {
+
+  return customClient<postApiIntranetPostsResponse>(getPostApiIntranetPostsUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(createPostDto)
+  }
+);}
+
+
+
+
+export const getPostApiIntranetPostsMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiIntranetPosts>>, TError,{data?: CreatePostDto}, TContext>, request?: SecondParameter<typeof customClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiIntranetPosts>>, TError,{data?: CreatePostDto}, TContext> => {
+
+const mutationKey = ['postApiIntranetPosts'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiIntranetPosts>>, {data?: CreatePostDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiIntranetPosts(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiIntranetPostsMutationResult = NonNullable<Awaited<ReturnType<typeof postApiIntranetPosts>>>
+    export type PostApiIntranetPostsMutationBody = CreatePostDto | undefined
+    export type PostApiIntranetPostsMutationError = unknown
+
+    export const usePostApiIntranetPosts = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiIntranetPosts>>, TError,{data?: CreatePostDto}, TContext>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiIntranetPosts>>,
+        TError,
+        {data?: CreatePostDto},
+        TContext
+      > => {
+      return useMutation(getPostApiIntranetPostsMutationOptions(options), queryClient);
+    }
+
+export type getApiIntranetFeedsResponse200TextPlain = {
+  data: FeedItem[]
+  status: 200
+}
+
+export type getApiIntranetFeedsResponse200ApplicationJson = {
+  data: FeedItem[]
+  status: 200
+}
+
+export type getApiIntranetFeedsResponse200TextJson = {
+  data: FeedItem[]
+  status: 200
+}
+
+export type getApiIntranetFeedsResponseSuccess = (getApiIntranetFeedsResponse200TextPlain | getApiIntranetFeedsResponse200ApplicationJson | getApiIntranetFeedsResponse200TextJson) & {
+  headers: Headers;
+};
+;
+
+export type getApiIntranetFeedsResponse = (getApiIntranetFeedsResponseSuccess)
+
+export const getGetApiIntranetFeedsUrl = (params?: GetApiIntranetFeedsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/intranet/feeds?${stringifiedParams}` : `/api/intranet/feeds`
+}
+
+export const getApiIntranetFeeds = async (params?: GetApiIntranetFeedsParams, options?: RequestInit): Promise<getApiIntranetFeedsResponse> => {
+
+  return customClient<getApiIntranetFeedsResponse>(getGetApiIntranetFeedsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiIntranetFeedsQueryKey = (params?: GetApiIntranetFeedsParams,) => {
+    return [
+    `/api/intranet/feeds`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetApiIntranetFeedsQueryOptions = <TData = Awaited<ReturnType<typeof getApiIntranetFeeds>>, TError = unknown>(params?: GetApiIntranetFeedsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetFeeds>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiIntranetFeedsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiIntranetFeeds>>> = ({ signal }) => getApiIntranetFeeds(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetFeeds>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiIntranetFeedsQueryResult = NonNullable<Awaited<ReturnType<typeof getApiIntranetFeeds>>>
+export type GetApiIntranetFeedsQueryError = unknown
+
+
+export function useGetApiIntranetFeeds<TData = Awaited<ReturnType<typeof getApiIntranetFeeds>>, TError = unknown>(
+ params: undefined |  GetApiIntranetFeedsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetFeeds>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiIntranetFeeds>>,
+          TError,
+          Awaited<ReturnType<typeof getApiIntranetFeeds>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiIntranetFeeds<TData = Awaited<ReturnType<typeof getApiIntranetFeeds>>, TError = unknown>(
+ params?: GetApiIntranetFeedsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetFeeds>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiIntranetFeeds>>,
+          TError,
+          Awaited<ReturnType<typeof getApiIntranetFeeds>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiIntranetFeeds<TData = Awaited<ReturnType<typeof getApiIntranetFeeds>>, TError = unknown>(
+ params?: GetApiIntranetFeedsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetFeeds>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiIntranetFeeds<TData = Awaited<ReturnType<typeof getApiIntranetFeeds>>, TError = unknown>(
+ params?: GetApiIntranetFeedsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetFeeds>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiIntranetFeedsQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -2767,6 +2970,392 @@ export const usePatchApiGlobalConfig = <TError = unknown,
       return useMutation(getPatchApiGlobalConfigMutationOptions(options), queryClient);
     }
 
+export type postApiGlobalConfigFeedsFetchResponse200 = {
+  data: void
+  status: 200
+}
+
+export type postApiGlobalConfigFeedsFetchResponseSuccess = (postApiGlobalConfigFeedsFetchResponse200) & {
+  headers: Headers;
+};
+;
+
+export type postApiGlobalConfigFeedsFetchResponse = (postApiGlobalConfigFeedsFetchResponseSuccess)
+
+export const getPostApiGlobalConfigFeedsFetchUrl = () => {
+
+
+
+
+  return `/api/global-config/feeds/fetch`
+}
+
+/**
+ * @summary Triggers the intranet feed aggregation job immediately.
+ */
+export const postApiGlobalConfigFeedsFetch = async ( options?: RequestInit): Promise<postApiGlobalConfigFeedsFetchResponse> => {
+
+  return customClient<postApiGlobalConfigFeedsFetchResponse>(getPostApiGlobalConfigFeedsFetchUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getPostApiGlobalConfigFeedsFetchMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiGlobalConfigFeedsFetch>>, TError,void, TContext>, request?: SecondParameter<typeof customClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiGlobalConfigFeedsFetch>>, TError,void, TContext> => {
+
+const mutationKey = ['postApiGlobalConfigFeedsFetch'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiGlobalConfigFeedsFetch>>, void> = () => {
+
+
+          return  postApiGlobalConfigFeedsFetch(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiGlobalConfigFeedsFetchMutationResult = NonNullable<Awaited<ReturnType<typeof postApiGlobalConfigFeedsFetch>>>
+
+    export type PostApiGlobalConfigFeedsFetchMutationError = unknown
+
+    /**
+ * @summary Triggers the intranet feed aggregation job immediately.
+ */
+export const usePostApiGlobalConfigFeedsFetch = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiGlobalConfigFeedsFetch>>, TError,void, TContext>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiGlobalConfigFeedsFetch>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getPostApiGlobalConfigFeedsFetchMutationOptions(options), queryClient);
+    }
+
+export type putApiGlobalConfigFeedsIntervalResponse200 = {
+  data: void
+  status: 200
+}
+
+export type putApiGlobalConfigFeedsIntervalResponseSuccess = (putApiGlobalConfigFeedsIntervalResponse200) & {
+  headers: Headers;
+};
+;
+
+export type putApiGlobalConfigFeedsIntervalResponse = (putApiGlobalConfigFeedsIntervalResponseSuccess)
+
+export const getPutApiGlobalConfigFeedsIntervalUrl = (params?: PutApiGlobalConfigFeedsIntervalParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/global-config/feeds/interval?${stringifiedParams}` : `/api/global-config/feeds/interval`
+}
+
+/**
+ * @summary Alters the intranet feed aggregation interval.
+ */
+export const putApiGlobalConfigFeedsInterval = async (params?: PutApiGlobalConfigFeedsIntervalParams, options?: RequestInit): Promise<putApiGlobalConfigFeedsIntervalResponse> => {
+
+  return customClient<putApiGlobalConfigFeedsIntervalResponse>(getPutApiGlobalConfigFeedsIntervalUrl(params),
+  {
+    ...options,
+    method: 'PUT'
+
+
+  }
+);}
+
+
+
+
+export const getPutApiGlobalConfigFeedsIntervalMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiGlobalConfigFeedsInterval>>, TError,{params?: PutApiGlobalConfigFeedsIntervalParams}, TContext>, request?: SecondParameter<typeof customClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof putApiGlobalConfigFeedsInterval>>, TError,{params?: PutApiGlobalConfigFeedsIntervalParams}, TContext> => {
+
+const mutationKey = ['putApiGlobalConfigFeedsInterval'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiGlobalConfigFeedsInterval>>, {params?: PutApiGlobalConfigFeedsIntervalParams}> = (props) => {
+          const {params} = props ?? {};
+
+          return  putApiGlobalConfigFeedsInterval(params,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutApiGlobalConfigFeedsIntervalMutationResult = NonNullable<Awaited<ReturnType<typeof putApiGlobalConfigFeedsInterval>>>
+
+    export type PutApiGlobalConfigFeedsIntervalMutationError = unknown
+
+    /**
+ * @summary Alters the intranet feed aggregation interval.
+ */
+export const usePutApiGlobalConfigFeedsInterval = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiGlobalConfigFeedsInterval>>, TError,{params?: PutApiGlobalConfigFeedsIntervalParams}, TContext>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putApiGlobalConfigFeedsInterval>>,
+        TError,
+        {params?: PutApiGlobalConfigFeedsIntervalParams},
+        TContext
+      > => {
+      return useMutation(getPutApiGlobalConfigFeedsIntervalMutationOptions(options), queryClient);
+    }
+
+export type getApiGlobalConfigIntervalsResponse200TextPlain = {
+  data: FetchIntervalsDto
+  status: 200
+}
+
+export type getApiGlobalConfigIntervalsResponse200ApplicationJson = {
+  data: FetchIntervalsDto
+  status: 200
+}
+
+export type getApiGlobalConfigIntervalsResponse200TextJson = {
+  data: FetchIntervalsDto
+  status: 200
+}
+
+export type getApiGlobalConfigIntervalsResponseSuccess = (getApiGlobalConfigIntervalsResponse200TextPlain | getApiGlobalConfigIntervalsResponse200ApplicationJson | getApiGlobalConfigIntervalsResponse200TextJson) & {
+  headers: Headers;
+};
+;
+
+export type getApiGlobalConfigIntervalsResponse = (getApiGlobalConfigIntervalsResponseSuccess)
+
+export const getGetApiGlobalConfigIntervalsUrl = () => {
+
+
+
+
+  return `/api/global-config/intervals`
+}
+
+/**
+ * @summary Retrieves the current global fetch intervals for all background jobs.
+ */
+export const getApiGlobalConfigIntervals = async ( options?: RequestInit): Promise<getApiGlobalConfigIntervalsResponse> => {
+
+  return customClient<getApiGlobalConfigIntervalsResponse>(getGetApiGlobalConfigIntervalsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiGlobalConfigIntervalsQueryKey = () => {
+    return [
+    `/api/global-config/intervals`
+    ] as const;
+    }
+
+
+export const getGetApiGlobalConfigIntervalsQueryOptions = <TData = Awaited<ReturnType<typeof getApiGlobalConfigIntervals>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiGlobalConfigIntervals>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiGlobalConfigIntervalsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiGlobalConfigIntervals>>> = ({ signal }) => getApiGlobalConfigIntervals({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiGlobalConfigIntervals>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiGlobalConfigIntervalsQueryResult = NonNullable<Awaited<ReturnType<typeof getApiGlobalConfigIntervals>>>
+export type GetApiGlobalConfigIntervalsQueryError = unknown
+
+
+export function useGetApiGlobalConfigIntervals<TData = Awaited<ReturnType<typeof getApiGlobalConfigIntervals>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiGlobalConfigIntervals>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiGlobalConfigIntervals>>,
+          TError,
+          Awaited<ReturnType<typeof getApiGlobalConfigIntervals>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiGlobalConfigIntervals<TData = Awaited<ReturnType<typeof getApiGlobalConfigIntervals>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiGlobalConfigIntervals>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiGlobalConfigIntervals>>,
+          TError,
+          Awaited<ReturnType<typeof getApiGlobalConfigIntervals>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiGlobalConfigIntervals<TData = Awaited<ReturnType<typeof getApiGlobalConfigIntervals>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiGlobalConfigIntervals>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Retrieves the current global fetch intervals for all background jobs.
+ */
+
+export function useGetApiGlobalConfigIntervals<TData = Awaited<ReturnType<typeof getApiGlobalConfigIntervals>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiGlobalConfigIntervals>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiGlobalConfigIntervalsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export type patchApiGlobalConfigIntervalsResponse200TextPlain = {
+  data: FetchIntervalsDto
+  status: 200
+}
+
+export type patchApiGlobalConfigIntervalsResponse200ApplicationJson = {
+  data: FetchIntervalsDto
+  status: 200
+}
+
+export type patchApiGlobalConfigIntervalsResponse200TextJson = {
+  data: FetchIntervalsDto
+  status: 200
+}
+
+export type patchApiGlobalConfigIntervalsResponseSuccess = (patchApiGlobalConfigIntervalsResponse200TextPlain | patchApiGlobalConfigIntervalsResponse200ApplicationJson | patchApiGlobalConfigIntervalsResponse200TextJson) & {
+  headers: Headers;
+};
+;
+
+export type patchApiGlobalConfigIntervalsResponse = (patchApiGlobalConfigIntervalsResponseSuccess)
+
+export const getPatchApiGlobalConfigIntervalsUrl = () => {
+
+
+
+
+  return `/api/global-config/intervals`
+}
+
+/**
+ * @summary Updates the global fetch intervals for background jobs.
+ */
+export const patchApiGlobalConfigIntervals = async (updateFetchIntervalsRequestDto?: UpdateFetchIntervalsRequestDto, options?: RequestInit): Promise<patchApiGlobalConfigIntervalsResponse> => {
+
+  return customClient<patchApiGlobalConfigIntervalsResponse>(getPatchApiGlobalConfigIntervalsUrl(),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateFetchIntervalsRequestDto)
+  }
+);}
+
+
+
+
+export const getPatchApiGlobalConfigIntervalsMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiGlobalConfigIntervals>>, TError,{data?: UpdateFetchIntervalsRequestDto}, TContext>, request?: SecondParameter<typeof customClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof patchApiGlobalConfigIntervals>>, TError,{data?: UpdateFetchIntervalsRequestDto}, TContext> => {
+
+const mutationKey = ['patchApiGlobalConfigIntervals'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof patchApiGlobalConfigIntervals>>, {data?: UpdateFetchIntervalsRequestDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  patchApiGlobalConfigIntervals(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PatchApiGlobalConfigIntervalsMutationResult = NonNullable<Awaited<ReturnType<typeof patchApiGlobalConfigIntervals>>>
+    export type PatchApiGlobalConfigIntervalsMutationBody = UpdateFetchIntervalsRequestDto | undefined
+    export type PatchApiGlobalConfigIntervalsMutationError = unknown
+
+    /**
+ * @summary Updates the global fetch intervals for background jobs.
+ */
+export const usePatchApiGlobalConfigIntervals = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiGlobalConfigIntervals>>, TError,{data?: UpdateFetchIntervalsRequestDto}, TContext>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof patchApiGlobalConfigIntervals>>,
+        TError,
+        {data?: UpdateFetchIntervalsRequestDto},
+        TContext
+      > => {
+      return useMutation(getPatchApiGlobalConfigIntervalsMutationOptions(options), queryClient);
+    }
+
 export type postApiIngestionBackfillResponse200 = {
   data: void
   status: 200
@@ -4392,6 +4981,120 @@ export function useGetApiMonitorsIdLatency<TData = Awaited<ReturnType<typeof get
 
 
 
+export type getApiIntranetNewslettersResponse200 = {
+  data: void
+  status: 200
+}
+
+export type getApiIntranetNewslettersResponseSuccess = (getApiIntranetNewslettersResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getApiIntranetNewslettersResponse = (getApiIntranetNewslettersResponseSuccess)
+
+export const getGetApiIntranetNewslettersUrl = (params?: GetApiIntranetNewslettersParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/intranet/newsletters?${stringifiedParams}` : `/api/intranet/newsletters`
+}
+
+export const getApiIntranetNewsletters = async (params?: GetApiIntranetNewslettersParams, options?: RequestInit): Promise<getApiIntranetNewslettersResponse> => {
+
+  return customClient<getApiIntranetNewslettersResponse>(getGetApiIntranetNewslettersUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiIntranetNewslettersQueryKey = (params?: GetApiIntranetNewslettersParams,) => {
+    return [
+    `/api/intranet/newsletters`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetApiIntranetNewslettersQueryOptions = <TData = Awaited<ReturnType<typeof getApiIntranetNewsletters>>, TError = unknown>(params?: GetApiIntranetNewslettersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetNewsletters>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiIntranetNewslettersQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiIntranetNewsletters>>> = ({ signal }) => getApiIntranetNewsletters(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetNewsletters>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiIntranetNewslettersQueryResult = NonNullable<Awaited<ReturnType<typeof getApiIntranetNewsletters>>>
+export type GetApiIntranetNewslettersQueryError = unknown
+
+
+export function useGetApiIntranetNewsletters<TData = Awaited<ReturnType<typeof getApiIntranetNewsletters>>, TError = unknown>(
+ params: undefined |  GetApiIntranetNewslettersParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetNewsletters>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiIntranetNewsletters>>,
+          TError,
+          Awaited<ReturnType<typeof getApiIntranetNewsletters>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiIntranetNewsletters<TData = Awaited<ReturnType<typeof getApiIntranetNewsletters>>, TError = unknown>(
+ params?: GetApiIntranetNewslettersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetNewsletters>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiIntranetNewsletters>>,
+          TError,
+          Awaited<ReturnType<typeof getApiIntranetNewsletters>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiIntranetNewsletters<TData = Awaited<ReturnType<typeof getApiIntranetNewsletters>>, TError = unknown>(
+ params?: GetApiIntranetNewslettersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetNewsletters>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiIntranetNewsletters<TData = Awaited<ReturnType<typeof getApiIntranetNewsletters>>, TError = unknown>(
+ params?: GetApiIntranetNewslettersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetNewsletters>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiIntranetNewslettersQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
 export type getApiSystemEventResponse200TextPlain = {
   data: SystemEvent[]
   status: 200
@@ -5999,5 +6702,81 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getPostApiWebhooksMotasticTenantIdMutationOptions(options), queryClient);
+    }
+
+export type postApiWebhooksNewsletterResponse200 = {
+  data: void
+  status: 200
+}
+
+export type postApiWebhooksNewsletterResponseSuccess = (postApiWebhooksNewsletterResponse200) & {
+  headers: Headers;
+};
+;
+
+export type postApiWebhooksNewsletterResponse = (postApiWebhooksNewsletterResponseSuccess)
+
+export const getPostApiWebhooksNewsletterUrl = () => {
+
+
+
+
+  return `/api/webhooks/newsletter`
+}
+
+export const postApiWebhooksNewsletter = async (createNewsletterDto?: CreateNewsletterDto, options?: RequestInit): Promise<postApiWebhooksNewsletterResponse> => {
+
+  return customClient<postApiWebhooksNewsletterResponse>(getPostApiWebhooksNewsletterUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(createNewsletterDto)
+  }
+);}
+
+
+
+
+export const getPostApiWebhooksNewsletterMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiWebhooksNewsletter>>, TError,{data?: CreateNewsletterDto}, TContext>, request?: SecondParameter<typeof customClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiWebhooksNewsletter>>, TError,{data?: CreateNewsletterDto}, TContext> => {
+
+const mutationKey = ['postApiWebhooksNewsletter'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiWebhooksNewsletter>>, {data?: CreateNewsletterDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiWebhooksNewsletter(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiWebhooksNewsletterMutationResult = NonNullable<Awaited<ReturnType<typeof postApiWebhooksNewsletter>>>
+    export type PostApiWebhooksNewsletterMutationBody = CreateNewsletterDto | undefined
+    export type PostApiWebhooksNewsletterMutationError = unknown
+
+    export const usePostApiWebhooksNewsletter = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiWebhooksNewsletter>>, TError,{data?: CreateNewsletterDto}, TContext>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiWebhooksNewsletter>>,
+        TError,
+        {data?: CreateNewsletterDto},
+        TContext
+      > => {
+      return useMutation(getPostApiWebhooksNewsletterMutationOptions(options), queryClient);
     }
 

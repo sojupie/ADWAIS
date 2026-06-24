@@ -98,17 +98,7 @@ export type UserResponseDto = {
   role: string;
 };
 
-export type GlobalConfigDto = Required<Omit<Generated.GlobalConfigResponseDto, 'lastPolled' | 'latencyDegradedFloor' | 'uptimeRobotApiKey' | 'monitorsCount' | 'monitorsLimit' | 'activeSubscription' | 'defaultUptimeSla'>> & {
-  lastPolled: string | null;
-  latencyDegradedFloor?: number | null;
-  uptimeRobotApiKey?: string | null;
-  monitorsCount?: number | null;
-  monitorsLimit?: number | null;
-  activeSubscription?: string | null;
-  defaultUptimeSla?: number | null;
-  retentionDays: number;
-  lastSyncError: string | null;
-};
+export type GlobalConfigDto = Generated.GlobalConfigResponseDto;
 
 // Added back for compatibility
 export type AccumulatedRevenuePointDto = Required<Generated.AccumulatedRevenuePointResponseDto>;

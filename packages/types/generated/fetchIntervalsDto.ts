@@ -11,4 +11,5 @@ export interface FetchIntervalsDto {
   statusFetchIntervalMinutes?: number;
   litiumFetchIntervalMinutes?: number;
   userStatsFetchIntervalMinutes?: number;
+  feedFetchIntervalHours?: number;
 }

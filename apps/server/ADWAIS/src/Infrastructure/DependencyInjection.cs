@@ -35,6 +35,7 @@ public static class DependencyInjection
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IKioskService, KioskService>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IGlobalConfigService, GlobalConfigService>();
 
         // Register Typed HTTP Clients with resilience policies
         services.AddTransient<UptimeRobotRateLimitHandler>();
@@ -63,6 +64,7 @@ public static class DependencyInjection
 
         services.AddTransient<IFeedParser, Services.Parsers.RssFeedParser>();
         services.AddTransient<IFeedParser, Services.Parsers.LitiumBlogParser>();
+        services.AddTransient<IFeedParser, Services.Parsers.LitiumNyhetsrumParser>();
         services.AddTransient<IFeedParser, Services.Parsers.MotilloAktuelltParser>();
         services.AddTransient<ISystemHealthService, SystemHealthService>();
         services.AddTransient<ICommunityPostService, CommunityPostService>();

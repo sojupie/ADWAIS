@@ -253,7 +253,8 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
                 UptimeFetchIntervalMinutes = 60,
                 LatencyFetchIntervalMinutes = 10,
                 UserStatsFetchIntervalMinutes = 60,
-                SystemEventRetentionDays = 2
+                SystemEventRetentionDays = 2,
+                FeedFetchIntervalHours = 2
             });
         });
         

@@ -18,4 +18,6 @@ export interface UpdateGlobalConfigRequestDto {
   systemEventRetentionDays?: number | null;
   /** @nullable */
   defaultUptimeSla?: number | null;
+  /** @nullable */
+  feedFetchIntervalHours?: number | null;
 }

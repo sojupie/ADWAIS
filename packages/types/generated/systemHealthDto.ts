@@ -15,6 +15,8 @@ export interface SystemHealthDto {
   /** @nullable */
   lastLitiumSync?: string | null;
   /** @nullable */
+  lastBlogSync?: string | null;
+  /** @nullable */
   lastFleetUpdate?: string | null;
   /** @nullable */
   lastFleetUptimeUpdate?: string | null;

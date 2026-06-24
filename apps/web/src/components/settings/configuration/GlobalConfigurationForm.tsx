@@ -5,9 +5,9 @@ import { FormSkeleton } from '../../common/ui/FormSkeleton';
 import type { GlobalConfigDto } from '@types';
 
 interface GlobalConfigurationFormProps {
-  config: (GlobalConfigDto & { uptimeRobotApiKey?: string; latencyDegradedFloor?: number | null; systemEventRetentionDays?: number; uptimeRobotFetchEnabled?: boolean }) | undefined;
+  config: GlobalConfigDto | undefined;
   updateConfig: {
-    mutate: (variables: Partial<GlobalConfigDto & { uptimeRobotApiKey?: string; latencyDegradedFloor?: number | null; systemEventRetentionDays?: number; uptimeRobotFetchEnabled?: boolean }>) => void;
+    mutate: (variables: Partial<GlobalConfigDto>) => void;
   };
   disabled?: boolean;
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Adwais.Application.DTOs.Intranet;
 using Adwais.Domain.Entities.Intranet;
 using Adwais.Infrastructure.Persistence;
 using Adwais.Infrastructure.Services;
@@ -39,19 +40,19 @@ public class FeedServiceTests
         var service = new FeedService(factoryMock.Object);
 
         // Act & Assert 1: No filters, sorting descending by date
-        var allItems = (await service.GetFeedsAsync(null, 1, 10, CancellationToken.None)).ToList();
+        var allItems = (await service.GetFeedsAsync(new GetFeedsRequest { FeedSourceId = null, Page = 1, PageSize = 10 }, CancellationToken.None)).ToList();
         Assert.Equal(3, allItems.Count);
         Assert.Equal("Title 3", allItems[0].Title); // newest first
         Assert.Equal("Title 1", allItems[1].Title);
         Assert.Equal("Title 2", allItems[2].Title);
 
         // Act & Assert 2: Filter by source
-        var source1Items = (await service.GetFeedsAsync(source1.Id, 1, 10, CancellationToken.None)).ToList();
+        var source1Items = (await service.GetFeedsAsync(new GetFeedsRequest { FeedSourceId = source1.Id, Page = 1, PageSize = 10 }, CancellationToken.None)).ToList();
         Assert.Equal(2, source1Items.Count);
         Assert.All(source1Items, i => Assert.Equal(source1.Id, i.FeedSourceId));
 
         // Act & Assert 3: Pagination
-        var paginatedItems = (await service.GetFeedsAsync(null, 2, 2, CancellationToken.None)).ToList();
+        var paginatedItems = (await service.GetFeedsAsync(new GetFeedsRequest { FeedSourceId = null, Page = 2, PageSize = 2 }, CancellationToken.None)).ToList();
         Assert.Single(paginatedItems);
         Assert.Equal("Title 2", paginatedItems[0].Title);
     }

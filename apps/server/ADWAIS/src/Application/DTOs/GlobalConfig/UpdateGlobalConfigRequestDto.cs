@@ -1,4 +1,4 @@
-namespace Adwais.Api.DTOs.GlobalConfig;
+namespace Adwais.Application.DTOs.GlobalConfig;
 
 public record UpdateGlobalConfigRequestDto(
     bool? LitiumFetchEnabled = null,
@@ -6,7 +6,6 @@ public record UpdateGlobalConfigRequestDto(
     int? LatencyDegradedFloor = -1,
     string? UptimeRobotApiKey = null,
     int? SystemEventRetentionDays = null,
-    double? DefaultUptimeSla = -1
+    double? DefaultUptimeSla = -1,
+    int? FeedFetchIntervalHours = null
 );
-
-

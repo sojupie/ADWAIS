@@ -81,13 +81,15 @@ export function SlaBreachWatchlist({
   monitors,
   onClearSelection,
   defaultSla,
-  defaultDegradedFloor
+  defaultDegradedFloor,
+  className = "flex-1 h-full min-h-[350px] contained:min-h-0 max-h-[600px] xl:max-h-none"
 }: {
   isLoading?: boolean;
   monitors: UptimeMonitorDto[];
   onClearSelection?: () => void;
   defaultSla?: number | null;
   defaultDegradedFloor?: number | null;
+  className?: string;
 }) {
   const issues = useMemo(() => buildIssues(monitors, defaultSla, defaultDegradedFloor), [monitors, defaultSla, defaultDegradedFloor]);
 
@@ -95,8 +97,8 @@ export function SlaBreachWatchlist({
     <ChartPanel
       isLoading={isLoading}
       title="SLA Breach Watchlist"
-      className="flex-1 min-h-0 h-full max-h-[600px] xl:max-h-none"
-      bodyClassName="h-full flex flex-col min-h-0"
+      className={className}
+      bodyClassName=""
       legend={
         <button
           onClick={onClearSelection}

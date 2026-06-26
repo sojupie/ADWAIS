@@ -118,14 +118,14 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe,
           isLoading={accumulatedQuery.isLoading} 
           isStale={accumulatedQuery.isPlaceholderData}
           comparison="YearOverYear"
-          className="h-full min-h-87.5 lg:min-h-0"
+          className="h-full min-h-[350px] contained:min-h-0"
         />
         
         <TransactionDensityChart
           points={densityQuery.data || EMPTY_DENSITY}
           isLoading={densityQuery.isLoading}
           isStale={densityQuery.isPlaceholderData}
-          className="h-full min-h-87.5 lg:min-h-0"
+          className="h-full min-h-[350px] contained:min-h-0"
         />
 
         <CumulativeGrowthDeltaChart 
@@ -133,14 +133,14 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe,
           isLoading={deltaQuery.isLoading} 
           isStale={deltaQuery.isPlaceholderData}
           comparison="YearOverYear"
-          className="h-full min-h-87.5 lg:min-h-0"
+          className="h-full min-h-[350px] contained:min-h-0"
         />
 
         <OrderValueDistributionChart 
           bins={orderQuery.data || EMPTY_BINS} 
           isLoading={orderQuery.isLoading} 
           isStale={orderQuery.isPlaceholderData}
-          className="h-full min-h-87.5 lg:min-h-0"
+          className="h-full min-h-[350px] contained:min-h-0"
         />
       </DashboardFlexRow>
 

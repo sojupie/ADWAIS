@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { Skeleton } from '../ui/Skeleton';
 
 type Extra =
@@ -8,15 +9,16 @@ type Extra =
 
 interface FactPanelProps {
     label: string;
-    value: string;
+    value?: string;
     isLoading?: boolean;
     valueColor?: "green" | "red" | "yellow"; 
     extra?: Extra;
     hasExtra?: boolean;
     inverseTrend?: boolean;
+    children?: ReactNode;
 }
 
-export function FactPanel({ label, value, isLoading, valueColor, extra, hasExtra, inverseTrend }: FactPanelProps) {
+export function FactPanel({ label, value = '', isLoading, valueColor, extra, hasExtra, inverseTrend, children }: FactPanelProps) {
     let valueColorClass = 'text-slate-800';
     let extraColor = '';
     let extraText = '';
@@ -46,16 +48,20 @@ export function FactPanel({ label, value, isLoading, valueColor, extra, hasExtra
     const showExtra = hasExtra || extra !== undefined;
 
     return (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-3 flex flex-col justify-between min-h-[90px] transition-all hover:shadow-md animate-in fade-in duration-300 min-w-0 overflow-hidden">
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm px-3 py-2 md:px-4 md:py-3 flex flex-col justify-between min-h-[72px] md:min-h-[90px] min-w-[160px] md:min-w-0 w-full transition-all hover:shadow-md overflow-hidden shrink-0">
             <h2 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-1 truncate">{label}</h2>
             {isLoading ? (
                 <div className="flex flex-col mt-auto">
                     <Skeleton className="h-8 lg:h-9 xl:h-8 2xl:h-10 w-28 bg-slate-200" />
                     {showExtra && <Skeleton className="h-5 2xl:h-6 w-20 bg-slate-100" />}
                 </div>
+            ) : children ? (
+                <div className="flex flex-col mt-auto">
+                    {children}
+                </div>
             ) : (
                 <div className="flex flex-col mt-auto">
-                    <span className={`text-2xl lg:text-3xl xl:text-2xl 2xl:text-4xl font-extrabold tracking-tight min-w-0 ${valueColorClass}`} style={{ wordBreak: 'break-word' }}>
+                    <span className={`text-xl md:text-2xl lg:text-3xl xl:text-2xl 2xl:text-4xl font-extrabold tracking-tight min-w-0 ${valueColorClass}`} style={{ wordBreak: 'break-word' }}>
                         {value}
                     </span>
 

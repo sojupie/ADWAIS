@@ -92,14 +92,14 @@ export function Financial() {
           isLoading={vm.velocityQuery.isLoading} 
           isStale={vm.velocityQuery.isPlaceholderData}
           comparison="YearOverYear"
-          className="h-full min-h-87.5 lg:min-h-0"
+          className="h-full min-h-[350px] contained:min-h-0"
         />
 
         <TransactionDensityChart 
           points={vm.densityQuery.data || EMPTY_DENSITY}
           isLoading={vm.densityQuery.isLoading} 
           isStale={vm.densityQuery.isPlaceholderData}
-          className="h-full min-h-87.5 lg:min-h-0"
+          className="h-full min-h-[350px] contained:min-h-0"
         />
 
         <RevenueEfficiencyChart 
@@ -108,7 +108,7 @@ export function Financial() {
           onTenantSelect={vm.handleTenantSelect} 
           isLoading={vm.efficiencyQuery.isLoading} 
           isStale={vm.efficiencyQuery.isPlaceholderData}
-          className="h-full min-h-87.5 lg:min-h-0"
+          className="h-full min-h-[350px] contained:min-h-0"
         />
 
         <MomentumMatrixChart 
@@ -117,7 +117,7 @@ export function Financial() {
           onTenantSelect={vm.handleTenantSelect} 
           isLoading={vm.momentumQuery.isLoading} 
           isStale={vm.momentumQuery.isPlaceholderData}
-          className="h-full min-h-87.5 lg:min-h-0"
+          className="h-full min-h-[350px] contained:min-h-0"
         />
       </DashboardFlexRow>
 

@@ -144,9 +144,9 @@ export function MonitorTile({
       <Lock size={14} />
     </span>
   ) : m.uptimeMonitorEnabled ? (
-    <button onClick={() => toggleMonitor.mutate({ id: m.id, action: 'pause' })} className="p-1.5 text-slate-500 hover:bg-slate-200 bg-white rounded-lg transition-colors cursor-pointer shadow-sm animate-in fade-in" title="Pause Monitor"><Pause size={14} /></button>
+    <button onClick={() => toggleMonitor.mutate({ id: m.id, action: 'pause' })} className="p-1.5 text-slate-500 hover:bg-slate-200 bg-white rounded-lg transition-colors cursor-pointer shadow-sm" title="Pause Monitor"><Pause size={14} /></button>
   ) : (
-    <button onClick={() => toggleMonitor.mutate({ id: m.id, action: 'start' })} className="p-1.5 text-green-600 hover:bg-green-100 bg-white rounded-lg transition-colors cursor-pointer shadow-sm animate-in fade-in" title="Resume Monitor"><Play size={14} /></button>
+    <button onClick={() => toggleMonitor.mutate({ id: m.id, action: 'start' })} className="p-1.5 text-green-600 hover:bg-green-100 bg-white rounded-lg transition-colors cursor-pointer shadow-sm" title="Resume Monitor"><Play size={14} /></button>
   );
 
   return (
@@ -251,7 +251,7 @@ export function MonitorTile({
             </span>
           </div>
         ) : isUnassigned || isAssigning ? (
-          <div className="flex items-center gap-2 w-full animate-in fade-in items-end">
+          <div className="flex items-center gap-2 w-full items-end">
             <Input
               list={`tenants-${m.id}`}
               value={assignTenantId}

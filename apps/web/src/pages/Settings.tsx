@@ -4,6 +4,7 @@ import { RefreshCw } from 'lucide-react';
 import { useState } from 'react';
 import { DashboardLayout } from "../components/common/layout/DashboardLayout.tsx";
 import { DashboardFlexRow } from "../components/common/layout/DashboardFlexRow.tsx";
+import { Select } from "../components/common/ui/Select.tsx";
 
 export function Settings() {
     const queryClient = useQueryClient();
@@ -37,7 +38,7 @@ export function Settings() {
                     className="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 hover:text-brand-accent transition-colors shadow-sm text-sm font-bold cursor-pointer"
                 >
                     <RefreshCw size={16} className={isRefreshing ? 'animate-spin' : ''} />
-                    Refresh
+                    <span>Refresh</span>
                 </button>
             </header>
 
@@ -45,18 +46,16 @@ export function Settings() {
                 <div className="flex-1 flex flex-col min-h-0 w-full gap-4">
                     {/* Mobile Dropdown Navigation */}
                     <div className="block sm:hidden relative group shrink-0">
-                        <select
-                            className="w-full bg-brand-bg-secondary border-none text-white text-sm font-bold rounded-xl pl-4 pr-10 py-3.5 outline-none shadow-md appearance-none cursor-pointer"
+                        <Select
+                            className="w-full bg-brand-bg-secondary border-none text-white text-sm font-bold rounded-xl pl-4 pr-10 py-3.5 outline-none shadow-md cursor-pointer hover:bg-brand-bg-secondary/95"
                             value={tabs.find(t => currentPath.startsWith(t.path))?.path || tabs[0].path}
                             onChange={(e) => navigate({ to: e.target.value })}
+                            icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-white/70"><path d="m6 9 6 6 6-6" /></svg>}
                         >
                             {tabs.map(t => (
                                 <option key={t.id} value={t.path}>{t.label}</option>
                             ))}
-                        </select>
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/70">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
-                        </div>
+                        </Select>
                     </div>
 
                     {/* Desktop Pill Navigation */}

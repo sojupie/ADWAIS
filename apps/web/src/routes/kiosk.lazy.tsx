@@ -53,7 +53,7 @@ function KioskLanding() {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-accent opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-4 w-4 bg-brand-accent"></span>
                 </span>
-                Waiting for authorization...
+                <span>Waiting for authorization...</span>
               </div>
               <div className="animate-stagger delay-500 mt-8 pt-4 border-t border-slate-900/5 flex justify-center">
                 <Link

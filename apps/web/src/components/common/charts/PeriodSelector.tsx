@@ -6,9 +6,8 @@ interface PeriodSelectorProps {
   from: PersistentDomain;
 }
 
-export function PeriodSelector({ from }: PeriodSelectorProps ) {
+export function PeriodSelector({ from }: PeriodSelectorProps) {
   const navigate = useNavigate({ from });
-  // Reactively subscribe to the current search parameters so the active button updates
   const search = useSearch({ strict: false });
   const timeframe = search.timeframe;
 
@@ -48,4 +47,3 @@ export function PeriodSelector({ from }: PeriodSelectorProps ) {
     </div>
   );
 }
-

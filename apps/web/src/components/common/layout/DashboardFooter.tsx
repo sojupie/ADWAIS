@@ -6,7 +6,7 @@ interface DashboardFooterProps {
 
 export function DashboardFooter({ children }: DashboardFooterProps) {
   return (
-    <footer className="flex flex-col md:flex-row justify-between items-center gap-4 w-full shrink-0">
+    <footer className="desktop-only flex flex-col contained:flex-row justify-between items-center gap-2 w-full shrink-0">
       {children}
     </footer>
   );

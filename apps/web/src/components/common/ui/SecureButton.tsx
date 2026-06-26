@@ -40,12 +40,12 @@ export function SecureButton({
       {loading ? (
         <>
           <Loader2 className="animate-spin shrink-0" size={16} />
-          {loadingText || children}
+          <span>{loadingText || children}</span>
         </>
       ) : (
         <>
           {locked ? <Lock className="shrink-0" size={16} /> : icon}
-          {children}
+          <span>{children}</span>
         </>
       )}
     </button>

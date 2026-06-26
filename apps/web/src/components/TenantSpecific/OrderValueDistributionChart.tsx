@@ -48,7 +48,7 @@ export const OrderValueDistributionChart = memo(function OrderValueDistributionC
     <ChartPanel isLoading={isLoading} isStale={isStale}
       title="Order Distribution & Shipping Threshold"
       className={className || ''}
-      bodyClassName="w-full h-full flex flex-col flex-1 min-h-0"
+      bodyClassName=""
     >
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart data={bins} margin={{ top: 16, right: 10, left: 10, bottom: 20 }}>

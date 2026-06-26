@@ -22,10 +22,10 @@ export function SyncStatusWidget() {
   const search = useSearch({ strict: false }) as { tenantId?: string };
   const params = useParams({ strict: false }) as { tenantId?: string };
   const matches = useRouterState({ select: (s) => s.matches });
-  
+
   const isFinancial = matches.some((m) => m.routeId === '/financial' || m.pathname.includes('/financial'));
   const isFleet = matches.some((m) => m.routeId === '/fleet-status' || m.pathname.includes('/fleet-status'));
-  
+
   const tenantId = search?.tenantId || params?.tenantId;
 
   const { data: health, isLoading: isHealthLoading } = useQuery<SystemHealthDto>({
@@ -41,7 +41,7 @@ export function SyncStatusWidget() {
     enabled: !!tenantId && (isFinancial || isFleet),
     refetchInterval: 60000,
   });
-  
+
   const tenant = tenants?.[0];
 
   const isFetchingCount = useIsFetching({ queryKey: isFinancial ? ['financial'] : isFleet ? ['fleet'] : ['disabled-key'] });
@@ -58,7 +58,7 @@ export function SyncStatusWidget() {
     }
     return timeAgo(time);
   };
-  
+
   const [dashboardSyncTime, setDashboardSyncTime] = useState<number | null>(null);
   const [countdown, setCountdown] = useState(60);
 
@@ -71,13 +71,13 @@ export function SyncStatusWidget() {
     };
 
     updateDashboardSync();
-    
+
     const unsubscribe = queryClient.getQueryCache().subscribe((event) => {
       if (event.type === 'updated' && event.action.type === 'success') {
         const queryKey = event.query.queryKey;
         if (queryKey.includes(isFinancial ? 'financial' : 'fleet')) {
-           updateDashboardSync();
-           setCountdown(60); // Reset countdown on successful fetch
+          updateDashboardSync();
+          setCountdown(60); // Reset countdown on successful fetch
         }
       }
     });
@@ -109,18 +109,18 @@ export function SyncStatusWidget() {
   if (!isFinancial && !isFleet) return null;
 
   return (
-    <div 
-      className="flex items-center gap-3 px-4 py-2 border rounded-xl shadow-sm bg-brand-bg-secondary border-brand-bg-secondary/20 w-full md:w-auto min-h-14"
+    <div
+      className="flex items-center gap-4 px-5 py-3 border rounded-xl shadow-sm bg-brand-bg-secondary border-brand-bg-secondary/20 w-full min-h-14 min-w-0"
     >
       {/* Timer Wheel */}
       <div className="relative w-6 h-6 shrink-0">
         <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
           <circle cx="18" cy="18" r="16" fill="none" stroke="currentColor" strokeWidth="4" className="text-white/10" />
-          <circle 
-            cx="18" cy="18" r="16" 
-            fill="none" 
+          <circle
+            cx="18" cy="18" r="16"
+            fill="none"
             stroke="currentColor"
-            strokeWidth="4" 
+            strokeWidth="4"
             strokeDasharray="100, 100"
             strokeDashoffset={100 - progress}
             strokeLinecap="round"
@@ -157,7 +157,7 @@ export function SyncStatusWidget() {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-0.5 items-center">
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-x-4 gap-y-0.5 items-center">
             <div className="flex justify-between items-center gap-2">
               <span className="text-xs font-black uppercase tracking-widest text-white/60">Dash UI</span>
               <span className="text-sm font-bold text-white text-right">{renderTime(dashboardSyncTime, isFetching)}</span>
@@ -176,7 +176,7 @@ export function SyncStatusWidget() {
             </div>
           </div>
         )}
-        
+
         {syncError && (
           <div className="mt-1 flex items-start gap-1 text-red-600 text-sm font-bold bg-red-50 p-1.5 rounded border border-red-100">
             <AlertCircle size={12} className="shrink-0 mt-0.5" />
@@ -187,7 +187,7 @@ export function SyncStatusWidget() {
 
       {/* Action */}
       <div className="pl-3 border-l border-white/10 ml-1">
-        <button 
+        <button
           onClick={forceFetch}
           disabled={isFetching}
           className="shrink-0 w-8 h-8 flex items-center justify-center rounded-sm bg-white/10 border border-white/20 text-white hover:bg-white/20 hover:border-transparent transition-colors disabled:opacity-50"

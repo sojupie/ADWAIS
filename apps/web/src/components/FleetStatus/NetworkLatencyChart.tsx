@@ -101,53 +101,55 @@ export const NetworkLatencyChart = memo(function NetworkLatencyChart({
       comparison={comparison}
       legend={legend}
       className={className}
-      bodyClassName={isEmpty ? "flex items-center justify-center" : "w-full h-full flex flex-col flex-1 min-h-0"}
+      bodyClassName={isEmpty ? "flex items-center justify-center" : ""}
     >
       {isEmpty ? (
         <EmptyState message="No latency data available" variant="minimal" />
       ) : (
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
-            <CartesianGrid vertical={false} stroke="var(--color-chart-grid)" strokeDasharray="3 3" />
-            <XAxis 
-              dataKey="label" 
-              fontSize={12} 
-              tick={{ fill: 'var(--color-chart-tick)', fontWeight: 700, fontFamily: 'Manrope, sans-serif' }} 
-              tickMargin={15} 
-              axisLine={false} 
-              tickLine={false} 
-            />
-            <YAxis 
-              tickLine={false} 
-              tick={{ fill: 'var(--color-chart-tick)', fontSize: 12 }} 
-              axisLine={false}
-              minTickGap={30}
-              tickFormatter={(value) => `${value}ms`}
-            />
-            <Tooltip content={<GraphTooltip />} useTranslate3d={true} />
-            <Line 
-              type="monotone" 
-              dataKey="previousAverage" 
-              name="Previous Period" 
-              stroke="var(--color-chart-prev-line)" 
-              strokeWidth={2} 
-              strokeDasharray="6 6" 
-              dot={false}
-              activeDot={false}
-              isAnimationActive={false}
-            />
-            <Line 
-              type="monotone" 
-              dataKey="average" 
-              name="Current Period" 
-              stroke="var(--color-brand-btn-primary)" 
-              strokeWidth={4} 
-              dot={false}
-              activeDot={{ r: 6, fill: 'var(--color-brand-btn-primary)', stroke: '#fff', strokeWidth: 3 }} 
-              isAnimationActive={false}
-            />
-          </LineChart>
-        </ResponsiveContainer>
+        <div className="absolute inset-0">
+          <ResponsiveContainer width="100%" height="100%" minHeight={280}>
+            <LineChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
+              <CartesianGrid vertical={false} stroke="var(--color-chart-grid)" strokeDasharray="3 3" />
+              <XAxis 
+                dataKey="label" 
+                fontSize={12} 
+                tick={{ fill: 'var(--color-chart-tick)', fontWeight: 700, fontFamily: 'Manrope, sans-serif' }} 
+                tickMargin={15} 
+                axisLine={false} 
+                tickLine={false} 
+              />
+              <YAxis 
+                tickLine={false} 
+                tick={{ fill: 'var(--color-chart-tick)', fontSize: 12 }} 
+                axisLine={false}
+                minTickGap={30}
+                tickFormatter={(value) => `${value}ms`}
+              />
+              <Tooltip content={<GraphTooltip />} useTranslate3d={true} />
+              <Line 
+                type="monotone" 
+                dataKey="previousAverage" 
+                name="Previous Period" 
+                stroke="var(--color-chart-prev-line)" 
+                strokeWidth={2} 
+                strokeDasharray="6 6" 
+                dot={false}
+                activeDot={false}
+                isAnimationActive={false}
+              />
+              <Line 
+                type="monotone" 
+                dataKey="average" 
+                name="Current Period" 
+                stroke="var(--color-brand-btn-primary)" 
+                strokeWidth={4} 
+                dot={false}
+                activeDot={{ r: 6, fill: 'var(--color-brand-btn-primary)', stroke: '#fff', strokeWidth: 3 }} 
+                isAnimationActive={false}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
       )}
     </ChartPanel>
   );

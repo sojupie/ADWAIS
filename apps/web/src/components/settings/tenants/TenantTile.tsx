@@ -4,6 +4,7 @@ import type { TenantResponseDto } from '@types';
 import { TileCard } from '../../common/layout/TileCard';
 import { TileSaveBar } from '../../common/ui/TileSaveBar';
 import { useUpdateTenantMutation } from '../../../hooks/useTenantQueries';
+import { Select } from '../../common/ui/Select';
 
 interface TenantTileProps {
   t: TenantResponseDto;
@@ -37,7 +38,7 @@ export function TenantTile({ t, deleteTenant, isAdmin = false }: TenantTileProps
     if (draft.name !== t.name) payload.name = draft.name;
     if (draft.type !== (t.type ?? 'Mixed')) payload.type = draft.type;
     if (draft.litiumBaseUrl !== (t.litiumBaseUrl || '')) payload.litiumBaseUrl = draft.litiumBaseUrl;
-    
+
     if (draft.clearToken) {
       payload.serviceAccountToken = '';
     } else if (draft.serviceAccountToken !== '') {
@@ -45,7 +46,7 @@ export function TenantTile({ t, deleteTenant, isAdmin = false }: TenantTileProps
     }
 
     if (draft.orderFetchingEnabled !== (t.orderFetchingEnabled ?? false)) payload.orderFetchingEnabled = draft.orderFetchingEnabled;
-    
+
     updateTenant.mutate(
       { id: t.id, payload },
       {
@@ -75,28 +76,28 @@ export function TenantTile({ t, deleteTenant, isAdmin = false }: TenantTileProps
       <span className="font-extrabold text-slate-800 text-sm flex items-center gap-2 min-w-0">
         <input
           value={draft.name}
-          onChange={e => setDraft({...draft, name: e.target.value})}
+          onChange={e => setDraft({ ...draft, name: e.target.value })}
           disabled={!isAdmin}
-          className={`bg-transparent border border-transparent rounded px-1 -ml-1 transition-all outline-none truncate flex-1 min-w-0 ${
-            isAdmin ? 'hover:bg-white/50 focus:bg-white focus:ring-2 focus:ring-brand-accent/20 hover:border-slate-300 focus:border-brand-accent/30' : 'cursor-not-allowed text-slate-500'
-          }`}
+          className={`bg-transparent border border-transparent rounded px-1 -ml-1 transition-all outline-none truncate flex-1 min-w-0 ${isAdmin ? 'hover:bg-white/50 focus:bg-white focus:ring-2 focus:ring-brand-accent/20 hover:border-slate-300 focus:border-brand-accent/30' : 'cursor-not-allowed text-slate-500'
+            }`}
         />
-        <select
+        <Select
           value={draft.type}
-          onChange={e => setDraft({...draft, type: e.target.value as 'Mixed' | 'B2B' | 'B2C'})}
+          onChange={e => setDraft({ ...draft, type: e.target.value as 'Mixed' | 'B2B' | 'B2C' })}
           disabled={!isAdmin}
-          className={`px-1.5 py-0.5 rounded-[4px] text-sm uppercase font-bold tracking-widest shadow-sm text-white outline-none shrink-0 ${
-            isAdmin ? 'cursor-pointer hover:opacity-90' : 'cursor-not-allowed opacity-50'
-          } ${
-            draft.type === 'B2B' ? 'bg-[var(--color-brand-btn-primary)]' :
-            draft.type === 'B2C' ? 'bg-[#0ea5e9]' :
-            'bg-[#8b5cf6]'
-          }`}
+          icon={null}
+          dropdownAlign="right"
+          containerClassName="w-auto shrink-0"
+          className={`px-1.5 py-0.5 h-6 text-[11px] uppercase font-bold tracking-widest shadow-sm text-white outline-none rounded-[4px] border-none ${isAdmin ? 'cursor-pointer hover:opacity-90' : 'cursor-not-allowed opacity-50'
+            } ${draft.type === 'B2B' ? '!bg-[var(--color-brand-btn-primary)]' :
+              draft.type === 'B2C' ? '!bg-[#0ea5e9]' :
+                '!bg-[#8b5cf6]'
+            }`}
         >
-          <option value="Mixed" className="text-slate-800 bg-white">MIXED</option>
-          <option value="B2B" className="text-slate-800 bg-white">B2B</option>
-          <option value="B2C" className="text-slate-800 bg-white">B2C</option>
-        </select>
+          <option value="Mixed">MIXED</option>
+          <option value="B2B">B2B</option>
+          <option value="B2C">B2C</option>
+        </Select>
       </span>
       <span className="text-sm text-slate-400 font-mono font-medium select-text cursor-text truncate">{t.id}</span>
     </>
@@ -104,8 +105,8 @@ export function TenantTile({ t, deleteTenant, isAdmin = false }: TenantTileProps
 
   const headerActions = isAdmin ? (
     <button
-      onClick={() => { if(confirm('Delete tenant?')) deleteTenant.mutate(t.id); }}
-      className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-white rounded-lg cursor-pointer transition-colors shadow-sm ml-2"
+      onClick={() => { if (confirm('Delete tenant?')) deleteTenant.mutate(t.id); }}
+      className="p-1.5 text-slate-500 hover:text-red-600 bg-white rounded-lg cursor-pointer transition-colors shadow-sm ml-2"
       title="Delete Tenant"
     >
       <Trash2 size={14} />
@@ -122,11 +123,10 @@ export function TenantTile({ t, deleteTenant, isAdmin = false }: TenantTileProps
         <label className="text-sm font-bold text-slate-500 uppercase tracking-wider">Litium Base URL</label>
         <input
           value={draft.litiumBaseUrl}
-          onChange={e => setDraft({...draft, litiumBaseUrl: e.target.value})}
+          onChange={e => setDraft({ ...draft, litiumBaseUrl: e.target.value })}
           disabled={!isAdmin}
-          className={`text-sm font-semibold text-slate-800 bg-transparent border border-transparent rounded px-2 py-1 -ml-2 transition-all outline-none ${
-            isAdmin ? 'hover:bg-slate-50 focus:bg-white focus:ring-2 focus:ring-brand-accent/20 hover:border-slate-200 focus:border-brand-accent/30' : 'cursor-not-allowed text-slate-500'
-          }`}
+          className={`text-sm font-semibold text-slate-800 bg-transparent border border-transparent rounded px-2 py-1 -ml-2 transition-all outline-none ${isAdmin ? 'hover:bg-slate-50 focus:bg-white focus:ring-2 focus:ring-brand-accent/20 hover:border-slate-200 focus:border-brand-accent/30' : 'cursor-not-allowed text-slate-500'
+            }`}
           placeholder="https://..."
         />
       </div>
@@ -136,15 +136,15 @@ export function TenantTile({ t, deleteTenant, isAdmin = false }: TenantTileProps
           <label className="text-sm font-bold text-slate-500 uppercase tracking-wider">Service Account Token</label>
           <div className="flex items-center gap-3">
             {isAdmin && t.hasServiceAccountToken && !draft.clearToken && (
-               <button 
-                 onClick={() => setDraft({ ...draft, clearToken: true, serviceAccountToken: '' })}
-                 className="text-sm text-red-500 hover:text-red-600 font-bold hover:underline cursor-pointer"
-               >
-                 Clear Token
-               </button>
+              <button
+                onClick={() => setDraft({ ...draft, clearToken: true, serviceAccountToken: '' })}
+                className="text-sm text-red-500 hover:text-red-600 font-bold hover:underline cursor-pointer"
+              >
+                Clear Token
+              </button>
             )}
             <span className="text-sm text-slate-400 italic">
-               {draft.clearToken ? 'Pending clear' : t.hasServiceAccountToken ? 'Token is set' : 'Not set'}
+              {draft.clearToken ? 'Pending clear' : t.hasServiceAccountToken ? 'Token is set' : 'Not set'}
             </span>
           </div>
         </div>
@@ -152,10 +152,9 @@ export function TenantTile({ t, deleteTenant, isAdmin = false }: TenantTileProps
           type="password"
           value={draft.serviceAccountToken}
           disabled={!isAdmin || draft.clearToken}
-          onChange={e => setDraft({...draft, serviceAccountToken: e.target.value, clearToken: false})}
-          className={`text-sm font-mono font-semibold text-slate-800 bg-transparent border border-transparent rounded px-2 py-1 -ml-2 transition-all outline-none ${
-            isAdmin && !draft.clearToken ? 'hover:bg-slate-50 focus:bg-white focus:ring-2 focus:ring-brand-accent/20 hover:border-slate-200 focus:border-brand-accent/30' : 'cursor-not-allowed text-slate-500 opacity-50'
-          }`}
+          onChange={e => setDraft({ ...draft, serviceAccountToken: e.target.value, clearToken: false })}
+          className={`text-sm font-mono font-semibold text-slate-800 bg-transparent border border-transparent rounded px-2 py-1 -ml-2 transition-all outline-none ${isAdmin && !draft.clearToken ? 'hover:bg-slate-50 focus:bg-white focus:ring-2 focus:ring-brand-accent/20 hover:border-slate-200 focus:border-brand-accent/30' : 'cursor-not-allowed text-slate-500 opacity-50'
+            }`}
           placeholder={draft.clearToken ? 'Cleared' : (t.hasServiceAccountToken ? '•••••••••••• (Type to change)' : 'Type to set new token')}
         />
       </div>
@@ -165,7 +164,7 @@ export function TenantTile({ t, deleteTenant, isAdmin = false }: TenantTileProps
           type="checkbox"
           checked={draft.orderFetchingEnabled}
           disabled={!isAdmin}
-          onChange={(e) => setDraft({...draft, orderFetchingEnabled: e.target.checked})}
+          onChange={(e) => setDraft({ ...draft, orderFetchingEnabled: e.target.checked })}
           className={`w-4 h-4 text-brand-link rounded border-slate-300 ${isAdmin ? 'cursor-pointer' : 'cursor-not-allowed text-slate-400'}`}
           id={`chk-${t.id}`}
         />

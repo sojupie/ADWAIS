@@ -53,7 +53,7 @@ export function TenantsMonitorsView() {
     } = useTenantsViewModel();
 
     return (
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 h-full min-h-0">
+        <div className="grid grid-cols-1 landscape-contained:grid-cols-2 portrait-contained:grid-rows-2 gap-6 h-full min-h-0">
             {/* Tenants Column */}
             <SettingsPanel>
                 <SectionHeader
@@ -70,6 +70,7 @@ export function TenantsMonitorsView() {
                     <Select
                         value={tenantSort}
                         onChange={e => setTenantSort(e.target.value as 'asc' | 'desc')}
+                        dropdownAlign="right"
                         containerClassName="w-auto shrink-0"
                         className="text-sm font-semibold pl-3 pr-8 py-1.5 text-slate-700 hover:bg-slate-50 focus:ring-2 h-9 rounded-lg border-slate-200"
                     >
@@ -81,7 +82,7 @@ export function TenantsMonitorsView() {
                         locked={!isAdmin}
                         lockTitle="Requires Admin privileges"
                         icon={<Plus size={16} className="shrink-0" />}
-                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-bold transition-colors shadow-sm shrink-0 bg-brand-link text-white hover:bg-brand-link/90 cursor-pointer animate-in fade-in duration-200"
+                        className="flex items-center gap-1 px-3 py-1.5 h-9 rounded-lg text-sm font-bold transition-colors shadow-sm shrink-0 bg-brand-link text-white hover:bg-brand-link/90 cursor-pointer"
                     >
                         New
                     </SecureButton>
@@ -146,6 +147,7 @@ export function TenantsMonitorsView() {
                     <Select
                         value={monitorSort}
                         onChange={e => setMonitorSort(e.target.value as 'asc' | 'desc')}
+                        dropdownAlign="right"
                         containerClassName="w-auto shrink-0"
                         className="text-sm font-semibold pl-3 pr-8 py-1.5 text-slate-700 hover:bg-slate-50 focus:ring-2 h-9 rounded-lg border-slate-200"
                     >
@@ -157,7 +159,7 @@ export function TenantsMonitorsView() {
                         locked={!isAdmin}
                         lockTitle="Requires Admin privileges"
                         icon={<Plus size={16} className="shrink-0" />}
-                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-bold transition-colors shadow-sm shrink-0 bg-brand-link text-white hover:bg-brand-link/90 cursor-pointer animate-in fade-in duration-200"
+                        className="flex items-center gap-1 px-3 py-1.5 h-9 rounded-lg text-sm font-bold transition-colors shadow-sm shrink-0 bg-brand-link text-white hover:bg-brand-link/90 cursor-pointer"
                     >
                         New
                     </SecureButton>

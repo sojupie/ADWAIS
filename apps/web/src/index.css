@@ -1,6 +1,8 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@theme {
+:root {
   --color-brand-bg-primary: #ffffff;
   --color-brand-bg-secondary: #022d2e;
   --color-brand-bg-tertiary: #ffffff;
@@ -67,6 +69,12 @@
     @apply bg-slate-400;
   }
 
+  /* Hide elements on mobile where the burger menu provides equivalent UI */
+  @media (max-width: 767px) {
+    .desktop-only {
+      display: none !important;
+    }
+  }
 }
 
 /* ── Components ── */
@@ -82,10 +90,9 @@
 
 /* ── Kiosk Indicator Animations ── */
 @keyframes pulse {
-  0% { transform: scale(0.95); box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-brand-btn-primary) 70%, transparent); }
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(81, 181, 185, 0.7); }
   70% { transform: scale(1); box-shadow: 0 0 0 6px transparent; }
   100% { transform: scale(0.95); box-shadow: 0 0 0 0 transparent; }
-
 }
 
 .kiosk-pulse {

@@ -98,30 +98,29 @@ export function FleetStatus() {
           inverseTrend={true}
         />
 
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-3 flex flex-col justify-center min-h-22.5">
-          <h2 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-1">Active Incidents</h2>
+        <FactPanel label="Active Incidents">
           <div className="flex items-baseline gap-6">
             <div className="flex items-baseline gap-2">
-              <span className="text-4xl font-extrabold tracking-tight text-red-500">{vm.fleetStats.down.length}</span>
-              <span className="text-sm font-black text-slate-500 uppercase tracking-widest">DOWN</span>
+              <span className="text-2xl lg:text-3xl xl:text-2xl 2xl:text-4xl font-extrabold tracking-tight text-status-down">{vm.fleetStats.down.length}</span>
+              <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">DOWN</span>
             </div>
             <div className="flex items-baseline gap-2">
-              <span className="text-4xl font-extrabold tracking-tight text-amber-500">{vm.fleetStats.degraded.length}</span>
-              <span className="text-sm font-black text-slate-500 uppercase tracking-widest">DEGRADED</span>
+              <span className="text-2xl lg:text-3xl xl:text-2xl 2xl:text-4xl font-extrabold tracking-tight text-status-degraded">{vm.fleetStats.degraded.length}</span>
+              <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">DEGRADED</span>
             </div>
           </div>
-        </div>
+        </FactPanel>
 
       </DashboardTopRow>
 
       {/* Main Content Grid: Matrix on Left, Watchlist & Latency on Right */}
-      <DashboardFlexRow weight="flex-1" gridCols="5" className="landscape:lg:min-h-0">
+      <DashboardFlexRow weight="flex-1" gridCols="5" className="landscape-contained:min-h-0">
 
         {/* Left Column: Fleet Matrix (Takes 60% of width on landscape lg screens) */}
-        <div className="landscape:lg:col-span-3 flex flex-col min-h-[500px] landscape:lg:min-h-0 landscape:lg:h-full">
+        <div className="landscape-lg:col-span-3 flex flex-col min-h-[500px] contained:min-h-0 contained:h-full">
           <CollectionPanel
             title={vm.selection ? `${vm.selectedTenantName} Monitors` : "Fleet Status Matrix"}
-            className="h-full min-h-0"
+            className="flex-grow min-h-0"
             isLoading={vm.globalMonitorsQuery.isLoading}
             actions={matrixActions}
           >
@@ -132,13 +131,14 @@ export function FleetStatus() {
         </div>
 
         {/* Right Column: Watchlist (Top) & Latency Chart (Bottom) (Takes 40% of width) */}
-        <div className="landscape:lg:col-span-2 flex flex-col gap-4 min-h-[500px] landscape:lg:min-h-0 landscape:lg:h-full">
+        <div className="landscape-lg:col-span-2 flex flex-col gap-2 min-h-[500px] contained:min-h-0 contained:h-full">
 
           <SlaBreachWatchlist
             monitors={vm.scopedMonitors}
             onClearSelection={vm.selection ? () => vm.setSelection(null) : undefined}
             defaultSla={vm.defaultSla}
             defaultDegradedFloor={vm.defaultDegradedFloor}
+            className="flex-1 min-h-[350px] contained:min-h-0 max-h-[600px] xl:max-h-none"
           />
 
           <NetworkLatencyChart
@@ -147,7 +147,7 @@ export function FleetStatus() {
             isLoading={vm.analyticsQuery.isLoading}
             isStale={vm.analyticsQuery.isPlaceholderData}
             comparison="Preceding"
-            className="flex-1 min-h-0"
+            className="flex-1 min-h-[350px] contained:min-h-0"
           />
 
         </div>

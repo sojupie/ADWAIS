@@ -25,7 +25,7 @@ export function SettingsCard({
   className = '',
 }: SettingsCardProps) {
   return (
-    <div className={`bg-white sm:border sm:border-slate-200 sm:rounded-2xl sm:shadow-sm border-b sm:border-b-0 border-slate-200 overflow-hidden flex flex-col break-inside-avoid animate-in fade-in ${className}`}>
+    <div className={`bg-white sm:border sm:border-slate-200 sm:rounded-2xl sm:shadow-sm border-b sm:border-b-0 border-slate-200 overflow-hidden flex flex-col break-inside-avoid ${className}`}>
       <SubSectionHeader title={title} subtitle={subtitle} icon={icon}>
         {headerActions}
       </SubSectionHeader>

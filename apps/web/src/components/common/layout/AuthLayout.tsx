@@ -55,10 +55,10 @@ export function AuthLayout({ children }: AuthLayoutProps) {
             </DashboardTopRow>
             {/* Mock Charts Grid */}
             <DashboardFlexRow weight="flex-1" gridCols="2">
-              <AccumulatedRevenueChart points={MOCK_ACCUMULATED_REVENUE} className="h-full min-h-87.5" />
-              <TransactionDensityChart points={MOCK_TRANSACTION_DENSITY} className="h-full min-h-87.5" />
-              <RevenueEfficiencyChart response={MOCK_EFFICIENCY} onTenantSelect={() => { }} className="h-full min-h-87.5" />
-              <MomentumMatrixChart momentum={MOCK_MOMENTUM} onTenantSelect={() => { }} className="h-full min-h-87.5" />
+              <AccumulatedRevenueChart points={MOCK_ACCUMULATED_REVENUE} className="h-full min-h-[350px]" />
+              <TransactionDensityChart points={MOCK_TRANSACTION_DENSITY} className="h-full min-h-[350px]" />
+              <RevenueEfficiencyChart response={MOCK_EFFICIENCY} onTenantSelect={() => { }} className="h-full min-h-[350px]" />
+              <MomentumMatrixChart momentum={MOCK_MOMENTUM} onTenantSelect={() => { }} className="h-full min-h-[350px]" />
             </DashboardFlexRow>
           </DashboardLayout>
         </div>

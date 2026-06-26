@@ -41,17 +41,17 @@ function HealthStatusCard({ title, subtitle, status, children }: HealthStatusCar
                 </div>
                 {isHealthy && (
                     <span className="flex items-center gap-1.5 px-2.5 py-1 bg-green-50 text-green-700 rounded-full text-sm font-bold border border-green-200">
-                        <CheckCircle2 size={13} /> OK
+                        <CheckCircle2 size={13} /> <span>OK</span>
                     </span>
                 )}
                 {isWarning && (
                     <span className="flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-700 rounded-full text-sm font-bold border border-amber-200">
-                        <AlertTriangle size={13} /> WARN
+                        <AlertTriangle size={13} /> <span>WARN</span>
                     </span>
                 )}
                 {isFailed && (
                     <span className="flex items-center gap-1.5 px-2.5 py-1 bg-red-50 text-red-700 rounded-full text-sm font-bold border border-red-200">
-                        <AlertCircle size={13} /> ERR
+                        <AlertCircle size={13} /> <span>ERR</span>
                     </span>
                 )}
             </div>
@@ -68,7 +68,7 @@ export function SystemEventsView() {
         clearErrorsMutation
     } = useSystemEventsViewModel();
     return (
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 h-full min-h-0">
+        <div className="grid grid-cols-1 landscape-contained:grid-cols-3 portrait-contained:grid-rows-[1fr_2fr] gap-6 h-full min-h-0">
 
             {/* Diagnostics / Health Panel */}
             <SettingsPanel className="col-span-1">
@@ -183,7 +183,7 @@ export function SystemEventsView() {
             </SettingsPanel>
 
             {/* System Logs console */}
-            <section className="flex flex-col col-span-1 xl:col-span-2 bg-slate-900 rounded-2xl shadow-lg border border-slate-800 overflow-hidden h-full min-h-0 max-h-[500px] sm:max-h-[800px] xl:max-h-[calc(100vh-230px)] min-w-[285px] sm:min-w-[320px] min-w-0">
+            <section className="flex flex-col col-span-1 landscape-contained:col-span-2 bg-slate-900 rounded-2xl shadow-lg border border-slate-800 overflow-hidden h-full min-h-0 max-h-[500px] sm:max-h-[800px] xl:max-h-[calc(100vh-230px)] min-w-[285px] sm:min-w-[320px] min-w-0">
                 <div className="flex items-center justify-between shrink-0 p-4 border-b border-slate-800 bg-slate-900 z-10">
                     <div className="flex items-center gap-3">
                         <TerminalSquare size={18} className="text-brand-accent" />

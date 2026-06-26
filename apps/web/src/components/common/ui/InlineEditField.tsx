@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Edit3, Check, X, Loader2, Lock } from 'lucide-react';
+import { Select } from './Select';
 
 type InlineEditFieldProps<T> = {
   label: string;
@@ -141,18 +142,19 @@ export function InlineEditField<T>({
       {isEditing ? (
         <div className="flex items-center gap-2 w-full">
           {type === 'select' ? (
-            <select
+            <Select
               ref={inputRef as React.RefObject<HTMLSelectElement>}
               value={draft as unknown as string}
               onChange={(e) => setDraft(e.target.value as unknown as T)}
               disabled={isSaving}
               onKeyDown={handleKeyDown}
-              className="flex-1 border border-slate-300 bg-white rounded-md px-2 py-1.5 text-sm font-semibold focus:ring-2 focus:ring-brand-btn-primary focus:outline-none"
+              containerClassName="flex-1"
+              className="h-9 text-sm font-semibold rounded-lg border-slate-300 focus:ring-2 focus:ring-brand-btn-primary"
             >
               {options.map((opt) => (
                 <option key={opt.value as React.Key} value={opt.value as unknown as string}>{opt.label}</option>
               ))}
-            </select>
+            </Select>
           ) : (
             <input
               ref={inputRef as React.RefObject<HTMLInputElement>}

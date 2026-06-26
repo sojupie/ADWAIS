@@ -53,7 +53,7 @@ export const PortfolioRevenueShareTrajectoryChart = memo(function PortfolioReven
     <ChartPanel isLoading={isLoading}
       title="Portfolio Share Trajectory"
       className={className || ''}
-      bodyClassName="w-full h-full flex flex-col flex-1 min-h-0"
+      bodyClassName=""
     >
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={rows} margin={{ top: 8, right: 10, left: 10, bottom: 10 }}>

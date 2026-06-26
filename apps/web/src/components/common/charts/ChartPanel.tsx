@@ -18,7 +18,7 @@ interface ChartPanelProps {
 export function ChartPanel({ title, subtitle, comparison, legend, bodyClassName = '', className = '', isLoading = false, isStale = false, children }: ChartPanelProps) {
   const displaySubtitle = subtitle || (comparison ? (comparison === 'YearOverYear' ? 'vs. Same Period Last Year' : 'vs. Preceding Period') : undefined);
   return (
-      <div className={`bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-4 flex flex-col h-full min-h-0 relative overflow-hidden ${className}`} style={{ contain: 'layout style paint', contentVisibility: 'auto', containIntrinsicSize: 'auto 350px' }}>
+      <div className={`bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-4 flex flex-col min-h-[350px] contained:min-h-0 relative overflow-hidden ${className}`}>
         {isStale && !isLoading && (
             <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-20 flex flex-col items-center justify-center animate-in fade-in duration-200">
                <Loader2 size={32} className="text-brand animate-spin opacity-80" />
@@ -38,7 +38,7 @@ export function ChartPanel({ title, subtitle, comparison, legend, bodyClassName 
             </div>
             {legend}
         </div>
-        <div className={`flex-1 min-h-0 w-full h-full flex flex-col z-10 ${bodyClassName}`}>
+        <div className={`flex-1 min-h-[280px] contained:min-h-0 w-full flex flex-col z-10 relative ${bodyClassName}`}>
             {isLoading ? <ChartSkeleton /> : children}
         </div>
       </div>

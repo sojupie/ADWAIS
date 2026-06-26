@@ -35,6 +35,7 @@ export function ManualBackfillPanel({ tenants, triggerBackfill, disabled }: Manu
           value={backfill.tenantId}
           onChange={e => setBackfill({ ...backfill, tenantId: e.target.value })}
           disabled={disabled}
+          optionHeightClass="h-12 py-2"
         >
           <option value="" disabled>Select a tenant...</option>
           {(tenants || []).map((t) => (
@@ -65,7 +66,7 @@ export function ManualBackfillPanel({ tenants, triggerBackfill, disabled }: Manu
         loading={triggerBackfill.isPending}
         loadingText="Initiating..."
         icon={<Play size={16} />}
-        className="text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors shadow-sm flex items-center justify-center gap-2 mt-2 w-full bg-brand-link hover:bg-brand-link/90 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        className="text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors shadow-sm flex items-center justify-center gap-2 mt-2 w-full bg-brand-btn-primary hover:bg-brand-btn-primary/90 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         disabled={!backfill.tenantId}
       >
         Execute Backfill

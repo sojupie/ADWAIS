@@ -10,13 +10,13 @@ interface FlexRowProps {
 export function DashboardFlexRow({ children, weight = 'flex-1', gridCols = '1', className = '' }: FlexRowProps) {
     const gridClass = {
         '1': 'grid-cols-1',
-        '2': 'grid-cols-1 portrait:lg:grid-cols-1 portrait:lg:grid-rows-4 landscape:lg:grid-cols-2',
-        '3': 'grid-cols-1 md:grid-cols-2 portrait:lg:grid-cols-2 landscape:lg:grid-cols-3',
-        '5': 'grid-cols-1 portrait:lg:grid-cols-1 portrait:lg:grid-rows-[auto_1fr] landscape:lg:grid-cols-5',
+        '2': 'grid-cols-1 portrait-lg:grid-cols-1 portrait-contained:grid-rows-4 landscape-lg:grid-cols-2',
+        '3': 'grid-cols-1 md:grid-cols-2 portrait-lg:grid-cols-2 landscape-lg:grid-cols-3',
+        '5': 'grid-cols-1 portrait-lg:grid-cols-1 portrait-contained:grid-rows-[1fr_1fr] landscape-lg:grid-cols-5',
     }[gridCols];
 
     return (
-        <section className={`${weight} grid ${gridClass} auto-rows-auto lg:auto-rows-fr gap-4 ${className} min-h-0`}>
+        <section className={`${weight} grid ${gridClass} auto-rows-auto contained:auto-rows-fr gap-4 ${className} min-h-0`}>
             {children}
         </section>
     )

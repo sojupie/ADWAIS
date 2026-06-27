@@ -110,7 +110,7 @@ export function SyncStatusWidget() {
 
   return (
     <div
-      className="flex items-center gap-4 px-5 py-3 border rounded-xl shadow-sm bg-brand-bg-secondary border-brand-bg-secondary/20 w-full min-h-14 min-w-0"
+      className="flex items-center gap-4 px-5 py-3 border rounded-xl shadow-sm bg-brand-bg-secondary border-brand-bg-secondary/20 min-h-14 min-w-0"
     >
       {/* Timer Wheel */}
       <div className="relative w-6 h-6 shrink-0">
@@ -157,7 +157,7 @@ export function SyncStatusWidget() {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 xs:grid-cols-2 gap-x-4 gap-y-0.5 items-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-0.5 items-center">
             <div className="flex justify-between items-center gap-2">
               <span className="text-xs font-black uppercase tracking-widest text-white/60">Dash UI</span>
               <span className="text-sm font-bold text-white text-right">{renderTime(dashboardSyncTime, isFetching)}</span>

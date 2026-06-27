@@ -467,7 +467,7 @@ function RootComponent() {
                 </div>
 
                 {/* Mobile Menu Content */}
-                <div className="flex-1 overflow-y-auto custom-scrollbar px-5 py-6 flex flex-col gap-8">
+                <div className="flex-1 overflow-y-auto bg-brand-bg-secondary custom-scrollbar px-5 py-6 flex flex-col gap-8">
                   {/* Navigation Links */}
                   <nav className="flex flex-col gap-1" aria-label="Main navigation">
                     <span className="text-xs font-black text-white/40 uppercase tracking-widest mb-2 px-3">Navigation</span>
@@ -538,7 +538,7 @@ function RootComponent() {
             className="flex-1 w-full px-3 pt-3 relative flex flex-col min-h-0 overflow-y-auto contained:overflow-hidden custom-scrollbar"
             style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
           >
-            <div className="flex flex-col pb-24 md:pb-3 contained:pb-0 contained:flex-1 contained:min-h-0">
+            <div className="flex flex-col contained:flex-1 contained:min-h-0">
               <Outlet />
             </div>
           </div>

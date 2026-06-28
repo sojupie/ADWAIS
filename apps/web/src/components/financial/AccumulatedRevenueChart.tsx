@@ -48,7 +48,7 @@ export const AccumulatedRevenueChart = memo(function AccumulatedRevenueChart({ i
         <EmptyState message="No revenue data available" variant="minimal" />
       ) : (
         <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
+          <ComposedChart data={chartData} margin={{ top: 10, right: 10, left: -5, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-chart-grid)" />
             <XAxis 
               dataKey="label" 

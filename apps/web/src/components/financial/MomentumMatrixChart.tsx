@@ -58,7 +58,7 @@ points: MomentumTenant[]; medianBaselineRevenue: number; globalGrowthPercentage:
 }) {
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <ScatterChart margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
+      <ScatterChart margin={{ top: 15, right: 20, left: 15, bottom: 20 }}>
         <CartesianGrid stroke="var(--color-chart-grid)" strokeDasharray="3 4" />
         <XAxis
           type="number"
@@ -86,6 +86,17 @@ points: MomentumTenant[]; medianBaselineRevenue: number; globalGrowthPercentage:
           tick={{ fill: 'var(--color-chart-tick)', fontSize: 13, fontWeight: 600, fontFamily: 'Manrope, sans-serif' }}
           axisLine={false}
           tickLine={false}
+          label={{
+              value: 'Growth (%)→',
+              angle: -90,
+              position: 'insideLeft',
+              offset: -10,
+              style: { textAnchor: 'middle' },
+              fill: 'var(--color-chart-label)',
+              fontSize: 13,
+              fontWeight: 800,
+              fontFamily: 'Manrope, sans-serif'
+          }}
         />
         <ZAxis type="number" dataKey="currentRevenue" range={[120, 1200]} />
         <ReferenceLine x={medianBaselineRevenue} stroke="var(--color-chart-prev-line)" strokeWidth={2} strokeDasharray="5 5" />

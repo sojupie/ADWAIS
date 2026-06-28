@@ -27,7 +27,7 @@ export function TileCard({
           </div>
         )}
       </div>
-      <div className="p-3 flex flex-col gap-3 bg-white">
+      <div className="p-3 flex flex-col gap-1 bg-white">
         {children}
       </div>
     </div>

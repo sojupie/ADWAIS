@@ -6,7 +6,7 @@ export function SeoRssAggregator() {
   const feedItems = response?.data || [];
 
   return (
-    <CollectionPanel title="Litium News" className="h-full relative overflow-hidden">
+    <CollectionPanel title="Litium News – Click to read" className="h-full relative overflow-hidden">
       {isLoading ? (
         <div className="p-4 flex flex-col gap-5 animate-pulse">
           {[1, 2, 3].map((i) => (
@@ -21,39 +21,24 @@ export function SeoRssAggregator() {
           No feeds available.
         </div>
       ) : (
-        <div className="p-4 flex flex-col gap-5 animate-[scroll_20s_linear_infinite] hover:[animation-play-state:paused]">
+        <div className="p-4 flex flex-col gap-2 animate-[scroll_10s_ease-in-out_infinite_alternate] hover:[animation-play-state:paused]">
           <style>{`
             @keyframes scroll {
-              0% { transform: translateY(0); }
-              100% { transform: translateY(-50%); }
+              0% { transform: translateY(5%); }
+              100% { transform: translateY(-30%); }
             }
           `}</style>
           {feedItems.map(item => (
             <div key={item.id} className="flex flex-col gap-1 border-l-2 border-brand-accent pl-3">
               <div className="flex justify-between items-center mb-0.5">
-                <span className="text-sm font-black text-brand-btn-primary uppercase tracking-widest">
+                <a href={item.feedSource?.url || undefined} target="_blank" rel="noopener noreferrer" className="text-sm hover:underline underline-offset-2 font-black text-brand-btn-primary uppercase tracking-widest">
                   {item.feedSource?.name || 'Feed'}
-                </span>
+                </a>
                 <span className="text-sm text-slate-400 font-bold shrink-0">
                   {item.publishDate ? new Date(item.publishDate).toLocaleDateString() : ''}
                 </span>
               </div>
-              <a href={item.link || undefined} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-slate-700 leading-snug hover:text-brand-accent transition-colors">
-                {item.title || ''}
-              </a>
-            </div>
-          ))}
-          {feedItems.map(item => (
-            <div key={`dup-${item.id}`} className="flex flex-col gap-1 border-l-2 border-brand-accent pl-3">
-              <div className="flex justify-between items-center mb-0.5">
-                <span className="text-sm font-black text-brand-btn-primary uppercase tracking-widest">
-                  {item.feedSource?.name || 'Feed'}
-                </span>
-                <span className="text-sm text-slate-400 font-bold shrink-0">
-                  {item.publishDate ? new Date(item.publishDate).toLocaleDateString() : ''}
-                </span>
-              </div>
-              <a href={item.link || undefined} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-slate-700 leading-snug hover:text-brand-accent transition-colors">
+              <a href={item.link || undefined} target="_blank" rel="noopener noreferrer" className="underline-offset-2 text-sm font-bold text-slate-700 leading-snug hover:underline transition-colors">
                 {item.title || ''}
               </a>
             </div>

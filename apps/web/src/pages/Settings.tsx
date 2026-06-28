@@ -43,11 +43,11 @@ export function Settings() {
             </header>
 
             <DashboardFlexRow weight={"flex-1"}>
-                <div className="flex-1 flex flex-col min-h-0 w-full gap-4">
+                <div className="flex-1 flex flex-col min-h-0 w-full gap-2">
                     {/* Mobile Dropdown Navigation */}
                     <div className="block sm:hidden relative group shrink-0">
                         <Select
-                            className="w-full bg-brand-bg-secondary border-none text-white text-sm font-bold rounded-xl pl-4 pr-10 py-3.5 outline-none shadow-md cursor-pointer hover:bg-brand-bg-secondary/95"
+                            className="w-full bg-brand-btn-primary border-none text-white text-sm font-bold rounded-xl pl-4 pr-10 py-3.5 outline-none shadow-md cursor-pointer hover:bg-brand-btn-primary/95"
                             value={tabs.find(t => currentPath.startsWith(t.path))?.path || tabs[0].path}
                             onChange={(e) => navigate({ to: e.target.value })}
                             icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-white/70"><path d="m6 9 6 6 6-6" /></svg>}
@@ -66,7 +66,7 @@ export function Settings() {
                                 <Link
                                     key={t.id}
                                     to={t.path}
-                                    className={`px-5 py-2.5 text-sm font-bold tracking-wide transition-all rounded-xl ${isActive ? 'bg-brand-bg-secondary text-white shadow-md' : 'text-slate-500 hover:text-slate-800 hover:bg-white hover:shadow-sm'}`}
+                                    className={`px-5 py-2.5 text-sm font-bold tracking-wide transition-all rounded-xl ${isActive ? 'bg-brand-btn-primary text-white shadow-md' : 'text-slate-500 hover:text-slate-800 hover:bg-brand-btn-primary/10 hover:shadow-sm'}`}
                                 >
                                     {t.label}
                                 </Link>

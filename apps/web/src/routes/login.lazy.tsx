@@ -29,7 +29,7 @@ function LoginComponent() {
       <div className="max-w-md mx-auto w-full relative z-10 flex flex-col gap-6 animate-stagger delay-200">
         <button
           onClick={handleLogin}
-          className="w-full py-4 bg-brand-btn-primary hover:bg-brand-btn-primary-hover text-white font-extrabold rounded-xl transition-all duration-300 shadow-md hover:shadow-brand-accent/25 active:scale-[0.98] cursor-pointer flex items-center justify-center gap-3.5 group text-sm tracking-widest uppercase border border-brand-accent/20"
+          className="w-full py-4 bg-brand-btn-primary hover:bg-brand-btn-primary-hover text-white font-extrabold rounded-xl transition-all duration-300 shadow-md hover:shadow-brand-accent/25 active:scale-[0.98] cursor-pointer flex items-center justify-center gap-1.5 group text-sm tracking-widest uppercase border border-brand-accent/20"
         >
           <svg className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M0 0H11V11H0V0Z" fill="#F25022" />

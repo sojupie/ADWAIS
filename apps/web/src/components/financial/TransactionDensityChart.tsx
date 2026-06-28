@@ -1,4 +1,4 @@
-import { useState, Fragment, memo } from 'react';
+import { useMemo, useState, Fragment, memo } from 'react';
 import { createPortal } from 'react-dom';
 import type { TransactionDensityPointDto } from '@types';
 import { formatCurrency } from '@utils';
@@ -37,25 +37,39 @@ export const TransactionDensityChart = memo(function TransactionDensityChart({
   } | null>(null);
 
   const isEmpty = points.length === 0;
-  const maxCount = isEmpty ? 0 : Math.max(...points.map(p => p.count));
-  const minCount = isEmpty ? 0 : Math.min(...points.map(p => p.count));
+  const {matrix, maxCount, minCount} = useMemo(() => {
+    const max = points.length === 0 ? 0 : Math.max(...points.map(p => p.count));
+    const min = points.length === 0 ? 0 : Math.min(...points.map(p => p.count));
+    const nextMatrix = Array.from({ length: 7 }, () => Array.from({ length: 24 }, () => ({ count: 0, totalRevenue: 0 })));
 
-  // Build a 7x24 matrix
-  const matrix = Array.from({ length: 7 }, () => Array.from({ length: 24 }, () => ({ count: 0, totalRevenue: 0 })));
-  points.forEach(p => {
-    // API returns dayOfWeek 1-7 (1 = Monday, 7 = Sunday)
-    const dayIndex = p.dayOfWeek - 1;
-    if (dayIndex >= 0 && dayIndex <= 6 && p.hour >= 0 && p.hour <= 23) {
-      matrix[dayIndex][p.hour] = { count: p.count, totalRevenue: p.totalRevenue };
-    }
-  });
+    points.forEach(p => {
+      const dayIndex = p.dayOfWeek - 1;
+      if (dayIndex >= 0 && dayIndex <= 6 && p.hour >= 0 && p.hour <= 23) {
+        nextMatrix[dayIndex][p.hour] = { count: p.count, totalRevenue: p.totalRevenue };
+      }
+    });
+
+    return {matrix: nextMatrix, maxCount: max, minCount: min};
+  }, [points]);
 
   return (
     <ChartPanel isLoading={isLoading} isStale={isStale}
       title="Transaction Density Matrix"
       className={className || "h-full relative"}
-      bodyClassName={isEmpty ? 'flex items-center justify-center' : 'flex-1 min-h-0 flex flex-col p-4'}
-      legend={<span className="text-sm font-bold text-slate-500 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded">30-Day Rolling Density</span>}
+      bodyClassName={isEmpty ? 'flex items-center h-full justify-center' : 'flex-1 min-h-0 flex flex-col p-4'}
+      legend={
+      <div className="flex gap-1 flex-wrap items-center">
+        <span className="text-sm whitespace-nowrap font-bold text-slate-500 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded">
+          30-Day Rolling Density</span>
+        <div
+            className="flex h-full rounded overflow-hidden"
+            style={{ background: `linear-gradient(to right, ${PALETTE.join(', ')})` }}
+        >
+          <span className="flex-1 text-center text-sm font-bold uppercase tracking-widest px-3 py-1.5 text-white mix-blend-difference">LOW</span>
+          <span className="flex-1 text-center text-sm font-bold uppercase tracking-widest px-3 py-1.5 text-white mix-blend-difference">MEDIUM</span>
+          <span className="flex-1 text-center text-sm font-bold uppercase tracking-widest px-3 py-1.5 text-white mix-blend-difference">HIGH</span>
+        </div>
+      </div>}
     >
       {isEmpty ? (
         <EmptyState message={"No data available"} variant={"minimal"}/>

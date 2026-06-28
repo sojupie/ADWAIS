@@ -70,7 +70,7 @@ export function UserRow({ u, updateUser, deleteUser, disabled = false }: UserRow
         {!disabled && (
           <button 
             onClick={() => { if(confirm('Revoke access for this user?')) deleteUser.mutate(u.id); }} 
-            className="inline-flex items-center gap-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 px-3 py-2 rounded-lg text-sm font-bold transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
+            className="inline-flex items-center gap-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 px-3 py-2 rounded-lg text-sm font-bold transition-colors group-hover:opacity-100 cursor-pointer"
           >
             <Trash2 size={16} /> Revoke
           </button>

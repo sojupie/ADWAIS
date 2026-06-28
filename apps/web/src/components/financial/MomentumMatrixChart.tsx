@@ -90,7 +90,7 @@ points: MomentumTenant[]; medianBaselineRevenue: number; globalGrowthPercentage:
         <ZAxis type="number" dataKey="currentRevenue" range={[120, 1200]} />
         <ReferenceLine x={medianBaselineRevenue} stroke="var(--color-chart-prev-line)" strokeWidth={2} strokeDasharray="5 5" />
         <ReferenceLine y={globalGrowthPercentage} stroke="var(--color-chart-prev-line)" strokeWidth={2} strokeDasharray="5 5" />
-        <Tooltip content={<CustomTooltip />} cursor={{ strokeDasharray: '3 3' }} useTranslate3d={true} />
+        <Tooltip content={<CustomTooltip />} cursor={{ strokeDasharray: '3 3' }} useTranslate3d={true} isAnimationActive={false} />
         <Scatter
           data={points}
           className={onTenantSelect ? 'cursor-pointer hover:opacity-90 transition-opacity' : undefined}

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useMsal } from '@azure/msal-react';
 import { useActivateKioskMutation } from '../../hooks/useKioskAuth';
@@ -56,7 +56,7 @@ export function AuthenticationSettings() {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-5xl">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-5xl">
       {/* Kiosk Activation Card */}
       <Card>
         <CardHeader>
@@ -66,7 +66,7 @@ export function AuthenticationSettings() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleActivate} className="flex flex-col gap-4">
+          <form onSubmit={handleActivate} className="flex flex-col gap-1">
             <Input
               label="Activation Code"
               type="text"
@@ -94,7 +94,7 @@ export function AuthenticationSettings() {
               lockTitle="Requires Staff (Employee or Admin) role"
               loading={activateMutation.isPending}
               loadingText="Activating..."
-              className="self-start px-6 py-2 bg-brand-btn-primary hover:bg-brand-btn-primary-hover text-white font-bold rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2"
+              className="self-start px-6 py-2 disabled:opacity-50 bg-brand-btn-primary hover:bg-brand-btn-quaternary text-white font-bold rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2"
               disabled={activationCode.length !== 6}
             >
               Activate Kiosk

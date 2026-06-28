@@ -69,17 +69,29 @@ export function MotilloNews() {
               <>
                 <div className="flex flex-col gap-1 mb-4 shrink-0">
                   <a
-                    href={selectedPost.link || undefined}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-lg font-black text-slate-900 leading-snug hover:text-brand-accent transition-colors"
+                      href={selectedPost.link || undefined}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-lg font-black text-slate-900 leading-snug hover:underline underline-offset-2"
                   >
                     {selectedPost.title}
                   </a>
                   <div className="text-sm text-slate-500 font-bold uppercase tracking-widest">
-                    {selectedPost.publishDate ? new Date(selectedPost.publishDate).toLocaleDateString() : ''} 
+                    {selectedPost.publishDate ? new Date(selectedPost.publishDate).toLocaleDateString() : ''}
                     {selectedPost.author ? ` • ${selectedPost.author}` : ''}
-                    {selectedPost.feedSource?.name ? ` • ${selectedPost.feedSource.name}` : ''}
+                    {selectedPost.feedSource?.name && (
+                      <>
+                        {' • '}
+                        <a
+                          href={selectedPost.feedSource.url || undefined}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="hover:underline underline-offset-2"
+                        >
+                          {selectedPost.feedSource.name}
+                        </a>
+                      </>
+                    )}
                   </div>
                 </div>
 
@@ -105,7 +117,7 @@ export function MotilloNews() {
                       href={selectedPost.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center bg-slate-900 text-white hover:bg-brand-accent transition-colors px-4 py-2 rounded text-sm font-bold uppercase tracking-wider"
+                      className="inline-flex items-center justify-center bg-brand-btn-primary text-white hover:bg-brand-btn-quaternary transition-colors px-4 py-2 rounded text-sm font-bold uppercase tracking-wider"
                     >
                       Read Full Article
                     </a>

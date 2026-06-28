@@ -47,7 +47,7 @@ export function GoLiveCalendar() {
       actions={
         <button 
           onClick={() => setIsAdding(!isAdding)}
-          className={`${isAdding ? 'bg-slate-200 text-slate-700' : 'bg-brand-bg-secondary text-white'} px-3 py-1 rounded-[4px] text-sm font-black uppercase tracking-widest hover:bg-brand-text hover:text-white transition-all shadow-sm cursor-pointer`}
+          className={`${isAdding ? 'bg-brand-btn-primary text-white' : 'bg-brand-btn-primary text-white'} px-3 py-1 rounded-[4px] text-sm font-black uppercase tracking-widest hover:bg-brand-text hover:text-white transition-all shadow-sm cursor-pointer`}
         >
           {isAdding ? 'Cancel' : '+ Milestone'}
         </button>
@@ -62,13 +62,13 @@ export function GoLiveCalendar() {
             <input type="date" value={date} onChange={e => setDate(e.target.value)} className="w-full px-3 py-2 text-sm rounded border border-slate-300 focus:outline-none focus:border-brand-accent focus:ring-1 focus:ring-brand-accent text-slate-700" required />
             <div className="flex justify-end gap-3 mt-2">
               <button type="button" onClick={() => setIsAdding(false)} className="text-slate-500 hover:text-slate-700 px-4 py-2 font-black uppercase tracking-widest text-sm transition-colors">Cancel</button>
-              <button type="submit" className="bg-brand-accent text-brand-bg-secondary px-4 py-2 rounded-[4px] text-sm font-black uppercase tracking-widest hover:brightness-110 transition-all shadow-sm">Save Milestone</button>
+              <button type="submit" className="bg-brand-btn-primary text-white px-4 py-2 rounded-[4px] text-sm font-black uppercase tracking-widest hover:bg-brand-btn-quaternary transition-all shadow-sm">Save Milestone</button>
             </div>
           </form>
         </div>
       )}
 
-      <div className="p-4 flex flex-col gap-3 h-full overflow-y-auto custom-scrollbar">
+      <div className="p-4 flex flex-col gap-1 h-full overflow-y-auto custom-scrollbar">
         {milestones.map(m => (
           <div key={m.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100 hover:border-brand-accent transition-colors">
             <div className="flex flex-col gap-0.5">

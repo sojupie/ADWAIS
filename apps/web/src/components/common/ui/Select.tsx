@@ -151,7 +151,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
                     disabled={opt.disabled}
                     onClick={() => handleSelectOption(opt.value)}
                     className={`w-full text-left px-3 ${itemHeight} flex items-center text-sm font-semibold rounded-lg transition-colors cursor-pointer focus:outline-none ${isSelected
-                      ? 'bg-brand-accent/15 text-slate-800 font-bold hover:bg-brand-accent/20'
+                      ? 'bg-brand-btn-primary/10 text-slate-800 font-bold hover:bg-brand-accent/20'
                       : opt.disabled
                         ? 'text-slate-350 bg-slate-50/50 cursor-not-allowed'
                         : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'

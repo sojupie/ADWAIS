@@ -30,13 +30,13 @@ export function ProvisionUserPanel({ createUser }: ProvisionUserPanelProps) {
           <p className="text-sm text-slate-500 font-medium mt-0.5">Add a new administrator or user to the system</p>
         </div>
       </div>
-      <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto items-center">
+      <div className="flex flex-col sm:flex-row gap-1 w-full sm:w-auto items-center">
         <Input
           type="email"
           placeholder="Email Address"
           value={newUser.email}
           onChange={e => setNewUser({ ...newUser, email: e.target.value })}
-          containerClassName="min-w-[200px] sm:w-auto"
+          containerClassName="min-w-[200px] w-full sm:w-auto"
           className="h-10"
         />
         <Select
@@ -55,7 +55,7 @@ export function ProvisionUserPanel({ createUser }: ProvisionUserPanelProps) {
           disabled={!newUser.email}
           loading={createUser.isPending}
           loadingText="Creating..."
-          className="h-10 bg-brand-link text-white px-6 text-sm font-semibold rounded-xl hover:bg-brand-link/90 transition-all cursor-pointer flex items-center justify-center gap-2 w-full sm:w-auto shrink-0"
+          className="h-10 bg-brand-btn-primary text-white px-6 text-sm font-semibold rounded-xl hover:bg-brand-btn-quaternary transition-all cursor-pointer flex items-center justify-center gap-2 w-full sm:w-auto shrink-0"
         >
           Create
         </SecureButton>

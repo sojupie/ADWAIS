@@ -82,7 +82,7 @@ export function OfficeContext() {
         <div className="mt-auto">
           <div className="flex items-center justify-between border-b border-white/10 pb-2 mb-3">
             <h3 className="text-sm font-black text-white/50 uppercase tracking-widest">Today's Schedule</h3>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1">
                <span className="text-sm font-bold text-white/40">{events.length} Events</span>
                <button 
                  onClick={() => {
@@ -95,7 +95,7 @@ export function OfficeContext() {
                </button>
             </div>
           </div>
-          <div className="flex flex-col gap-2.5">
+          <div className="flex flex-col gap-1">
             {events.map(e => (
               <div key={e.id} className="flex items-center gap-4 bg-white/5 hover:bg-white/10 transition-colors p-3 rounded-lg border border-white/10 backdrop-blur-sm">
                 <span className="text-sm font-black text-brand-accent w-12 shrink-0 text-right">{e.time}</span>

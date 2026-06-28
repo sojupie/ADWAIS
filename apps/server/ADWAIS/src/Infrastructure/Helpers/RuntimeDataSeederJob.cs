@@ -61,6 +61,19 @@ public class RuntimeDataSeederJob(
         new("Scandi Design Studio", 1500, 15000, 3),
     };
 
+    private static readonly double[] HourlyWeights = 
+    { 
+        0.020, 0.010, 0.005, 0.005, 0.007, 0.010, 0.020, 0.035, 
+        0.050, 0.058, 0.065, 0.068, 0.075, 0.075, 0.068, 0.060, 
+        0.050, 0.045, 0.048, 0.055, 0.070, 0.075, 0.065, 0.042 
+    };
+
+    // Index mapping: Sunday = 0, Monday = 1, Tuesday = 2, Wednesday = 3, Thursday = 4, Friday = 5, Saturday = 6
+    private static readonly double[] DailyWeights = 
+    { 
+        0.12, 0.16, 0.16, 0.15, 0.16, 0.14, 0.11 
+    };
+
     [DisableConcurrentExecution(timeoutInSeconds: 300)]
     [AutomaticRetry(Attempts = 0)]
     public async Task ExecuteAsync()
@@ -77,14 +90,22 @@ public class RuntimeDataSeederJob(
         var now = DateTimeOffset.UtcNow;
         var orders = new List<Order>();
 
+        double currentHourWeight = HourlyWeights[now.Hour];
+        double currentDayWeight = DailyWeights[(int)now.DayOfWeek];
+
         foreach (var tenant in tenants)
         {
             var baseName = tenant.Name.Replace(" [MOCK]", "");
             var profile = Profiles.FirstOrDefault(p => p.Name == baseName);
             if (profile == null) continue;
 
-            // Seed a small amount of orders proportional to their daily volume
-            double expectedOrdersPerRun = profile.DailyVolume / 288.0;
+            double weeklyVolume = profile.DailyVolume * 7.0;
+            double expectedOrdersToday = weeklyVolume * currentDayWeight;
+            double expectedOrdersThisHour = expectedOrdersToday * currentHourWeight;
+            
+            // Assume the job runs every 5 minutes (12 times an hour)
+            double expectedOrdersPerRun = expectedOrdersThisHour / 12.0;
+            
             int count = (int)expectedOrdersPerRun + (random.NextDouble() < (expectedOrdersPerRun % 1.0) ? 1 : 0);
 
             if (count > 0)
@@ -100,10 +121,6 @@ public class RuntimeDataSeederJob(
             
             logger.LogInformation("Added {Count} new orders across {TenantCount} tenants during runtime seeding.", 
                 orders.Count, orders.Select(o => o.TenantId).Distinct().Count());
-
-            // Refresh views so frontend gets the update
-            // await db.Database.ExecuteSqlRawAsync("REFRESH MATERIALIZED VIEW CONCURRENTLY v_mat_financial_daily_tenant_rollup;");
-            // await db.Database.ExecuteSqlRawAsync("REFRESH MATERIALIZED VIEW CONCURRENTLY v_mat_financial_daily_global_rollup;");
         }
 
         var isMockEnabled = configuration.GetValue<bool>("FeatureToggles:MockUptimeRobotIntegrations", false);
@@ -113,10 +130,6 @@ public class RuntimeDataSeederJob(
         }
     }
 
-    /// <summary>
-    /// Seeds a single ResponseTime entry per seeded (negative-ID) monitor for the current timestamp.
-    /// Simulates live latency data that would normally come from UptimeRobot polling.
-    /// </summary>
     private static async Task SeedMockMonitorLatencyAsync(AnalyticsDbContext db, DateTimeOffset now, Random random)
     {
         var seededMonitors = await db.Monitors

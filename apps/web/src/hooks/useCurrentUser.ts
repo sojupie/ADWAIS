@@ -15,7 +15,6 @@ export function useCurrentUser() {
   const { accounts } = useMsal();
   const hasMsalAccount = accounts.length > 0;
 
-  // Derive Kiosk state directly on render (no useEffect)
   const kioskUser = kioskToken ? parseJwt(kioskToken) : null;
   const kioskRole = kioskUser?.role as 'Admin' | 'Employee' | 'Viewer' | undefined;
 

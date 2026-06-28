@@ -18,15 +18,15 @@ interface ChartPanelProps {
 export function ChartPanel({ title, subtitle, comparison, legend, bodyClassName = '', className = '', isLoading = false, isStale = false, children }: ChartPanelProps) {
   const displaySubtitle = subtitle || (comparison ? (comparison === 'YearOverYear' ? 'vs. Same Period Last Year' : 'vs. Preceding Period') : undefined);
   return (
-      <div className={`bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-4 flex flex-col min-h-[350px] contained:min-h-0 relative overflow-hidden ${className}`}>
+      <div className={`chart-panel bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-4 min-h-[350px] contained:min-h-0 relative overflow-hidden ${className}`}>
         {isStale && !isLoading && (
-            <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-20 flex flex-col items-center justify-center animate-in fade-in duration-200">
+            <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-20 flex flex-col flex-wrap items-center justify-center animate-in fade-in duration-200">
                <Loader2 size={32} className="text-brand animate-spin opacity-80" />
                <span className="text-sm font-bold text-brand uppercase tracking-widest mt-2 bg-white/80 px-2 py-1 rounded">Updating...</span>
             </div>
         )}
-        <div className="flex justify-between items-start mb-2 z-10">
-            <div className="flex flex-col gap-0.5">
+        <div className="flex justify-between gap-0.5 flex-wrap items-start mb-2 z-10 min-h-0">
+            <div className="flex flex-col">
                 <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">
                     {title}
                 </span>
@@ -38,7 +38,7 @@ export function ChartPanel({ title, subtitle, comparison, legend, bodyClassName 
             </div>
             {legend}
         </div>
-        <div className={`flex-1 min-h-[280px] contained:min-h-0 w-full flex flex-col z-10 relative ${bodyClassName}`}>
+        <div className={`chart-panel__body min-h-[280px] contained:min-h-0 w-full z-10 relative ${bodyClassName}`}>
             {isLoading ? <ChartSkeleton /> : children}
         </div>
       </div>

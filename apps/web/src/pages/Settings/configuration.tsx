@@ -23,7 +23,7 @@ export function ConfigurationView() {
                     icon={<Activity size={24} />}
                 />
                 <div className="flex-1 overflow-y-auto px-2 py-3 sm:p-4 custom-scrollbar bg-white rounded-xl shadow-sm border border-slate-200/60">
-                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
                         <GlobalConfigurationForm config={config} updateConfig={updateConfig} disabled={disabled} />
                         <FetchIntervalsForm intervals={intervals} updateIntervals={updateIntervals} disabled={disabled} />
                     </div>

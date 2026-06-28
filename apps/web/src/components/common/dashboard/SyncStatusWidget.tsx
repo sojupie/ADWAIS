@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useQuery, useQueryClient, useIsFetching } from '@tanstack/react-query';
 import { useSearch, useParams, useRouterState } from '@tanstack/react-router';
 import { apiFetch } from '../../../apiClient';
@@ -15,6 +15,58 @@ function timeAgo(date: string | number | null | undefined): string {
   const hours = Math.floor(minutes / 60);
   if (hours < 24) return `${hours}h ago`;
   return `${Math.floor(hours / 24)}d ago`;
+}
+
+function CountdownRing({resetKey, syncError}: { resetKey: number; syncError: boolean }) {
+  const circleRef = useRef<SVGCircleElement | null>(null);
+  const textRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    let countdown = 60;
+
+    const renderCountdown = () => {
+      const progress = ((60 - countdown) / 60) * 100;
+
+      if (circleRef.current) {
+        circleRef.current.style.strokeDashoffset = String(100 - progress);
+      }
+
+      if (textRef.current) {
+        textRef.current.textContent = String(countdown);
+      }
+    };
+
+    renderCountdown();
+
+    const timer = window.setInterval(() => {
+      countdown = Math.max(0, countdown - 1);
+      renderCountdown();
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, [resetKey]);
+
+  return (
+    <div className="relative w-6 h-6 shrink-0">
+      <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
+        <circle cx="18" cy="18" r="16" fill="none" stroke="currentColor" strokeWidth="4" className="text-white/10" />
+        <circle
+          ref={circleRef}
+          cx="18" cy="18" r="16"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="4"
+          strokeDasharray="100, 100"
+          strokeDashoffset="100"
+          strokeLinecap="round"
+          className={`${syncError ? 'text-red-500' : 'text-[#51B5B9]'} transition-all duration-1000 ease-linear`}
+        />
+      </svg>
+      <div ref={textRef} className="absolute inset-0 flex items-center justify-center text-xs font-bold text-white/60 font-mono">
+        60
+      </div>
+    </div>
+  );
 }
 
 export function SyncStatusWidget() {
@@ -60,7 +112,7 @@ export function SyncStatusWidget() {
   };
 
   const [dashboardSyncTime, setDashboardSyncTime] = useState<number | null>(null);
-  const [countdown, setCountdown] = useState(60);
+  const [countdownResetKey, setCountdownResetKey] = useState(0);
 
   useEffect(() => {
     if (!isFinancial && !isFleet) return;
@@ -75,9 +127,9 @@ export function SyncStatusWidget() {
     const unsubscribe = queryClient.getQueryCache().subscribe((event) => {
       if (event.type === 'updated' && event.action.type === 'success') {
         const queryKey = event.query.queryKey;
-        if (queryKey.includes(isFinancial ? 'financial' : 'fleet')) {
-          updateDashboardSync();
-          setCountdown(60); // Reset countdown on successful fetch
+          if (queryKey.includes(isFinancial ? 'financial' : 'fleet')) {
+            updateDashboardSync();
+          setCountdownResetKey((current) => current + 1);
         }
       }
     });
@@ -85,16 +137,8 @@ export function SyncStatusWidget() {
     return unsubscribe;
   }, [queryClient, isFinancial, isFleet]);
 
-  useEffect(() => {
-    if (!isFinancial && !isFleet) return;
-    const timer = setInterval(() => {
-      setCountdown(c => Math.max(0, c - 1));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [isFinancial, isFleet]);
-
   const forceFetch = () => {
-    setCountdown(60);
+    setCountdownResetKey((current) => current + 1);
     queryClient.invalidateQueries({ queryKey: ['financial'] });
     queryClient.invalidateQueries({ queryKey: ['fleet'] });
     queryClient.invalidateQueries({ queryKey: ['system-health'] });
@@ -102,9 +146,6 @@ export function SyncStatusWidget() {
   };
 
   const syncError = isDrillDown ? tenant?.lastSyncError : health?.sync?.globalSyncError;
-  const strokeColor = syncError ? 'text-red-500' : 'text-[#51B5B9]';
-
-  const progress = ((60 - countdown) / 60) * 100;
 
   if (!isFinancial && !isFleet) return null;
 
@@ -113,24 +154,7 @@ export function SyncStatusWidget() {
       className="flex items-center gap-4 px-5 py-3 border rounded-xl shadow-sm bg-brand-bg-secondary border-brand-bg-secondary/20 min-h-14 min-w-0"
     >
       {/* Timer Wheel */}
-      <div className="relative w-6 h-6 shrink-0">
-        <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-          <circle cx="18" cy="18" r="16" fill="none" stroke="currentColor" strokeWidth="4" className="text-white/10" />
-          <circle
-            cx="18" cy="18" r="16"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="4"
-            strokeDasharray="100, 100"
-            strokeDashoffset={100 - progress}
-            strokeLinecap="round"
-            className={`${strokeColor} transition-all duration-1000 ease-linear`}
-          />
-        </svg>
-        <div className="absolute inset-0 flex items-center justify-center text-xs font-bold text-white/60 font-mono">
-          {countdown}
-        </div>
-      </div>
+      <CountdownRing resetKey={countdownResetKey} syncError={!!syncError} />
 
       {/* Info */}
       <div className="flex-1 min-w-0">

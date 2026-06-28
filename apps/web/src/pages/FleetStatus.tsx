@@ -1,4 +1,3 @@
-import { ArrowLeft } from 'lucide-react';
 import { CollectionPanel } from '../components/common/dashboard/CollectionPanel';
 import { FactPanel } from '../components/common/dashboard/FactPanel';
 import { FleetMatrix } from '../components/FleetStatus/FleetMatrix';
@@ -19,13 +18,13 @@ export function FleetStatus() {
   const vm = useFleetStatusViewModel();
 
   const matrixActions = (
-    <div className="flex items-center gap-6">
+    <div className="flex items-center gap-2">
       {vm.selection && (
         <button
           onClick={() => vm.setSelection(null)}
-          className="bg-brand-bg-secondary border border-brand-bg-secondary px-3 py-1.5 rounded-sm text-sm font-extrabold text-white hover:bg-brand-text hover:border-brand-text uppercase tracking-widest transition-all shadow-sm"
+          className="bg-brand-bg-secondary text-white px-3 py-1 rounded-sm text-sm font-black uppercase tracking-widest hover:bg-brand-text transition-all shadow-sm cursor-pointer"
         >
-          <ArrowLeft size={14} className="mr-1 inline-block -mt-0.5 stroke-[3px]" /> BACK TO GLOBAL
+          CLEAR
         </button>
       )}
       <span className="text-sm font-bold text-slate-500">
@@ -120,7 +119,7 @@ export function FleetStatus() {
         <div className="landscape-lg:col-span-3 flex flex-col min-h-[500px] contained:min-h-0 contained:h-full">
           <CollectionPanel
             title={vm.selection ? `${vm.selectedTenantName} Monitors` : "Fleet Status Matrix"}
-            className="flex-grow min-h-0"
+            className="flex-grow min-h-[59px]"
             isLoading={vm.globalMonitorsQuery.isLoading}
             actions={matrixActions}
           >

@@ -17,7 +17,7 @@ export function UsersView() {
     const isAdmin = role === 'Admin';
 
     return (
-        <div className="flex flex-col gap-6 h-full min-h-0">
+        <div className="flex flex-col gap-2 h-full min-h-0">
             {isAdmin && <ProvisionUserPanel createUser={createUser} />}
 
             <SettingsPanel className="flex-1">

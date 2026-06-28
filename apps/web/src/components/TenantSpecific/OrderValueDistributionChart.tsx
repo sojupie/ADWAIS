@@ -78,7 +78,7 @@ export const OrderValueDistributionChart = memo(function OrderValueDistributionC
             axisLine={false}
             tickLine={false}
           />
-          <Tooltip content={<CustomTooltip />} useTranslate3d={true} />
+          <Tooltip content={<CustomTooltip />} useTranslate3d={true} isAnimationActive={false} />
           <Legend wrapperStyle={{ bottom: 0, fontSize: '12px', fontWeight: 600, fontFamily: 'Manrope, sans-serif' }} />
           
           <Bar

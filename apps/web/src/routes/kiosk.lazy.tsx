@@ -40,8 +40,8 @@ function KioskLanding() {
           <div className="relative z-10 flex-1 flex flex-col justify-between">
             <div>
               <h1 className="animate-stagger delay-100 text-4xl sm:text-5xl font-extrabold mb-4 sm:mb-6 text-brand-text">Device Activation</h1>
-              <p className="animate-stagger delay-200 text-slate-500 text-base sm:text-lg mb-6 sm:mb-8 px-2 sm:px-4 leading-relaxed font-medium">
-                To activate this display, log in to ADWAIS as a staff member and enter the activation code below in the <strong>Settings &gt; Kiosks</strong> section.
+              <p className="animate-stagger delay-200 text-slate-700 text-base sm:text-lg mb-6 sm:mb-8 px-2 sm:px-4 leading-relaxed font-medium">
+                To activate this display, log in to ADWAIS as a staff member and enter the activation code below in the <strong>Settings &gt; Authentication</strong> section.
               </p>
             </div>
             <div className="animate-stagger delay-300 bg-brand-bg-secondary backdrop-blur-sm text-5xl sm:text-[4rem] md:text-[5rem] leading-none font-mono tracking-widest sm:tracking-[0.2em] py-6 sm:py-8 px-4 sm:px-8 rounded-2xl text-brand-accent mb-8 shadow-inner font-bold border border-slate-900/10 select-all cursor-text overflow-hidden text-ellipsis whitespace-nowrap max-w-full">

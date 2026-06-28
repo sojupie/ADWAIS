@@ -49,7 +49,7 @@ export function TileSaveBar({
           <button
             onClick={onSave}
             disabled={isPending}
-            className="flex-1 bg-brand-link text-white font-bold text-sm py-1.5 rounded-lg hover:bg-brand-link/90 transition-colors shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 bg-brand-btn-primary text-white font-bold text-sm py-1.5 rounded-lg hover:bg-brand-btn-quaternary transition-colors shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Save Changes
           </button>

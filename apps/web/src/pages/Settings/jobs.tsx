@@ -30,7 +30,7 @@ export function BackgroundJobsView() {
     ];
 
     return (
-        <div className="grid grid-cols-1 landscape-contained:grid-cols-2 portrait-contained:grid-rows-2 gap-6 h-full min-h-0">
+        <div className="grid grid-cols-1 landscape-contained:grid-cols-2 portrait-contained:grid-rows-2 gap-4 h-full min-h-0">
             {/* Top Action Section / Left Pane */}
             <SettingsPanel>
                 <SectionHeader
@@ -82,8 +82,8 @@ export function BackgroundJobsView() {
                     subtitle="Recurring intervals & recent executions"
                     icon={<Clock size={24} />}
                 />
-                <div className="flex-1 flex flex-col gap-4 p-4 bg-white rounded-xl shadow-sm border border-slate-200/60 min-h-0">
-                    <div className="flex flex-col gap-4 h-full min-h-0">
+                <div className="flex-1 flex flex-col gap-2 p-4 bg-white rounded-xl shadow-sm border border-slate-200/60 min-h-0">
+                    <div className="flex flex-col gap-2 h-full min-h-0">
                         {/* Recurring Table */}
                         <div className="flex flex-col bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden shrink-0 max-h-[250px]">
                             <div className="overflow-y-auto custom-scrollbar h-full">

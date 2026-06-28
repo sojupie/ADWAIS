@@ -90,7 +90,7 @@ export const VolumeAnomalyChart = memo(function VolumeAnomalyChart({
               tickFormatter={(value) => `${value > 0 ? '+' : ''}${value}%`}
               tick={{ fill: 'var(--color-chart-tick)', fontSize: 12, fontFamily: 'Manrope, sans-serif' }}
             />
-            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'var(--color-chart-grid)', opacity: 0.4 }} useTranslate3d={true} />
+            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'var(--color-chart-grid)', opacity: 0.4 }} useTranslate3d={true} isAnimationActive={false} />
             <ReferenceLine y={0} stroke="#cbd5e1" strokeWidth={2} />
             <Bar 
               dataKey="volumeDeviationPercentage" 

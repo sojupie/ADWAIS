@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { ComposedChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import type { AccumulatedRevenuePointDto, ComparisonPeriod } from '@types';
 import { ChartPanel } from '../common/charts/ChartPanel';
@@ -34,11 +34,13 @@ const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?:
 };
 
 export const AccumulatedRevenueChart = memo(function AccumulatedRevenueChart({ isLoading, isStale, points, comparison, className }: AccumulatedRevenueChartProps) {
-  const binSize = inferBinSize(points.map(p => p.timestamp), false);
-  const chartData = points.map((p, i) => ({
-    ...p,
-    label: formatChartLabel(p.timestamp, binSize, i)
-  }));
+  const chartData = useMemo(() => {
+    const binSize = inferBinSize(points.map(p => p.timestamp), false);
+    return points.map((p, i) => ({
+      ...p,
+      label: formatChartLabel(p.timestamp, binSize, i)
+    }));
+  }, [points]);
 
   return (
     <ChartPanel isLoading={isLoading} isStale={isStale} title="Revenue Performance" comparison={comparison} className={className} bodyClassName={points.length === 0 ? "flex items-center justify-center" : ""}>
@@ -71,7 +73,7 @@ export const AccumulatedRevenueChart = memo(function AccumulatedRevenueChart({ i
               tickFormatter={(value) => formatCompact(value)}
               width={45}
             />
-            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'var(--color-chart-grid)', opacity: 0.4 }} useTranslate3d={true} />
+            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'var(--color-chart-grid)', opacity: 0.4 }} useTranslate3d={true} isAnimationActive={false} />
             <Legend wrapperStyle={{ fontSize: 12, paddingTop: 5 }} />
             
             {/* Discrete Revenue (Bars) */}

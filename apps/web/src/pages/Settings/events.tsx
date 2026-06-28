@@ -33,7 +33,7 @@ function HealthStatusCard({ title, subtitle, status, children }: HealthStatusCar
     const isFailed = status === 'Failed' || status === 'Error' || status === 'Critical';
 
     return (
-        <Card className="flex flex-col p-3 gap-2">
+        <Card className="flex flex-col p-3">
             <div className="flex items-center justify-between">
                 <div className="flex flex-col">
                     <span className="text-sm font-bold text-slate-800">{title}</span>
@@ -68,7 +68,7 @@ export function SystemEventsView() {
         clearErrorsMutation
     } = useSystemEventsViewModel();
     return (
-        <div className="grid grid-cols-1 landscape-contained:grid-cols-3 portrait-contained:grid-rows-[1fr_2fr] gap-6 h-full min-h-0">
+        <div className="grid grid-cols-1 landscape-contained:grid-cols-3 portrait-contained:grid-rows-[1fr_2fr] gap-4 h-full min-h-0">
 
             {/* Diagnostics / Health Panel */}
             <SettingsPanel className="col-span-1">
@@ -79,9 +79,9 @@ export function SystemEventsView() {
                     dark={true}
                 />
 
-                <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-5 custom-scrollbar bg-white rounded-xl shadow-sm border border-slate-200/60">
+                <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 custom-scrollbar bg-white rounded-xl shadow-sm border border-slate-200/60">
                     {health ? (
-                        <div className="flex flex-col gap-4">
+                        <div className="flex flex-col gap-2">
 
                             {/* Database Health Card */}
                             <HealthStatusCard
@@ -96,7 +96,7 @@ export function SystemEventsView() {
                                 subtitle="Monitoring & order ingestion"
                                 status={health.sync?.status}
                             >
-                                <div className="grid grid-cols-2 gap-2 mt-1 text-sm border-t border-slate-100 pt-2 text-slate-500">
+                                <div className="grid grid-cols-2 gap-2 mt-1 text-sm border-t border-slate-100 pt-3 text-slate-500">
                                     <div>Tenants with errors: <span className="font-bold text-slate-800">{health.sync?.tenantsWithErrorsCount}</span></div>
                                     <div>Monitors with errors: <span className="font-bold text-slate-800">{health.sync?.monitorsWithErrorsCount}</span></div>
                                 </div>

@@ -3,7 +3,6 @@ import { useMemo, useCallback } from 'react';
 import { 
   useGlobalKpis, 
   useAccumulatedRevenue, 
-  useGrowthExtremes, 
   useMomentum, 
   useRevenueEfficiency,
   useTransactionDensity
@@ -19,7 +18,6 @@ export function useFinancialViewModel() {
 
   const kpiQuery = useGlobalKpis(timeframe);
   const velocityQuery = useAccumulatedRevenue(timeframe, undefined, 'YearOverYear');
-  const extremesQuery = useGrowthExtremes(timeframe, 'YearOverYear');
   const momentumQuery = useMomentum(timeframe, 'YearOverYear');
   const efficiencyQuery = useRevenueEfficiency(timeframe, 'YearOverYear');
   const densityQuery = useTransactionDensity(timeframe);
@@ -28,8 +26,7 @@ export function useFinancialViewModel() {
     const efficiencyTenants = efficiencyQuery.data?.tenants;
     const momentumTenants = momentumQuery.data?.tenants;
 
-    const tenantName = extremesQuery.data?.find(e => e.tenantId === tenantId)?.tenantName 
-      || efficiencyTenants?.find((d) => d.tenantId === tenantId)?.tenantName 
+    const tenantName = efficiencyTenants?.find((d) => d.tenantId === tenantId)?.tenantName
       || momentumTenants?.find((t) => t.tenantId === tenantId)?.tenantName
       || 'Unknown Tenant';
 
@@ -38,7 +35,7 @@ export function useFinancialViewModel() {
       || 'Mixed';
       
     return { tenantName, type };
-  }, [tenantId, extremesQuery.data, efficiencyQuery.data, momentumQuery.data]);
+  }, [tenantId, efficiencyQuery.data, momentumQuery.data]);
 
   const handleTenantSelect = useCallback((id: string) => {
     void navigate({ search: (prev: Record<string, unknown>) => ({ ...prev, tenantId: id }) });
@@ -54,7 +51,6 @@ export function useFinancialViewModel() {
     selectedTenantDetails,
     kpiQuery,
     velocityQuery,
-    extremesQuery,
     momentumQuery,
     efficiencyQuery,
     densityQuery,

@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import {
   CartesianGrid,
   Line,
@@ -33,12 +33,14 @@ const CustomTooltip = ({ active, payload, label }: { isLoading?: boolean;  activ
 };
 
 export const TenantRevenueVelocityChart = memo(function TenantRevenueVelocityChart({ isLoading, points, comparison, className }: { isLoading?: boolean;  points: FinancialVelocityPoint[], comparison?: ComparisonPeriod, className?: string }) {
-  const isHourly = points.length > 0 && points.length <= 24;
-  const binSize = inferBinSize(points.map(p => p.timestamp), isHourly);
-  const chartData = points.map((p, i) => ({
-    ...p,
-    label: formatChartLabel(p.timestamp, binSize, i)
-  }));
+  const chartData = useMemo(() => {
+    const isHourly = points.length > 0 && points.length <= 24;
+    const binSize = inferBinSize(points.map(p => p.timestamp), isHourly);
+    return points.map((p, i) => ({
+      ...p,
+      label: formatChartLabel(p.timestamp, binSize, i)
+    }));
+  }, [points]);
 
   return (
     <ChartPanel isLoading={isLoading}
@@ -76,7 +78,7 @@ export const TenantRevenueVelocityChart = memo(function TenantRevenueVelocityCha
             tickLine={false}
             minTickGap={20}
           />
-          <Tooltip content={<CustomTooltip />} useTranslate3d={true} />
+          <Tooltip content={<CustomTooltip />} useTranslate3d={true} isAnimationActive={false} />
           <Line
             type="monotone"
             dataKey="previousRevenue"

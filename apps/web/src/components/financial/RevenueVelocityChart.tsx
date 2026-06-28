@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import {
   LineChart,
   Line,
@@ -59,12 +59,14 @@ const GraphTooltip = ({ active, payload, label }: { active?: boolean; payload?: 
 
 //can probably move a lot of styling over to the styling file
 function RevenueVelocityGraphJSX({ points }: { isLoading?: boolean;  points: FinancialVelocityPoint[] }) {
-  const isHourly = points.length > 0 && points.length <= 24;
-  const binSize = inferBinSize(points.map(p => p.timestamp), isHourly);
-  const chartData = points.map((p, i) => ({
-    ...p,
-    label: formatChartLabel(p.timestamp, binSize, i)
-  }));
+  const chartData = useMemo(() => {
+    const isHourly = points.length > 0 && points.length <= 24;
+    const binSize = inferBinSize(points.map(p => p.timestamp), isHourly);
+    return points.map((p, i) => ({
+      ...p,
+      label: formatChartLabel(p.timestamp, binSize, i)
+    }));
+  }, [points]);
 
   return (
     <ResponsiveContainer width="100%" height="100%">
@@ -84,7 +86,7 @@ function RevenueVelocityGraphJSX({ points }: { isLoading?: boolean;  points: Fin
           axisLine={false}
           tickLine={false}
         />
-        <Tooltip content={<GraphTooltip />} useTranslate3d={true} />
+        <Tooltip content={<GraphTooltip />} useTranslate3d={true} isAnimationActive={false} />
         <Line
           type="monotone"
           dataKey="previousRevenue"

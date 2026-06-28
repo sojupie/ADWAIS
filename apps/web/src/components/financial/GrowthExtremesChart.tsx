@@ -81,7 +81,7 @@ export const GrowthExtremesChart = memo(function GrowthExtremesChart({ isLoading
             tickLine={false}
           />
           <ReferenceLine x={0} stroke="var(--color-chart-prev-line)" strokeWidth={2} />
-          <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f1f5f9' }} useTranslate3d={true} />
+          <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f1f5f9' }} useTranslate3d={true} isAnimationActive={false} />
           <Bar
             dataKey="growthPercentage"
             className={onTenantSelect ? 'cursor-pointer hover:opacity-90 transition-opacity' : undefined}

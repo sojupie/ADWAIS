@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import {
   Area,
   AreaChart,
@@ -47,7 +47,7 @@ const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?:
 };
 
 export const PortfolioRevenueShareTrajectoryChart = memo(function PortfolioRevenueShareTrajectoryChart({isLoading, tenantVelocity, portfolioVelocity, className}: { isLoading?: boolean; tenantVelocity: FinancialVelocityPoint[]; portfolioVelocity: FinancialVelocityPoint[]; className?: string; }) {
-  const rows = buildRows(tenantVelocity, portfolioVelocity);
+  const rows = useMemo(() => buildRows(tenantVelocity, portfolioVelocity), [tenantVelocity, portfolioVelocity]);
 
   return (
     <ChartPanel isLoading={isLoading}
@@ -73,7 +73,7 @@ export const PortfolioRevenueShareTrajectoryChart = memo(function PortfolioReven
             tickLine={false}
             domain={['dataMin', 'dataMax']}
           />
-          <Tooltip content={<CustomTooltip />} useTranslate3d={true} />
+          <Tooltip content={<CustomTooltip />} useTranslate3d={true} isAnimationActive={false} />
           <Area
             type="monotone"
             dataKey="portfolioShare"

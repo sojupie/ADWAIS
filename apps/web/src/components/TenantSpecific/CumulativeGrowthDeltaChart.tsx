@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import {
   CartesianGrid,
   Line,
@@ -45,12 +45,14 @@ const CustomTooltip = ({ active, payload, label }: { isLoading?: boolean;  activ
 };
 
 export const CumulativeGrowthDeltaChart = memo(function CumulativeGrowthDeltaChart({ isLoading, isStale, points, comparison, className }: { isLoading?: boolean; isStale?: boolean; points: CumulativeGrowthDeltaPoint[], comparison?: ComparisonPeriod, className?: string }) {
-  const isHourly = points.length > 0 && points.length <= 24;
-  const binSize = inferBinSize(points.map(p => p.timestamp), isHourly);
-  const chartData = points.map((p, i) => ({
-    ...p,
-    label: formatChartLabel(p.timestamp, binSize, i)
-  }));
+  const chartData = useMemo(() => {
+    const isHourly = points.length > 0 && points.length <= 24;
+    const binSize = inferBinSize(points.map(p => p.timestamp), isHourly);
+    return points.map((p, i) => ({
+      ...p,
+      label: formatChartLabel(p.timestamp, binSize, i)
+    }));
+  }, [points]);
 
   return (
     <ChartPanel isLoading={isLoading} isStale={isStale}
@@ -76,7 +78,7 @@ export const CumulativeGrowthDeltaChart = memo(function CumulativeGrowthDeltaCha
             axisLine={false}
             tickLine={false}
           />
-          <Tooltip content={<CustomTooltip />} useTranslate3d={true} />
+          <Tooltip content={<CustomTooltip />} useTranslate3d={true} isAnimationActive={false} />
           <Line
             type="stepAfter"
             dataKey="cumulativeGrowthDelta"

@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import {
   CartesianGrid,
   ResponsiveContainer,
@@ -71,12 +71,14 @@ export const NetworkLatencyChart = memo(function NetworkLatencyChart({
   className?: string;
   comparison?: ComparisonPeriod;
 }) {
-  const isHourly = points.length > 0 && points.length <= 24;
-  const binSize = inferBinSize(points.map(p => p.timestamp), isHourly);
-  const chartData = points.map((p, i) => ({
-    ...p,
-    label: formatChartLabel(p.timestamp, binSize, i)
-  }));
+  const chartData = useMemo(() => {
+    const isHourly = points.length > 0 && points.length <= 24;
+    const binSize = inferBinSize(points.map(p => p.timestamp), isHourly);
+    return points.map((p, i) => ({
+      ...p,
+      label: formatChartLabel(p.timestamp, binSize, i)
+    }));
+  }, [points]);
 
   const legend = (
     <div className="flex gap-4 text-sm font-black text-slate-500 uppercase tracking-widest bg-slate-50 px-3 py-1 rounded-full border border-slate-100">
@@ -125,7 +127,7 @@ export const NetworkLatencyChart = memo(function NetworkLatencyChart({
                 minTickGap={30}
                 tickFormatter={(value) => `${value}ms`}
               />
-              <Tooltip content={<GraphTooltip />} useTranslate3d={true} />
+              <Tooltip content={<GraphTooltip />} useTranslate3d={true} isAnimationActive={false} />
               <Line 
                 type="monotone" 
                 dataKey="previousAverage" 

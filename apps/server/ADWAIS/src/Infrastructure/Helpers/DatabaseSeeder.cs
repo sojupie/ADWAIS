@@ -12,13 +12,25 @@ public static class DatabaseSeeder
 {
     private record TenantProfile(string Name, string Type, int MinAov, int MaxAov, int DailyVolume, int VolumeVariance, decimal SeasonalMultiplier);
 
+    private static readonly double[] HourlyWeights = 
+    { 
+        0.020, 0.010, 0.005, 0.005, 0.007, 0.010, 0.020, 0.035, 
+        0.050, 0.058, 0.065, 0.068, 0.075, 0.075, 0.068, 0.060, 
+        0.050, 0.045, 0.048, 0.055, 0.070, 0.075, 0.065, 0.042 
+    };
+
+    // Index mapping: Sunday = 0, Monday = 1, Tuesday = 2, Wednesday = 3, Thursday = 4, Friday = 5, Saturday = 6
+    private static readonly double[] DailyWeights = 
+    { 
+        0.12, 0.16, 0.16, 0.15, 0.16, 0.14, 0.11 
+    };
+
     public static async Task SeedSampleDataAsync(AnalyticsDbContext context)
     {
         var random = new Random(42);
         var profiles = GenerateProfiles();
         var tenants = await SeedTenantsAsync(context, profiles);
 
-        // Seed default FeedSources for Intranet
         if (!await context.FeedSources.AnyAsync())
         {
             context.FeedSources.AddRange(
@@ -40,7 +52,6 @@ public static class DatabaseSeeder
             await context.Database.ExecuteSqlRawAsync("TRUNCATE TABLE monitor CASCADE;");
         }
 
-        // Always run monitor seeding independently — idempotent per-tenant guard is inside the method.
         await SeedMonitorsAndMetricsAsync(context, random);
 
         if (!forceReSeed && await context.Orders.AnyAsync())
@@ -62,7 +73,6 @@ public static class DatabaseSeeder
             await BulkInsertOrdersForTenantAsync(context, tenant, profile, startDate, endDate, random);
         }
 
-        // Refresh views at the end to ensure dashboard is functional
         var views = new[]
         {
             "v_mat_financial_daily_tenant_rollup",
@@ -77,12 +87,24 @@ public static class DatabaseSeeder
 
         foreach (var view in views)
         {
-#pragma warning disable EF1003 // Safe hardcoded view names
+#pragma warning disable EF1003
             await context.Database.ExecuteSqlRawAsync("REFRESH MATERIALIZED VIEW " + view + ";");
 #pragma warning restore EF1003
         }
 
         Console.WriteLine($"Seeding completed in {sw.Elapsed.TotalMinutes:F2} minutes.");
+    }
+
+    private static int GetWeightedHour(Random random)
+    {
+        double r = random.NextDouble();
+        double sum = 0;
+        for (int i = 0; i < HourlyWeights.Length; i++)
+        {
+            sum += HourlyWeights[i];
+            if (r <= sum) return i;
+        }
+        return 23; 
     }
 
     private static async Task<int> BulkInsertOrdersForTenantAsync(
@@ -100,32 +122,34 @@ public static class DatabaseSeeder
             "COPY orders (id, tenant_id, order_state, litium_order_id, created_date, total_value_inc_vat, total_value_exc_vat, currency) FROM STDIN (FORMAT BINARY)");
 
         int count = 0;
+        double weeklyVolume = profile.DailyVolume * 7.0;
+
         for (var date = startDate; date <= endDate; date = date.AddDays(1))
         {
-            var isHolidaySeason = date.Month == 11 || date.Month == 12;
-            var dailyVolume = profile.DailyVolume + random.Next(-profile.VolumeVariance, profile.VolumeVariance + 1);
+            double dayWeight = DailyWeights[(int)date.DayOfWeek];
+            double expectedBaseDailyVolume = weeklyVolume * dayWeight;
             
+            var dailyVolume = (int)expectedBaseDailyVolume + random.Next(-profile.VolumeVariance, profile.VolumeVariance + 1);
+            if (dailyVolume < 0) dailyVolume = 0;
+            
+            var isHolidaySeason = date.Month == 11 || date.Month == 12;
             if (isHolidaySeason) dailyVolume = (int)(dailyVolume * (double)profile.SeasonalMultiplier);
-            if (date.DayOfWeek is DayOfWeek.Friday or DayOfWeek.Saturday or DayOfWeek.Sunday) dailyVolume = (int)(dailyVolume * 1.3);
 
             for (int i = 0; i < dailyVolume; i++)
             {
+                int hour = GetWeightedHour(random);
                 var orderDate = new DateTimeOffset(date.Year, date.Month, date.Day, 
-                    random.Next(0, 24), random.Next(0, 60), random.Next(0, 60), TimeSpan.Zero);
+                    hour, random.Next(0, 60), random.Next(0, 60), TimeSpan.Zero);
 
-                // Box-Muller transform for standard normal distribution
                 double u1 = 1.0 - random.NextDouble();
                 double u2 = 1.0 - random.NextDouble();
                 double randStdNormal = Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Sin(2.0 * Math.PI * u2);
 
-                // Create a log-normal distribution for e-commerce AOV
-                // We want the peak (mode) to be around the lower-middle of the range.
-                double meanLog = Math.Log((double)profile.MinAov * 2.5); // Shift mode up a bit from absolute minimum
-                double stdDevLog = 0.6; // Controls the spread and skewness
+                double meanLog = Math.Log((double)profile.MinAov * 2.5); 
+                double stdDevLog = 0.6; 
 
                 double logNormalValue = Math.Exp(meanLog + stdDevLog * randStdNormal);
 
-                // Avoid artificial volume spikes at boundaries by softly clamping to reasonable ranges without piling up values.
                 decimal valueIncVat = Math.Round((decimal)logNormalValue, 2);
                 if (valueIncVat < 50m) valueIncVat = 50m + (decimal)random.NextDouble() * 100m;
 
@@ -193,7 +217,6 @@ public static class DatabaseSeeder
     {
         var tenants = await context.Tenants.Where(t => t.Id != AnalyticsDbContext.SystemTenantGuid).ToListAsync();
 
-        // Determine the lowest existing seeded (negative) ID to avoid PK collisions on re-runs.
         var lowestExistingId = await context.Monitors.Where(m => m.Id < 0).MinAsync(m => (int?)m.Id) ?? 0;
         var nextId = lowestExistingId - 1;
 
@@ -201,15 +224,12 @@ public static class DatabaseSeeder
         {
             if (!await context.Monitors.AnyAsync(m => m.TenantId == tenant.Id))
             {
-                // Distribute SLA tiers: ~50% at 99.0, ~30% at 99.5, ~20% at 99.9
                 var slaTier = random.NextDouble();
                 var sla = slaTier < 0.5 ? 99.0 : slaTier < 0.8 ? 99.5 : 99.9;
 
-                // ~5% chance of a low degraded floor (~2 of 40 monitors will be caught by the filter)
-                // Synthetic latency is 160–199ms, so floors below 180ms will trigger degraded state.
                 var degradedFloor = random.NextDouble() < 0.05
-                    ? random.Next(120, 160)   // Low: synthetic latency will exceed this
-                    : random.Next(400, 900);  // Safe: well above synthetic latency
+                    ? random.Next(120, 160)   
+                    : random.Next(400, 900);  
 
                 context.Monitors.Add(new UptimeMonitor
                 {
@@ -247,7 +267,6 @@ public static class DatabaseSeeder
                 {
                     MonitorId = monitor.Id,
                     Date = utcMidnight,
-                    // Range 99.5–100.0% so most monitors stay above their SLA tier
                     UptimePercentage = random.NextDouble() * (100.0 - 99.5) + 99.5
                 });
 

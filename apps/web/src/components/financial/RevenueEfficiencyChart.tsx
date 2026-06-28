@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import {
   Cell,
   ReferenceLine,
@@ -62,6 +62,10 @@ export const RevenueEfficiencyChart = memo(function RevenueEfficiencyChart({
   className?: string;
 }) {
   const isEmpty = !response || response.tenants.length === 0;
+  const chartData = useMemo(
+    () => response.tenants.map((tenant) => ({ ...tenant, absoluteGrowth: Math.abs(tenant.growthVelocity) })),
+    [response.tenants]
+  );
 
   return (
     <ChartPanel isLoading={isLoading} isStale={isStale}
@@ -108,9 +112,9 @@ export const RevenueEfficiencyChart = memo(function RevenueEfficiencyChart({
             <ZAxis type="number" dataKey="growthVelocity" range={[50, 1500]} name="Growth Velocity" />
             <ReferenceLine x={response.globalAverageOrderValue} stroke="var(--color-chart-prev-line)" strokeWidth={2} strokeDasharray="5 5" />
             <ReferenceLine y={response.medianPortfolioShare} stroke="var(--color-chart-prev-line)" strokeWidth={2} strokeDasharray="5 5" />
-            <Tooltip content={<CustomTooltip />} cursor={{ strokeDasharray: '3 3' }} useTranslate3d={true} />
+            <Tooltip content={<CustomTooltip />} cursor={{ strokeDasharray: '3 3' }} useTranslate3d={true} isAnimationActive={false} />
             <Scatter
-              data={response.tenants.map(e => ({ ...e, absoluteGrowth: Math.abs(e.growthVelocity) }))}
+              data={chartData}
               dataKey="absoluteGrowth"
               className={onTenantSelect ? 'cursor-pointer hover:opacity-90 transition-opacity' : undefined}
               fillOpacity={0.7}

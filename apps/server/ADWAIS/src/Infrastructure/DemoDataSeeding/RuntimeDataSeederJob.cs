@@ -1,14 +1,13 @@
-using Adwais.Domain.Entities;
 using Adwais.Domain.Entities.Monitoring;
 using Adwais.Domain.Entities.OrderData;
 using Adwais.Domain.Enums;
 using Adwais.Infrastructure.Persistence;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
-namespace Adwais.Infrastructure.Helpers;
+namespace Adwais.Infrastructure.DemoDataSeeding;
 
 public class RuntimeDataSeederJob(
     IDbContextFactory<AnalyticsDbContext> dbContextFactory,
@@ -19,46 +18,54 @@ public class RuntimeDataSeederJob(
 
     private static readonly List<TenantProfile> Profiles = new()
     {
-        new("Nordic Fashion House", 1200, 8000, 5),
-        new("Tech Gadgets Plus", 400, 1500, 15),
-        new("Daily Grocery Express", 150, 1200, 40),
-        new("Urban Style Co", 800, 4500, 8),
-        new("Home & Hearth", 1500, 12000, 3),
-        new("Pet Paradise", 200, 1500, 20),
-        new("Sporting Goods Pro", 600, 6000, 10),
-        new("Beauty & Bliss", 300, 2500, 18),
-        new("The Coffee Beanery", 50, 400, 60),
-        new("Gourmet Delights", 500, 3500, 12),
-        new("Adventure Gear", 1000, 9000, 6),
-        new("Modern Furniture", 2500, 25000, 2),
-        new("Eco Living", 400, 3000, 14),
-        new("Toy Town", 150, 1800, 25),
-        new("Bookworm Central", 100, 800, 35),
-        new("Music Masters", 200, 5000, 9),
-        new("Gardener's Choice", 300, 4500, 11),
-        new("Fitness First", 450, 4000, 16),
-        new("Chef's Corner", 700, 5500, 7),
-        new("The Stationery Shop", 80, 600, 45),
-        new("Artistic Soul", 400, 7000, 5),
-        new("Gadget Galaxy", 300, 2000, 22),
-        new("Luxe Jewelry", 5000, 50000, 1),
-        new("Baby Steps", 250, 3000, 20),
-        new("Vintage Finds", 400, 6000, 6),
-        new("Outdoor Oasis", 1200, 10000, 4),
-        new("Smart Home Solutions", 600, 8000, 8),
-        new("The Shoe Box", 400, 3500, 14),
-        new("Healthy Habits", 200, 1200, 28),
-        new("Auto Accessories", 350, 4500, 13),
-        new("Crystal Skincare", 500, 4000, 12),
-        new("Nordic Outdoors", 800, 7000, 7),
-        new("Office Supply Hub", 100, 900, 38),
-        new("Craft Brewery Co", 200, 1500, 24),
-        new("Digital Print Shop", 300, 3000, 17),
-        new("Nordic Candles", 150, 1200, 29),
-        new("Vinyl Records", 250, 3500, 9),
-        new("Organic Pantry", 100, 800, 33),
-        new("Workshop Tools", 500, 6000, 6),
-        new("Scandi Design Studio", 1500, 15000, 3),
+        // Segment 1: High-Volume FMCG & Essentials (Low AOV, High Volume, Low Seasonality)
+        new("Daily Grocery Express", 200, 800, 400),
+        new("Organic Pantry", 300, 1000, 250),
+        new("Pet Paradise Essentials", 150, 1200, 300),
+        new("Healthy Habits Supplements", 250, 900, 350),
+        new("Office Supply Hub", 500, 3000, 200),
+
+        // Segment 2: Enterprise B2B & Industrial (High AOV, Low Volume, High Variance)
+        new("Nordic Heavy Machinery", 15000, 150000, 5),
+        new("Construction Materials Direct", 5000, 40000, 20),
+        new("Commercial Kitchen Supply", 2000, 25000, 15),
+        new("Medical Equipment Pro", 8000, 60000, 8),
+        new("Wholesale Electronics Dist", 10000, 80000, 12),
+
+        // Segment 3: Fashion & Apparel (Medium AOV, Medium/High Volume, High Seasonality)
+        new("Nordic Fashion House", 800, 4500, 150),
+        new("Urban Style Co", 600, 3500, 180),
+        new("Peak Performance Activewear", 1000, 5000, 120),
+        new("Vintage Finds Boutique", 400, 2500, 80),
+        new("The Shoe Box", 700, 3000, 140),
+
+        // Segment 4: Consumer Electronics & Tech (Medium-High AOV, High Seasonality)
+        new("Tech Gadgets Plus", 1500, 8000, 100),
+        new("Smart Home Solutions", 1000, 12000, 80),
+        new("Cosmic PC Gaming", 3000, 25000, 50),
+        new("Camera Gear Supply", 2500, 18000, 40),
+        new("Drone Store Pro", 4000, 20000, 30),
+
+        // Segment 5: Niche Luxury & High-End (Extreme AOV, Very Low Volume)
+        new("Luxe Jewelry", 8000, 80000, 8),
+        new("Elite Timepieces", 15000, 120000, 4),
+        new("Modern Art Prints", 3000, 25000, 12),
+        new("Handcrafted Leather Goods", 2000, 15000, 15),
+
+        // Segment 6: Home, Furniture & Garden (High AOV, Medium Volume, Low/Medium Seasonality)
+        new("Home & Hearth", 1500, 12000, 80),
+        new("Modern Furniture Direct", 3000, 35000, 40),
+        new("Scandi Design Studio", 1000, 8000, 60),
+        new("Gardener's Choice", 400, 3500, 90),
+        new("Outdoor Oasis", 2000, 15000, 50),
+
+        // Segment 7: Hobbies, Sports & Leisure (Mixed AOV, Mixed Volume, High Variance)
+        new("Adventure Gear Outdoors", 1200, 9000, 70),
+        new("Sporting Goods Pro", 800, 6000, 110),
+        new("Music Masters Instruments", 1500, 18000, 40),
+        new("Bookworm Central", 150, 1000, 150),
+        new("Toy Town", 200, 1500, 120),
+        new("Craft Brewery Supplies", 1000, 8000, 60)
     };
 
     private static readonly double[] HourlyWeights = 
@@ -68,7 +75,6 @@ public class RuntimeDataSeederJob(
         0.050, 0.045, 0.048, 0.055, 0.070, 0.075, 0.065, 0.042 
     };
 
-    // Index mapping: Sunday = 0, Monday = 1, Tuesday = 2, Wednesday = 3, Thursday = 4, Friday = 5, Saturday = 6
     private static readonly double[] DailyWeights = 
     { 
         0.12, 0.16, 0.16, 0.15, 0.16, 0.14, 0.11 
@@ -103,9 +109,7 @@ public class RuntimeDataSeederJob(
             double expectedOrdersToday = weeklyVolume * currentDayWeight;
             double expectedOrdersThisHour = expectedOrdersToday * currentHourWeight;
             
-            // Assume the job runs every 5 minutes (12 times an hour)
             double expectedOrdersPerRun = expectedOrdersThisHour / 12.0;
-            
             int count = (int)expectedOrdersPerRun + (random.NextDouble() < (expectedOrdersPerRun % 1.0) ? 1 : 0);
 
             if (count > 0)
@@ -127,7 +131,35 @@ public class RuntimeDataSeederJob(
         if (isMockEnabled)
         {
             await SeedMockMonitorLatencyAsync(db, now, random);
+            await SeedMockMonitorAvailabilityAsync(db, now, random);
         }
+    }
+
+    private static async Task SeedMockMonitorAvailabilityAsync(AnalyticsDbContext db, DateTimeOffset now, Random random)
+    {
+        var seededMonitors = await db.Monitors
+            .AsNoTracking()
+            .Where(m => m.Id < 0)
+            .ToListAsync();
+
+        if (!seededMonitors.Any()) return;
+
+        var availabilities = seededMonitors.Select(m =>
+        {
+            double uptimePercentage = random.NextDouble() < 0.01 
+                ? random.NextDouble() * (99.8 - 98.0) + 98.0 
+                : random.NextDouble() * (100.0 - 99.9) + 99.9;
+
+            return new MonitorAvailability
+            {
+                MonitorId = m.Id,
+                Date = now,
+                UptimePercentage = uptimePercentage
+            };
+        }).ToList();
+
+        db.MonitorAvailabilities.AddRange(availabilities);
+        await db.SaveChangesAsync();
     }
 
     private static async Task SeedMockMonitorLatencyAsync(AnalyticsDbContext db, DateTimeOffset now, Random random)
@@ -141,14 +173,29 @@ public class RuntimeDataSeederJob(
 
         var responseTimes = seededMonitors.Select(m =>
         {
-            var baseLatency = 150 + random.Next(0, 250);
+            int stableBaseLatency = 80 + (Math.Abs(m.Id.GetHashCode()) % 200);
+            int avg = stableBaseLatency + random.Next(-10, 20);
+            int highest = avg + random.Next(10, 60);
+
+            double spikeChance = random.NextDouble();
+            if (spikeChance < 0.005)
+            {
+                highest += random.Next(800, 2500);
+                avg += random.Next(150, 400);
+            }
+            else if (spikeChance < 0.03)
+            {
+                highest += random.Next(150, 300);
+                avg += random.Next(30, 80);
+            }
+
             return new ResponseTime
             {
                 MonitorId = m.Id,
                 Date = now,
-                Average = baseLatency,
-                Lowest = baseLatency - random.Next(20, 60),
-                Highest = baseLatency + random.Next(40, 150)
+                Average = Math.Max(10, avg),
+                Lowest = Math.Max(10, avg - random.Next(5, 20)),
+                Highest = highest
             };
         }).ToList();
 
@@ -178,6 +225,3 @@ public class RuntimeDataSeederJob(
         }
     }
 }
-
-
-

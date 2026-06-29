@@ -1,5 +1,3 @@
-using Adwais.Domain.Entities;
-using Adwais.Application.Common.Models;
 using Adwais.Api.DTOs.Monitoring;
 using Adwais.Domain.Entities.Monitoring;
 using Adwais.Domain.Enums;
@@ -113,7 +111,7 @@ public class MonitorController(
     /// </summary>
     /// <param name="timeframe">The timeframe for calculating uptime percentage.</param>
     /// <param name="ct">Cancellation token</param>
-    /// <param name="comparison">The comparision period type.</param>
+    /// <param name="comparison">The comparison period type.</param>
     [HttpGet("unassigned")]
     [Authorize(Policy = "KioskOrStaffAccess")]
     public async Task<ActionResult<IEnumerable<UptimeMonitorDto>>> GetUnassignedMonitors([FromQuery] Timeframe timeframe = Timeframe.T30, [FromQuery] ComparisonType comparison = ComparisonType.Preceding, CancellationToken ct = default)

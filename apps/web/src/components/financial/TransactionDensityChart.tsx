@@ -124,7 +124,7 @@ export const TransactionDensityChart = memo(function TransactionDensityChart({
           {/* Custom Tooltip */}
           {hoverInfo && createPortal(
             <div 
-              className="fixed z-50 bg-white border border-slate-100 rounded-lg shadow-lg p-4 text-sm pointer-events-none transform -translate-x-1/2 -translate-y-full w-48"
+              className="fixed min-w-min z-50 bg-white border border-slate-100 rounded-lg shadow-lg p-4 text-sm pointer-events-none transform -translate-x-1/2 -translate-y-full w-48"
               style={{ left: hoverInfo.x, top: hoverInfo.y }}
             >
               <p className="font-bold text-slate-900 mb-3 border-b border-slate-50 pb-2">

@@ -4,6 +4,7 @@ import type { AccumulatedRevenuePointDto, ComparisonPeriod } from '@types';
 import { ChartPanel } from '../common/charts/ChartPanel';
 import { formatCurrency, formatChartLabel, inferBinSize, formatCompact } from '@utils';
 import { EmptyState } from '../common/ui/EmptyState';
+import {CHART_COLORS} from "../../chartConfig.ts";
 
 interface AccumulatedRevenueChartProps {
   isLoading?: boolean;
@@ -94,7 +95,7 @@ export const AccumulatedRevenueChart = memo(function AccumulatedRevenueChart({ i
               type="monotone" 
               dataKey="previousAccumulated" 
               name="Previous Accumulated"
-              stroke="var(--color-chart-tick)" 
+              stroke={CHART_COLORS.prevLine}
               strokeWidth={2}
               strokeDasharray="4 4"
               dot={false}
@@ -105,7 +106,7 @@ export const AccumulatedRevenueChart = memo(function AccumulatedRevenueChart({ i
               type="monotone" 
               dataKey="currentAccumulated" 
               name="Current Accumulated"
-              stroke="var(--color-brand-btn-primary)" 
+              stroke={CHART_COLORS.primary}
               strokeWidth={2}
               dot={false}
               isAnimationActive={false}

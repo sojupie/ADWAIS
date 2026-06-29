@@ -618,7 +618,7 @@ namespace Adwais.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("monitor_id");
 
-                    b.Property<double>("UptimePercentage")
+                    b.Property<double?>("UptimePercentage")
                         .HasColumnType("double precision")
                         .HasColumnName("uptime_percentage");
 

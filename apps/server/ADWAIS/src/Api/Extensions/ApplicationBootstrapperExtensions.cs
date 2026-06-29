@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using System;
 using System.Threading.Tasks;
+using Adwais.Infrastructure.DemoDataSeeding;
 using Adwais.Infrastructure.Jobs;
 using Adwais.Infrastructure.Jobs.MaterializedViews;
 

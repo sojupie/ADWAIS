@@ -24,9 +24,6 @@ RUN pnpm build
 FROM nginx:alpine
 COPY --from=builder /app/apps/web/dist /usr/share/nginx/html
 
-# Copy custom nginx config if needed, but default is often fine for SPA if we add a fallback
-# We will create a simple nginx conf for SPA routing inline or just rely on default and add it later if needed.
-# To support React Router SPA, we add a simple nginx config
 RUN echo 'server { \
     listen 80; \
     location / { \

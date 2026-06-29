@@ -7,8 +7,12 @@
 
 export interface LatencyPointResponseDto {
   timestamp?: string;
-  average?: number;
-  previousAverage?: number;
-  lowest?: number;
-  highest?: number;
+  /** @nullable */
+  average?: number | null;
+  /** @nullable */
+  previousAverage?: number | null;
+  /** @nullable */
+  lowest?: number | null;
+  /** @nullable */
+  highest?: number | null;
 }

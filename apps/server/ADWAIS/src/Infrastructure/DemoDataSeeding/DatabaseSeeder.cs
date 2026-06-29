@@ -1,12 +1,11 @@
 using Adwais.Domain.Entities;
 using Adwais.Domain.Entities.Intranet;
 using Adwais.Domain.Entities.Monitoring;
-using Adwais.Domain.Entities.OrderData;
 using Adwais.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
-namespace Adwais.Infrastructure.Helpers;
+namespace Adwais.Infrastructure.DemoDataSeeding;
 
 public static class DatabaseSeeder
 {
@@ -19,7 +18,6 @@ public static class DatabaseSeeder
         0.050, 0.045, 0.048, 0.055, 0.070, 0.075, 0.065, 0.042 
     };
 
-    // Index mapping: Sunday = 0, Monday = 1, Tuesday = 2, Wednesday = 3, Thursday = 4, Friday = 5, Saturday = 6
     private static readonly double[] DailyWeights = 
     { 
         0.12, 0.16, 0.16, 0.15, 0.16, 0.14, 0.11 
@@ -176,14 +174,54 @@ public static class DatabaseSeeder
     {
         return new List<TenantProfile>
         {
-            new("Adventure Gear", "B2C", 1000, 9000, 65, 15, 2.0m),
-            new("Modern Furniture", "B2B", 2500, 25000, 25, 8, 1.7m),
-            new("Eco Living", "B2C", 400, 3000, 145, 35, 1.3m),
-            new("Toy Town", "B2C", 150, 1800, 260, 60, 3.0m),
-            new("Bookworm Central", "B2C", 100, 800, 380, 80, 1.2m),
-            new("Music Masters", "Mixed", 200, 5000, 95, 25, 1.5m),
-            new("Gardener's Choice", "B2C", 300, 4500, 115, 30, 1.2m),
-            new("Fitness First", "B2B", 450, 4000, 165, 40, 1.4m),
+            // Segment 1: High-Volume FMCG & Essentials (Low AOV, High Volume, Low Seasonality)
+            new("Daily Grocery Express", "B2C", 200, 800, 400, 50, 1.1m),
+            new("Organic Pantry", "B2C", 300, 1000, 250, 40, 1.2m),
+            new("Pet Paradise Essentials", "B2C", 150, 1200, 300, 60, 1.1m),
+            new("Healthy Habits Supplements", "B2C", 250, 900, 350, 40, 1.3m),
+            new("Office Supply Hub", "B2B", 500, 3000, 200, 80, 1.1m),
+
+            // Segment 2: Enterprise B2B & Industrial (High AOV, Low Volume, High Variance)
+            new("Nordic Heavy Machinery", "B2B", 15000, 150000, 5, 3, 1.0m),
+            new("Construction Materials Direct", "B2B", 5000, 40000, 20, 10, 1.1m),
+            new("Commercial Kitchen Supply", "B2B", 2000, 25000, 15, 8, 1.2m),
+            new("Medical Equipment Pro", "B2B", 8000, 60000, 8, 4, 1.0m),
+            new("Wholesale Electronics Dist", "B2B", 10000, 80000, 12, 6, 1.4m),
+
+            // Segment 3: Fashion & Apparel (Medium AOV, Medium/High Volume, High Seasonality)
+            new("Nordic Fashion House", "B2C", 800, 4500, 150, 40, 1.8m),
+            new("Urban Style Co", "B2C", 600, 3500, 180, 50, 1.7m),
+            new("Peak Performance Activewear", "B2C", 1000, 5000, 120, 30, 1.6m),
+            new("Vintage Finds Boutique", "B2C", 400, 2500, 80, 20, 1.5m),
+            new("The Shoe Box", "B2C", 700, 3000, 140, 35, 1.6m),
+
+            // Segment 4: Consumer Electronics & Tech (Medium-High AOV, High Seasonality)
+            new("Tech Gadgets Plus", "B2C", 1500, 8000, 100, 30, 2.5m),
+            new("Smart Home Solutions", "Mixed", 1000, 12000, 80, 25, 2.2m),
+            new("Cosmic PC Gaming", "B2C", 3000, 25000, 50, 15, 2.0m),
+            new("Camera Gear Supply", "Mixed", 2500, 18000, 40, 12, 1.8m),
+            new("Drone Store Pro", "B2C", 4000, 20000, 30, 10, 1.9m),
+
+            // Segment 5: Niche Luxury & High-End (Extreme AOV, Very Low Volume)
+            new("Luxe Jewelry", "B2C", 8000, 80000, 8, 4, 2.5m),
+            new("Elite Timepieces", "B2C", 15000, 120000, 4, 2, 2.0m),
+            new("Modern Art Prints", "B2C", 3000, 25000, 12, 5, 1.5m),
+            new("Handcrafted Leather Goods", "B2C", 2000, 15000, 15, 6, 1.8m),
+
+            // Segment 6: Home, Furniture & Garden (High AOV, Medium Volume, Low/Medium Seasonality)
+            new("Home & Hearth", "B2C", 1500, 12000, 80, 20, 1.6m),
+            new("Modern Furniture Direct", "Mixed", 3000, 35000, 40, 15, 1.4m),
+            new("Scandi Design Studio", "B2C", 1000, 8000, 60, 15, 1.3m),
+            new("Gardener's Choice", "B2C", 400, 3500, 90, 30, 1.8m),
+            new("Outdoor Oasis", "Mixed", 2000, 15000, 50, 20, 1.7m),
+
+            // Segment 7: Hobbies, Sports & Leisure (Mixed AOV, Mixed Volume, High Variance)
+            new("Adventure Gear Outdoors", "B2C", 1200, 9000, 70, 25, 1.8m),
+            new("Sporting Goods Pro", "Mixed", 800, 6000, 110, 30, 1.5m),
+            new("Music Masters Instruments", "Mixed", 1500, 18000, 40, 15, 1.6m),
+            new("Bookworm Central", "B2C", 150, 1000, 150, 40, 1.4m),
+            new("Toy Town", "B2C", 200, 1500, 120, 40, 3.5m),
+            new("Craft Brewery Supplies", "B2B", 1000, 8000, 60, 20, 1.2m)
         };
     }
 
@@ -240,7 +278,7 @@ public static class DatabaseSeeder
                     UptimeSla = sla,
                     LatencyDegradedFloor = degradedFloor,
                     UptimeMonitorEnabled = true,
-                    CreatedDate = DateTimeOffset.UtcNow.AddDays(-60),
+                    CreatedDate = DateTimeOffset.UtcNow.AddDays(-730),
                     UpdateInterval = 300
                 });
             }
@@ -248,47 +286,69 @@ public static class DatabaseSeeder
         await context.SaveChangesAsync();
 
         var allMonitors = await context.Monitors.ToListAsync();
-        var sixtyDaysAgo = DateTimeOffset.UtcNow.Date.AddDays(-60);
+        var historyStartDate = DateTimeOffset.UtcNow.Date.AddDays(-730);
 
         foreach (var monitor in allMonitors)
         {
             if (await context.MonitorAvailabilities.AnyAsync(ma => ma.MonitorId == monitor.Id))
                 continue;
 
+            int stableBaseLatency = 80 + (Math.Abs(monitor.Id.GetHashCode()) % 200);
             var availabilityList = new List<MonitorAvailability>();
             var responseTimes = new List<ResponseTime>();
 
-            for (var d = 0; d < 60; d++)
+            for (var d = 0; d < 730; d++)
             {
-                var date = sixtyDaysAgo.AddDays(d);
+                var date = historyStartDate.AddDays(d);
                 var utcMidnight = new DateTimeOffset(date.Year, date.Month, date.Day, 0, 0, 0, TimeSpan.Zero);
 
-                availabilityList.Add(new MonitorAvailability
-                {
-                    MonitorId = monitor.Id,
-                    Date = utcMidnight,
-                    UptimePercentage = random.NextDouble() * (100.0 - 99.5) + 99.5
-                });
-
-                for (int h = 0; h < 24; h++)
+                for (int h = 0; h < 24; h += 6)
                 {
                     var timestamp = utcMidnight.AddHours(h);
-                    var avg = random.Next(150, 800);
+                    
+                    double uptimePercentage = random.NextDouble() < 0.01 
+                        ? random.NextDouble() * (99.8 - 98.0) + 98.0 
+                        : random.NextDouble() * (100.0 - 99.9) + 99.9;
+
+                    availabilityList.Add(new MonitorAvailability
+                    {
+                        MonitorId = monitor.Id,
+                        Date = timestamp,
+                        UptimePercentage = uptimePercentage
+                    });
+                    
+                    int avg = stableBaseLatency + random.Next(-10, 20);
+                    int highest = avg + random.Next(10, 60);
+
+                    double spikeChance = random.NextDouble();
+                    if (spikeChance < 0.005)
+                    {
+                        highest += random.Next(800, 2500);
+                        avg += random.Next(150, 400);
+                    }
+                    else if (spikeChance < 0.03)
+                    {
+                        highest += random.Next(150, 300);
+                        avg += random.Next(30, 80);
+                    }
+
                     responseTimes.Add(new ResponseTime
                     {
                         MonitorId = monitor.Id,
                         Date = timestamp,
-                        Average = avg,
-                        Lowest = avg - 50,
-                        Highest = avg + 150
+                        Average = Math.Max(10, avg),
+                        Lowest = Math.Max(10, avg - random.Next(5, 20)),
+                        Highest = highest
                     });
                 }
                 
                 if (responseTimes.Count > 2000)
                 {
                     context.ResponseTimes.AddRange(responseTimes);
+                    context.MonitorAvailabilities.AddRange(availabilityList);
                     await context.SaveChangesAsync();
                     responseTimes.Clear();
+                    availabilityList.Clear();
                 }
             }
             
@@ -298,5 +358,3 @@ public static class DatabaseSeeder
         }
     }
 }
-
-

@@ -49,6 +49,9 @@ public static class TimeframeResolver
         return new ResolvedPeriod(currentStart, currentEnd, previousStart, previousEnd, steps, isHourly, false);
     }
 
+    /// <summary>
+    /// Builds a rolling hourly period and its previous comparison period.
+    /// </summary>
     private static ResolvedPeriod BuildRollingHourlyPeriod(DateTimeOffset currentEnd, DateTimeOffset now, int days, ComparisonType comparisonType)
     {
         var currentHour = new DateTimeOffset(now.Year, now.Month, now.Day, now.Hour, 0, 0, TimeSpan.Zero);

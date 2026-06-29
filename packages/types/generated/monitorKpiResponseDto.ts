@@ -6,16 +6,28 @@
  */
 
 export interface MonitorKpiResponseDto {
-  averageUptime?: number;
-  previousAverageUptime?: number;
-  uptimeGrowthPercentage?: number;
-  averageLatency?: number;
-  previousAverageLatency?: number;
-  latencyGrowthPercentage?: number;
-  highestLatency?: number;
-  previousHighestLatency?: number;
-  highestLatencyGrowthPercentage?: number;
-  lowestLatency?: number;
-  previousLowestLatency?: number;
-  lowestLatencyGrowthPercentage?: number;
+  /** @nullable */
+  averageUptime?: number | null;
+  /** @nullable */
+  previousAverageUptime?: number | null;
+  /** @nullable */
+  uptimeGrowthPercentage?: number | null;
+  /** @nullable */
+  averageLatency?: number | null;
+  /** @nullable */
+  previousAverageLatency?: number | null;
+  /** @nullable */
+  latencyGrowthPercentage?: number | null;
+  /** @nullable */
+  highestLatency?: number | null;
+  /** @nullable */
+  previousHighestLatency?: number | null;
+  /** @nullable */
+  highestLatencyGrowthPercentage?: number | null;
+  /** @nullable */
+  lowestLatency?: number | null;
+  /** @nullable */
+  previousLowestLatency?: number | null;
+  /** @nullable */
+  lowestLatencyGrowthPercentage?: number | null;
 }

@@ -9,7 +9,6 @@ using Adwais.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
-
 namespace Adwais.Application.Services;
 
 public class MonitorOrchestrationService(
@@ -18,7 +17,7 @@ public class MonitorOrchestrationService(
     ICacheService cache,
     IConfiguration configuration) : IMonitorOrchestrationService
 {
-    private record LatencyRow(DateTime Timestamp, double Average, double Lowest, double Highest);
+    private record LatencyRow(DateTime Timestamp, double? Average, double? Lowest, double? Highest);
 
     public async Task<MonitorAnalyticsDto> GetAnalyticsAsync(ResolvedPeriod period, Guid? tenantId = null, int? monitorId = null, CancellationToken ct = default)
     {
@@ -49,7 +48,7 @@ public class MonitorOrchestrationService(
 
         var previousByStep = previousRows
             .GroupBy(r => (int)((r.Timestamp - previousStart.UtcDateTime).TotalHours / binSizeHours))
-            .ToDictionary(g => g.Key, g => g.Average(r => r.Average));
+            .ToDictionary(g => g.Key, g => (double?)g.Average(r => r.Average));
 
         var latencyPoints = new List<LatencyPointDto>(steps);
         for (var i = 0; i < steps; i++)
@@ -64,14 +63,14 @@ public class MonitorOrchestrationService(
             }
             
             var data = currentByStep.GetValueOrDefault(i);
-            var prevAvg = previousByStep.GetValueOrDefault(i, 0.0);
+            double? prevAvg = previousByStep.TryGetValue(i, out var p) ? p : null;
 
             latencyPoints.Add(new LatencyPointDto(
                 timestamp, 
-                data?.Avg ?? 0, 
+                data?.Avg, 
                 prevAvg,
-                data?.Min ?? 0, 
-                data?.Max ?? 0));
+                data?.Min, 
+                data?.Max));
         }
         
         IQueryable<UptimeMonitor> monitorQuery = dbContext.Monitors.AsNoTracking().Include(m => m.Tenant);
@@ -107,21 +106,21 @@ public class MonitorOrchestrationService(
             .Select(m => previousPeriodUptimes[m.Id]!.Value)
             .ToList();
 
-        double avgUptime = currentEnabledUptimes.Count > 0 ? currentEnabledUptimes.Average() : 0.0;
-        double previousAvgUptime = previousEnabledUptimes.Count > 0 ? previousEnabledUptimes.Average() : 0.0;
-        double uptimeGrowth = CalculateGrowthPercentage(avgUptime, previousAvgUptime);
+        double? avgUptime = currentEnabledUptimes.Count > 0 ? currentEnabledUptimes.Average() : null;
+        double? previousAvgUptime = previousEnabledUptimes.Count > 0 ? previousEnabledUptimes.Average() : null;
+        double? uptimeGrowth = CalculateGrowthPercentage(avgUptime, previousAvgUptime);
 
-        double avgLatency = currentRows.Count > 0 ? currentRows.Average(r => r.Average) : 0.0;
-        double prevAvgLatency = previousRows.Count > 0 ? previousRows.Average(r => r.Average) : 0.0;
-        double latencyGrowth = CalculateGrowthPercentage(avgLatency, prevAvgLatency);
+        double? avgLatency = currentRows.Count > 0 ? currentRows.Average(r => r.Average) : null;
+        double? prevAvgLatency = previousRows.Count > 0 ? previousRows.Average(r => r.Average) : null;
+        double? latencyGrowth = CalculateGrowthPercentage(avgLatency, prevAvgLatency);
 
-        double highestLatency = currentRows.Count > 0 ? currentRows.Max(r => r.Highest) : 0.0;
-        double prevHighestLatency = previousRows.Count > 0 ? previousRows.Max(r => r.Highest) : 0.0;
-        double highestLatencyGrowth = CalculateGrowthPercentage(highestLatency, prevHighestLatency);
+        double? highestLatency = currentRows.Count > 0 ? currentRows.Max(r => r.Highest) : null;
+        double? prevHighestLatency = previousRows.Count > 0 ? previousRows.Max(r => r.Highest) : null;
+        double? highestLatencyGrowth = CalculateGrowthPercentage(highestLatency, prevHighestLatency);
 
-        double lowestLatency = currentRows.Count > 0 ? currentRows.Min(r => r.Lowest) : 0.0;
-        double prevLowestLatency = previousRows.Count > 0 ? previousRows.Min(r => r.Lowest) : 0.0;
-        double lowestLatencyGrowth = CalculateGrowthPercentage(lowestLatency, prevLowestLatency);
+        double? lowestLatency = currentRows.Count > 0 ? currentRows.Min(r => r.Lowest) : null;
+        double? prevLowestLatency = previousRows.Count > 0 ? previousRows.Min(r => r.Lowest) : null;
+        double? lowestLatencyGrowth = CalculateGrowthPercentage(lowestLatency, prevLowestLatency);
 
         var kpis = new MonitorKpiDto(
             avgUptime,
@@ -149,12 +148,15 @@ public class MonitorOrchestrationService(
 
     private async Task<Dictionary<int, double?>> GetPeriodUptimesAsync(DateTimeOffset start, DateTimeOffset end, Guid? tenantId, int? monitorId, CancellationToken ct = default)
     {
-        var yesterday = new DateTimeOffset(DateTimeOffset.UtcNow.Date);
-        var viewEnd = yesterday < end ? yesterday : end;
+        // Floor start boundary to UTC midnight to capture preceding time-series buckets
+        var queryStart = new DateTimeOffset(start.UtcDateTime.Date, TimeSpan.Zero);
+        var yesterday = new DateTimeOffset(DateTimeOffset.UtcNow.Date, TimeSpan.Zero);
+        
+        var histEnd = yesterday < end ? yesterday : end;
 
-        IQueryable<DailyAvailabilityMonitorRollup> histQuery = dbContext.DailyAvailabilityMonitorRollups
+        var histQuery = dbContext.DailyAvailabilityMonitorRollups
             .AsNoTracking()
-            .Where(r => r.Date >= start && r.Date < viewEnd);
+            .Where(r => r.Date >= queryStart && r.Date < histEnd);
 
         if (monitorId.HasValue)
             histQuery = histQuery.Where(r => r.MonitorId == monitorId.Value);
@@ -170,14 +172,15 @@ public class MonitorOrchestrationService(
                 Avg = (double?)g.Average(r => r.UptimePercentage), 
                 Count = g.Count(r => r.UptimePercentage != null) 
             })
-            .ToListAsync(ct);
+            .ToDictionaryAsync(x => x.MonitorId, x => (x.Avg, x.Count), ct);
 
-        var todayLive = new Dictionary<int, double>();
+        var todayLive = new Dictionary<int, (double? Avg, int Count)>();
         if (yesterday < end)
         {
+            var liveStart = yesterday > queryStart ? yesterday : queryStart;
             IQueryable<MonitorAvailability> liveQuery = dbContext.MonitorAvailabilities
                 .AsNoTracking()
-                .Where(ma => ma.Date >= yesterday && ma.Date < end);
+                .Where(ma => ma.Date >= liveStart && ma.Date < end);
 
             if (monitorId.HasValue)
                 liveQuery = liveQuery.Where(ma => ma.MonitorId == monitorId.Value);
@@ -187,20 +190,26 @@ public class MonitorOrchestrationService(
                 liveQuery = liveQuery.Where(ma => ma.UptimeMonitor!.TenantId != IApplicationDbContext.SystemTenantGuid);
 
             todayLive = await liveQuery
-                .ToDictionaryAsync(ma => ma.MonitorId, ma => ma.UptimePercentage, ct);
+                .GroupBy(ma => ma.MonitorId)
+                .Select(g => new { 
+                    MonitorId = g.Key, 
+                    Avg = (double?)g.Average(ma => ma.UptimePercentage),
+                    Count = g.Count(ma => ma.UptimePercentage != null) 
+                })
+                .ToDictionaryAsync(x => x.MonitorId, x => (x.Avg, x.Count), ct);
         }
 
         var results = new Dictionary<int, double?>();
-        var allMonitorIds = historicalDaily.Select(x => x.MonitorId).Union(todayLive.Keys);
+        var allMonitorIds = historicalDaily.Keys.Union(todayLive.Keys).Distinct();
 
         foreach (var mid in allMonitorIds)
         {
-            var hist = historicalDaily.FirstOrDefault(x => x.MonitorId == mid);
-            var today = todayLive.TryGetValue(mid, out var todayVal) ? (double?)todayVal : null;
+            var hasHist = historicalDaily.TryGetValue(mid, out var hist);
+            var hasLive = todayLive.TryGetValue(mid, out var live);
             
-            var histCount = hist?.Count ?? 0;
-            var todayCount = today.HasValue ? 1 : 0;
-            var totalCount = histCount + todayCount;
+            var histCount = hasHist ? hist.Count : 0;
+            var liveCount = hasLive ? live.Count : 0;
+            var totalCount = histCount + liveCount;
             
             if (totalCount == 0)
             {
@@ -208,9 +217,9 @@ public class MonitorOrchestrationService(
             }
             else
             {
-                var histSum = (hist?.Avg ?? 0) * histCount;
-                var todaySum = today ?? 0;
-                results[mid] = (histSum + todaySum) / totalCount;
+                var histSum = (hasHist ? (hist.Avg ?? 0) : 0) * histCount;
+                var liveSum = (hasLive ? (live.Avg ?? 0) : 0) * liveCount;
+                results[mid] = (histSum + liveSum) / totalCount;
             }
         }
 
@@ -234,9 +243,9 @@ public class MonitorOrchestrationService(
                 .GroupBy(rt => new { rt.Date.Year, rt.Date.Month, rt.Date.Day, rt.Date.Hour })
                 .Select(g => new LatencyRow(
                     new DateTime(g.Key.Year, g.Key.Month, g.Key.Day, g.Key.Hour, 0, 0),
-                    g.Average(rt => rt.Average ?? 0),
-                    g.Min(rt => rt.Lowest ?? 0),
-                    g.Max(rt => rt.Highest ?? 0)
+                    g.Average(rt => rt.Average),
+                    g.Min(rt => rt.Lowest),
+                    g.Max(rt => rt.Highest)
                 ))
                 .ToListAsync(ct);
             return grouped;
@@ -254,7 +263,7 @@ public class MonitorOrchestrationService(
             histQuery = histQuery.Where(r => r.UptimeMonitor.TenantId != IApplicationDbContext.SystemTenantGuid);
 
         var historical = await histQuery
-            .Select(r => new LatencyRow(r.Date.DateTime, r.Average ?? 0, r.Lowest ?? 0, r.Highest ?? 0))
+            .Select(r => new LatencyRow(r.Date.DateTime, r.Average, r.Lowest, r.Highest))
             .ToListAsync(ct);
 
         if (yesterday < end)
@@ -271,9 +280,9 @@ public class MonitorOrchestrationService(
                 .GroupBy(rt => rt.Date.Date)
                 .Select(g => new LatencyRow(
                     g.Key,
-                    g.Average(rt => rt.Average ?? 0),
-                    g.Min(rt => rt.Lowest ?? 0),
-                    g.Max(rt => rt.Highest ?? 0)
+                    g.Average(rt => rt.Average),
+                    g.Min(rt => rt.Lowest),
+                    g.Max(rt => rt.Highest)
                 ))
                 .ToListAsync(ct);
             historical.AddRange(fresh);
@@ -386,7 +395,7 @@ public class MonitorOrchestrationService(
             if (isMockEnabled && monitor.Id <= 0)
             {
                 monitor.StatusStr = "Up";
-                monitor.CurrentLatency = 200 + (monitor.Id % 400); // Deterministic fake latency 200-599ms
+                monitor.CurrentLatency = 200 + (monitor.Id % 400); 
             }
         }
     }
@@ -502,14 +511,11 @@ public class MonitorOrchestrationService(
         return monitor;
     }
 
-    private static double CalculateGrowthPercentage(double current, double previous)
+    private static double? CalculateGrowthPercentage(double? current, double? previous)
     {
-        if (previous == 0)
-            return 0.0;
+        if (!current.HasValue || !previous.HasValue || previous == 0)
+            return null;
 
-        return Math.Round((current - previous) / previous * 100, 2);
+        return Math.Round((current.Value - previous.Value) / previous.Value * 100, 2);
     }
 }
-
-
-

@@ -13,7 +13,7 @@ export type GetApiMonitorsUnassignedParams = {
  */
 timeframe?: Timeframe;
 /**
- * The comparision period type.
+ * The comparison period type.
  */
 comparison?: ComparisonType;
 };

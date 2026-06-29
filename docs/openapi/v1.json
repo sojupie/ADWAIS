@@ -1499,7 +1499,7 @@
           {
             "name": "comparison",
             "in": "query",
-            "description": "The comparision period type.",
+            "description": "The comparison period type.",
             "schema": {
               "$ref": "#/components/schemas/ComparisonType"
             }
@@ -3022,19 +3022,23 @@
           },
           "average": {
             "type": "number",
-            "format": "double"
+            "format": "double",
+            "nullable": true
           },
           "previousAverage": {
             "type": "number",
-            "format": "double"
+            "format": "double",
+            "nullable": true
           },
           "lowest": {
             "type": "number",
-            "format": "double"
+            "format": "double",
+            "nullable": true
           },
           "highest": {
             "type": "number",
-            "format": "double"
+            "format": "double",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -3164,51 +3168,63 @@
         "properties": {
           "averageUptime": {
             "type": "number",
-            "format": "double"
+            "format": "double",
+            "nullable": true
           },
           "previousAverageUptime": {
             "type": "number",
-            "format": "double"
+            "format": "double",
+            "nullable": true
           },
           "uptimeGrowthPercentage": {
             "type": "number",
-            "format": "double"
+            "format": "double",
+            "nullable": true
           },
           "averageLatency": {
             "type": "number",
-            "format": "double"
+            "format": "double",
+            "nullable": true
           },
           "previousAverageLatency": {
             "type": "number",
-            "format": "double"
+            "format": "double",
+            "nullable": true
           },
           "latencyGrowthPercentage": {
             "type": "number",
-            "format": "double"
+            "format": "double",
+            "nullable": true
           },
           "highestLatency": {
             "type": "number",
-            "format": "double"
+            "format": "double",
+            "nullable": true
           },
           "previousHighestLatency": {
             "type": "number",
-            "format": "double"
+            "format": "double",
+            "nullable": true
           },
           "highestLatencyGrowthPercentage": {
             "type": "number",
-            "format": "double"
+            "format": "double",
+            "nullable": true
           },
           "lowestLatency": {
             "type": "number",
-            "format": "double"
+            "format": "double",
+            "nullable": true
           },
           "previousLowestLatency": {
             "type": "number",
-            "format": "double"
+            "format": "double",
+            "nullable": true
           },
           "lowestLatencyGrowthPercentage": {
             "type": "number",
-            "format": "double"
+            "format": "double",
+            "nullable": true
           }
         },
         "additionalProperties": false

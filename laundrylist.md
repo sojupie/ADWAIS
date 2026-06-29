@@ -12,3 +12,6 @@
 - provide error/warning when a litium job fails either due to an error or if the service is disabled, or dont even offer it as an option
 - add date to system logs
 - correct dbcontext factory implementation in controllers and services
+- alert on new orders
+- change uptime% fetch to be more accurate, not full day block
+- backend should calculate p10 and p90 for latency charts

@@ -42,7 +42,7 @@ export function InternalAnnouncements() {
           No announcements available.
         </div>
       ) : (
-        <div className="flex flex-col gap-4 p-4 flex-1 min-h-0 overflow-y-auto custom-scrollbar">
+        <div className="flex flex-col gap-4 p-4 flex-1 min-h-0 overflow-y-auto divide-y divide-slate-100 custom-scrollbar">
           {newsletters.map((a) => (
             <div key={a.id} className="pb-4 border-b border-slate-100 last:border-0 last:pb-0 animate-in fade-in slide-in-from-top-2 duration-300">
               <div className="flex justify-between items-baseline mb-1">

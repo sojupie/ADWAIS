@@ -1,9 +1,9 @@
 import { CollectionPanel } from '../common/dashboard/CollectionPanel';
-import { useGetApiIntranetNewsletters } from '../../api/generated/endpoints';
+import { useGetApiIntranetPosts } from '../../api/generated/endpoints';
 
 export function InternalAnnouncements() {
-  const { data: response, isLoading, isError } = useGetApiIntranetNewsletters();
-  const newsletters = response?.data || [];
+  const { data: response, isLoading, isError } = useGetApiIntranetPosts();
+  const posts = response?.data || [];
 
   const formatDate = (dateString: string) => {
     try {
@@ -37,16 +37,21 @@ export function InternalAnnouncements() {
         <div className="p-4 text-center text-slate-400 text-sm font-semibold py-8">
           Failed to load announcements.
         </div>
-      ) : newsletters.length === 0 ? (
+      ) : posts.length === 0 ? (
         <div className="p-4 text-center text-slate-400 text-sm font-semibold py-8">
           No announcements available.
         </div>
       ) : (
         <div className="flex flex-col gap-4 p-4 flex-1 min-h-0 overflow-y-auto divide-y divide-slate-100 custom-scrollbar">
-          {newsletters.map((a) => (
+          {posts.map((a) => (
             <div key={a.id} className="pb-4 border-b border-slate-100 last:border-0 last:pb-0 animate-in fade-in slide-in-from-top-2 duration-300">
               <div className="flex justify-between items-baseline mb-1">
-                <h3 className="text-sm font-bold text-slate-800">{a.title || 'Untitled'}</h3>
+                <div className="flex flex-col gap-0.5">
+                  <h3 className="text-sm font-bold text-slate-800">{a.title || 'Untitled'}</h3>
+                  {a.user?.name && (
+                    <span className="text-xs text-slate-400 font-medium">by {a.user.name}</span>
+                  )}
+                </div>
                 <span className="text-sm font-black text-slate-400 uppercase tracking-widest shrink-0 ml-2">
                   {formatDate(a.createdAt)}
                 </span>

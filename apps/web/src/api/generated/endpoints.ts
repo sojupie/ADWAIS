@@ -27,6 +27,7 @@ import type {
   AccumulatedRevenuePointResponseDto,
   ActivateKioskRequestDto,
   BackgroundJobStatusDto,
+  CommunityPost,
   CreateMonitorRequestDto,
   CreateNewsletterDto,
   CreatePostDto,
@@ -49,7 +50,6 @@ import type {
   GetApiFinancialVelocityParams,
   GetApiFinancialVolumeAnomalyParams,
   GetApiIntranetFeedsParams,
-  GetApiIntranetNewslettersParams,
   GetApiKioskTokenParams,
   GetApiMonitorsAnalyticsParams,
   GetApiMonitorsIdLatencyParams,
@@ -65,7 +65,6 @@ import type {
   MomentumResponseDto,
   MonitorAnalyticsResponseDto,
   NetGrowthAdditionPointResponseDto,
-  Newsletter,
   OrderBinResponseDto,
   PostApiIngestionBackfillParams,
   PostApiMonitorsParams,
@@ -893,12 +892,22 @@ export function useGetApiJobStatusJobId<TData = Awaited<ReturnType<typeof getApi
 
 
 
-export type getApiIntranetPostsIdResponse200 = {
-  data: void
+export type getApiIntranetPostsIdResponse200TextPlain = {
+  data: CommunityPost
   status: 200
 }
 
-export type getApiIntranetPostsIdResponseSuccess = (getApiIntranetPostsIdResponse200) & {
+export type getApiIntranetPostsIdResponse200ApplicationJson = {
+  data: CommunityPost
+  status: 200
+}
+
+export type getApiIntranetPostsIdResponse200TextJson = {
+  data: CommunityPost
+  status: 200
+}
+
+export type getApiIntranetPostsIdResponseSuccess = (getApiIntranetPostsIdResponse200TextPlain | getApiIntranetPostsIdResponse200ApplicationJson | getApiIntranetPostsIdResponse200TextJson) & {
   headers: Headers;
 };
 ;
@@ -1000,12 +1009,22 @@ export function useGetApiIntranetPostsId<TData = Awaited<ReturnType<typeof getAp
 
 
 
-export type getApiIntranetPostsResponse200 = {
-  data: void
+export type getApiIntranetPostsResponse200TextPlain = {
+  data: CommunityPost[]
   status: 200
 }
 
-export type getApiIntranetPostsResponseSuccess = (getApiIntranetPostsResponse200) & {
+export type getApiIntranetPostsResponse200ApplicationJson = {
+  data: CommunityPost[]
+  status: 200
+}
+
+export type getApiIntranetPostsResponse200TextJson = {
+  data: CommunityPost[]
+  status: 200
+}
+
+export type getApiIntranetPostsResponseSuccess = (getApiIntranetPostsResponse200TextPlain | getApiIntranetPostsResponse200ApplicationJson | getApiIntranetPostsResponse200TextJson) & {
   headers: Headers;
 };
 ;
@@ -1107,12 +1126,22 @@ export function useGetApiIntranetPosts<TData = Awaited<ReturnType<typeof getApiI
 
 
 
-export type postApiIntranetPostsResponse200 = {
-  data: void
+export type postApiIntranetPostsResponse200TextPlain = {
+  data: CommunityPost
   status: 200
 }
 
-export type postApiIntranetPostsResponseSuccess = (postApiIntranetPostsResponse200) & {
+export type postApiIntranetPostsResponse200ApplicationJson = {
+  data: CommunityPost
+  status: 200
+}
+
+export type postApiIntranetPostsResponse200TextJson = {
+  data: CommunityPost
+  status: 200
+}
+
+export type postApiIntranetPostsResponseSuccess = (postApiIntranetPostsResponse200TextPlain | postApiIntranetPostsResponse200ApplicationJson | postApiIntranetPostsResponse200TextJson) & {
   headers: Headers;
 };
 ;
@@ -4880,130 +4909,6 @@ export function useGetApiMonitorsIdLatency<TData = Awaited<ReturnType<typeof get
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetApiMonitorsIdLatencyQueryOptions(id,params,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-
-
-
-
-export type getApiIntranetNewslettersResponse200TextPlain = {
-  data: Newsletter[]
-  status: 200
-}
-
-export type getApiIntranetNewslettersResponse200ApplicationJson = {
-  data: Newsletter[]
-  status: 200
-}
-
-export type getApiIntranetNewslettersResponse200TextJson = {
-  data: Newsletter[]
-  status: 200
-}
-
-export type getApiIntranetNewslettersResponseSuccess = (getApiIntranetNewslettersResponse200TextPlain | getApiIntranetNewslettersResponse200ApplicationJson | getApiIntranetNewslettersResponse200TextJson) & {
-  headers: Headers;
-};
-;
-
-export type getApiIntranetNewslettersResponse = (getApiIntranetNewslettersResponseSuccess)
-
-export const getGetApiIntranetNewslettersUrl = (params?: GetApiIntranetNewslettersParams,) => {
-  const normalizedParams = new URLSearchParams();
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : String(value))
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0 ? `/api/intranet/newsletters?${stringifiedParams}` : `/api/intranet/newsletters`
-}
-
-export const getApiIntranetNewsletters = async (params?: GetApiIntranetNewslettersParams, options?: RequestInit): Promise<getApiIntranetNewslettersResponse> => {
-
-  return customClient<getApiIntranetNewslettersResponse>(getGetApiIntranetNewslettersUrl(params),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getGetApiIntranetNewslettersQueryKey = (params?: GetApiIntranetNewslettersParams,) => {
-    return [
-    `/api/intranet/newsletters`, ...(params ? [params] : [])
-    ] as const;
-    }
-
-
-export const getGetApiIntranetNewslettersQueryOptions = <TData = Awaited<ReturnType<typeof getApiIntranetNewsletters>>, TError = unknown>(params?: GetApiIntranetNewslettersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetNewsletters>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetApiIntranetNewslettersQueryKey(params);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiIntranetNewsletters>>> = ({ signal }) => getApiIntranetNewsletters(params, { signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetNewsletters>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetApiIntranetNewslettersQueryResult = NonNullable<Awaited<ReturnType<typeof getApiIntranetNewsletters>>>
-export type GetApiIntranetNewslettersQueryError = unknown
-
-
-export function useGetApiIntranetNewsletters<TData = Awaited<ReturnType<typeof getApiIntranetNewsletters>>, TError = unknown>(
- params: undefined |  GetApiIntranetNewslettersParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetNewsletters>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiIntranetNewsletters>>,
-          TError,
-          Awaited<ReturnType<typeof getApiIntranetNewsletters>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customClient>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiIntranetNewsletters<TData = Awaited<ReturnType<typeof getApiIntranetNewsletters>>, TError = unknown>(
- params?: GetApiIntranetNewslettersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetNewsletters>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiIntranetNewsletters>>,
-          TError,
-          Awaited<ReturnType<typeof getApiIntranetNewsletters>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customClient>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiIntranetNewsletters<TData = Awaited<ReturnType<typeof getApiIntranetNewsletters>>, TError = unknown>(
- params?: GetApiIntranetNewslettersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetNewsletters>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-
-export function useGetApiIntranetNewsletters<TData = Awaited<ReturnType<typeof getApiIntranetNewsletters>>, TError = unknown>(
- params?: GetApiIntranetNewslettersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetNewsletters>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetApiIntranetNewslettersQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

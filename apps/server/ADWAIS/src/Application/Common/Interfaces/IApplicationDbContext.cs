@@ -26,7 +26,6 @@ public interface IApplicationDbContext : IDisposable, IAsyncDisposable
     DbSet<DailyAvailabilityTenantRollup> DailyAvailabilityTenantRollups { get; }
     DbSet<DailyAvailabilityGlobalRollup> DailyAvailabilityGlobalRollups { get; }
     DbSet<CommunityPost> CommunityPosts { get; }
-    DbSet<Newsletter> Newsletters { get; }
     DbSet<OfficeEvent> OfficeEvents { get; }
     DbSet<FeedSource> FeedSources { get; }
     DbSet<FeedItem> FeedItems { get; }

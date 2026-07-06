@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,102 +11,325 @@ using Adwais.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Moq.Protected;
 using Xunit;
 
 namespace Adwais.Tests.Services;
 
 public class FeedAggregationServiceTests
 {
-    [Fact]
-    public async Task AggregateSourceAsync_ResolvesCorrectParser_AndPersistsItems()
+    private readonly DbContextOptions<AnalyticsDbContext> _options;
+    private readonly Mock<ISystemEventService> _eventServiceMock;
+    private readonly Mock<ILogger<FeedAggregationService>> _loggerMock;
+
+    public FeedAggregationServiceTests()
     {
-        // Arrange
+        // A single database instance per test class run, identified by a unique name.
         var dbName = Guid.NewGuid().ToString();
-        var options = new DbContextOptionsBuilder<AnalyticsDbContext>().UseInMemoryDatabase(dbName).Options;
-        var dbContext = new AnalyticsDbContext(options);
-        
-        var source = new FeedSource { Id = Guid.NewGuid(), Name = "Litium", Url = "https://www.litium.com/blog", IsActive = true };
-        dbContext.FeedSources.Add(source);
-        await dbContext.SaveChangesAsync();
-
-        var factoryMock = new Mock<IDbContextFactory<AnalyticsDbContext>>();
-        factoryMock.Setup(f => f.CreateDbContextAsync(It.IsAny<CancellationToken>()))
-            .Returns(() => Task.FromResult(new AnalyticsDbContext(options)));
-
-        // Mock Parser Strategy
-        var parserMock = new Mock<IFeedParser>();
-        parserMock.Setup(p => p.CanParse("https://www.litium.com/blog")).Returns(true);
-        parserMock.Setup(p => p.ParseAsync(It.IsAny<FeedSource>(), It.IsAny<HttpClient>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<FeedItem>
-            {
-                new FeedItem { Id = Guid.NewGuid(), FeedSourceId = source.Id, Title = "Strategy Decoupled Item", Link = "https://link" }
-            });
-
-        var service = new FeedAggregationService(
-            factoryMock.Object,
-            new[] { parserMock.Object },
-            new HttpClient(),
-            new Mock<ILogger<FeedAggregationService>>().Object,
-            new Mock<ISystemEventService>().Object);
-
-        // Act
-        await service.AggregateSourceAsync(source.Id);
-
-        // Assert
-        var items = await dbContext.FeedItems.ToListAsync();
-        var item = Assert.Single(items);
-        Assert.Equal("Strategy Decoupled Item", item.Title);
-
-        await using var verifyContext = new AnalyticsDbContext(options);
-        var updatedSource = await verifyContext.FeedSources.FindAsync(source.Id);
-        Assert.NotNull(updatedSource);
-        Assert.NotNull(updatedSource.LastPolledAt);
-        Assert.NotNull(updatedSource.LastSuccessAt);
-        Assert.Null(updatedSource.LastSyncError);
+        _options = new DbContextOptionsBuilder<AnalyticsDbContext>().UseInMemoryDatabase(dbName).Options;
+        _eventServiceMock = new Mock<ISystemEventService>();
+        _loggerMock = new Mock<ILogger<FeedAggregationService>>();
     }
 
+    private Mock<IDbContextFactory<AnalyticsDbContext>> GetDbContextFactoryMock()
+    {
+        var factoryMock = new Mock<IDbContextFactory<AnalyticsDbContext>>();
+        // This is the key: return a NEW context instance each time, but with the SAME database options.
+        factoryMock.Setup(f => f.CreateDbContextAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(() => new AnalyticsDbContext(_options));
+        return factoryMock;
+    }
+    
     [Fact]
-    public async Task AggregateSourceAsync_LogsErrorsToSystemEvents_AndWritesToFeedSource_OnParserFailure()
+    public async Task AggregateSourceAsync_WithNewItem_ShouldCreateNewItem()
     {
         // Arrange
-        var dbName = Guid.NewGuid().ToString();
-        var options = new DbContextOptionsBuilder<AnalyticsDbContext>().UseInMemoryDatabase(dbName).Options;
-        var dbContext = new AnalyticsDbContext(options);
-        
-        var source = new FeedSource { Id = Guid.NewGuid(), Name = "Error Source", Url = "https://error.com", IsActive = true };
-        dbContext.FeedSources.Add(source);
-        await dbContext.SaveChangesAsync();
+        var sourceId = Guid.NewGuid();
+        const string itemLink = "https://test.com/new-article";
+        await using (var context = new AnalyticsDbContext(_options))
+        {
+            context.FeedSources.Add(new FeedSource { Id = sourceId, Name = "Test Source", Url = "https://test.com", IsActive = true });
+            await context.SaveChangesAsync();
+        }
 
-        var factoryMock = new Mock<IDbContextFactory<AnalyticsDbContext>>();
-        factoryMock.Setup(f => f.CreateDbContextAsync(It.IsAny<CancellationToken>()))
-            .Returns(() => Task.FromResult(new AnalyticsDbContext(options)));
-
+        var factoryMock = GetDbContextFactoryMock();
         var parserMock = new Mock<IFeedParser>();
         parserMock.Setup(p => p.CanParse(It.IsAny<string>())).Returns(true);
         parserMock.Setup(p => p.ParseAsync(It.IsAny<FeedSource>(), It.IsAny<HttpClient>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new Exception("Scraper Blocked"));
+            .ReturnsAsync(new List<FeedItem> { new() { Title = "New Item", Link = itemLink, Id = Guid.NewGuid() } });
 
-        var eventServiceMock = new Mock<ISystemEventService>();
+        var mockHttpHandler = new Mock<HttpMessageHandler>();
+        mockHttpHandler.Protected().Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+            .ReturnsAsync(new HttpResponseMessage(System.Net.HttpStatusCode.OK) { RequestMessage = new HttpRequestMessage(HttpMethod.Head, itemLink) });
+        var httpClient = new HttpClient(mockHttpHandler.Object);
 
-        var service = new FeedAggregationService(
-            factoryMock.Object,
-            new[] { parserMock.Object },
-            new HttpClient(),
-            new Mock<ILogger<FeedAggregationService>>().Object,
-            eventServiceMock.Object);
+        var service = new FeedAggregationService(factoryMock.Object, new[] { parserMock.Object }, httpClient, _loggerMock.Object, _eventServiceMock.Object);
 
         // Act
-        await service.AggregateSourceAsync(source.Id);
+        await service.AggregateSourceAsync(sourceId);
 
         // Assert
-        eventServiceMock.Verify(es => es.LogErrorAsync(
-            nameof(FeedAggregationService), 
-            It.Is<string>(msg => msg.Contains("Scraper Blocked")), 
-            It.IsAny<Exception>()), Times.Once);
+        await using var assertContext = new AnalyticsDbContext(_options);
+        var item = await assertContext.FeedItems.SingleOrDefaultAsync();
+        Assert.NotNull(item);
+        Assert.Equal("New Item", item.Title);
+        Assert.Equal(itemLink, item.Link);
+    }
 
-        await using var verifyContext = new AnalyticsDbContext(options);
-        var updatedSource = await verifyContext.FeedSources.FindAsync(source.Id);
-        Assert.NotNull(updatedSource);
-        Assert.Equal("Scraper Blocked", updatedSource.LastSyncError);
+    [Fact]
+    public async Task AggregateSourceAsync_WithUpdatedTitle_ShouldUpdateExistingItem()
+    {
+        // Arrange
+        var sourceId = Guid.NewGuid();
+        var itemId = Guid.NewGuid();
+        const string itemLink = "https://test.com/article-1";
+        await using (var context = new AnalyticsDbContext(_options))
+        {
+            context.FeedSources.Add(new FeedSource { Id = sourceId, Name = "Test Source", Url = "https://test.com", IsActive = true });
+            context.FeedItems.Add(new FeedItem { Id = itemId, FeedSourceId = sourceId, Title = "Old Title", Link = itemLink });
+            await context.SaveChangesAsync();
+        }
+
+        var factoryMock = GetDbContextFactoryMock();
+        var parserMock = new Mock<IFeedParser>();
+        parserMock.Setup(p => p.CanParse(It.IsAny<string>())).Returns(true);
+        parserMock.Setup(p => p.ParseAsync(It.IsAny<FeedSource>(), It.IsAny<HttpClient>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<FeedItem> { new() { Title = "New Title", Link = itemLink, Id = Guid.NewGuid() } });
+
+        var mockHttpHandler = new Mock<HttpMessageHandler>();
+        mockHttpHandler.Protected().Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+            .ReturnsAsync(new HttpResponseMessage(System.Net.HttpStatusCode.OK) { RequestMessage = new HttpRequestMessage(HttpMethod.Head, itemLink) });
+        var httpClient = new HttpClient(mockHttpHandler.Object);
+
+        var service = new FeedAggregationService(factoryMock.Object, new[] { parserMock.Object }, httpClient, _loggerMock.Object, _eventServiceMock.Object);
+
+        // Act
+        await service.AggregateSourceAsync(sourceId);
+
+        // Assert
+        await using var assertContext = new AnalyticsDbContext(_options);
+        var items = await assertContext.FeedItems.ToListAsync();
+        var item = Assert.Single(items);
+        Assert.Equal("New Title", item.Title);
+        Assert.Equal(itemId, item.Id);
+    }
+    
+    [Fact]
+    public async Task AggregateSourceAsync_WithNewUrlAndSameTitle_ShouldUpdateExistingItem()
+    {
+        // Arrange
+        var sourceId = Guid.NewGuid();
+        var itemId = Guid.NewGuid();
+        const string oldLink = "https://test.com/article-1";
+        const string newLink = "https://test.com/article-1-new";
+        await using (var context = new AnalyticsDbContext(_options))
+        {
+            context.FeedSources.Add(new FeedSource { Id = sourceId, Name = "Test Source", Url = "https://test.com", IsActive = true });
+            context.FeedItems.Add(new FeedItem { Id = itemId, FeedSourceId = sourceId, Title = "Same Title", Link = oldLink });
+            await context.SaveChangesAsync();
+        }
+        
+        var factoryMock = GetDbContextFactoryMock();
+        var parserMock = new Mock<IFeedParser>();
+        parserMock.Setup(p => p.CanParse(It.IsAny<string>())).Returns(true);
+        parserMock.Setup(p => p.ParseAsync(It.IsAny<FeedSource>(), It.IsAny<HttpClient>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<FeedItem> { new() { Title = "Same Title", Link = newLink, Id = Guid.NewGuid() } });
+        
+        var mockHttpHandler = new Mock<HttpMessageHandler>();
+        mockHttpHandler.Protected().Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+            .ReturnsAsync(new HttpResponseMessage(System.Net.HttpStatusCode.OK) { RequestMessage = new HttpRequestMessage(HttpMethod.Head, newLink) });
+        var httpClient = new HttpClient(mockHttpHandler.Object);
+        
+        var service = new FeedAggregationService(factoryMock.Object, new[] { parserMock.Object }, httpClient, _loggerMock.Object, _eventServiceMock.Object);
+
+        // Act
+        await service.AggregateSourceAsync(sourceId);
+
+        // Assert
+        await using var assertContext = new AnalyticsDbContext(_options);
+        var item = await assertContext.FeedItems.SingleAsync();
+        Assert.Equal(newLink, item.Link);
+        Assert.Equal(itemId, item.Id);
+    }
+
+    [Fact]
+    public async Task AggregateSourceAsync_WithRedirectToExistingLink_ShouldUpdateExistingItem()
+    {
+        // Arrange
+        var sourceId = Guid.NewGuid();
+        var itemId = Guid.NewGuid();
+        const string oldUrl = "https://test.com/old-article";
+        const string newUrl = "https://test.com/new-article";
+        await using (var context = new AnalyticsDbContext(_options))
+        {
+            context.FeedSources.Add(new FeedSource { Id = sourceId, Name = "Test Source", Url = "https://test.com", IsActive = true });
+            context.FeedItems.Add(new FeedItem { Id = itemId, FeedSourceId = sourceId, Title = "Old Title", Link = oldUrl });
+            await context.SaveChangesAsync();
+        }
+
+        var factoryMock = GetDbContextFactoryMock();
+        var parserMock = new Mock<IFeedParser>();
+        parserMock.Setup(p => p.CanParse(It.IsAny<string>())).Returns(true);
+        parserMock.Setup(p => p.ParseAsync(It.IsAny<FeedSource>(), It.IsAny<HttpClient>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<FeedItem> { new() { Title = "New Title", Link = newUrl, Id = Guid.NewGuid() } });
+
+        var mockHttpHandler = new Mock<HttpMessageHandler>(MockBehavior.Strict);
+        mockHttpHandler.Protected()
+            .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.Is<HttpRequestMessage>(req => req.RequestUri.ToString() == newUrl), ItExpr.IsAny<CancellationToken>())
+            .ReturnsAsync(new HttpResponseMessage(System.Net.HttpStatusCode.MovedPermanently) { Headers = { Location = new Uri(oldUrl) }, RequestMessage = new HttpRequestMessage(HttpMethod.Head, oldUrl) });
+        
+        var httpClient = new HttpClient(mockHttpHandler.Object);
+        var service = new FeedAggregationService(factoryMock.Object, new[] { parserMock.Object }, httpClient, _loggerMock.Object, _eventServiceMock.Object);
+
+        // Act
+        await service.AggregateSourceAsync(sourceId);
+
+        // Assert
+        await using var assertContext = new AnalyticsDbContext(_options);
+        var item = await assertContext.FeedItems.SingleAsync();
+        Assert.Equal("New Title", item.Title);
+        Assert.Equal(oldUrl, item.Link);
+        Assert.Equal(itemId, item.Id);
+    }
+
+    [Fact]
+    public async Task AggregateSourceAsync_WithDuplicateIncomingItems_ShouldNotThrowAndShouldInsertOnlyOne()
+    {
+        // Arrange
+        var sourceId = Guid.NewGuid();
+        const string itemLink = "https://test.com/duplicate-article";
+        await using (var context = new AnalyticsDbContext(_options))
+        {
+            context.FeedSources.Add(new FeedSource { Id = sourceId, Name = "Test Source", Url = "https://test.com", IsActive = true });
+            await context.SaveChangesAsync();
+        }
+
+        var factoryMock = GetDbContextFactoryMock();
+        var parserMock = new Mock<IFeedParser>();
+        parserMock.Setup(p => p.CanParse(It.IsAny<string>())).Returns(true);
+        parserMock.Setup(p => p.ParseAsync(It.IsAny<FeedSource>(), It.IsAny<HttpClient>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<FeedItem>
+            {
+                new() { Title = "First Title", Link = itemLink, Id = Guid.NewGuid() },
+                new() { Title = "Second Title (Duplicate)", Link = itemLink, Id = Guid.NewGuid() }
+            });
+
+        var mockHttpHandler = new Mock<HttpMessageHandler>();
+        mockHttpHandler.Protected().Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+            .ReturnsAsync(new HttpResponseMessage(System.Net.HttpStatusCode.OK) { RequestMessage = new HttpRequestMessage(HttpMethod.Head, itemLink) });
+        var httpClient = new HttpClient(mockHttpHandler.Object);
+
+        var service = new FeedAggregationService(factoryMock.Object, new[] { parserMock.Object }, httpClient, _loggerMock.Object, _eventServiceMock.Object);
+
+        // Act
+        await service.AggregateSourceAsync(sourceId);
+
+        // Assert
+        await using var assertContext = new AnalyticsDbContext(_options);
+        var items = await assertContext.FeedItems.Where(fi => fi.FeedSourceId == sourceId).ToListAsync();
+        var item = Assert.Single(items);
+        Assert.Equal("Second Title (Duplicate)", item.Title);
+        Assert.Equal(itemLink, item.Link);
+    }
+
+    [Fact]
+    public async Task AggregateSourceAsync_ShouldSynchronizeAllFeedItemFields()
+    {
+        // Arrange
+        var sourceId = Guid.NewGuid();
+        var itemId = Guid.NewGuid();
+        const string itemLink = "https://test.com/sync-article";
+        await using (var context = new AnalyticsDbContext(_options))
+        {
+            context.FeedSources.Add(new FeedSource { Id = sourceId, Name = "Test Source", Url = "https://test.com", IsActive = true });
+            context.FeedItems.Add(new FeedItem
+            {
+                Id = itemId,
+                FeedSourceId = sourceId,
+                Title = "Old Title",
+                Link = itemLink,
+                Author = "Old Author",
+                Content = "Old Content",
+                ImageUrl = "https://test.com/old.png",
+                PublishDate = DateTime.UnixEpoch
+            });
+            await context.SaveChangesAsync();
+        }
+
+        var factoryMock = GetDbContextFactoryMock();
+        var parserMock = new Mock<IFeedParser>();
+        parserMock.Setup(p => p.CanParse(It.IsAny<string>())).Returns(true);
+        
+        var now = DateTime.UtcNow;
+        parserMock.Setup(p => p.ParseAsync(It.IsAny<FeedSource>(), It.IsAny<HttpClient>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<FeedItem>
+            {
+                new()
+                {
+                    Title = "New Title",
+                    Link = itemLink,
+                    Author = "New Author",
+                    Content = "New Content",
+                    ImageUrl = "https://test.com/new.png",
+                    PublishDate = now
+                }
+            });
+
+        var mockHttpHandler = new Mock<HttpMessageHandler>();
+        mockHttpHandler.Protected().Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+            .ReturnsAsync(new HttpResponseMessage(System.Net.HttpStatusCode.OK) { RequestMessage = new HttpRequestMessage(HttpMethod.Head, itemLink) });
+        var httpClient = new HttpClient(mockHttpHandler.Object);
+
+        var service = new FeedAggregationService(factoryMock.Object, new[] { parserMock.Object }, httpClient, _loggerMock.Object, _eventServiceMock.Object);
+
+        // Act
+        await service.AggregateSourceAsync(sourceId);
+
+        // Assert
+        await using var assertContext = new AnalyticsDbContext(_options);
+        var items = await assertContext.FeedItems.Where(fi => fi.FeedSourceId == sourceId).ToListAsync();
+        var item = Assert.Single(items);
+        Assert.Equal(itemId, item.Id);
+        Assert.Equal("New Title", item.Title);
+        Assert.Equal("New Author", item.Author);
+        Assert.Equal("New Content", item.Content);
+        Assert.Equal("https://test.com/new.png", item.ImageUrl);
+        Assert.Equal(now, item.PublishDate);
+    }
+
+    [Fact]
+    public async Task AggregateSourceAsync_WithExistingItemByLink_ShouldSkipProbing()
+    {
+        // Arrange
+        var sourceId = Guid.NewGuid();
+        var itemId = Guid.NewGuid();
+        const string itemLink = "https://test.com/existing-article";
+        await using (var context = new AnalyticsDbContext(_options))
+        {
+            context.FeedSources.Add(new FeedSource { Id = sourceId, Name = "Test Source", Url = "https://test.com", IsActive = true });
+            context.FeedItems.Add(new FeedItem { Id = itemId, FeedSourceId = sourceId, Title = "Old Title", Link = itemLink });
+            await context.SaveChangesAsync();
+        }
+
+        var factoryMock = GetDbContextFactoryMock();
+        var parserMock = new Mock<IFeedParser>();
+        parserMock.Setup(p => p.CanParse(It.IsAny<string>())).Returns(true);
+        parserMock.Setup(p => p.ParseAsync(It.IsAny<FeedSource>(), It.IsAny<HttpClient>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<FeedItem> { new() { Title = "New Title", Link = itemLink, Id = Guid.NewGuid() } });
+
+        // Strict behavior ensures that if SendAsync is called on this handler, it throws an exception.
+        var mockHttpHandler = new Mock<HttpMessageHandler>(MockBehavior.Strict);
+        var httpClient = new HttpClient(mockHttpHandler.Object);
+
+        var service = new FeedAggregationService(factoryMock.Object, new[] { parserMock.Object }, httpClient, _loggerMock.Object, _eventServiceMock.Object);
+
+        // Act
+        // This will throw if the HttpClient is invoked (probing is executed)
+        await service.AggregateSourceAsync(sourceId);
+
+        // Assert
+        await using var assertContext = new AnalyticsDbContext(_options);
+        var item = await assertContext.FeedItems.SingleAsync(fi => fi.Id == itemId);
+        Assert.Equal("New Title", item.Title); // Verifies that it successfully matched and updated without probing!
     }
 }

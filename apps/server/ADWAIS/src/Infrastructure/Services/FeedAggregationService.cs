@@ -66,48 +66,110 @@ public class FeedAggregationService(
                 throw new NotSupportedException($"No registered parser could parse the URL: {source.Url}");
             }
 
-            var items = await parser.ParseAsync(source, _httpClient, ct);
-            if (items.Count > 0)
+            var incomingItems = await parser.ParseAsync(source, _httpClient, ct);
+            if (incomingItems.Count > 0)
             {
                 await using var context = await _contextFactory.CreateDbContextAsync(ct);
 
-                var uniqueItems = items
-                    .Where(item => !string.IsNullOrWhiteSpace(item.Link))
-                    .Select(item =>
-                    {
-                        item.Link = NormalizeFeedLink(item.Link);
-                        return item;
-                    })
-                    .GroupBy(item => item.Link, StringComparer.OrdinalIgnoreCase)
-                    .Select(group => group.First())
-                    .ToList();
+                var existingItems = await context.FeedItems
+                    .Where(fi => fi.FeedSourceId == source.Id)
+                    .ToListAsync(ct);
 
-                foreach (var item in uniqueItems)
+                var existingByLink = existingItems.ToDictionary(fi => fi.Link, fi => fi, StringComparer.OrdinalIgnoreCase);
+                var existingByTitle = existingItems.ToLookup(fi => fi.Title, fi => fi, StringComparer.OrdinalIgnoreCase);
+
+                var itemsToProbe = new List<FeedItem>();
+                foreach (var incomingItem in incomingItems)
                 {
-                    await context.Database.ExecuteSqlInterpolatedAsync($"""
-                        INSERT INTO feed_item (
-                            id,
-                            author,
-                            content,
-                            feed_source_id,
-                            image_url,
-                            link,
-                            publish_date,
-                            title
-                        )
-                        VALUES (
-                            {item.Id},
-                            {item.Author},
-                            {item.Content},
-                            {item.FeedSourceId},
-                            {item.ImageUrl},
-                            {item.Link},
-                            {item.PublishDate},
-                            {item.Title}
-                        )
-                        ON CONFLICT (link) DO NOTHING
-                        """, ct);
+                    var normalizedLink = NormalizeFeedLink(incomingItem.Link);
+                    if (existingByLink.TryGetValue(normalizedLink, out var matchedItem))
+                    {
+                        UpdateFeedItemFields(matchedItem, incomingItem);
+                    }
+                    else if (existingByTitle.Contains(incomingItem.Title))
+                    {
+                        matchedItem = existingByTitle[incomingItem.Title].First();
+                        matchedItem.Link = normalizedLink;
+                        UpdateFeedItemFields(matchedItem, incomingItem);
+                        existingByLink[normalizedLink] = matchedItem;
+                    }
+                    else
+                    {
+                        itemsToProbe.Add(incomingItem);
+                    }
                 }
+
+                if (itemsToProbe.Count > 0)
+                {
+                    var semaphore = new SemaphoreSlim(4);
+                    try
+                    {
+                        var probeTasks = itemsToProbe.Select(async item =>
+                        {
+                            await semaphore.WaitAsync(ct);
+                            try
+                            {
+                                return await ProbeUrlAsync(item.Link, ct);
+                            }
+                            finally
+                            {
+                                semaphore.Release();
+                            }
+                        }).ToList();
+                        var probedItems = await Task.WhenAll(probeTasks);
+
+                        for (int i = 0; i < itemsToProbe.Count; i++)
+                        {
+                            var incomingItem = itemsToProbe[i];
+                            var probedItem = probedItems[i];
+
+                            var canonicalUrl = NormalizeFeedLink(probedItem.CanonicalUrl);
+                            var originalUrl = NormalizeFeedLink(probedItem.OriginalUrl);
+
+                            if (existingByLink.TryGetValue(canonicalUrl, out var matchedItem))
+                            {
+                                UpdateFeedItemFields(matchedItem, incomingItem);
+                            }
+                            else if (probedItem.WasRedirected && existingByLink.TryGetValue(originalUrl, out matchedItem))
+                            {
+                                matchedItem.Link = canonicalUrl;
+                                UpdateFeedItemFields(matchedItem, incomingItem);
+
+                                existingByLink.Remove(originalUrl);
+                                existingByLink[canonicalUrl] = matchedItem;
+                            }
+                            else if (existingByTitle.Contains(incomingItem.Title))
+                            {
+                                matchedItem = existingByTitle[incomingItem.Title].First();
+                                matchedItem.Link = canonicalUrl;
+                                UpdateFeedItemFields(matchedItem, incomingItem);
+                                existingByLink[canonicalUrl] = matchedItem;
+                            }
+                            else
+                            {
+                                var newItem = new FeedItem
+                                {
+                                    Id = incomingItem.Id,
+                                    Author = incomingItem.Author,
+                                    Content = incomingItem.Content,
+                                    FeedSourceId = source.Id,
+                                    ImageUrl = incomingItem.ImageUrl,
+                                    Link = canonicalUrl,
+                                    PublishDate = incomingItem.PublishDate,
+                                    Title = incomingItem.Title
+                                };
+                                context.FeedItems.Add(newItem);
+                                existingByLink[canonicalUrl] = newItem;
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        semaphore.Dispose();
+                    }
+                }
+
+                await context.SaveChangesAsync(ct);
             }
 
             await using (var context = await _contextFactory.CreateDbContextAsync(ct))
@@ -130,6 +192,42 @@ public class FeedAggregationService(
             }
             await _eventService.LogErrorAsync(nameof(FeedAggregationService), $"Feed aggregation failed for {source.Name}: {ex.Message}", ex);
         }
+    }
+
+    private record ProbeResult(string OriginalUrl, string CanonicalUrl, bool WasRedirected);
+
+    private async Task<ProbeResult> ProbeUrlAsync(string url, CancellationToken ct)
+    {
+        if (!Uri.TryCreate(url, UriKind.Absolute, out _))
+        {
+            return new ProbeResult(url, url, false);
+        }
+
+        try
+        {
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+            cts.CancelAfter(TimeSpan.FromSeconds(10));
+
+            using var request = new HttpRequestMessage(HttpMethod.Head, url);
+            var response = await _httpClient.SendAsync(request, cts.Token);
+
+            var finalUri = response.RequestMessage?.RequestUri?.ToString() ?? url;
+            return new ProbeResult(url, finalUri, url != finalUri);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to resolve final URL for {Url}. Using original.", url);
+            return new ProbeResult(url, url, false);
+        }
+    }
+
+    private static void UpdateFeedItemFields(FeedItem existing, FeedItem incoming)
+    {
+        existing.Title = incoming.Title;
+        existing.Author = incoming.Author;
+        existing.Content = incoming.Content;
+        existing.ImageUrl = incoming.ImageUrl;
+        existing.PublishDate = incoming.PublishDate;
     }
 
     private static string NormalizeFeedLink(string link)

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Adwais.Application.DTOs.Financial.Upstream;
 using Adwais.Application.DTOs.Intranet;
 using Adwais.Application.Interfaces;
+using Adwais.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
@@ -18,7 +19,7 @@ public class WebhooksController(
     ILitiumIngestionService ingestionService,
     IConfiguration configuration,
     ILogger<WebhooksController> logger,
-    INewsletterWebhookService newsletterWebhookService)
+    ICommunityPostService postService)
     : ControllerBase
 {
     [HttpPost("motastic/{tenantId}")]
@@ -66,8 +67,8 @@ public class WebhooksController(
             return BadRequest(new { Error = "Payload cannot be null." });
         }
 
-        var newsletterId = await newsletterWebhookService.IngestNewsletterAsync(payload, ct);
+        var post = await postService.CreatePostAsync(AnalyticsDbContext.SystemUserGuid, payload.Title, payload.Body, ct);
 
-        return Ok(new { Id = newsletterId });
+        return Ok(new { Id = post.Id });
     }
 }

@@ -15,6 +15,8 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
+using Adwais.Infrastructure.Persistence;
+
 namespace Adwais.Tests.Controllers;
 
 public class IntranetControllerTests
@@ -74,16 +76,23 @@ public class IntranetControllerTests
         var configMock = new Mock<IConfiguration>();
         configMock.Setup(c => c["Webhooks:NewsletterApiKey"]).Returns("valid-secret-key");
 
-        var newsletterId = Guid.NewGuid();
-        var webhookServiceMock = new Mock<INewsletterWebhookService>();
-        webhookServiceMock.Setup(s => s.IngestNewsletterAsync(It.IsAny<CreateNewsletterDto>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(newsletterId);
+        var createdPost = new CommunityPost
+        {
+            Id = Guid.NewGuid(),
+            UserId = AnalyticsDbContext.SystemUserGuid,
+            Title = "Weekly News",
+            Body = "Content",
+            CreatedAt = DateTime.UtcNow
+        };
+        var postServiceMock = new Mock<ICommunityPostService>();
+        postServiceMock.Setup(s => s.CreatePostAsync(AnalyticsDbContext.SystemUserGuid, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(createdPost);
 
         var controller = new WebhooksController(
             new Mock<ILitiumIngestionService>().Object,
             configMock.Object,
             new Mock<ILogger<WebhooksController>>().Object,
-            webhookServiceMock.Object);
+            postServiceMock.Object);
 
         var payload = new CreateNewsletterDto { Title = "Weekly News", Body = "Content", Category = "General" };
 
@@ -98,7 +107,7 @@ public class IntranetControllerTests
         var okResult = Assert.IsType<OkObjectResult>(result);
         var returnedData = okResult.Value;
         Assert.NotNull(returnedData);
-        webhookServiceMock.Verify(s => s.IngestNewsletterAsync(payload, It.IsAny<CancellationToken>()), Times.Once);
+        postServiceMock.Verify(s => s.CreatePostAsync(AnalyticsDbContext.SystemUserGuid, payload.Title, payload.Body, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -108,12 +117,12 @@ public class IntranetControllerTests
         var configMock = new Mock<IConfiguration>();
         configMock.Setup(c => c["Webhooks:NewsletterApiKey"]).Returns("valid-secret-key");
 
-        var webhookServiceMock = new Mock<INewsletterWebhookService>();
+        var postServiceMock = new Mock<ICommunityPostService>();
         var controller = new WebhooksController(
             new Mock<ILitiumIngestionService>().Object,
             configMock.Object,
             new Mock<ILogger<WebhooksController>>().Object,
-            webhookServiceMock.Object);
+            postServiceMock.Object);
 
         var payload = new CreateNewsletterDto { Title = "Weekly News", Body = "Content", Category = "General" };
         var httpContext = new DefaultHttpContext();
@@ -157,7 +166,7 @@ public class IntranetControllerTests
         var result = await controller.CreatePost(dto, CancellationToken.None);
 
         // Assert
-        var createdResult = Assert.IsType<CreatedAtActionResult>(result);
+        var createdResult = Assert.IsType<CreatedAtActionResult>(result.Result);
         var returned = Assert.IsType<CommunityPost>(createdResult.Value);
         Assert.Equal(userId, returned.UserId);
         Assert.Equal("Announcing Intranet", returned.Title);
@@ -181,7 +190,7 @@ public class IntranetControllerTests
         var result = await controller.CreatePost(dto, CancellationToken.None);
 
         // Assert
-        Assert.IsType<UnauthorizedObjectResult>(result);
+        Assert.IsType<UnauthorizedObjectResult>(result.Result);
     }
 
     [Fact]
@@ -202,7 +211,7 @@ public class IntranetControllerTests
         var result = await controller.GetPosts(CancellationToken.None);
 
         // Assert
-        var okResult = Assert.IsType<OkObjectResult>(result);
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
         var returned = Assert.IsType<List<CommunityPost>>(okResult.Value);
         Assert.Single(returned);
         postServiceMock.Verify(s => s.GetPostsAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -232,27 +241,5 @@ public class IntranetControllerTests
         feedServiceMock.Verify(s => s.GetFeedsAsync(It.Is<GetFeedsRequest>(r => r.FeedSourceId == null && r.Page == 1 && r.PageSize == 10), It.IsAny<CancellationToken>()), Times.Once);
     }
 
-    [Fact]
-    public async Task NewsletterController_GetNewsletters_ShouldReturnOkWithList()
-    {
-        // Arrange
-        var newsletters = new List<Newsletter>
-        {
-            new() { Id = Guid.NewGuid(), Title = "Newsletter 1", Body = "Body 1", Category = "General", CreatedAt = DateTime.UtcNow }
-        };
-        var newsletterServiceMock = new Mock<INewsletterService>();
-        newsletterServiceMock.Setup(s => s.GetNewslettersAsync("General", It.IsAny<CancellationToken>()))
-            .ReturnsAsync(newsletters);
 
-        var controller = new NewsletterController(newsletterServiceMock.Object);
-
-        // Act
-        var result = await controller.GetNewsletters("General", CancellationToken.None);
-
-        // Assert
-        var okResult = Assert.IsType<OkObjectResult>(result);
-        var returned = Assert.IsType<List<Newsletter>>(okResult.Value);
-        Assert.Single(returned);
-        newsletterServiceMock.Verify(s => s.GetNewslettersAsync("General", It.IsAny<CancellationToken>()), Times.Once);
-    }
 }

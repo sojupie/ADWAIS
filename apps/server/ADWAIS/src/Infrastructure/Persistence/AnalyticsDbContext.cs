@@ -19,6 +19,7 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
     public DbSet<Tenant> Tenants => Set<Tenant>();
     public DbSet<KioskDevice> KioskDevices => Set<KioskDevice>();
     public static readonly Guid SystemTenantGuid = new Guid("00000000-0000-0000-0000-000000000001");
+    public static readonly Guid SystemUserGuid = new Guid("00000000-0000-0000-0000-000000000002");
     
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<DailyFinancialTenantRollup> DailyTenantRollups => Set<DailyFinancialTenantRollup>();
@@ -36,7 +37,6 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
 
     public DbSet<SystemEvent> SystemEvents => Set<SystemEvent>();
     public DbSet<CommunityPost> CommunityPosts => Set<CommunityPost>();
-    public DbSet<Newsletter> Newsletters => Set<Newsletter>();
     public DbSet<OfficeEvent> OfficeEvents => Set<OfficeEvent>();
     public DbSet<FeedSource> FeedSources => Set<FeedSource>();
     public DbSet<FeedItem> FeedItems => Set<FeedItem>();
@@ -286,6 +286,14 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
 
             entity.HasIndex(u => u.Email)
                 .IsUnique();
+
+            entity.HasData(new User
+            {
+                Id = SystemUserGuid,
+                Name = "System",
+                Role = UserRole.Employee,
+                Email = "system@adwais.local"
+            });
         });
         
         modelBuilder.Entity<KioskDevice>(entity =>
@@ -413,18 +421,7 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
             entity.Property(fs => fs.LastSyncError).HasMaxLength(4000);
         });
 
-        // Newsletter
-        modelBuilder.Entity<Newsletter>(entity =>
-        {
-            entity.ToTable("newsletter");
-            entity.HasKey(n => n.Id);
-            entity.Property(n => n.Id).HasDefaultValueSql("uuid_generate_v4()");
-            entity.Property(n => n.Title).HasMaxLength(512).IsRequired();
-            entity.Property(n => n.Body).IsRequired();
-            entity.Property(n => n.Category).HasMaxLength(100).IsRequired();
-            entity.Property(n => n.CreatedAt).IsRequired();
-            entity.HasIndex(n => n.CreatedAt);
-        });
+
 
         // FeedItem
         modelBuilder.Entity<FeedItem>(entity =>

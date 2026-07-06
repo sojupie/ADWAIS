@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using Adwais.Application.DTOs.Intranet;
 using Adwais.Application.Interfaces;
+using Adwais.Domain.Entities.Intranet;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,7 +19,7 @@ public class CommunityPostController(ICommunityPostService postService) : Contro
     private readonly ICommunityPostService _postService = postService;
 
     [HttpGet("{id:guid}")]
-    public async Task<IActionResult> GetPost(Guid id, CancellationToken ct)
+    public async Task<ActionResult<CommunityPost>> GetPost(Guid id, CancellationToken ct)
     {
         var post = await _postService.GetPostByIdAsync(id, ct);
         if (post == null) return NotFound();
@@ -25,14 +27,14 @@ public class CommunityPostController(ICommunityPostService postService) : Contro
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetPosts(CancellationToken ct)
+    public async Task<ActionResult<IEnumerable<CommunityPost>>> GetPosts(CancellationToken ct)
     {
         var posts = await _postService.GetPostsAsync(ct);
         return Ok(posts);
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreatePost([FromBody] CreatePostDto dto, CancellationToken ct)
+    public async Task<ActionResult<CommunityPost>> CreatePost([FromBody] CreatePostDto dto, CancellationToken ct)
     {
         var nameIdentifier = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 

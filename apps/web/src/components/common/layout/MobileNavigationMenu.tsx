@@ -2,6 +2,7 @@ import {Link} from '@tanstack/react-router';
 import {Settings, X} from 'lucide-react';
 import type {Timeframe} from '../../../schemas';
 import {MotilloLogoLink} from './MotilloLogoLink';
+import {NotificationToggleWidget} from '../dashboard/NotificationToggleWidget';
 
 type MobileNavigationMenuProps = {
   pathname: string;
@@ -74,6 +75,12 @@ export function MobileNavigationMenu({pathname, financialTimeframe, fleetTimefra
             <Settings size={18} />
             Settings
           </Link>
+        </nav>
+        <nav className="flex flex-col gap-1" aria-label="Controls">
+          <span className="text-xs font-black text-white/40 uppercase tracking-widest mt-4 mb-2 px-3">Controls</span>
+          <div className="px-3">
+            <NotificationToggleWidget />
+          </div>
         </nav>
       </div>
     </div>

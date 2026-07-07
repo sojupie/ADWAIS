@@ -3,8 +3,10 @@ import { useLocation } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { ShoppingBag, X } from 'lucide-react';
+import type { TenantResponseDto } from '@types';
 import { useKiosk } from '../components/common/dashboard/KioskContext';
+import { getTenantFaviconUrl } from '../utils/tenantHelper';
+import { OrderToast } from '../components/common/ui/OrderToast';
 
 export function useOrderNotifier() {
   const { pathname } = useLocation();
@@ -12,7 +14,7 @@ export function useOrderNotifier() {
   const queryClient = useQueryClient();
   const { notificationsEnabled } = useKiosk();
 
-  const formatDate = (dateString?: string) => {
+  const formatDate = (dateString?: string | null) => {
     if (!dateString) return '';
     try {
       return new Date(dateString).toLocaleDateString('en-SE', {
@@ -21,7 +23,7 @@ export function useOrderNotifier() {
         year: 'numeric',
         hour: 'numeric',
         minute: 'numeric',
-        hour12: true,
+        hour12: false,
       });
     } catch {
       return '';
@@ -55,38 +57,21 @@ export function useOrderNotifier() {
                     ? `${order.totalValueIncVat.toLocaleString()} ${order.currency || 'SEK'}`
                     : 'N/A';
 
+                  const tenantsRes = queryClient.getQueryData<{ data: TenantResponseDto[] }>(['tenants']);
+                  const tenantsList = tenantsRes?.data || [];
+                  const tenant = tenantsList.find((t) => t.id === order.adwaisTenantId);
+                  const faviconUrl = tenant ? getTenantFaviconUrl(tenant.litiumBaseUrl) : null;
+
                   if (notificationsEnabled) {
                     toast.custom(
                       (t) => (
-                        <div 
-                          className="w-[480px] min-w-[480px] bg-brand-bg-secondary text-white rounded-2xl p-6 shadow-2xl border border-brand-link/30 flex items-center gap-3 animate-in fade-in slide-in-from-bottom-4 duration-300"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          {/* Animated Bouncing Shopping Bag Icon styled with brand accent yellow */}
-                          <div className="w-16 h-16 rounded-xl bg-brand-accent/10 border border-brand-accent/25 flex items-center justify-center text-brand-accent shrink-0">
-                            <ShoppingBag className="w-8 h-8 animate-bounce" />
-                          </div>
-                          {/* Order Info */}
-                          <div className="flex-grow min-w-0 text-left">
-                            <div className="text-sm uppercase font-black tracking-widest text-brand-accent font-mono">
-                              New Order Placed
-                            </div>
-                            <div className="text-xl font-black truncate mt-1 text-white">
-                              {order.tenantName || 'Unknown Tenant'}
-                            </div>
-                            <div className="text-sm text-white/60 mt-2 font-mono">
-                              {formatDate(order.createdDate)}
-                            </div>
-                            <div className="font-bold text-brand-accent">{displayValue}</div>
-                          </div>
-                          {/* Close Button */}
-                          <button 
-                            onClick={() => toast.dismiss(t)} 
-                            className="text-white/40 hover:text-white p-2 hover:bg-white/5 rounded-lg transition-colors cursor-pointer shrink-0"
-                          >
-                            <X className="w-6 h-6" />
-                          </button>
-                        </div>
+                        <OrderToast 
+                          order={order} 
+                          t={t} 
+                          faviconUrl={faviconUrl} 
+                          displayValue={displayValue} 
+                          formatDate={formatDate} 
+                        />
                       ),
                       {
                         duration: 10000,

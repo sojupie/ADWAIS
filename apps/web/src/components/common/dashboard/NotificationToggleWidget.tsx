@@ -16,7 +16,7 @@ export function NotificationToggleWidget() {
       aria-label={notificationsEnabled ? 'Disable notifications' : 'Enable notifications'}
       title={notificationsEnabled ? 'Mute new order notifications' : 'Unmute new order notifications'}
     >
-      <div className="flex items-center">
+      <div className="flex items-center w-[88px]">
         <span className={`text-sm font-bold tracking-wider transition-colors duration-500
             ${notificationsEnabled ? 'text-emerald-700' : 'text-slate-650'}`}>
           {notificationsEnabled ? 'ALERTS ON' : 'ALERTS OFF'}

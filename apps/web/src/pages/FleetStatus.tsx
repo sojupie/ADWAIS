@@ -115,20 +115,6 @@ export function FleetStatus() {
       {/* Main Content Grid: Matrix on Left, Watchlist & Latency on Right */}
       <DashboardFlexRow weight="flex-1" gridCols="5" className="landscape-contained:min-h-0">
 
-        {/* Left Column: Fleet Matrix (Takes 60% of width on landscape lg screens) */}
-        <div className="landscape-lg:col-span-3 flex flex-col min-h-[500px] contained:min-h-0 contained:h-full">
-          <CollectionPanel
-            title={vm.selection ? `${vm.selectedTenantName} Monitors` : "Fleet Status Matrix"}
-            className="flex-grow min-h-[59px]"
-            isLoading={vm.globalMonitorsQuery.isLoading}
-            actions={matrixActions}
-          >
-            <div className="px-4 py-3 h-full flex flex-col min-h-0">
-              {matrixContent}
-            </div>
-          </CollectionPanel>
-        </div>
-
         {/* Right Column: Watchlist (Top) & Latency Chart (Bottom) (Takes 40% of width) */}
         <div className="landscape-lg:col-span-2 flex flex-col gap-2 min-h-[500px] contained:min-h-0 contained:h-full">
 
@@ -149,6 +135,20 @@ export function FleetStatus() {
             className="flex-1 min-h-[350px] contained:min-h-0"
           />
 
+        </div>
+
+        {/* Left Column: Fleet Matrix (Takes 60% of width on landscape lg screens) */}
+        <div className="landscape-lg:col-span-3 flex flex-col min-h-[500px] contained:min-h-0 contained:h-full">
+          <CollectionPanel
+              title={vm.selection ? `${vm.selectedTenantName} Monitors` : "Fleet Status Matrix"}
+              className="flex-grow min-h-[59px]"
+              isLoading={vm.globalMonitorsQuery.isLoading}
+              actions={matrixActions}
+          >
+            <div className="px-4 py-4 h-full flex flex-col min-h-0">
+              {matrixContent}
+            </div>
+          </CollectionPanel>
         </div>
       </DashboardFlexRow>
 

@@ -95,6 +95,7 @@ export function SlaBreachWatchlist({
   className?: string;
 }) {
   const issues = useMemo(() => buildIssues(monitors, defaultSla, defaultDegradedFloor), [monitors, defaultSla, defaultDegradedFloor]);
+  const [failedFavicons, setFailedFavicons] = useState<Set<number>>(new Set());
 
   return (
     <ChartPanel
@@ -113,76 +114,76 @@ export function SlaBreachWatchlist({
         </button>
       }
     >
-      <div className="flex-1 overflow-y-auto pr-1 min-h-0 custom-scrollbar grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-2 gap-2 content-start">
+      <div className="flex-1 overflow-y-auto pr-1 min-h-0 pb-4 custom-scrollbar grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-2 gap-2 content-start">
         {issues.length === 0 ? (
           <div className="col-span-full h-full">
             <EmptyState message={"No issues detected"} variant={"minimal"} />
           </div>
         ) : (
-          issues.map(issue => (
-            <SlaBreachCard key={`watch-${issue.id}`} issue={issue} />
-          ))
+          issues.map(issue => {
+            const faviconUrl = issue.url ? getTenantFaviconUrl(issue.url) : null;
+            const showFavicon = faviconUrl && !failedFavicons.has(issue.id);
+
+            return (
+              <div key={`watch-${issue.id}`} className="relative p-2 bg-slate-50 border border-slate-100 rounded-lg transition-all hover:border-slate-200 shadow-sm shrink-0 flex flex-col justify-between">
+                {showFavicon && (
+                  <img
+                    src={faviconUrl}
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 opacity-20 pointer-events-none select-none"
+                    onError={() => setFailedFavicons(prev => {
+                      const next = new Set(prev);
+                      next.add(issue.id);
+                      return next;
+                    })}
+                    alt=""
+                  />
+                )}
+                <div className="flex justify-between items-start mb-1 gap-2 relative z-10">
+                  <div className="flex flex-col overflow-hidden min-w-0 flex-1 pr-2">
+                    <span className="text-sm font-black text-slate-900 uppercase tracking-tight leading-tight truncate">{issue.tenantName}</span>
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-0.5 truncate">{issue.monitorName}</span>
+                  </div>
+                  <div className="flex gap-1 flex-wrap justify-end shrink-0">
+                    {issue.isDown && <span className="bg-red-500 text-white text-xs font-black px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest shrink-0">DOWN</span>}
+                    {issue.isDegraded && !issue.isDown && <span className="bg-amber-500 text-white text-xs font-black px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest shrink-0">DEGRADED</span>}
+                    {issue.isSlaBreach && <span className="bg-slate-700 text-white text-xs font-black px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest shrink-0">SLA BREACH</span>}
+                  </div>
+                </div>
+                <div className="flex justify-between items-end relative z-10">
+                  <div className="flex flex-col">
+                    <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">Uptime</span>
+                    <span className={`text-base font-black ${issue.slaLimit && issue.uptime !== null && issue.uptime < issue.slaLimit ? 'text-red-600' : 'text-slate-900'}`}>
+                      {issue.uptime !== null ? `${formatPercent(issue.uptime)}%` : 'N/A'}
+                    </span>
+                  </div>
+                  <div className="flex flex-col items-end">
+                    <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">Latency</span>
+                    <span className="text-base font-black text-slate-900">
+                      {issue.isDown ? 'N/A' : `${Math.round(issue.latency ?? 0)}ms`}
+                    </span>
+                  </div>
+                </div>
+                {(issue.slaLimit !== undefined && issue.slaLimit !== null || issue.degradedFloor !== undefined && issue.degradedFloor !== null) && (
+                  <div className="mt-1 pt-1 flex justify-between items-center gap-2 relative z-10">
+                    {(issue.slaLimit !== undefined && issue.slaLimit !== null) ? (
+                      <div className="flex flex-col">
+                        <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">SLA Limit</span>
+                        <span className="text-sm font-black text-slate-600 uppercase">{formatPercent(issue.slaLimit)}%</span>
+                      </div>
+                    ) : <div />}
+                    {(issue.degradedFloor !== undefined && issue.degradedFloor !== null) ? (
+                      <div className="flex flex-col items-end text-right">
+                        <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">Degraded</span>
+                        <span className="text-sm font-black text-slate-600 uppercase">{issue.degradedFloor}ms</span>
+                      </div>
+                    ) : <div />}
+                  </div>
+                )}
+              </div>
+            );
+          })
         )}
       </div>
     </ChartPanel>
-  );
-}
-
-function SlaBreachCard({ issue }: { issue: MonitorIssue }) {
-  const [imgError, setImgError] = useState(false);
-  const faviconUrl = getTenantFaviconUrl(issue.url);
-
-  return (
-    <div className="relative overflow-hidden p-2 bg-slate-50 border border-slate-100 rounded-lg transition-all hover:border-slate-200 shadow-sm shrink-0 flex flex-col justify-between">
-      {faviconUrl && !imgError && (
-        <img
-          src={faviconUrl}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 opacity-20 pointer-events-none select-none"
-          onError={() => setImgError(true)}
-          alt=""
-        />
-      )}
-      <div className="flex justify-between items-start mb-1 gap-2">
-        <div className="flex flex-col overflow-hidden min-w-0 flex-1 pr-2">
-          <span className="text-sm font-black text-slate-900 uppercase tracking-tight leading-tight truncate">{issue.tenantName}</span>
-          <span className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-0.5 truncate">{issue.monitorName}</span>
-        </div>
-        <div className="flex gap-1 flex-wrap justify-end shrink-0">
-          {issue.isDown && <span className="bg-red-500 text-white text-xs font-black px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest shrink-0">DOWN</span>}
-          {issue.isDegraded && !issue.isDown && <span className="bg-amber-500 text-white text-xs font-black px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest shrink-0">DEGRADED</span>}
-          {issue.isSlaBreach && <span className="bg-slate-700 text-white text-xs font-black px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest shrink-0">SLA BREACH</span>}
-        </div>
-      </div>
-      <div className="flex justify-between items-end">
-        <div className="flex flex-col">
-          <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">Uptime</span>
-          <span className={`text-base font-black ${issue.slaLimit && issue.uptime !== null && issue.uptime < issue.slaLimit ? 'text-red-600' : 'text-slate-900'}`}>
-            {issue.uptime !== null ? `${formatPercent(issue.uptime)}%` : 'N/A'}
-          </span>
-        </div>
-        <div className="flex flex-col items-end">
-          <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">Latency</span>
-          <span className="text-base font-black text-slate-900">
-            {issue.isDown ? 'N/A' : `${Math.round(issue.latency ?? 0)}ms`}
-          </span>
-        </div>
-      </div>
-      {(issue.slaLimit !== undefined && issue.slaLimit !== null || issue.degradedFloor !== undefined && issue.degradedFloor !== null) && (
-        <div className="mt-1 pt-1 border-t border-slate-100 flex justify-between items-center gap-2">
-          {(issue.slaLimit !== undefined && issue.slaLimit !== null) ? (
-            <div className="flex flex-col">
-              <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">SLA Limit</span>
-              <span className="text-sm font-black text-slate-600 uppercase">{formatPercent(issue.slaLimit)}%</span>
-            </div>
-          ) : <div />}
-          {(issue.degradedFloor !== undefined && issue.degradedFloor !== null) ? (
-            <div className="flex flex-col items-end text-right">
-              <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">Degraded</span>
-              <span className="text-sm font-black text-slate-600 uppercase">{issue.degradedFloor}ms</span>
-            </div>
-          ) : <div />}
-        </div>
-      )}
-    </div>
   );
 }

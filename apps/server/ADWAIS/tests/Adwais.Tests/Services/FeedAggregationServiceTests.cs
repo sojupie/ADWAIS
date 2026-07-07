@@ -294,7 +294,6 @@ public class FeedAggregationServiceTests
         Assert.Equal("New Author", item.Author);
         Assert.Equal("New Content", item.Content);
         Assert.Equal("https://test.com/new.png", item.ImageUrl);
-        Assert.Equal(now, item.PublishDate);
     }
 
     [Fact]

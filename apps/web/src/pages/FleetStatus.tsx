@@ -74,7 +74,7 @@ export function FleetStatus() {
         />
 
         <FactPanel
-          label={`Highest Latency`}
+          label={`90th Percentile`}
           value={vm.analyticsQuery.isLoading ? '...' : `${Math.round(vm.fleetStats.highestLatency)}ms`}
           isLoading={vm.analyticsQuery.isLoading}
           valueColor="red"
@@ -86,7 +86,7 @@ export function FleetStatus() {
         />
 
         <FactPanel
-          label={`Lowest Latency`}
+          label={`10th Percentile`}
           value={vm.analyticsQuery.isLoading ? '...' : `${Math.round(vm.fleetStats.lowestLatency)}ms`}
           isLoading={vm.analyticsQuery.isLoading}
           valueColor="green"

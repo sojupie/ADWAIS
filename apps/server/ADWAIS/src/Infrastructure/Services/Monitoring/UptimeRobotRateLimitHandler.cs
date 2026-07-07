@@ -99,10 +99,45 @@ public class UptimeRobotRateLimitHandler(IMemoryCache cache) : DelegatingHandler
 
             // Wait out the delay and retry the request
             await Task.Delay(delay.Add(TimeSpan.FromSeconds(1)), cancellationToken);
-            return await base.SendAsync(request, cancellationToken);
+            using var clonedRequest = await CloneHttpRequestMessageAsync(request);
+            return await base.SendAsync(clonedRequest, cancellationToken);
         }
 
         return response;
+    }
+
+    private static async Task<HttpRequestMessage> CloneHttpRequestMessageAsync(HttpRequestMessage req)
+    {
+        var clone = new HttpRequestMessage(req.Method, req.RequestUri)
+        {
+            Version = req.Version
+        };
+
+        foreach (var header in req.Headers)
+        {
+            clone.Headers.TryAddWithoutValidation(header.Key, header.Value);
+        }
+
+        foreach (var property in req.Properties)
+        {
+            clone.Properties.Add(property.Key, property.Value);
+        }
+
+        if (req.Content != null)
+        {
+            var ms = new System.IO.MemoryStream();
+            await req.Content.CopyToAsync(ms);
+            ms.Position = 0;
+            
+            var streamContent = new StreamContent(ms);
+            foreach (var header in req.Content.Headers)
+            {
+                streamContent.Headers.TryAddWithoutValidation(header.Key, header.Value);
+            }
+            clone.Content = streamContent;
+        }
+
+        return clone;
     }
 }
 

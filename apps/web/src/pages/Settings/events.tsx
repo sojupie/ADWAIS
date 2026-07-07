@@ -207,8 +207,24 @@ export function SystemEventsView() {
 
 function LogEventRow({ e }: { e: SystemEvent }) {
     const [copied, setCopied] = useState(false);
-    const isError = e.level === 'Error';
-    const isWarn = e.level === 'Warning';
+
+    const levelStr = (() => {
+        if (e.level === undefined || e.level === null) return 'info';
+        if (typeof e.level === 'number') {
+            const map: Record<number, string> = {
+                0: 'info',
+                1: 'warning',
+                2: 'error',
+                3: 'critical'
+            };
+            return map[e.level] || `level-${e.level}`;
+        }
+        return String(e.level);
+    })();
+
+    const levelLower = levelStr.toLowerCase();
+    const isError = levelLower === 'error' || levelLower === 'critical' || levelLower.includes('error') || levelLower.includes('critical') || levelLower.includes('4') || levelLower.includes('5');
+    const isWarn = levelLower === 'warning';
 
     let displayMessage = e.message;
     if (e.tenant && e.tenant.name) {
@@ -218,9 +234,25 @@ function LogEventRow({ e }: { e: SystemEvent }) {
     }
 
     const handleCopy = () => {
-        const time = new Date(e.timestamp).toLocaleTimeString([], { hour12: false });
-        const levelStr = `[${(e.level || 'info').toUpperCase()}]`;
-        const fullText = `${time} ${levelStr} ${displayMessage}${e.exception ? `\nException: ${e.exception}` : ''}`;
+        const d = new Date(e.timestamp);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        const time = d.toLocaleTimeString([], { hour12: false });
+        const dateTimeStr = `${year}-${month}-${day} ${time}`;
+        const levelStrFormatted = `[${levelStr.toUpperCase()}]`;
+        
+        let fullText = `${dateTimeStr} ${levelStrFormatted}`;
+        if (e.source) {
+            fullText += ` [Source: ${e.source}]`;
+        }
+        fullText += ` ${displayMessage}`;
+        if (e.details && e.details !== e.message) {
+            fullText += `\nDetails: ${e.details}`;
+        }
+        if (e.exception) {
+            fullText += `\nException: ${e.exception}`;
+        }
 
         navigator.clipboard.writeText(fullText).then(() => {
             setCopied(true);
@@ -229,26 +261,53 @@ function LogEventRow({ e }: { e: SystemEvent }) {
     };
 
     return (
-        <div className="flex items-start gap-4 p-1.5 rounded hover:bg-white/5 transition-colors group text-slate-300 relative">
-            <span className="text-slate-500 shrink-0 mt-0.5 text-sm">
-                {new Date(e.timestamp).toLocaleTimeString([], { hour12: false })}
-            </span>
-            <div className="flex flex-col gap-1 w-full min-w-0">
-                <div className="flex items-center gap-2 pr-8">
-                    {isError ? <AlertCircle size={13} className="text-red-400 shrink-0" /> :
-                        isWarn ? <AlertTriangle size={13} className="text-amber-455 shrink-0" /> :
-                            <Info size={13} className="text-blue-400 shrink-0" />}
-                    <span className={`font-bold text-sm shrink-0 ${isError ? 'text-red-400' : isWarn ? 'text-amber-455' : 'text-blue-400'}`}>
-                        [{(e.level || 'info').toUpperCase()}]
-                    </span>
-                    <span className="break-words leading-tight text-slate-200 select-text">{displayMessage}</span>
-                </div>
-                {e.exception && (
-                    <div className="mt-1.5 p-2 bg-red-950/30 border border-red-900/50 rounded text-red-200/80 text-sm overflow-x-auto custom-scrollbar select-text">
-                        <pre className="whitespace-pre-wrap">{e.exception}</pre>
-                    </div>
-                )}
+        <div className="flex flex-col p-1.5 rounded hover:bg-white/5 transition-colors group text-slate-300 relative gap-1 select-text">
+            {/* First Row: Date, Level icon, Level prefix, Message */}
+            <div className="flex items-center flex-wrap gap-x-2 gap-y-1 pr-8">
+                <span className="text-slate-500 text-xs font-mono shrink-0">
+                    {(() => {
+                        const d = new Date(e.timestamp);
+                        const year = d.getFullYear();
+                        const month = String(d.getMonth() + 1).padStart(2, '0');
+                        const day = String(d.getDate()).padStart(2, '0');
+                        const time = d.toLocaleTimeString([], { hour12: false });
+                        return `${year}-${month}-${day} ${time}`;
+                    })()}
+                </span>
+                {isError ? <AlertCircle size={13} className="text-red-400 shrink-0" /> :
+                    isWarn ? <AlertTriangle size={13} className="text-amber-455 shrink-0" /> :
+                        <Info size={13} className="text-blue-400 shrink-0" />}
+                <span className={`font-bold text-xs shrink-0 ${isError ? 'text-red-400' : isWarn ? 'text-amber-455' : 'text-blue-400'}`}>
+                    [{levelStr.toUpperCase()}]
+                </span>
+                <span className="break-words leading-tight text-slate-200">{displayMessage}</span>
             </div>
+
+            {/* Second Row: Badges (Source, Tenant) */}
+            {(e.source || e.tenant?.name) && (
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 font-medium">
+                    {e.source && (
+                        <span>Source: <strong className="text-slate-400">{e.source}</strong></span>
+                    )}
+                    {e.tenant?.name && (
+                        <span className="text-brand-accent">Tenant: <strong className="text-slate-350">{e.tenant.name}</strong></span>
+                    )}
+                </div>
+            )}
+
+            {/* Third Row: Details */}
+            {e.details && e.details !== e.message && (
+                <div className="p-2 bg-slate-800/40 border border-slate-700/40 rounded text-slate-300 text-xs whitespace-pre-wrap">
+                    {e.details}
+                </div>
+            )}
+
+            {/* Fourth Row: Exception */}
+            {e.exception && (
+                <div className="p-2 bg-red-950/30 border border-red-900/50 rounded text-red-200/80 text-xs overflow-x-auto custom-scrollbar">
+                    <pre className="whitespace-pre-wrap">{e.exception}</pre>
+                </div>
+            )}
 
             {/* Copy Button (visible on hover) */}
             <button

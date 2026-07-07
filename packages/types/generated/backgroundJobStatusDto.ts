@@ -20,4 +20,8 @@ export interface BackgroundJobStatusDto {
   durationSeconds?: number | null;
   /** @nullable */
   exceptionMessage?: string | null;
+  /** @nullable */
+  tenantName?: string | null;
+  /** @nullable */
+  monitorName?: string | null;
 }

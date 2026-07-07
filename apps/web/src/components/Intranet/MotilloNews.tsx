@@ -15,7 +15,7 @@ export function MotilloNews() {
       {isLoading ? (
         <div className="flex flex-col md:flex-row h-full animate-pulse">
           {/* Skeleton Sidebar */}
-          <div className="md:w-1/3 border-b md:border-b-0 md:border-r border-slate-100 flex flex-col p-4 gap-4 bg-slate-50/50">
+          <div className="h-[160px] md:h-auto md:w-1/3 flex-shrink-0 border-b md:border-b-0 md:border-r border-slate-100 flex flex-col p-4 gap-4 bg-slate-50/50">
             {[1, 2, 3].map((i) => (
               <div key={i} className="flex flex-col gap-2">
                 <div className="h-3 w-20 bg-slate-200 rounded" />
@@ -39,7 +39,7 @@ export function MotilloNews() {
       ) : (
         <div className="flex flex-col md:flex-row h-full overflow-hidden">
           {/* Sidebar List */}
-          <div className="md:w-1/3 border-b md:border-b-0 md:border-r border-slate-100 flex flex-col overflow-y-auto custom-scrollbar bg-slate-50/50 min-h-0">
+          <div className="h-[160px] md:h-full md:w-1/3 flex-shrink-0 border-b md:border-b-0 md:border-r border-slate-100 flex flex-col overflow-y-auto custom-scrollbar bg-slate-50/50 min-h-0">
             {feedItems.map((post) => {
               const isSelected = selectedPost?.id === post.id;
               return (

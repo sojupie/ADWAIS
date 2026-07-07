@@ -179,51 +179,137 @@ public class SystemHealthService(IDbContextFactory<AnalyticsDbContext> dbContext
         var failed = await Task.Run(() => monitorApi.FailedJobs(0, 15), ct);
         var processing = await Task.Run(() => monitorApi.ProcessingJobs(0, 10), ct);
 
-        var list = new List<BackgroundJobStatusDto>();
+        var tempJobs = new List<(string Key, string JobName, string? JobArgs, string State, DateTime? CreatedAt, double? Duration, string? Exception, Hangfire.Common.Job? RawJob)>();
 
         foreach (var job in processing)
         {
             var (jobName, jobArgs) = ParseJobDetails(job.Value.Job);
-            list.Add(new BackgroundJobStatusDto(
-                JobId: job.Key,
+            tempJobs.Add((
+                Key: job.Key,
                 JobName: jobName,
                 JobArgs: jobArgs,
                 State: "Processing",
                 CreatedAt: job.Value.StartedAt,
-                DurationSeconds: job.Value.StartedAt.HasValue ? (DateTime.UtcNow - job.Value.StartedAt.Value).TotalSeconds : 0.0,
-                ExceptionMessage: null
+                Duration: job.Value.StartedAt.HasValue ? (DateTime.UtcNow - job.Value.StartedAt.Value).TotalSeconds : 0.0,
+                Exception: null,
+                RawJob: job.Value.Job
             ));
         }
 
         foreach (var job in succeeded)
         {
             var (jobName, jobArgs) = ParseJobDetails(job.Value.Job);
-            list.Add(new BackgroundJobStatusDto(
-                JobId: job.Key,
+            tempJobs.Add((
+                Key: job.Key,
                 JobName: jobName,
                 JobArgs: jobArgs,
                 State: "Succeeded",
                 CreatedAt: job.Value.SucceededAt,
-                DurationSeconds: (double?)job.Value.TotalDuration / 1000.0,
-                ExceptionMessage: null
+                Duration: (double?)job.Value.TotalDuration / 1000.0,
+                Exception: null,
+                RawJob: job.Value.Job
             ));
         }
 
         foreach (var job in failed)
         {
             var (jobName, jobArgs) = ParseJobDetails(job.Value.Job);
-            list.Add(new BackgroundJobStatusDto(
-                JobId: job.Key,
+            tempJobs.Add((
+                Key: job.Key,
                 JobName: jobName,
                 JobArgs: jobArgs,
                 State: "Failed",
                 CreatedAt: job.Value.FailedAt,
-                DurationSeconds: null,
-                ExceptionMessage: job.Value.ExceptionMessage
+                Duration: null,
+                Exception: job.Value.ExceptionMessage,
+                RawJob: job.Value.Job
             ));
         }
 
-        return list.OrderByDescending(j => j.CreatedAt).Take(20).ToList();
+        var top20 = tempJobs.OrderByDescending(j => j.CreatedAt).Take(20).ToList();
+
+        var monitorIds = new HashSet<int>();
+        var tenantIds = new HashSet<Guid>();
+
+        foreach (var job in top20)
+        {
+            var mId = GetMonitorId(job.RawJob);
+            if (mId.HasValue) monitorIds.Add(mId.Value);
+
+            var tId = GetTenantId(job.RawJob);
+            if (tId.HasValue) tenantIds.Add(tId.Value);
+        }
+
+        var monitorNames = new Dictionary<int, string>();
+        var tenantNames = new Dictionary<Guid, string>();
+
+        if (monitorIds.Any() || tenantIds.Any())
+        {
+            await using var db = await _dbContextFactory.CreateDbContextAsync(ct);
+            if (monitorIds.Any())
+            {
+                monitorNames = await db.Monitors
+                    .Where(m => monitorIds.Contains(m.Id))
+                    .ToDictionaryAsync(m => m.Id, m => m.Name, ct);
+            }
+            if (tenantIds.Any())
+            {
+                tenantNames = await db.Tenants
+                    .Where(t => tenantIds.Contains(t.Id))
+                    .ToDictionaryAsync(t => t.Id, t => t.Name, ct);
+            }
+        }
+
+        var result = new List<BackgroundJobStatusDto>();
+        foreach (var job in top20)
+        {
+            string? mName = null;
+            string? tName = null;
+
+            var mId = GetMonitorId(job.RawJob);
+            if (mId.HasValue) monitorNames.TryGetValue(mId.Value, out mName);
+
+            var tId = GetTenantId(job.RawJob);
+            if (tId.HasValue) tenantNames.TryGetValue(tId.Value, out tName);
+
+            result.Add(new BackgroundJobStatusDto(
+                JobId: job.Key,
+                JobName: job.JobName,
+                JobArgs: job.JobArgs,
+                State: job.State,
+                CreatedAt: job.CreatedAt,
+                DurationSeconds: job.Duration,
+                ExceptionMessage: job.Exception,
+                TenantName: tName,
+                MonitorName: mName
+            ));
+        }
+
+        return result;
+    }
+
+    private static int? GetMonitorId(Hangfire.Common.Job? job)
+    {
+        if (job == null || job.Args == null || job.Args.Count == 0) return null;
+        if (job.Type.Name.Contains("Monitor") || job.Type.Name.Contains("Uptime") || job.Type.Name.Contains("Latency"))
+        {
+            var arg0 = job.Args[0];
+            if (arg0 is int id) return id;
+            if (arg0 != null && int.TryParse(arg0.ToString(), out var parsedId)) return parsedId;
+        }
+        return null;
+    }
+
+    private static Guid? GetTenantId(Hangfire.Common.Job? job)
+    {
+        if (job == null || job.Args == null || job.Args.Count == 0) return null;
+        if (job.Type.Name.Contains("Ingestion") || job.Type.Name.Contains("Order") || job.Type.Name.Contains("Tenant"))
+        {
+            var arg0 = job.Args[0];
+            if (arg0 is Guid guid) return guid;
+            if (arg0 != null && Guid.TryParse(arg0.ToString(), out var parsedGuid)) return parsedGuid;
+        }
+        return null;
     }
 
     private static (string Name, string? Args) ParseJobDetails(Hangfire.Common.Job? job)

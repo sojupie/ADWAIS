@@ -1,0 +1,107 @@
+using System;
+using System.Collections.Generic;
+using FluentValidation.TestHelper;
+using Adwais.Api.DTOs.Monitoring;
+using Adwais.Api.Validators.Monitoring;
+using Xunit;
+
+namespace Adwais.Tests.Validators;
+
+public class MonitorValidatorsTests
+{
+    private readonly CreateMonitorRequestDtoValidator _createValidator = new();
+    private readonly UpdateMonitorRequestDtoValidator _updateValidator = new();
+    private readonly UptimeMonitorDtoValidator _dtoValidator = new();
+
+    [Fact]
+    public void CreateMonitorRequestDtoValidator_ShouldFail_WhenNameIsEmptyOrTooLong()
+    {
+        var modelEmpty = new CreateMonitorRequestDto(string.Empty, "https://url.com", null);
+        var resultEmpty = _createValidator.TestValidate(modelEmpty);
+        resultEmpty.ShouldHaveValidationErrorFor(x => x.Name);
+
+        var modelLong = new CreateMonitorRequestDto(new string('a', 101), "https://url.com", null);
+        var resultLong = _createValidator.TestValidate(modelLong);
+        resultLong.ShouldHaveValidationErrorFor(x => x.Name);
+    }
+
+    [Fact]
+    public void CreateMonitorRequestDtoValidator_ShouldFail_WhenUrlIsInvalid()
+    {
+        var model = new CreateMonitorRequestDto("Monitor", "invalid-url", null);
+        var result = _createValidator.TestValidate(model);
+        result.ShouldHaveValidationErrorFor(x => x.Url);
+    }
+
+    [Fact]
+    public void CreateMonitorRequestDtoValidator_ShouldFail_WhenSlaIsOutOfRange()
+    {
+        var model = new CreateMonitorRequestDto("Monitor", "https://url.com", -10.0);
+        var result = _createValidator.TestValidate(model);
+        result.ShouldHaveValidationErrorFor(x => x.UptimeSla);
+    }
+
+    [Fact]
+    public void CreateMonitorRequestDtoValidator_ShouldPass_WhenModelIsValid()
+    {
+        var model = new CreateMonitorRequestDto("Monitor", "https://url.com", 99.5);
+        var result = _createValidator.TestValidate(model);
+        result.ShouldNotHaveAnyValidationErrors();
+    }
+
+    [Fact]
+    public void UpdateMonitorRequestDtoValidator_ShouldFail_WhenSlaIsOutOfRange()
+    {
+        var model = new UpdateMonitorRequestDto { Sla = -5.0 };
+        var result = _updateValidator.TestValidate(model);
+        result.ShouldHaveValidationErrorFor(x => x.Sla);
+    }
+
+    [Fact]
+    public void UpdateMonitorRequestDtoValidator_ShouldPass_WhenSlaIsValidOrNegOne()
+    {
+        var modelValid = new UpdateMonitorRequestDto { Sla = 99.0 };
+        var resultValid = _updateValidator.TestValidate(modelValid);
+        resultValid.ShouldNotHaveAnyValidationErrors();
+
+        var modelNegOne = new UpdateMonitorRequestDto { Sla = -1.0 };
+        var resultNegOne = _updateValidator.TestValidate(modelNegOne);
+        resultNegOne.ShouldNotHaveAnyValidationErrors();
+    }
+
+    [Fact]
+    public void UptimeMonitorDtoValidator_ShouldFail_WhenFieldsAreEmptyOrInvalid()
+    {
+        var modelEmpty = CreateUptimeMonitorDto(1, string.Empty, "https://url.com");
+        var resultEmpty = _dtoValidator.TestValidate(modelEmpty);
+        resultEmpty.ShouldHaveValidationErrorFor(x => x.Name);
+
+        var modelInvalidUrl = CreateUptimeMonitorDto(1, "Monitor", "invalid-url");
+        var resultInvalidUrl = _dtoValidator.TestValidate(modelInvalidUrl);
+        resultInvalidUrl.ShouldHaveValidationErrorFor(x => x.Url);
+    }
+
+    private static UptimeMonitorDto CreateUptimeMonitorDto(int id, string name, string url)
+    {
+        return new UptimeMonitorDto(
+            Id: id,
+            TenantId: Guid.NewGuid(),
+            TenantName: "Tenant",
+            Name: name,
+            Url: url,
+            UpdateInterval: 300,
+            LatencyDegradedFloor: null,
+            UptimeSla: null,
+            CurrentUptimePercentage: null,
+            CurrentLatency: null,
+            UptimeMonitorEnabled: true,
+            CurrentStatus: "up",
+            LastUpdate: null,
+            LastUptimeUpdate: null,
+            LastLatencyUpdate: null,
+            CreatedDate: DateTimeOffset.UtcNow,
+            LastSyncError: null,
+            Tags: new List<string>()
+        );
+    }
+}

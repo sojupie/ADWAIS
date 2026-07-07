@@ -78,9 +78,12 @@ export function useUpdateTenantMutation() {
       onSuccess: (res) => {
         toast.success('Tenant updated successfully.');
         const data = (res as unknown as { data: TenantResponseDto }).data;
-        queryClient.setQueryData(['tenants'], (old: TenantResponseDto[] | undefined) => {
-          if (!old) return old;
-          return old.map(t => t.id === data.id ? data : t);
+        queryClient.setQueryData(['tenants'], (old: { data: TenantResponseDto[] } | undefined) => {
+          if (!old || !Array.isArray(old.data)) return old;
+          return {
+            ...old,
+            data: old.data.map(t => t.id === data.id ? data : t)
+          };
         });
         queryClient.invalidateQueries({ queryKey: ['tenants'] });
       },

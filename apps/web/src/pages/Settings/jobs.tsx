@@ -96,7 +96,7 @@ export function BackgroundJobsView() {
                             <div className="flex items-center justify-between shrink-0 p-4 border-b border-slate-800 bg-slate-900 z-10">
                                 <div className="flex items-center gap-3">
                                     <Activity size={18} className="text-brand-accent" />
-                                    <h2 className="text-sm font-bold text-white tracking-wider">RECENT EXECUTIONS</h2>
+                                    <h2 className="text-sm font-bold text-white tracking-wider">RECENT JOB DISPATCHES</h2>
                                 </div>
                                 <div className="flex items-center gap-3">
                                     <div className="flex gap-1.5">
@@ -117,8 +117,16 @@ export function BackgroundJobsView() {
                                                 <div key={job.jobId} className="flex flex-col p-2.5 hover:bg-white/5 transition-colors gap-1 group text-slate-300 relative">
                                                     <div className="flex items-center justify-between gap-4 min-w-0">
                                                         <div className="flex items-center gap-3 min-w-0">
-                                                            <span className="text-slate-500 shrink-0 text-xs">
-                                                                {job.createdAt ? new Date(job.createdAt).toLocaleTimeString([], { hour12: false }) : 'N/A'}
+                                                            <span className="text-slate-500 shrink-0 text-xs font-mono">
+                                                                {(() => {
+                                                                    if (!job.createdAt) return 'N/A';
+                                                                    const d = new Date(job.createdAt);
+                                                                    const year = d.getFullYear();
+                                                                    const month = String(d.getMonth() + 1).padStart(2, '0');
+                                                                    const day = String(d.getDate()).padStart(2, '0');
+                                                                    const time = d.toLocaleTimeString([], { hour12: false });
+                                                                    return `${year}-${month}-${day} ${time}`;
+                                                                })()}
                                                             </span>
                                                             <div className="flex items-center gap-2 min-w-0">
                                                                 {isProcessing && (
@@ -131,15 +139,10 @@ export function BackgroundJobsView() {
                                                                 {isFailed && <div className="w-2 h-2 rounded-full bg-red-500 shrink-0"></div>}
                                                                 <span
                                                                     className="font-bold text-slate-200 truncate"
-                                                                    title={`${job.jobName}${job.jobArgs ? `(${job.jobArgs})` : ''}`}
+                                                                    title={job.jobName || ''}
                                                                 >
                                                                     {job.jobName}
                                                                 </span>
-                                                                {job.jobArgs && (
-                                                                    <span className="ml-1 text-xs text-slate-500 font-normal truncate hidden sm:inline">
-                                                                        ({job.jobArgs})
-                                                                    </span>
-                                                                )}
                                                             </div>
                                                         </div>
                                                         <div className="flex items-center gap-3 text-xs font-bold shrink-0">
@@ -153,11 +156,22 @@ export function BackgroundJobsView() {
                                                             {isFailed && <span className="text-red-400 tracking-wide uppercase">Failed</span>}
                                                         </div>
                                                     </div>
-                                                    <div className="flex items-center text-xs text-slate-500 font-medium pl-[72px]">
+                                                    {job.jobArgs && (
+                                                        <div className="text-xs text-slate-500 font-normal leading-relaxed pr-4 break-all select-text">
+                                                            ({job.jobArgs})
+                                                        </div>
+                                                    )}
+                                                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 font-medium">
                                                         <span>ID: {job.jobId}</span>
+                                                        {job.tenantName && (
+                                                            <span className="text-brand-accent">Tenant: <strong className="text-slate-350">{job.tenantName}</strong></span>
+                                                        )}
+                                                        {job.monitorName && (
+                                                            <span className="text-brand-accent">Monitor: <strong className="text-slate-350">{job.monitorName}</strong></span>
+                                                        )}
                                                     </div>
                                                     {isFailed && job.exceptionMessage && (
-                                                        <div className="mt-1.5 ml-[72px] p-2 bg-red-950/30 border border-red-900/50 rounded text-red-200/80 text-xs overflow-x-auto custom-scrollbar select-text">
+                                                        <div className="mt-1.5 p-2 bg-red-950/30 border border-red-900/50 rounded text-red-200/80 text-xs overflow-x-auto custom-scrollbar select-text">
                                                             <pre className="whitespace-pre-wrap">{job.exceptionMessage}</pre>
                                                         </div>
                                                     )}

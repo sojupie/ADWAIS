@@ -6,7 +6,7 @@ import type { SystemHealthDto } from '@types';
 export interface SystemEvent {
     id?: string | number;
     timestamp: string;
-    level?: string;
+    level?: string | number | null;
     message: string;
     exception?: string;
     tenantId?: string | null;
@@ -14,6 +14,8 @@ export interface SystemEvent {
         id: string;
         name: string;
     } | null;
+    source?: string | null;
+    details?: string | null;
 }
 
 export function useSystemEventsViewModel() {

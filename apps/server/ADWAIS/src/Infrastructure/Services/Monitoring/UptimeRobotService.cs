@@ -91,31 +91,52 @@ public class UptimeRobotService(
 
     public async Task<List<UptimeRobotMonitorDto>> GetMonitorsAsync(int[]? monitorIds = null)
     {
-        var url = "https://api.uptimerobot.com/v3/monitors";
-        var context = "GetMonitors";
+        var monitors = new List<UptimeRobotMonitorDto>();
+        var baseUrl = "https://api.uptimerobot.com/v3/monitors";
+        var queryParams = new List<string> { "limit=200" };
+
         if (monitorIds is { Length: > 0 })
         {
-            var ids = string.Join("-", monitorIds);
-            url += $"?monitors={ids}";
-            context += $": {ids}";
+            queryParams.Add($"monitors={string.Join("-", monitorIds)}");
         }
 
-        var request = new HttpRequestMessage(HttpMethod.Get, url);
-        using var response = await GetResponseAsync(request, context);
+        var nextUrl = $"{baseUrl}?{string.Join("&", queryParams)}";
+        var context = "GetMonitors";
 
-        var monitors = new List<UptimeRobotMonitorDto>();
-        foreach (var monitor in response.RootElement.GetProperty("data").EnumerateArray())
+        while (!string.IsNullOrEmpty(nextUrl))
         {
-            monitors.Add(new UptimeRobotMonitorDto(
-                Id: monitor.GetProperty("id").GetInt32(),
-                FriendlyName: monitor.GetProperty("friendlyName").GetString()!,
-                Url: monitor.GetProperty("url").GetString()!,
-                Status: monitor.GetProperty("status").GetString()!,
-                CreatedDate: monitor.GetProperty("createDateTime").GetDateTimeOffset(),
-                UpdateInterval: monitor.GetProperty("interval").GetInt32(),
-                Tags: ParseTags(monitor)
-            ));
+            var request = new HttpRequestMessage(HttpMethod.Get, nextUrl);
+            using var response = await GetResponseAsync(request, context);
+
+            if (response.RootElement.TryGetProperty("data", out var dataProp) && dataProp.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var monitor in dataProp.EnumerateArray())
+                {
+                    monitors.Add(new UptimeRobotMonitorDto(
+                        Id: monitor.GetProperty("id").GetInt32(),
+                        FriendlyName: monitor.GetProperty("friendlyName").GetString()!,
+                        Url: monitor.GetProperty("url").GetString()!,
+                        Status: monitor.GetProperty("status").GetString()!,
+                        CreatedDate: monitor.GetProperty("createDateTime").GetDateTimeOffset(),
+                        UpdateInterval: monitor.GetProperty("interval").GetInt32(),
+                        Tags: ParseTags(monitor)
+                    ));
+                }
+            }
+
+            nextUrl = null;
+            if (response.RootElement.TryGetProperty("nextLink", out var nextLinkProp) && nextLinkProp.ValueKind == JsonValueKind.String)
+            {
+                var link = nextLinkProp.GetString();
+                if (!string.IsNullOrWhiteSpace(link))
+                {
+                    nextUrl = link.StartsWith("http", StringComparison.OrdinalIgnoreCase)
+                        ? link
+                        : "https://api.uptimerobot.com" + (link.StartsWith("/") ? link : "/" + link);
+                }
+            }
         }
+
         return monitors;
     }
 

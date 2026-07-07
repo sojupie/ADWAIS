@@ -21,6 +21,12 @@ public static class MaterializedViewOrchestrator
         existingViews.Remove("v_mat_financial_daily_global_rollup");
         existingViews.Remove("v_mat_financial_daily_tenant_rollup");
 
+        // --- Latency Domain Drop ---
+        await context.Database.ExecuteSqlRawAsync("DROP MATERIALIZED VIEW IF EXISTS v_mat_daily_latency_global_rollup CASCADE; DROP MATERIALIZED VIEW IF EXISTS v_mat_daily_latency_tenant_rollup CASCADE; DROP MATERIALIZED VIEW IF EXISTS v_mat_daily_latency_monitor_rollup CASCADE;");
+        existingViews.Remove("v_mat_daily_latency_global_rollup");
+        existingViews.Remove("v_mat_daily_latency_tenant_rollup");
+        existingViews.Remove("v_mat_daily_latency_monitor_rollup");
+
         if (!existingViews.Contains("v_mat_financial_daily_tenant_rollup"))
         {
             await context.Database.ExecuteSqlRawAsync(@"
@@ -62,8 +68,8 @@ public static class MaterializedViewOrchestrator
                 SELECT date_trunc('day', date) AS date,
                        monitor_id,
                        avg(average) AS average,
-                       min(lowest)  AS lowest,
-                       max(highest) AS highest
+                       percentile_cont(0.10) WITHIN GROUP (ORDER BY average) AS p10,
+                       percentile_cont(0.90) WITHIN GROUP (ORDER BY average) AS p90
                 FROM response_time
                 WHERE response_time.date >= (CURRENT_DATE - '730 days'::interval)
                   AND response_time.date < CURRENT_DATE
@@ -80,8 +86,8 @@ public static class MaterializedViewOrchestrator
                 SELECT date_trunc('day', rt.date) AS date,
                        m.tenant_id,
                        avg(rt.average) AS average,
-                       min(rt.lowest)  AS lowest,
-                       max(rt.highest) AS highest
+                       percentile_cont(0.10) WITHIN GROUP (ORDER BY rt.average) AS p10,
+                       percentile_cont(0.90) WITHIN GROUP (ORDER BY rt.average) AS p90
                 FROM response_time rt
                          JOIN monitor m ON rt.monitor_id = m.id
                 WHERE rt.date < CURRENT_DATE
@@ -95,12 +101,14 @@ public static class MaterializedViewOrchestrator
         {
             await context.Database.ExecuteSqlRawAsync(@"
                 CREATE MATERIALIZED VIEW v_mat_daily_latency_global_rollup AS
-                SELECT date,
-                       avg(average) AS average,
-                       min(lowest)  AS lowest,
-                       max(highest) AS highest
-                FROM v_mat_daily_latency_tenant_rollup
-                WHERE date < CURRENT_DATE
+                SELECT date_trunc('day', rt.date) AS date,
+                       avg(rt.average) AS average,
+                       percentile_cont(0.10) WITHIN GROUP (ORDER BY rt.average) AS p10,
+                       percentile_cont(0.90) WITHIN GROUP (ORDER BY rt.average) AS p90
+                FROM response_time rt
+                         JOIN monitor m ON rt.monitor_id = m.id
+                WHERE rt.date < CURRENT_DATE
+                  AND m.tenant_id != '00000000-0000-0000-0000-000000000001'::uuid
                 GROUP BY 1
                 ORDER BY 1 DESC;
                 CREATE UNIQUE INDEX uq_v_mat_lat_global_rollup ON v_mat_daily_latency_global_rollup (date);

@@ -227,7 +227,6 @@ public class FeedAggregationService(
         existing.Author = incoming.Author;
         existing.Content = incoming.Content;
         existing.ImageUrl = incoming.ImageUrl;
-        existing.PublishDate = incoming.PublishDate;
     }
 
     private static string NormalizeFeedLink(string link)

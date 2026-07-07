@@ -104,7 +104,8 @@ public class FinancialController(IFinancialService financialService) : Controlle
                 r.Type,
                 r.AverageOrderValue,
                 r.PortfolioSharePercentage,
-                r.GrowthVelocity
+                r.GrowthVelocity,
+                r.LitiumBaseUrl
             )).ToList()
         ));
     }
@@ -145,7 +146,8 @@ public class FinancialController(IFinancialService financialService) : Controlle
                 t.Type,
                 t.BaselineRevenue,
                 t.GrowthPercentage,
-                t.CurrentRevenue)).ToList()));
+                t.CurrentRevenue,
+                t.LitiumBaseUrl)).ToList()));
     }
 
     /// <summary>

@@ -89,9 +89,26 @@ pnpm dev:api   # ASP.NET Core backend
 |---|---|
 | `pnpm dev:web` | Start the React frontend dev server |
 | `pnpm dev:api` | Start the .NET backend API |
+| `pnpm codegen` | Regenerate OpenAPI specification (`v1.json`) and TypeScript types / endpoints |
 | `pnpm db:up` | Start the local PostgreSQL container |
 | `pnpm db:down` | Stop the local PostgreSQL container |
 | `pnpm migration:add <Name>` | Create a new EF Core migration (stop `dev:api` first) |
 | `pnpm migration:update` | Apply pending migrations to the local database |
 | `pnpm migration:remove` | Remove the last unapplied migration |
 | `pnpm migration:list` | List all migrations and their applied status |
+| `pnpm dev:web:build` | Build the React frontend for production |
+| `pnpm dev:web:preview` | Preview the React frontend for production |
+
+---
+
+## Code Generation (OpenAPI & TypeScript)
+
+The project leverages `Microsoft.Extensions.ApiDescription.Server` in the ASP.NET Core project to compile and output the Swagger/OpenAPI definition at `docs/openapi/v1.json` whenever the API project builds.
+
+The React frontend uses `orval` to consume this specification and generate TypeScript types (`packages/types/generated/*`) and custom API client hooks (`apps/web/src/api/generated/endpoints.ts`).
+
+To update both after modifying endpoints or backend DTOs, run:
+```bash
+pnpm codegen
+```
+

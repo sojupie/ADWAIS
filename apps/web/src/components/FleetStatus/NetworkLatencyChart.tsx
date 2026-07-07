@@ -43,11 +43,11 @@ const GraphTooltip = ({ active, payload, label }: GraphTooltipProps) => {
           </p>
           <div className="pt-2 border-t border-slate-50 mt-2 space-y-1">
             <p className="flex justify-between gap-8">
-              <span className="text-slate-500 font-bold uppercase text-sm tracking-widest">Highest</span>
+              <span className="text-slate-500 font-bold uppercase text-sm tracking-widest">90th Percentile</span>
               <strong className="text-red-500 text-sm">{formatLatency(point.highest)}</strong>
             </p>
             <p className="flex justify-between gap-8">
-              <span className="text-slate-500 font-bold uppercase text-sm tracking-widest">Lowest</span>
+              <span className="text-slate-500 font-bold uppercase text-sm tracking-widest">10th Percentile</span>
               <strong className="text-emerald-500 text-sm">{formatLatency(point.lowest)}</strong>
             </p>
           </div>

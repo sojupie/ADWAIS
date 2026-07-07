@@ -26,7 +26,8 @@ export const MOCK_MOMENTUM: MomentumResponse = {
     previousRevenue: 1000000 + Math.random() * 8000000,
     type: 'B2C',
     vertical: 'Retail',
-    status: 'Active'
+    status: 'Active',
+    litiumBaseUrl: null
   }))
 };
 
@@ -44,7 +45,8 @@ export const MOCK_EFFICIENCY: RevenueEfficiencyResponse = {
     transactionVolume: 5000 + Math.random() * 20000,
     type: 'B2C',
     vertical: 'Retail',
-    status: 'Active'
+    status: 'Active',
+    litiumBaseUrl: null
   }))
 };
 

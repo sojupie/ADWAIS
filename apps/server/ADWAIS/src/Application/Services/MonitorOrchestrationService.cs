@@ -17,7 +17,7 @@ public class MonitorOrchestrationService(
     ICacheService cache,
     IConfiguration configuration) : IMonitorOrchestrationService
 {
-    private record LatencyRow(DateTime Timestamp, double? Average, double? Lowest, double? Highest);
+    private record LatencyRow(DateTime Timestamp, double? Average, double? P10, double? P90);
 
     public async Task<MonitorAnalyticsDto> GetAnalyticsAsync(ResolvedPeriod period, Guid? tenantId = null, int? monitorId = null, CancellationToken ct = default)
     {
@@ -42,8 +42,8 @@ public class MonitorOrchestrationService(
                 g => g.Key, 
                 g => new { 
                     Avg = g.Average(r => r.Average), 
-                    Min = g.Min(r => r.Lowest), 
-                    Max = g.Max(r => r.Highest) 
+                    P10 = g.Average(r => r.P10), 
+                    P90 = g.Average(r => r.P90) 
                 });
 
         var previousByStep = previousRows
@@ -69,8 +69,8 @@ public class MonitorOrchestrationService(
                 timestamp, 
                 data?.Avg, 
                 prevAvg,
-                data?.Min, 
-                data?.Max));
+                data?.P10, 
+                data?.P90));
         }
         
         IQueryable<UptimeMonitor> monitorQuery = dbContext.Monitors.AsNoTracking().Include(m => m.Tenant);
@@ -114,12 +114,12 @@ public class MonitorOrchestrationService(
         double? prevAvgLatency = previousRows.Count > 0 ? previousRows.Average(r => r.Average) : null;
         double? latencyGrowth = CalculateGrowthPercentage(avgLatency, prevAvgLatency);
 
-        double? highestLatency = currentRows.Count > 0 ? currentRows.Max(r => r.Highest) : null;
-        double? prevHighestLatency = previousRows.Count > 0 ? previousRows.Max(r => r.Highest) : null;
+        double? highestLatency = currentRows.Count > 0 ? currentRows.Max(r => r.P90) : null;
+        double? prevHighestLatency = previousRows.Count > 0 ? previousRows.Max(r => r.P90) : null;
         double? highestLatencyGrowth = CalculateGrowthPercentage(highestLatency, prevHighestLatency);
 
-        double? lowestLatency = currentRows.Count > 0 ? currentRows.Min(r => r.Lowest) : null;
-        double? prevLowestLatency = previousRows.Count > 0 ? previousRows.Min(r => r.Lowest) : null;
+        double? lowestLatency = currentRows.Count > 0 ? currentRows.Min(r => r.P10) : null;
+        double? prevLowestLatency = previousRows.Count > 0 ? previousRows.Min(r => r.P10) : null;
         double? lowestLatencyGrowth = CalculateGrowthPercentage(lowestLatency, prevLowestLatency);
 
         var kpis = new MonitorKpiDto(
@@ -239,15 +239,23 @@ public class MonitorOrchestrationService(
             else 
                 query = query.Where(rt => rt.UptimeMonitor!.TenantId != IApplicationDbContext.SystemTenantGuid);
 
-            var grouped = await query
-                .GroupBy(rt => new { rt.Date.Year, rt.Date.Month, rt.Date.Day, rt.Date.Hour })
-                .Select(g => new LatencyRow(
-                    new DateTime(g.Key.Year, g.Key.Month, g.Key.Day, g.Key.Hour, 0, 0),
-                    g.Average(rt => rt.Average),
-                    g.Min(rt => rt.Lowest),
-                    g.Max(rt => rt.Highest)
-                ))
+            var raw = await query
+                .Select(rt => new { rt.Date, rt.Average })
                 .ToListAsync(ct);
+
+            var grouped = raw
+                .GroupBy(rt => new DateTime(rt.Date.Year, rt.Date.Month, rt.Date.Day, rt.Date.Hour, 0, 0))
+                .Select(g => {
+                    var avgList = g.Where(x => x.Average.HasValue).Select(x => x.Average!.Value).ToList();
+                    return new LatencyRow(
+                        g.Key,
+                        avgList.Count > 0 ? avgList.Average() : null,
+                        CalculatePercentile(avgList, 0.10),
+                        CalculatePercentile(avgList, 0.90)
+                    );
+                })
+                .OrderBy(r => r.Timestamp)
+                .ToList();
             return grouped;
         }
 
@@ -263,7 +271,7 @@ public class MonitorOrchestrationService(
             histQuery = histQuery.Where(r => r.UptimeMonitor.TenantId != IApplicationDbContext.SystemTenantGuid);
 
         var historical = await histQuery
-            .Select(r => new LatencyRow(r.Date.DateTime, r.Average, r.Lowest, r.Highest))
+            .Select(r => new LatencyRow(r.Date.DateTime, r.Average, r.P10, r.P90))
             .ToListAsync(ct);
 
         if (yesterday < end)
@@ -276,15 +284,22 @@ public class MonitorOrchestrationService(
             else
                 liveQuery = liveQuery.Where(rt => rt.UptimeMonitor!.TenantId != IApplicationDbContext.SystemTenantGuid);
 
-            var fresh = await liveQuery
-                .GroupBy(rt => rt.Date.Date)
-                .Select(g => new LatencyRow(
-                    g.Key,
-                    g.Average(rt => rt.Average),
-                    g.Min(rt => rt.Lowest),
-                    g.Max(rt => rt.Highest)
-                ))
+            var liveRaw = await liveQuery
+                .Select(rt => new { rt.Date, rt.Average })
                 .ToListAsync(ct);
+
+            var fresh = liveRaw
+                .GroupBy(rt => rt.Date.Date)
+                .Select(g => {
+                    var avgList = g.Where(x => x.Average.HasValue).Select(x => x.Average!.Value).ToList();
+                    return new LatencyRow(
+                        g.Key,
+                        avgList.Count > 0 ? avgList.Average() : null,
+                        CalculatePercentile(avgList, 0.10),
+                        CalculatePercentile(avgList, 0.90)
+                    );
+                })
+                .ToList();
             historical.AddRange(fresh);
         }
 
@@ -329,9 +344,15 @@ public class MonitorOrchestrationService(
 
     public async Task ReassignAllTenantMonitorsToSystemAsync(Guid tenantId, CancellationToken ct = default)
     {
-        await dbContext.Monitors
+        var monitors = await dbContext.Monitors
             .Where(m => m.TenantId == tenantId)
-            .ExecuteUpdateAsync(s => s.SetProperty(m => m.TenantId, IApplicationDbContext.SystemTenantGuid), ct);
+            .ToListAsync(ct);
+
+        foreach (var m in monitors)
+        {
+            m.TenantId = IApplicationDbContext.SystemTenantGuid;
+        }
+        await dbContext.SaveChangesAsync(ct);
     }
 
     public async Task<IEnumerable<UptimeMonitor>> GetMonitorsByTenantAsync(Guid tenantId, ResolvedPeriod period, CancellationToken ct = default)
@@ -517,5 +538,13 @@ public class MonitorOrchestrationService(
             return null;
 
         return Math.Round((current.Value - previous.Value) / previous.Value * 100, 2);
+    }
+
+    private static double? CalculatePercentile(List<double> values, double percentile)
+    {
+        if (values == null || values.Count == 0) return null;
+        values.Sort();
+        var idx = (int)Math.Round(percentile * (values.Count - 1));
+        return values[idx];
     }
 }

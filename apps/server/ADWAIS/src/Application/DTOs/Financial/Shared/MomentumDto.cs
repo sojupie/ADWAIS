@@ -8,7 +8,8 @@ public record MomentumTenantDto(
     TenantType Type,
     decimal BaselineRevenue,
     decimal GrowthPercentage,
-    decimal CurrentRevenue);
+    decimal CurrentRevenue,
+    string? LitiumBaseUrl);
 
 public record MomentumDto(
     decimal MedianBaselineRevenue,

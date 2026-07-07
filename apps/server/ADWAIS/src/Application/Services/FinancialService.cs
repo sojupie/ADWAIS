@@ -399,7 +399,7 @@ public class FinancialService(IApplicationDbContextFactory contextFactory) : IFi
         var tenantDetails = await context.Tenants
             .AsNoTracking()
             .Where(t => t.Id != IApplicationDbContext.SystemTenantGuid)
-            .Select(t => new { t.Id, t.Name, t.Type })
+            .Select(t => new { t.Id, t.Name, t.Type, t.LitiumBaseUrl })
             .ToDictionaryAsync(t => t.Id, ct);
 
         var currentByTenant = currentRows
@@ -430,7 +430,7 @@ public class FinancialService(IApplicationDbContextFactory contextFactory) : IFi
                 var growth = CalculateGrowthPercentage(curRev, prevRev);
                 var details = tenantDetails[tid];
 
-                return new RevenueEfficiencyTenantDto(tid, details.Name, details.Type, aov, share, growth);
+                return new RevenueEfficiencyTenantDto(tid, details.Name, details.Type, aov, share, growth, details.LitiumBaseUrl);
             })
             .ToList();
 
@@ -510,7 +510,7 @@ public class FinancialService(IApplicationDbContextFactory contextFactory) : IFi
         var tenantDetails = await context.Tenants
             .AsNoTracking()
             .Where(t => t.Id != IApplicationDbContext.SystemTenantGuid)
-            .Select(t => new { t.Id, t.Name, t.Type })
+            .Select(t => new { t.Id, t.Name, t.Type, t.LitiumBaseUrl })
             .ToDictionaryAsync(t => t.Id, ct);
 
         var currentByTenant = currentRows
@@ -535,7 +535,7 @@ public class FinancialService(IApplicationDbContextFactory contextFactory) : IFi
                 var growth = CalculateGrowthPercentage(cur, prev);
                 var details = tenantDetails[tid];
 
-                return new MomentumTenantDto(tid, details.Name, details.Type, prev, growth, cur);
+                return new MomentumTenantDto(tid, details.Name, details.Type, prev, growth, cur, details.LitiumBaseUrl);
             })
             .ToList();
 

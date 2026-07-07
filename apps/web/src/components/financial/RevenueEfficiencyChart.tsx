@@ -14,6 +14,7 @@ import type { RevenueEfficiencyResponse, RevenueEfficiencyTenant, ComparisonPeri
 import { formatCompact, formatCurrency } from '@utils';
 import { ChartPanel } from '../common/charts/ChartPanel';
 import {EmptyState} from "../common/ui/EmptyState.tsx";
+import { ChartFaviconDot } from '../common/charts/ChartFaviconDot';
 
 const TYPE_COLORS: Record<string, string> = {
   'B2C': 'var(--color-chart-1)',
@@ -127,10 +128,7 @@ export const RevenueEfficiencyChart = memo(function RevenueEfficiencyChart({
             <Scatter
               data={chartData}
               dataKey="absoluteGrowth"
-              className={onTenantSelect ? 'cursor-pointer hover:opacity-90 transition-opacity' : undefined}
-              fillOpacity={0.7}
-              stroke="#fff"
-              strokeWidth={2}
+              shape={<ChartFaviconDot />}
               isAnimationActive={false}
               onClick={(point) => {
                 const payload = point?.payload as RevenueEfficiencyTenant | undefined;

@@ -1,7 +1,8 @@
 import type { UptimeMonitorDto } from '@types';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { ChartPanel } from '../common/charts/ChartPanel';
 import { EmptyState } from "../common/ui/EmptyState.tsx";
+import { getTenantFaviconUrl } from '../../utils/tenantHelper';
 
 interface MonitorIssue {
   id: number;
@@ -15,6 +16,7 @@ interface MonitorIssue {
   latency: number | null;
   slaLimit?: number;
   degradedFloor?: number;
+  url?: string | null;
 }
 
 function formatPercent(val: number): string {
@@ -63,6 +65,7 @@ function buildIssues(
         isSlaBreach,
         slaLimit: slaThreshold ?? undefined,
         degradedFloor: degradedFloor ?? undefined,
+        url: m.url,
       });
     });
 
@@ -117,52 +120,69 @@ export function SlaBreachWatchlist({
           </div>
         ) : (
           issues.map(issue => (
-            <div key={`watch-${issue.id}`} className="p-2 bg-slate-50 border border-slate-100 rounded-lg transition-all hover:border-slate-200 shadow-sm shrink-0 flex flex-col justify-between">
-              <div className="flex justify-between items-start mb-1 gap-2">
-                <div className="flex flex-col overflow-hidden min-w-0 flex-1 pr-2">
-                  <span className="text-sm font-black text-slate-900 uppercase tracking-tight leading-tight truncate">{issue.tenantName}</span>
-                  <span className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-0.5 truncate">{issue.monitorName}</span>
-                </div>
-                <div className="flex gap-1 flex-wrap justify-end shrink-0">
-                  {issue.isDown && <span className="bg-red-500 text-white text-xs font-black px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest shrink-0">DOWN</span>}
-                  {issue.isDegraded && !issue.isDown && <span className="bg-amber-500 text-white text-xs font-black px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest shrink-0">DEGRADED</span>}
-                  {issue.isSlaBreach && <span className="bg-slate-700 text-white text-xs font-black px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest shrink-0">SLA BREACH</span>}
-                </div>
-              </div>
-              <div className="flex justify-between items-end">
-                <div className="flex flex-col">
-                  <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">Uptime</span>
-                  <span className={`text-base font-black ${issue.slaLimit && issue.uptime !== null && issue.uptime < issue.slaLimit ? 'text-red-600' : 'text-slate-900'}`}>
-                    {issue.uptime !== null ? `${formatPercent(issue.uptime)}%` : 'N/A'}
-                  </span>
-                </div>
-                <div className="flex flex-col items-end">
-                  <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">Latency</span>
-                  <span className="text-base font-black text-slate-900">
-                    {issue.isDown ? 'N/A' : `${Math.round(issue.latency ?? 0)}ms`}
-                  </span>
-                </div>
-              </div>
-              {(issue.slaLimit !== undefined && issue.slaLimit !== null || issue.degradedFloor !== undefined && issue.degradedFloor !== null) && (
-                <div className="mt-1 pt-1 border-t border-slate-100 flex justify-between items-center gap-2">
-                  {(issue.slaLimit !== undefined && issue.slaLimit !== null) ? (
-                    <div className="flex flex-col">
-                      <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">SLA Limit</span>
-                      <span className="text-sm font-black text-slate-600 uppercase">{formatPercent(issue.slaLimit)}%</span>
-                    </div>
-                  ) : <div />}
-                  {(issue.degradedFloor !== undefined && issue.degradedFloor !== null) ? (
-                    <div className="flex flex-col items-end text-right">
-                      <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">Degraded</span>
-                      <span className="text-sm font-black text-slate-600 uppercase">{issue.degradedFloor}ms</span>
-                    </div>
-                  ) : <div />}
-                </div>
-              )}
-            </div>
+            <SlaBreachCard key={`watch-${issue.id}`} issue={issue} />
           ))
         )}
       </div>
     </ChartPanel>
+  );
+}
+
+function SlaBreachCard({ issue }: { issue: MonitorIssue }) {
+  const [imgError, setImgError] = useState(false);
+  const faviconUrl = getTenantFaviconUrl(issue.url);
+
+  return (
+    <div className="relative overflow-hidden p-2 bg-slate-50 border border-slate-100 rounded-lg transition-all hover:border-slate-200 shadow-sm shrink-0 flex flex-col justify-between">
+      {faviconUrl && !imgError && (
+        <img
+          src={faviconUrl}
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 opacity-20 pointer-events-none select-none"
+          onError={() => setImgError(true)}
+          alt=""
+        />
+      )}
+      <div className="flex justify-between items-start mb-1 gap-2">
+        <div className="flex flex-col overflow-hidden min-w-0 flex-1 pr-2">
+          <span className="text-sm font-black text-slate-900 uppercase tracking-tight leading-tight truncate">{issue.tenantName}</span>
+          <span className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-0.5 truncate">{issue.monitorName}</span>
+        </div>
+        <div className="flex gap-1 flex-wrap justify-end shrink-0">
+          {issue.isDown && <span className="bg-red-500 text-white text-xs font-black px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest shrink-0">DOWN</span>}
+          {issue.isDegraded && !issue.isDown && <span className="bg-amber-500 text-white text-xs font-black px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest shrink-0">DEGRADED</span>}
+          {issue.isSlaBreach && <span className="bg-slate-700 text-white text-xs font-black px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest shrink-0">SLA BREACH</span>}
+        </div>
+      </div>
+      <div className="flex justify-between items-end">
+        <div className="flex flex-col">
+          <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">Uptime</span>
+          <span className={`text-base font-black ${issue.slaLimit && issue.uptime !== null && issue.uptime < issue.slaLimit ? 'text-red-600' : 'text-slate-900'}`}>
+            {issue.uptime !== null ? `${formatPercent(issue.uptime)}%` : 'N/A'}
+          </span>
+        </div>
+        <div className="flex flex-col items-end">
+          <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">Latency</span>
+          <span className="text-base font-black text-slate-900">
+            {issue.isDown ? 'N/A' : `${Math.round(issue.latency ?? 0)}ms`}
+          </span>
+        </div>
+      </div>
+      {(issue.slaLimit !== undefined && issue.slaLimit !== null || issue.degradedFloor !== undefined && issue.degradedFloor !== null) && (
+        <div className="mt-1 pt-1 border-t border-slate-100 flex justify-between items-center gap-2">
+          {(issue.slaLimit !== undefined && issue.slaLimit !== null) ? (
+            <div className="flex flex-col">
+              <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">SLA Limit</span>
+              <span className="text-sm font-black text-slate-600 uppercase">{formatPercent(issue.slaLimit)}%</span>
+            </div>
+          ) : <div />}
+          {(issue.degradedFloor !== undefined && issue.degradedFloor !== null) ? (
+            <div className="flex flex-col items-end text-right">
+              <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">Degraded</span>
+              <span className="text-sm font-black text-slate-600 uppercase">{issue.degradedFloor}ms</span>
+            </div>
+          ) : <div />}
+        </div>
+      )}
+    </div>
   );
 }

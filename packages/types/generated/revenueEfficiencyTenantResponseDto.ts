@@ -14,4 +14,6 @@ export interface RevenueEfficiencyTenantResponseDto {
   averageOrderValue?: number;
   portfolioSharePercentage?: number;
   growthVelocity?: number;
+  /** @nullable */
+  litiumBaseUrl?: string | null;
 }

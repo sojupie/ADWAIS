@@ -15,6 +15,7 @@ import type { MomentumResponse, MomentumTenant, ComparisonPeriod } from '@types'
 import { formatCompact } from '@utils';
 import { ChartPanel } from '../common/charts/ChartPanel';
 import {EmptyState} from "../common/ui/EmptyState.tsx";
+import { ChartFaviconDot } from '../common/charts/ChartFaviconDot';
 
 
 
@@ -104,11 +105,7 @@ points: MomentumTenant[]; medianBaselineRevenue: number; globalGrowthPercentage:
         <Tooltip content={<CustomTooltip />} cursor={{ strokeDasharray: '3 3' }} useTranslate3d={true} isAnimationActive={false} />
         <Scatter
           data={points}
-          className={onTenantSelect ? 'cursor-pointer hover:opacity-90 transition-opacity' : undefined}
-          fill="var(--color-brand-btn-primary)"
-          fillOpacity={0.7}
-          stroke="#fff"
-          strokeWidth={2}
+          shape={<ChartFaviconDot />}
           isAnimationActive={false}
           onClick={(point) => {
             const payload = point?.payload as MomentumTenant | undefined;

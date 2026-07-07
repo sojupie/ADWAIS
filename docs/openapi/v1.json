@@ -2573,6 +2573,14 @@
           "exceptionMessage": {
             "type": "string",
             "nullable": true
+          },
+          "tenantName": {
+            "type": "string",
+            "nullable": true
+          },
+          "monitorName": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -3183,6 +3191,10 @@
           "currentRevenue": {
             "type": "number",
             "format": "double"
+          },
+          "litiumBaseUrl": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -3479,6 +3491,10 @@
           "growthVelocity": {
             "type": "number",
             "format": "double"
+          },
+          "litiumBaseUrl": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false

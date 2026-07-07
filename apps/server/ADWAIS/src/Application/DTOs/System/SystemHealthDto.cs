@@ -36,5 +36,7 @@ public record BackgroundJobStatusDto(
     string State,
     DateTime? CreatedAt,
     double? DurationSeconds,
-    string? ExceptionMessage
+    string? ExceptionMessage,
+    string? TenantName = null,
+    string? MonitorName = null
 );

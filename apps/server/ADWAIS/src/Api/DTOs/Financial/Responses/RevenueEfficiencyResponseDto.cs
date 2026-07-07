@@ -8,7 +8,8 @@ public record RevenueEfficiencyTenantResponseDto(
     TenantType Type,
     decimal AverageOrderValue,
     decimal PortfolioSharePercentage,
-    decimal GrowthVelocity
+    decimal GrowthVelocity,
+    string? LitiumBaseUrl
 );
 
 public record RevenueEfficiencyResponseDto(

@@ -15,7 +15,7 @@ export function KioskControls() {
       title={mode === 'paused' ? 'Resume Kiosk' : 'Pause Kiosk'}
     >
       {/* Left side: Status dot and label matching UserAccountLink text-sm font-bold */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
         <div className={`w-3 h-3 rounded-full transition-colors duration-500
             ${mode === 'kiosk' ? 'bg-emerald-500 kiosk-pulse' :
             mode === 'interactive' ? 'bg-amber-500' : 'bg-slate-400'}`}

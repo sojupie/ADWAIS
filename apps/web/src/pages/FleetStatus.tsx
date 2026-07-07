@@ -19,14 +19,13 @@ export function FleetStatus() {
 
   const matrixActions = (
     <div className="flex items-center gap-2">
-      {vm.selection && (
-        <button
-          onClick={() => vm.setSelection(null)}
-          className="bg-brand-bg-secondary text-white px-3 py-1 rounded-sm text-sm font-black uppercase tracking-widest hover:bg-brand-text transition-all shadow-sm cursor-pointer"
-        >
-          CLEAR
-        </button>
-      )}
+      <button
+        onClick={() => vm.setSelection(null)}
+        disabled={!vm.selection}
+        className="bg-brand-bg-secondary text-white px-3 py-1 rounded-sm text-sm font-black uppercase tracking-widest hover:bg-brand-text transition-all shadow-sm cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed"
+      >
+        CLEAR
+      </button>
       <span className="text-sm font-bold text-slate-500">
         {vm.fleetStats.enabled.length} Online
       </span>
@@ -146,12 +145,12 @@ export function FleetStatus() {
         {/* Left Column: Fleet Matrix (Takes 60% of width on landscape lg screens) */}
         <div className="landscape-lg:col-span-3 flex flex-col min-h-[500px] contained:min-h-0 contained:h-full">
           <CollectionPanel
-              title={vm.selection ? `${vm.selectedTenantName} Monitors` : "Fleet Status Matrix – Click to select a tenant"}
+              title={vm.selection ? `${vm.selectedTenantName} Monitors` : "Endpoint status – Click to select a tenant"}
               className="flex-grow min-h-[59px]"
               isLoading={vm.globalMonitorsQuery.isLoading}
               actions={matrixActions}
           >
-            <div className="px-4 py-4 h-full flex flex-col min-h-0">
+            <div className="px-4 pb-4 h-full flex flex-col min-h-0">
               {matrixContent}
             </div>
           </CollectionPanel>

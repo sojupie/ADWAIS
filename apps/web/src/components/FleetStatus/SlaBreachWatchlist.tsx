@@ -86,14 +86,12 @@ function buildIssues(
 export function SlaBreachWatchlist({
   isLoading,
   monitors,
-  onClearSelection,
   defaultSla,
   defaultDegradedFloor,
   className = "flex-1 h-full min-h-[350px] contained:min-h-0 max-h-[600px] xl:max-h-none"
 }: {
   isLoading?: boolean;
   monitors: UptimeMonitorDto[];
-  onClearSelection?: () => void;
   defaultSla?: number | null;
   defaultDegradedFloor?: number | null;
   className?: string;
@@ -104,19 +102,9 @@ export function SlaBreachWatchlist({
   return (
     <ChartPanel
       isLoading={isLoading}
-      title="SLA Breach Watchlist"
+      title="Endpoint Watchlist"
       className={className}
       bodyClassName=""
-      legend={
-        <button
-          onClick={onClearSelection}
-          disabled={!onClearSelection}
-          className={`bg-brand-bg-secondary text-white px-3 py-1 rounded-sm text-sm font-black uppercase tracking-widest hover:bg-brand-text transition-all shadow-sm cursor-pointer ${!onClearSelection ? 'opacity-0 pointer-events-none' : 'opacity-100'
-            }`}
-        >
-          Clear
-        </button>
-      }
     >
       <div className="flex-1 overflow-y-auto pr-1 min-h-0 pb-4 custom-scrollbar grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-2 gap-2 content-start">
         {issues.length === 0 ? (

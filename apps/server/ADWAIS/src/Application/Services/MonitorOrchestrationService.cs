@@ -17,7 +17,7 @@ public class MonitorOrchestrationService(
     ICacheService cache,
     IConfiguration configuration) : IMonitorOrchestrationService
 {
-    private record LatencyRow(DateTime Timestamp, double? Average, double? P10, double? P90);
+    private record LatencyRow(DateTimeOffset Timestamp, double? Average, double? P10, double? P90);
 
     public async Task<MonitorAnalyticsDto> GetAnalyticsAsync(ResolvedPeriod period, Guid? tenantId = null, int? monitorId = null, CancellationToken ct = default)
     {

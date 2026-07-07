@@ -1,6 +1,7 @@
 using Adwais.Application.Common.Models;
 using Adwais.Application.DTOs.Financial;
 using Adwais.Domain.Entities;
+using Adwais.Domain.Entities.OrderData;
 
 namespace Adwais.Application.Interfaces;
 
@@ -60,4 +61,6 @@ public interface IFinancialService
     /// Calculates the cumulative growth delta for the specified timeframe.
     /// </summary>
     Task<IReadOnlyList<CumulativeGrowthDeltaPointDto>> GetCumulativeGrowthDeltaAsync(ResolvedPeriod period, Guid? tenantId = null, CancellationToken ct = default);
+
+    Task<IReadOnlyList<OrderDto>> GetOrdersAsync(DateTimeOffset dateSince, DateTimeOffset dateUntil, int ceilingCount, CancellationToken ct);
 }

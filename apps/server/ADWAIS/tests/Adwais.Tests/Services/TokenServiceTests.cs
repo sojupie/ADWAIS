@@ -12,13 +12,14 @@ namespace Adwais.Tests.Services;
 public class TokenServiceTests
 {
     private readonly Mock<IConfiguration> _configMock;
-    private readonly string _secret = "SuperSecretKeyForTestingKioskTokens32CharsMinimum!";
-    
+
     public TokenServiceTests()
     {
         _configMock = new Mock<IConfiguration>();
         _configMock.Setup(c => c["Authentication:KioskJwtSecret"]).Returns(_secret);
     }
+
+    private readonly string _secret = "SuperSecretKeyForTestingKioskTokens32CharsMinimum!";
 
     [Fact]
     public void GenerateKioskToken_ShouldReturnValidJwtWithCorrectClaims()

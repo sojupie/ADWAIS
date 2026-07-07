@@ -1002,6 +1002,74 @@
         }
       }
     },
+    "/api/financial/orders": {
+      "get": {
+        "tags": [
+          "Financial"
+        ],
+        "summary": "List of orders\r\nNOTE: DO NOT USE FOR LARGE BATCH EXPORTS. MAX 100 RECORDS.\r\nFOR LARGE BATCH EXPORTS USE /orders/export",
+        "parameters": [
+          {
+            "name": "dateSince",
+            "in": "query",
+            "description": "Optional. Defaults to 5 minutes ago.",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "dateUntil",
+            "in": "query",
+            "description": "Optional. Defaults to now.",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "CeilingCount",
+            "in": "query",
+            "description": "Optional. Defaults to 20.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrderDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrderDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrderDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/global-config": {
       "get": {
         "tags": [
@@ -3381,6 +3449,47 @@
           "kdeDensity": {
             "type": "number",
             "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "OrderDto": {
+        "type": "object",
+        "properties": {
+          "adwaisOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "litiumOrderId": {
+            "type": "string",
+            "nullable": true
+          },
+          "adwaisTenantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderState": {
+            "$ref": "#/components/schemas/OrderState"
+          },
+          "createdDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "totalValueIncVat": {
+            "type": "number",
+            "format": "double"
+          },
+          "totalValueExcVat": {
+            "type": "number",
+            "format": "double"
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "tenantName": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false

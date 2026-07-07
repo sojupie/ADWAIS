@@ -89,6 +89,7 @@ pnpm dev:api   # ASP.NET Core backend
 |---|---|
 | `pnpm dev:web` | Start the React frontend dev server |
 | `pnpm dev:api` | Start the .NET backend API |
+| `pnpm dev:api:watch` | Start the .NET backend API with hot-reload |
 | `pnpm codegen` | Regenerate OpenAPI specification (`v1.json`) and TypeScript types / endpoints |
 | `pnpm db:up` | Start the local PostgreSQL container |
 | `pnpm db:down` | Stop the local PostgreSQL container |

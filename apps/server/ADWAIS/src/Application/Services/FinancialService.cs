@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Adwais.Application.Common.Models;
 using Adwais.Application.DTOs.Financial;
 using Adwais.Application.Interfaces;
@@ -783,6 +784,32 @@ public class FinancialService(IApplicationDbContextFactory contextFactory) : IFi
         }
 
         return points;
+    }
+
+    public async Task<IReadOnlyList<OrderDto>> GetOrdersAsync(DateTimeOffset dateSince, DateTimeOffset dateUntil, int ceilingCount, CancellationToken ct)
+    {
+        await using var context = await contextFactory.CreateDbContextAsync(ct);
+
+        return await context.Orders
+            .AsNoTracking()
+            .Where(o => o.CreatedDate >= dateSince
+                        && o.CreatedDate <= dateUntil
+                        && o.OrderState != OrderState.Cancelled
+                        && o.TotalValueIncVat > 0m)
+            .OrderByDescending(o => o.CreatedDate)
+            .Take(ceilingCount)
+            .Select(p => new OrderDto(
+                AdwaisOrderId: p.Id,
+                LitiumOrderId: p.LitiumOrderId,
+                AdwaisTenantId: p.TenantId,
+                OrderState: p.OrderState,
+                CreatedDate: p.CreatedDate,
+                TotalValueIncVat: p.TotalValueIncVat,
+                TotalValueExcVat: p.TotalValueExcVat,
+                Currency: p.Currency,
+                TenantName: p.Tenant != null ? p.Tenant.Name : null
+                ))
+            .ToListAsync(ct);
     }
 
     #endregion

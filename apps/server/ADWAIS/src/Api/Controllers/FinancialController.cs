@@ -1,8 +1,10 @@
 using Adwais.Application.Common.Models;
 using Adwais.Api.DTOs.Financial;
+using Adwais.Application.DTOs.Financial;
 using Adwais.Domain.Enums;
 using Adwais.Application.Interfaces;
 using Adwais.Application.Services;
+using Adwais.Domain.Entities.OrderData;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 
@@ -210,6 +212,27 @@ public class FinancialController(IFinancialService financialService) : Controlle
                 p.CurrentCumulative,
                 p.PreviousCumulative,
                 p.CumulativeGrowthDelta)).ToList());
+    }
+    
+    /// <summary>
+    /// List of orders
+    /// NOTE: DO NOT USE FOR LARGE BATCH EXPORTS. MAX 100 RECORDS.
+    /// FOR LARGE BATCH EXPORTS USE /orders/export
+    /// </summary>
+    [HttpGet("orders")]
+    public async Task<ActionResult<IEnumerable<OrderDto>>> GetOrders([FromQuery] OrderRequestDto request, CancellationToken ct = default)
+    {
+        var result = await financialService.GetOrdersAsync(request.DateSince, request.DateUntil, request.CeilingCount, ct);
+        return Ok(result.Select(p => new OrderDto(
+            AdwaisOrderId: p.AdwaisOrderId,
+            LitiumOrderId: p.LitiumOrderId,
+            AdwaisTenantId: p.AdwaisTenantId,
+            OrderState: p.OrderState,
+            CreatedDate: p.CreatedDate,
+            TotalValueIncVat: p.TotalValueIncVat,
+            TotalValueExcVat: p.TotalValueExcVat,
+            Currency: p.Currency,
+            TenantName: p.TenantName)).ToList());
     }
 }
 

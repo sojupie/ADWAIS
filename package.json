@@ -15,6 +15,7 @@
     "dev:web:build": "pnpm --filter web build",
     "dev:web:preview": "pnpm --filter web preview",
     "dev:api": "dotnet run --project apps/server/ADWAIS/src/Api/Adwais.Api.csproj",
+    "dev:api:watch": "dotnet watch run --project apps/server/ADWAIS/src/Api/Adwais.Api.csproj",
     "codegen": "dotnet build apps/server/ADWAIS/src/Api/Adwais.Api.csproj && pnpm --filter web codegen",
     "migration:add": "pwsh -File scripts/migration-add.ps1",
     "migration:update": "dotnet ef database update --project apps/server/ADWAIS/src/Infrastructure/Adwais.Infrastructure.csproj --startup-project apps/server/ADWAIS/src/Api/Adwais.Api.csproj",

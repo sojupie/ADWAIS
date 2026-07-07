@@ -163,7 +163,7 @@ function FleetMatrixTile({
         </div>
 
         {monitor.tags && monitor.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 mb-3 w-full">
+          <div className="flex flex-wrap gap-1 w-full pb-2">
             {monitor.tags.map((tag) => {
               const name = tag.split(':')[0].trim();
               const color = getTagColor(tag);

@@ -149,8 +149,8 @@ function FleetMatrixTile({
         )}
       </div>
 
-      <div className="relative z-10 flex flex-col h-full w-full min-w-0">
-        <div className="flex justify-between items-start mb-2 w-full min-w-0">
+      <div className="gap-1 relative z-10 flex flex-col h-full justify-between w-full min-w-0">
+        <div className="flex justify-between items-start w-full min-w-0">
           <div className="flex flex-col overflow-hidden min-w-0 flex-1 pr-2">
             <span className={`text-sm font-black ${theme.text} line-clamp-2 uppercase tracking-tight leading-tight`}>
               {tenantDisplay}
@@ -163,7 +163,7 @@ function FleetMatrixTile({
         </div>
 
         {monitor.tags && monitor.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 w-full pb-2">
+          <div className="flex flex-wrap gap-1 w-full">
             {monitor.tags.map((tag) => {
               const name = tag.split(':')[0].trim();
               const color = getTagColor(tag);

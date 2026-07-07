@@ -18,6 +18,7 @@ import {DashboardFlexRow} from "../components/common/layout/DashboardFlexRow.tsx
 import { DashboardFooter } from "../components/common/layout/DashboardFooter.tsx";
 import { SyncStatusWidget } from '../components/common/dashboard/SyncStatusWidget';
 import { PeriodSelector } from '../components/common/charts/PeriodSelector';
+import { TenantSelector } from '../components/financial/TenantSelector';
 
 const EMPTY_ACCUMULATED: never[] = [];
 const EMPTY_DENSITY: never[] = [];
@@ -29,10 +30,9 @@ interface Props {
   tenantName: string;
   tenantType: string;
   timeframe: string;
-  onBack: () => void;
 }
 
-export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe, onBack }: Props) {
+export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe }: Props) {
   const kpiQuery = useGlobalKpis(timeframe, tenantId);
   const globalKpiQuery = useGlobalKpis(timeframe);
   const accumulatedQuery = useAccumulatedRevenue(timeframe, tenantId, 'YearOverYear');
@@ -49,20 +49,12 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe,
 
   return (
     <DashboardLayout>
-      <header className="flex items-center gap-6 shrink-0">
-        <button
-          className="w-10 h-10 rounded-full border border-slate-200 bg-white flex items-center justify-center text-xl font-extrabold text-slate-700 hover:text-brand-text hover:bg-slate-100 hover:border-slate-300 transition-all shadow-sm cursor-pointer"
-          type="button"
-          onClick={onBack}
-          aria-label="Back to financial overview"
-        >
-          <ArrowLeft size={20} className="stroke-[3px]" />
-        </button>
-        <div>
+      <header className="flex items-center justify-between gap-1 shrink-0 flex-wrap w-full">
+        <div className="min-w-0">
           <div className="flex items-center gap-3 mb-1">
             <h1 className="text-2xl font-extrabold text-brand-text tracking-tight m-0">{tenantName} Diagnostics</h1>
             <span 
-              className={`inline-flex items-center px-3 py-1 rounded-sm text-sm font-black uppercase tracking-widest shadow-sm ${
+              className={`inline-flex items-center px-3 py-1 rounded-sm text-sm font-black uppercase tracking-widest shadow-sm shrink-0 ${
                 tenantType === 'B2C' ? 'bg-chart-1 text-white' : 
                 tenantType === 'Mixed' ? 'bg-chart-2 text-white' : 
                 'bg-(--color-brand-btn-primary) text-white'
@@ -73,6 +65,7 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe,
           </div>
           <p className="text-sm text-slate-500 m-0 font-medium tracking-wide">Isolated entity performance view for the {timeframe} period.</p>
         </div>
+        <TenantSelector />
       </header>
 
       <DashboardTopRow>

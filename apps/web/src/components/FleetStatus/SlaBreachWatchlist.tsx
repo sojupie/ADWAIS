@@ -129,7 +129,7 @@ export function SlaBreachWatchlist({
                 {showFavicon && (
                   <img
                     src={faviconUrl}
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 opacity-20 pointer-events-none select-none"
+                    className="absolute bottom-2 left-1/2 -translate-x-1/2 w-16 h-16 opacity-20 pointer-events-none select-none"
                     onError={() => setFailedFavicons(prev => {
                       const next = new Set(prev);
                       next.add(issue.id);

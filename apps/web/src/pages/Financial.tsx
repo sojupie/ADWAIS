@@ -11,6 +11,7 @@ import { DashboardFlexRow } from "../components/common/layout/DashboardFlexRow.t
 import { DashboardFooter } from "../components/common/layout/DashboardFooter.tsx";
 import { SyncStatusWidget } from '../components/common/dashboard/SyncStatusWidget';
 import { PeriodSelector } from '../components/common/charts/PeriodSelector';
+import { TenantSelector } from '../components/financial/TenantSelector';
 import { useFinancialViewModel } from "../hooks/useFinancialViewModel.ts";
 import type { RevenueEfficiencyResponse, MomentumResponse } from '@types';
 
@@ -29,13 +30,22 @@ export function Financial() {
         tenantName={vm.selectedTenantDetails.tenantName}
         tenantType={vm.selectedTenantDetails.type}
         timeframe={vm.timeframe}
-        onBack={vm.handleBackToGlobal}
       />
     );
   }
 
   return (
     <DashboardLayout>
+      <header className="flex items-center justify-between gap-6 shrink-0 w-full">
+        <div className="min-w-0">
+          <div className="flex items-center gap-3 mb-1">
+            <h1 className="text-2xl font-extrabold text-brand-text tracking-tight m-0">Global Portfolio</h1>
+          </div>
+          <p className="text-sm text-slate-500 m-0 font-medium tracking-wide">Performance overview across all active tenants.</p>
+        </div>
+        <TenantSelector />
+      </header>
+
       {/* KPI Section */}
       <DashboardTopRow>
         <FactPanel

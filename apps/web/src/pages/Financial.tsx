@@ -36,7 +36,7 @@ export function Financial() {
 
   return (
     <DashboardLayout>
-      <header className="flex items-center justify-between gap-6 shrink-0 w-full">
+      <header className="flex items-center justify-between gap-1 shrink-0 w-full flex-wrap">
         <div className="min-w-0">
           <div className="flex items-center gap-3 mb-1">
             <h1 className="text-2xl font-extrabold text-brand-text tracking-tight m-0">Global Portfolio</h1>

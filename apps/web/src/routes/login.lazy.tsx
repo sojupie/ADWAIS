@@ -52,7 +52,7 @@ function LoginComponent() {
 
       <div className="pt-4 border-t border-white/5 flex justify-between items-center text-sm text-slate-500 font-extrabold tracking-widest uppercase relative z-10 w-full animate-stagger delay-300">
         <span>ADWAIS Platform</span>
-        <span className="text-slate-600">v1.0.0</span>
+        <span className="text-slate-600">v1.1.0</span>
       </div>
     </>
   );

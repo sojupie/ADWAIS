@@ -2,42 +2,7 @@ import { useState } from 'react';
 import type { UptimeMonitorDto } from '@types';
 import { normalizeStatus } from "../../utils/monitorStatusHelper.ts";
 import { getTenantFaviconUrl } from "../../utils/tenantHelper.ts";
-
-const getTagColor = (tag: string) => {
-  const parts = tag.split(':');
-  if (parts.length > 1 && parts[1]) {
-    return parts[1].toLowerCase();
-  }
-  const tagName = parts[0].trim().toUpperCase();
-  const colors = ['blue', 'green', 'red', 'orange', 'yellow', 'purple'];
-  let hash = 0;
-  for (let i = 0; i < tagName.length; i++) {
-    hash = tagName.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  const index = Math.abs(hash) % colors.length;
-  return colors[index];
-};
-
-const getTagStyle = (color: string) => {
-  switch (color?.toLowerCase()) {
-    case 'blue':
-      return 'bg-blue-50 text-blue-700 border-blue-200';
-    case 'green':
-      return 'bg-green-50 text-green-700 border-green-200';
-    case 'red':
-      return 'bg-red-50 text-red-700 border-red-200';
-    case 'orange':
-      return 'bg-orange-50 text-orange-700 border-orange-200';
-    case 'yellow':
-      return 'bg-yellow-50 text-yellow-700 border-yellow-200';
-    case 'purple':
-      return 'bg-purple-50 text-purple-700 border-purple-200';
-    case 'grey':
-    case 'slate':
-    default:
-      return 'bg-slate-50 text-slate-700 border-slate-200';
-  }
-};
+import { getTagColor, getTagStyle } from "../../utils/tagHelper.ts";
 
 function getMonitorStatus(monitor: UptimeMonitorDto): 'operational' | 'degraded' | 'down' | 'unknown' | 'paused' | 'starting' {
   const status = normalizeStatus(monitor.currentStatus);

@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { ChartPanel } from '../common/charts/ChartPanel';
 import { EmptyState } from "../common/ui/EmptyState.tsx";
 import { getTenantFaviconUrl } from '../../utils/tenantHelper';
+import { getTagColor, getTagStyle } from '../../utils/tagHelper';
 
 interface MonitorIssue {
   id: number;
@@ -17,6 +18,7 @@ interface MonitorIssue {
   slaLimit?: number;
   degradedFloor?: number;
   url?: string | null;
+  tags?: string[];
 }
 
 function formatPercent(val: number): string {
@@ -66,6 +68,7 @@ function buildIssues(
         slaLimit: slaThreshold ?? undefined,
         degradedFloor: degradedFloor ?? undefined,
         url: m.url,
+        tags: m.tags ?? undefined,
       });
     });
 
@@ -125,7 +128,7 @@ export function SlaBreachWatchlist({
             const showFavicon = faviconUrl && !failedFavicons.has(issue.id);
 
             return (
-              <div key={`watch-${issue.id}`} className="relative p-2 bg-slate-50 border border-slate-100 rounded-lg transition-all hover:border-slate-200 shadow-sm shrink-0 flex flex-col justify-between">
+              <div key={`watch-${issue.id}`} className="relative p-2 bg-slate-50 border border-slate-100 rounded-lg transition-all hover:border-slate-200 shadow-sm shrink-0 flex flex-col gap-0.5 justify-between">
                 {showFavicon && (
                   <img
                     src={faviconUrl}
@@ -138,7 +141,8 @@ export function SlaBreachWatchlist({
                     alt=""
                   />
                 )}
-                <div className="flex justify-between items-start mb-1 gap-2 relative z-10">
+                {/* Row 1: title + status badges */}
+                <div className="flex justify-between items-start gap-2 relative z-10">
                   <div className="flex flex-col overflow-hidden min-w-0 flex-1 pr-2">
                     <span className="text-sm font-black text-slate-900 uppercase tracking-tight leading-tight truncate">{issue.tenantName}</span>
                     <span className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-0.5 truncate">{issue.monitorName}</span>
@@ -149,6 +153,26 @@ export function SlaBreachWatchlist({
                     {issue.isSlaBreach && <span className="bg-slate-700 text-white text-xs font-black px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest shrink-0">SLA BREACH</span>}
                   </div>
                 </div>
+
+                {/* Row 2: tags */}
+                {issue.tags && issue.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1 relative z-10">
+                    {issue.tags.map((tag) => {
+                      const name = tag.split(':')[0].trim();
+                      const color = getTagColor(tag);
+                      return (
+                        <span
+                          key={tag}
+                          className={`text-xs font-bold px-1.5 py-0.5 rounded uppercase tracking-wider border shadow-sm ${getTagStyle(color)}`}
+                        >
+                          {name}
+                        </span>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Row 3: uptime + latency */}
                 <div className="flex justify-between items-end relative z-10">
                   <div className="flex flex-col">
                     <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">Uptime</span>
@@ -163,8 +187,10 @@ export function SlaBreachWatchlist({
                     </span>
                   </div>
                 </div>
+
+                {/* Row 4: SLA limit + degraded floor */}
                 {(issue.slaLimit !== undefined && issue.slaLimit !== null || issue.degradedFloor !== undefined && issue.degradedFloor !== null) && (
-                  <div className="mt-1 pt-1 flex justify-between items-center gap-2 relative z-10">
+                  <div className="pt-1 flex justify-between items-center gap-2 relative z-10">
                     {(issue.slaLimit !== undefined && issue.slaLimit !== null) ? (
                       <div className="flex flex-col">
                         <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">SLA Limit</span>

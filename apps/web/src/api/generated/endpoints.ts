@@ -45,6 +45,7 @@ import type {
   GetApiFinancialKpisParams,
   GetApiFinancialMomentumParams,
   GetApiFinancialOrderDistributionParams,
+  GetApiFinancialOrdersParams,
   GetApiFinancialRevenueEfficiencyParams,
   GetApiFinancialTransactionDensityParams,
   GetApiFinancialVelocityParams,
@@ -66,6 +67,7 @@ import type {
   MonitorAnalyticsResponseDto,
   NetGrowthAdditionPointResponseDto,
   OrderBinResponseDto,
+  OrderDto,
   PostApiIngestionBackfillParams,
   PostApiMonitorsParams,
   RegisterKioskRequestDto,
@@ -2768,6 +2770,140 @@ export function useGetApiFinancialCumulativeGrowthDelta<TData = Awaited<ReturnTy
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetApiFinancialCumulativeGrowthDeltaQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export type getApiFinancialOrdersResponse200TextPlain = {
+  data: OrderDto[]
+  status: 200
+}
+
+export type getApiFinancialOrdersResponse200ApplicationJson = {
+  data: OrderDto[]
+  status: 200
+}
+
+export type getApiFinancialOrdersResponse200TextJson = {
+  data: OrderDto[]
+  status: 200
+}
+
+export type getApiFinancialOrdersResponseSuccess = (getApiFinancialOrdersResponse200TextPlain | getApiFinancialOrdersResponse200ApplicationJson | getApiFinancialOrdersResponse200TextJson) & {
+  headers: Headers;
+};
+;
+
+export type getApiFinancialOrdersResponse = (getApiFinancialOrdersResponseSuccess)
+
+export const getGetApiFinancialOrdersUrl = (params?: GetApiFinancialOrdersParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/financial/orders?${stringifiedParams}` : `/api/financial/orders`
+}
+
+/**
+ * @summary List of orders
+NOTE: DO NOT USE FOR LARGE BATCH EXPORTS. MAX 100 RECORDS.
+FOR LARGE BATCH EXPORTS USE /orders/export
+ */
+export const getApiFinancialOrders = async (params?: GetApiFinancialOrdersParams, options?: RequestInit): Promise<getApiFinancialOrdersResponse> => {
+
+  return customClient<getApiFinancialOrdersResponse>(getGetApiFinancialOrdersUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiFinancialOrdersQueryKey = (params?: GetApiFinancialOrdersParams,) => {
+    return [
+    `/api/financial/orders`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetApiFinancialOrdersQueryOptions = <TData = Awaited<ReturnType<typeof getApiFinancialOrders>>, TError = unknown>(params?: GetApiFinancialOrdersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialOrders>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiFinancialOrdersQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiFinancialOrders>>> = ({ signal }) => getApiFinancialOrders(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialOrders>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiFinancialOrdersQueryResult = NonNullable<Awaited<ReturnType<typeof getApiFinancialOrders>>>
+export type GetApiFinancialOrdersQueryError = unknown
+
+
+export function useGetApiFinancialOrders<TData = Awaited<ReturnType<typeof getApiFinancialOrders>>, TError = unknown>(
+ params: undefined |  GetApiFinancialOrdersParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialOrders>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiFinancialOrders>>,
+          TError,
+          Awaited<ReturnType<typeof getApiFinancialOrders>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiFinancialOrders<TData = Awaited<ReturnType<typeof getApiFinancialOrders>>, TError = unknown>(
+ params?: GetApiFinancialOrdersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialOrders>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiFinancialOrders>>,
+          TError,
+          Awaited<ReturnType<typeof getApiFinancialOrders>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiFinancialOrders<TData = Awaited<ReturnType<typeof getApiFinancialOrders>>, TError = unknown>(
+ params?: GetApiFinancialOrdersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialOrders>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary List of orders
+NOTE: DO NOT USE FOR LARGE BATCH EXPORTS. MAX 100 RECORDS.
+FOR LARGE BATCH EXPORTS USE /orders/export
+ */
+
+export function useGetApiFinancialOrders<TData = Awaited<ReturnType<typeof getApiFinancialOrders>>, TError = unknown>(
+ params?: GetApiFinancialOrdersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialOrders>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiFinancialOrdersQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

@@ -125,7 +125,6 @@ export function FleetStatus() {
 
           <SlaBreachWatchlist
             monitors={vm.scopedMonitors}
-            onClearSelection={vm.selection ? () => vm.setSelection(null) : undefined}
             defaultSla={vm.defaultSla}
             defaultDegradedFloor={vm.defaultDegradedFloor}
             className="flex-1 min-h-[350px] contained:min-h-0 max-h-[600px] xl:max-h-none"

@@ -8,6 +8,7 @@ import { SiteHeader } from './SiteHeader';
 import { MobileNavigationMenu } from './MobileNavigationMenu';
 import { useMediaQuery } from '../../../hooks/useMediaQuery';
 import { useVisualViewportCssVars } from '../../../hooks/useVisualViewportCssVars';
+import { useOrderNotifier } from '../../../hooks/useOrderNotifier';
 
 type AppShellProps = {
   pathname: string;
@@ -38,6 +39,7 @@ export function AppShell({
 }: AppShellProps) {
   const isMobileView = useMediaQuery('(max-width: 767px)');
   useVisualViewportCssVars();
+  useOrderNotifier();
 
   const isFetching = useIsFetching();
   const isMutating = useIsMutating();

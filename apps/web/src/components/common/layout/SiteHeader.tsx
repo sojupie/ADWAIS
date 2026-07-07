@@ -1,6 +1,7 @@
 import {Menu, Settings, X} from 'lucide-react';
 import type {Timeframe} from '../../../schemas';
 import {KioskControls} from '../dashboard/KioskControls';
+import {NotificationToggleWidget} from '../dashboard/NotificationToggleWidget';
 import {NavLink} from './NavLink';
 import {ConnectivityStatus} from './ConnectivityStatus';
 import {UserAccountLink} from './UserAccountLink';
@@ -78,6 +79,7 @@ export function SiteHeader({
               <ConnectivityStatus isOnline={isOnline} isBackendOnline={isBackendOnline} variant="desktop" />
               <UserAccountLink label={userLabel} variant="desktop" />
             </div>
+            <NotificationToggleWidget />
             <KioskControls />
           </div>
           <style>{`

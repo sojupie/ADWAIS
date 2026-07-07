@@ -142,6 +142,7 @@ export function SyncStatusWidget() {
     queryClient.invalidateQueries({ queryKey: ['financial'] });
     queryClient.invalidateQueries({ queryKey: ['fleet'] });
     queryClient.invalidateQueries({ queryKey: ['system-health'] });
+    queryClient.invalidateQueries({ queryKey: ['/api/financial/orders'] });
     if (tenantId) queryClient.invalidateQueries({ queryKey: ['tenant', tenantId] });
   };
 

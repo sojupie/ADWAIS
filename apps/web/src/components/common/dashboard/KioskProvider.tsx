@@ -16,6 +16,7 @@ export function KioskProvider({ children }: { children: ReactNode }) {
   const [mode, setMode] = useState<KioskMode>('kiosk');
   const [kioskTimer, setKioskTimer] = useState(KIOSK_ROTATION_SECONDS);
   const [idleTimer, setIdleTimer] = useState(0);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   
   const currentRoute = matches[matches.length - 1]?.routeId;
   const isKioskEligibleRoute = KIOSK_ROUTES.includes(currentRoute as KioskRoute);
@@ -111,8 +112,10 @@ export function KioskProvider({ children }: { children: ReactNode }) {
       ? (idleTimer / IDLE_TIMEOUT_SECONDS) * 100 
       : 0;
 
+  const toggleNotifications = () => setNotificationsEnabled(prev => !prev);
+
   return (
-    <KioskContext.Provider value={{ mode: effectiveMode, setMode, kioskTimer: effectiveKioskTimer, idleTimer: effectiveIdleTimer, progress, togglePaused }}>
+    <KioskContext.Provider value={{ mode: effectiveMode, setMode, kioskTimer: effectiveKioskTimer, idleTimer: effectiveIdleTimer, progress, togglePaused, notificationsEnabled, toggleNotifications }}>
       {children}
     </KioskContext.Provider>
   );

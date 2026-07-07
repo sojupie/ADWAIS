@@ -9,6 +9,8 @@ export interface KioskContextType {
   idleTimer: number;
   progress: number;
   togglePaused: () => void;
+  notificationsEnabled: boolean;
+  toggleNotifications: () => void;
 }
 
 export const KioskContext = createContext<KioskContextType | null>(null);
@@ -22,7 +24,9 @@ export function useKiosk() {
       kioskTimer: 0,
       idleTimer: 0,
       progress: 0,
-      togglePaused: () => {}
+      togglePaused: () => {},
+      notificationsEnabled: true,
+      toggleNotifications: () => {}
     };
   }
   return context;

@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react';
-import {useMediaQuery} from '../../../hooks/useMediaQuery';
+import { type ReactNode } from 'react';
+import { useMediaQuery } from '../../../hooks/useMediaQuery';
 
 interface DashboardFooterProps {
   children: ReactNode;

@@ -15,6 +15,7 @@ type SiteHeaderProps = {
   isBackendOnline: boolean;
   userLabel: string | null;
   onToggleMobileMenu: () => void;
+  isProgressBarVisible: boolean;
 };
 
 export function SiteHeader({
@@ -25,6 +26,7 @@ export function SiteHeader({
   isBackendOnline,
   userLabel,
   onToggleMobileMenu,
+  isProgressBarVisible,
 }: SiteHeaderProps) {
   const isMobileView = useMediaQuery('(max-width: 767px)');
 
@@ -77,6 +79,29 @@ export function SiteHeader({
               <UserAccountLink label={userLabel} variant="desktop" />
             </div>
             <KioskControls />
+          </div>
+          <style>{`
+            @keyframes loading-bar {
+              0% { left: -35%; width: 35%; }
+              100% { left: 100%; width: 35%; }
+            }
+            .animate-loading-bar {
+              animation: loading-bar 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            }
+          `}</style>
+          <div 
+            className="absolute bottom-0 left-0 right-0 h-[6px] translate-y-full z-50 overflow-hidden bg-brand-btn-primary/20 pointer-events-none transition-opacity duration-500"
+            style={{ opacity: isProgressBarVisible ? 1 : 0 }}
+          >
+            <div 
+              className="absolute top-0 bottom-0 animate-loading-bar rounded-full" 
+              style={{
+                left: '-35%',
+                width: '35%',
+                background: 'linear-gradient(90deg, color-mix(in srgb, var(--color-brand-accent) 0%, transparent) 0%, color-mix(in srgb, var(--color-brand-accent) 95%, transparent) 50%, var(--color-brand-accent) 100%)',
+                boxShadow: '0 0 16px 3px var(--color-brand-accent), 0 0 8px 1px var(--color-brand-accent), 0 0 4px var(--color-brand-accent)'
+              }}
+            />
           </div>
         </>
       )}

@@ -5,51 +5,25 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   label?: string;
   icon?: React.ReactNode;
   containerClassName?: string;
-  dropdownAlign?: 'left' | 'right';
-  optionHeightClass?: string;
-}
-
-function mergeClasses(defaultClasses: string, customClasses: string): string {
-  if (!customClasses) return defaultClasses;
-
-  const defaults = defaultClasses.split(/\s+/);
-  const customs = customClasses.split(/\s+/);
-
-  const getCategory = (clsName: string) => {
-    const parts = clsName.split(':');
-    const base = parts[parts.length - 1];
-
-    if (base.startsWith('bg-')) return 'bg';
-    if (base === 'border-none' || base.startsWith('border-')) return 'border';
-    if (base.startsWith('rounded-')) return 'rounded';
-    if (base.startsWith('h-')) return 'height';
-    if (base.startsWith('w-')) return 'width';
-    if (base.startsWith('p-') || base.startsWith('px-') || base.startsWith('py-') || base.startsWith('pl-') || base.startsWith('pr-')) return 'padding';
-    if (base.startsWith('text-')) {
-      const isSize = /text-(xs|sm|base|lg|xl|2xl|3xl|4xl|5xl|6xl|7xl|8xl|9xl)\b/.test(base);
-      return isSize ? 'text-size' : 'text-color';
-    }
-    return null;
-  };
-
-  const customCategories = new Map<string, string>();
-  customs.forEach(c => {
-    const cat = getCategory(c);
-    if (cat) {
-      customCategories.set(cat, c);
-    }
-  });
-
-  const filteredDefaults = defaults.filter(d => {
-    const cat = getCategory(d);
-    return !cat || !customCategories.has(cat);
-  });
-
-  return [...filteredDefaults, ...customs].join(' ');
+  dropdownAlign?: string;
+  optionClassName?: string;
 }
 
 export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
-  ({ label, icon = <ChevronDown size={14} />, children, className = '', disabled, containerClassName = '', value, onChange, defaultValue, dropdownAlign = 'left', optionHeightClass, ...props }, ref) => {
+  ({ 
+    label, 
+    icon = <ChevronDown size={14} />, 
+    children, 
+    className = 'pl-3 pr-10 py-2 text-sm font-semibold h-10 border border-slate-300 hover:border-slate-400 rounded-xl bg-slate-50 text-slate-800', 
+    disabled, 
+    containerClassName = 'flex flex-col relative w-full', 
+    value, 
+    onChange, 
+    defaultValue, 
+    dropdownAlign = 'left', 
+    optionClassName = 'py-1.5 min-h-[36px]', 
+    ...props 
+  }, ref) => {
     const [isOpen, setIsOpen] = useState(false);
     const [uncontrolledValue, setUncontrolledValue] = useState<string>(() => {
       if (defaultValue !== undefined) return String(defaultValue);
@@ -118,15 +92,13 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
       }
     };
 
-    const finalContainerClass = mergeClasses("flex flex-col relative w-full", containerClassName);
-
-    const defaultButtonClasses = "pl-3 pr-10 py-2 text-sm font-semibold h-10 border border-slate-300 hover:border-slate-400 rounded-xl bg-slate-50 text-slate-800";
-    const finalButtonClass = mergeClasses(defaultButtonClasses, className);
-
-    const alignClass = dropdownAlign === 'right' ? 'right-0 origin-top-right' : 'left-0 origin-top-left';
+    const alignClass = 
+      dropdownAlign === 'right' ? 'right-0 origin-top-right' : 
+      dropdownAlign === 'left' ? 'left-0 origin-top-left' : 
+      dropdownAlign;
 
     return (
-      <div ref={containerRef} className={finalContainerClass}>
+      <div ref={containerRef} className={containerClassName}>
         {label && (
           <label className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">
             {label}
@@ -150,13 +122,11 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
             type="button"
             disabled={disabled}
             onClick={() => setIsOpen(!isOpen)}
-            className={`w-full text-left transition-all focus:outline-none focus:ring-2 focus:ring-brand-link/20 focus:border-brand-link/30 cursor-pointer flex items-center justify-between ${
-              disabled
-                ? 'bg-slate-100 border-slate-200 text-slate-450 cursor-not-allowed pl-3 pr-10 py-2 text-sm font-semibold h-10 border rounded-xl'
-                : finalButtonClass
+            className={`w-full text-left transition-all focus:outline-none focus:ring-2 focus:ring-brand-link/20 focus:border-brand-link/30 cursor-pointer flex items-center justify-between ${className} ${
+              disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''
             }`}
           >
-            <span className="truncate flex items-center h-full leading-none">
+            <span className="truncate block pr-4 leading-none">
               {activeOption ? activeOption.label : 'Select...'}
             </span>
           </button>
@@ -171,10 +141,6 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
             <div className={`absolute top-full mt-1.5 ${alignClass} min-w-full w-max max-w-[340px] bg-white border border-slate-200/80 shadow-xl rounded-xl p-1 flex flex-col gap-0.5 z-[100] max-h-60 overflow-y-auto custom-scrollbar animate-in fade-in slide-in-from-top-1 duration-100`}>
               {options.map((opt) => {
                 const isSelected = opt.value === activeValue;
-                const defaultItemClasses = "w-full text-left px-3 py-1.5 min-h-[36px] flex items-center text-sm font-semibold rounded-lg transition-colors cursor-pointer focus:outline-none leading-tight shrink-0";
-                const itemClass = optionHeightClass
-                  ? mergeClasses(defaultItemClasses, optionHeightClass)
-                  : defaultItemClasses;
 
                 return (
                   <button
@@ -182,7 +148,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
                     type="button"
                     disabled={opt.disabled}
                     onClick={() => handleSelectOption(opt.value)}
-                    className={`${itemClass} ${isSelected
+                    className={`${optionClassName} w-full text-left px-3 flex items-center text-sm font-semibold rounded-lg transition-colors cursor-pointer focus:outline-none leading-tight shrink-0 ${isSelected
                       ? 'bg-brand-btn-primary/10 text-slate-800 font-bold hover:bg-brand-accent/20'
                       : opt.disabled
                         ? 'text-slate-350 bg-slate-50/50 cursor-not-allowed'

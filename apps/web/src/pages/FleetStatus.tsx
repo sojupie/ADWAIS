@@ -50,6 +50,12 @@ export function FleetStatus() {
 
   return (
     <DashboardLayout>
+      <div className="min-w-0">
+        <div className="flex items-center gap-3 mb-1">
+          <h1 className="text-2xl font-extrabold text-brand-text tracking-tight m-0">Fleet Status</h1>
+        </div>
+        <p className="text-sm text-slate-500 m-0 font-medium tracking-wide">Endpoint status, uptime%, and response time.</p>
+      </div>
       {/* Top Row: Macro Stats */}
       <DashboardTopRow>
         <FactPanel
@@ -140,7 +146,7 @@ export function FleetStatus() {
         {/* Left Column: Fleet Matrix (Takes 60% of width on landscape lg screens) */}
         <div className="landscape-lg:col-span-3 flex flex-col min-h-[500px] contained:min-h-0 contained:h-full">
           <CollectionPanel
-              title={vm.selection ? `${vm.selectedTenantName} Monitors` : "Fleet Status Matrix"}
+              title={vm.selection ? `${vm.selectedTenantName} Monitors` : "Fleet Status Matrix – Click to select a tenant"}
               className="flex-grow min-h-[59px]"
               isLoading={vm.globalMonitorsQuery.isLoading}
               actions={matrixActions}

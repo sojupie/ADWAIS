@@ -44,7 +44,12 @@ export const AccumulatedRevenueChart = memo(function AccumulatedRevenueChart({ i
   }, [points]);
 
   return (
-    <ChartPanel isLoading={isLoading} isStale={isStale} title="Revenue Performance" comparison={comparison} className={className} bodyClassName={points.length === 0 ? "flex items-center justify-center" : ""}>
+    <ChartPanel isLoading={isLoading} isStale={isStale}
+                title="Revenue Performance"
+                comparison={comparison}
+                className={className}
+                bodyClassName={points.length === 0 ? "flex items-center justify-center" : ""}
+                legend={<span className="text-sm font-bold text-slate-500 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded">L = Current rev, R = Accumulated Rev</span>}>
       {points.length === 0 ? (
         <EmptyState message="No revenue data available" variant="minimal" />
       ) : (

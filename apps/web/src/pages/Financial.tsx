@@ -1,4 +1,5 @@
 import { formatCurrency, formatCompact, formatNumber } from '@utils';
+import { ArrowLeft } from 'lucide-react';
 import { FactPanel } from '../components/common/dashboard/FactPanel';
 import { MomentumMatrixChart } from '../components/financial/MomentumMatrixChart';
 import { RevenueEfficiencyChart } from '../components/financial/RevenueEfficiencyChart';
@@ -41,9 +42,19 @@ export function Financial() {
           <div className="flex items-center gap-3 mb-1">
             <h1 className="text-2xl font-extrabold text-brand-text tracking-tight m-0">Global Portfolio</h1>
           </div>
-          <p className="text-sm text-slate-500 m-0 font-medium tracking-wide">Performance overview across all active tenants.</p>
+          <p className="text-sm text-slate-500 m-0 font-medium tracking-wide">Performance overview across all active tenants. VAT included.</p>
         </div>
-        <TenantSelector />
+        <div className="flex items-center gap-1 shrink-0 w-full lg:w-auto">
+          <button
+            type="button"
+            disabled
+            className="w-10 h-10 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center text-slate-450 cursor-not-allowed opacity-50 shrink-0"
+            aria-label="Already at global portfolio"
+          >
+            <ArrowLeft size={20} className="stroke-[2.5]" />
+          </button>
+          <TenantSelector />
+        </div>
       </header>
 
       {/* KPI Section */}

@@ -72,7 +72,7 @@ export function TenantsMonitorsView() {
                         onChange={e => setTenantSort(e.target.value as 'asc' | 'desc')}
                         dropdownAlign="right"
                         containerClassName="w-auto shrink-0"
-                        className="text-sm font-semibold pl-3 pr-8 py-1.5 text-slate-700 hover:bg-slate-50 focus:ring-2 h-9 rounded-lg border-slate-200"
+                        className="text-sm font-semibold pl-3 pr-8 py-1.5 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 focus:ring-2 h-9 rounded-lg"
                     >
                         <option value="asc">A-Z</option>
                         <option value="desc">Z-A</option>
@@ -149,7 +149,7 @@ export function TenantsMonitorsView() {
                         onChange={e => setMonitorSort(e.target.value as 'asc' | 'desc')}
                         dropdownAlign="right"
                         containerClassName="w-auto shrink-0"
-                        className="text-sm font-semibold pl-3 pr-8 py-1.5 text-slate-700 hover:bg-slate-50 focus:ring-2 h-9 rounded-lg border-slate-200"
+                        className="text-sm font-semibold pl-3 pr-8 py-1.5 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 focus:ring-2 h-9 rounded-lg"
                     >
                         <option value="asc">A-Z</option>
                         <option value="desc">Z-A</option>

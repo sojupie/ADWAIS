@@ -149,7 +149,7 @@ export function InlineEditField<T>({
               disabled={isSaving}
               onKeyDown={handleKeyDown}
               containerClassName="flex-1"
-              className="h-9 text-sm font-semibold rounded-lg border-slate-300 focus:ring-2 focus:ring-brand-btn-primary"
+              className="pl-3 pr-10 py-1.5 h-9 text-sm font-semibold rounded-lg border border-slate-300 bg-slate-50 focus:ring-2 focus:ring-brand-btn-primary"
             >
               {options.map((opt) => (
                 <option key={opt.value as React.Key} value={opt.value as unknown as string}>{opt.label}</option>

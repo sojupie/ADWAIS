@@ -1,7 +1,8 @@
 import { useTenantsQuery } from '../../hooks/useTenantQueries';
 import { Select } from '../common/ui/Select';
-import { useNavigate, useSearch } from '@tanstack/react-router';
+import { useSearch } from '@tanstack/react-router';
 import { useMemo } from 'react';
+import { Route } from '../../routes/financial';
 
 const dropdownIcon = (
   <svg
@@ -20,8 +21,8 @@ const dropdownIcon = (
 );
 
 export function TenantSelector() {
-  const search = useSearch({ strict: false }) as { tenantId?: string };
-  const navigate = useNavigate();
+  const search = useSearch({ from: Route.fullPath });
+  const navigate = Route.useNavigate();
   const { data: tenants, isLoading } = useTenantsQuery();
 
   const activeValue = search.tenantId || 'global';
@@ -29,8 +30,7 @@ export function TenantSelector() {
   const handleSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const val = e.target.value;
     void navigate({
-      to: '/financial',
-      search: (prev: Record<string, unknown>) => ({
+      search: (prev) => ({
         ...prev,
         tenantId: val === 'global' ? undefined : val
       })
@@ -47,10 +47,9 @@ export function TenantSelector() {
       value={activeValue}
       onChange={handleSelect}
       disabled={isLoading}
-      containerClassName="w-full lg:w-64 shrink-0"
+      containerClassName="min-w-0 flex-1 lg:w-64 lg:flex-initial shrink-0"
       className="bg-brand-btn-primary border-none text-white w-full text-sm font-bold rounded-xl pl-4 pr-10 h-10 outline-none shadow-md cursor-pointer hover:bg-brand-btn-primary/95 flex items-center"
-      dropdownAlign="right"
-      optionHeightClass="h-9"
+      dropdownAlign="left-0 origin-top-left lg:left-auto lg:right-0 lg:origin-top-right"
       icon={dropdownIcon}
     >
       <option value="global">Global Portfolio</option>

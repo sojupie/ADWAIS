@@ -33,7 +33,7 @@ export function ChartFaviconDot(props: ChartFaviconDotProps) {
   const showLetter = !faviconUrl || imgError;
 
   return (
-    <g {...rest} opacity={0.55} className="cursor-pointer hover:opacity-90 transition-opacity">
+    <g {...rest} opacity={0.7} className="cursor-pointer hover:opacity-90 transition-opacity">
       <defs>
         <clipPath id={clipId}>
           <circle cx={cx} cy={cy} r={r - 1} />
@@ -72,7 +72,7 @@ export function ChartFaviconDot(props: ChartFaviconDotProps) {
           height={imgSize}
           clipPath={`url(#${clipId})`}
           opacity={1}
-          style={{ pointerEvents: 'none', mixBlendMode: 'luminosity' }}
+          style={{ pointerEvents: 'none', mixBlendMode: 'screen' }}
           onError={() => setImgError(true)}
         />
       )}

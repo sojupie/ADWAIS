@@ -91,7 +91,7 @@ export function MonitorFilterMenu({ filters, setFilters, tags }: MonitorFilterMe
               value={filters.tag}
               disabled={filters.tag === 'all'}
               onChange={e => setFilters({ ...filters, tag: e.target.value })}
-              className={`text-sm font-semibold h-9 rounded-lg border-slate-200 ${filters.tag === 'all' ? 'opacity-50' : ''}`}
+              className={`text-sm font-semibold h-9 rounded-lg border border-slate-200 bg-white ${filters.tag === 'all' ? 'opacity-50' : ''}`}
             >
               <option value="all">All Tags</option>
               {tags.map(tag => (

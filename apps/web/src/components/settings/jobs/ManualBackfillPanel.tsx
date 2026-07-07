@@ -35,7 +35,7 @@ export function ManualBackfillPanel({ tenants, triggerBackfill, disabled }: Manu
           value={backfill.tenantId}
           onChange={e => setBackfill({ ...backfill, tenantId: e.target.value })}
           disabled={disabled}
-          optionHeightClass="h-12 py-2"
+          optionClassName="h-12 py-2"
         >
           <option value="" disabled>Select a tenant...</option>
           {(tenants || []).map((t) => (

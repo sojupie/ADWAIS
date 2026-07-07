@@ -1,11 +1,13 @@
-import {Outlet} from '@tanstack/react-router';
-import type {Timeframe} from '../../../schemas';
-import type {PersistentDomain} from '../../../utils/timeframeStorage';
-import {MobileFooterPill} from '../ui/mobileFooterPill';
-import {SiteHeader} from './SiteHeader';
-import {MobileNavigationMenu} from './MobileNavigationMenu';
-import {useMediaQuery} from '../../../hooks/useMediaQuery';
-import {useVisualViewportCssVars} from '../../../hooks/useVisualViewportCssVars';
+import { useState, useEffect } from 'react';
+import { Outlet, useRouterState } from '@tanstack/react-router';
+import { useIsFetching, useIsMutating } from '@tanstack/react-query';
+import type { Timeframe } from '../../../schemas';
+import type { PersistentDomain } from '../../../utils/timeframeStorage';
+import { MobileFooterPill } from '../ui/mobileFooterPill';
+import { SiteHeader } from './SiteHeader';
+import { MobileNavigationMenu } from './MobileNavigationMenu';
+import { useMediaQuery } from '../../../hooks/useMediaQuery';
+import { useVisualViewportCssVars } from '../../../hooks/useVisualViewportCssVars';
 
 type AppShellProps = {
   pathname: string;
@@ -30,12 +32,36 @@ export function AppShell({
   userLabel,
   financialTimeframe,
   fleetTimeframe,
-  timeframeDomain,
+   timeframeDomain,
   onCloseMobileMenu,
   onToggleMobileMenu,
 }: AppShellProps) {
   const isMobileView = useMediaQuery('(max-width: 767px)');
   useVisualViewportCssVars();
+
+  const isFetching = useIsFetching();
+  const isMutating = useIsMutating();
+  const isNavigating = useRouterState({ select: (s) => s.status === 'pending' });
+
+  const showProgressBar = isNavigating || isFetching > 0 || isMutating > 0;
+
+  const [isProgressBarVisible, setIsProgressBarVisible] = useState(false);
+
+  useEffect(() => {
+    let timer: any;
+    
+    if (showProgressBar) {
+      const defer = setTimeout(() => {
+        setIsProgressBarVisible(true);
+      }, 0);
+      return () => clearTimeout(defer);
+    } else {
+      timer = setTimeout(() => {
+        setIsProgressBarVisible(false);
+      }, 600);
+      return () => clearTimeout(timer);
+    }
+  }, [showProgressBar]);
 
   return (
     <div className="app-shell flex flex-col bg-brand-bg-tertiary overflow-hidden select-none font-sans text-brand-text">
@@ -49,6 +75,7 @@ export function AppShell({
             isBackendOnline={isBackendOnline}
             userLabel={userLabel}
             onToggleMobileMenu={onToggleMobileMenu}
+            isProgressBarVisible={isProgressBarVisible}
           />
 
           {isMobileMenuOpen && (

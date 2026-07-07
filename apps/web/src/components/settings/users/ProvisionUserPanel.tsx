@@ -44,7 +44,7 @@ export function ProvisionUserPanel({ createUser }: ProvisionUserPanelProps) {
           onChange={e => setNewUser({ ...newUser, role: e.target.value })}
           icon={<Shield size={14} />}
           containerClassName="w-full sm:w-36"
-          className="h-10"
+          className="pl-3 pr-10 py-2 text-sm font-semibold h-10 border border-slate-300 hover:border-slate-400 rounded-xl bg-slate-50 text-slate-800"
         >
           <option value="Admin">Admin</option>
           <option value="Viewer">Viewer</option>

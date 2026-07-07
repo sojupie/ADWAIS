@@ -88,7 +88,7 @@ points: MomentumTenant[]; medianBaselineRevenue: number; globalGrowthPercentage:
           axisLine={false}
           tickLine={false}
           label={{
-              value: 'Growth (%)→',
+              value: 'Revenue growth (%)→',
               angle: -90,
               position: 'insideLeft',
               offset: -10,
@@ -145,7 +145,7 @@ momentum: MomentumResponse; comparison?: ComparisonPeriod; onTenantSelect?: (ten
       comparison={comparison}
       className={className || "h-full"}
       bodyClassName={isEmpty ? 'flex items-center justify-center' : 'flex-1 min-h-0'}
-      legend={<span className="text-sm font-bold text-slate-500 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded">Size = Total Rev Contribution</span>}
+      legend={<span className="text-sm font-bold text-slate-500 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded">Size = % of portfolio revenue</span>}
     >
       {isEmpty ? (
         <EmptyState message={"No previous-period baseline data"} variant={"minimal"}/>

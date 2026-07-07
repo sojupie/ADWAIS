@@ -1,5 +1,6 @@
 import { formatCurrency, formatNumber } from '@utils';
-//import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
+import { Route } from '../routes/financial';
 import { FactPanel } from '../components/common/dashboard/FactPanel';
 import { CumulativeGrowthDeltaChart } from '../components/TenantSpecific/CumulativeGrowthDeltaChart';
 import { OrderValueDistributionChart } from '../components/TenantSpecific/OrderValueDistributionChart';
@@ -40,6 +41,16 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe 
   const deltaQuery = useCumulativeGrowthDelta(timeframe, tenantId, 'YearOverYear');
   const orderQuery = useOrderDistribution(timeframe, tenantId);
 
+  const navigate = Route.useNavigate();
+  const handleBackToGlobal = () => {
+    void navigate({
+      search: (prev) => ({
+        ...prev,
+        tenantId: undefined,
+      }),
+    });
+  };
+
   const kpis = kpiQuery.data;
   const globalKpis = globalKpiQuery.data;
   
@@ -63,9 +74,19 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe 
               {tenantType}
             </span>
           </div>
-          <p className="text-sm text-slate-500 m-0 font-medium tracking-wide">Isolated entity performance view for the {timeframe} period.</p>
+          <p className="text-sm text-slate-500 m-0 font-medium tracking-wide">Isolated entity performance view for the {timeframe} period. VAT included.</p>
         </div>
-        <TenantSelector />
+        <div className="flex items-center gap-1 shrink-0 w-full lg:w-auto">
+          <button
+            type="button"
+            onClick={handleBackToGlobal}
+            className="w-10 h-10 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-700 hover:text-brand-text hover:bg-slate-100 hover:border-slate-300 transition-all shadow-sm cursor-pointer shrink-0"
+            aria-label="Back to global portfolio"
+          >
+            <ArrowLeft size={20} className="stroke-[2.5]" />
+          </button>
+          <TenantSelector />
+        </div>
       </header>
 
       <DashboardTopRow>

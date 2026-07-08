@@ -6,8 +6,8 @@ public class OfficeEvent
     public required string Title { get; set; }
     public string? Description { get; set; }
     public string? Location { get; set; }
-    public DateTime StartTime { get; set; }
-    public DateTime EndTime { get; set; }
+    public DateTimeOffset StartTime { get; set; }
+    public DateTimeOffset EndTime { get; set; }
     public required string EventType { get; set; }
     public bool IsImportant { get; set; }
     public bool IsRecurring { get; set; }

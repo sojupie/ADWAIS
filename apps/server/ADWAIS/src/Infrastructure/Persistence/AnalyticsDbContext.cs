@@ -38,6 +38,7 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
     public DbSet<SystemEvent> SystemEvents => Set<SystemEvent>();
     public DbSet<CommunityPost> CommunityPosts => Set<CommunityPost>();
     public DbSet<OfficeEvent> OfficeEvents => Set<OfficeEvent>();
+    public DbSet<CalendarSubscription> CalendarSubscriptions => Set<CalendarSubscription>();
     public DbSet<FeedSource> FeedSources => Set<FeedSource>();
     public DbSet<FeedItem> FeedItems => Set<FeedItem>();
     
@@ -287,6 +288,13 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
             entity.HasIndex(u => u.Email)
                 .IsUnique();
 
+            entity.Property(u => u.CalendarFeedToken)
+                .HasMaxLength(255)
+                .IsRequired(false);
+
+            entity.HasIndex(u => u.CalendarFeedToken)
+                .IsUnique();
+
             entity.HasData(new User
             {
                 Id = SystemUserGuid,
@@ -398,14 +406,32 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
             entity.Property(oe => oe.Title).HasMaxLength(255).IsRequired();
             entity.Property(oe => oe.Description).IsRequired(false);
             entity.Property(oe => oe.Location).HasMaxLength(255).IsRequired(false);
-            entity.Property(oe => oe.EventType).HasMaxLength(50).IsRequired();
-            entity.Property(oe => oe.Recurrence).HasMaxLength(50).IsRequired().HasDefaultValue("None");
+            entity.Property(oe => oe.EventType).IsRequired();
+            entity.Property(oe => oe.Recurrence).IsRequired().HasDefaultValue(RecurrenceType.None);
+            entity.Property(oe => oe.ExternalUid).HasMaxLength(255).IsRequired(false);
             entity.HasOne(oe => oe.User)
                 .WithMany()
                 .HasForeignKey(oe => oe.UserId)
                 .OnDelete(DeleteBehavior.SetNull);
+            entity.HasOne(oe => oe.CalendarSubscription)
+                .WithMany(cs => cs.Events)
+                .HasForeignKey(oe => oe.CalendarSubscriptionId)
+                .OnDelete(DeleteBehavior.Cascade);
             entity.HasIndex(oe => oe.StartTime);
             entity.HasIndex(oe => oe.EndTime);
+            entity.HasIndex(oe => oe.ExternalUid);
+        });
+
+        // CalendarSubscription
+        modelBuilder.Entity<CalendarSubscription>(entity =>
+        {
+            entity.ToTable("calendar_subscription");
+            entity.HasKey(cs => cs.Id);
+            entity.Property(cs => cs.Id).HasDefaultValueSql("uuid_generate_v4()");
+            entity.Property(cs => cs.Name).HasMaxLength(255).IsRequired();
+            entity.Property(cs => cs.Url).HasMaxLength(2048).IsRequired();
+            entity.Property(cs => cs.IsActive).HasDefaultValue(true);
+            entity.Property(cs => cs.LastSyncError).HasMaxLength(4000);
         });
 
         // FeedSource

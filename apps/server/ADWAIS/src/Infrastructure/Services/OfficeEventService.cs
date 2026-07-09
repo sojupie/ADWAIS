@@ -95,6 +95,11 @@ public class OfficeEventService(IApplicationDbContext dbContext) : IOfficeEventS
         if (dto.IsSpecial.HasValue) officeEvent.IsSpecial = dto.IsSpecial.Value;
         if (dto.Recurrence.HasValue) officeEvent.Recurrence = dto.Recurrence.Value;
 
+        if (officeEvent.EndTime < officeEvent.StartTime)
+        {
+            throw new ArgumentException("End time must be greater than or equal to start time.");
+        }
+
         await _dbContext.SaveChangesAsync(ct);
         return MapToDto(officeEvent);
     }

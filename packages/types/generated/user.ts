@@ -15,4 +15,6 @@ export interface User {
   /** @nullable */
   name: string | null;
   role: UserRole;
+  /** @nullable */
+  calendarFeedToken?: string | null;
 }

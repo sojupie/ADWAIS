@@ -86,6 +86,7 @@ export function AppShell({
               financialTimeframe={financialTimeframe}
               fleetTimeframe={fleetTimeframe}
               onClose={onCloseMobileMenu}
+              userLabel={userLabel}
             />
           )}
 
@@ -98,7 +99,7 @@ export function AppShell({
       )}
 
       <main className="app-main flex-1 min-h-0 relative flex flex-col">
-        <div className="app-main-scroll flex-1 w-full px-3 pt-3 relative flex flex-col min-h-0 overflow-y-auto contained:overflow-hidden custom-scrollbar">
+        <div className="app-main-scroll bg-surface-container-low flex-1 w-full px-3 pt-3 relative flex flex-col min-h-0 overflow-y-auto contained:overflow-hidden custom-scrollbar">
           <div className="flex flex-col contained:flex-1 contained:min-h-0">
             <Outlet />
           </div>

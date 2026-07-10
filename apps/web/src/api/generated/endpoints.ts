@@ -27,9 +27,13 @@ import type {
   AccumulatedRevenuePointResponseDto,
   ActivateKioskRequestDto,
   BackgroundJobStatusDto,
+  CalendarSubscriptionDto,
+  CalendarTokenDto,
   CommunityPost,
+  CreateCalendarSubscriptionDto,
   CreateMonitorRequestDto,
   CreateNewsletterDto,
+  CreateOfficeEventDto,
   CreatePostDto,
   CreateTenantRequestDto,
   CreateUserRequestDto,
@@ -50,6 +54,8 @@ import type {
   GetApiFinancialTransactionDensityParams,
   GetApiFinancialVelocityParams,
   GetApiFinancialVolumeAnomalyParams,
+  GetApiIntranetCalendarFeedIcsParams,
+  GetApiIntranetEventsParams,
   GetApiIntranetFeedsParams,
   GetApiKioskTokenParams,
   GetApiMonitorsAnalyticsParams,
@@ -66,6 +72,7 @@ import type {
   MomentumResponseDto,
   MonitorAnalyticsResponseDto,
   NetGrowthAdditionPointResponseDto,
+  OfficeEventDto,
   OrderBinResponseDto,
   OrderDto,
   PostApiIngestionBackfillParams,
@@ -76,15 +83,18 @@ import type {
   SystemHealthDto,
   TenantResponseDto,
   TransactionDensityPointResponseDto,
+  UpdateCalendarSubscriptionDto,
   UpdateFetchIntervalsRequestDto,
   UpdateGlobalConfigRequestDto,
   UpdateMonitorRequestDto,
+  UpdateOfficeEventDto,
   UpdateTenantRequestDto,
   UpdateUserRequestDto,
   UptimeMonitorDto,
   UserResponseDto,
   VelocityPointResponseDto,
-  VolumeAnomalyResponseDto
+  VolumeAnomalyResponseDto,
+  WeatherDto
 } from '../../../../../packages/types/generated';
 
 import { customClient } from '../../apiClient';
@@ -893,6 +903,882 @@ export function useGetApiJobStatusJobId<TData = Awaited<ReturnType<typeof getApi
 
 
 
+
+export type getApiIntranetCalendarFeedIcsResponse200 = {
+  data: void
+  status: 200
+}
+
+export type getApiIntranetCalendarFeedIcsResponseSuccess = (getApiIntranetCalendarFeedIcsResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getApiIntranetCalendarFeedIcsResponse = (getApiIntranetCalendarFeedIcsResponseSuccess)
+
+export const getGetApiIntranetCalendarFeedIcsUrl = (params?: GetApiIntranetCalendarFeedIcsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/intranet/calendar/feed.ics?${stringifiedParams}` : `/api/intranet/calendar/feed.ics`
+}
+
+export const getApiIntranetCalendarFeedIcs = async (params?: GetApiIntranetCalendarFeedIcsParams, options?: RequestInit): Promise<getApiIntranetCalendarFeedIcsResponse> => {
+
+  return customClient<getApiIntranetCalendarFeedIcsResponse>(getGetApiIntranetCalendarFeedIcsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiIntranetCalendarFeedIcsQueryKey = (params?: GetApiIntranetCalendarFeedIcsParams,) => {
+    return [
+    `/api/intranet/calendar/feed.ics`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetApiIntranetCalendarFeedIcsQueryOptions = <TData = Awaited<ReturnType<typeof getApiIntranetCalendarFeedIcs>>, TError = unknown>(params?: GetApiIntranetCalendarFeedIcsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetCalendarFeedIcs>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiIntranetCalendarFeedIcsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiIntranetCalendarFeedIcs>>> = ({ signal }) => getApiIntranetCalendarFeedIcs(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetCalendarFeedIcs>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiIntranetCalendarFeedIcsQueryResult = NonNullable<Awaited<ReturnType<typeof getApiIntranetCalendarFeedIcs>>>
+export type GetApiIntranetCalendarFeedIcsQueryError = unknown
+
+
+export function useGetApiIntranetCalendarFeedIcs<TData = Awaited<ReturnType<typeof getApiIntranetCalendarFeedIcs>>, TError = unknown>(
+ params: undefined |  GetApiIntranetCalendarFeedIcsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetCalendarFeedIcs>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiIntranetCalendarFeedIcs>>,
+          TError,
+          Awaited<ReturnType<typeof getApiIntranetCalendarFeedIcs>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiIntranetCalendarFeedIcs<TData = Awaited<ReturnType<typeof getApiIntranetCalendarFeedIcs>>, TError = unknown>(
+ params?: GetApiIntranetCalendarFeedIcsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetCalendarFeedIcs>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiIntranetCalendarFeedIcs>>,
+          TError,
+          Awaited<ReturnType<typeof getApiIntranetCalendarFeedIcs>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiIntranetCalendarFeedIcs<TData = Awaited<ReturnType<typeof getApiIntranetCalendarFeedIcs>>, TError = unknown>(
+ params?: GetApiIntranetCalendarFeedIcsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetCalendarFeedIcs>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiIntranetCalendarFeedIcs<TData = Awaited<ReturnType<typeof getApiIntranetCalendarFeedIcs>>, TError = unknown>(
+ params?: GetApiIntranetCalendarFeedIcsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetCalendarFeedIcs>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiIntranetCalendarFeedIcsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export type getApiIntranetCalendarTokenResponse200TextPlain = {
+  data: CalendarTokenDto
+  status: 200
+}
+
+export type getApiIntranetCalendarTokenResponse200ApplicationJson = {
+  data: CalendarTokenDto
+  status: 200
+}
+
+export type getApiIntranetCalendarTokenResponse200TextJson = {
+  data: CalendarTokenDto
+  status: 200
+}
+
+export type getApiIntranetCalendarTokenResponseSuccess = (getApiIntranetCalendarTokenResponse200TextPlain | getApiIntranetCalendarTokenResponse200ApplicationJson | getApiIntranetCalendarTokenResponse200TextJson) & {
+  headers: Headers;
+};
+;
+
+export type getApiIntranetCalendarTokenResponse = (getApiIntranetCalendarTokenResponseSuccess)
+
+export const getGetApiIntranetCalendarTokenUrl = () => {
+
+
+
+
+  return `/api/intranet/calendar/token`
+}
+
+export const getApiIntranetCalendarToken = async ( options?: RequestInit): Promise<getApiIntranetCalendarTokenResponse> => {
+
+  return customClient<getApiIntranetCalendarTokenResponse>(getGetApiIntranetCalendarTokenUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiIntranetCalendarTokenQueryKey = () => {
+    return [
+    `/api/intranet/calendar/token`
+    ] as const;
+    }
+
+
+export const getGetApiIntranetCalendarTokenQueryOptions = <TData = Awaited<ReturnType<typeof getApiIntranetCalendarToken>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetCalendarToken>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiIntranetCalendarTokenQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiIntranetCalendarToken>>> = ({ signal }) => getApiIntranetCalendarToken({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetCalendarToken>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiIntranetCalendarTokenQueryResult = NonNullable<Awaited<ReturnType<typeof getApiIntranetCalendarToken>>>
+export type GetApiIntranetCalendarTokenQueryError = unknown
+
+
+export function useGetApiIntranetCalendarToken<TData = Awaited<ReturnType<typeof getApiIntranetCalendarToken>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetCalendarToken>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiIntranetCalendarToken>>,
+          TError,
+          Awaited<ReturnType<typeof getApiIntranetCalendarToken>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiIntranetCalendarToken<TData = Awaited<ReturnType<typeof getApiIntranetCalendarToken>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetCalendarToken>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiIntranetCalendarToken>>,
+          TError,
+          Awaited<ReturnType<typeof getApiIntranetCalendarToken>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiIntranetCalendarToken<TData = Awaited<ReturnType<typeof getApiIntranetCalendarToken>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetCalendarToken>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiIntranetCalendarToken<TData = Awaited<ReturnType<typeof getApiIntranetCalendarToken>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetCalendarToken>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiIntranetCalendarTokenQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export type postApiIntranetCalendarTokenRegenerateResponse200TextPlain = {
+  data: CalendarTokenDto
+  status: 200
+}
+
+export type postApiIntranetCalendarTokenRegenerateResponse200ApplicationJson = {
+  data: CalendarTokenDto
+  status: 200
+}
+
+export type postApiIntranetCalendarTokenRegenerateResponse200TextJson = {
+  data: CalendarTokenDto
+  status: 200
+}
+
+export type postApiIntranetCalendarTokenRegenerateResponseSuccess = (postApiIntranetCalendarTokenRegenerateResponse200TextPlain | postApiIntranetCalendarTokenRegenerateResponse200ApplicationJson | postApiIntranetCalendarTokenRegenerateResponse200TextJson) & {
+  headers: Headers;
+};
+;
+
+export type postApiIntranetCalendarTokenRegenerateResponse = (postApiIntranetCalendarTokenRegenerateResponseSuccess)
+
+export const getPostApiIntranetCalendarTokenRegenerateUrl = () => {
+
+
+
+
+  return `/api/intranet/calendar/token/regenerate`
+}
+
+export const postApiIntranetCalendarTokenRegenerate = async ( options?: RequestInit): Promise<postApiIntranetCalendarTokenRegenerateResponse> => {
+
+  return customClient<postApiIntranetCalendarTokenRegenerateResponse>(getPostApiIntranetCalendarTokenRegenerateUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getPostApiIntranetCalendarTokenRegenerateMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiIntranetCalendarTokenRegenerate>>, TError,void, TContext>, request?: SecondParameter<typeof customClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiIntranetCalendarTokenRegenerate>>, TError,void, TContext> => {
+
+const mutationKey = ['postApiIntranetCalendarTokenRegenerate'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiIntranetCalendarTokenRegenerate>>, void> = () => {
+
+
+          return  postApiIntranetCalendarTokenRegenerate(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiIntranetCalendarTokenRegenerateMutationResult = NonNullable<Awaited<ReturnType<typeof postApiIntranetCalendarTokenRegenerate>>>
+
+    export type PostApiIntranetCalendarTokenRegenerateMutationError = unknown
+
+    export const usePostApiIntranetCalendarTokenRegenerate = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiIntranetCalendarTokenRegenerate>>, TError,void, TContext>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiIntranetCalendarTokenRegenerate>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getPostApiIntranetCalendarTokenRegenerateMutationOptions(options), queryClient);
+    }
+
+export type getApiIntranetCalendarSubscriptionsResponse200TextPlain = {
+  data: CalendarSubscriptionDto[]
+  status: 200
+}
+
+export type getApiIntranetCalendarSubscriptionsResponse200ApplicationJson = {
+  data: CalendarSubscriptionDto[]
+  status: 200
+}
+
+export type getApiIntranetCalendarSubscriptionsResponse200TextJson = {
+  data: CalendarSubscriptionDto[]
+  status: 200
+}
+
+export type getApiIntranetCalendarSubscriptionsResponseSuccess = (getApiIntranetCalendarSubscriptionsResponse200TextPlain | getApiIntranetCalendarSubscriptionsResponse200ApplicationJson | getApiIntranetCalendarSubscriptionsResponse200TextJson) & {
+  headers: Headers;
+};
+;
+
+export type getApiIntranetCalendarSubscriptionsResponse = (getApiIntranetCalendarSubscriptionsResponseSuccess)
+
+export const getGetApiIntranetCalendarSubscriptionsUrl = () => {
+
+
+
+
+  return `/api/intranet/calendar/subscriptions`
+}
+
+export const getApiIntranetCalendarSubscriptions = async ( options?: RequestInit): Promise<getApiIntranetCalendarSubscriptionsResponse> => {
+
+  return customClient<getApiIntranetCalendarSubscriptionsResponse>(getGetApiIntranetCalendarSubscriptionsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiIntranetCalendarSubscriptionsQueryKey = () => {
+    return [
+    `/api/intranet/calendar/subscriptions`
+    ] as const;
+    }
+
+
+export const getGetApiIntranetCalendarSubscriptionsQueryOptions = <TData = Awaited<ReturnType<typeof getApiIntranetCalendarSubscriptions>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetCalendarSubscriptions>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiIntranetCalendarSubscriptionsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiIntranetCalendarSubscriptions>>> = ({ signal }) => getApiIntranetCalendarSubscriptions({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetCalendarSubscriptions>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiIntranetCalendarSubscriptionsQueryResult = NonNullable<Awaited<ReturnType<typeof getApiIntranetCalendarSubscriptions>>>
+export type GetApiIntranetCalendarSubscriptionsQueryError = unknown
+
+
+export function useGetApiIntranetCalendarSubscriptions<TData = Awaited<ReturnType<typeof getApiIntranetCalendarSubscriptions>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetCalendarSubscriptions>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiIntranetCalendarSubscriptions>>,
+          TError,
+          Awaited<ReturnType<typeof getApiIntranetCalendarSubscriptions>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiIntranetCalendarSubscriptions<TData = Awaited<ReturnType<typeof getApiIntranetCalendarSubscriptions>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetCalendarSubscriptions>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiIntranetCalendarSubscriptions>>,
+          TError,
+          Awaited<ReturnType<typeof getApiIntranetCalendarSubscriptions>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiIntranetCalendarSubscriptions<TData = Awaited<ReturnType<typeof getApiIntranetCalendarSubscriptions>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetCalendarSubscriptions>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiIntranetCalendarSubscriptions<TData = Awaited<ReturnType<typeof getApiIntranetCalendarSubscriptions>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetCalendarSubscriptions>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiIntranetCalendarSubscriptionsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export type postApiIntranetCalendarSubscriptionsResponse200TextPlain = {
+  data: CalendarSubscriptionDto
+  status: 200
+}
+
+export type postApiIntranetCalendarSubscriptionsResponse200ApplicationJson = {
+  data: CalendarSubscriptionDto
+  status: 200
+}
+
+export type postApiIntranetCalendarSubscriptionsResponse200TextJson = {
+  data: CalendarSubscriptionDto
+  status: 200
+}
+
+export type postApiIntranetCalendarSubscriptionsResponseSuccess = (postApiIntranetCalendarSubscriptionsResponse200TextPlain | postApiIntranetCalendarSubscriptionsResponse200ApplicationJson | postApiIntranetCalendarSubscriptionsResponse200TextJson) & {
+  headers: Headers;
+};
+;
+
+export type postApiIntranetCalendarSubscriptionsResponse = (postApiIntranetCalendarSubscriptionsResponseSuccess)
+
+export const getPostApiIntranetCalendarSubscriptionsUrl = () => {
+
+
+
+
+  return `/api/intranet/calendar/subscriptions`
+}
+
+export const postApiIntranetCalendarSubscriptions = async (createCalendarSubscriptionDto?: CreateCalendarSubscriptionDto, options?: RequestInit): Promise<postApiIntranetCalendarSubscriptionsResponse> => {
+
+  return customClient<postApiIntranetCalendarSubscriptionsResponse>(getPostApiIntranetCalendarSubscriptionsUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(createCalendarSubscriptionDto)
+  }
+);}
+
+
+
+
+export const getPostApiIntranetCalendarSubscriptionsMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiIntranetCalendarSubscriptions>>, TError,{data?: CreateCalendarSubscriptionDto}, TContext>, request?: SecondParameter<typeof customClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiIntranetCalendarSubscriptions>>, TError,{data?: CreateCalendarSubscriptionDto}, TContext> => {
+
+const mutationKey = ['postApiIntranetCalendarSubscriptions'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiIntranetCalendarSubscriptions>>, {data?: CreateCalendarSubscriptionDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiIntranetCalendarSubscriptions(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiIntranetCalendarSubscriptionsMutationResult = NonNullable<Awaited<ReturnType<typeof postApiIntranetCalendarSubscriptions>>>
+    export type PostApiIntranetCalendarSubscriptionsMutationBody = CreateCalendarSubscriptionDto | undefined
+    export type PostApiIntranetCalendarSubscriptionsMutationError = unknown
+
+    export const usePostApiIntranetCalendarSubscriptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiIntranetCalendarSubscriptions>>, TError,{data?: CreateCalendarSubscriptionDto}, TContext>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiIntranetCalendarSubscriptions>>,
+        TError,
+        {data?: CreateCalendarSubscriptionDto},
+        TContext
+      > => {
+      return useMutation(getPostApiIntranetCalendarSubscriptionsMutationOptions(options), queryClient);
+    }
+
+export type getApiIntranetCalendarSubscriptionsIdResponse200TextPlain = {
+  data: CalendarSubscriptionDto
+  status: 200
+}
+
+export type getApiIntranetCalendarSubscriptionsIdResponse200ApplicationJson = {
+  data: CalendarSubscriptionDto
+  status: 200
+}
+
+export type getApiIntranetCalendarSubscriptionsIdResponse200TextJson = {
+  data: CalendarSubscriptionDto
+  status: 200
+}
+
+export type getApiIntranetCalendarSubscriptionsIdResponseSuccess = (getApiIntranetCalendarSubscriptionsIdResponse200TextPlain | getApiIntranetCalendarSubscriptionsIdResponse200ApplicationJson | getApiIntranetCalendarSubscriptionsIdResponse200TextJson) & {
+  headers: Headers;
+};
+;
+
+export type getApiIntranetCalendarSubscriptionsIdResponse = (getApiIntranetCalendarSubscriptionsIdResponseSuccess)
+
+export const getGetApiIntranetCalendarSubscriptionsIdUrl = (id: string,) => {
+
+
+
+
+  return `/api/intranet/calendar/subscriptions/${id}`
+}
+
+export const getApiIntranetCalendarSubscriptionsId = async (id: string, options?: RequestInit): Promise<getApiIntranetCalendarSubscriptionsIdResponse> => {
+
+  return customClient<getApiIntranetCalendarSubscriptionsIdResponse>(getGetApiIntranetCalendarSubscriptionsIdUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiIntranetCalendarSubscriptionsIdQueryKey = (id: string,) => {
+    return [
+    `/api/intranet/calendar/subscriptions/${id}`
+    ] as const;
+    }
+
+
+export const getGetApiIntranetCalendarSubscriptionsIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiIntranetCalendarSubscriptionsId>>, TError = unknown>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetCalendarSubscriptionsId>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiIntranetCalendarSubscriptionsIdQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiIntranetCalendarSubscriptionsId>>> = ({ signal }) => getApiIntranetCalendarSubscriptionsId(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetCalendarSubscriptionsId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiIntranetCalendarSubscriptionsIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiIntranetCalendarSubscriptionsId>>>
+export type GetApiIntranetCalendarSubscriptionsIdQueryError = unknown
+
+
+export function useGetApiIntranetCalendarSubscriptionsId<TData = Awaited<ReturnType<typeof getApiIntranetCalendarSubscriptionsId>>, TError = unknown>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetCalendarSubscriptionsId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiIntranetCalendarSubscriptionsId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiIntranetCalendarSubscriptionsId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiIntranetCalendarSubscriptionsId<TData = Awaited<ReturnType<typeof getApiIntranetCalendarSubscriptionsId>>, TError = unknown>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetCalendarSubscriptionsId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiIntranetCalendarSubscriptionsId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiIntranetCalendarSubscriptionsId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiIntranetCalendarSubscriptionsId<TData = Awaited<ReturnType<typeof getApiIntranetCalendarSubscriptionsId>>, TError = unknown>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetCalendarSubscriptionsId>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiIntranetCalendarSubscriptionsId<TData = Awaited<ReturnType<typeof getApiIntranetCalendarSubscriptionsId>>, TError = unknown>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetCalendarSubscriptionsId>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiIntranetCalendarSubscriptionsIdQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export type patchApiIntranetCalendarSubscriptionsIdResponse200TextPlain = {
+  data: CalendarSubscriptionDto
+  status: 200
+}
+
+export type patchApiIntranetCalendarSubscriptionsIdResponse200ApplicationJson = {
+  data: CalendarSubscriptionDto
+  status: 200
+}
+
+export type patchApiIntranetCalendarSubscriptionsIdResponse200TextJson = {
+  data: CalendarSubscriptionDto
+  status: 200
+}
+
+export type patchApiIntranetCalendarSubscriptionsIdResponseSuccess = (patchApiIntranetCalendarSubscriptionsIdResponse200TextPlain | patchApiIntranetCalendarSubscriptionsIdResponse200ApplicationJson | patchApiIntranetCalendarSubscriptionsIdResponse200TextJson) & {
+  headers: Headers;
+};
+;
+
+export type patchApiIntranetCalendarSubscriptionsIdResponse = (patchApiIntranetCalendarSubscriptionsIdResponseSuccess)
+
+export const getPatchApiIntranetCalendarSubscriptionsIdUrl = (id: string,) => {
+
+
+
+
+  return `/api/intranet/calendar/subscriptions/${id}`
+}
+
+export const patchApiIntranetCalendarSubscriptionsId = async (id: string,
+    updateCalendarSubscriptionDto?: UpdateCalendarSubscriptionDto, options?: RequestInit): Promise<patchApiIntranetCalendarSubscriptionsIdResponse> => {
+
+  return customClient<patchApiIntranetCalendarSubscriptionsIdResponse>(getPatchApiIntranetCalendarSubscriptionsIdUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateCalendarSubscriptionDto)
+  }
+);}
+
+
+
+
+export const getPatchApiIntranetCalendarSubscriptionsIdMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiIntranetCalendarSubscriptionsId>>, TError,{id: string;data?: UpdateCalendarSubscriptionDto}, TContext>, request?: SecondParameter<typeof customClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof patchApiIntranetCalendarSubscriptionsId>>, TError,{id: string;data?: UpdateCalendarSubscriptionDto}, TContext> => {
+
+const mutationKey = ['patchApiIntranetCalendarSubscriptionsId'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof patchApiIntranetCalendarSubscriptionsId>>, {id: string;data?: UpdateCalendarSubscriptionDto}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  patchApiIntranetCalendarSubscriptionsId(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PatchApiIntranetCalendarSubscriptionsIdMutationResult = NonNullable<Awaited<ReturnType<typeof patchApiIntranetCalendarSubscriptionsId>>>
+    export type PatchApiIntranetCalendarSubscriptionsIdMutationBody = UpdateCalendarSubscriptionDto | undefined
+    export type PatchApiIntranetCalendarSubscriptionsIdMutationError = unknown
+
+    export const usePatchApiIntranetCalendarSubscriptionsId = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiIntranetCalendarSubscriptionsId>>, TError,{id: string;data?: UpdateCalendarSubscriptionDto}, TContext>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof patchApiIntranetCalendarSubscriptionsId>>,
+        TError,
+        {id: string;data?: UpdateCalendarSubscriptionDto},
+        TContext
+      > => {
+      return useMutation(getPatchApiIntranetCalendarSubscriptionsIdMutationOptions(options), queryClient);
+    }
+
+export type deleteApiIntranetCalendarSubscriptionsIdResponse200 = {
+  data: void
+  status: 200
+}
+
+export type deleteApiIntranetCalendarSubscriptionsIdResponseSuccess = (deleteApiIntranetCalendarSubscriptionsIdResponse200) & {
+  headers: Headers;
+};
+;
+
+export type deleteApiIntranetCalendarSubscriptionsIdResponse = (deleteApiIntranetCalendarSubscriptionsIdResponseSuccess)
+
+export const getDeleteApiIntranetCalendarSubscriptionsIdUrl = (id: string,) => {
+
+
+
+
+  return `/api/intranet/calendar/subscriptions/${id}`
+}
+
+export const deleteApiIntranetCalendarSubscriptionsId = async (id: string, options?: RequestInit): Promise<deleteApiIntranetCalendarSubscriptionsIdResponse> => {
+
+  return customClient<deleteApiIntranetCalendarSubscriptionsIdResponse>(getDeleteApiIntranetCalendarSubscriptionsIdUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteApiIntranetCalendarSubscriptionsIdMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiIntranetCalendarSubscriptionsId>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteApiIntranetCalendarSubscriptionsId>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['deleteApiIntranetCalendarSubscriptionsId'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteApiIntranetCalendarSubscriptionsId>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteApiIntranetCalendarSubscriptionsId(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteApiIntranetCalendarSubscriptionsIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteApiIntranetCalendarSubscriptionsId>>>
+
+    export type DeleteApiIntranetCalendarSubscriptionsIdMutationError = unknown
+
+    export const useDeleteApiIntranetCalendarSubscriptionsId = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiIntranetCalendarSubscriptionsId>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteApiIntranetCalendarSubscriptionsId>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+      return useMutation(getDeleteApiIntranetCalendarSubscriptionsIdMutationOptions(options), queryClient);
+    }
+
+export type postApiIntranetCalendarSubscriptionsIdSyncResponse200 = {
+  data: void
+  status: 200
+}
+
+export type postApiIntranetCalendarSubscriptionsIdSyncResponseSuccess = (postApiIntranetCalendarSubscriptionsIdSyncResponse200) & {
+  headers: Headers;
+};
+;
+
+export type postApiIntranetCalendarSubscriptionsIdSyncResponse = (postApiIntranetCalendarSubscriptionsIdSyncResponseSuccess)
+
+export const getPostApiIntranetCalendarSubscriptionsIdSyncUrl = (id: string,) => {
+
+
+
+
+  return `/api/intranet/calendar/subscriptions/${id}/sync`
+}
+
+export const postApiIntranetCalendarSubscriptionsIdSync = async (id: string, options?: RequestInit): Promise<postApiIntranetCalendarSubscriptionsIdSyncResponse> => {
+
+  return customClient<postApiIntranetCalendarSubscriptionsIdSyncResponse>(getPostApiIntranetCalendarSubscriptionsIdSyncUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getPostApiIntranetCalendarSubscriptionsIdSyncMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiIntranetCalendarSubscriptionsIdSync>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiIntranetCalendarSubscriptionsIdSync>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['postApiIntranetCalendarSubscriptionsIdSync'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiIntranetCalendarSubscriptionsIdSync>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  postApiIntranetCalendarSubscriptionsIdSync(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiIntranetCalendarSubscriptionsIdSyncMutationResult = NonNullable<Awaited<ReturnType<typeof postApiIntranetCalendarSubscriptionsIdSync>>>
+
+    export type PostApiIntranetCalendarSubscriptionsIdSyncMutationError = unknown
+
+    export const usePostApiIntranetCalendarSubscriptionsIdSync = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiIntranetCalendarSubscriptionsIdSync>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiIntranetCalendarSubscriptionsIdSync>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+      return useMutation(getPostApiIntranetCalendarSubscriptionsIdSyncMutationOptions(options), queryClient);
+    }
 
 export type getApiIntranetPostsIdResponse200TextPlain = {
   data: CommunityPost
@@ -5057,6 +5943,613 @@ export function useGetApiMonitorsIdLatency<TData = Awaited<ReturnType<typeof get
 
 
 
+export type getApiIntranetEventsResponse200TextPlain = {
+  data: OfficeEventDto[]
+  status: 200
+}
+
+export type getApiIntranetEventsResponse200ApplicationJson = {
+  data: OfficeEventDto[]
+  status: 200
+}
+
+export type getApiIntranetEventsResponse200TextJson = {
+  data: OfficeEventDto[]
+  status: 200
+}
+
+export type getApiIntranetEventsResponseSuccess = (getApiIntranetEventsResponse200TextPlain | getApiIntranetEventsResponse200ApplicationJson | getApiIntranetEventsResponse200TextJson) & {
+  headers: Headers;
+};
+;
+
+export type getApiIntranetEventsResponse = (getApiIntranetEventsResponseSuccess)
+
+export const getGetApiIntranetEventsUrl = (params?: GetApiIntranetEventsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/intranet/events?${stringifiedParams}` : `/api/intranet/events`
+}
+
+export const getApiIntranetEvents = async (params?: GetApiIntranetEventsParams, options?: RequestInit): Promise<getApiIntranetEventsResponse> => {
+
+  return customClient<getApiIntranetEventsResponse>(getGetApiIntranetEventsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiIntranetEventsQueryKey = (params?: GetApiIntranetEventsParams,) => {
+    return [
+    `/api/intranet/events`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetApiIntranetEventsQueryOptions = <TData = Awaited<ReturnType<typeof getApiIntranetEvents>>, TError = unknown>(params?: GetApiIntranetEventsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetEvents>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiIntranetEventsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiIntranetEvents>>> = ({ signal }) => getApiIntranetEvents(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetEvents>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiIntranetEventsQueryResult = NonNullable<Awaited<ReturnType<typeof getApiIntranetEvents>>>
+export type GetApiIntranetEventsQueryError = unknown
+
+
+export function useGetApiIntranetEvents<TData = Awaited<ReturnType<typeof getApiIntranetEvents>>, TError = unknown>(
+ params: undefined |  GetApiIntranetEventsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetEvents>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiIntranetEvents>>,
+          TError,
+          Awaited<ReturnType<typeof getApiIntranetEvents>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiIntranetEvents<TData = Awaited<ReturnType<typeof getApiIntranetEvents>>, TError = unknown>(
+ params?: GetApiIntranetEventsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetEvents>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiIntranetEvents>>,
+          TError,
+          Awaited<ReturnType<typeof getApiIntranetEvents>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiIntranetEvents<TData = Awaited<ReturnType<typeof getApiIntranetEvents>>, TError = unknown>(
+ params?: GetApiIntranetEventsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetEvents>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiIntranetEvents<TData = Awaited<ReturnType<typeof getApiIntranetEvents>>, TError = unknown>(
+ params?: GetApiIntranetEventsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetEvents>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiIntranetEventsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export type postApiIntranetEventsResponse200TextPlain = {
+  data: OfficeEventDto
+  status: 200
+}
+
+export type postApiIntranetEventsResponse200ApplicationJson = {
+  data: OfficeEventDto
+  status: 200
+}
+
+export type postApiIntranetEventsResponse200TextJson = {
+  data: OfficeEventDto
+  status: 200
+}
+
+export type postApiIntranetEventsResponseSuccess = (postApiIntranetEventsResponse200TextPlain | postApiIntranetEventsResponse200ApplicationJson | postApiIntranetEventsResponse200TextJson) & {
+  headers: Headers;
+};
+;
+
+export type postApiIntranetEventsResponse = (postApiIntranetEventsResponseSuccess)
+
+export const getPostApiIntranetEventsUrl = () => {
+
+
+
+
+  return `/api/intranet/events`
+}
+
+export const postApiIntranetEvents = async (createOfficeEventDto?: CreateOfficeEventDto, options?: RequestInit): Promise<postApiIntranetEventsResponse> => {
+
+  return customClient<postApiIntranetEventsResponse>(getPostApiIntranetEventsUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(createOfficeEventDto)
+  }
+);}
+
+
+
+
+export const getPostApiIntranetEventsMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiIntranetEvents>>, TError,{data?: CreateOfficeEventDto}, TContext>, request?: SecondParameter<typeof customClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiIntranetEvents>>, TError,{data?: CreateOfficeEventDto}, TContext> => {
+
+const mutationKey = ['postApiIntranetEvents'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiIntranetEvents>>, {data?: CreateOfficeEventDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiIntranetEvents(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiIntranetEventsMutationResult = NonNullable<Awaited<ReturnType<typeof postApiIntranetEvents>>>
+    export type PostApiIntranetEventsMutationBody = CreateOfficeEventDto | undefined
+    export type PostApiIntranetEventsMutationError = unknown
+
+    export const usePostApiIntranetEvents = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiIntranetEvents>>, TError,{data?: CreateOfficeEventDto}, TContext>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiIntranetEvents>>,
+        TError,
+        {data?: CreateOfficeEventDto},
+        TContext
+      > => {
+      return useMutation(getPostApiIntranetEventsMutationOptions(options), queryClient);
+    }
+
+export type getApiIntranetEventsTodayResponse200TextPlain = {
+  data: OfficeEventDto[]
+  status: 200
+}
+
+export type getApiIntranetEventsTodayResponse200ApplicationJson = {
+  data: OfficeEventDto[]
+  status: 200
+}
+
+export type getApiIntranetEventsTodayResponse200TextJson = {
+  data: OfficeEventDto[]
+  status: 200
+}
+
+export type getApiIntranetEventsTodayResponseSuccess = (getApiIntranetEventsTodayResponse200TextPlain | getApiIntranetEventsTodayResponse200ApplicationJson | getApiIntranetEventsTodayResponse200TextJson) & {
+  headers: Headers;
+};
+;
+
+export type getApiIntranetEventsTodayResponse = (getApiIntranetEventsTodayResponseSuccess)
+
+export const getGetApiIntranetEventsTodayUrl = () => {
+
+
+
+
+  return `/api/intranet/events/today`
+}
+
+export const getApiIntranetEventsToday = async ( options?: RequestInit): Promise<getApiIntranetEventsTodayResponse> => {
+
+  return customClient<getApiIntranetEventsTodayResponse>(getGetApiIntranetEventsTodayUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiIntranetEventsTodayQueryKey = () => {
+    return [
+    `/api/intranet/events/today`
+    ] as const;
+    }
+
+
+export const getGetApiIntranetEventsTodayQueryOptions = <TData = Awaited<ReturnType<typeof getApiIntranetEventsToday>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetEventsToday>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiIntranetEventsTodayQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiIntranetEventsToday>>> = ({ signal }) => getApiIntranetEventsToday({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetEventsToday>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiIntranetEventsTodayQueryResult = NonNullable<Awaited<ReturnType<typeof getApiIntranetEventsToday>>>
+export type GetApiIntranetEventsTodayQueryError = unknown
+
+
+export function useGetApiIntranetEventsToday<TData = Awaited<ReturnType<typeof getApiIntranetEventsToday>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetEventsToday>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiIntranetEventsToday>>,
+          TError,
+          Awaited<ReturnType<typeof getApiIntranetEventsToday>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiIntranetEventsToday<TData = Awaited<ReturnType<typeof getApiIntranetEventsToday>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetEventsToday>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiIntranetEventsToday>>,
+          TError,
+          Awaited<ReturnType<typeof getApiIntranetEventsToday>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiIntranetEventsToday<TData = Awaited<ReturnType<typeof getApiIntranetEventsToday>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetEventsToday>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiIntranetEventsToday<TData = Awaited<ReturnType<typeof getApiIntranetEventsToday>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetEventsToday>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiIntranetEventsTodayQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export type getApiIntranetEventsIdResponse200TextPlain = {
+  data: OfficeEventDto
+  status: 200
+}
+
+export type getApiIntranetEventsIdResponse200ApplicationJson = {
+  data: OfficeEventDto
+  status: 200
+}
+
+export type getApiIntranetEventsIdResponse200TextJson = {
+  data: OfficeEventDto
+  status: 200
+}
+
+export type getApiIntranetEventsIdResponseSuccess = (getApiIntranetEventsIdResponse200TextPlain | getApiIntranetEventsIdResponse200ApplicationJson | getApiIntranetEventsIdResponse200TextJson) & {
+  headers: Headers;
+};
+;
+
+export type getApiIntranetEventsIdResponse = (getApiIntranetEventsIdResponseSuccess)
+
+export const getGetApiIntranetEventsIdUrl = (id: string,) => {
+
+
+
+
+  return `/api/intranet/events/${id}`
+}
+
+export const getApiIntranetEventsId = async (id: string, options?: RequestInit): Promise<getApiIntranetEventsIdResponse> => {
+
+  return customClient<getApiIntranetEventsIdResponse>(getGetApiIntranetEventsIdUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiIntranetEventsIdQueryKey = (id: string,) => {
+    return [
+    `/api/intranet/events/${id}`
+    ] as const;
+    }
+
+
+export const getGetApiIntranetEventsIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiIntranetEventsId>>, TError = unknown>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetEventsId>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiIntranetEventsIdQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiIntranetEventsId>>> = ({ signal }) => getApiIntranetEventsId(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetEventsId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiIntranetEventsIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiIntranetEventsId>>>
+export type GetApiIntranetEventsIdQueryError = unknown
+
+
+export function useGetApiIntranetEventsId<TData = Awaited<ReturnType<typeof getApiIntranetEventsId>>, TError = unknown>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetEventsId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiIntranetEventsId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiIntranetEventsId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiIntranetEventsId<TData = Awaited<ReturnType<typeof getApiIntranetEventsId>>, TError = unknown>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetEventsId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiIntranetEventsId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiIntranetEventsId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiIntranetEventsId<TData = Awaited<ReturnType<typeof getApiIntranetEventsId>>, TError = unknown>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetEventsId>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiIntranetEventsId<TData = Awaited<ReturnType<typeof getApiIntranetEventsId>>, TError = unknown>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiIntranetEventsId>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiIntranetEventsIdQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export type patchApiIntranetEventsIdResponse200TextPlain = {
+  data: OfficeEventDto
+  status: 200
+}
+
+export type patchApiIntranetEventsIdResponse200ApplicationJson = {
+  data: OfficeEventDto
+  status: 200
+}
+
+export type patchApiIntranetEventsIdResponse200TextJson = {
+  data: OfficeEventDto
+  status: 200
+}
+
+export type patchApiIntranetEventsIdResponseSuccess = (patchApiIntranetEventsIdResponse200TextPlain | patchApiIntranetEventsIdResponse200ApplicationJson | patchApiIntranetEventsIdResponse200TextJson) & {
+  headers: Headers;
+};
+;
+
+export type patchApiIntranetEventsIdResponse = (patchApiIntranetEventsIdResponseSuccess)
+
+export const getPatchApiIntranetEventsIdUrl = (id: string,) => {
+
+
+
+
+  return `/api/intranet/events/${id}`
+}
+
+export const patchApiIntranetEventsId = async (id: string,
+    updateOfficeEventDto?: UpdateOfficeEventDto, options?: RequestInit): Promise<patchApiIntranetEventsIdResponse> => {
+
+  return customClient<patchApiIntranetEventsIdResponse>(getPatchApiIntranetEventsIdUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateOfficeEventDto)
+  }
+);}
+
+
+
+
+export const getPatchApiIntranetEventsIdMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiIntranetEventsId>>, TError,{id: string;data?: UpdateOfficeEventDto}, TContext>, request?: SecondParameter<typeof customClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof patchApiIntranetEventsId>>, TError,{id: string;data?: UpdateOfficeEventDto}, TContext> => {
+
+const mutationKey = ['patchApiIntranetEventsId'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof patchApiIntranetEventsId>>, {id: string;data?: UpdateOfficeEventDto}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  patchApiIntranetEventsId(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PatchApiIntranetEventsIdMutationResult = NonNullable<Awaited<ReturnType<typeof patchApiIntranetEventsId>>>
+    export type PatchApiIntranetEventsIdMutationBody = UpdateOfficeEventDto | undefined
+    export type PatchApiIntranetEventsIdMutationError = unknown
+
+    export const usePatchApiIntranetEventsId = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiIntranetEventsId>>, TError,{id: string;data?: UpdateOfficeEventDto}, TContext>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof patchApiIntranetEventsId>>,
+        TError,
+        {id: string;data?: UpdateOfficeEventDto},
+        TContext
+      > => {
+      return useMutation(getPatchApiIntranetEventsIdMutationOptions(options), queryClient);
+    }
+
+export type deleteApiIntranetEventsIdResponse200 = {
+  data: void
+  status: 200
+}
+
+export type deleteApiIntranetEventsIdResponseSuccess = (deleteApiIntranetEventsIdResponse200) & {
+  headers: Headers;
+};
+;
+
+export type deleteApiIntranetEventsIdResponse = (deleteApiIntranetEventsIdResponseSuccess)
+
+export const getDeleteApiIntranetEventsIdUrl = (id: string,) => {
+
+
+
+
+  return `/api/intranet/events/${id}`
+}
+
+export const deleteApiIntranetEventsId = async (id: string, options?: RequestInit): Promise<deleteApiIntranetEventsIdResponse> => {
+
+  return customClient<deleteApiIntranetEventsIdResponse>(getDeleteApiIntranetEventsIdUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteApiIntranetEventsIdMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiIntranetEventsId>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteApiIntranetEventsId>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['deleteApiIntranetEventsId'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteApiIntranetEventsId>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteApiIntranetEventsId(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteApiIntranetEventsIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteApiIntranetEventsId>>>
+
+    export type DeleteApiIntranetEventsIdMutationError = unknown
+
+    export const useDeleteApiIntranetEventsId = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiIntranetEventsId>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteApiIntranetEventsId>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+      return useMutation(getDeleteApiIntranetEventsIdMutationOptions(options), queryClient);
+    }
+
 export type getApiSystemEventResponse200TextPlain = {
   data: SystemEvent[]
   status: 200
@@ -6588,6 +8081,129 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getDeleteApiUsersIdMutationOptions(options), queryClient);
     }
+
+export type getApiWeatherResponse200TextPlain = {
+  data: WeatherDto
+  status: 200
+}
+
+export type getApiWeatherResponse200ApplicationJson = {
+  data: WeatherDto
+  status: 200
+}
+
+export type getApiWeatherResponse200TextJson = {
+  data: WeatherDto
+  status: 200
+}
+
+export type getApiWeatherResponseSuccess = (getApiWeatherResponse200TextPlain | getApiWeatherResponse200ApplicationJson | getApiWeatherResponse200TextJson) & {
+  headers: Headers;
+};
+;
+
+export type getApiWeatherResponse = (getApiWeatherResponseSuccess)
+
+export const getGetApiWeatherUrl = () => {
+
+
+
+
+  return `/api/weather`
+}
+
+/**
+ * @summary Returns current weather for the configured office location.
+ */
+export const getApiWeather = async ( options?: RequestInit): Promise<getApiWeatherResponse> => {
+
+  return customClient<getApiWeatherResponse>(getGetApiWeatherUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiWeatherQueryKey = () => {
+    return [
+    `/api/weather`
+    ] as const;
+    }
+
+
+export const getGetApiWeatherQueryOptions = <TData = Awaited<ReturnType<typeof getApiWeather>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiWeather>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiWeatherQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiWeather>>> = ({ signal }) => getApiWeather({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiWeather>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiWeatherQueryResult = NonNullable<Awaited<ReturnType<typeof getApiWeather>>>
+export type GetApiWeatherQueryError = unknown
+
+
+export function useGetApiWeather<TData = Awaited<ReturnType<typeof getApiWeather>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiWeather>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiWeather>>,
+          TError,
+          Awaited<ReturnType<typeof getApiWeather>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiWeather<TData = Awaited<ReturnType<typeof getApiWeather>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiWeather>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiWeather>>,
+          TError,
+          Awaited<ReturnType<typeof getApiWeather>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiWeather<TData = Awaited<ReturnType<typeof getApiWeather>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiWeather>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Returns current weather for the configured office location.
+ */
+
+export function useGetApiWeather<TData = Awaited<ReturnType<typeof getApiWeather>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiWeather>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiWeatherQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
 
 export type postApiWebhooksMotasticTenantIdResponse200 = {
   data: void

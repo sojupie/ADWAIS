@@ -10,10 +10,10 @@ interface SectionHeaderProps {
 }
 
 export function SectionHeader({ title, subtitle, icon, children, className = '', dark = true }: SectionHeaderProps) {
-  const bgClass = dark ? 'bg-brand-bg-secondary border-slate-700/50' : 'bg-white border-slate-200';
-  const textClass = dark ? 'text-white' : 'text-slate-800';
-  const subtitleClass = dark ? 'text-slate-300' : 'text-slate-500';
-  const iconBgClass = dark ? 'bg-white/10 text-brand-accent' : 'bg-brand-accent/10 text-brand-accent';
+  const bgClass = dark ? 'bg-brand-bg-secondary border-slate-700/50' : 'bg-surface border-outline-variant';
+  const textClass = dark ? 'text-white' : 'text-on-surface';
+  const subtitleClass = dark ? 'text-slate-300' : 'text-on-surface-variant';
+  const iconBgClass = dark ? 'bg-surface/10 text-brand-accent' : 'bg-brand-accent/10 text-brand-accent';
 
   return (
     <div className={`flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4 shrink-0 px-4 py-3 sm:p-4 shadow-sm rounded-xl z-10 ${bgClass} ${className}`}>

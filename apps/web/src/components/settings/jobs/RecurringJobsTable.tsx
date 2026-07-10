@@ -11,7 +11,7 @@ export function RecurringJobsTable({ recurring }: RecurringJobsTableProps) {
   return (
     <div className="w-full text-left text-sm overflow-x-auto">
       <table className="w-full">
-        <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase text-xs">
+        <thead className="bg-surface-container-low border-b border-outline-variant text-on-surface-variant font-semibold uppercase text-xs">
           <tr>
             <th className="px-3 py-2">Job ID</th>
             <th className="px-3 py-2">Cron</th>
@@ -33,17 +33,17 @@ export function RecurringJobsTable({ recurring }: RecurringJobsTableProps) {
             ))
           ) : (
             recurring.map((job) => (
-              <tr key={job.id} className="hover:bg-slate-50/50 transition-colors">
-                <td className="px-3 py-2 font-bold text-slate-800 break-words max-w-[150px]">{job.id}</td>
+              <tr key={job.id} className="hover:bg-surface-container-lowest transition-colors">
+                <td className="px-3 py-2 font-bold text-on-surface break-words max-w-[150px]">{job.id}</td>
                 <td className="px-3 py-2">
                   <span className="px-1 py-0.5 bg-brand-accent/10 text-brand-text rounded text-xs font-mono font-bold tracking-widest break-words max-w-[100px] inline-block">
                     {job.cron}
                   </span>
                 </td>
-                <td className="px-3 py-2 text-slate-700 font-bold whitespace-nowrap">
+                <td className="px-3 py-2 text-on-surface-variant font-bold whitespace-nowrap">
                   {job.lastExecution ? new Date(job.lastExecution).toLocaleString() : 'Never'}
                 </td>
-                <td className="px-3 py-2 text-slate-500 whitespace-nowrap">
+                <td className="px-3 py-2 text-on-surface-variant whitespace-nowrap">
                   {job.nextExecution ? new Date(job.nextExecution).toLocaleString() : 'Never'}
                 </td>
                 <td className="px-3 py-2">

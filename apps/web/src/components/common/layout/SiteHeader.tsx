@@ -45,7 +45,7 @@ export function SiteHeader({
             <UserAccountLink label={userLabel} variant="mobile" />
             <button
               onClick={onToggleMobileMenu}
-              className="flex items-center justify-center w-10 h-10 rounded-lg text-white hover:bg-white/10 transition-colors"
+              className="flex items-center justify-center w-10 h-10 rounded-lg text-white hover:bg-surface/10 transition-colors"
               aria-label="Toggle menu"
               aria-expanded={isMobileMenuOpen}
             >
@@ -92,7 +92,7 @@ export function SiteHeader({
             }
           `}</style>
           <div 
-            className="absolute bottom-0 left-0 right-0 h-[6px] translate-y-full z-50 overflow-hidden bg-brand-btn-primary/20 pointer-events-none transition-opacity duration-500"
+            className="absolute bottom-0 left-0 right-0 h-[6px] translate-y-full z-50 overflow-hidden bg-primary-container pointer-events-none transition-opacity duration-500"
             style={{ opacity: isProgressBarVisible ? 1 : 0 }}
           >
             <div 

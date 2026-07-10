@@ -32,6 +32,8 @@ public class TokenService(IConfiguration configuration) : ITokenService
         {
             Subject = new ClaimsIdentity(new[]
             {
+                new Claim("sub", deviceId),
+                new Claim(ClaimTypes.NameIdentifier, deviceId),
                 new Claim("name", $"Kiosk-Device-{deviceId}"),
                 new Claim("role", role)
             }),

@@ -40,7 +40,7 @@ function LoginComponent() {
           <span>Sign in with Microsoft</span>
         </button>
 
-        <div className="pt-4 border-t border-slate-900/5 flex justify-center">
+        <div className="pt-4 border-t border-outline-variant flex justify-center">
           <Link
             to="/kiosk"
             className="text-sm font-black text-brand-link hover:text-brand-accent transition-colors flex items-center gap-2 cursor-pointer uppercase tracking-widest"
@@ -50,9 +50,9 @@ function LoginComponent() {
         </div>
       </div>
 
-      <div className="pt-4 border-t border-white/5 flex justify-between items-center text-sm text-slate-500 font-extrabold tracking-widest uppercase relative z-10 w-full animate-stagger delay-300">
+      <div className="pt-4 border-t border-outline-variant flex justify-between items-center text-sm text-on-surface-variant font-extrabold tracking-widest uppercase relative z-10 w-full animate-stagger delay-300">
         <span>ADWAIS Platform</span>
-        <span className="text-slate-600">v1.1.0</span>
+        <span className="text-on-surface-variant">v1.1.0</span>
       </div>
     </>
   );

@@ -110,6 +110,18 @@ namespace Adwais.Infrastructure.Migrations
                         .HasDefaultValue(60)
                         .HasColumnName("user_stats_fetch_interval_minutes");
 
+                    b.Property<int>("WeatherFetchIntervalMinutes")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(15)
+                        .HasColumnName("weather_fetch_interval_minutes");
+
+                    b.Property<string>("WeatherLocation")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("Karlstad")
+                        .HasColumnName("weather_location");
+
                     b.HasKey("Id")
                         .HasName("pk_global_config");
 
@@ -129,7 +141,9 @@ namespace Adwais.Infrastructure.Migrations
                             SystemEventRetentionDays = 2,
                             UptimeFetchIntervalMinutes = 60,
                             UptimeRobotFetchEnabled = true,
-                            UserStatsFetchIntervalMinutes = 60
+                            UserStatsFetchIntervalMinutes = 60,
+                            WeatherFetchIntervalMinutes = 15,
+                            WeatherLocation = "Karlstad"
                         });
                 });
 

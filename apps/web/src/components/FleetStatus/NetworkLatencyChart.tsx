@@ -30,24 +30,24 @@ const GraphTooltip = ({ active, payload, label }: GraphTooltipProps) => {
   const point = payload[0].payload as LatencyPoint;
 
   return (
-      <div className="bg-white border border-slate-100 rounded-lg shadow-lg p-4 text-sm animate-in fade-in zoom-in duration-200">
+      <div className="bg-surface border border-outline-variant rounded-lg shadow-lg p-4 text-sm animate-in fade-in zoom-in duration-200">
         <p className="font-bold text-brand-text mb-3 border-b border-slate-50 pb-2 uppercase tracking-widest text-sm">{label}</p>
         <div className="space-y-2">
           <p className="flex justify-between gap-8">
-            <span className="text-slate-500 font-bold uppercase text-sm tracking-widest">Current Avg</span>
+            <span className="text-on-surface-variant font-bold uppercase text-sm tracking-widest">Current Avg</span>
             <strong className="text-brand-btn-primary">{formatLatency(point.average)}</strong>
           </p>
           <p className="flex justify-between gap-8">
-            <span className="text-slate-500 font-bold uppercase text-sm tracking-widest">Previous Avg</span>
-            <strong className="text-slate-500">{formatLatency(point.previousAverage)}</strong>
+            <span className="text-on-surface-variant font-bold uppercase text-sm tracking-widest">Previous Avg</span>
+            <strong className="text-on-surface-variant">{formatLatency(point.previousAverage)}</strong>
           </p>
           <div className="pt-2 border-t border-slate-50 mt-2 space-y-1">
             <p className="flex justify-between gap-8">
-              <span className="text-slate-500 font-bold uppercase text-sm tracking-widest">90th Percentile</span>
+              <span className="text-on-surface-variant font-bold uppercase text-sm tracking-widest">90th Percentile</span>
               <strong className="text-red-500 text-sm">{formatLatency(point.highest)}</strong>
             </p>
             <p className="flex justify-between gap-8">
-              <span className="text-slate-500 font-bold uppercase text-sm tracking-widest">10th Percentile</span>
+              <span className="text-on-surface-variant font-bold uppercase text-sm tracking-widest">10th Percentile</span>
               <strong className="text-emerald-500 text-sm">{formatLatency(point.lowest)}</strong>
             </p>
           </div>
@@ -104,13 +104,13 @@ export const NetworkLatencyChart = memo(function NetworkLatencyChart({
   }, [points]);
 
   const legend = (
-      <div className="flex gap-4 text-sm font-black text-slate-500 uppercase tracking-widest bg-slate-50 px-3 py-1 rounded-full border border-slate-100">
+      <div className="flex gap-4 text-sm font-black text-on-surface-variant uppercase tracking-widest bg-surface-container-low px-3 py-1 rounded-full border border-outline-variant">
         <div className="flex items-center gap-1.5">
           <div className="w-2.5 h-2.5 rounded-full bg-brand-btn-primary"></div>
           <span>Current</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-2.5 h-2.5 rounded-full border-2 border-slate-300 border-dashed bg-transparent"></div>
+          <div className="w-2.5 h-2.5 rounded-full border-2 border-outline-variant border-dashed bg-transparent"></div>
           <span>Previous</span>
         </div>
       </div>

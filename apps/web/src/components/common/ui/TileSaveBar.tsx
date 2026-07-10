@@ -22,9 +22,9 @@ export function TileSaveBar({
   if (!isDirty && !isPending && !isSuccess && !isError) return null;
 
   return (
-    <div className="flex flex-col gap-2 mt-2 pt-3 border-t border-slate-100 animate-in fade-in duration-200">
+    <div className="flex flex-col gap-2 mt-2 pt-3 border-t border-outline-variant animate-in fade-in duration-200">
       {isPending && (
-        <div className="flex items-center gap-2 text-sm font-semibold text-slate-500 bg-slate-50 border border-slate-100 rounded-lg px-2.5 py-1.5 animate-pulse">
+        <div className="flex items-center gap-2 text-sm font-semibold text-on-surface-variant bg-surface-container-low border border-outline-variant rounded-lg px-2.5 py-1.5 animate-pulse">
           <Loader2 className="animate-spin text-brand-link h-3.5 w-3.5" />
           <span>Saving updates to remote fleet (may take a long time if being rate limited)...</span>
         </div>
@@ -56,7 +56,7 @@ export function TileSaveBar({
           <button
             onClick={onCancel}
             disabled={isPending}
-            className="px-3 py-1.5 text-sm font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-3 py-1.5 text-sm font-bold text-on-surface-variant bg-surface-container hover:bg-surface-container-high rounded-lg transition-colors shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Cancel
           </button>

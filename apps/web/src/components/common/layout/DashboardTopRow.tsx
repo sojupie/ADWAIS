@@ -16,7 +16,7 @@ export function DashboardTopRow({ children }: { children: ReactNode }) {
     }
 
     return (
-        <section className="grid grid-cols-2 portrait-lg:grid-cols-3 landscape-lg:grid-cols-5 gap-4 shrink-0">
+        <section className="grid grid-cols-2 portrait-lg:grid-cols-3 landscape-lg:grid-cols-5 gap-6 shrink-0">
             {children}
         </section>
     );

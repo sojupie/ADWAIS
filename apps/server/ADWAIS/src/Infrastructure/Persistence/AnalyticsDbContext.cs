@@ -243,6 +243,8 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
             entity.Property(x => x.LitiumFetchEnabled).HasDefaultValue(true);
             entity.Property(x => x.UptimeRobotFetchEnabled).HasDefaultValue(true);
             entity.Property(x => x.DefaultUptimeSla);
+            entity.Property(x => x.WeatherLocation).HasDefaultValue("Karlstad");
+            entity.Property(x => x.WeatherFetchIntervalMinutes).HasDefaultValue(15);
 
             entity.HasData(new GlobalConfig
             {
@@ -254,7 +256,9 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
                 LatencyFetchIntervalMinutes = 10,
                 UserStatsFetchIntervalMinutes = 60,
                 SystemEventRetentionDays = 2,
-                FeedFetchIntervalHours = 2
+                FeedFetchIntervalHours = 2,
+                WeatherLocation = "Karlstad",
+                WeatherFetchIntervalMinutes = 15
             });
         });
         

@@ -20,4 +20,8 @@ export interface UpdateGlobalConfigRequestDto {
   defaultUptimeSla?: number | null;
   /** @nullable */
   feedFetchIntervalHours?: number | null;
+  /** @nullable */
+  weatherLocation?: string | null;
+  /** @nullable */
+  weatherFetchIntervalMinutes?: number | null;
 }

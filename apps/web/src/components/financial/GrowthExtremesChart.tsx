@@ -22,22 +22,22 @@ const CustomTooltip = ({ active, payload }: { isLoading?: boolean;  active?: boo
   const tenant = payload[0].payload as GrowthExtreme;
 
   return (
-    <div className="bg-white border border-slate-100 rounded-lg shadow-lg p-4 text-sm animate-in fade-in zoom-in duration-200">
-      <p className="font-bold text-slate-900 mb-3 border-b border-slate-50 pb-2">{tenant.tenantName}</p>
+    <div className="bg-surface border border-outline-variant rounded-lg shadow-lg p-4 text-sm animate-in fade-in zoom-in duration-200">
+      <p className="font-bold text-on-surface mb-3 border-b border-slate-50 pb-2">{tenant.tenantName}</p>
       <div className="space-y-2">
-        <p className="flex justify-between gap-6 text-slate-500">
+        <p className="flex justify-between gap-6 text-on-surface-variant">
           <span>Growth:</span>
           <strong className={tenant.growthPercentage >= 0 ? 'text-growth' : 'text-[#c92a2a]'}>
             {formatGrowth(tenant.growthPercentage)}
           </strong>
         </p>
-        <p className="flex justify-between gap-6 text-slate-500">
+        <p className="flex justify-between gap-6 text-on-surface-variant">
           <span>Current:</span>
-          <strong className="text-slate-700">{formatCompact(tenant.currentRevenue)} SEK</strong>
+          <strong className="text-on-surface-variant">{formatCompact(tenant.currentRevenue)} SEK</strong>
         </p>
-        <p className="flex justify-between gap-6 text-slate-500">
+        <p className="flex justify-between gap-6 text-on-surface-variant">
           <span>Variance:</span>
-          <strong className="text-slate-700">{formatCompact(tenant.absoluteVariance)} SEK</strong>
+          <strong className="text-on-surface-variant">{formatCompact(tenant.absoluteVariance)} SEK</strong>
         </p>
       </div>
     </div>

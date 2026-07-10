@@ -19,7 +19,7 @@ interface FactPanelProps {
 }
 
 export function FactPanel({ label, value = '', isLoading, valueColor, extra, hasExtra, inverseTrend, children }: FactPanelProps) {
-    let valueColorClass = 'text-slate-800';
+    let valueColorClass = 'text-on-surface';
     let extraColor = '';
     let extraText = '';
 
@@ -35,25 +35,25 @@ export function FactPanel({ label, value = '', isLoading, valueColor, extra, has
             extraColor = inverseTrend ? 'text-growth' : 'text-decline';
             extraText = `▼ ${Math.abs(extra.value).toFixed(2)}% PoP`;
         } else {
-            extraColor = 'text-slate-500';
+            extraColor = 'text-on-surface-variant';
             extraText = `${extra.value.toFixed(2)}% PoP`;
         }
     }
 
     if (extra !== undefined && extra.type === "Desc") {
         extraText = extra.value;
-        extraColor = 'text-slate-500';
+        extraColor = 'text-on-surface-variant';
     }
 
     const showExtra = hasExtra || extra !== undefined;
 
     return (
-        <div className="snap-start bg-white rounded-xl border border-slate-200 shadow-sm px-3 py-2 md:px-4 md:py-3 flex flex-col justify-between min-h-[72px] md:min-h-[90px] min-w-[40vw] md:min-w-0 md:w-full transition-all hover:shadow-md overflow-hidden shrink-0">
-            <h2 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-1 truncate">{label}</h2>
+        <div className="snap-start bg-surface rounded-2xl ring-1 ring-slate-900/5 px-4 py-3 md:px-5 md:py-4 flex flex-col justify-between min-h-[80px] md:min-h-[100px] min-w-[40vw] md:min-w-0 md:w-full transition-all overflow-hidden shrink-0">
+            <h2 className="text-xs md:text-sm font-bold text-on-surface-variant uppercase tracking-widest mb-2 truncate">{label}</h2>
             {isLoading ? (
                 <div className="flex flex-col mt-auto">
-                    <Skeleton className="h-8 lg:h-9 xl:h-8 2xl:h-10 w-28 bg-slate-200" />
-                    {showExtra && <Skeleton className="h-5 2xl:h-6 w-20 bg-slate-100" />}
+                    <Skeleton className="h-8 lg:h-9 xl:h-8 2xl:h-10 w-28 bg-surface-container-high" />
+                    {showExtra && <Skeleton className="h-5 2xl:h-6 w-20 bg-surface-container" />}
                 </div>
             ) : children ? (
                 <div className="flex flex-col mt-auto">

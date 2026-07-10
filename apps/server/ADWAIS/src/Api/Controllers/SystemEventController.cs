@@ -1,8 +1,11 @@
 using Adwais.Domain.Entities;
-using Adwais.Infrastructure.Persistence;
+using Adwais.Application.Common.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Adwais.Api.Controllers;
 
@@ -11,8 +14,10 @@ namespace Adwais.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-public class SystemEventController(IDbContextFactory<AnalyticsDbContext> dbContextFactory) : ControllerBase
+public class SystemEventController(IApplicationDbContext dbContext) : ControllerBase
 {
+    private readonly IApplicationDbContext _dbContext = dbContext;
+
     /// <summary>
     /// Retrieves a list of recent system events, with optional filtering.
     /// </summary>
@@ -27,7 +32,7 @@ public class SystemEventController(IDbContextFactory<AnalyticsDbContext> dbConte
         [FromQuery] SystemEventLevel? minLevel = null,
         [FromQuery] Guid? tenantId = null)
     {
-        await using var db = await dbContextFactory.CreateDbContextAsync();
+        var db = _dbContext;
         
         var query = db.SystemEvents
             .AsNoTracking()
@@ -58,7 +63,7 @@ public class SystemEventController(IDbContextFactory<AnalyticsDbContext> dbConte
     [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> ClearEvents([FromQuery] int olderThanDays = 30)
     {
-        await using var db = await dbContextFactory.CreateDbContextAsync();
+        var db = _dbContext;
         var cutoff = DateTimeOffset.UtcNow.AddDays(-olderThanDays);
         
         var count = await db.SystemEvents
@@ -68,6 +73,3 @@ public class SystemEventController(IDbContextFactory<AnalyticsDbContext> dbConte
         return Ok(new { DeletedCount = count });
     }
 }
-
-
-

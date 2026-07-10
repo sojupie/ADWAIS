@@ -20,14 +20,14 @@ export function ProvisionUserPanel({ createUser }: ProvisionUserPanelProps) {
   };
 
   return (
-    <section className="bg-white border border-slate-200 rounded-2xl shadow-sm p-4 flex flex-col sm:flex-row gap-6 items-center justify-between shrink-0">
+    <section className="bg-surface border border-outline-variant rounded-2xl shadow-sm p-4 flex flex-col sm:flex-row gap-6 items-center justify-between shrink-0">
       <div className="flex items-center gap-4">
         <div className="p-3 bg-brand-bg-secondary text-white rounded-xl shadow-sm">
           <UserPlus size={24} />
         </div>
         <div>
           <h3 className="font-bold text-brand-text text-lg">Provision New User</h3>
-          <p className="text-sm text-slate-500 font-medium mt-0.5">Add a new administrator or user to the system</p>
+          <p className="text-sm text-on-surface-variant font-medium mt-0.5">Add a new administrator or user to the system</p>
         </div>
       </div>
       <div className="flex flex-col sm:flex-row gap-1 w-full sm:w-auto items-center">
@@ -44,7 +44,7 @@ export function ProvisionUserPanel({ createUser }: ProvisionUserPanelProps) {
           onChange={e => setNewUser({ ...newUser, role: e.target.value })}
           icon={<Shield size={14} />}
           containerClassName="w-full sm:w-36"
-          className="pl-3 pr-10 py-2 text-sm font-semibold h-10 border border-slate-300 hover:border-slate-400 rounded-xl bg-slate-50 text-slate-800"
+          className="pl-3 pr-10 py-2 text-sm font-semibold h-10 border border-outline-variant hover:border-slate-400 rounded-xl bg-surface-container-low text-on-surface"
         >
           <option value="Admin">Admin</option>
           <option value="Viewer">Viewer</option>

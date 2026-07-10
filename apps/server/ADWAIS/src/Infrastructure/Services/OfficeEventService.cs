@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Adwais.Application.Common.Interfaces;
@@ -28,22 +29,73 @@ public class OfficeEventService(IApplicationDbContext dbContext) : IOfficeEventS
 
     public async Task<IEnumerable<OfficeEventDto>> GetEventsAsync(DateTimeOffset? start, DateTimeOffset? end, CancellationToken ct = default)
     {
-        var query = _dbContext.OfficeEvents.Include(oe => oe.User).AsQueryable();
+        var startUtc = start?.ToUniversalTime() ?? DateTimeOffset.MinValue;
+        var endUtc = end?.ToUniversalTime() ?? DateTimeOffset.MaxValue;
+        var expansionCap = DateTimeOffset.UtcNow.AddYears(1);
+        var effectiveEnd = endUtc < expansionCap ? endUtc : expansionCap;
 
-        if (start.HasValue)
+        // Fetch non-recurring events that overlap the window, plus all recurring events
+        // whose base start time is before the window ends (they may have occurrences inside).
+        var dbEvents = await _dbContext.OfficeEvents
+            .Include(oe => oe.User)
+            .Where(oe =>
+                (!oe.IsRecurring && oe.EndTime >= startUtc && oe.StartTime <= endUtc) ||
+                (oe.IsRecurring && oe.StartTime <= endUtc))
+            .ToListAsync(ct);
+
+        var results = new List<OfficeEventDto>();
+
+        foreach (var oe in dbEvents)
         {
-            var startUtc = start.Value.ToUniversalTime();
-            query = query.Where(oe => oe.EndTime >= startUtc);
+            if (!oe.IsRecurring || oe.Recurrence == RecurrenceType.None)
+            {
+                results.Add(MapToDto(oe));
+                continue;
+            }
+
+            var duration = oe.EndTime - oe.StartTime;
+
+            for (var n = 0; ; n++)
+            {
+                // Calculate Nth occurrence from base start — no drift, handles month/year edge cases natively.
+                var occurrenceStart = oe.Recurrence switch
+                {
+                    RecurrenceType.Daily   => oe.StartTime.AddDays(n),
+                    RecurrenceType.Weekly  => oe.StartTime.AddDays(n * 7),
+                    RecurrenceType.Monthly => oe.StartTime.AddMonths(n),
+                    RecurrenceType.Yearly  => oe.StartTime.AddYears(n),
+                    _                      => effectiveEnd.AddTicks(1) // exit condition
+                };
+
+                if (occurrenceStart > effectiveEnd) break;
+
+                var occurrenceEnd = occurrenceStart + duration;
+
+                // Only include occurrences that overlap the requested window.
+                if (occurrenceEnd >= startUtc && occurrenceStart <= endUtc)
+                {
+                    results.Add(new OfficeEventDto(
+                        GenerateDeterministicGuid(oe.Id, occurrenceStart),
+                        oe.Title,
+                        oe.Description,
+                        oe.Location,
+                        occurrenceStart,
+                        occurrenceEnd,
+                        oe.EventType,
+                        oe.IsImportant,
+                        oe.IsRecurring,
+                        oe.IsSpecial,
+                        oe.Recurrence,
+                        oe.UserId,
+                        oe.User?.Name,
+                        oe.ExternalUid,
+                        oe.CalendarSubscriptionId
+                    ));
+                }
+            }
         }
 
-        if (end.HasValue)
-        {
-            var endUtc = end.Value.ToUniversalTime();
-            query = query.Where(oe => oe.StartTime <= endUtc);
-        }
-
-        var events = await query.OrderBy(oe => oe.StartTime).ToListAsync(ct);
-        return events.Select(MapToDto);
+        return results.OrderBy(o => o.StartTime);
     }
 
     public async Task<OfficeEventDto> CreateEventAsync(Guid? userId, CreateOfficeEventDto dto, CancellationToken ct = default)
@@ -114,18 +166,11 @@ public class OfficeEventService(IApplicationDbContext dbContext) : IOfficeEventS
         return true;
     }
 
-    public async Task<IEnumerable<OfficeEventDto>> GetTodaysEventsAsync(CancellationToken ct = default)
+    public Task<IEnumerable<OfficeEventDto>> GetTodaysEventsAsync(CancellationToken ct = default)
     {
         var todayStart = new DateTimeOffset(DateTime.UtcNow.Date, TimeSpan.Zero);
-        var todayEnd = todayStart.AddDays(1);
-
-        var events = await _dbContext.OfficeEvents
-            .Include(oe => oe.User)
-            .Where(oe => oe.StartTime < todayEnd && oe.EndTime >= todayStart)
-            .OrderBy(oe => oe.StartTime)
-            .ToListAsync(ct);
-
-        return events.Select(MapToDto);
+        var todayEnd = todayStart.AddDays(1).AddTicks(-1);
+        return GetEventsAsync(todayStart, todayEnd, ct);
     }
 
     private static OfficeEventDto MapToDto(OfficeEvent oe)
@@ -147,5 +192,18 @@ public class OfficeEventService(IApplicationDbContext dbContext) : IOfficeEventS
             oe.ExternalUid,
             oe.CalendarSubscriptionId
         );
+    }
+
+    /// <summary>
+    /// Generates a stable, deterministic Guid for a recurring event occurrence.
+    /// This ensures React list keys remain consistent across re-renders.
+    /// </summary>
+    private static Guid GenerateDeterministicGuid(Guid sourceId, DateTimeOffset occurrenceStart)
+    {
+        Span<byte> buffer = stackalloc byte[24];
+        sourceId.TryWriteBytes(buffer[..16]);
+        BitConverter.TryWriteBytes(buffer[16..], occurrenceStart.UtcTicks);
+        var hash = MD5.HashData(buffer);
+        return new Guid(hash);
     }
 }

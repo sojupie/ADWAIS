@@ -23,19 +23,19 @@ const CustomTooltip = ({ active, payload, label }: { isLoading?: boolean;  activ
   const kde = payload.find(p => p.dataKey === 'kdeDensity')?.value;
 
   return (
-    <div className="bg-white border border-slate-100 rounded-lg shadow-lg p-4 text-sm animate-in fade-in zoom-in duration-200 min-w-[200px]">
-      <p className="font-bold text-slate-900 mb-3 border-b border-slate-50 pb-2">{label}</p>
+    <div className="bg-surface border border-outline-variant rounded-lg shadow-lg p-4 text-sm animate-in fade-in zoom-in duration-200 min-w-[200px]">
+      <p className="font-bold text-on-surface mb-3 border-b border-slate-50 pb-2">{label}</p>
       <div className="flex flex-col gap-2">
         <p className="flex justify-between gap-6">
-          <span className="text-slate-500">Volume:</span>
+          <span className="text-on-surface-variant">Volume:</span>
           <strong className="text-brand-btn-primary">{formatNumber(orderCount || 0)}</strong>
         </p>
         <p className="flex justify-between gap-6">
-          <span className="text-slate-500">Density (KDE):</span>
+          <span className="text-on-surface-variant">Density (KDE):</span>
           <strong className="text-teal-600">{formatNumber(kde || 0)}</strong>
         </p>
         <p className="flex justify-between gap-6 mt-1 pt-2 border-t border-slate-50">
-          <span className="text-slate-500">Cumulative:</span>
+          <span className="text-on-surface-variant">Cumulative:</span>
           <strong className="text-orange-500">{cdf?.toFixed(1) || 0}%</strong>
         </p>
       </div>

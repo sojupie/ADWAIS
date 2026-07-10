@@ -22,11 +22,11 @@ export function FleetStatus() {
       <button
         onClick={() => vm.setSelection(null)}
         disabled={!vm.selection}
-        className="bg-brand-bg-secondary text-white px-3 py-1 rounded-sm text-sm font-black uppercase tracking-widest hover:bg-brand-text transition-all shadow-sm cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed"
+        className="bg-brand-bg-secondary text-white px-4 py-1.5 rounded-full text-sm font-bold tracking-wide hover:bg-brand-text hover:shadow-md transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
       >
         CLEAR
       </button>
-      <span className="text-sm font-bold text-slate-500">
+      <span className="text-sm font-bold text-on-surface-variant">
         {vm.fleetStats.enabled.length} Online
       </span>
     </div>
@@ -53,7 +53,7 @@ export function FleetStatus() {
         <div className="flex items-center gap-3 mb-1">
           <h1 className="text-2xl font-extrabold text-brand-text tracking-tight m-0">Fleet Status</h1>
         </div>
-        <p className="text-sm text-slate-500 m-0 font-medium tracking-wide">Endpoint status, uptime%, and response time.</p>
+        <p className="text-sm text-on-surface-variant m-0 font-medium tracking-wide">Endpoint status, uptime%, and response time.</p>
       </div>
       {/* Top Row: Macro Stats */}
       <DashboardTopRow>
@@ -106,11 +106,11 @@ export function FleetStatus() {
           <div className="flex items-baseline gap-6">
             <div className="flex items-baseline gap-2">
               <span className="text-2xl lg:text-3xl xl:text-2xl 2xl:text-4xl font-extrabold tracking-tight text-status-down">{vm.fleetStats.down.length}</span>
-              <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">DOWN</span>
+              <span className="text-sm font-bold text-on-surface-variant uppercase tracking-widest">DOWN</span>
             </div>
             <div className="flex items-baseline gap-2">
               <span className="text-2xl lg:text-3xl xl:text-2xl 2xl:text-4xl font-extrabold tracking-tight text-status-degraded">{vm.fleetStats.degraded.length}</span>
-              <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">DEGRADED</span>
+              <span className="text-sm font-bold text-on-surface-variant uppercase tracking-widest">DEGRADED</span>
             </div>
           </div>
         </FactPanel>
@@ -127,6 +127,10 @@ export function FleetStatus() {
             monitors={vm.scopedMonitors}
             defaultSla={vm.defaultSla}
             defaultDegradedFloor={vm.defaultDegradedFloor}
+            onMonitorSelect={vm.handleMonitorSelect}
+            selectedMonitorId={vm.selection?.monitorId}
+            onClearSelection={() => vm.setSelection(null)}
+            hasActiveSelection={!!vm.selection}
             className="flex-1 min-h-[350px] contained:min-h-0 max-h-[600px] xl:max-h-none"
           />
 

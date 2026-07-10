@@ -26,10 +26,10 @@ export function UsersView() {
                     subtitle="Manage directory"
                     icon={<Users size={24} />}
                 />
-                <div className="flex-1 overflow-y-auto custom-scrollbar bg-white rounded-xl shadow-sm border border-slate-200/60">
+                <div className="flex-1 overflow-y-auto custom-scrollbar bg-surface rounded-xl shadow-sm border border-outline-variant/60">
                     <div className="overflow-x-auto">
                         <table className="w-full text-left text-sm whitespace-nowrap">
-                            <thead className="bg-white text-slate-500 border-b border-slate-200">
+                            <thead className="bg-surface text-on-surface-variant border-b border-outline-variant">
                                 <tr>
                                     <th className="px-6 py-4 font-bold text-sm uppercase tracking-wider">User</th>
                                     <th className="px-6 py-4 font-bold text-sm uppercase tracking-wider w-44">Role Level</th>

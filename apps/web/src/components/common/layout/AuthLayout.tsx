@@ -30,7 +30,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
               <span className="text-white/55"><Settings size={20} /></span>
             </nav>
             <div className="flex justify-center md:justify-end items-center gap-4 min-w-0">
-              <div className="flex items-center gap-2 md:gap-3 px-2.5 md:px-3 py-1.5 rounded-lg border bg-amber-100 text-slate-900 border-amber-400 shadow-sm cursor-not-allowed opacity-90 max-w-full">
+              <div className="flex items-center gap-2 md:gap-3 px-2.5 md:px-3 py-1.5 rounded-lg border bg-amber-100 text-on-surface border-amber-400 shadow-sm cursor-not-allowed opacity-90 max-w-full">
                 <span className="relative flex h-2.5 w-2.5">
                   <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
                 </span>
@@ -62,7 +62,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
         </div>
 
         {/* Moderate Blur Overlay to preserve vibrant colors */}
-        <div className="absolute inset-0 backdrop-blur-sm bg-white/45 z-10" />
+        <div className="absolute inset-0 backdrop-blur-sm bg-surface/45 z-10" />
       </div>
 
       {/* Auth Content */}

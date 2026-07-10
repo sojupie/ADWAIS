@@ -58,8 +58,8 @@ export const TransactionDensityChart = memo(function TransactionDensityChart({
       className={className || "h-full relative"}
       bodyClassName={isEmpty ? 'flex items-center h-full justify-center' : 'flex-1 min-h-0 flex flex-col p-4'}
       legend={
-      <div className="flex gap-1 flex-wrap items-center">
-        <span className="text-sm whitespace-nowrap font-bold text-slate-500 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded">
+      <div className="flex gap-1 flex-wrap items-center justify-end">
+        <span className="text-sm whitespace-nowrap font-bold text-on-surface-variant uppercase tracking-widest bg-surface-container-low px-3 py-1.5 rounded">
           30-Day Rolling Density</span>
         <div
             className="flex h-full rounded overflow-hidden"
@@ -80,7 +80,7 @@ export const TransactionDensityChart = memo(function TransactionDensityChart({
             {/* Header row for Hours */}
             <div className="col-span-1"></div>
             {Array.from({ length: 24 }).map((_, h) => (
-              <div key={h} className="text-center text-xs lg:text-sm text-slate-500 font-bold self-end pb-1">
+              <div key={h} className="text-center text-xs lg:text-sm text-on-surface-variant font-bold self-end pb-1">
                 {h.toString().padStart(2, '0')}
               </div>
             ))}
@@ -89,7 +89,7 @@ export const TransactionDensityChart = memo(function TransactionDensityChart({
             {DAYS.map((day, dayIndex) => (
               <Fragment key={day}>
                 {/* Day Label */}
-                <div className="flex items-center justify-end pr-2 text-sm text-slate-500 font-bold">
+                <div className="flex items-center justify-end pr-2 text-sm text-on-surface-variant font-bold">
                   {day}
                 </div>
                 {/* 24 Hour Cells for the Day */}
@@ -124,20 +124,20 @@ export const TransactionDensityChart = memo(function TransactionDensityChart({
           {/* Custom Tooltip */}
           {hoverInfo && createPortal(
             <div 
-              className="fixed min-w-min z-50 bg-white border border-slate-100 rounded-lg shadow-lg p-4 text-sm pointer-events-none transform -translate-x-1/2 -translate-y-full w-48"
+              className="fixed min-w-min z-50 bg-surface border border-outline-variant rounded-lg shadow-lg p-4 text-sm pointer-events-none transform -translate-x-1/2 -translate-y-full w-48"
               style={{ left: hoverInfo.x, top: hoverInfo.y }}
             >
-              <p className="font-bold text-slate-900 mb-3 border-b border-slate-50 pb-2">
+              <p className="font-bold text-on-surface mb-3 border-b border-slate-50 pb-2">
                 {DAYS[hoverInfo.day]} at {hoverInfo.hour.toString().padStart(2, '0')}:00
               </p>
               <div className="space-y-2">
                 <p className="flex justify-between gap-6">
-                  <span className="text-slate-500">Transactions:</span>
-                  <strong className="text-slate-700">{hoverInfo.count}</strong>
+                  <span className="text-on-surface-variant">Transactions:</span>
+                  <strong className="text-on-surface-variant">{hoverInfo.count}</strong>
                 </p>
                 <p className="flex justify-between gap-6">
-                  <span className="text-slate-500">Revenue:</span>
-                  <strong className="text-slate-700">{formatCurrency(hoverInfo.revenue)}</strong>
+                  <span className="text-on-surface-variant">Revenue:</span>
+                  <strong className="text-on-surface-variant">{formatCurrency(hoverInfo.revenue)}</strong>
                 </p>
               </div>
             </div>,

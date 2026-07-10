@@ -7,5 +7,7 @@ public record UpdateGlobalConfigRequestDto(
     string? UptimeRobotApiKey = null,
     int? SystemEventRetentionDays = null,
     double? DefaultUptimeSla = -1,
-    int? FeedFetchIntervalHours = null
+    int? FeedFetchIntervalHours = null,
+    string? WeatherLocation = null,
+    int? WeatherFetchIntervalMinutes = null
 );

@@ -3,8 +3,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Adwais.Application.DTOs.GlobalConfig;
 using Adwais.Application.Interfaces;
+using Adwais.Application.Common.Interfaces;
 using Adwais.Domain.Entities;
-using Adwais.Infrastructure.Persistence;
 using Adwais.Infrastructure.Helpers;
 using Adwais.Infrastructure.Jobs;
 using Adwais.Infrastructure.Jobs.Monitor;
@@ -15,16 +15,15 @@ using Hangfire;
 namespace Adwais.Infrastructure.Services;
 
 public class GlobalConfigService(
-    IDbContextFactory<AnalyticsDbContext> dbContextFactory,
+    IApplicationDbContext dbContext,
     ISystemEventService eventService) : IGlobalConfigService
 {
-    private readonly IDbContextFactory<AnalyticsDbContext> _dbContextFactory = dbContextFactory;
+    private readonly IApplicationDbContext _dbContext = dbContext;
     private readonly ISystemEventService _eventService = eventService;
 
     public async Task<GlobalConfigResponseDto> GetConfigAsync(CancellationToken ct = default)
     {
-        await using var db = await _dbContextFactory.CreateDbContextAsync(ct);
-        var config = await db.GlobalConfigs.AsNoTracking().SingleOrDefaultAsync(ct);
+        var config = await _dbContext.GlobalConfigs.AsNoTracking().SingleOrDefaultAsync(ct);
         if (config == null) throw new InvalidOperationException("Global configuration not found.");
 
         return MapToDto(config);
@@ -32,8 +31,7 @@ public class GlobalConfigService(
 
     public async Task<GlobalConfigResponseDto> UpdateConfigAsync(UpdateGlobalConfigRequestDto request, CancellationToken ct = default)
     {
-        await using var db = await _dbContextFactory.CreateDbContextAsync(ct);
-        var config = await db.GlobalConfigs.SingleOrDefaultAsync(ct);
+        var config = await _dbContext.GlobalConfigs.SingleOrDefaultAsync(ct);
         if (config == null) throw new InvalidOperationException("Global configuration not found.");
 
         if (request.LitiumFetchEnabled.HasValue) config.LitiumFetchEnabled = request.LitiumFetchEnabled.Value;
@@ -50,8 +48,10 @@ public class GlobalConfigService(
                 job => job.ExecuteAsync(CancellationToken.None),
                 Cron.HourInterval(request.FeedFetchIntervalHours.Value));
         }
+        if (!string.IsNullOrWhiteSpace(request.WeatherLocation)) config.WeatherLocation = request.WeatherLocation.Trim();
+        if (request.WeatherFetchIntervalMinutes.HasValue) config.WeatherFetchIntervalMinutes = request.WeatherFetchIntervalMinutes.Value;
 
-        await db.SaveChangesAsync(ct);
+        await _dbContext.SaveChangesAsync(ct);
         await _eventService.LogAsync(nameof(GlobalConfigService), "Global configuration updated.");
 
         return MapToDto(config);
@@ -66,12 +66,11 @@ public class GlobalConfigService(
     {
         if (intervalHours <= 0) throw new ArgumentException("Interval must be at least 1 hour.", nameof(intervalHours));
 
-        await using var db = await _dbContextFactory.CreateDbContextAsync(ct);
-        var config = await db.GlobalConfigs.SingleOrDefaultAsync(ct);
+        var config = await _dbContext.GlobalConfigs.SingleOrDefaultAsync(ct);
         if (config == null) throw new InvalidOperationException("Global configuration not found.");
 
         config.FeedFetchIntervalHours = intervalHours;
-        await db.SaveChangesAsync(ct);
+        await _dbContext.SaveChangesAsync(ct);
 
         RecurringJob.AddOrUpdate<FeedAggregationJob>(
             "aggregate-intranet-feeds",
@@ -83,8 +82,7 @@ public class GlobalConfigService(
 
     public async Task<FetchIntervalsDto> GetFetchIntervalsAsync(CancellationToken ct = default)
     {
-        await using var db = await _dbContextFactory.CreateDbContextAsync(ct);
-        var config = await db.GlobalConfigs
+        var config = await _dbContext.GlobalConfigs
             .AsNoTracking()
             .Select(g => new
             {
@@ -98,8 +96,8 @@ public class GlobalConfigService(
 
         if (config == null) throw new InvalidOperationException("Global configuration not found.");
 
-        var lowestInterval = await db.Monitors
-            .Where(m => m.TenantId != AnalyticsDbContext.SystemTenantGuid)
+        var lowestInterval = await _dbContext.Monitors
+            .Where(m => m.TenantId != IApplicationDbContext.SystemTenantGuid)
             .MinAsync(m => (int?)m.UpdateInterval, ct);
 
         var lowestIntervalMins = Math.Max(1, (lowestInterval ?? 300) / 60);
@@ -117,8 +115,7 @@ public class GlobalConfigService(
 
     public async Task<FetchIntervalsDto> UpdateFetchIntervalsAsync(UpdateFetchIntervalsRequestDto request, CancellationToken ct = default)
     {
-        await using var db = await _dbContextFactory.CreateDbContextAsync(ct);
-        var config = await db.GlobalConfigs.SingleOrDefaultAsync(ct);
+        var config = await _dbContext.GlobalConfigs.SingleOrDefaultAsync(ct);
         if (config == null) throw new InvalidOperationException("Global configuration not found.");
 
         if (request.UptimeFetchIntervalMinutes.HasValue)
@@ -171,10 +168,10 @@ public class GlobalConfigService(
             await _eventService.LogAsync(nameof(GlobalConfigService), $"Updated Feed Fetch Interval to {request.FeedFetchIntervalHours.Value} hours");
         }
 
-        await db.SaveChangesAsync(ct);
+        await _dbContext.SaveChangesAsync(ct);
 
-        var lowestInterval = await db.Monitors
-            .Where(m => m.TenantId != AnalyticsDbContext.SystemTenantGuid)
+        var lowestInterval = await _dbContext.Monitors
+            .Where(m => m.TenantId != IApplicationDbContext.SystemTenantGuid)
             .MinAsync(m => (int?)m.UpdateInterval, ct);
 
         var lowestIntervalMins = Math.Max(1, (lowestInterval ?? 300) / 60);
@@ -208,7 +205,9 @@ public class GlobalConfigService(
             config.MonitorsLimit,
             config.ActiveSubscription,
             config.DefaultUptimeSla,
-            config.FeedFetchIntervalHours
+            config.FeedFetchIntervalHours,
+            config.WeatherLocation,
+            config.WeatherFetchIntervalMinutes
         );
     }
 

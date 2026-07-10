@@ -125,8 +125,8 @@ export function MonitorTile({
           value={draft.name}
           onChange={e => setDraft({...draft, name: e.target.value})}
           disabled={!isAdmin}
-          className={`font-extrabold text-slate-800 text-sm bg-transparent border border-transparent rounded px-1 -ml-1 transition-all w-full outline-none truncate ${
-            isAdmin ? 'hover:bg-white/50 focus:bg-white focus:ring-2 focus:ring-brand-link/20 hover:border-slate-300 focus:border-brand-link/30' : 'cursor-not-allowed text-slate-550'
+          className={`font-extrabold text-on-surface text-sm bg-transparent border border-transparent rounded px-1 -ml-1 transition-all w-full outline-none truncate ${
+            isAdmin ? 'hover:bg-surface/50 focus:bg-surface focus:ring-2 focus:ring-brand-link/20 hover:border-outline-variant focus:border-brand-link/30' : 'cursor-not-allowed text-slate-550'
           }`}
           placeholder="Monitor Name"
         />
@@ -140,25 +140,25 @@ export function MonitorTile({
   );
 
   const headerActions = !isAdmin ? (
-    <span className="p-1.5 text-slate-400 opacity-60 cursor-not-allowed ml-2" title="Requires Admin privileges">
+    <span className="p-1.5 text-on-surface-variant opacity-60 cursor-not-allowed ml-2" title="Requires Admin privileges">
       <Lock size={14} />
     </span>
   ) : m.uptimeMonitorEnabled ? (
-    <button onClick={() => toggleMonitor.mutate({ id: m.id, action: 'pause' })} className="p-1.5 text-slate-500 hover:bg-slate-200 bg-white rounded-lg transition-colors cursor-pointer shadow-sm" title="Pause Monitor"><Pause size={14} /></button>
+    <button onClick={() => toggleMonitor.mutate({ id: m.id, action: 'pause' })} className="p-1.5 text-on-surface-variant hover:bg-surface-container-high bg-surface rounded-lg transition-colors cursor-pointer shadow-sm" title="Pause Monitor"><Pause size={14} /></button>
   ) : (
-    <button onClick={() => toggleMonitor.mutate({ id: m.id, action: 'start' })} className="p-1.5 text-green-600 hover:bg-green-100 bg-white rounded-lg transition-colors cursor-pointer shadow-sm" title="Resume Monitor"><Play size={14} /></button>
+    <button onClick={() => toggleMonitor.mutate({ id: m.id, action: 'start' })} className="p-1.5 text-green-600 hover:bg-green-100 bg-surface rounded-lg transition-colors cursor-pointer shadow-sm" title="Resume Monitor"><Play size={14} /></button>
   );
 
   return (
     <TileCard header={header} headerActions={headerActions} isUnassigned={isUnassigned}>
       <div className="flex flex-col gap-1 group">
-        <label className="text-sm font-bold text-slate-500 uppercase tracking-wider">Target URL</label>
+        <label className="text-sm font-bold text-on-surface-variant uppercase tracking-wider">Target URL</label>
         <input
           value={draft.url}
           onChange={e => setDraft({...draft, url: e.target.value})}
           disabled={!isAdmin}
-          className={`text-sm font-semibold text-slate-800 bg-transparent border border-transparent rounded px-2 py-1 -ml-2 transition-all outline-none ${
-            isAdmin ? 'hover:bg-slate-50 focus:bg-white focus:ring-2 focus:ring-brand-link/20 hover:border-slate-200 focus:border-brand-link/30' : 'cursor-not-allowed text-slate-500'
+          className={`text-sm font-semibold text-on-surface bg-transparent border border-transparent rounded px-2 py-1 -ml-2 transition-all outline-none ${
+            isAdmin ? 'hover:bg-surface-container-low focus:bg-surface focus:ring-2 focus:ring-brand-link/20 hover:border-outline-variant focus:border-brand-link/30' : 'cursor-not-allowed text-on-surface-variant'
           }`}
           placeholder="https://..."
         />
@@ -166,7 +166,7 @@ export function MonitorTile({
 
       <div className="flex gap-4 mt-2">
         <div className="flex flex-col gap-1 flex-1">
-          <label className="text-sm font-bold text-slate-500 uppercase tracking-wider">Uptime SLA (%)</label>
+          <label className="text-sm font-bold text-on-surface-variant uppercase tracking-wider">Uptime SLA (%)</label>
           <input
             type="number"
             step="0.01"
@@ -175,8 +175,8 @@ export function MonitorTile({
             value={draft.uptimeSla}
             onChange={e => setDraft({...draft, uptimeSla: e.target.value === '' ? '' : Number(e.target.value)})}
             disabled={!isAdmin}
-            className={`text-sm font-semibold text-slate-800 bg-transparent border border-transparent rounded px-2 py-1 -ml-2 transition-all outline-none ${
-              isAdmin ? 'hover:bg-slate-50 focus:bg-white focus:ring-2 focus:ring-brand-link/20 hover:border-slate-200 focus:border-brand-link/30' : 'cursor-not-allowed text-slate-500'
+            className={`text-sm font-semibold text-on-surface bg-transparent border border-transparent rounded px-2 py-1 -ml-2 transition-all outline-none ${
+              isAdmin ? 'hover:bg-surface-container-low focus:bg-surface focus:ring-2 focus:ring-brand-link/20 hover:border-outline-variant focus:border-brand-link/30' : 'cursor-not-allowed text-on-surface-variant'
             }`}
             placeholder="e.g. 99.5"
           />
@@ -184,12 +184,12 @@ export function MonitorTile({
       </div>
 
       <div className="flex flex-col gap-1 mt-2">
-        <label className="text-sm font-bold text-slate-500 uppercase tracking-wider">Tags</label>
+        <label className="text-sm font-bold text-on-surface-variant uppercase tracking-wider">Tags</label>
         <div className="flex flex-wrap gap-1 mb-1.5 items-center">
           {draft.tags.map((tag) => (
             <span
               key={tag}
-              className="text-sm font-bold px-2 py-0.5 rounded uppercase tracking-wider bg-slate-100 border border-slate-200 text-slate-600 flex items-center gap-1"
+              className="text-sm font-bold px-2 py-0.5 rounded uppercase tracking-wider bg-surface-container border border-outline-variant text-on-surface-variant flex items-center gap-1"
             >
               {tag}
               {isAdmin && (
@@ -218,7 +218,7 @@ export function MonitorTile({
                 }
               }
             }}
-            className="text-sm font-semibold text-slate-800 bg-transparent hover:bg-slate-50 focus:bg-white focus:ring-2 focus:ring-brand-link/20 border border-transparent hover:border-slate-200 focus:border-brand-link/30 rounded px-2 py-1 -ml-2 transition-all outline-none"
+            className="text-sm font-semibold text-on-surface bg-transparent hover:bg-surface-container-low focus:bg-surface focus:ring-2 focus:ring-brand-link/20 border border-transparent hover:border-outline-variant focus:border-brand-link/30 rounded px-2 py-1 -ml-2 transition-all outline-none"
             placeholder="+ Add tag (Press Enter)"
           />
         )}
@@ -236,18 +236,18 @@ export function MonitorTile({
         />
       )}
 
-      <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+      <div className="pt-3 border-t border-outline-variant flex items-center justify-between">
         {!isAdmin ? (
           <div className="flex items-center justify-between w-full">
-            <span className="text-sm font-bold text-slate-500 uppercase tracking-wide flex flex-col gap-0.5 min-w-0">
+            <span className="text-sm font-bold text-on-surface-variant uppercase tracking-wide flex flex-col gap-0.5 min-w-0">
               Linked to
-              <span className="text-sm text-slate-700 font-mono font-semibold truncate max-w-[250px] select-text cursor-text">
+              <span className="text-sm text-on-surface-variant font-mono font-semibold truncate max-w-[250px] select-text cursor-text">
                 {isUnassigned ? 'Unassigned' : ((tenants || []).find((t) => t.id === m.tenantId)?.name || m.tenantName || m.tenantId)}
               </span>
             </span>
-            <span className="p-1 text-slate-400 opacity-60 cursor-not-allowed flex items-center gap-1" title="Requires Admin privileges">
+            <span className="p-1 text-on-surface-variant opacity-60 cursor-not-allowed flex items-center gap-1" title="Requires Admin privileges">
               <Lock size={12} />
-              <span className="text-sm font-bold uppercase tracking-wider text-slate-400">Admin Only</span>
+              <span className="text-sm font-bold uppercase tracking-wider text-on-surface-variant">Admin Only</span>
             </span>
           </div>
         ) : isUnassigned || isAssigning ? (
@@ -273,19 +273,19 @@ export function MonitorTile({
             >
               Link
             </SecureButton>
-            <button onClick={() => { setAssigningMonitorId(null); setAssignTenantId(''); }} className="p-1.5 text-slate-400 hover:bg-slate-100 rounded-lg cursor-pointer h-8 flex items-center justify-center shrink-0"><X size={14}/></button>
+            <button onClick={() => { setAssigningMonitorId(null); setAssignTenantId(''); }} className="p-1.5 text-on-surface-variant hover:bg-surface-container rounded-lg cursor-pointer h-8 flex items-center justify-center shrink-0"><X size={14}/></button>
           </div>
         ) : (
           <div className="flex items-center justify-between w-full">
-            <span className="text-sm font-bold text-slate-500 uppercase tracking-wide flex flex-col gap-0.5 min-w-0">
+            <span className="text-sm font-bold text-on-surface-variant uppercase tracking-wide flex flex-col gap-0.5 min-w-0">
               Linked to
-              <span className="text-sm text-slate-700 font-mono font-semibold truncate max-w-[150px] select-text cursor-text">{(tenants || []).find((t) => t.id === m.tenantId)?.name || m.tenantName || m.tenantId}</span>
+              <span className="text-sm text-on-surface-variant font-mono font-semibold truncate max-w-[150px] select-text cursor-text">{(tenants || []).find((t) => t.id === m.tenantId)?.name || m.tenantName || m.tenantId}</span>
             </span>
             <div className="flex gap-2 ml-2">
               <SecureButton
                 onClick={() => setAssigningMonitorId(m.id)}
                 locked={!isAdmin}
-                className="text-sm font-bold text-slate-600 hover:text-slate-800 bg-slate-50 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition-colors cursor-pointer border border-slate-200 shadow-sm flex items-center justify-center gap-1.5"
+                className="text-sm font-bold text-on-surface-variant hover:text-on-surface bg-surface-container-low hover:bg-surface-container px-3 py-1.5 rounded-lg transition-colors cursor-pointer border border-outline-variant shadow-sm flex items-center justify-center gap-1.5"
               >
                 Reassign
               </SecureButton>

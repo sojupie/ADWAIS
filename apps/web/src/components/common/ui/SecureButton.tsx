@@ -27,7 +27,7 @@ export function SecureButton({
     ? className
         .replace(/(bg|text|border|hover|active|shadow|cursor|opacity)-\S+/g, '')
         .replace(/(hover|active|focus|disabled):\S+/g, '')
-        .trim() + ' bg-slate-500/10 border border-slate-500/20 text-slate-400 font-bold cursor-not-allowed shadow-none opacity-80 flex items-center justify-center gap-2'
+        .trim() + ' bg-slate-500/10 border border-slate-500/20 text-on-surface-variant font-bold cursor-not-allowed shadow-none opacity-80 flex items-center justify-center gap-2'
     : className;
 
   return (

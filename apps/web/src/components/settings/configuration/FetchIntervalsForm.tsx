@@ -20,8 +20,8 @@ export function FetchIntervalsForm({ intervals, updateIntervals, disabled }: Fet
       icon={<Clock size={20} />}
     >
       {disabled && intervals && (
-        <div className="mb-4 p-3 bg-slate-100 border border-slate-200 rounded-xl flex items-center gap-2 text-sm text-slate-650 font-bold uppercase tracking-wider animate-in fade-in duration-300">
-          <Lock size={14} className="text-slate-500 shrink-0" />
+        <div className="mb-4 p-3 bg-surface-container border border-outline-variant rounded-xl flex items-center gap-2 text-sm text-slate-650 font-bold uppercase tracking-wider animate-in fade-in duration-300">
+          <Lock size={14} className="text-on-surface-variant shrink-0" />
           <span>Read-only configuration view</span>
         </div>
       )}

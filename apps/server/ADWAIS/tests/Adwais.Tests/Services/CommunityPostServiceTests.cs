@@ -24,10 +24,7 @@ public class CommunityPostServiceTests
         var options = new DbContextOptionsBuilder<AnalyticsDbContext>().UseInMemoryDatabase(dbName).Options;
         var dbContext = new AnalyticsDbContext(options);
 
-        var factoryMock = new Mock<IDbContextFactory<AnalyticsDbContext>>();
-        factoryMock.Setup(f => f.CreateDbContextAsync(It.IsAny<CancellationToken>())).ReturnsAsync(() => new AnalyticsDbContext(options));
-
-        var service = new CommunityPostService(factoryMock.Object);
+        var service = new CommunityPostService(dbContext);
         var userId = Guid.NewGuid();
 
         // Act
@@ -56,10 +53,7 @@ public class CommunityPostServiceTests
         dbContext.CommunityPosts.Add(post);
         await dbContext.SaveChangesAsync();
 
-        var factoryMock = new Mock<IDbContextFactory<AnalyticsDbContext>>();
-        factoryMock.Setup(f => f.CreateDbContextAsync(It.IsAny<CancellationToken>())).ReturnsAsync(() => new AnalyticsDbContext(options));
-
-        var service = new CommunityPostService(factoryMock.Object);
+        var service = new CommunityPostService(dbContext);
 
         // Act
         var result = await service.GetPostByIdAsync(post.Id, CancellationToken.None);
@@ -87,10 +81,7 @@ public class CommunityPostServiceTests
         dbContext.CommunityPosts.AddRange(post1, post2);
         await dbContext.SaveChangesAsync();
 
-        var factoryMock = new Mock<IDbContextFactory<AnalyticsDbContext>>();
-        factoryMock.Setup(f => f.CreateDbContextAsync(It.IsAny<CancellationToken>())).ReturnsAsync(() => new AnalyticsDbContext(options));
-
-        var service = new CommunityPostService(factoryMock.Object);
+        var service = new CommunityPostService(dbContext);
 
         // Act
         var result = (await service.GetPostsAsync(CancellationToken.None)).ToList();

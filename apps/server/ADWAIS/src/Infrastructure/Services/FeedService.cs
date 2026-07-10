@@ -3,26 +3,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Adwais.Application.Common.Interfaces;
 using Adwais.Application.DTOs.Intranet;
 using Adwais.Application.Interfaces;
 using Adwais.Domain.Entities.Intranet;
-using Adwais.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace Adwais.Infrastructure.Services;
 
-public class FeedService(IDbContextFactory<AnalyticsDbContext> dbContextFactory) : IFeedService
+public class FeedService(IApplicationDbContext dbContext) : IFeedService
 {
-    private readonly IDbContextFactory<AnalyticsDbContext> _dbContextFactory = dbContextFactory;
+    private readonly IApplicationDbContext _dbContext = dbContext;
 
     public async Task<IEnumerable<FeedItem>> GetFeedsAsync(GetFeedsRequest request, CancellationToken ct = default)
     {
         var page = request.Page < 1 ? 1 : request.Page;
         var pageSize = request.PageSize < 1 ? 10 : (request.PageSize > 100 ? 100 : request.PageSize);
 
-        await using var db = await _dbContextFactory.CreateDbContextAsync(ct);
-
-        var query = db.FeedItems
+        var query = _dbContext.FeedItems
             .Include(fi => fi.FeedSource)
             .AsNoTracking();
 

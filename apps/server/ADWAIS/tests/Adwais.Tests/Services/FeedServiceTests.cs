@@ -34,10 +34,7 @@ public class FeedServiceTests
         dbContext.FeedItems.AddRange(item1, item2, item3);
         await dbContext.SaveChangesAsync();
 
-        var factoryMock = new Mock<IDbContextFactory<AnalyticsDbContext>>();
-        factoryMock.Setup(f => f.CreateDbContextAsync(It.IsAny<CancellationToken>())).ReturnsAsync(() => new AnalyticsDbContext(options));
-
-        var service = new FeedService(factoryMock.Object);
+        var service = new FeedService(dbContext);
 
         // Act & Assert 1: No filters, sorting descending by date
         var allItems = (await service.GetFeedsAsync(new GetFeedsRequest { FeedSourceId = null, Page = 1, PageSize = 10 }, CancellationToken.None)).ToList();

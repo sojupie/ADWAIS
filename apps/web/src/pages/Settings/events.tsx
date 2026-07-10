@@ -36,8 +36,8 @@ function HealthStatusCard({ title, subtitle, status, children }: HealthStatusCar
         <Card className="flex flex-col p-3">
             <div className="flex items-center justify-between">
                 <div className="flex flex-col">
-                    <span className="text-sm font-bold text-slate-800">{title}</span>
-                    <span className="text-sm text-slate-400">{subtitle}</span>
+                    <span className="text-sm font-bold text-on-surface">{title}</span>
+                    <span className="text-sm text-on-surface-variant">{subtitle}</span>
                 </div>
                 {isHealthy && (
                     <span className="flex items-center gap-1.5 px-2.5 py-1 bg-green-50 text-green-700 rounded-full text-sm font-bold border border-green-200">
@@ -79,7 +79,7 @@ export function SystemEventsView() {
                     dark={true}
                 />
 
-                <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 custom-scrollbar bg-white rounded-xl shadow-sm border border-slate-200/60">
+                <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 custom-scrollbar bg-surface rounded-xl shadow-sm border border-outline-variant/60">
                     {health ? (
                         <div className="flex flex-col gap-2">
 
@@ -96,9 +96,9 @@ export function SystemEventsView() {
                                 subtitle="Monitoring & order ingestion"
                                 status={health.sync?.status}
                             >
-                                <div className="grid grid-cols-2 gap-2 mt-1 text-sm border-t border-slate-100 pt-3 text-slate-500">
-                                    <div>Tenants with errors: <span className="font-bold text-slate-800">{health.sync?.tenantsWithErrorsCount}</span></div>
-                                    <div>Monitors with errors: <span className="font-bold text-slate-800">{health.sync?.monitorsWithErrorsCount}</span></div>
+                                <div className="grid grid-cols-2 gap-2 mt-1 text-sm border-t border-outline-variant pt-3 text-on-surface-variant">
+                                    <div>Tenants with errors: <span className="font-bold text-on-surface">{health.sync?.tenantsWithErrorsCount}</span></div>
+                                    <div>Monitors with errors: <span className="font-bold text-on-surface">{health.sync?.monitorsWithErrorsCount}</span></div>
                                 </div>
                                 {health.sync?.globalSyncError && (
                                     <div className="mt-1 p-2 bg-red-50 text-red-800 border border-red-100 rounded text-sm leading-tight font-medium">
@@ -113,20 +113,20 @@ export function SystemEventsView() {
                                 subtitle="Scheduler worker queues"
                                 status={health.hangfire?.status}
                             >
-                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2 text-center border-t border-slate-100 pt-3 text-sm text-slate-500">
-                                    <div className="flex flex-col p-1.5 bg-slate-50 rounded">
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2 text-center border-t border-outline-variant pt-3 text-sm text-on-surface-variant">
+                                    <div className="flex flex-col p-1.5 bg-surface-container-low rounded">
                                         <span className="font-extrabold text-slate-850">{health.hangfire?.processingCount}</span>
                                         <span>Active</span>
                                     </div>
-                                    <div className="flex flex-col p-1.5 bg-slate-50 rounded">
+                                    <div className="flex flex-col p-1.5 bg-surface-container-low rounded">
                                         <span className="font-extrabold text-slate-850">{health.hangfire?.enqueuedCount}</span>
                                         <span>Queued</span>
                                     </div>
-                                    <div className="flex flex-col p-1.5 bg-slate-50 rounded">
+                                    <div className="flex flex-col p-1.5 bg-surface-container-low rounded">
                                         <span className="font-extrabold text-slate-850">{health.hangfire?.scheduledCount}</span>
                                         <span>Scheduled</span>
                                     </div>
-                                    <div className="flex flex-col p-1.5 bg-slate-50 rounded">
+                                    <div className="flex flex-col p-1.5 bg-surface-container-low rounded">
                                         <span className={`font-extrabold ${health.hangfire?.failedCount > 0 ? 'text-red-650' : 'text-slate-850'}`}>{health.hangfire?.failedCount}</span>
                                         <span>Failed</span>
                                     </div>
@@ -140,7 +140,7 @@ export function SystemEventsView() {
                                 lockTitle="Requires Admin privileges"
                                 loading={clearErrorsMutation.isPending}
                                 loadingText="Clearing Diagnostics..."
-                                className="w-full py-2.5 px-4 bg-slate-150 hover:bg-slate-200 active:bg-slate-250 text-slate-700 font-bold rounded-xl text-sm shadow-sm transition-colors border border-slate-250 cursor-pointer flex items-center justify-center gap-2"
+                                className="w-full py-2.5 px-4 bg-slate-150 hover:bg-surface-container-high active:bg-slate-250 text-on-surface-variant font-bold rounded-xl text-sm shadow-sm transition-colors border border-slate-250 cursor-pointer flex items-center justify-center gap-2"
                             >
                                 Clear Sync Errors
                             </SecureButton>
@@ -155,26 +155,26 @@ export function SystemEventsView() {
 
                     {/* Sync Dates Section */}
                     {health && (
-                        <div className="flex flex-col border border-slate-200 rounded-xl bg-white shadow-sm overflow-hidden">
-                            <div className="p-3 bg-slate-50 border-b border-slate-200 font-bold text-sm text-slate-400 uppercase tracking-widest">
+                        <div className="flex flex-col border border-outline-variant rounded-xl bg-surface shadow-sm overflow-hidden">
+                            <div className="p-3 bg-surface-container-low border-b border-outline-variant font-bold text-sm text-on-surface-variant uppercase tracking-widest">
                                 Last Successful Syncs
                             </div>
                             <div className="flex flex-col divide-y divide-slate-100 text-sm">
                                 <div className="flex justify-between items-center p-3">
-                                    <span className="font-semibold text-slate-600">Litium Ingestion</span>
-                                    <span className="font-bold text-slate-800">{timeAgo(health.lastLitiumSync)}</span>
+                                    <span className="font-semibold text-on-surface-variant">Litium Ingestion</span>
+                                    <span className="font-bold text-on-surface">{timeAgo(health.lastLitiumSync)}</span>
                                 </div>
                                 <div className="flex justify-between items-center p-3">
-                                    <span className="font-semibold text-slate-600">Fleet Meta Update</span>
-                                    <span className="font-bold text-slate-800">{timeAgo(health.lastFleetUpdate)}</span>
+                                    <span className="font-semibold text-on-surface-variant">Fleet Meta Update</span>
+                                    <span className="font-bold text-on-surface">{timeAgo(health.lastFleetUpdate)}</span>
                                 </div>
                                 <div className="flex justify-between items-center p-3">
-                                    <span className="font-semibold text-slate-600">Uptimerobot Sync</span>
-                                    <span className="font-bold text-slate-800">{timeAgo(health.lastFleetUptimeUpdate)}</span>
+                                    <span className="font-semibold text-on-surface-variant">Uptimerobot Sync</span>
+                                    <span className="font-bold text-on-surface">{timeAgo(health.lastFleetUptimeUpdate)}</span>
                                 </div>
                                 <div className="flex justify-between items-center p-3">
-                                    <span className="font-semibold text-slate-600">Latencyrobot Sync</span>
-                                    <span className="font-bold text-slate-800">{timeAgo(health.lastFleetLatencyUpdate)}</span>
+                                    <span className="font-semibold text-on-surface-variant">Latencyrobot Sync</span>
+                                    <span className="font-bold text-on-surface">{timeAgo(health.lastFleetLatencyUpdate)}</span>
                                 </div>
                             </div>
                         </div>
@@ -261,10 +261,10 @@ function LogEventRow({ e }: { e: SystemEvent }) {
     };
 
     return (
-        <div className="flex flex-col p-1.5 rounded hover:bg-white/5 transition-colors group text-slate-300 relative gap-1 select-text">
+        <div className="flex flex-col p-1.5 rounded hover:bg-surface/5 transition-colors group text-slate-300 relative gap-1 select-text">
             {/* First Row: Date, Level icon, Level prefix, Message */}
             <div className="flex items-center flex-wrap gap-x-2 gap-y-1 pr-8">
-                <span className="text-slate-500 text-xs font-mono shrink-0">
+                <span className="text-on-surface-variant text-xs font-mono shrink-0">
                     {(() => {
                         const d = new Date(e.timestamp);
                         const year = d.getFullYear();
@@ -285,9 +285,9 @@ function LogEventRow({ e }: { e: SystemEvent }) {
 
             {/* Second Row: Badges (Source, Tenant) */}
             {(e.source || e.tenant?.name) && (
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 font-medium">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-on-surface-variant font-medium">
                     {e.source && (
-                        <span>Source: <strong className="text-slate-400">{e.source}</strong></span>
+                        <span>Source: <strong className="text-on-surface-variant">{e.source}</strong></span>
                     )}
                     {e.tenant?.name && (
                         <span className="text-brand-accent">Tenant: <strong className="text-slate-350">{e.tenant.name}</strong></span>
@@ -312,7 +312,7 @@ function LogEventRow({ e }: { e: SystemEvent }) {
             {/* Copy Button (visible on hover) */}
             <button
                 onClick={handleCopy}
-                className="absolute right-2 top-2 p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity duration-150 cursor-pointer"
+                className="absolute right-2 top-2 p-1 rounded bg-slate-800 hover:bg-slate-700 text-on-surface-variant hover:text-white opacity-0 group-hover:opacity-100 transition-opacity duration-150 cursor-pointer"
                 title="Copy full log entry"
             >
                 {copied ? <Check size={12} className="text-green-400" /> : <Copy size={12} />}

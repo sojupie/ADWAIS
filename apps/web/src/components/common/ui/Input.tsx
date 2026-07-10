@@ -13,13 +13,13 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className={`flex flex-col gap-1 ${widthClass} ${containerClassName}`}>
         {label && (
-          <label className="text-sm font-bold text-slate-500 uppercase tracking-wider">
+          <label className="text-sm font-bold text-on-surface-variant uppercase tracking-wider">
             {label}
           </label>
         )}
         <div className="relative flex items-center">
           {icon && (
-            <div className="absolute left-3 text-slate-400 pointer-events-none flex items-center justify-center">
+            <div className="absolute left-3 text-on-surface-variant pointer-events-none flex items-center justify-center">
               {icon}
             </div>
           )}
@@ -30,8 +30,8 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
               icon ? 'pl-9' : ''
             } ${
               disabled
-                ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'
-                : 'bg-white border-slate-300 text-slate-800 placeholder:text-slate-400 hover:border-slate-400'
+                ? 'bg-surface-container border-outline-variant text-on-surface-variant cursor-not-allowed'
+                : 'bg-surface border-outline-variant text-on-surface placeholder:text-on-surface-variant hover:border-slate-400'
             } ${
               error ? 'border-red-500 focus:ring-red-500/20 focus:border-red-500' : ''
             } ${className}`}

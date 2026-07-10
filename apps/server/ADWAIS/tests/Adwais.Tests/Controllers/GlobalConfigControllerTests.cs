@@ -41,7 +41,9 @@ public class GlobalConfigControllerTests
             MonitorsLimit: null,
             ActiveSubscription: null,
             DefaultUptimeSla: null,
-            FeedFetchIntervalHours: 2
+            FeedFetchIntervalHours: 2,
+            WeatherLocation: "Karlstad",
+            WeatherFetchIntervalMinutes: 15
         );
 
         _configServiceMock.Setup(s => s.GetConfigAsync(It.IsAny<CancellationToken>()))
@@ -78,7 +80,9 @@ public class GlobalConfigControllerTests
             MonitorsLimit: null,
             ActiveSubscription: null,
             DefaultUptimeSla: null,
-            FeedFetchIntervalHours: 6
+            FeedFetchIntervalHours: 6,
+            WeatherLocation: "Karlstad",
+            WeatherFetchIntervalMinutes: 15
         );
 
         _configServiceMock.Setup(s => s.UpdateConfigAsync(request, It.IsAny<CancellationToken>()))

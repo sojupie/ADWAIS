@@ -27,7 +27,7 @@ export function Settings() {
             <header className="flex justify-between items-start shrink-0">
                 <div className="flex flex-col gap-1">
                     <h1 className="text-2xl font-extrabold text-brand-text tracking-tight m-0">Settings & Administration</h1>
-                    <p className="text-sm text-slate-500 m-0 font-medium tracking-wide">Manage system configuration and entities.</p>
+                    <p className="text-sm text-on-surface-variant m-0 font-medium tracking-wide">Manage system configuration and entities.</p>
                 </div>
                 <button
                     onClick={async () => {
@@ -35,7 +35,7 @@ export function Settings() {
                         await queryClient.invalidateQueries();
                         setTimeout(() => setIsRefreshing(false), 500);
                     }}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 hover:text-brand-accent transition-colors shadow-sm text-sm font-bold cursor-pointer"
+                    className="flex items-center gap-2 px-3 py-1.5 bg-surface border border-outline-variant text-on-surface-variant rounded-lg hover:bg-surface-container-low hover:text-on-surface hover:border-slate-350 transition-colors shadow-sm text-sm font-bold cursor-pointer"
                 >
                     <RefreshCw size={16} className={isRefreshing ? 'animate-spin' : ''} />
                     <span>Refresh</span>
@@ -66,7 +66,7 @@ export function Settings() {
                                 <Link
                                     key={t.id}
                                     to={t.path}
-                                    className={`px-5 py-2.5 text-sm font-bold tracking-wide transition-all rounded-xl ${isActive ? 'bg-brand-btn-primary text-white shadow-md' : 'text-slate-500 hover:text-slate-800 hover:bg-brand-btn-primary/10 hover:shadow-sm'}`}
+                                    className={`px-5 py-2.5 text-sm font-bold tracking-wide transition-all rounded-xl ${isActive ? 'bg-brand-btn-primary text-white shadow-md' : 'text-on-surface-variant hover:text-on-surface hover:bg-primary-container hover:shadow-sm'}`}
                                 >
                                     {t.label}
                                 </Link>

@@ -94,7 +94,10 @@ if (!isBuildTime)
 
 var app = builder.Build();
 
-app.UseMiddleware<Adwais.Api.Middleware.DashboardBasicAuthMiddleware>();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseMiddleware<Adwais.Api.Middleware.DashboardBasicAuthMiddleware>();
+}
 
 app.MapOpenApi();
 app.UseSwagger();
@@ -108,6 +111,7 @@ if (!isBuildTime)
     });
 }
 
+app.UseMiddleware<Adwais.Api.Middleware.DevMockAuthMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 

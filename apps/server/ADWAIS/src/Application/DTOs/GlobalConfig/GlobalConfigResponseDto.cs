@@ -18,5 +18,7 @@ public record GlobalConfigResponseDto(
     int? MonitorsLimit,
     string? ActiveSubscription,
     double? DefaultUptimeSla,
-    int FeedFetchIntervalHours
+    int FeedFetchIntervalHours,
+    string? WeatherLocation,
+    int WeatherFetchIntervalMinutes
 );

@@ -36,10 +36,10 @@ const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?:
   if (!active || !payload?.length) return null;
 
   return (
-    <div className="bg-white border border-slate-100 rounded-lg shadow-lg p-4 text-sm animate-in fade-in zoom-in duration-200">
-      <p className="font-bold text-slate-900 mb-3 border-b border-slate-50 pb-2">{label}</p>
+    <div className="bg-surface border border-outline-variant rounded-lg shadow-lg p-4 text-sm animate-in fade-in zoom-in duration-200">
+      <p className="font-bold text-on-surface mb-3 border-b border-slate-50 pb-2">{label}</p>
       <p className="flex justify-between gap-6">
-        <span className="text-slate-500">Share:</span>
+        <span className="text-on-surface-variant">Share:</span>
         <strong className="text-brand-btn-primary">{payload[0].value.toFixed(2)}%</strong>
       </p>
     </div>

@@ -1,6 +1,9 @@
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Adwais.Api.DTOs.Ingestion;
 using Hangfire;
-using Adwais.Infrastructure.Persistence;
+using Adwais.Application.Common.Interfaces;
 using Adwais.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
@@ -15,10 +18,13 @@ namespace Adwais.Api.Controllers;
 [Route("api/[controller]")]
 [Authorize(Policy = "AdminOnly")]
 public class IngestionController(
-    IDbContextFactory<AnalyticsDbContext> contextFactory,
+    IApplicationDbContext dbContext,
     IBackgroundJobClient backgroundJobClient)
     : ControllerBase
 {
+    private readonly IApplicationDbContext _dbContext = dbContext;
+    private readonly IBackgroundJobClient _backgroundJobClient = backgroundJobClient;
+
     /// <summary>
     /// Manually triggers a historical backfill for a specific tenant within a given date range.
     /// </summary>
@@ -38,7 +44,7 @@ public class IngestionController(
         [FromQuery] HistoricalBackfillRequestDto request,
         CancellationToken ct)
     {
-        await using var context = await contextFactory.CreateDbContextAsync(ct);
+        var context = _dbContext;
         var tenant = await context.Tenants.SingleOrDefaultAsync(t => t.Id == request.TenantId, ct);
         
         if (tenant == null) return NotFound("Tenant not found.");
@@ -52,12 +58,9 @@ public class IngestionController(
         var startDate = request.StartDate ?? DateTimeOffset.UtcNow.AddYears(request.DefaultLookBackPeriodYears);
         var endDate = request.EndDate ?? DateTimeOffset.UtcNow;
 
-        var jobId = backgroundJobClient.Enqueue<ILitiumIngestionService>(
+        var jobId = _backgroundJobClient.Enqueue<ILitiumIngestionService>(
             service => service.ExecuteIngestionAsync(tenant.Id, startDate, endDate, CancellationToken.None));
 
         return Accepted(new { JobId = jobId });
     }
 }
-
-
-

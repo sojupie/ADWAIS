@@ -108,12 +108,12 @@ export function InlineEditField<T>({
               setDraft(e.target.checked as unknown as T);
             }
           }}
-          className={`w-4 h-4 text-brand-link rounded border-slate-300 disabled:opacity-50 ${disabled ? 'cursor-not-allowed text-slate-400' : 'cursor-pointer'}`}
+          className={`w-4 h-4 text-brand-link rounded border-outline-variant disabled:opacity-50 ${disabled ? 'cursor-not-allowed text-on-surface-variant' : 'cursor-pointer'}`}
         />
-        <label className={`text-sm font-semibold select-none ${disabled ? 'text-slate-400 cursor-not-allowed' : 'text-slate-700 cursor-pointer'}`}>
+        <label className={`text-sm font-semibold select-none ${disabled ? 'text-on-surface-variant cursor-not-allowed' : 'text-on-surface-variant cursor-pointer'}`}>
           {label}
         </label>
-        {isSaving && <Loader2 size={12} className="animate-spin text-slate-400" />}
+        {isSaving && <Loader2 size={12} className="animate-spin text-on-surface-variant" />}
       </div>
     );
   }
@@ -123,18 +123,18 @@ export function InlineEditField<T>({
       className={`flex flex-col gap-1 w-full transition-colors ${
         hideLabel
           ? 'py-0.5'
-          : `py-1 px-2 -mx-2 rounded-lg ${isEditing ? 'bg-slate-50/50' : 'hover:bg-slate-50/50'}`
+          : `py-1 px-2 -mx-2 rounded-lg ${isEditing ? 'bg-surface-container-lowest' : 'hover:bg-surface-container-lowest'}`
       }`}
     >
       {!hideLabel && (
-        <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex justify-between items-center select-none mb-0.5">
+        <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider flex justify-between items-center select-none mb-0.5">
           <span>{label}</span>
           {required ? (
             <span className="text-red-500/70 lowercase font-medium text-xs">
               {requiredCondition ? `(Required ${requiredCondition})` : '(Required)'}
             </span>
           ) : (
-            <span className="text-slate-400 lowercase font-medium text-xs">(Optional)</span>
+            <span className="text-on-surface-variant lowercase font-medium text-xs">(Optional)</span>
           )}
         </label>
       )}
@@ -149,7 +149,7 @@ export function InlineEditField<T>({
               disabled={isSaving}
               onKeyDown={handleKeyDown}
               containerClassName="flex-1"
-              className="pl-3 pr-10 py-1.5 h-9 text-sm font-semibold rounded-lg border border-slate-300 bg-slate-50 focus:ring-2 focus:ring-brand-btn-primary"
+              className="pl-3 pr-10 py-1.5 h-9 text-sm font-semibold rounded-lg border border-outline-variant bg-surface-container-low focus:ring-2 focus:ring-brand-btn-primary"
             >
               {options.map((opt) => (
                 <option key={opt.value as React.Key} value={opt.value as unknown as string}>{opt.label}</option>
@@ -167,7 +167,7 @@ export function InlineEditField<T>({
               }}
               disabled={isSaving}
               onKeyDown={handleKeyDown}
-              className={`flex-1 border border-slate-300 bg-white rounded-md px-2 py-1.5 text-sm font-semibold focus:ring-2 focus:ring-brand-btn-primary focus:outline-none ${type === 'password' ? 'font-mono' : ''}`}
+              className={`flex-1 border border-outline-variant bg-surface rounded-md px-2 py-1.5 text-sm font-semibold focus:ring-2 focus:ring-brand-btn-primary focus:outline-none ${type === 'password' ? 'font-mono' : ''}`}
             />
           )}
           <div className="flex items-center gap-1 shrink-0">
@@ -195,7 +195,7 @@ export function InlineEditField<T>({
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="p-1 text-brand-link hover:bg-brand-btn-primary/10 rounded cursor-pointer"
+              className="p-1 text-brand-link hover:bg-primary-container rounded cursor-pointer"
               title="Save"
             >
               {isSaving ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
@@ -206,7 +206,7 @@ export function InlineEditField<T>({
                 setIsEditing(false);
               }}
               disabled={isSaving}
-              className="p-1 text-slate-500 hover:bg-slate-100 rounded cursor-pointer"
+              className="p-1 text-on-surface-variant hover:bg-surface-container rounded cursor-pointer"
               title="Cancel"
             >
               <X size={14} />
@@ -215,7 +215,7 @@ export function InlineEditField<T>({
         </div>
       ) : (
         <div className="flex items-center justify-between group/val w-full min-h-[28px]">
-          <div className={`text-sm font-semibold text-slate-800 ${type === 'password' || displayValue === 'Not set' ? 'italic text-slate-400' : ''}`}>
+          <div className={`text-sm font-semibold text-on-surface ${type === 'password' || displayValue === 'Not set' ? 'italic text-on-surface-variant' : ''}`}>
             {displayValue ? displayValue : (
               type === 'password' ? (value ? '••••••••••••' : 'Not set') : (
                 (value !== null && value !== undefined && value !== '') ? String(value) : '—'
@@ -223,9 +223,9 @@ export function InlineEditField<T>({
             )}
           </div>
           {disabled ? (
-            <span className="p-1 text-slate-400 cursor-not-allowed opacity-60 flex items-center gap-1 shrink-0" title="Requires Admin privileges">
+            <span className="p-1 text-on-surface-variant cursor-not-allowed opacity-60 flex items-center gap-1 shrink-0" title="Requires Admin privileges">
               <Lock size={12} />
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Admin</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">Admin</span>
             </span>
           ) : (
             <button
@@ -233,7 +233,7 @@ export function InlineEditField<T>({
                 setDraft((type === 'password' ? '' : value) as unknown as T);
                 setIsEditing(true);
               }}
-              className="p-1 text-slate-400 hover:text-brand-link hover:bg-brand-bg-secondary rounded cursor-pointer transition-all opacity-100 sm:opacity-0 sm:group-hover/val:opacity-100 shrink-0 ml-2"
+              className="p-1 text-on-surface-variant hover:bg-surface-container rounded cursor-pointer transition-all opacity-100 sm:opacity-0 sm:group-hover/val:opacity-100 shrink-0 ml-2"
               title="Edit"
             >
               <Edit3 size={14} />

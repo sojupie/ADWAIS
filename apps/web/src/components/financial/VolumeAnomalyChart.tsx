@@ -21,21 +21,21 @@ const CustomTooltip = ({ active, payload }: { isLoading?: boolean;  active?: boo
   const point = payload[0].payload as VolumeAnomalyResponseDto;
 
   return (
-    <div className="bg-white border border-slate-100 rounded-lg shadow-lg p-4 text-sm animate-in fade-in zoom-in duration-200">
-      <p className="font-bold text-slate-900 mb-3 border-b border-slate-50 pb-2">
+    <div className="bg-surface border border-outline-variant rounded-lg shadow-lg p-4 text-sm animate-in fade-in zoom-in duration-200">
+      <p className="font-bold text-on-surface mb-3 border-b border-slate-50 pb-2">
         {point.tenantName}
       </p>
       <div className="space-y-2">
         <p className="flex justify-between gap-6">
-          <span className="text-slate-500">Current Volume:</span>
-          <strong className="text-slate-700">{formatNumber(point.currentVolume)}</strong>
+          <span className="text-on-surface-variant">Current Volume:</span>
+          <strong className="text-on-surface-variant">{formatNumber(point.currentVolume)}</strong>
         </p>
         <p className="flex justify-between gap-6">
-          <span className="text-slate-500">Baseline Volume:</span>
-          <strong className="text-slate-700">{formatNumber(point.baselineVolume)}</strong>
+          <span className="text-on-surface-variant">Baseline Volume:</span>
+          <strong className="text-on-surface-variant">{formatNumber(point.baselineVolume)}</strong>
         </p>
         <p className="flex justify-between gap-6">
-          <span className="text-slate-500">Deviation:</span>
+          <span className="text-on-surface-variant">Deviation:</span>
           <strong className={point.volumeDeviationPercentage >= 0 ? 'text-green-600' : 'text-red-600'}>
             {point.volumeDeviationPercentage > 0 ? '+' : ''}{point.volumeDeviationPercentage.toFixed(1)}%
           </strong>
@@ -66,7 +66,7 @@ export const VolumeAnomalyChart = memo(function VolumeAnomalyChart({
       comparison={comparison}
       className={className || "h-full"}
       bodyClassName={isEmpty ? 'flex items-center justify-center' : 'flex-1 min-h-0'}
-      legend={<span className="text-sm font-bold text-slate-500 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded">Deviation from baseline</span>}
+      legend={<span className="text-sm font-bold text-on-surface-variant uppercase tracking-widest bg-surface-container-low px-3 py-1.5 rounded">Deviation from baseline</span>}
     >
       {isEmpty ? (
         <EmptyState message={"No data available"} variant={"minimal"}/>

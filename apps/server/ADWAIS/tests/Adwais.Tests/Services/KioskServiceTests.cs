@@ -14,7 +14,7 @@ namespace Adwais.Tests.Services;
 public class KioskServiceTests
 {
     private readonly DbContextOptions<AnalyticsDbContext> _dbOptions;
-    private readonly Mock<IDbContextFactory<AnalyticsDbContext>> _dbContextFactoryMock;
+    private readonly AnalyticsDbContext _dbContext;
     private readonly Mock<ITokenService> _tokenServiceMock;
     private readonly KioskService _kioskService;
 
@@ -24,12 +24,9 @@ public class KioskServiceTests
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
 
-        _dbContextFactoryMock = new Mock<IDbContextFactory<AnalyticsDbContext>>();
-        _dbContextFactoryMock.Setup(f => f.CreateDbContextAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(() => new AnalyticsDbContext(_dbOptions));
-
+        _dbContext = new AnalyticsDbContext(_dbOptions);
         _tokenServiceMock = new Mock<ITokenService>();
-        _kioskService = new KioskService(_dbContextFactoryMock.Object, _tokenServiceMock.Object);
+        _kioskService = new KioskService(_dbContext, _tokenServiceMock.Object);
     }
 
     [Fact]

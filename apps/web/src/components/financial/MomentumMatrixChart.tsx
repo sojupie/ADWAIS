@@ -25,9 +25,9 @@ const CustomTooltip = ({ active, payload }: { isLoading?: boolean;  active?: boo
   const point = payload[0].payload as MomentumTenant;
 
   return (
-    <div className="bg-white border border-slate-100 rounded-lg shadow-lg p-4 text-sm animate-in fade-in zoom-in duration-200">
+    <div className="bg-surface border border-outline-variant rounded-lg shadow-lg p-4 text-sm animate-in fade-in zoom-in duration-200">
       <div className="border-b border-slate-50 pb-2 mb-3 flex justify-between items-center">
-        <p className="font-bold text-slate-900">{point.tenantName}</p>
+        <p className="font-bold text-on-surface">{point.tenantName}</p>
         <span 
           className={`inline-flex items-center px-2 py-0.5 rounded-[3px] text-sm font-black uppercase tracking-widest text-white ${
             point.type === 'B2C' ? 'bg-[#0ea5e9]' : 
@@ -40,11 +40,11 @@ const CustomTooltip = ({ active, payload }: { isLoading?: boolean;  active?: boo
       </div>
       <div className="space-y-2">
         <p className="flex justify-between gap-6">
-          <span className="text-slate-500">Current Revenue:</span>
-          <strong className="text-slate-700">{formatCompact(point.currentRevenue)}</strong>
+          <span className="text-on-surface-variant">Current Revenue:</span>
+          <strong className="text-on-surface-variant">{formatCompact(point.currentRevenue)}</strong>
         </p>
         <p className="flex justify-between gap-6">
-          <span className="text-slate-500">Momentum:</span>
+          <span className="text-on-surface-variant">Momentum:</span>
           <strong className={point.growthPercentage >= 0 ? 'text-growth' : 'text-[#c92a2a]'}>
             {point.growthPercentage > 0 ? '+' : ''}{point.growthPercentage.toFixed(1)}%
           </strong>
@@ -145,7 +145,7 @@ momentum: MomentumResponse; comparison?: ComparisonPeriod; onTenantSelect?: (ten
       comparison={comparison}
       className={className || "h-full"}
       bodyClassName={isEmpty ? 'flex items-center justify-center' : 'flex-1 min-h-0'}
-      legend={<span className="text-sm font-bold text-slate-500 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded">Size = % of portfolio revenue</span>}
+      legend={<span className="text-sm font-bold text-on-surface-variant uppercase tracking-widest bg-surface-container-low px-3 py-1.5 rounded">Size = % of portfolio revenue</span>}
     >
       {isEmpty ? (
         <EmptyState message={"No previous-period baseline data"} variant={"minimal"}/>

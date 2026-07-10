@@ -10,6 +10,7 @@ public class User
     public string? Email { get; set; } 
     public required string Name { get; set; }
     public required UserRole Role { get; set; }
+    public string? CalendarFeedToken { get; set; }
 }
 
 

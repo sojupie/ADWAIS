@@ -20,6 +20,7 @@ interface MonitorIssue {
   degradedFloor?: number;
   url?: string | null;
   tags?: string[];
+  monitor: UptimeMonitorDto;
 }
 
 function formatPercent(val: number): string {
@@ -70,6 +71,7 @@ function buildIssues(
         degradedFloor: degradedFloor ?? undefined,
         url: m.url,
         tags: m.tags ?? undefined,
+        monitor: m,
       });
     });
 
@@ -88,12 +90,20 @@ export function SlaBreachWatchlist({
   monitors,
   defaultSla,
   defaultDegradedFloor,
+  onMonitorSelect,
+  selectedMonitorId,
+  onClearSelection,
+  hasActiveSelection,
   className = "flex-1 h-full min-h-[350px] contained:min-h-0 max-h-[600px] xl:max-h-none"
 }: {
   isLoading?: boolean;
   monitors: UptimeMonitorDto[];
   defaultSla?: number | null;
   defaultDegradedFloor?: number | null;
+  onMonitorSelect?: (monitor: UptimeMonitorDto) => void;
+  selectedMonitorId?: number | null;
+  onClearSelection?: () => void;
+  hasActiveSelection?: boolean;
   className?: string;
 }) {
   const issues = useMemo(() => buildIssues(monitors, defaultSla, defaultDegradedFloor), [monitors, defaultSla, defaultDegradedFloor]);
@@ -105,8 +115,20 @@ export function SlaBreachWatchlist({
       title="Endpoint Watchlist"
       className={className}
       bodyClassName=""
+      legend={
+        onClearSelection ? (
+          <button
+            type="button"
+            onClick={onClearSelection}
+            disabled={!hasActiveSelection}
+            className="bg-brand-bg-secondary text-white px-4 py-1.5 rounded-full text-sm font-bold tracking-wide hover:bg-brand-text hover:shadow-md transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            CLEAR
+          </button>
+        ) : undefined
+      }
     >
-      <div className="flex-1 overflow-y-auto pr-1 min-h-0 pb-4 custom-scrollbar grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-2 gap-2 content-start">
+      <div className="flex-1 overflow-y-auto px-2 pt-1.5 pb-4 custom-scrollbar grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-2 gap-4 content-start">
         {issues.length === 0 ? (
           <div className="col-span-full h-full">
             <EmptyState message={"No issues detected"} variant={"minimal"} />
@@ -117,13 +139,23 @@ export function SlaBreachWatchlist({
             const showFavicon = faviconUrl && !failedFavicons.has(issue.id);
             const status = issue.isDown ? 'down' : issue.isDegraded ? 'degraded' : 'operational';
             const theme = STATUS_THEMES[status];
+            const isActive = selectedMonitorId === issue.id;
 
             return (
-              <div key={`watch-${issue.id}`} className={`relative p-2 rounded-lg transition-all shadow-sm shrink-0 flex flex-col gap-0.5 justify-between border ${theme.bg} ${theme.border}`}>
+              <button
+                type="button"
+                key={`watch-${issue.id}`}
+                onClick={() => onMonitorSelect?.(issue.monitor)}
+                className={`relative p-2 rounded-lg transition-all text-left w-full shrink-0 flex flex-col gap-0.5 justify-between border
+                  ${theme.bg} ${theme.border}
+                  ${isActive ? 'ring-4 ring-slate-300/40 z-10 shadow-elevation-3' : 'shadow-elevation-2 hover:shadow-elevation-3 cursor-pointer'}
+                  ${selectedMonitorId && !isActive ? 'opacity-30' : 'opacity-100'}
+                `}
+              >
                 {showFavicon && (
                   <img
                     src={faviconUrl}
-                    className="absolute bottom-2 left-1/2 -translate-x-1/2 w-16 h-16 opacity-20 pointer-events-none select-none"
+                    className="absolute bottom-2 left-1/2 -translate-x-1/2 w-16 h-16 opacity-20 pointer-events-none select-none mix-blend-multiply"
                     onError={() => setFailedFavicons(prev => {
                       const next = new Set(prev);
                       next.add(issue.id);
@@ -172,7 +204,7 @@ export function SlaBreachWatchlist({
                         ? 'text-red-600'
                         : (issue.slaLimit && issue.uptime !== null && issue.uptime < issue.slaLimit)
                           ? 'text-red-600'
-                          : 'text-slate-900'
+                          : 'text-on-surface'
                     }`}>
                       {issue.uptime !== null ? `${formatPercent(issue.uptime)}%` : 'N/A'}
                     </span>
@@ -181,10 +213,10 @@ export function SlaBreachWatchlist({
                     <span className={`text-sm font-bold uppercase tracking-widest ${theme.mutedText}`}>Latency</span>
                     <span className={`text-base font-black ${
                       issue.isDown
-                        ? 'text-slate-400'
+                        ? 'text-on-surface-variant'
                         : issue.isDegraded
                           ? 'text-amber-600'
-                          : 'text-slate-900'
+                          : 'text-on-surface'
                     }`}>
                       {issue.isDown ? 'N/A' : `${Math.round(issue.latency ?? 0)}ms`}
                     </span>
@@ -208,7 +240,7 @@ export function SlaBreachWatchlist({
                     ) : <div />}
                   </div>
                 )}
-              </div>
+              </button>
             );
           })
         )}

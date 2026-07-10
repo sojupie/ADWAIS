@@ -3,6 +3,7 @@ import { useGlobalConfigQuery, useFetchIntervalsQuery, useUpdateConfigMutation, 
 import { useCurrentUser } from '../../hooks/useCurrentUser';
 import { GlobalConfigurationForm } from '../../components/settings/configuration/GlobalConfigurationForm';
 import { FetchIntervalsForm } from '../../components/settings/configuration/FetchIntervalsForm';
+import { CalendarSubscriptionsPanel } from '../../components/settings/configuration/CalendarSubscriptionsPanel';
 import { SettingsPanel } from '../../components/common/layout/SettingsPanel';
 import { SectionHeader } from '../../components/common/layout/SectionHeader';
 
@@ -22,10 +23,15 @@ export function ConfigurationView() {
                     subtitle="Global settings and intervals"
                     icon={<Activity size={24} />}
                 />
-                <div className="flex-1 overflow-y-auto px-2 py-3 sm:p-4 custom-scrollbar bg-white rounded-xl shadow-sm border border-slate-200/60">
+                <div className="flex-1 overflow-y-auto sm:p-4 custom-scrollbar bg-surface rounded-xl shadow-sm border border-outline-variant/60">
                     <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                        <GlobalConfigurationForm config={config} updateConfig={updateConfig} disabled={disabled} />
-                        <FetchIntervalsForm intervals={intervals} updateIntervals={updateIntervals} disabled={disabled} />
+                        <div className="flex flex-col gap-2">
+                            <FetchIntervalsForm intervals={intervals} updateIntervals={updateIntervals} disabled={disabled} />
+                            <CalendarSubscriptionsPanel disabled={disabled} />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                            <GlobalConfigurationForm config={config} updateConfig={updateConfig} disabled={disabled} />
+                        </div>
                     </div>
                 </div>
             </SettingsPanel>

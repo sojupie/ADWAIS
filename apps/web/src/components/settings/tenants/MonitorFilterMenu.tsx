@@ -32,10 +32,10 @@ export function MonitorFilterMenu({ filters, setFilters, tags }: MonitorFilterMe
   const reset = () => setFilters({ assignment: 'all', tag: 'all' });
 
   return (
-    <div className="relative bg-white border-brand-accent rounded-lg" ref={ref}>
+    <div className="relative bg-surface border-brand-accent rounded-lg" ref={ref}>
       <button
           onClick={() => setIsOpen(!isOpen)}
-          className={`text-sm bg-slate-200 font-semibold border rounded-lg px-3 py-1.5 transition-colors focus:outline-none flex items-center gap-1 cursor-pointer h-9 ${activeCount > 0 ? 'border-brand-accent bg-white hover:bg-slate-50' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-50'}`}
+          className={`text-sm bg-surface-container-high font-semibold border rounded-lg px-3 py-1.5 transition-colors focus:outline-none flex items-center gap-1 cursor-pointer h-9 ${activeCount > 0 ? 'border-brand-accent bg-surface hover:bg-surface-container-low' : 'bg-surface-container-low border-outline-variant text-on-surface-variant hover:bg-surface-container-low'}`}
       >
         <Filter size={14} />
         <span>Filters</span>
@@ -43,31 +43,31 @@ export function MonitorFilterMenu({ filters, setFilters, tags }: MonitorFilterMe
       </button>
 
       {isOpen && (
-        <div className="absolute top-full mt-2 right-0 w-[280px] bg-white border border-slate-200 shadow-xl rounded-xl p-4 flex flex-col gap-5 z-50 animate-in fade-in slide-in-from-top-2">
+        <div className="absolute top-full mt-2 right-0 w-[280px] bg-surface border border-outline-variant shadow-xl rounded-xl p-4 flex flex-col gap-5 z-50 animate-in fade-in slide-in-from-top-2">
 
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-bold text-slate-500 uppercase tracking-wider">Assignment</span>
+              <span className="text-sm font-bold text-on-surface-variant uppercase tracking-wider">Assignment</span>
               <label className="flex items-center gap-1.5 text-sm font-semibold cursor-pointer select-none">
                 <input
                   type="checkbox"
                   checked={filters.assignment === 'all'}
                   onChange={e => setFilters({ ...filters, assignment: e.target.checked ? 'all' : 'assigned' })}
-                  className="rounded border-slate-300 w-3.5 h-3.5"
+                  className="rounded border-outline-variant w-3.5 h-3.5"
                 />
                 All
               </label>
             </div>
-            <div className={`flex items-center bg-slate-100 rounded-lg p-1 transition-opacity ${filters.assignment === 'all' ? 'opacity-70' : ''}`}>
+            <div className={`flex items-center bg-surface-container rounded-lg p-1 transition-opacity ${filters.assignment === 'all' ? 'opacity-70' : ''}`}>
               <button
                 onClick={() => setFilters({ ...filters, assignment: 'assigned' })}
-                className={`flex-1 py-1 text-sm font-bold uppercase rounded-md transition-all cursor-pointer ${filters.assignment === 'assigned' ? 'bg-white shadow-sm text-slate-500' : 'text-slate-500 hover:text-slate-700'}`}
+                className={`flex-1 py-1 text-sm font-bold uppercase rounded-md transition-all cursor-pointer ${filters.assignment === 'assigned' ? 'bg-surface shadow-sm text-on-surface-variant' : 'text-on-surface-variant hover:text-on-surface-variant'}`}
               >
                 Assigned
               </button>
               <button
                 onClick={() => setFilters({ ...filters, assignment: 'unassigned' })}
-                className={`flex-1 py-1 text-sm font-bold uppercase rounded-md transition-all cursor-pointer ${filters.assignment === 'unassigned' ? 'bg-white shadow-sm text-slate-500' : 'text-slate-500 hover:text-slate-700'}`}
+                className={`flex-1 py-1 text-sm font-bold uppercase rounded-md transition-all cursor-pointer ${filters.assignment === 'unassigned' ? 'bg-surface shadow-sm text-on-surface-variant' : 'text-on-surface-variant hover:text-on-surface-variant'}`}
               >
                 Unassigned
               </button>
@@ -76,13 +76,13 @@ export function MonitorFilterMenu({ filters, setFilters, tags }: MonitorFilterMe
 
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-bold text-slate-500 uppercase tracking-wider">Tag</span>
+              <span className="text-sm font-bold text-on-surface-variant uppercase tracking-wider">Tag</span>
               <label className="flex items-center gap-1.5 text-sm font-semibold cursor-pointer select-none">
                 <input
                   type="checkbox"
                   checked={filters.tag === 'all'}
                   onChange={e => setFilters({ ...filters, tag: e.target.checked ? 'all' : (tags[0] || 'all') })}
-                  className="rounded border-slate-300 w-3.5 h-3.5"
+                  className="rounded border-outline-variant w-3.5 h-3.5"
                 />
                 All
               </label>
@@ -91,7 +91,7 @@ export function MonitorFilterMenu({ filters, setFilters, tags }: MonitorFilterMe
               value={filters.tag}
               disabled={filters.tag === 'all'}
               onChange={e => setFilters({ ...filters, tag: e.target.value })}
-              className={`text-sm font-semibold h-9 rounded-lg border border-slate-200 bg-white ${filters.tag === 'all' ? 'opacity-50' : ''}`}
+              className={`text-sm font-semibold h-9 rounded-lg border border-outline-variant bg-surface ${filters.tag === 'all' ? 'opacity-50' : ''}`}
             >
               <option value="all">All Tags</option>
               {tags.map(tag => (
@@ -100,11 +100,11 @@ export function MonitorFilterMenu({ filters, setFilters, tags }: MonitorFilterMe
             </Select>
           </div>
 
-          <div className="pt-3 border-t border-slate-100 flex justify-end">
+          <div className="pt-3 border-t border-outline-variant flex justify-end">
             <button
               onClick={reset}
               disabled={activeCount === 0}
-              className="text-sm font-bold text-slate-500 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
+              className="text-sm font-bold text-on-surface-variant bg-surface-container-low border border-outline-variant px-3 py-1.5 rounded-lg hover:bg-surface-container disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
             >
               Reset Filters
             </button>

@@ -1,12 +1,17 @@
 using Adwais.Api.DTOs.Monitoring;
 using Adwais.Domain.Entities.Monitoring;
 using Adwais.Domain.Enums;
-using Adwais.Infrastructure.Persistence;
+using Adwais.Application.Common.Interfaces;
 using Adwais.Application.Interfaces;
 using Adwais.Application.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Adwais.Api.Controllers;
 
@@ -16,15 +21,19 @@ namespace Adwais.Api.Controllers;
 [ApiController]
 [Route("api/monitors")]
 public class MonitorController(
-    IDbContextFactory<AnalyticsDbContext> dbContextFactory,
+    IApplicationDbContext dbContext,
     IMonitorOrchestrationService monitorService) : ControllerBase
 {
+    private readonly IApplicationDbContext _dbContext = dbContext;
+    private readonly IMonitorOrchestrationService _monitorService = monitorService;
+
     private async Task<bool> IsUptimeRobotConfiguredAsync(CancellationToken ct)
     {
-        await using var db = await dbContextFactory.CreateDbContextAsync(ct);
+        var db = _dbContext;
         var config = await db.GlobalConfigs.AsNoTracking().SingleOrDefaultAsync(ct);
         return config != null && !string.IsNullOrWhiteSpace(config.UptimeRobotApiKey);
     }
+
     /// <summary>
     /// Unified analytics endpoint for monitoring data.
     /// Provides latency time-series and filtered monitor lists hydrated with uptime for the specified timeframe (defaults to T30).
@@ -34,7 +43,7 @@ public class MonitorController(
     public async Task<ActionResult<MonitorAnalyticsResponseDto>> GetAnalytics([FromQuery] MonitorRequestDto request, CancellationToken ct = default)
     {
         var period = TimeframeResolver.Resolve(request.Timeframe, request.Comparison);
-        var result = await monitorService.GetAnalyticsAsync(period, request.TenantId, request.MonitorId, ct);
+        var result = await _monitorService.GetAnalyticsAsync(period, request.TenantId, request.MonitorId, ct);
 
         return Ok(new MonitorAnalyticsResponseDto(
             result.GlobalAverageLatency,
@@ -75,31 +84,31 @@ public class MonitorController(
 
         if (request.MonitorId.HasValue)
         {
-            await using var db = await dbContextFactory.CreateDbContextAsync(ct);
+            var db = _dbContext;
             var tid = await db.Monitors.Where(m => m.Id == request.MonitorId.Value).Select(m => (Guid?)m.TenantId).SingleOrDefaultAsync(ct);
             if (tid == null) return Ok(Enumerable.Empty<UptimeMonitorDto>());
 
-            var m = await monitorService.GetMonitorAsync(tid.Value, request.MonitorId.Value, period, ct);
+            var m = await _monitorService.GetMonitorAsync(tid.Value, request.MonitorId.Value, period, ct);
             return Ok(new[] { ToDto(m) });
         }
 
         if (request.TenantId.HasValue)
         {
-            var monitors = await monitorService.GetMonitorsByTenantAsync(request.TenantId.Value, period, ct);
+            var monitors = await _monitorService.GetMonitorsByTenantAsync(request.TenantId.Value, period, ct);
             return Ok(monitors.Select(ToDto));
         }
 
-        await using var dbCtx = await dbContextFactory.CreateDbContextAsync(ct);
+        var dbCtx = _dbContext;
         var allMonitorIds = await dbCtx.Monitors
             .AsNoTracking()
-            .Where(m => m.TenantId != AnalyticsDbContext.SystemTenantGuid)
+            .Where(m => m.TenantId != IApplicationDbContext.SystemTenantGuid)
             .Select(m => new { m.Id, m.TenantId })
             .ToListAsync(ct);
         
         var dtos = new List<UptimeMonitorDto>();
         foreach (var m in allMonitorIds)
         {
-            var hydrated = await monitorService.GetMonitorAsync(m.TenantId, m.Id, period, ct);
+            var hydrated = await _monitorService.GetMonitorAsync(m.TenantId, m.Id, period, ct);
             dtos.Add(ToDto(hydrated));
         }
 
@@ -117,7 +126,7 @@ public class MonitorController(
     public async Task<ActionResult<IEnumerable<UptimeMonitorDto>>> GetUnassignedMonitors([FromQuery] Timeframe timeframe = Timeframe.T30, [FromQuery] ComparisonType comparison = ComparisonType.Preceding, CancellationToken ct = default)
     {
         var period = TimeframeResolver.Resolve(timeframe, comparison);
-        var monitors = await monitorService.GetMonitorsByTenantAsync(AnalyticsDbContext.SystemTenantGuid, period, ct);
+        var monitors = await _monitorService.GetMonitorsByTenantAsync(IApplicationDbContext.SystemTenantGuid, period, ct);
         return Ok(monitors.Select(ToDto));
     }
 
@@ -132,7 +141,7 @@ public class MonitorController(
         CancellationToken ct = default)
     {
         if (!await IsUptimeRobotConfiguredAsync(ct)) return BadRequest("UptimeRobot API key is not configured.");
-        var m = await monitorService.CreateMonitorAsync(tenantId, request.Name, request.Url, request.UptimeSla, ct);
+        var m = await _monitorService.CreateMonitorAsync(tenantId, request.Name, request.Url, request.UptimeSla, ct);
         return CreatedAtAction(nameof(GetMonitors), new { id = m.Id }, ToDto(m));
     }
 
@@ -143,7 +152,7 @@ public class MonitorController(
     [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> AssignMonitor(int id, Guid tenantId, CancellationToken ct = default)
     {
-        await monitorService.AssignMonitorAsync(id, tenantId, ct);
+        await _monitorService.AssignMonitorAsync(id, tenantId, ct);
         return Ok();
     }
 
@@ -154,7 +163,7 @@ public class MonitorController(
     [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> UnassignMonitor(int id, CancellationToken ct = default)
     {
-        await monitorService.AssignMonitorAsync(id, AnalyticsDbContext.SystemTenantGuid, ct);
+        await _monitorService.AssignMonitorAsync(id, IApplicationDbContext.SystemTenantGuid, ct);
         return Ok();
     }
 
@@ -166,7 +175,7 @@ public class MonitorController(
     public async Task<IActionResult> PauseMonitor(int id, CancellationToken ct = default)
     {
         if (!await IsUptimeRobotConfiguredAsync(ct)) return BadRequest("UptimeRobot API key is not configured.");
-        await monitorService.PauseMonitorAsync(id, ct);
+        await _monitorService.PauseMonitorAsync(id, ct);
         return Ok();
     }
 
@@ -178,7 +187,7 @@ public class MonitorController(
     public async Task<IActionResult> StartMonitor(int id, CancellationToken ct = default)
     {
         if (!await IsUptimeRobotConfiguredAsync(ct)) return BadRequest("UptimeRobot API key is not configured.");
-        await monitorService.StartMonitorAsync(id, ct);
+        await _monitorService.StartMonitorAsync(id, ct);
         return Ok();
     }
 
@@ -193,13 +202,13 @@ public class MonitorController(
 
         if (!tenantId.HasValue)
         {
-            await using var db = await dbContextFactory.CreateDbContextAsync(ct);
+            var db = _dbContext;
             tenantId = await db.Monitors.Where(m => m.Id == id).Select(m => (Guid?)m.TenantId).SingleOrDefaultAsync(ct);
         }
 
         if (tenantId == null) return NotFound();
 
-        await monitorService.DeleteMonitorAsync(tenantId.Value, id, ct);
+        await _monitorService.DeleteMonitorAsync(tenantId.Value, id, ct);
         return NoContent();
     }
 
@@ -217,13 +226,13 @@ public class MonitorController(
     {
         if (!tenantId.HasValue)
         {
-             await using var db = await dbContextFactory.CreateDbContextAsync(ct);
+             var db = _dbContext;
              tenantId = await db.Monitors.Where(m => m.Id == id).Select(m => (Guid?)m.TenantId).SingleOrDefaultAsync(ct);
         }
 
         if (tenantId == null) return NotFound();
 
-        var metrics = await monitorService.GetAggregatedLatencyAsync(tenantId.Value, id, from, to, ct);
+        var metrics = await _monitorService.GetAggregatedLatencyAsync(tenantId.Value, id, from, to, ct);
         return Ok(metrics);
     }
 
@@ -235,13 +244,13 @@ public class MonitorController(
     public async Task<ActionResult<UptimeMonitorDto>> UpdateMonitor(int id, [FromBody] UpdateMonitorRequestDto request, CancellationToken ct = default)
     {
         if (!await IsUptimeRobotConfiguredAsync(ct)) return BadRequest("UptimeRobot API key is not configured.");
-        await monitorService.UpdateMonitorAsync(id, request.Name, request.Url, request.Sla, request.Tags, ct);
+        await _monitorService.UpdateMonitorAsync(id, request.Name, request.Url, request.Sla, request.Tags, ct);
         
-        await using var db = await dbContextFactory.CreateDbContextAsync(ct);
+        var db = _dbContext;
         var tenantId = await db.Monitors.Where(m => m.Id == id).Select(m => (Guid?)m.TenantId).SingleOrDefaultAsync(ct);
         if (tenantId == null) return NotFound();
 
-        var m = await monitorService.GetMonitorAsync(tenantId.Value, id, TimeframeResolver.Resolve(Timeframe.T30), ct);
+        var m = await _monitorService.GetMonitorAsync(tenantId.Value, id, TimeframeResolver.Resolve(Timeframe.T30), ct);
         return Ok(ToDto(m));
     }
 
@@ -268,6 +277,3 @@ public class MonitorController(
             Tags: m.Tags);
     }
 }
-
-
-

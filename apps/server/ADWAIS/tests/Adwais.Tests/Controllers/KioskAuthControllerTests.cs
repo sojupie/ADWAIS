@@ -113,4 +113,51 @@ public class KioskAuthControllerTests
         Assert.Equal("Kiosk device is not authorized.", unauthorizedResult.Value);
         _kioskServiceMock.Verify(s => s.GetTokenAsync(deviceId), Times.Once);
     }
+
+    [Fact]
+    public void GenerateSwaggerAdminToken_InDevelopment_WithValidSecret_ReturnsToken()
+    {
+        // Arrange
+        var mockConfig = new Mock<Microsoft.Extensions.Configuration.IConfiguration>();
+        mockConfig.Setup(c => c["Authentication:KioskJwtSecret"]).Returns("SuperSecretKeyForTestingKioskTokens32CharsMinimum!");
+        
+        var mockTokenService = new Mock<ITokenService>();
+        mockTokenService.Setup(s => s.GenerateKioskToken("swagger-admin", "Admin")).Returns("generated-token");
+
+        var mockEnv = new Mock<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>();
+        mockEnv.Setup(e => e.EnvironmentName).Returns("Development");
+
+        // Act
+        var result = _controller.GenerateSwaggerAdminToken(
+            "SuperSecretKeyForTestingKioskTokens32CharsMinimum!",
+            mockConfig.Object,
+            mockTokenService.Object,
+            mockEnv.Object);
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        var response = Assert.IsType<KioskTokenResponseDto>(okResult.Value);
+        Assert.Equal("generated-token", response.Token);
+    }
+
+    [Fact]
+    public void GenerateSwaggerAdminToken_InProduction_ReturnsNotFound()
+    {
+        // Arrange
+        var mockConfig = new Mock<Microsoft.Extensions.Configuration.IConfiguration>();
+        var mockTokenService = new Mock<ITokenService>();
+        
+        var mockEnv = new Mock<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>();
+        mockEnv.Setup(e => e.EnvironmentName).Returns("Production");
+
+        // Act
+        var result = _controller.GenerateSwaggerAdminToken(
+            "any-secret",
+            mockConfig.Object,
+            mockTokenService.Object,
+            mockEnv.Object);
+
+        // Assert
+        Assert.IsType<NotFoundResult>(result);
+    }
 }

@@ -4,24 +4,23 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Adwais.Application.Interfaces;
+using Adwais.Application.Common.Interfaces;
 using Adwais.Domain.Entities;
 using Adwais.Domain.Enums;
-using Adwais.Infrastructure.Persistence;
 
 namespace Adwais.Infrastructure.Services;
 
 /// <summary>
 /// Service managing system users database interactions.
 /// </summary>
-public class UserService(IDbContextFactory<AnalyticsDbContext> contextFactory) : IUserService
+public class UserService(IApplicationDbContext dbContext) : IUserService
 {
-    private readonly IDbContextFactory<AnalyticsDbContext> _contextFactory = contextFactory;
+    private readonly IApplicationDbContext _dbContext = dbContext;
 
     /// <inheritdoc />
     public async Task<IEnumerable<User>> GetUsersAsync(CancellationToken ct)
     {
-        await using var db = await _contextFactory.CreateDbContextAsync(ct);
-        return await db.Users
+        return await _dbContext.Users
             .AsNoTracking()
             .ToListAsync(ct);
     }
@@ -29,8 +28,7 @@ public class UserService(IDbContextFactory<AnalyticsDbContext> contextFactory) :
     /// <inheritdoc />
     public async Task<User?> GetUserByIdAsync(Guid id, CancellationToken ct)
     {
-        await using var db = await _contextFactory.CreateDbContextAsync(ct);
-        return await db.Users
+        return await _dbContext.Users
             .AsNoTracking()
             .SingleOrDefaultAsync(u => u.Id == id, ct);
     }
@@ -38,8 +36,7 @@ public class UserService(IDbContextFactory<AnalyticsDbContext> contextFactory) :
     /// <inheritdoc />
     public async Task<User?> GetUserByEntraObjectIdAsync(Guid entraObjectId, CancellationToken ct)
     {
-        await using var db = await _contextFactory.CreateDbContextAsync(ct);
-        return await db.Users
+        return await _dbContext.Users
             .AsNoTracking()
             .SingleOrDefaultAsync(u => u.EntraObjectId == entraObjectId, ct);
     }
@@ -47,7 +44,6 @@ public class UserService(IDbContextFactory<AnalyticsDbContext> contextFactory) :
     /// <inheritdoc />
     public async Task<User> CreateUserAsync(string email, UserRole role, CancellationToken ct)
     {
-        await using var db = await _contextFactory.CreateDbContextAsync(ct);
         var user = new User
         {
             Id = Guid.NewGuid(),
@@ -56,16 +52,15 @@ public class UserService(IDbContextFactory<AnalyticsDbContext> contextFactory) :
             Role = role
         };
 
-        db.Users.Add(user);
-        await db.SaveChangesAsync(ct);
+        _dbContext.Users.Add(user);
+        await _dbContext.SaveChangesAsync(ct);
         return user;
     }
 
     /// <inheritdoc />
     public async Task<User?> UpdateUserAsync(Guid id, string? name, UserRole? role, CancellationToken ct)
     {
-        await using var db = await _contextFactory.CreateDbContextAsync(ct);
-        var user = await db.Users.SingleOrDefaultAsync(u => u.Id == id, ct);
+        var user = await _dbContext.Users.SingleOrDefaultAsync(u => u.Id == id, ct);
         if (user == null)
         {
             return null;
@@ -81,22 +76,21 @@ public class UserService(IDbContextFactory<AnalyticsDbContext> contextFactory) :
             user.Role = role.Value;
         }
 
-        await db.SaveChangesAsync(ct);
+        await _dbContext.SaveChangesAsync(ct);
         return user;
     }
 
     /// <inheritdoc />
     public async Task<bool> DeleteUserAsync(Guid id, CancellationToken ct)
     {
-        await using var db = await _contextFactory.CreateDbContextAsync(ct);
-        var user = await db.Users.SingleOrDefaultAsync(u => u.Id == id, ct);
+        var user = await _dbContext.Users.SingleOrDefaultAsync(u => u.Id == id, ct);
         if (user == null)
         {
             return false;
         }
 
-        db.Users.Remove(user);
-        await db.SaveChangesAsync(ct);
+        _dbContext.Users.Remove(user);
+        await _dbContext.SaveChangesAsync(ct);
         return true;
     }
 }

@@ -51,10 +51,7 @@ public class GlobalConfigServiceTests
         dbContext.GlobalConfigs.Add(config);
         await dbContext.SaveChangesAsync();
 
-        var factoryMock = new Mock<IDbContextFactory<AnalyticsDbContext>>();
-        factoryMock.Setup(f => f.CreateDbContextAsync(It.IsAny<CancellationToken>())).ReturnsAsync(() => new AnalyticsDbContext(_options));
-
-        var service = new GlobalConfigService(factoryMock.Object, _eventServiceMock.Object);
+        var service = new GlobalConfigService(dbContext, _eventServiceMock.Object);
 
         // Act
         var result = await service.GetConfigAsync();
@@ -82,10 +79,7 @@ public class GlobalConfigServiceTests
         dbContext.GlobalConfigs.Add(config);
         await dbContext.SaveChangesAsync();
 
-        var factoryMock = new Mock<IDbContextFactory<AnalyticsDbContext>>();
-        factoryMock.Setup(f => f.CreateDbContextAsync(It.IsAny<CancellationToken>())).ReturnsAsync(() => new AnalyticsDbContext(_options));
-
-        var service = new GlobalConfigService(factoryMock.Object, _eventServiceMock.Object);
+        var service = new GlobalConfigService(dbContext, _eventServiceMock.Object);
         var request = new UpdateGlobalConfigRequestDto(FeedFetchIntervalHours: 4, LitiumFetchEnabled: false);
 
         // Act
@@ -119,10 +113,7 @@ public class GlobalConfigServiceTests
         dbContext.GlobalConfigs.Add(config);
         await dbContext.SaveChangesAsync();
 
-        var factoryMock = new Mock<IDbContextFactory<AnalyticsDbContext>>();
-        factoryMock.Setup(f => f.CreateDbContextAsync(It.IsAny<CancellationToken>())).ReturnsAsync(() => new AnalyticsDbContext(_options));
-
-        var service = new GlobalConfigService(factoryMock.Object, _eventServiceMock.Object);
+        var service = new GlobalConfigService(dbContext, _eventServiceMock.Object);
 
         // Act
         await service.UpdateFeedIntervalAsync(12);
@@ -151,10 +142,7 @@ public class GlobalConfigServiceTests
         dbContext.GlobalConfigs.Add(config);
         await dbContext.SaveChangesAsync();
 
-        var factoryMock = new Mock<IDbContextFactory<AnalyticsDbContext>>();
-        factoryMock.Setup(f => f.CreateDbContextAsync(It.IsAny<CancellationToken>())).ReturnsAsync(() => new AnalyticsDbContext(_options));
-
-        var service = new GlobalConfigService(factoryMock.Object, _eventServiceMock.Object);
+        var service = new GlobalConfigService(dbContext, _eventServiceMock.Object);
 
         // Act
         var result = await service.GetFetchIntervalsAsync();
@@ -185,10 +173,7 @@ public class GlobalConfigServiceTests
         dbContext.GlobalConfigs.Add(config);
         await dbContext.SaveChangesAsync();
 
-        var factoryMock = new Mock<IDbContextFactory<AnalyticsDbContext>>();
-        factoryMock.Setup(f => f.CreateDbContextAsync(It.IsAny<CancellationToken>())).ReturnsAsync(() => new AnalyticsDbContext(_options));
-
-        var service = new GlobalConfigService(factoryMock.Object, _eventServiceMock.Object);
+        var service = new GlobalConfigService(dbContext, _eventServiceMock.Object);
         var request = new UpdateFetchIntervalsRequestDto(
             LitiumFetchIntervalMinutes: 120,
             UptimeFetchIntervalMinutes: 30,

@@ -7,8 +7,6 @@ using Adwais.Infrastructure.Services.Monitoring;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Polly;
-using Polly.Extensions.Http;
 
 namespace Adwais.Infrastructure;
 
@@ -40,27 +38,17 @@ public static class DependencyInjection
         // Register Typed HTTP Clients with resilience policies
         services.AddTransient<UptimeRobotRateLimitHandler>();
         services.AddHttpClient<IUptimeRobotService, UptimeRobotService>()
-            .AddHttpMessageHandler<UptimeRobotRateLimitHandler>();
+            .AddHttpMessageHandler<UptimeRobotRateLimitHandler>()
+            .AddStandardResilienceHandler();
 
         services.AddHttpClient<ILitiumIngestionService, LitiumIngestionService>()
-            .AddPolicyHandler(HttpPolicyExtensions
-                .HandleTransientHttpError()
-                .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
-                .WaitAndRetryAsync(
-                    retryCount: 5,
-                    sleepDurationProvider: retryAttempt =>
-                        TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)) + TimeSpan.FromMilliseconds(new Random().Next(0, 1000))
-                ));
+            .AddStandardResilienceHandler(options =>
+            {
+                options.Retry.MaxRetryAttempts = 5;
+            });
 
         services.AddHttpClient<IFeedAggregationService, FeedAggregationService>()
-            .AddPolicyHandler(HttpPolicyExtensions
-                .HandleTransientHttpError()
-                .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
-                .WaitAndRetryAsync(
-                    retryCount: 3,
-                    sleepDurationProvider: retryAttempt =>
-                        TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)) + TimeSpan.FromMilliseconds(new Random().Next(0, 1000))
-                ));
+            .AddStandardResilienceHandler();
 
         services.AddTransient<IFeedParser, Services.Parsers.RssFeedParser>();
         services.AddTransient<IFeedParser, Services.Parsers.LitiumBlogParser>();
@@ -69,6 +57,13 @@ public static class DependencyInjection
         services.AddTransient<ISystemHealthService, SystemHealthService>();
         services.AddTransient<ICommunityPostService, CommunityPostService>();
         services.AddTransient<IFeedService, FeedService>();
+
+        services.AddScoped<IOfficeEventService, OfficeEventService>();
+        services.AddScoped<ICalendarFeedService, CalendarFeedService>();
+        services.AddHttpClient<ICalendarSubscriptionService, CalendarSubscriptionService>()
+            .AddStandardResilienceHandler();
+        services.AddHttpClient<IWeatherService, WeatherService>()
+            .AddStandardResilienceHandler();
 
         return services;
     }

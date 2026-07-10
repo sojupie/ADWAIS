@@ -5,19 +5,19 @@ using System.Threading;
 using System.Threading.Tasks;
 using Adwais.Application.DTOs.System;
 using Adwais.Application.Interfaces;
-using Adwais.Infrastructure.Persistence;
+using Adwais.Application.Common.Interfaces;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
 
 namespace Adwais.Infrastructure.Services;
 
-public class SystemHealthService(IDbContextFactory<AnalyticsDbContext> dbContextFactory) : ISystemHealthService
+public class SystemHealthService(IApplicationDbContext dbContext) : ISystemHealthService
 {
-    private readonly IDbContextFactory<AnalyticsDbContext> _dbContextFactory = dbContextFactory;
+    private readonly IApplicationDbContext _dbContext = dbContext;
 
     public async Task<SystemHealthDto> GetHealthAsync(CancellationToken ct = default)
     {
-        await using var db = await _dbContextFactory.CreateDbContextAsync(ct);
+        var db = _dbContext;
         
         string dbStatus = "Healthy";
         DateTimeOffset? lastLitiumSync = null;
@@ -48,7 +48,7 @@ public class SystemHealthService(IDbContextFactory<AnalyticsDbContext> dbContext
 
             totalMonitors = await db.Monitors.CountAsync(m => m.UptimeMonitorEnabled, ct);
             monitorsWithErrors = await db.Monitors.CountAsync(m => m.LastSyncError != null && m.UptimeMonitorEnabled, ct);
-            tenantsWithErrors = await db.Tenants.CountAsync(t => t.LastSyncError != null && t.Id != AnalyticsDbContext.SystemTenantGuid, ct);
+            tenantsWithErrors = await db.Tenants.CountAsync(t => t.LastSyncError != null && t.Id != IApplicationDbContext.SystemTenantGuid, ct);
 
             var activeFeeds = await db.FeedSources.AsNoTracking().Where(fs => fs.IsActive).ToListAsync(ct);
             if (activeFeeds.Any())
@@ -148,9 +148,9 @@ public class SystemHealthService(IDbContextFactory<AnalyticsDbContext> dbContext
 
     public async Task ClearErrorsAsync(CancellationToken ct = default)
     {
-        await using var db = await _dbContextFactory.CreateDbContextAsync(ct);
+        var db = _dbContext;
         
-        if (db.Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory")
+        if (db.GetType().Name.Contains("InMemory"))
         {
             var sources = await db.FeedSources.ToListAsync(ct);
             foreach (var s in sources) s.LastSyncError = null;
@@ -245,7 +245,7 @@ public class SystemHealthService(IDbContextFactory<AnalyticsDbContext> dbContext
 
         if (monitorIds.Any() || tenantIds.Any())
         {
-            await using var db = await _dbContextFactory.CreateDbContextAsync(ct);
+            var db = _dbContext;
             if (monitorIds.Any())
             {
                 monitorNames = await db.Monitors

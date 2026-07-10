@@ -2,8 +2,9 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { TanStackRouterVite } from '@tanstack/router-vite-plugin'
 import { resolve } from 'node:path'
+import basicSsl from "@vitejs/plugin-basic-ssl"
 
-// https://vite.dev/config/
+// https://vite.dev
 export default defineConfig({
   plugins: [
     TanStackRouterVite({
@@ -11,6 +12,7 @@ export default defineConfig({
       generatedRouteTree: './src/routeTree.gen.ts',
     }),
     react(),
+    basicSsl()
   ],
   build: {
     target: 'chrome76',
@@ -31,11 +33,12 @@ export default defineConfig({
       '@utils': resolve(__dirname, '../../packages/utils/index.ts'),
     },
   },
+  // CHANGED: The 'server' block only dictates local development behavior.
   server: {
-    host: '127.0.0.1',
+    host: true, // <-- CHANGED: Tells Vite to listen on your local Wi-Fi network (0.0.0.0) so your phone can connect
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:5002',
+        target: 'http://127.0.0.1:5002', // <-- UNCHANGED: Keeps the fast IPv4 loopback for your Windows PC
         changeOrigin: true,
         secure: false,
       },

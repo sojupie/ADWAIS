@@ -2,11 +2,15 @@ using Adwais.Api.DTOs.Tenants;
 using Adwais.Api.DTOs.Monitoring;
 using Adwais.Domain.Entities;
 using FluentValidation;
-using Adwais.Infrastructure.Persistence;
+using Adwais.Application.Common.Interfaces;
 using Adwais.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Adwais.Api.Controllers;
 
@@ -16,9 +20,12 @@ namespace Adwais.Api.Controllers;
 [ApiController]
 [Route("api/tenants")]
 public class TenantController(
-    IDbContextFactory<AnalyticsDbContext> contextFactory,
+    IApplicationDbContext dbContext,
     IMonitorOrchestrationService monitorService) : ControllerBase
 {
+    private readonly IApplicationDbContext _dbContext = dbContext;
+    private readonly IMonitorOrchestrationService _monitorService = monitorService;
+
     /// <summary>
     /// Retrieves tenants, optionally filtered by ID.
     /// </summary>
@@ -27,7 +34,7 @@ public class TenantController(
     [Authorize(Policy = "KioskOrStaffAccess")]
     public async Task<ActionResult<IEnumerable<TenantResponseDto>>> GetTenants([FromQuery] Guid? id)
     {
-        await using var context = await contextFactory.CreateDbContextAsync();
+        var context = _dbContext;
 
         if (id.HasValue)
         {
@@ -85,7 +92,7 @@ public class TenantController(
     [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> CreateTenant([FromBody] CreateTenantRequestDto request)
     {
-        await using var context = await contextFactory.CreateDbContextAsync();
+        var context = _dbContext;
 
         var tenant = new Tenant
         {
@@ -122,19 +129,19 @@ public class TenantController(
     [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> DeleteTenant(Guid id)
     {
-        if (id == AnalyticsDbContext.SystemTenantGuid)
+        if (id == IApplicationDbContext.SystemTenantGuid)
         {
             return BadRequest("Cannot delete the system tenant.");
         }
 
-        await using var context = await contextFactory.CreateDbContextAsync();
+        var context = _dbContext;
         var tenant = await context.Tenants.FindAsync(id);
         if (tenant == null)
         {
             return NotFound();
         }
         
-        await monitorService.ReassignAllTenantMonitorsToSystemAsync(id);
+        await _monitorService.ReassignAllTenantMonitorsToSystemAsync(id);
 
         context.Tenants.Remove(tenant);
         await context.SaveChangesAsync();
@@ -148,7 +155,7 @@ public class TenantController(
     [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> UpdateTenant(Guid id, [FromBody] UpdateTenantRequestDto request)
     {
-        await using var context = await contextFactory.CreateDbContextAsync();
+        var context = _dbContext;
 
         var tenant = await context.Tenants.FindAsync(id);
         if (tenant == null)
@@ -194,6 +201,3 @@ public class TenantController(
         });
     }
 }
-
-
-

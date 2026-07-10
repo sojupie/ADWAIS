@@ -27,23 +27,23 @@ function FleetMatrixTile({
     <button
       type="button"
       onClick={() => onMonitorSelect?.(monitor)}
-      className={`w-full h-full p-3 rounded-lg border transition-all text-left relative overflow-hidden group min-h-22.5 shadow-sm
+      className={`w-full h-full p-3 rounded-lg border transition-all text-left relative overflow-hidden group min-h-22.5
         ${theme.bg} ${theme.border}
-        ${isActive ? 'ring-4 ring-slate-300/40 scale-[1.02] z-10' : 'hover:scale-[1.01] hover:shadow-md'}
+        ${isActive ? 'ring-4 ring-slate-300/40 z-10 shadow-elevation-2' : 'shadow-elevation-2 hover: hover:shadow-elevation-3'}
         ${selectedMonitorId && !isActive ? 'opacity-30' : 'opacity-100'}
         ${!monitor.uptimeMonitorEnabled ? 'grayscale opacity-50' : ''}
       `}
     >
       <div className="absolute right-2 bottom-2  z-0 flex items-center justify-end pointer-events-none">
         {showLetter ? (
-          <span className="text-5xl font-black text-slate-900 opacity-[0.2] select-none leading-none">
+          <span className={`text-5xl font-black opacity-[0.15] select-none leading-none ${theme.text}`}>
             {tenantDisplay.charAt(0).toUpperCase()}
           </span>
         ) : (
           <img
             src={faviconUrl!}
             alt=""
-            className="w-12 h-12 object-contain opacity-[0.2]"
+            className={`w-12 h-12 object-contain opacity-[0.2] mix-blend-multiply`}
             onError={() => setImgError(true)}
           />
         )}
@@ -108,7 +108,7 @@ export function FleetMatrix({
   selectedMonitorId?: number | null
 }) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 portrait-lg:grid-cols-4 landscape-lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 pt-1 pb-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 portrait-lg:grid-cols-4 landscape-lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 p-1.5 pb-4">
       {monitors.map((monitor) => (
         <FleetMatrixTile
           key={`${monitor.tenantId}-${monitor.id}`}

@@ -69,15 +69,17 @@ export async function apiFetch<T>(url: string, options?: RequestInit): Promise<T
 
   if (!response.ok) {
     const isProfileUrl = url.includes('/api/users/me');
-    if (response.status === 401 || (response.status === 403 && isProfileUrl)) {
-      const bypass = headers.get('X-Bypass-Global-401');
-      if (bypass !== 'true') {
-        handleSessionInvalidation();
+    if (response.status === 401 || response.status === 403) {
+      if (isProfileUrl) {
+        const bypass = headers.get('X-Bypass-Global-401');
+        if (bypass !== 'true') {
+          handleSessionInvalidation();
+        }
+      } else {
+        checkSessionValidity().catch((err) => {
+          console.error('Error during session validity check:', err);
+        });
       }
-    } else if (response.status === 403) {
-      checkSessionValidity().catch((err) => {
-        console.error('Error during session validity check:', err);
-      });
     }
 
     const errorBody = await response.text().catch(() => 'Unknown error');
@@ -132,15 +134,17 @@ export async function customClient<T>(
 
     if (!response.ok) {
       const isProfileUrl = url.includes('/api/users/me');
-      if (response.status === 401 || (response.status === 403 && isProfileUrl)) {
-        const bypass = headers.get('X-Bypass-Global-401');
-        if (bypass !== 'true') {
-          handleSessionInvalidation();
+      if (response.status === 401 || response.status === 403) {
+        if (isProfileUrl) {
+          const bypass = headers.get('X-Bypass-Global-401');
+          if (bypass !== 'true') {
+            handleSessionInvalidation();
+          }
+        } else {
+          checkSessionValidity().catch((err) => {
+            console.error('Error during session validity check:', err);
+          });
         }
-      } else if (response.status === 403) {
-        checkSessionValidity().catch((err) => {
-          console.error('Error during session validity check:', err);
-        });
       }
 
       const errorBody = await response.text().catch(() => 'Unknown error');

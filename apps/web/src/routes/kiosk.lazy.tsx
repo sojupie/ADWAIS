@@ -40,22 +40,22 @@ function KioskLanding() {
           <div className="relative z-10 flex-1 flex flex-col justify-between">
             <div>
               <h1 className="animate-stagger delay-100 text-4xl sm:text-5xl font-extrabold mb-4 sm:mb-6 text-brand-text">Device Activation</h1>
-              <p className="animate-stagger delay-200 text-slate-700 text-base sm:text-lg mb-6 sm:mb-8 px-2 sm:px-4 leading-relaxed font-medium">
+              <p className="animate-stagger delay-200 text-on-surface-variant text-base sm:text-lg mb-6 sm:mb-8 px-2 sm:px-4 leading-relaxed font-medium">
                 To activate this display, log in to ADWAIS as a staff member and enter the activation code below in the <strong>Settings &gt; Authentication</strong> section.
               </p>
             </div>
-            <div className="animate-stagger delay-300 bg-brand-bg-secondary backdrop-blur-sm text-5xl sm:text-[4rem] md:text-[5rem] leading-none font-mono tracking-widest sm:tracking-[0.2em] py-6 sm:py-8 px-4 sm:px-8 rounded-2xl text-brand-accent mb-8 shadow-inner font-bold border border-slate-900/10 select-all cursor-text overflow-hidden text-ellipsis whitespace-nowrap max-w-full">
+            <div className="animate-stagger delay-300 bg-brand-bg-secondary backdrop-blur-sm text-5xl sm:text-[4rem] md:text-[5rem] leading-none font-mono tracking-widest sm:tracking-[0.2em] py-6 sm:py-8 px-4 sm:px-8 rounded-2xl text-brand-accent mb-8 shadow-inner font-bold border border-outline-variant select-all cursor-text overflow-hidden text-ellipsis whitespace-nowrap max-w-full">
               {activationCode}
             </div>
             <div>
-              <div className="animate-stagger delay-400 flex items-center justify-center gap-4 text-slate-500 text-base font-medium tracking-wide">
+              <div className="animate-stagger delay-400 flex items-center justify-center gap-4 text-on-surface-variant text-base font-medium tracking-wide">
                 <span className="relative flex h-4 w-4">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-accent opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-4 w-4 bg-brand-accent"></span>
                 </span>
                 <span>Waiting for authorization...</span>
               </div>
-              <div className="animate-stagger delay-500 mt-8 pt-4 border-t border-slate-900/5 flex justify-center">
+              <div className="animate-stagger delay-500 mt-8 pt-4 border-t border-outline-variant flex justify-center">
                 <Link
                   to="/login"
                   className="text-sm font-black text-brand-link hover:text-brand-accent transition-colors flex items-center gap-2 cursor-pointer uppercase tracking-widest"
@@ -70,13 +70,13 @@ function KioskLanding() {
             <ServerCrash className="w-16 h-16 text-rose-400 mx-auto opacity-80" />
             <div>
               <p className="text-brand-text text-lg font-bold">Server Unreachable</p>
-              <p className="text-slate-500 text-sm mt-2 max-w-xs mx-auto">The backend could not be reached. Retrying automatically when connectivity is restored.</p>
+              <p className="text-on-surface-variant text-sm mt-2 max-w-xs mx-auto">The backend could not be reached. Retrying automatically when connectivity is restored.</p>
             </div>
           </div>
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center gap-8 py-16 relative z-10">
-            <div className="w-14 h-14 border-[5px] border-slate-200 border-t-brand-accent rounded-full animate-spin shadow-sm"></div>
-            <p className="text-slate-500 text-lg font-medium animate-pulse">Generating secure token...</p>
+            <div className="w-14 h-14 border-[5px] border-outline-variant border-t-brand-accent rounded-full animate-spin shadow-sm"></div>
+            <p className="text-on-surface-variant text-lg font-medium animate-pulse">Generating secure token...</p>
           </div>
         )}
     </>

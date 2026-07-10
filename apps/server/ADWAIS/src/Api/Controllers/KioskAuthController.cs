@@ -68,8 +68,13 @@ public class KioskAuthController(IKioskService kioskService) : ControllerBase
     /// </summary>
     [HttpPost("swagger-admin-token")]
     [AllowAnonymous]
-    public IActionResult GenerateSwaggerAdminToken([FromBody] string secret, [FromServices] Microsoft.Extensions.Configuration.IConfiguration config, [FromServices] ITokenService tokenService)
+    public IActionResult GenerateSwaggerAdminToken([FromBody] string secret, [FromServices] IConfiguration config, [FromServices] ITokenService tokenService, [FromServices] IWebHostEnvironment env)
     {
+        if (!env.IsDevelopment())
+        {
+            return NotFound();
+        }
+
         var configuredSecret = config["Authentication:KioskJwtSecret"];
         if (string.IsNullOrEmpty(secret) || secret != configuredSecret)
         {

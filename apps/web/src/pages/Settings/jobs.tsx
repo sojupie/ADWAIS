@@ -22,7 +22,7 @@ export function BackgroundJobsView() {
         { id: 'monitor-sync', name: 'Monitor Sync', desc: 'Syncs monitor states from external providers.', isAdminOnly: true, url: '/api/job/trigger/monitor-sync' },
         { id: 'uptime-sync', name: 'Uptime Sync', desc: 'Fetches latest uptime ping data.', isAdminOnly: true, url: '/api/job/trigger/uptime-sync' },
         { id: 'latency-sync', name: 'Latency Sync', desc: 'Fetches latency metrics for all monitors.', isAdminOnly: true, url: '/api/job/trigger/latency-sync' },
-        { id: 'user-stats-sync', name: 'User Stats', desc: 'Calculates active user statistics.', isAdminOnly: true, url: '/api/job/trigger/user-stats-sync' },
+        { id: 'user-stats-sync', name: 'UptimeRobot User Stats', desc: 'Calculates active UptimeRobot user statistics.', isAdminOnly: true, url: '/api/job/trigger/user-stats-sync' },
         { id: 'litium-sync', name: 'Litium Sync', desc: 'Synchronizes order data from Litium.', isAdminOnly: true, url: '/api/job/trigger/litium-sync' },
         { id: 'feed-fetch', name: 'Feed Fetch', desc: 'Triggers aggregation of RSS, blogs, and newsrooms immediately.', isAdminOnly: true, url: '/api/global-config/feeds/fetch' },
         { id: 'refresh-historic-order-data', name: 'Refresh Historic Orders', desc: 'Rebuilds materialized views for old orders.', isAdminOnly: false, url: '/api/job/trigger/refresh-historic-order-data' },
@@ -38,9 +38,9 @@ export function BackgroundJobsView() {
                     subtitle="Force execution & settings"
                     icon={<Activity size={24} />}
                 />
-                <div className="flex-1 overflow-y-auto px-2 py-3 sm:p-4 custom-scrollbar bg-white rounded-xl shadow-sm border border-slate-200/60">
+                <div className="flex-1 overflow-y-auto sm:p-4 custom-scrollbar bg-surface rounded-xl shadow-sm border border-outline-variant/60">
                     <div className="grid grid-cols-1 gap-6">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 p-3 lg:grid-cols-3 gap-3">
                             {manualJobs.map(job => {
                                 const isRestricted = job.isAdminOnly && role !== 'Admin';
                                 return (
@@ -48,23 +48,23 @@ export function BackgroundJobsView() {
                                         key={job.id}
                                         onClick={() => !isRestricted && triggerJob.mutate(job.url)}
                                         disabled={isRestricted}
-                                        className={`group flex flex-col text-left p-3 border rounded-xl transition-all relative overflow-hidden bg-slate-50/50 ${isRestricted
+                                        className={`group flex flex-col text-left p-3 border rounded-xl transition-all relative overflow-hidden bg-surface-container-lowest ${isRestricted
                                             ? 'border-slate-250 opacity-40 cursor-not-allowed'
-                                            : 'border-slate-200 hover:border-brand-accent hover:shadow-md cursor-pointer hover:bg-white'
+                                            : 'border-outline-variant hover:border-brand-accent hover:shadow-md cursor-pointer hover:bg-surface'
                                             }`}
                                     >
                                         <div className="flex items-center gap-2 mb-1">
                                             {isRestricted ? (
-                                                <Lock size={14} className="text-slate-400" />
+                                                <Lock size={14} className="text-on-surface-variant" />
                                             ) : (
                                                 <Play size={14} className="text-brand-accent group-hover:scale-110 transition-transform" />
                                             )}
-                                            <span className="text-sm font-bold text-slate-800">{job.name}</span>
+                                            <span className="text-sm font-bold text-on-surface">{job.name}</span>
                                             {isRestricted && (
-                                                <span className="text-sm font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded ml-auto">Admin</span>
+                                                <span className="text-sm font-bold text-on-surface-variant bg-surface-container px-1.5 py-0.5 rounded ml-auto">Admin</span>
                                             )}
                                         </div>
-                                        <span className="text-sm text-slate-500 font-medium">{job.desc}</span>
+                                        <span className="text-sm text-on-surface-variant font-medium">{job.desc}</span>
                                     </button>
                                 );
                             })}
@@ -82,10 +82,10 @@ export function BackgroundJobsView() {
                     subtitle="Recurring intervals & recent executions"
                     icon={<Clock size={24} />}
                 />
-                <div className="flex-1 flex flex-col gap-2 p-4 bg-white rounded-xl shadow-sm border border-slate-200/60 min-h-0">
+                <div className="flex-1 flex flex-col gap-2 p-4 bg-surface rounded-xl shadow-sm border border-outline-variant/60 min-h-0">
                     <div className="flex flex-col gap-2 h-full min-h-0">
                         {/* Recurring Table */}
-                        <div className="flex flex-col bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden shrink-0 max-h-[250px]">
+                        <div className="flex flex-col bg-surface border border-outline-variant rounded-2xl shadow-sm overflow-hidden shrink-0 max-h-[250px]">
                             <div className="overflow-y-auto custom-scrollbar h-full">
                                 <RecurringJobsTable recurring={recurring} />
                             </div>
@@ -114,10 +114,10 @@ export function BackgroundJobsView() {
                                             const isSucceeded = job.state === 'Succeeded';
                                             const isFailed = job.state === 'Failed';
                                             return (
-                                                <div key={job.jobId} className="flex flex-col p-2.5 hover:bg-white/5 transition-colors gap-1 group text-slate-300 relative">
+                                                <div key={job.jobId} className="flex flex-col p-2.5 hover:bg-surface/5 transition-colors gap-1 group text-slate-300 relative">
                                                     <div className="flex items-center justify-between gap-4 min-w-0">
                                                         <div className="flex items-center gap-3 min-w-0">
-                                                            <span className="text-slate-500 shrink-0 text-xs font-mono">
+                                                            <span className="text-on-surface-variant shrink-0 text-xs font-mono">
                                                                 {(() => {
                                                                     if (!job.createdAt) return 'N/A';
                                                                     const d = new Date(job.createdAt);
@@ -147,7 +147,7 @@ export function BackgroundJobsView() {
                                                         </div>
                                                         <div className="flex items-center gap-3 text-xs font-bold shrink-0">
                                                             {job.durationSeconds !== null && (
-                                                                <span className="font-mono text-slate-500 font-normal">
+                                                                <span className="font-mono text-on-surface-variant font-normal">
                                                                     {job.durationSeconds.toFixed(1)}s
                                                                 </span>
                                                             )}
@@ -157,11 +157,11 @@ export function BackgroundJobsView() {
                                                         </div>
                                                     </div>
                                                     {job.jobArgs && (
-                                                        <div className="text-xs text-slate-500 font-normal leading-relaxed pr-4 break-all select-text">
+                                                        <div className="text-xs text-on-surface-variant font-normal leading-relaxed pr-4 break-all select-text">
                                                             ({job.jobArgs})
                                                         </div>
                                                     )}
-                                                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 font-medium">
+                                                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-on-surface-variant font-medium">
                                                         <span>ID: {job.jobId}</span>
                                                         {job.tenantName && (
                                                             <span className="text-brand-accent">Tenant: <strong className="text-slate-350">{job.tenantName}</strong></span>
@@ -180,7 +180,7 @@ export function BackgroundJobsView() {
                                         })}
                                     </div>
                                 ) : (
-                                    <div className="h-full flex items-center justify-center text-slate-500 text-sm font-semibold tracking-wide">
+                                    <div className="h-full flex items-center justify-center text-on-surface-variant text-sm font-semibold tracking-wide">
                                         No recent background jobs found
                                     </div>
                                 )}

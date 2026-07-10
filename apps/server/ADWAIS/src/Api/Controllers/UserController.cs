@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Adwais.Api.DTOs.Users;
 using Adwais.Application.Interfaces;
+using Adwais.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,7 +16,6 @@ namespace Adwais.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/users")]
-[Authorize]
 public class UserController(IUserService userService) : ControllerBase
 {
     private readonly IUserService _userService = userService;
@@ -24,8 +24,7 @@ public class UserController(IUserService userService) : ControllerBase
     [Authorize(Policy = "KioskOrStaffAccess")]
     public async Task<ActionResult<UserResponseDto>> GetMe(CancellationToken ct)
     {
-        var oidClaim = User.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier")?.Value 
-                       ?? User.FindFirst("oid")?.Value;
+        var oidClaim = User.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier")?.Value ?? User.FindFirst("oid")?.Value;
 
         if (!string.IsNullOrEmpty(oidClaim) && Guid.TryParse(oidClaim, out var entraOid))
         {
@@ -35,15 +34,21 @@ public class UserController(IUserService userService) : ControllerBase
                 return Ok(new UserResponseDto(user.Id, user.Name, user.Email, user.Role));
             }
         }
-
-        var role = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
-        if (role == "Viewer")
+        
+        var role = User.FindFirst("role")?.Value ?? User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+        var kioskRole = role switch
         {
-            var name = User.Identity?.Name ?? "Kiosk Device";
-            return Ok(new UserResponseDto(Guid.Empty, name, null, Adwais.Domain.Enums.UserRole.Viewer));
-        }
+            "Admin"    => (UserRole?)UserRole.Admin,
+            "Employee" => UserRole.Employee,
+            "Viewer"   => UserRole.Viewer,
+            _          => null
+        };
 
-        return Unauthorized("User context is invalid or not registered.");
+        if (!kioskRole.HasValue) return Unauthorized("User context is invalid or not registered.");
+        
+        var name = User.Identity?.Name ?? User.FindFirst("name")?.Value ?? "Kiosk Device";
+        return Ok(new UserResponseDto(Guid.Empty, name, null, kioskRole.Value));
+
     }
 
     [HttpGet]
@@ -64,6 +69,7 @@ public class UserController(IUserService userService) : ControllerBase
         {
             return NotFound();
         }
+
         return Ok(new UserResponseDto(user.Id, user.Name, user.Email, user.Role));
     }
 
@@ -76,7 +82,8 @@ public class UserController(IUserService userService) : ControllerBase
     public async Task<ActionResult<UserResponseDto>> CreateUser([FromBody] CreateUserRequestDto request, CancellationToken ct)
     {
         var user = await _userService.CreateUserAsync(request.Email, request.Role, ct);
-        return CreatedAtAction(nameof(GetUser), new { id = user.Id }, new UserResponseDto(user.Id, user.Name, user.Email, user.Role));
+        return CreatedAtAction(nameof(GetUser), new { id = user.Id },
+            new UserResponseDto(user.Id, user.Name, user.Email, user.Role));
     }
 
     [HttpPatch("{id:guid}")]
@@ -88,6 +95,7 @@ public class UserController(IUserService userService) : ControllerBase
         {
             return NotFound();
         }
+
         return Ok(new UserResponseDto(user.Id, user.Name, user.Email, user.Role));
     }
 
@@ -100,6 +108,7 @@ public class UserController(IUserService userService) : ControllerBase
         {
             return NotFound();
         }
+
         return NoContent();
     }
 }

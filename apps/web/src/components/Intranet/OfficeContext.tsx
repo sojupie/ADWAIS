@@ -1,111 +1,178 @@
-import { useState, useEffect } from 'react';
+import { useMemo } from 'react';
+import { useGetApiWeather } from '../../api/generated/endpoints';
+import { useCalendarEventsQuery } from '../../hooks/useCalendarQueries';
+import type { OfficeEventDto } from '@types';
+import { useClock } from '../../hooks/useClock';
 
-const INITIAL_EVENTS = [
-  { id: 1, time: '14:00', title: 'Tech Sync', location: 'Conf Room A' },
-  { id: 2, time: '15:00', title: 'Fika', location: 'Kitchen' },
-  { id: 3, time: '16:30', title: 'Client Demo', location: 'Zoom' }
-];
+const getWeatherEmoji = (code?: number | null) => {
+  if (code === undefined || code === null) return '🌤️';
+  if (code === 0) return '☀️';
+  if (code <= 3) return '🌤️';
+  if (code === 45 || code === 48) return '🌫️';
+  if (code >= 51 && code <= 57) return '🌦️';
+  if (code >= 61 && code <= 67) return '🌧️';
+  if (code >= 71 && code <= 77) return '❄️';
+  if (code >= 80 && code <= 82) return '🌧️';
+  if (code >= 95) return '⛈️';
+  return '🌤️';
+};
+
+const getEventEmoji = (type?: string) => {
+  switch (type) {
+    case 'Meeting': return '🤝';
+    case 'Fika': return '☕';
+    case 'Social': return '🎉';
+    case 'Birthday': return '🎂';
+    case 'GoLive': return '🚀';
+    case 'ExternalSync': return '🔄';
+    default: return '📅';
+  }
+};
 
 export function OfficeContext() {
-  const [time, setTime] = useState(new Date());
-  const [events, setEvents] = useState(INITIAL_EVENTS);
-  const [isAdding, setIsAdding] = useState(false);
-  const [eventTitle, setEventTitle] = useState('');
-  const [eventTime, setEventTime] = useState('');
-  const [eventLocation, setEventLocation] = useState('');
+  const time = useClock();
 
-  const handleAddEvent = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!eventTitle.trim() || !eventTime.trim()) return;
-    setEvents([...events, {
-      id: Date.now(),
-      time: eventTime.trim(),
-      title: eventTitle.trim(),
-      location: eventLocation.trim() || 'TBD'
-    }].sort((a, b) => a.time.localeCompare(b.time)));
-    setEventTitle('');
-    setEventTime('');
-    setEventLocation('');
-    setIsAdding(false);
+  // Calculate start/end of today in UTC
+  const todayRange = useMemo(() => {
+    const start = new Date(time);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(time);
+    end.setHours(23, 59, 59, 999);
+    return {
+      start: start.toISOString(),
+      end: end.toISOString()
+    };
+  }, [time]);
+
+  // Generate mock events for design verification
+  const mockEvents = useMemo(() => {
+    const today = new Date(time);
+    
+    const event1: OfficeEventDto = {
+      id: 'mock-today-meeting',
+      title: 'Project Status Sync',
+      description: 'Duis sit amet lectus finibus, sollicitudin nunc ac, hendrerit urna. Vivamus gravida nisi a venenatis elementum. Vivamus elementum sapien vitae nunc eleifend imperdiet. Nunc eu turpis lectus.',
+      location: 'Meeting Room A',
+      startTime: new Date(new Date(today).setHours(10, 0, 0, 0)).toISOString(),
+      endTime: new Date(new Date(today).setHours(11, 0, 0, 0)).toISOString(),
+      eventType: 'Meeting',
+      isImportant: false,
+      isRecurring: false,
+      isSpecial: false,
+      recurrence: 'None'
+    };
+
+    const event2: OfficeEventDto = {
+      id: 'mock-today-fika',
+      title: 'Afternoon Fika',
+      description: 'Join the team for afternoon coffee and snacks.',
+      location: 'Kitchen',
+      startTime: new Date(new Date(today).setHours(14, 30, 0, 0)).toISOString(),
+      endTime: new Date(new Date(today).setHours(15, 0, 0, 0)).toISOString(),
+      eventType: 'Fika',
+      isImportant: false,
+      isRecurring: false,
+      isSpecial: false,
+      recurrence: 'None'
+    };
+
+    return [event1, event2];
+  }, [time]);
+
+  // Fetch today's events from the backend
+  const { data: rawEvents = [], isLoading } = useCalendarEventsQuery(todayRange.start, todayRange.end);
+  const events = useMemo(() => [...rawEvents, ...mockEvents], [rawEvents, mockEvents]);
+
+  // Fetch current weather
+  const { data: weatherData } = useGetApiWeather();
+  const weather = weatherData?.data || {
+    weatherCode: 1,
+    temperature: 25,
+    location: 'Karlstad',
+    windSpeed: 5
   };
-  
-  useEffect(() => {
-    const interval = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(interval);
-  }, []);
 
-  const dateString = time.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-  const timeString = time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
-  const secondsString = time.getSeconds().toString().padStart(2, '0');
+
+
+  const dateString = time.toLocaleDateString('en-SE', { weekday: 'long', month: 'long', day: 'numeric' });
+  const timeString = time.toLocaleTimeString('en-SE', { hour: '2-digit', minute: '2-digit', hour12: false });
+
+  const formatEventTime = (startTimeStr?: string) => {
+    if (!startTimeStr) {
+      throw new Error("Cannot format empty event start time string.");
+    }
+    const date = new Date(startTimeStr);
+    if (isNaN(date.getTime())) {
+      throw new Error(`Invalid start time string: "${startTimeStr}"`);
+    }
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+  };
 
   return (
-    <section className="rounded-xl shadow-sm flex flex-col overflow-hidden bg-brand-bg-secondary text-white h-full relative">
-      {isAdding && (
-        <div className="absolute inset-0 z-20 bg-brand-bg-secondary/95 backdrop-blur-md p-6 flex flex-col justify-center animate-in fade-in zoom-in-95 duration-200">
-          <h3 className="text-sm font-black text-brand-accent uppercase tracking-widest mb-4">Add New Event</h3>
-          <form onSubmit={handleAddEvent} className="flex flex-col gap-3">
-            <div className="flex gap-2">
-              <input type="time" value={eventTime} onChange={e => setEventTime(e.target.value)} className="w-1/3 bg-white/10 border border-white/20 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-accent" required />
-              <input type="text" placeholder="Title" value={eventTitle} onChange={e => setEventTitle(e.target.value)} className="flex-1 bg-white/10 border border-white/20 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-accent placeholder:text-white/40" required autoFocus />
-            </div>
-            <input type="text" placeholder="Location (optional)" value={eventLocation} onChange={e => setEventLocation(e.target.value)} className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-accent placeholder:text-white/40" />
-            <div className="flex justify-end gap-3 mt-2">
-              <button type="button" onClick={() => setIsAdding(false)} className="text-white/60 hover:text-white px-4 py-2 font-black uppercase tracking-widest text-sm transition-colors">Cancel</button>
-              <button type="submit" className="bg-brand-accent text-brand-bg-secondary px-4 py-2 rounded font-black uppercase tracking-widest text-sm hover:brightness-110 transition-all">Add Event</button>
-            </div>
-          </form>
+    <section className="gap-2 rounded-2xl border-0 overflow-hidden bg-brand-bg-secondary text-white h-[400px] max-h-[400px] md:max-h-none md:h-full relative flex flex-col md:grid md:grid-rows-[30%_70%] w-full min-w-0">
+      <div className="px-5 py-4 relative z-10 flex justify-between items-start gap-4">
+        <div className="flex flex-col">
+          <span className="text-sm sm:text-base font-black text-brand-accent uppercase tracking-widest mb-1">{dateString}</span>
+          <span className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tighter leading-none">{timeString}</span>
         </div>
-      )}
-
-      <div className="absolute top-0 right-0 p-4 opacity-10">
-         <svg width="120" height="120" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-           <path d="M12 2L2 22H22L12 2Z" />
-         </svg>
+        {weather && (
+          <div className="flex flex-col items-end text-right shrink-0">
+            <span className="text-2xl sm:text-3xl lg:text-4xl" title={`Wind: ${weather.windSpeed} km/h`}>
+              {getWeatherEmoji(weather.weatherCode)}
+            </span>
+            <span className="text-base sm:text-lg font-bold mt-1">
+              {weather.temperature !== undefined ? `${Math.round(weather.temperature)}°C` : 'N/A'}
+            </span>
+            <span className="text-sm sm:text-base font-bold uppercase tracking-widest text-white/60">
+              {weather.location}
+            </span>
+          </div>
+        )}
       </div>
-      
-      <div className="p-6 flex flex-col h-full relative z-10">
-        <div className="flex justify-between items-start mb-8">
-          <div className="flex flex-col">
-            <span className="text-sm font-black text-brand-accent uppercase tracking-widest mb-1">{dateString}</span>
-            <div className="flex items-baseline gap-1">
-              <span className="text-5xl lg:text-6xl font-black tracking-tighter">{timeString}</span>
-              <span className="text-xl font-bold text-white/50">:{secondsString}</span>
-            </div>
-          </div>
-          <div className="flex flex-col items-end">
-            <span className="text-3xl lg:text-4xl">🌤️</span>
-            <span className="text-lg font-bold mt-1">18°C</span>
-            <span className="text-sm font-bold uppercase tracking-widest text-white/60">Karlstad</span>
+
+      {/* Bottom 70% — event list */}
+      <div className="relative z-10 flex flex-col flex-1 min-h-0 w-full min-w-0">
+        <div className="flex items-center justify-between pb-2 mb-1 px-5">
+          <h3 className="text-sm font-bold text-white/70">Today's Schedule</h3>
+          <div className="flex items-center gap-1">
+            <span className="text-sm font-bold text-white/40">{events.length} Events</span>
           </div>
         </div>
 
-        <div className="mt-auto">
-          <div className="flex items-center justify-between border-b border-white/10 pb-2 mb-3">
-            <h3 className="text-sm font-black text-white/50 uppercase tracking-widest">Today's Schedule</h3>
-            <div className="flex items-center gap-1">
-               <span className="text-sm font-bold text-white/40">{events.length} Events</span>
-               <button 
-                 onClick={() => {
-                   if (!isAdding) setEventTime(new Date().toTimeString().slice(0, 5));
-                   setIsAdding(!isAdding);
-                 }}
-                 className="bg-white/10 text-white hover:bg-white/20 border border-white/20 px-2 py-0.5 rounded-[4px] text-sm font-black uppercase tracking-widest transition-all shadow-sm cursor-pointer"
-               >
-                 {isAdding ? 'Cancel' : '+ Add Event'}
-               </button>
-            </div>
-          </div>
-          <div className="flex flex-col gap-1">
-            {events.map(e => (
-              <div key={e.id} className="flex items-center gap-4 bg-white/5 hover:bg-white/10 transition-colors p-3 rounded-lg border border-white/10 backdrop-blur-sm">
-                <span className="text-sm font-black text-brand-accent w-12 shrink-0 text-right">{e.time}</span>
-                <div className="flex flex-col">
-                  <span className="text-sm font-bold text-white leading-tight">{e.title}</span>
-                  <span className="text-sm font-bold text-white/50 uppercase tracking-widest mt-0.5">{e.location}</span>
+        <div className="flex flex-col overflow-y-auto flex-1 custom-scrollbar w-full min-w-0">
+          {isLoading ? (
+            <div className="text-sm text-white/40 italic text-center py-2">Loading today's schedule...</div>
+          ) : events.length === 0 ? (
+            <div className="text-sm text-white/40 italic text-center py-2">No events scheduled for today.</div>
+          ) : (
+            events.map(e => (
+              <div 
+                key={e.id} 
+                className="flex flex-col hover:bg-surface/5 transition-colors py-4 px-5 border-b border-outline-variant last:border-b-0 justify-center w-full min-w-0 shrink-0 gap-1"
+              >
+                {/* Row 1: icon, time, title */}
+                <div className="flex items-center gap-1 min-w-0 flex-shrink-0">
+                  <span className="text-sm shrink-0 leading-none pr-1">{getEventEmoji(e.eventType)}</span>
+                  <span className="text-sm font-black text-brand-accent whitespace-nowrap leading-none shrink-0">
+                    {formatEventTime(e.startTime)}
+                  </span>
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <span className="text-sm font-bold text-white truncate leading-none flex-1 min-w-0">{e.title}</span>
+                    {e.location && (
+                      <span className="text-sm text-white/60 font-bold uppercase tracking-wider truncate leading-none max-w-[50%] min-w-0">
+                        📍 {e.location}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Row 2: content / description */}
+                <div className="text-sm text-white/50 truncate min-w-0 leading-normal select-text flex-shrink-0 ml-[22px]">
+                  {e.description || 'No description provided.'}
                 </div>
               </div>
-            ))}
-          </div>
+            ))
+          )}
         </div>
       </div>
     </section>

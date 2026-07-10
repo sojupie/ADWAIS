@@ -15,7 +15,7 @@ interface UserRowProps {
 
 export function UserRow({ u, updateUser, deleteUser, disabled = false }: UserRowProps) {
   return (
-    <tr className="transition-colors group hover:bg-slate-50/80">
+    <tr className="transition-colors group hover:bg-surface-container-low">
       <td className="px-6 py-3 align-middle">
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 rounded-full bg-brand-accent/10 flex items-center justify-center text-brand-accent font-bold text-lg shrink-0">
@@ -30,11 +30,11 @@ export function UserRow({ u, updateUser, deleteUser, disabled = false }: UserRow
                disabled={disabled}
                displayValue={
                  <div className="flex flex-col">
-                   <span className="font-bold text-slate-800 text-sm">{u.name}</span>
+                   <span className="font-bold text-on-surface text-sm">{u.name}</span>
                    {u.email && u.email !== u.name && (
-                     <span className="text-xs text-slate-500 font-medium mt-0.5">{u.email}</span>
+                     <span className="text-xs text-on-surface-variant font-medium mt-0.5">{u.email}</span>
                    )}
-                   <span className="text-xs text-slate-400 font-mono mt-0.5">{u.id}</span>
+                   <span className="text-xs text-on-surface-variant font-mono mt-0.5">{u.id}</span>
                  </div>
                }
                onSave={(val) => updateUser.mutate({ id: u.id, payload: { name: val }})}
@@ -57,7 +57,7 @@ export function UserRow({ u, updateUser, deleteUser, disabled = false }: UserRow
            displayValue={
              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-bold border ${
                u.role === 'Admin' ? 'bg-purple-50 text-purple-700 border-purple-200' : 
-               u.role === 'Employee' ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-slate-100 text-slate-600 border-slate-200'
+               u.role === 'Employee' ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-surface-container text-on-surface-variant border-outline-variant'
              }`}>
                {u.role === 'Admin' ? <Shield size={12} /> : <User size={12} />}
                {u.role}

@@ -69,7 +69,7 @@ function CountdownRing({resetKey, syncError}: { resetKey: number; syncError: boo
   );
 }
 
-export function SyncStatusWidget() {
+export function SyncStatusWidget({ embedded = false }: { embedded?: boolean }) {
   const queryClient = useQueryClient();
   const search = useSearch({ strict: false }) as { tenantId?: string };
   const params = useParams({ strict: false }) as { tenantId?: string };
@@ -106,7 +106,7 @@ export function SyncStatusWidget() {
 
   const renderTime = (time: string | number | null | undefined, isTimeLoading: boolean) => {
     if (isTimeLoading || (!time && isFetching)) {
-      return <div className="h-3.5 w-12 bg-white/15 rounded animate-pulse inline-block" />;
+      return <div className="h-3.5 w-12 bg-surface/15 rounded animate-pulse inline-block" />;
     }
     return timeAgo(time);
   };
@@ -152,7 +152,10 @@ export function SyncStatusWidget() {
 
   return (
     <div
-      className="flex items-center gap-4 px-5 py-3 border rounded-xl shadow-sm bg-brand-bg-secondary border-brand-bg-secondary/20 min-h-14 min-w-0"
+      className={embedded 
+        ? "flex items-center gap-4 w-full min-w-0" 
+        : "flex items-center gap-4 px-5 py-3 border rounded-full shadow-sm bg-brand-bg-secondary border-brand-bg-secondary/20 min-h-14 min-w-0"
+      }
     >
       {/* Timer Wheel */}
       <CountdownRing resetKey={countdownResetKey} syncError={!!syncError} />
@@ -161,43 +164,43 @@ export function SyncStatusWidget() {
       <div className="flex-1 min-w-0">
         {isDrillDown ? (
           <div className="flex flex-col gap-0.5">
-            <div className="flex justify-between items-center gap-4">
-              <span className="text-xs font-black uppercase tracking-widest text-white/60">Dashboard UI</span>
-              <span className="text-sm font-bold text-white truncate min-w-10 text-right">{renderTime(dashboardSyncTime, isFetching)}</span>
+            <div className="flex justify-between items-center gap-3">
+              <span className="text-xs font-black uppercase tracking-wider text-white/60 whitespace-nowrap">Dashboard UI</span>
+              <span className="text-sm font-bold text-white whitespace-nowrap text-right w-[64px] shrink-0">{renderTime(dashboardSyncTime, isFetching)}</span>
             </div>
-            <div className="flex justify-between items-center gap-4">
-              <span className="text-xs font-black uppercase tracking-widest text-white/60">Source Polled</span>
-              <span className="text-sm font-bold text-white truncate min-w-10 text-right">{renderTime(tenant?.lastPolled, isLoading)}</span>
+            <div className="flex justify-between items-center gap-3">
+              <span className="text-xs font-black uppercase tracking-wider text-white/60 whitespace-nowrap">Source Polled</span>
+              <span className="text-sm font-bold text-white whitespace-nowrap text-right w-[64px] shrink-0">{renderTime(tenant?.lastPolled, isLoading)}</span>
             </div>
           </div>
         ) : isFinancial ? (
           <div className="flex flex-col gap-0.5">
-            <div className="flex justify-between items-center gap-4">
-              <span className="text-xs font-black uppercase tracking-widest text-white/60">Dashboard UI</span>
-              <span className="text-sm font-bold text-white truncate min-w-10 text-right">{renderTime(dashboardSyncTime, isFetching)}</span>
+            <div className="flex justify-between items-center gap-3">
+              <span className="text-xs font-black uppercase tracking-wider text-white/60 whitespace-nowrap">Dashboard UI</span>
+              <span className="text-sm font-bold text-white whitespace-nowrap text-right w-[64px] shrink-0">{renderTime(dashboardSyncTime, isFetching)}</span>
             </div>
-            <div className="flex justify-between items-center gap-4">
-              <span className="text-xs font-black uppercase tracking-widest text-white/60">Litium Sync</span>
-              <span className="text-sm font-bold text-white truncate min-w-10 text-right">{renderTime(health?.lastLitiumSync, isLoading)}</span>
+            <div className="flex justify-between items-center gap-3">
+              <span className="text-xs font-black uppercase tracking-wider text-white/60 whitespace-nowrap">Litium Sync</span>
+              <span className="text-sm font-bold text-white whitespace-nowrap text-right w-[64px] shrink-0">{renderTime(health?.lastLitiumSync, isLoading)}</span>
             </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-0.5 items-center">
             <div className="flex justify-between items-center gap-2">
-              <span className="text-xs font-black uppercase tracking-widest text-white/60">Dash UI</span>
-              <span className="text-sm font-bold text-white text-right">{renderTime(dashboardSyncTime, isFetching)}</span>
+              <span className="text-xs font-black uppercase tracking-wider text-white/60 whitespace-nowrap">Dash UI</span>
+              <span className="text-sm font-bold text-white whitespace-nowrap text-right w-[56px] shrink-0">{renderTime(dashboardSyncTime, isFetching)}</span>
             </div>
             <div className="flex justify-between items-center gap-2">
-              <span className="text-xs font-black uppercase tracking-widest text-white/60">Meta</span>
-              <span className="text-sm font-bold text-white text-right">{renderTime(health?.lastFleetUpdate, isLoading)}</span>
+              <span className="text-xs font-black uppercase tracking-wider text-white/60 whitespace-nowrap">Meta</span>
+              <span className="text-sm font-bold text-white whitespace-nowrap text-right w-[56px] shrink-0">{renderTime(health?.lastFleetUpdate, isLoading)}</span>
             </div>
             <div className="flex justify-between items-center gap-2">
-              <span className="text-xs font-black uppercase tracking-widest text-white/60">Uptime</span>
-              <span className="text-sm font-bold text-white text-right">{renderTime(health?.lastFleetUptimeUpdate, isLoading)}</span>
+              <span className="text-xs font-black uppercase tracking-wider text-white/60 whitespace-nowrap">Uptime</span>
+              <span className="text-sm font-bold text-white whitespace-nowrap text-right w-[56px] shrink-0">{renderTime(health?.lastFleetUptimeUpdate, isLoading)}</span>
             </div>
             <div className="flex justify-between items-center gap-2">
-              <span className="text-xs font-black uppercase tracking-widest text-white/60">Latency</span>
-              <span className="text-sm font-bold text-white text-right">{renderTime(health?.lastFleetLatencyUpdate, isLoading)}</span>
+              <span className="text-xs font-black uppercase tracking-wider text-white/60 whitespace-nowrap">Latency</span>
+              <span className="text-sm font-bold text-white whitespace-nowrap text-right w-[56px] shrink-0">{renderTime(health?.lastFleetLatencyUpdate, isLoading)}</span>
             </div>
           </div>
         )}
@@ -211,11 +214,11 @@ export function SyncStatusWidget() {
       </div>
 
       {/* Action */}
-      <div className="pl-3 border-l border-white/10 ml-1">
+      <div className="pl-3 border-l border-outline-variant ml-1">
         <button
           onClick={forceFetch}
           disabled={isFetching}
-          className="shrink-0 w-8 h-8 flex items-center justify-center rounded-sm bg-white/10 border border-white/20 text-white hover:bg-white/20 hover:border-transparent transition-colors disabled:opacity-50"
+          className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-surface text-brand-bg-secondary hover:bg-surface/90 active:bg-surface/80 transition-all shadow-sm border-none cursor-pointer disabled:opacity-50"
           title="Force Fetch"
         >
           <RefreshCw size={14} className={isFetching ? 'animate-spin' : ''} />

@@ -15,7 +15,7 @@ namespace Adwais.Tests.Services;
 public class UserServiceTests
 {
     private readonly DbContextOptions<AnalyticsDbContext> _dbOptions;
-    private readonly Mock<IDbContextFactory<AnalyticsDbContext>> _dbContextFactoryMock;
+    private readonly AnalyticsDbContext _dbContext;
     private readonly UserService _userService;
 
     public UserServiceTests()
@@ -24,11 +24,8 @@ public class UserServiceTests
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
 
-        _dbContextFactoryMock = new Mock<IDbContextFactory<AnalyticsDbContext>>();
-        _dbContextFactoryMock.Setup(f => f.CreateDbContextAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(() => new AnalyticsDbContext(_dbOptions));
-
-        _userService = new UserService(_dbContextFactoryMock.Object);
+        _dbContext = new AnalyticsDbContext(_dbOptions);
+        _userService = new UserService(_dbContext);
     }
 
     [Fact]

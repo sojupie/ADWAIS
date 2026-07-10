@@ -244,7 +244,7 @@ public class MonitorOrchestrationService(
                 .ToListAsync(ct);
 
             var grouped = raw
-                .GroupBy(rt => new DateTime(rt.Date.Year, rt.Date.Month, rt.Date.Day, rt.Date.Hour, 0, 0))
+                .GroupBy(rt => new DateTimeOffset(rt.Date.Year, rt.Date.Month, rt.Date.Day, rt.Date.Hour, 0, 0, TimeSpan.Zero))
                 .Select(g => {
                     var avgList = g.Where(x => x.Average.HasValue).Select(x => x.Average!.Value).ToList();
                     return new LatencyRow(
@@ -271,7 +271,7 @@ public class MonitorOrchestrationService(
             histQuery = histQuery.Where(r => r.UptimeMonitor.TenantId != IApplicationDbContext.SystemTenantGuid);
 
         var historical = await histQuery
-            .Select(r => new LatencyRow(r.Date.DateTime, r.Average, r.P10, r.P90))
+            .Select(r => new LatencyRow(r.Date, r.Average, r.P10, r.P90))
             .ToListAsync(ct);
 
         if (yesterday < end)
@@ -289,7 +289,7 @@ public class MonitorOrchestrationService(
                 .ToListAsync(ct);
 
             var fresh = liveRaw
-                .GroupBy(rt => rt.Date.Date)
+                .GroupBy(rt => new DateTimeOffset(rt.Date.Year, rt.Date.Month, rt.Date.Day, 0, 0, 0, TimeSpan.Zero))
                 .Select(g => {
                     var avgList = g.Where(x => x.Average.HasValue).Select(x => x.Average!.Value).ToList();
                     return new LatencyRow(

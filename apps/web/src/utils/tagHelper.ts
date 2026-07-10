@@ -30,6 +30,6 @@ export const getTagStyle = (color: string): string => {
     case 'grey':
     case 'slate':
     default:
-      return 'bg-slate-50 text-slate-700 border-slate-200';
+      return 'bg-surface-container-low text-on-surface-variant border-outline-variant';
   }
 };

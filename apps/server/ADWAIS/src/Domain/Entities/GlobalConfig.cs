@@ -20,6 +20,6 @@ public class GlobalConfig
     public string? LastSyncError { get; set; }
     public double? DefaultUptimeSla { get; set; }
     public int FeedFetchIntervalHours { get; set; } = 2;
+    public string? WeatherLocation { get; set; }
+    public int WeatherFetchIntervalMinutes { get; set; } = 15;
 }
-
-

@@ -21,9 +21,42 @@ export default {
         'brand-text': '#022D2E',
         'brand-accent': '#FFCE44',
         'brand-link': '#06959B',
-        'status-up': '#10B981',
-        'status-down': '#EF4444',
-        'status-degraded': '#F59E0B',
+        'status-up': {
+          DEFAULT: '#10B981', // emerald-500
+          container: '#D1FAE5', // emerald-100
+          'on-container': '#022C22', // emerald-950
+          muted: '#064E3B', // emerald-900
+        },
+        'status-down': {
+          DEFAULT: '#EF4444', // red-500
+          container: '#FEE2E2', // red-100
+          'on-container': '#450A0A', // red-950
+          muted: '#7F1D1D', // red-900
+        },
+        'status-degraded': {
+          DEFAULT: '#F59E0B', // amber-500
+          container: '#FEF3C7', // amber-100
+          'on-container': '#451A03', // amber-950
+          muted: '#78350F', // amber-900
+        },
+        'status-paused': {
+          DEFAULT: '#0EA5E9', // sky-500
+          container: '#E0F2FE', // sky-100
+          'on-container': '#082F49', // sky-950
+          muted: '#0C4A6E', // sky-900
+        },
+        'status-starting': {
+          DEFAULT: '#6366F1', // indigo-500
+          container: '#E0E7FF', // indigo-100
+          'on-container': '#1E1B4B', // indigo-950
+          muted: '#312E81', // indigo-900
+        },
+        'status-unknown': {
+          DEFAULT: '#94A3B8', // slate-400
+          container: '#F1F5F9', // slate-100
+          'on-container': '#0F172A', // slate-900
+          muted: '#334155', // slate-700
+        },
         'chart-grid': '#f1f5f9',
         'chart-tick': '#94a3b8',
         'chart-prev-line': '#cbd5e1',
@@ -40,12 +73,17 @@ export default {
       },
       boxShadow: {
         card: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+        'elevation-1': '0 1px 2px 0 rgba(0, 0, 0, 0.3), 0 1px 3px 1px rgba(0, 0, 0, 0.15)',
+        'elevation-2': '0 1px 2px 0 rgba(0, 0, 0, 0.3), 0 2px 6px 2px rgba(0, 0, 0, 0.15)',
+        'elevation-3': '0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 4px 8px 3px rgba(0, 0, 0, 0.15)',
+        'elevation-4': '0 2px 3px 0 rgba(0, 0, 0, 0.3), 0 6px 10px 4px rgba(0, 0, 0, 0.15)',
+        'elevation-5': '0 4px 4px 0 rgba(0, 0, 0, 0.3), 0 8px 12px 6px rgba(0, 0, 0, 0.15)',
       },
       screens: {
-        'contained': { 'raw': '(min-width: 1024px) and (min-height: 900px) and (orientation: landscape), (min-width: 1024px) and (min-height: 1350px) and (orientation: portrait)' },
+        'contained': { 'raw': '(min-width: 1024px) and (min-height: 950px) and (orientation: landscape), (min-width: 1024px) and (min-height: 1350px) and (orientation: portrait)' },
         'landscape-lg': { 'raw': '(orientation: landscape) and (min-width: 1024px)' },
         'portrait-lg': { 'raw': '(orientation: portrait) and (min-width: 1024px)' },
-        'landscape-contained': { 'raw': '(orientation: landscape) and (min-width: 1024px) and (min-height: 900px)' },
+        'landscape-contained': { 'raw': '(orientation: landscape) and (min-width: 1024px) and (min-height: 950px)' },
         'portrait-contained': { 'raw': '(orientation: portrait) and (min-width: 1024px) and (min-height: 1350px)' }
       }
     },
@@ -140,6 +178,47 @@ export default {
       });
       
       addComponents(flexGapComponents);
+    }),
+    plugin(function({ addUtilities, theme }) {
+      const primaryColor = theme('colors.brand-btn-primary') || '#04686D';
+      
+      const hexToRgb = (hex) => {
+        const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+        const fullHex = hex.replace(shorthandRegex, (m, r, g, b) => r + r + g + g + b + b);
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(fullHex);
+        return result ? `${parseInt(result[1], 16)} ${parseInt(result[2], 16)} ${parseInt(result[3], 16)}` : '4 104 109';
+      };
+
+      const rgbValues = hexToRgb(primaryColor);
+
+      const elevations = {
+        '.m3-elevation-0': {
+          boxShadow: 'none',
+          backgroundImage: 'none',
+        },
+        '.m3-elevation-1': {
+          boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.3), 0 1px 3px 1px rgba(0, 0, 0, 0.15)',
+          backgroundImage: `linear-gradient(rgba(${rgbValues} / 0.05), rgba(${rgbValues} / 0.05))`,
+        },
+        '.m3-elevation-2': {
+          boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.3), 0 2px 6px 2px rgba(0, 0, 0, 0.15)',
+          backgroundImage: `linear-gradient(rgba(${rgbValues} / 0.08), rgba(${rgbValues} / 0.08))`,
+        },
+        '.m3-elevation-3': {
+          boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 4px 8px 3px rgba(0, 0, 0, 0.15)',
+          backgroundImage: `linear-gradient(rgba(${rgbValues} / 0.11), rgba(${rgbValues} / 0.11))`,
+        },
+        '.m3-elevation-4': {
+          boxShadow: '0 2px 3px 0 rgba(0, 0, 0, 0.3), 0 6px 10px 4px rgba(0, 0, 0, 0.15)',
+          backgroundImage: `linear-gradient(rgba(${rgbValues} / 0.12), rgba(${rgbValues} / 0.12))`,
+        },
+        '.m3-elevation-5': {
+          boxShadow: '0 4px 4px 0 rgba(0, 0, 0, 0.3), 0 8px 12px 6px rgba(0, 0, 0, 0.15)',
+          backgroundImage: `linear-gradient(rgba(${rgbValues} / 0.14), rgba(${rgbValues} / 0.14))`,
+        },
+      };
+
+      addUtilities(elevations, ['hover', 'focus', 'responsive']);
     })
   ],
 }

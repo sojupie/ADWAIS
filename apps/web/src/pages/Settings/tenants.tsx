@@ -72,7 +72,7 @@ export function TenantsMonitorsView() {
                         onChange={e => setTenantSort(e.target.value as 'asc' | 'desc')}
                         dropdownAlign="right"
                         containerClassName="w-auto shrink-0"
-                        className="text-sm font-semibold pl-3 pr-8 py-1.5 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 focus:ring-2 h-9 rounded-lg"
+                        className="text-sm font-semibold pl-3 pr-8 py-1.5 bg-surface border border-outline-variant text-on-surface-variant hover:bg-surface-container-low focus:ring-2 h-9 rounded-lg"
                     >
                         <option value="asc">A-Z</option>
                         <option value="desc">Z-A</option>
@@ -88,12 +88,12 @@ export function TenantsMonitorsView() {
                     </SecureButton>
                 </SectionHeader>
 
-                <div className="flex-1 overflow-y-auto px-2 py-3 sm:p-4 flex flex-col gap-2 custom-scrollbar bg-white rounded-xl shadow-sm border border-slate-200/60">
+                <div className="flex-1 overflow-y-auto px-2 py-3 sm:p-4 flex flex-col gap-2 custom-scrollbar bg-surface rounded-xl shadow-sm border border-outline-variant/60">
                     {isCreatingTenant && (
                         <div className="border-2 border-brand-link/20 rounded-xl overflow-hidden bg-brand-link/5 shadow-sm shrink-0 flex flex-col">
                             <div className="flex items-center justify-between p-3 border-b border-brand-link/10">
-                                <span className="font-extrabold text-slate-800 text-sm">Create New Tenant</span>
-                                <button onClick={() => setIsCreatingTenant(false)} className="text-slate-400 hover:text-slate-600 cursor-pointer"><X size={16} /></button>
+                                <span className="font-extrabold text-on-surface text-sm">Create New Tenant</span>
+                                <button onClick={() => setIsCreatingTenant(false)} className="text-on-surface-variant hover:text-on-surface-variant cursor-pointer"><X size={16} /></button>
                             </div>
                             <div className="p-4 flex flex-col gap-1">
                                 <Input label="Name" placeholder="Tenant Name" value={newTenantDraft.name} onChange={e => setNewTenantDraft({ ...newTenantDraft, name: e.target.value })} />
@@ -149,7 +149,7 @@ export function TenantsMonitorsView() {
                         onChange={e => setMonitorSort(e.target.value as 'asc' | 'desc')}
                         dropdownAlign="right"
                         containerClassName="w-auto shrink-0"
-                        className="text-sm font-semibold pl-3 pr-8 py-1.5 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 focus:ring-2 h-9 rounded-lg"
+                        className="text-sm font-semibold pl-3 pr-8 py-1.5 bg-surface border border-outline-variant text-on-surface-variant hover:bg-surface-container-low focus:ring-2 h-9 rounded-lg"
                     >
                         <option value="asc">A-Z</option>
                         <option value="desc">Z-A</option>
@@ -165,12 +165,12 @@ export function TenantsMonitorsView() {
                     </SecureButton>
                 </SectionHeader>
 
-                <div className="flex-1 overflow-y-auto px-2 py-3 sm:p-4 flex flex-col gap-2 custom-scrollbar bg-white rounded-xl shadow-sm border border-slate-200/60">
+                <div className="flex-1 overflow-y-auto px-2 py-3 sm:p-4 flex flex-col gap-2 custom-scrollbar bg-surface rounded-xl shadow-sm border border-outline-variant/60">
                     {isCreatingMonitor && (
                         <div className="border-2 border-brand-link/20 rounded-xl overflow-hidden bg-brand-link/5 shadow-sm shrink-0 flex flex-col">
                             <div className="flex items-center justify-between p-3 border-b border-brand-link/10">
-                                <span className="font-extrabold text-slate-700 text-sm">Create New Monitor</span>
-                                <button onClick={() => setIsCreatingMonitor(false)} className="text-slate-400 hover:text-slate-600 cursor-pointer"><X size={16} /></button>
+                                <span className="font-extrabold text-on-surface-variant text-sm">Create New Monitor</span>
+                                <button onClick={() => setIsCreatingMonitor(false)} className="text-on-surface-variant hover:text-on-surface-variant cursor-pointer"><X size={16} /></button>
                             </div>
                             <div className="p-4 flex flex-col gap-1">
                                 <Input label="Name" placeholder="Monitor Name" value={newMonitorDraft.name} onChange={e => setNewMonitorDraft({ ...newMonitorDraft, name: e.target.value })} />

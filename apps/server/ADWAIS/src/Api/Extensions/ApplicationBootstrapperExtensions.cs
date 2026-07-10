@@ -98,6 +98,11 @@ public static class ApplicationBootstrapperExtensions
                     newJob => newJob.ExecuteAsync(CancellationToken.None),
                     Cron.HourInterval(feedInterval));
 
+                recurringJobManager.AddOrUpdate<CalendarSyncJob>(
+                    "sync-intranet-calendars",
+                    newJob => newJob.ExecuteAsync(CancellationToken.None),
+                    Cron.MinuteInterval(30));
+
                 if (enableSeeding)
                 {
                     recurringJobManager.AddOrUpdate<RuntimeDataSeederJob>(

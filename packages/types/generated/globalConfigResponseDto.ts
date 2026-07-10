@@ -29,4 +29,7 @@ export interface GlobalConfigResponseDto {
   /** @nullable */
   defaultUptimeSla?: number | null;
   feedFetchIntervalHours?: number;
+  /** @nullable */
+  weatherLocation?: string | null;
+  weatherFetchIntervalMinutes?: number;
 }

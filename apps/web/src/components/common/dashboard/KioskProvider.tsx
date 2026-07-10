@@ -13,10 +13,10 @@ export function KioskProvider({ children }: { children: ReactNode }) {
   const matches = useRouterState({ select: (s) => s.matches });
   const isMobileView = useMediaQuery('(max-width: 767px)');
   
-  const [mode, setMode] = useState<KioskMode>('kiosk');
+  const [mode, setMode] = useState<KioskMode>('paused');
   const [kioskTimer, setKioskTimer] = useState(KIOSK_ROTATION_SECONDS);
   const [idleTimer, setIdleTimer] = useState(0);
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   
   const currentRoute = matches[matches.length - 1]?.routeId;
   const isKioskEligibleRoute = KIOSK_ROUTES.includes(currentRoute as KioskRoute);

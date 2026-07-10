@@ -2,7 +2,7 @@ import React from 'react';
 
 export function Card({ className = '', children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={`bg-white rounded-xl border border-slate-200 shadow-sm ${className}`} {...props}>
+    <div className={`bg-surface rounded-xl border border-outline-variant shadow-sm ${className}`} {...props}>
       {children}
     </div>
   );
@@ -18,7 +18,7 @@ export function CardHeader({ className = '', children, ...props }: React.HTMLAtt
 
 export function CardTitle({ className = '', children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
   return (
-    <h3 className={`text-xl font-bold text-slate-800 tracking-tight leading-none ${className}`} {...props}>
+    <h3 className={`text-xl font-bold text-on-surface tracking-tight leading-none ${className}`} {...props}>
       {children}
     </h3>
   );
@@ -26,7 +26,7 @@ export function CardTitle({ className = '', children, ...props }: React.HTMLAttr
 
 export function CardDescription({ className = '', children, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {
   return (
-    <p className={`text-sm text-slate-600 mt-1 ${className}`} {...props}>
+    <p className={`text-sm text-on-surface-variant mt-1 ${className}`} {...props}>
       {children}
     </p>
   );

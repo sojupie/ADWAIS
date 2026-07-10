@@ -1,12 +1,14 @@
-- add a toggle for switching between vat and no vat, multiple materialized views or accept latency for the sake of simplicity?
-- - or just provide info about what we're using (incl. vat)
+- system logs (message/info) horizontal text overflow
 - add an about/info page with good to know info and links
 - intranet api
-  - calendar component that "todays events" pull from.
-  - integrate calendar from msuite?
+  - community post(ing) frontend functionality
+  - revamped ui/ux
+  - private/public calendar url?
 - ping litium env for health checks (to see if base url is correct after adding it to a tenant card).
-- alert on new orders
-- change uptime% fetch to be more accurate, not full day block
-- backend should calculate p10 and p90 for latency charts
-- add icons (favicons) to the bubbles to make it easier to identify? same with other tiles like in fleetstatus (background with opacity)?
-- currently the global charts only show bubbles for tenants with data in the given period, making it hard find/select a tenant for drill down view. maybe add a menu for swapping inbetween global view and drill down?
+- revamp settings ui
+- for some strange reason i cant view 
+- modals needs to close when you click outside
+- motillo news: open the "next" article as you scroll and the card snaps into view?
+- does motillo.com use different fonts? different weights? our current is pretty blocky and short, it feels like.
+- match motillo.com navbar
+- hide or make the FAB useful in intranet/settings

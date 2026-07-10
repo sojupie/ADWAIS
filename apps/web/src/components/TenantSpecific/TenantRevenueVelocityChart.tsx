@@ -16,13 +16,13 @@ const CustomTooltip = ({ active, payload, label }: { isLoading?: boolean;  activ
   if (!active || !payload?.length) return null;
 
   return (
-    <div className="bg-white border border-slate-100 rounded-lg shadow-lg p-4 text-sm animate-in fade-in zoom-in duration-200">
-      <p className="font-bold text-slate-900 mb-3 border-b border-slate-50 pb-2">{label}</p>
+    <div className="bg-surface border border-outline-variant rounded-lg shadow-lg p-4 text-sm animate-in fade-in zoom-in duration-200">
+      <p className="font-bold text-on-surface mb-3 border-b border-slate-50 pb-2">{label}</p>
       <div className="space-y-2">
         {payload.map((entry) => (
           <p key={entry.dataKey} className="flex justify-between gap-6">
-            <span className="text-slate-500">{entry.dataKey === 'currentRevenue' ? 'Current' : 'Previous'}:</span>
-            <strong className={entry.dataKey === 'currentRevenue' ? 'text-brand-btn-primary' : 'text-slate-700'}>
+            <span className="text-on-surface-variant">{entry.dataKey === 'currentRevenue' ? 'Current' : 'Previous'}:</span>
+            <strong className={entry.dataKey === 'currentRevenue' ? 'text-brand-btn-primary' : 'text-on-surface-variant'}>
               {formatCompact(entry.value)} SEK
             </strong>
           </p>
@@ -49,13 +49,13 @@ export const TenantRevenueVelocityChart = memo(function TenantRevenueVelocityCha
       className={className || ''}
       bodyClassName=""
       legend={
-        <div className="flex items-center gap-6 text-sm font-black text-slate-500 uppercase tracking-widest bg-slate-50 px-4 py-2 rounded-full border border-slate-100">
+        <div className="flex items-center gap-6 text-sm font-black text-on-surface-variant uppercase tracking-widest bg-surface-container-low px-4 py-2 rounded-full border border-outline-variant">
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-brand-btn-primary" />
             <span>Current</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full border-2 border-slate-300 border-dashed bg-transparent" />
+            <span className="w-3 h-3 rounded-full border-2 border-outline-variant border-dashed bg-transparent" />
             <span>Previous</span>
           </div>
         </div>

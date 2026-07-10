@@ -18,11 +18,11 @@ const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?:
   if (!active || !payload?.length) return null;
 
   return (
-    <div className="bg-white border border-slate-100 rounded-lg shadow-lg p-4 text-sm animate-in fade-in zoom-in duration-200">
-      <p className="font-bold text-slate-900 mb-3 border-b border-slate-50 pb-2">{label}</p>
+    <div className="bg-surface border border-outline-variant rounded-lg shadow-lg p-4 text-sm animate-in fade-in zoom-in duration-200">
+      <p className="font-bold text-on-surface mb-3 border-b border-slate-50 pb-2">{label}</p>
       <div className="space-y-2">
         {payload.map((entry, index) => (
-          <p key={index} className="flex justify-between gap-6 text-slate-500">
+          <p key={index} className="flex justify-between gap-6 text-on-surface-variant">
             <span>{entry.name}:</span>
             <strong style={{ color: entry.color }}>
               {formatCurrency(entry.value)}
@@ -49,7 +49,7 @@ export const AccumulatedRevenueChart = memo(function AccumulatedRevenueChart({ i
                 comparison={comparison}
                 className={className}
                 bodyClassName={points.length === 0 ? "flex items-center justify-center" : ""}
-                legend={<span className="text-sm font-bold text-slate-500 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded">L = Current rev, R = Accumulated Rev</span>}>
+                legend={<span className="text-sm font-bold text-on-surface-variant uppercase tracking-widest bg-surface-container-low px-3 py-1.5 rounded">L = Current rev, R = Accumulated Rev</span>}>
       {points.length === 0 ? (
         <EmptyState message="No revenue data available" variant="minimal" />
       ) : (

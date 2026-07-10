@@ -42,13 +42,13 @@ export function Financial() {
           <div className="flex items-center gap-3 mb-1">
             <h1 className="text-2xl font-extrabold text-brand-text tracking-tight m-0">Global Portfolio</h1>
           </div>
-          <p className="text-sm text-slate-500 m-0 font-medium tracking-wide">Performance overview across all active tenants. VAT included.</p>
+          <p className="text-sm text-on-surface-variant m-0 font-medium tracking-wide">Performance overview across all active tenants. VAT included.</p>
         </div>
         <div className="flex items-center gap-1 shrink-0 w-full lg:w-auto">
           <button
             type="button"
             disabled
-            className="w-10 h-10 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center text-slate-450 cursor-not-allowed opacity-50 shrink-0"
+            className="w-10 h-10 rounded-full border border-outline-variant bg-surface-container-low flex items-center justify-center text-on-surface-variant cursor-not-allowed opacity-50 shrink-0"
             aria-label="Already at global portfolio"
           >
             <ArrowLeft size={20} className="stroke-[2.5]" />

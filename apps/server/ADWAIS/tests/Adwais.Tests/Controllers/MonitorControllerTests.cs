@@ -22,7 +22,7 @@ namespace Adwais.Tests.Controllers;
 public class MonitorControllerTests
 {
     private readonly DbContextOptions<AnalyticsDbContext> _dbOptions;
-    private readonly Mock<IDbContextFactory<AnalyticsDbContext>> _dbContextFactoryMock;
+    private readonly AnalyticsDbContext _dbContext;
     private readonly Mock<IMonitorOrchestrationService> _monitorServiceMock;
     private readonly MonitorController _controller;
 
@@ -32,13 +32,10 @@ public class MonitorControllerTests
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
 
-        _dbContextFactoryMock = new Mock<IDbContextFactory<AnalyticsDbContext>>();
-        _dbContextFactoryMock.Setup(f => f.CreateDbContextAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(() => new AnalyticsDbContext(_dbOptions));
-
+        _dbContext = new AnalyticsDbContext(_dbOptions);
         _monitorServiceMock = new Mock<IMonitorOrchestrationService>();
 
-        _controller = new MonitorController(_dbContextFactoryMock.Object, _monitorServiceMock.Object);
+        _controller = new MonitorController(_dbContext, _monitorServiceMock.Object);
 
         // Seed global config for IsUptimeRobotConfiguredAsync
         using var db = new AnalyticsDbContext(_dbOptions);

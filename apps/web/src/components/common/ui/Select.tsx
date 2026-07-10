@@ -7,6 +7,7 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   containerClassName?: string;
   dropdownAlign?: string;
   optionClassName?: string;
+  dropdownClassName?: string;
 }
 
 export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
@@ -14,14 +15,15 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     label, 
     icon = <ChevronDown size={14} />, 
     children, 
-    className = 'pl-3 pr-10 py-2 text-sm font-semibold h-10 border border-slate-300 hover:border-slate-400 rounded-xl bg-slate-50 text-slate-800', 
+    className = 'pl-3 pr-10 py-2 text-sm font-semibold h-10 border border-outline-variant hover:border-slate-350 rounded-lg bg-surface-container-low text-on-surface transition-all', 
     disabled, 
     containerClassName = 'flex flex-col relative w-full', 
     value, 
     onChange, 
     defaultValue, 
     dropdownAlign = 'left', 
-    optionClassName = 'py-1.5 min-h-[36px]', 
+    optionClassName = 'py-2.5 min-h-[40px]', 
+    dropdownClassName,
     ...props 
   }, ref) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -35,13 +37,13 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
 
     React.useImperativeHandle(ref, () => selectRef.current!);
 
-    const options: { value: string; label: string; disabled?: boolean }[] = [];
+    const options: { value: string; label: React.ReactNode; disabled?: boolean }[] = [];
     React.Children.forEach(children, (child) => {
       if (React.isValidElement(child) && child.type === 'option') {
         const optionProps = child.props as React.OptionHTMLAttributes<HTMLOptionElement>;
         options.push({
           value: String(optionProps.value ?? ''),
-          label: String(optionProps.children ?? ''),
+          label: optionProps.children,
           disabled: optionProps.disabled,
         });
       }
@@ -100,7 +102,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     return (
       <div ref={containerRef} className={containerClassName}>
         {label && (
-          <label className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">
+          <label className="text-sm font-bold text-on-surface-variant uppercase tracking-wider mb-1">
             {label}
           </label>
         )}
@@ -138,7 +140,9 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           )}
 
           {isOpen && !disabled && (
-            <div className={`absolute top-full mt-1.5 ${alignClass} min-w-full w-max max-w-[340px] bg-white border border-slate-200/80 shadow-xl rounded-xl p-1 flex flex-col gap-0.5 z-[100] max-h-60 overflow-y-auto custom-scrollbar animate-in fade-in slide-in-from-top-1 duration-100`}>
+            <div className={`absolute ${alignClass} w-full bg-surface border border-outline-variant/50 shadow-lg rounded-lg py-1.5 flex flex-col z-[100] overflow-y-auto custom-scrollbar animate-in fade-in duration-100 ${
+              dropdownClassName ? dropdownClassName : 'top-full mt-1.5 max-h-60 slide-in-from-bottom-1'
+            }`}>
               {options.map((opt) => {
                 const isSelected = opt.value === activeValue;
 
@@ -148,11 +152,11 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
                     type="button"
                     disabled={opt.disabled}
                     onClick={() => handleSelectOption(opt.value)}
-                    className={`${optionClassName} w-full text-left px-3 flex items-center text-sm font-semibold rounded-lg transition-colors cursor-pointer focus:outline-none leading-tight shrink-0 ${isSelected
-                      ? 'bg-brand-btn-primary/10 text-slate-800 font-bold hover:bg-brand-accent/20'
+                    className={`${optionClassName} w-full text-left px-4 flex items-center text-sm font-semibold transition-colors cursor-pointer focus:outline-none leading-tight shrink-0 ${isSelected
+                      ? 'bg-primary-container text-brand-text font-bold hover:bg-brand-btn-primary/15'
                       : opt.disabled
-                        ? 'text-slate-350 bg-slate-50/50 cursor-not-allowed'
-                        : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'
+                        ? 'opacity-40 bg-surface-container-lowest cursor-not-allowed'
+                        : 'text-brand-text hover:bg-surface-container-low hover:text-brand-text'
                       }`}
                   >
                     {opt.label}

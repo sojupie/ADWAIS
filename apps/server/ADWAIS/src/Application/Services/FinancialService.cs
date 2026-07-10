@@ -14,8 +14,10 @@ namespace Adwais.Application.Services;
 /// <summary>
 /// Provides financial analytics and KPI calculations by merging historical rollup data with real-time order data.
 /// </summary>
-public class FinancialService(IApplicationDbContextFactory contextFactory) : IFinancialService
+public class FinancialService(IApplicationDbContext dbContext) : IFinancialService
 {
+    private readonly IApplicationDbContext _dbContext = dbContext;
+
     #region Internal data model for the merge layer
 
     private record DataRow(DateTimeOffset Timestamp, Guid? TenantId, decimal Revenue, int Volume);
@@ -181,7 +183,7 @@ public class FinancialService(IApplicationDbContextFactory contextFactory) : IFi
         var currentEnd = period.CurrentEnd;
         var previousStart = period.PreviousStart;
         var isHourly = period.IsHourly;
-        await using var context = await contextFactory.CreateDbContextAsync(ct);
+        var context = _dbContext;
 
         var currentRows = await GetMergedTenantDataAsync(context, currentStart, currentEnd, isHourly, tenantId, ct);
         var previousRows = await GetMergedTenantDataAsync(context, previousStart, period.PreviousEnd, isHourly, tenantId, ct);
@@ -218,7 +220,7 @@ public class FinancialService(IApplicationDbContextFactory contextFactory) : IFi
         var steps = period.StepsInPeriod;
         var isHourly = period.IsHourly;
         var includeActualTime = period.IncludeActualTime;
-        await using var context = await contextFactory.CreateDbContextAsync(ct);
+        var context = _dbContext;
 
         List<DataRow> currentRows, previousRows;
 
@@ -279,7 +281,7 @@ public class FinancialService(IApplicationDbContextFactory contextFactory) : IFi
         var steps = period.StepsInPeriod;
         var isHourly = period.IsHourly;
         var includeActualTime = period.IncludeActualTime;
-        await using var context = await contextFactory.CreateDbContextAsync(ct);
+        var context = _dbContext;
 
         List<DataRow> currentRows, previousRows;
 
@@ -355,7 +357,7 @@ public class FinancialService(IApplicationDbContextFactory contextFactory) : IFi
         var currentEnd = period.CurrentEnd;
         var previousStart = period.PreviousStart;
         var isHourly = period.IsHourly;
-        await using var context = await contextFactory.CreateDbContextAsync(ct);
+        var context = _dbContext;
 
         var currentRows = await GetMergedTenantDataAsync(context, currentStart, currentEnd, isHourly, ct: ct);
         var previousRows = await GetMergedTenantDataAsync(context, previousStart, period.PreviousEnd, isHourly, ct: ct);
@@ -392,7 +394,7 @@ public class FinancialService(IApplicationDbContextFactory contextFactory) : IFi
         var currentEnd = period.CurrentEnd;
         var previousStart = period.PreviousStart;
         var isHourly = period.IsHourly;
-        await using var context = await contextFactory.CreateDbContextAsync(ct);
+        var context = _dbContext;
 
         var currentRows = await GetMergedTenantDataAsync(context, currentStart, currentEnd, isHourly, ct: ct);
         var previousRows = await GetMergedTenantDataAsync(context, previousStart, period.PreviousEnd, isHourly, ct: ct);
@@ -458,7 +460,7 @@ public class FinancialService(IApplicationDbContextFactory contextFactory) : IFi
         var previousDuration = currentStart - previousStart;
         var durationRatio = (decimal)timeframeDuration.TotalDays / (decimal)Math.Max(1, previousDuration.TotalDays);
 
-        await using var context = await contextFactory.CreateDbContextAsync(ct);
+        var context = _dbContext;
 
         // Volume anomaly only calculates aggregate totals and does not need hourly resolution. 
         // Forcing 'false' ensures we use the fast DailyTenantRollups materialized view for the 30-day baseline 
@@ -504,7 +506,7 @@ public class FinancialService(IApplicationDbContextFactory contextFactory) : IFi
         var currentEnd = period.CurrentEnd;
         var previousStart = period.PreviousStart;
         var isHourly = period.IsHourly;
-        await using var context = await contextFactory.CreateDbContextAsync(ct);
+        var context = _dbContext;
 
         var currentRows = await GetMergedTenantDataAsync(context, currentStart, currentEnd, isHourly, ct: ct);
         var previousRows = await GetMergedTenantDataAsync(context, previousStart, period.PreviousEnd, isHourly, ct: ct);
@@ -555,7 +557,7 @@ public class FinancialService(IApplicationDbContextFactory contextFactory) : IFi
         var steps = period.StepsInPeriod;
         var isHourly = period.IsHourly;
         var includeActualTime = period.IncludeActualTime;
-        await using var context = await contextFactory.CreateDbContextAsync(ct);
+        var context = _dbContext;
 
         var currentRows = await GetMergedTenantDataAsync(context, currentStart, currentEnd, isHourly, tenantId, ct);
 
@@ -586,7 +588,7 @@ public class FinancialService(IApplicationDbContextFactory contextFactory) : IFi
     {
         var currentStart = period.CurrentStart;
         var currentEnd = period.CurrentEnd;
-        await using var context = await contextFactory.CreateDbContextAsync(ct);
+        var context = _dbContext;
 
         var orderValues = await context.Orders
             .AsNoTracking()
@@ -687,7 +689,7 @@ public class FinancialService(IApplicationDbContextFactory contextFactory) : IFi
         var t30 = TimeframeResolver.Resolve(Timeframe.T30);
         var currentStart = t30.CurrentStart;
         var currentEnd = t30.CurrentEnd;
-        await using var context = await contextFactory.CreateDbContextAsync(ct);
+        var context = _dbContext;
 
         var query = context.Orders
             .AsNoTracking()
@@ -741,7 +743,7 @@ public class FinancialService(IApplicationDbContextFactory contextFactory) : IFi
         var steps = period.StepsInPeriod;
         var isHourly = period.IsHourly;
         var includeActualTime = period.IncludeActualTime;
-        await using var context = await contextFactory.CreateDbContextAsync(ct);
+        var context = _dbContext;
 
         List<DataRow> currentRows, previousRows;
 
@@ -788,7 +790,7 @@ public class FinancialService(IApplicationDbContextFactory contextFactory) : IFi
 
     public async Task<IReadOnlyList<OrderDto>> GetOrdersAsync(DateTimeOffset dateSince, DateTimeOffset dateUntil, int ceilingCount, CancellationToken ct)
     {
-        await using var context = await contextFactory.CreateDbContextAsync(ct);
+        var context = _dbContext;
 
         return await context.Orders
             .AsNoTracking()

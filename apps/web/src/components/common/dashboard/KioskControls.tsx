@@ -8,10 +8,10 @@ export function KioskControls() {
     <button
       type="button"
       onClick={togglePaused}
-      className={`relative overflow-hidden flex items-center justify-between w-[200px] px-3.5 py-1.5 border rounded-lg shadow-sm transition-all duration-300 whitespace-nowrap shrink-0 cursor-pointer active:scale-[0.98]
+      className={`relative overflow-hidden flex items-center justify-between w-[200px] px-4 py-1.5 border rounded-full shadow-sm transition-all duration-300 whitespace-nowrap shrink-0 cursor-pointer active:scale-[0.98]
         ${mode === 'kiosk' ? 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100' :
           mode === 'interactive' ? 'bg-amber-50 border-amber-200 hover:bg-amber-100' : 
-          'bg-slate-200 border-slate-200 hover:bg-slate-50'}`}
+          'bg-surface-container-high border-outline-variant hover:bg-surface-container-low'}`}
       title={mode === 'paused' ? 'Resume Kiosk' : 'Pause Kiosk'}
     >
       {/* Left side: Status dot and label matching UserAccountLink text-sm font-bold */}

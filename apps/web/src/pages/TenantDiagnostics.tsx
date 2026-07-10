@@ -74,13 +74,13 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe 
               {tenantType}
             </span>
           </div>
-          <p className="text-sm text-slate-500 m-0 font-medium tracking-wide">Isolated entity performance view for the {timeframe} period. VAT included.</p>
+          <p className="text-sm text-on-surface-variant m-0 font-medium tracking-wide">Isolated entity performance view for the {timeframe} period. VAT included.</p>
         </div>
         <div className="flex items-center gap-1 shrink-0 w-full lg:w-auto">
           <button
             type="button"
             onClick={handleBackToGlobal}
-            className="w-10 h-10 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-700 hover:text-brand-text hover:bg-slate-100 hover:border-slate-300 transition-all shadow-sm cursor-pointer shrink-0"
+            className="w-10 h-10 rounded-full border border-outline-variant bg-surface flex items-center justify-center text-on-surface-variant hover:text-brand-text hover:bg-surface-container-low hover:border-outline-variant active:bg-surface-container transition-all shadow-sm cursor-pointer shrink-0"
             aria-label="Back to global portfolio"
           >
             <ArrowLeft size={20} className="stroke-[2.5]" />

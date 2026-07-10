@@ -28,21 +28,21 @@ const CustomTooltip = ({ active, payload }: { isLoading?: boolean;  active?: boo
   const point = payload[0].payload as RevenueEfficiencyTenant;
 
   return (
-    <div className="bg-white border border-slate-100 rounded-lg shadow-lg p-4 text-sm animate-in fade-in zoom-in duration-200">
-      <p className="font-bold text-slate-900 mb-3 border-b border-slate-50 pb-2">
-        {point.tenantName} <span className="text-slate-500 font-normal text-sm ml-2 uppercase tracking-wider">{point.type}</span>
+    <div className="bg-surface border border-outline-variant rounded-lg shadow-lg p-4 text-sm animate-in fade-in zoom-in duration-200">
+      <p className="font-bold text-on-surface mb-3 border-b border-slate-50 pb-2">
+        {point.tenantName} <span className="text-on-surface-variant font-normal text-sm ml-2 uppercase tracking-wider">{point.type}</span>
       </p>
       <div className="space-y-2">
         <p className="flex justify-between gap-6">
-          <span className="text-slate-500">Average Order Value:</span>
-          <strong className="text-slate-700">{formatCurrency(point.averageOrderValue)}</strong>
+          <span className="text-on-surface-variant">Average Order Value:</span>
+          <strong className="text-on-surface-variant">{formatCurrency(point.averageOrderValue)}</strong>
         </p>
         <p className="flex justify-between gap-6">
-          <span className="text-slate-500">Portfolio Share:</span>
-          <strong className="text-slate-700">{point.portfolioSharePercentage.toFixed(1)}%</strong>
+          <span className="text-on-surface-variant">Portfolio Share:</span>
+          <strong className="text-on-surface-variant">{point.portfolioSharePercentage.toFixed(1)}%</strong>
         </p>
         <p className="flex justify-between gap-6">
-          <span className="text-slate-500">Growth Velocity:</span>
+          <span className="text-on-surface-variant">Growth Velocity:</span>
           <strong className={point.growthVelocity >= 0 ? 'text-growth' : 'text-[#c92a2a]'}>
             {point.growthVelocity > 0 ? '+' : ''}{point.growthVelocity.toFixed(1)}%
           </strong>
@@ -74,7 +74,7 @@ export const RevenueEfficiencyChart = memo(function RevenueEfficiencyChart({
       comparison={comparison}
       className={className || "h-full"}
       bodyClassName={isEmpty ? 'flex items-center justify-center' : 'flex-1 min-h-0'}
-      legend={<span className="text-sm font-bold text-slate-500 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded">Size = Relative Revenue Growth</span>}
+      legend={<span className="text-sm font-bold text-on-surface-variant uppercase tracking-widest bg-surface-container-low px-3 py-1.5 rounded">Size = Relative Revenue Growth</span>}
     >
       {isEmpty ? (
         <EmptyState message={"No data available"} variant={"minimal"}/>

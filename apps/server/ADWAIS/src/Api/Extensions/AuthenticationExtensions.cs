@@ -22,7 +22,13 @@ public static class AuthenticationExtensions
         {
             options.MapInboundClaims = false;
             var secret = configuration["Authentication:KioskJwtSecret"];
-            var key = Encoding.UTF8.GetBytes(string.IsNullOrEmpty(secret) ? "SuperSecretKeyForTestingKioskTokens32CharsMinimum!" : secret);
+            if (string.IsNullOrEmpty(secret))
+            {
+                // Generate a secure transient key on startup to satisfy EF/OpenAPI tools 
+                // while effectively disabling JWT token validation for external clients
+                secret = Guid.NewGuid().ToString("N") + Guid.NewGuid().ToString("N");
+            }
+            var key = Encoding.UTF8.GetBytes(secret);
 
             options.TokenValidationParameters = new TokenValidationParameters
             {

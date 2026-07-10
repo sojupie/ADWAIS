@@ -8,14 +8,14 @@ namespace Adwais.Api.Middleware;
 public class DashboardBasicAuthMiddleware
 {
     private readonly RequestDelegate _next;
-    private readonly string _username;
-    private readonly string _password;
+    private readonly string? _username;
+    private readonly string? _password;
 
     public DashboardBasicAuthMiddleware(RequestDelegate next, IConfiguration configuration)
     {
         _next = next;
-        _username = configuration["DashboardAuth:Username"] ?? "admin";
-        _password = configuration["DashboardAuth:Password"] ?? "admin";
+        _username = configuration["DashboardAuth:Username"];
+        _password = configuration["DashboardAuth:Password"];
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -23,6 +23,11 @@ public class DashboardBasicAuthMiddleware
         if (context.Request.Path.StartsWithSegments("/swagger") || 
             context.Request.Path.StartsWithSegments("/hangfire"))
         {
+            if (string.IsNullOrEmpty(_username) || string.IsNullOrEmpty(_password))
+            {
+                throw new InvalidOperationException("DashboardAuth:Username and Password must be configured to access system dashboards.");
+            }
+
             if (!context.Request.Headers.ContainsKey("Authorization"))
             {
                 ReturnUnauthorized(context);

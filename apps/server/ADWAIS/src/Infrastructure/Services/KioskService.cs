@@ -1,10 +1,11 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Adwais.Application.Interfaces;
+using Adwais.Application.Common.Interfaces;
 using Adwais.Domain.Entities;
 using Adwais.Infrastructure.Helpers;
-using Adwais.Infrastructure.Persistence;
 
 namespace Adwais.Infrastructure.Services;
 
@@ -12,34 +13,32 @@ namespace Adwais.Infrastructure.Services;
 /// Service implementation managing kiosk registration, activation, and token retrieval flows.
 /// </summary>
 public class KioskService(
-    IDbContextFactory<AnalyticsDbContext> contextFactory,
+    IApplicationDbContext dbContext,
     ITokenService tokenService)
     : IKioskService
 {
-    private readonly IDbContextFactory<AnalyticsDbContext> _contextFactory = contextFactory;
+    private readonly IApplicationDbContext _dbContext = dbContext;
     private readonly ITokenService _tokenService = tokenService;
 
     /// <inheritdoc />
     public async Task<string> RegisterDeviceAsync(string deviceId, CancellationToken ct = default)
     {
-        await using var db = await _contextFactory.CreateDbContextAsync(ct);
-        
         string code;
         bool isDuplicate;
         do
         {
             code = AuthStringHelper.GetRandomActivationCode();
-            isDuplicate = await db.KioskDevices.AnyAsync(kd => 
+            isDuplicate = await _dbContext.KioskDevices.AnyAsync(kd => 
                 kd.ActivationCode == code && 
                 !kd.IsAuthorized && 
                 kd.ActivationCodeExpires > DateTimeOffset.UtcNow, ct);
         } while (isDuplicate);
         
-        var device = await db.KioskDevices.SingleOrDefaultAsync(kd => kd.DeviceId == deviceId, ct);
+        var device = await _dbContext.KioskDevices.SingleOrDefaultAsync(kd => kd.DeviceId == deviceId, ct);
         var expiry = DateTimeOffset.UtcNow.AddMinutes(10);
         if (device == null)
         {
-            db.KioskDevices.Add(new KioskDevice
+            _dbContext.KioskDevices.Add(new KioskDevice
             {
                 DeviceId = deviceId,
                 ActivationCode = code,
@@ -56,16 +55,14 @@ public class KioskService(
             device.IsAuthorized = false;
             device.AuthorizedAt = null;
         }
-        await db.SaveChangesAsync(ct);
+        await _dbContext.SaveChangesAsync(ct);
         return code;
     }
 
     /// <inheritdoc />
     public async Task<bool> ActivateDeviceAsync(string activationCode, CancellationToken ct = default)
     {
-        await using var db = await _contextFactory.CreateDbContextAsync(ct);
-
-        var device = await db.KioskDevices.SingleOrDefaultAsync(kd => 
+        var device = await _dbContext.KioskDevices.SingleOrDefaultAsync(kd => 
             kd.ActivationCode == activationCode && 
             !kd.IsAuthorized && 
             kd.ActivationCodeExpires > DateTimeOffset.UtcNow, ct);
@@ -78,16 +75,14 @@ public class KioskService(
         device.IsAuthorized = true;
         device.AuthorizedAt = DateTimeOffset.UtcNow;
 
-        await db.SaveChangesAsync(ct);
+        await _dbContext.SaveChangesAsync(ct);
         return true;
     }
 
     /// <inheritdoc />
     public async Task<string?> GetTokenAsync(string deviceId, CancellationToken ct = default)
     {
-        await using var db = await _contextFactory.CreateDbContextAsync(ct);
-
-        var device = await db.KioskDevices.SingleOrDefaultAsync(kd => kd.DeviceId == deviceId, ct);
+        var device = await _dbContext.KioskDevices.SingleOrDefaultAsync(kd => kd.DeviceId == deviceId, ct);
 
         if (device is null || !device.IsAuthorized)
         {

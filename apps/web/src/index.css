@@ -83,9 +83,8 @@
   --color-growth: #37b24d;
   --color-decline: #f03e3e;
   --color-decline-warning: #f59f00;
-
-  /* Material Design 3 (M3) Semantic Colors mapped deliberately to ADWAIS brand identity and slate surfaces */
-  --md-sys-color-primary: #04686D;
+  
+  --md-sys-color-primary: #ffffff;
   --md-sys-color-on-primary: #ffffff;
   --md-sys-color-primary-container: #e1eeee;
   --md-sys-color-on-primary-container: #022D2E;

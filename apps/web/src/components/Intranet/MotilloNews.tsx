@@ -47,7 +47,7 @@ export function MotilloNews() {
                   key={post.id}
                   onClick={() => setSelectedPostId(post.id)}
                   className={`flex flex-col text-left p-4 rounded-xl transition-all w-[280px] md:w-auto flex-shrink-0 snap-start ${
-                    isSelected ? 'bg-primary-container' : 'bg-transparent hover:bg-brand-btn-primary/5'
+                    isSelected ? 'bg-brand-active' : 'bg-transparent hover:bg-brand-hover'
                   }`}
                 >
                   <div className="flex items-center gap-2 mb-2">

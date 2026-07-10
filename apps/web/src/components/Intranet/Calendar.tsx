@@ -496,7 +496,7 @@ export function Calendar() {
         
         {/* Month/Week Navigation */}
         {viewMode !== 'schedule' && (
-          <div className="flex items-center justify-between border-b bg-surface border-outline-variant pb-2 px-4">
+          <div className="flex items-center justify-between bg-surface pb-2 px-4">
             <h3 className="text-sm font-black uppercase tracking-wider text-on-surface">{navLabel}</h3>
             <div className="flex items-center gap-1">
               <button 
@@ -547,7 +547,7 @@ export function Calendar() {
                     onClick={() => handleCellClick(cell.date)}
                     className={`min-h-[50px] md:min-h-[65px] bg-surface p-1.5 flex flex-col transition duration-150 relative group ${
                       cell.isCurrentMonth ? '' : 'bg-surface-container-low opacity-40'
-                    } ${isToday ? 'bg-surface-container-low' : 'hover:bg-surface-container-low'} ${
+                    } ${isToday ? 'bg-calendar-today-bg' : 'hover:bg-brand-hover'} ${
                       isWriter ? 'cursor-pointer' : ''
                     }`}
                   >
@@ -596,7 +596,7 @@ export function Calendar() {
                   ref={isToday ? todayRef : undefined}
                   onClick={() => handleCellClick(day)}
                   className={`bg-surface p-4 flex flex-col h-full w-[200px] shrink-0 transition-colors ${
-                    isToday ? 'bg-brand-accent/5' : 'hover:bg-surface-container-lowest'
+                    isToday ? 'bg-calendar-today-bg' : 'hover:bg-brand-hover'
                   } cursor-pointer`}
                 >
                   <div className="flex items-start justify-between pb-2 border-b border-outline-variant mb-2 gap-1.5">

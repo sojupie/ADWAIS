@@ -12,52 +12,52 @@ export type MonitorStatus = 'operational' | 'degraded' | 'down' | 'unknown' | 'p
 
 export const STATUS_THEMES = {
   down: {
-    bg: 'bg-status-down-container/70 hover:bg-status-down-container/90',
+    bg: 'bg-status-down-container hover:bg-status-down-container-hover',
     border: 'border-0',
     text: 'text-status-down-on-container font-bold',
     valueText: 'text-status-down-on-container font-black',
     mutedText: 'text-status-down-muted font-semibold',
-    dot: 'bg-status-down shadow-[0_0_8px] shadow-status-down/50 animate-pulse'
+    dot: 'bg-status-down shadow-status-down-glow animate-pulse'
   },
   degraded: {
-    bg: 'bg-status-degraded-container/70 hover:bg-status-degraded-container/90',
+    bg: 'bg-status-degraded-container hover:bg-status-degraded-container-hover',
     border: 'border-0',
     text: 'text-status-degraded-on-container font-bold',
     valueText: 'text-status-degraded-on-container font-black',
     mutedText: 'text-status-degraded-muted font-semibold',
-    dot: 'bg-status-degraded shadow-[0_0_8px] shadow-status-degraded/50'
+    dot: 'bg-status-degraded shadow-status-degraded-glow'
   },
   operational: {
-    bg: 'bg-status-up-container/70 hover:bg-status-up-container/90',
+    bg: 'bg-status-up-container hover:bg-status-up-container-hover',
     border: 'border-0',
     text: 'text-status-up-on-container',
     valueText: 'text-status-up-on-container font-bold',
     mutedText: 'text-status-up-muted',
-    dot: 'bg-status-up shadow-[0_0_8px] shadow-status-up/30'
+    dot: 'bg-status-up shadow-status-up-glow'
   },
   unknown: {
-    bg: 'bg-status-unknown-container/70 hover:bg-status-unknown-container/90',
+    bg: 'bg-status-unknown-container hover:bg-status-unknown-container-hover',
     border: 'border-0',
     text: 'text-status-unknown-on-container font-bold',
     valueText: 'text-status-unknown-on-container font-black',
     mutedText: 'text-status-unknown-muted font-semibold',
-    dot: 'bg-status-unknown shadow-[0_0_8px] shadow-status-unknown/40'
+    dot: 'bg-status-unknown shadow-status-unknown-glow'
   },
   paused: {
-    bg: 'bg-status-paused-container/70 hover:bg-status-paused-container/90',
+    bg: 'bg-status-paused-container hover:bg-status-paused-container-hover',
     border: 'border-0',
     text: 'text-status-paused-on-container font-bold',
     valueText: 'text-status-paused-on-container font-black',
     mutedText: 'text-status-paused-muted font-semibold',
-    dot: 'bg-status-paused shadow-[0_0_6px] shadow-status-paused/40'
+    dot: 'bg-status-paused shadow-status-paused-glow'
   },
   starting: {
-    bg: 'bg-status-starting-container/70 hover:bg-status-starting-container/90',
+    bg: 'bg-status-starting-container hover:bg-status-starting-container-hover',
     border: 'border-0',
     text: 'text-status-starting-on-container font-bold',
     valueText: 'text-status-starting-on-container font-black',
     mutedText: 'text-status-starting-muted font-semibold',
-    dot: 'bg-status-starting shadow-[0_0_6px] shadow-status-starting/40'
+    dot: 'bg-status-starting shadow-status-starting-glow'
   }
 } as const;
 

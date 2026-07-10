@@ -9,64 +9,108 @@ export default {
   theme: {
     extend: {
       colors: {
-        'brand-bg-primary': '#ffffff',
-        'brand-bg-secondary': '#022d2e',
-        'brand-bg-tertiary': '#ffffff',
-        'brand-bg-quaternary': '#034b4e',
-        'brand-btn-primary': '#04686D',
-        'brand-btn-border-primary': '#04686D',
-        'brand-btn-secondary': '#ffffff',
-        'brand-btn-border-secondary': '#06959B',
-        'brand-btn-quaternary': '#034b4e',
-        'brand-text': '#022D2E',
-        'brand-accent': '#FFCE44',
-        'brand-link': '#06959B',
+        // Material 3 Semantic Colors mapped directly to CSS variables
+        primary: 'var(--md-sys-color-primary)',
+        'on-primary': 'var(--md-sys-color-on-primary)',
+        'primary-container': 'var(--md-sys-color-primary-container)',
+        'on-primary-container': 'var(--md-sys-color-on-primary-container)',
+        secondary: 'var(--md-sys-color-secondary)',
+        'on-secondary': 'var(--md-sys-color-on-secondary)',
+        'secondary-container': 'var(--md-sys-color-secondary-container)',
+        'on-secondary-container': 'var(--md-sys-color-on-secondary-container)',
+        tertiary: 'var(--md-sys-color-tertiary)',
+        'on-tertiary': 'var(--md-sys-color-on-tertiary)',
+        'tertiary-container': 'var(--md-sys-color-tertiary-container)',
+        'on-tertiary-container': 'var(--md-sys-color-on-tertiary-container)',
+        error: 'var(--md-sys-color-error)',
+        'on-error': 'var(--md-sys-color-on-error)',
+        'error-container': 'var(--md-sys-color-error-container)',
+        'on-error-container': 'var(--md-sys-color-on-error-container)',
+        background: 'var(--md-sys-color-background)',
+        'on-background': 'var(--md-sys-color-on-background)',
+        surface: 'var(--md-sys-color-surface)',
+        'on-surface': 'var(--md-sys-color-on-surface)',
+        'on-surface-variant': 'var(--md-sys-color-on-surface-variant)',
+        'surface-container-lowest': 'var(--md-sys-color-surface-container-lowest)',
+        'surface-container-low': 'var(--md-sys-color-surface-container-low)',
+        'surface-container': 'var(--md-sys-color-surface-container)',
+        'surface-container-high': 'var(--md-sys-color-surface-container-high)',
+        'surface-container-highest': 'var(--md-sys-color-surface-container-highest)',
+        'surface-dim': 'var(--md-sys-color-surface-dim)',
+        'surface-bright': 'var(--md-sys-color-surface-bright)',
+        outline: 'var(--md-sys-color-outline)',
+        'outline-variant': 'var(--md-sys-color-outline-variant)',
+        'inverse-surface': 'var(--md-sys-color-inverse-surface)',
+        'inverse-on-surface': 'var(--md-sys-color-inverse-on-surface)',
+        'inverse-primary': 'var(--md-sys-color-inverse-primary)',
+        // Legacy Brand mappings mapped to CSS variables
+        'brand-bg-primary': 'var(--color-brand-bg-primary)',
+        'brand-bg-secondary': 'var(--color-brand-bg-secondary)',
+        'brand-bg-tertiary': 'var(--color-brand-bg-tertiary)',
+        'brand-bg-quaternary': 'var(--color-brand-bg-quaternary)',
+        'brand-btn-primary': 'var(--color-brand-btn-primary)',
+        'brand-btn-border-primary': 'var(--color-brand-btn-border-primary)',
+        'brand-btn-secondary': 'var(--color-brand-btn-secondary)',
+        'brand-btn-border-secondary': 'var(--color-brand-btn-border-secondary)',
+        'brand-btn-quaternary': 'var(--color-brand-btn-quaternary)',
+        'brand-text': 'var(--color-brand-text)',
+        'brand-accent': 'var(--color-brand-accent)',
+        'brand-link': 'var(--color-brand-link)',
+        'brand-hover': 'var(--color-brand-hover)',
+        'brand-active': 'var(--color-brand-active)',
+        'calendar-today-bg': 'var(--color-calendar-today-bg)',
         'status-up': {
-          DEFAULT: '#10B981', // emerald-500
-          container: '#D1FAE5', // emerald-100
-          'on-container': '#022C22', // emerald-950
-          muted: '#064E3B', // emerald-900
+          DEFAULT: 'var(--color-status-up)',
+          container: 'var(--color-status-up-container)',
+          'container-hover': 'var(--color-status-up-container-hover)',
+          'on-container': 'var(--color-status-up-on-container)',
+          muted: 'var(--color-status-up-muted)',
         },
         'status-down': {
-          DEFAULT: '#EF4444', // red-500
-          container: '#FEE2E2', // red-100
-          'on-container': '#450A0A', // red-950
-          muted: '#7F1D1D', // red-900
+          DEFAULT: 'var(--color-status-down)',
+          container: 'var(--color-status-down-container)',
+          'container-hover': 'var(--color-status-down-container-hover)',
+          'on-container': 'var(--color-status-down-on-container)',
+          muted: 'var(--color-status-down-muted)',
         },
         'status-degraded': {
-          DEFAULT: '#F59E0B', // amber-500
-          container: '#FEF3C7', // amber-100
-          'on-container': '#451A03', // amber-950
-          muted: '#78350F', // amber-900
+          DEFAULT: 'var(--color-status-degraded)',
+          container: 'var(--color-status-degraded-container)',
+          'container-hover': 'var(--color-status-degraded-container-hover)',
+          'on-container': 'var(--color-status-degraded-on-container)',
+          muted: 'var(--color-status-degraded-muted)',
         },
         'status-paused': {
-          DEFAULT: '#0EA5E9', // sky-500
-          container: '#E0F2FE', // sky-100
-          'on-container': '#082F49', // sky-950
-          muted: '#0C4A6E', // sky-900
+          DEFAULT: 'var(--color-status-paused)',
+          container: 'var(--color-status-paused-container)',
+          'container-hover': 'var(--color-status-paused-container-hover)',
+          'on-container': 'var(--color-status-paused-on-container)',
+          muted: 'var(--color-status-paused-muted)',
         },
         'status-starting': {
-          DEFAULT: '#6366F1', // indigo-500
-          container: '#E0E7FF', // indigo-100
-          'on-container': '#1E1B4B', // indigo-950
-          muted: '#312E81', // indigo-900
+          DEFAULT: 'var(--color-status-starting)',
+          container: 'var(--color-status-starting-container)',
+          'container-hover': 'var(--color-status-starting-container-hover)',
+          'on-container': 'var(--color-status-starting-on-container)',
+          muted: 'var(--color-status-starting-muted)',
         },
         'status-unknown': {
-          DEFAULT: '#94A3B8', // slate-400
-          container: '#F1F5F9', // slate-100
-          'on-container': '#0F172A', // slate-900
-          muted: '#334155', // slate-700
+          DEFAULT: 'var(--color-status-unknown)',
+          container: 'var(--color-status-unknown-container)',
+          'container-hover': 'var(--color-status-unknown-container-hover)',
+          'on-container': 'var(--color-status-unknown-on-container)',
+          muted: 'var(--color-status-unknown-muted)',
         },
-        'chart-grid': '#f1f5f9',
-        'chart-tick': '#94a3b8',
-        'chart-prev-line': '#cbd5e1',
-        'chart-label': '#1A1A1A',
-        'chart-1': '#0ea5e9',
-        'chart-2': '#8b5cf6',
-        'chart-3': '#51B5B9',
-        'growth': '#37b24d',
-        'decline': '#f03e3e',
-        'decline-warning': '#f59f00',
+        'chart-grid': 'var(--color-chart-grid)',
+        'chart-tick': 'var(--color-chart-tick)',
+        'chart-prev-line': 'var(--color-chart-prev-line)',
+        'chart-label': 'var(--color-chart-label)',
+        'chart-1': 'var(--color-chart-1)',
+        'chart-2': 'var(--color-chart-2)',
+        'chart-3': 'var(--color-chart-3)',
+        'growth': 'var(--color-growth)',
+        'decline': 'var(--color-decline)',
+        'decline-warning': 'var(--color-decline-warning)',
       },
       fontFamily: {
         sans: ['Manrope', 'system-ui', 'sans-serif'],
@@ -78,6 +122,12 @@ export default {
         'elevation-3': '0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 4px 8px 3px rgba(0, 0, 0, 0.15)',
         'elevation-4': '0 2px 3px 0 rgba(0, 0, 0, 0.3), 0 6px 10px 4px rgba(0, 0, 0, 0.15)',
         'elevation-5': '0 4px 4px 0 rgba(0, 0, 0, 0.3), 0 8px 12px 6px rgba(0, 0, 0, 0.15)',
+        'status-up-glow': '0 0 8px var(--color-status-up-glow)',
+        'status-down-glow': '0 0 8px var(--color-status-down-glow)',
+        'status-degraded-glow': '0 0 8px var(--color-status-degraded-glow)',
+        'status-unknown-glow': '0 0 8px var(--color-status-unknown-glow)',
+        'status-paused-glow': '0 0 6px var(--color-status-paused-glow)',
+        'status-starting-glow': '0 0 6px var(--color-status-starting-glow)',
       },
       screens: {
         'contained': { 'raw': '(min-width: 1024px) and (min-height: 950px) and (orientation: landscape), (min-width: 1024px) and (min-height: 1350px) and (orientation: portrait)' },

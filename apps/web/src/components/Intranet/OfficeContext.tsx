@@ -109,8 +109,8 @@ export function OfficeContext() {
   };
 
   return (
-    <section className="gap-2 rounded-2xl border-0 overflow-hidden bg-brand-bg-secondary text-white h-[400px] max-h-[400px] md:max-h-none md:h-full relative flex flex-col md:grid md:grid-rows-[30%_70%] w-full min-w-0">
-      <div className="px-5 py-4 relative z-10 flex justify-between items-start gap-4">
+    <section className="gap-2 rounded-2xl border-0 overflow-hidden bg-brand-bg-secondary text-white h-[400px] max-h-[400px] md:max-h-none md:h-full relative flex flex-col md:grid md:grid-rows-[30%_70%] w-full min-w-0 p-6">
+      <div className="relative z-10 flex justify-between items-start gap-4">
         <div className="flex flex-col">
           <span className="text-sm sm:text-base font-black text-brand-accent uppercase tracking-widest mb-1">{dateString}</span>
           <span className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tighter leading-none">{timeString}</span>
@@ -132,14 +132,14 @@ export function OfficeContext() {
 
       {/* Bottom 70% — event list */}
       <div className="relative z-10 flex flex-col flex-1 min-h-0 w-full min-w-0">
-        <div className="flex items-center justify-between pb-2 mb-1 px-5">
+        <div className="flex items-center justify-between pb-2 mb-1">
           <h3 className="text-sm font-bold text-white/70">Today's Schedule</h3>
           <div className="flex items-center gap-1">
             <span className="text-sm font-bold text-white/40">{events.length} Events</span>
           </div>
         </div>
 
-        <div className="flex flex-col overflow-y-auto flex-1 custom-scrollbar w-full min-w-0">
+        <div className="flex flex-col overflow-y-auto flex-1 divide-y divide-slate-50/30 custom-scrollbar w-full min-w-0">
           {isLoading ? (
             <div className="text-sm text-white/40 italic text-center py-2">Loading today's schedule...</div>
           ) : events.length === 0 ? (
@@ -148,7 +148,7 @@ export function OfficeContext() {
             events.map(e => (
               <div 
                 key={e.id} 
-                className="flex flex-col hover:bg-surface/5 transition-colors py-4 px-5 border-b border-outline-variant last:border-b-0 justify-center w-full min-w-0 shrink-0 gap-1"
+                className="flex flex-col transition-colors py-4 justify-center w-full min-w-0 shrink-0 gap-1"
               >
                 {/* Row 1: icon, time, title */}
                 <div className="flex items-center gap-1 min-w-0 flex-shrink-0">

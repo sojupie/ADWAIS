@@ -78,7 +78,7 @@ export function EventEditModal({
             <textarea rows={3} placeholder="Event scope, notes, etc." value={form.description} onChange={e => onChange({ ...form, description: e.target.value })} className="w-full bg-surface-container border-0 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:bg-surface focus:ring-2 focus:ring-brand-accent/20 transition-all text-on-surface resize-none custom-scrollbar" />
           </div>
 
-          <div className="flex flex-wrap gap-4 bg-surface-container-low p-4 rounded-2xl border border-outline-variant">
+          <div className="flex flex-wrap gap-4 bg-surface-container-low p-4 rounded-2xl">
             <label className="flex items-center gap-2 cursor-pointer text-sm font-bold text-on-surface-variant">
               <input type="checkbox" checked={form.isImportant} onChange={e => onChange({ ...form, isImportant: e.target.checked })} className="rounded text-brand-accent focus:ring-brand-accent/20 w-4 h-4 cursor-pointer" />
               Important Highlight

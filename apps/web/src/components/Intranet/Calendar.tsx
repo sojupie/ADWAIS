@@ -545,9 +545,11 @@ export function Calendar() {
                   <div 
                     key={idx}
                     onClick={() => handleCellClick(cell.date)}
-                    className={`min-h-[50px] md:min-h-[65px] bg-surface p-1.5 flex flex-col transition duration-150 relative group ${
+                    className={`min-h-[50px] md:min-h-[65px] p-1.5 flex flex-col transition-all relative group ${
                       cell.isCurrentMonth ? '' : 'bg-surface-container-low opacity-40'
-                    } ${isToday ? 'bg-calendar-today-bg' : 'hover:bg-brand-hover'} ${
+                    } ${
+                      isToday ? 'bg-brand-active' : 'bg-surface hover:bg-brand-hover'
+                    } ${
                       isWriter ? 'cursor-pointer' : ''
                     }`}
                   >
@@ -595,8 +597,8 @@ export function Calendar() {
                   key={idx}
                   ref={isToday ? todayRef : undefined}
                   onClick={() => handleCellClick(day)}
-                  className={`bg-surface p-4 flex flex-col h-full w-[200px] shrink-0 transition-colors ${
-                    isToday ? 'bg-calendar-today-bg' : 'hover:bg-brand-hover'
+                  className={`p-4 flex flex-col h-full w-[200px] shrink-0 transition-all ${
+                    isToday ? 'bg-surface' : 'bg-surface hover:bg-brand-hover'
                   } cursor-pointer`}
                 >
                   <div className="flex items-start justify-between pb-2 border-b border-outline-variant mb-2 gap-1.5">

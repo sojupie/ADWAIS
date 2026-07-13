@@ -1,12 +1,13 @@
 import { CollectionPanel } from '../common/dashboard/CollectionPanel';
 import { useGetApiIntranetFeeds } from '../../api/generated/endpoints';
+import {ExternalLink} from "lucide-react";
 
 export function SeoRssAggregator() {
   const { data: response, isLoading } = useGetApiIntranetFeeds({ PageSize: 10, AuthorName: 'litium' });
   const feedItems = response?.data || [];
 
   return (
-    <CollectionPanel title="Litium News – Click to read" className="h-full relative overflow-hidden">
+    <CollectionPanel title="Litium News – Click to read" className="h-full relative overflow-hidden pb-4 rounded-2xl">
       {isLoading ? (
         <div className="flex flex-col animate-pulse">
           {[1, 2, 3].map((i) => (
@@ -21,15 +22,9 @@ export function SeoRssAggregator() {
           No feeds available.
         </div>
       ) : (
-        <div className="flex flex-col p-0 flex-1 min-h-0 overflow-y-auto custom-scrollbar">
-          <style>{`
-            @keyframes scroll {
-              0% { transform: translateY(5%); }
-              100% { transform: translateY(-30%); }
-            }
-          `}</style>
+        <div className="flex flex-col p-0 flex-1 gap-1 min-h-0 overflow-y-auto custom-scrollbar px-4">
           {feedItems.map(item => (
-            <div key={item.id} className="flex flex-col gap-1.5 p-5 border-b border-outline-variant last:border-b-0 hover:bg-surface-container-low transition-colors">
+            <div key={item.id} className="flex rounded-xl flex-col gap-1.5 p-4 bg-surface-container hover:bg-surface-container-high transition-colors">
               <div className="flex justify-between items-center mb-0.5">
                 <a href={item.feedSource?.url || undefined} target="_blank" rel="noopener noreferrer" className="text-xs hover:underline underline-offset-2 font-black text-brand-btn-primary uppercase tracking-widest">
                   {item.feedSource?.name || 'Feed'}
@@ -38,15 +33,18 @@ export function SeoRssAggregator() {
                   {item.publishDate ? new Date(item.publishDate).toLocaleDateString() : ''}
                 </span>
               </div>
-              <a href={item.link || undefined} target="_blank" rel="noopener noreferrer" className="underline-offset-2 text-sm font-bold text-on-surface-variant leading-snug hover:underline transition-colors block">
-                {item.title || ''}
-              </a>
+              <div className={"flex gap-1 justify-between items-center"}>
+                <a href={item.link || undefined} target="_blank" rel="noopener noreferrer" className="underline-offset-2 text-left text-sm font-bold text-on-surface-variant leading-snug hover:underline transition-colors block">
+                  {item.title || ''}
+                </a>
+                <ExternalLink size={18}/>
+              </div>
             </div>
           ))}
         </div>
       )}
-      <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent pointer-events-none" />
-      <div className="absolute top-8 left-0 right-0 h-6 bg-gradient-to-b from-white to-transparent pointer-events-none" />
+      {/*<div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent pointer-events-none" />*/}
+      {/*<div className="absolute top-8 left-0 right-0 h-6 bg-gradient-to-b from-white to-transparent pointer-events-none" />*/}
     </CollectionPanel>
   );
 }

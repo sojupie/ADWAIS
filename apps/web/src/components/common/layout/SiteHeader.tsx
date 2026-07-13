@@ -32,7 +32,7 @@ export function SiteHeader({
   const isMobileView = useMediaQuery('(max-width: 767px)');
 
   return (
-    <header className="site-header relative shrink-0 bg-brand-bg-secondary border-b border-brand-bg-secondary/20 shadow-sm z-10 px-6 py-3">
+    <header className="site-header relative shrink-0 bg-brand-bg-secondary shadow-sm z-10 px-6 py-3">
       {isMobileView ? (
         <div className="site-header__mobile-bar" data-header="mobile-bar">
           <MotilloLogoLink

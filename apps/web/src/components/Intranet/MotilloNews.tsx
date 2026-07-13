@@ -15,7 +15,7 @@ export function MotilloNews() {
       {isLoading ? (
         <div className="flex flex-col md:flex-row h-full animate-pulse">
           {/* Skeleton Sidebar */}
-          <div className="flex flex-row md:flex-col w-full md:w-1/3 flex-shrink-0 p-4 gap-4 bg-surface md:border-r md:border-outline-variant/60 overflow-hidden">
+          <div className="flex flex-row md:flex-col w-full md:w-1/3 flex-shrink-0 p-4 gap-4 overflow-hidden">
             {[1, 2, 3].map((i) => (
               <div key={i} className="flex flex-col gap-2 p-4 w-[280px] md:w-auto flex-shrink-0 rounded-xl bg-surface-container/50">
                 <div className="h-3 w-20 bg-surface-container-high rounded-full" />
@@ -37,9 +37,9 @@ export function MotilloNews() {
           No news available.
         </div>
       ) : (
-        <div className="flex flex-col md:flex-row h-full overflow-hidden">
+        <div className="flex gap-1 px-4 pb-4 flex-col md:flex-row h-full overflow-hidden">
           {/* Sidebar List (Surface Container Low) */}
-          <div className="flex flex-row md:flex-col w-full md:w-1/3 md:h-full flex-shrink-0 p-4 gap-2 overflow-x-auto md:overflow-x-hidden md:overflow-y-auto custom-scrollbar bg-surface md:border-r md:border-outline-variant/60 snap-x scroll-px-4">
+          <div className="flex flex-row md:flex-col rounded-2xl w-full md:w-1/3 md:h-full flex-shrink-0 p-3 gap-2 overflow-x-auto md:overflow-x-hidden md:overflow-y-auto custom-scrollbar bg-surface-container snap-x scroll-px-4">
             {feedItems.map((post) => {
               const isSelected = selectedPost?.id === post.id;
               return (
@@ -47,7 +47,7 @@ export function MotilloNews() {
                   key={post.id}
                   onClick={() => setSelectedPostId(post.id)}
                   className={`flex flex-col text-left p-4 rounded-xl transition-all w-[280px] md:w-auto flex-shrink-0 snap-start ${
-                    isSelected ? 'bg-brand-active' : 'bg-transparent hover:bg-brand-hover'
+                    isSelected ? 'bg-surface-container-high' : 'bg-transparent hover:bg-surface-container-high'
                   }`}
                 >
                   <div className="flex items-center gap-2 mb-2">
@@ -64,7 +64,7 @@ export function MotilloNews() {
           </div>
 
           {/* Detail View (Surface) */}
-          <div className="flex-1 flex flex-col p-5 md:p-8 min-h-0 overflow-y-auto custom-scrollbar bg-surface">
+          <div className="flex-1 flex flex-col p-5 md:p-8 min-h-0 overflow-y-auto custom-scrollbar bg-surface-container rounded-2xl">
             {selectedPost && (
               <>
                 <div className="flex flex-col gap-1 mb-4 shrink-0">
@@ -72,7 +72,7 @@ export function MotilloNews() {
                       href={selectedPost.link || undefined}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-2xl md:text-3xl font-black text-brand-text leading-tight hover:underline underline-offset-2"
+                      className="text-xl md:text-2xl font-black text-brand-text leading-tight hover:underline underline-offset-2"
                   >
                     {selectedPost.title}
                   </a>
@@ -102,7 +102,7 @@ export function MotilloNews() {
                 )}
 
                 {selectedPost.imageUrl && (
-                  <div className="w-full flex-1 min-h-[200px] max-h-[400px] rounded-lg overflow-hidden relative border border-outline-variant shadow-sm shrink-0 animate-in fade-in duration-300 mb-4">
+                  <div className="w-full flex-1 min-h-[200px] max-h-[400px] rounded-xl overflow-hidden relative shrink-0 animate-in fade-in duration-300 mb-4">
                     <img
                       src={selectedPost.imageUrl}
                       className="w-full h-full object-cover"
@@ -117,7 +117,7 @@ export function MotilloNews() {
                       href={selectedPost.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center h-10 px-6 rounded-full bg-brand-btn-primary hover:bg-brand-btn-quaternary text-white text-sm font-bold m3-elevation-1 hover:m3-elevation-2 transition-all"
+                      className="inline-flex items-center justify-center h-10 px-6 rounded-full bg-brand-btn-primary hover:bg-brand-btn-quaternary text-white text-sm font-bold transition-all"
                     >
                       Read Full Article
                     </a>

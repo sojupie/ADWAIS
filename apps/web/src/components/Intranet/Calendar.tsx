@@ -598,7 +598,7 @@ export function Calendar() {
                   ref={isToday ? todayRef : undefined}
                   onClick={() => handleCellClick(day)}
                   className={`p-4 flex flex-col h-full w-[200px] shrink-0 transition-all ${
-                    isToday ? 'bg-surface' : 'bg-surface hover:bg-brand-hover'
+                    isToday ? '' : ''
                   } cursor-pointer`}
                 >
                   <div className="flex items-start justify-between pb-2 border-b border-outline-variant mb-2 gap-1.5">

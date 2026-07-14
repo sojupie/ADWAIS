@@ -523,7 +523,7 @@ export function Calendar() {
 
         {/* ── MONTH VIEW ── */}
         {viewMode === 'month' && (
-          <div className="flex flex-col bg-surface-container flex-1 px-4 py-2 min-h-0">
+          <div className="flex flex-col bg-surface flex-1 px-4 py-2 min-h-0">
             {/* Days grid headers */}
             <div className="grid grid-cols-7 gap-1 text-center font-black text-sm uppercase tracking-widest text-on-surface-variant mb-1">
               <div>Mon</div>
@@ -548,7 +548,7 @@ export function Calendar() {
                     className={`min-h-[50px] md:min-h-[65px] p-1.5 flex flex-col transition-all relative group ${
                       cell.isCurrentMonth ? '' : 'bg-surface-container-low opacity-40'
                     } ${
-                      isToday ? 'bg-brand-active' : 'bg-surface hover:bg-brand-hover'
+                      isToday ? 'bg-surface-container-high' : 'bg-surface hover:bg-surface-container'
                     } ${
                       isWriter ? 'cursor-pointer' : ''
                     }`}
@@ -598,7 +598,7 @@ export function Calendar() {
                   ref={isToday ? todayRef : undefined}
                   onClick={() => handleCellClick(day)}
                   className={`p-4 flex flex-col h-full w-[200px] shrink-0 transition-all ${
-                    isToday ? 'bg-surface' : 'bg-surface hover:bg-brand-hover'
+                    isToday ? 'bg-surface-container-low' : ''
                   } cursor-pointer`}
                 >
                   <div className="flex items-start justify-between pb-2 border-b border-outline-variant mb-2 gap-1.5">

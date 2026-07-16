@@ -459,20 +459,98 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/CommunityPost"
+                  "$ref": "#/components/schemas/CommunityPostResponseDto"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CommunityPost"
+                  "$ref": "#/components/schemas/CommunityPostResponseDto"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CommunityPost"
+                  "$ref": "#/components/schemas/CommunityPostResponseDto"
                 }
               }
             }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "CommunityPost"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePostDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePostDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePostDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommunityPostResponseDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommunityPostResponseDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommunityPostResponseDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "CommunityPost"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -490,7 +568,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/CommunityPost"
+                    "$ref": "#/components/schemas/CommunityPostResponseDto"
                   }
                 }
               },
@@ -498,7 +576,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/CommunityPost"
+                    "$ref": "#/components/schemas/CommunityPostResponseDto"
                   }
                 }
               },
@@ -506,7 +584,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/CommunityPost"
+                    "$ref": "#/components/schemas/CommunityPostResponseDto"
                   }
                 }
               }
@@ -543,17 +621,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/CommunityPost"
+                  "$ref": "#/components/schemas/CommunityPostResponseDto"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CommunityPost"
+                  "$ref": "#/components/schemas/CommunityPostResponseDto"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CommunityPost"
+                  "$ref": "#/components/schemas/CommunityPostResponseDto"
                 }
               }
             }
@@ -1213,26 +1291,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/TransactionDensityPointResponseDto"
-                  }
+                  "$ref": "#/components/schemas/TransactionDensityResponseDto"
                 }
               },
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/TransactionDensityPointResponseDto"
-                  }
+                  "$ref": "#/components/schemas/TransactionDensityResponseDto"
                 }
               },
               "text/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/TransactionDensityPointResponseDto"
-                  }
+                  "$ref": "#/components/schemas/TransactionDensityResponseDto"
                 }
               }
             }
@@ -3290,19 +3359,24 @@
         },
         "additionalProperties": false
       },
-      "CommunityPost": {
-        "required": [
-          "body",
-          "createdAt",
-          "title"
-        ],
+      "CommunityPostAuthorDto": {
         "type": "object",
         "properties": {
           "id": {
             "type": "string",
             "format": "uuid"
           },
-          "userId": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CommunityPostResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
             "type": "string",
             "format": "uuid"
           },
@@ -3323,8 +3397,8 @@
             "format": "date-time",
             "nullable": true
           },
-          "user": {
-            "$ref": "#/components/schemas/User"
+          "author": {
+            "$ref": "#/components/schemas/CommunityPostAuthorDto"
           }
         },
         "additionalProperties": false
@@ -4674,6 +4748,31 @@
         },
         "additionalProperties": false
       },
+      "TransactionDensityResponseDto": {
+        "type": "object",
+        "properties": {
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "minCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maxCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TransactionDensityPointResponseDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "UpdateCalendarSubscriptionDto": {
         "type": "object",
         "properties": {
@@ -4843,6 +4942,20 @@
           },
           "recurrence": {
             "$ref": "#/components/schemas/RecurrenceType"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdatePostDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "body": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -5064,40 +5177,6 @@
             "items": {
               "type": "string"
             },
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "User": {
-        "required": [
-          "name",
-          "role"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "entraObjectId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "email": {
-            "type": "string",
-            "nullable": true
-          },
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "role": {
-            "$ref": "#/components/schemas/UserRole"
-          },
-          "calendarFeedToken": {
-            "type": "string",
             "nullable": true
           }
         },

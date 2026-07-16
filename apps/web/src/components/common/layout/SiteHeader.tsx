@@ -55,10 +55,10 @@ export function SiteHeader({
         </div>
       ) : (
         <>
-          <div className="site-header__logo flex justify-start" data-header="logo">
+          <div className="site-header__logo flex justify-start shrink-0" data-header="logo">
             <MotilloLogoLink
               timeframe={financialTimeframe}
-              className="h-8 w-auto object-contain object-left brightness-0 invert"
+              className="h-8 w-auto object-contain object-left brightness-0 invert shrink-0"
               height={32}
             />
           </div>

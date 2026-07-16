@@ -11,8 +11,8 @@ type MotilloLogoLinkProps = {
 
 export function MotilloLogoLink({timeframe, className, height, onClick}: MotilloLogoLinkProps) {
   return (
-    <Link to="/financial" search={{timeframe}} onClick={onClick} aria-label="Go to Financial">
-      <img className={className} src={motilloLogo} alt="Motillo" height={height} />
+    <Link to="/financial" search={{timeframe}} onClick={onClick} className="shrink-0 flex items-center" aria-label="Go to Financial">
+      <img className={`${className} shrink-0`} src={motilloLogo} alt="Motillo" height={height} />
     </Link>
   );
 }

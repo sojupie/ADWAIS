@@ -735,6 +735,8 @@ public class FinancialService(IApplicationDbContext dbContext) : IFinancialServi
             result.Sum(point => point.Count),
             result.Count == 0 ? 0 : result.Min(point => point.Count),
             result.Count == 0 ? 0 : result.Max(point => point.Count),
+            currentStart,
+            currentEnd,
             result);
     }
 

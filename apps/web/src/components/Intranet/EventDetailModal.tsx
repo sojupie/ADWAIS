@@ -37,7 +37,7 @@ export function EventDetailModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in">
       <div className="bg-surface rounded-3xl m3-elevation-4 border-0 w-full max-w-md overflow-hidden flex flex-col animate-in zoom-in-95">
-        <div className="flex justify-between items-center bg-surface px-6 py-5 pb-2">
+        <div className="flex justify-between items-center bg-surface px-6 py-5">
           <span className={`text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full ${badgeClass}`}>
             {event.eventType || 'Event'}
           </span>
@@ -50,11 +50,11 @@ export function EventDetailModal({
           </button>
         </div>
         
-        <div className="bg-surface p-6 pt-2 flex flex-col gap-8">
+        <div className="flex flex-col gap-6 bg-surface px-6 pb-6">
           <div>
-            <h3 className="text-2xl font-bold text-on-surface leading-snug">{event.title}</h3>
+            <h3 className="text-xl font-bold leading-snug text-on-surface">{event.title}</h3>
             {event.description && (
-              <p className="text-sm text-on-surface-variant mt-3 whitespace-pre-wrap leading-relaxed">{event.description}</p>
+              <p className="mt-3 whitespace-pre-wrap text-base leading-relaxed text-on-surface-variant">{event.description}</p>
             )}
           </div>
           
@@ -99,7 +99,7 @@ export function EventDetailModal({
             <div className="flex justify-end gap-4 pt-2">
               <button 
                 onClick={() => event.id && onDelete(event.id)}
-                className="inline-flex min-h-11 items-center justify-center rounded-full px-3 text-base font-bold text-error transition-colors hover:bg-error-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-error"
+                className="inline-flex min-h-11 items-center justify-center rounded-full px-4 text-base font-bold text-error transition-colors hover:bg-error-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-error"
               >
                 Delete
               </button>

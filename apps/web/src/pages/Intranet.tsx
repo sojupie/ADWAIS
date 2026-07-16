@@ -8,7 +8,7 @@ import { DashboardLayout } from '../components/common/layout/DashboardLayout';
 export function Intranet() {
   return (
     <DashboardLayout>
-      <div className="grid grid-cols-1 portrait-lg:grid-cols-2 portrait-contained:grid-rows-3 landscape-lg:grid-cols-3 landscape-contained:grid-rows-2 gap-6 flex-1 min-h-0 animate-in fade-in duration-500">
+      <div className="grid grid-cols-1 portrait-lg:grid-cols-2 portrait-contained:grid-rows-3 landscape-lg:grid-cols-3 landscape-contained:grid-rows-2 gap-4 flex-1 min-h-0 animate-in fade-in duration-500">
         {/* Top row */}
         <div className="col-span-1 md:h-[500px] contained:h-full contained:min-h-0 flex flex-col [&>*]:flex-1 [&>*]:min-h-0">
           <OfficeContext />

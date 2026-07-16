@@ -82,4 +82,6 @@ export const MOCK_TRANSACTION_DENSITY_RESPONSE: TransactionDensityResponse = {
   totalCount: MOCK_TRANSACTION_DENSITY.reduce((sum, point) => sum + point.count, 0),
   minCount: Math.min(...MOCK_TRANSACTION_DENSITY.map(point => point.count)),
   maxCount: Math.max(...MOCK_TRANSACTION_DENSITY.map(point => point.count)),
+  periodStart: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+  periodEnd: new Date().toISOString(),
 };

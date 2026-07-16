@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from '@tanstack/react-router';
-import { ArrowLeft, BriefcaseBusiness, ChevronRight, Settings } from 'lucide-react';
+import { ArrowLeft, ChevronRight, Settings } from 'lucide-react';
 import type { Timeframe } from '../../../schemas';
 import { NotificationToggleWidget } from '../dashboard/NotificationToggleWidget';
 
@@ -20,11 +20,9 @@ const mobileLinkClass = (isActive: boolean, extra = '') =>
   }`;
 
 export function MobileNavigationMenu({ isOpen, pathname, financialTimeframe, fleetTimeframe, onClose }: MobileNavigationMenuProps) {
-  const [view, setView] = useState<'main' | 'settings'>('main');
-
-  useEffect(() => {
-    if (isOpen) setView(pathname.startsWith('/settings') ? 'settings' : 'main');
-  }, [isOpen, pathname]);
+  const [view, setView] = useState<'main' | 'settings'>(() =>
+    pathname.startsWith('/settings') ? 'settings' : 'main',
+  );
 
   useEffect(() => {
     if (!isOpen) return;
@@ -61,7 +59,7 @@ export function MobileNavigationMenu({ isOpen, pathname, financialTimeframe, fle
             <button
               type="button"
               onClick={() => setView('main')}
-              className="flex min-h-12 w-full items-center gap-6 rounded-full bg-white/10 px-4 text-left text-base font-black transition-colors hover:bg-white/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
+              className="flex min-h-12 w-full items-center gap-4 rounded-full bg-white/10 px-4 text-left text-base font-black transition-colors hover:bg-white/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
             >
               <ArrowLeft size={22} aria-hidden="true" />
               Main menu
@@ -76,13 +74,13 @@ export function MobileNavigationMenu({ isOpen, pathname, financialTimeframe, fle
               <Link to="/fleet-status" search={{ timeframe: fleetTimeframe }} onClick={onClose} className={mobileLinkClass(pathname.startsWith('/fleet-status'))} aria-current={pathname.startsWith('/fleet-status') ? 'page' : undefined}>Fleet Status</Link>
               <Link to="/intranet" onClick={onClose} className={mobileLinkClass(pathname === '/intranet')} aria-current={pathname === '/intranet' ? 'page' : undefined}>Intranet</Link>
               <button type="button" onClick={() => setView('settings')} className={mobileLinkClass(pathname.startsWith('/settings'), 'justify-between gap-3')}>
-                <span className="flex items-center gap-6"><Settings size={19} aria-hidden="true" />Settings</span>
+                <span className="flex items-center gap-4"><Settings size={19} aria-hidden="true" />Settings</span>
                 <ChevronRight size={20} aria-hidden="true" />
               </button>
             </nav>
           ) : (
             <nav className="flex flex-col gap-2" aria-label="Settings navigation links">
-              <Link to="/settings/jobs" onClick={onClose} className={mobileLinkClass(pathname === '/settings/jobs', 'gap-3')} aria-current={pathname === '/settings/jobs' ? 'page' : undefined}><BriefcaseBusiness size={19} aria-hidden="true" />Background Jobs</Link>
+              <Link to="/settings/jobs" onClick={onClose} className={mobileLinkClass(pathname === '/settings/jobs', 'gap-3')} aria-current={pathname === '/settings/jobs' ? 'page' : undefined}>Background Jobs</Link>
               <Link to="/settings/configuration" onClick={onClose} className={mobileLinkClass(pathname === '/settings/configuration')}>Configuration</Link>
               <Link to="/settings/tenants" onClick={onClose} className={mobileLinkClass(pathname === '/settings/tenants')}>Tenants &amp; Monitors</Link>
               <Link to="/settings/events" onClick={onClose} className={mobileLinkClass(pathname === '/settings/events')}>Events &amp; Health</Link>

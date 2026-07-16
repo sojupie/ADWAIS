@@ -23,7 +23,7 @@ import { TenantSelector } from '../components/financial/TenantSelector';
 import type { TransactionDensityResponse } from '@types';
 
 const EMPTY_ACCUMULATED: never[] = [];
-const EMPTY_DENSITY: TransactionDensityResponse = { points: [], totalCount: 0, minCount: 0, maxCount: 0 };
+const EMPTY_DENSITY: TransactionDensityResponse = { points: [], totalCount: 0, minCount: 0, maxCount: 0, periodStart: '', periodEnd: '' };
 const EMPTY_DELTA: never[] = [];
 const EMPTY_BINS: never[] = [];
 

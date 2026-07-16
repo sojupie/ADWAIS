@@ -23,9 +23,9 @@ interface EventFormModalProps {
   onChange: (form: EventForm) => void;
 }
 
-const inputClass = 'w-full rounded-2xl border-0 bg-surface-container px-4 py-3 text-base text-on-surface transition-all focus:bg-primary-container focus:text-on-primary-container focus:outline-none focus:ring-2 focus:ring-secondary/40';
+const inputClass = 'w-full rounded-xl border-0 bg-surface-container px-4 py-3 text-base font-medium text-on-surface transition-all focus:bg-primary-container focus:text-on-primary-container focus:outline-none focus:ring-2 focus:ring-secondary/40';
 const fieldClass = 'flex flex-col gap-2';
-const labelClass = 'pl-1 text-base font-bold text-on-surface-variant';
+const labelClass = 'pl-1 text-sm font-bold text-on-surface-variant';
 
 export function EventFormModal({ mode, isOpen, onClose, onSubmit, form, onChange }: EventFormModalProps) {
   if (!isOpen) return null;
@@ -42,8 +42,8 @@ export function EventFormModal({ mode, isOpen, onClose, onSubmit, form, onChange
         aria-modal="true"
         aria-labelledby={`${mode}-event-dialog-title`}
       >
-        <div className="flex items-center justify-between bg-surface px-6 pb-2 pt-5">
-          <h3 id={`${mode}-event-dialog-title`} className="flex items-center gap-4 text-lg font-bold text-on-surface">
+        <div className="flex items-center justify-between bg-surface px-6 py-5">
+          <h3 id={`${mode}-event-dialog-title`} className="flex items-center gap-4 text-xl font-bold text-on-surface">
             <Icon size={20} className="text-on-surface-variant" aria-hidden="true" />
             {isEditing ? 'Edit Calendar Event' : 'Add Calendar Event'}
           </h3>
@@ -52,7 +52,7 @@ export function EventFormModal({ mode, isOpen, onClose, onSubmit, form, onChange
           </button>
         </div>
 
-        <div className="flex max-h-[75vh] flex-col gap-8 overflow-y-auto bg-surface p-6 pt-2 custom-scrollbar">
+        <div className="flex max-h-[75vh] flex-col gap-6 overflow-y-auto bg-surface px-6 pb-6 custom-scrollbar">
           <div className={fieldClass}>
             <label className={labelClass} htmlFor={`${mode}-event-title`}>Event Title</label>
             <input id={`${mode}-event-title`} type="text" placeholder="Weekly Sync / Launch / etc." value={form.title} onChange={event => onChange({ ...form, title: event.target.value })} className={inputClass} required />
@@ -88,20 +88,20 @@ export function EventFormModal({ mode, isOpen, onClose, onSubmit, form, onChange
           </div>
 
           <div className="flex flex-wrap gap-8 rounded-2xl bg-surface-container-low p-4">
-            <label className="flex cursor-pointer items-center gap-4 text-base font-bold text-on-surface-variant">
+            <label className="flex cursor-pointer items-center gap-4 text-base font-medium text-on-surface-variant">
               <input type="checkbox" checked={form.isImportant} onChange={event => onChange({ ...form, isImportant: event.target.checked })} className="h-4 w-4 cursor-pointer rounded text-brand-accent focus:ring-brand-accent/20" />
               Important Highlight
             </label>
-            <label className="flex cursor-pointer items-center gap-4 text-base font-bold text-on-surface-variant">
+            <label className="flex cursor-pointer items-center gap-4 text-base font-medium text-on-surface-variant">
               <input type="checkbox" checked={form.isSpecial} onChange={event => onChange({ ...form, isSpecial: event.target.checked })} className="h-4 w-4 cursor-pointer rounded text-brand-accent focus:ring-brand-accent/20" />
               Special Occasion
             </label>
           </div>
         </div>
 
-        <div className="flex justify-end gap-4 bg-surface px-6 py-5">
-          <button type="button" onClick={onClose} className="inline-flex min-h-11 items-center justify-center rounded-full px-3 font-bold transition-colors hover:bg-surface-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary">Cancel</button>
-          <button type="submit" className="inline-flex min-h-11 items-center justify-center rounded-full bg-on-primary-container px-5 font-bold text-primary-container transition-colors hover:bg-brand-btn-quaternary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary">
+        <div className="flex justify-end gap-3 bg-surface px-6 py-4">
+          <button type="button" onClick={onClose} className="inline-flex min-h-11 items-center justify-center rounded-full px-4 text-base font-bold transition-colors hover:bg-surface-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary">Cancel</button>
+          <button type="submit" className="inline-flex min-h-11 items-center justify-center rounded-full bg-on-primary-container px-5 text-base font-bold text-primary-container transition-colors hover:bg-brand-btn-quaternary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary">
             {isEditing ? 'Save Changes' : 'Save Event'}
           </button>
         </div>

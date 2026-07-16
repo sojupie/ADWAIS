@@ -17,7 +17,7 @@ import { useFinancialViewModel } from "../hooks/useFinancialViewModel.ts";
 import type { RevenueEfficiencyResponse, MomentumResponse, TransactionDensityResponse } from '@types';
 
 const EMPTY_VELOCITY: never[] = [];
-const EMPTY_DENSITY: TransactionDensityResponse = { points: [], totalCount: 0, minCount: 0, maxCount: 0 };
+const EMPTY_DENSITY: TransactionDensityResponse = { points: [], totalCount: 0, minCount: 0, maxCount: 0, periodStart: '', periodEnd: '' };
 const EMPTY_EFFICIENCY: RevenueEfficiencyResponse = { tenants: [], globalAverageOrderValue: 0, medianPortfolioShare: 0 };
 const EMPTY_MOMENTUM: MomentumResponse = { tenants: [], medianBaselineRevenue: 0, globalGrowthPercentage: 0 };
 

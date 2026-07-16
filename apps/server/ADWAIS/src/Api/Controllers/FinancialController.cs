@@ -195,6 +195,8 @@ public class FinancialController(IFinancialService financialService) : Controlle
             result.TotalCount,
             result.MinCount,
             result.MaxCount,
+            result.PeriodStart,
+            result.PeriodEnd,
             result.Points.Select(p => new TransactionDensityPointResponseDto(
                 p.DayOfWeek,
                 p.Hour,

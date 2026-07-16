@@ -27,23 +27,23 @@ export function PeriodSelector({ from, embedded = false }: PeriodSelectorProps) 
   };
 
   const containerCls = embedded
-    ? "grid grid-cols-3 gap-1.5 w-full items-center"
-    : "group grid grid-cols-3 gap-1.5 md:flex md:gap-1 bg-brand-bg-secondary p-1.5 rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-brand-bg-secondary/10 pointer-events-auto w-full md:w-auto max-w-[400px] md:max-w-none items-center min-h-14";
+    ? "grid grid-cols-3 w-full items-center"
+    : "group grid grid-cols-3 md:flex bg-surface rounded-full m3-elevation-1 pointer-events-auto w-full md:w-auto max-w-[400px] md:max-w-none items-center min-h-14";
 
   return (
     <div className={containerCls}>
       {options.map((opt) => {
         const isActive = timeframe === opt.value;
         const buttonCls = isActive
-          ? 'bg-brand-accent text-brand-bg-secondary shadow-md'
-          : 'text-white/60 hover:text-white hover:bg-surface/10';
+          ? 'bg-primary-container text-on-primary-container'
+          : 'text-on-surface-variant hover:bg-surface-container';
 
         return (
           <button
             key={opt.value}
             id={`period-${opt.value}`}
             onClick={() => handleSelect(opt.value)}
-            className={`px-3 py-2 md:px-5 md:py-2 rounded-full text-xs md:text-sm font-black transition-all duration-300 tracking-widest uppercase cursor-pointer text-center ${buttonCls}`}
+            className={`px-3 py-2 md:px-5 md:py-2 rounded-full text-xs md:text-sm min-h-14 min-w-[100px] font-black transition-all duration-200 tracking-widest uppercase cursor-pointer text-center ${buttonCls}`}
           >
             {opt.label}
           </button>

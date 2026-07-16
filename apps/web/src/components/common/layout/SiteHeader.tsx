@@ -37,15 +37,15 @@ export function SiteHeader({
         <div className="site-header__mobile-bar" data-header="mobile-bar">
           <MotilloLogoLink
             timeframe={financialTimeframe}
-            className="h-7 w-auto object-contain object-left brightness-0 invert"
+            className="h-7 object-contain object-left brightness-0 invert"
             height={28}
           />
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4">
             <ConnectivityStatus isOnline={isOnline} isBackendOnline={isBackendOnline} variant="mobile" />
             <UserAccountLink label={userLabel} variant="mobile" />
             <button
               onClick={onToggleMobileMenu}
-              className="flex items-center justify-center w-10 h-10 rounded-lg text-white hover:bg-surface/10 transition-colors"
+              className="flex h-11 w-11 items-center justify-center rounded-full text-white transition-colors hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
               aria-label="Toggle menu"
               aria-expanded={isMobileMenuOpen}
             >
@@ -63,7 +63,7 @@ export function SiteHeader({
             />
           </div>
 
-          <nav className="site-header__nav flex items-center gap-4 mb-[-8px]" data-header="nav">
+          <nav className="site-header__nav flex items-center gap-4" data-header="nav">
             <NavLink to="/financial" search={{timeframe: financialTimeframe}}>
               Financial
             </NavLink>
@@ -75,7 +75,7 @@ export function SiteHeader({
           </nav>
 
           <div className="site-header__controls flex justify-center items-center gap-2" data-header="controls">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-8">
               <ConnectivityStatus isOnline={isOnline} isBackendOnline={isBackendOnline} variant="desktop" />
               <UserAccountLink label={userLabel} variant="desktop" />
             </div>
@@ -100,7 +100,7 @@ export function SiteHeader({
               style={{
                 left: '-35%',
                 width: '35%',
-                background: 'linear-gradient(90deg, color-mix(in srgb, var(--color-brand-accent) 0%, transparent) 0%, color-mix(in srgb, var(--color-brand-accent) 95%, transparent) 50%, var(--color-brand-accent) 100%)',
+                background: 'linear-gradient(90deg, var(--color-brand-accent-transparent) 0%, var(--color-brand-accent-95) 50%, var(--color-brand-accent) 100%)',
                 boxShadow: '0 0 16px 3px var(--color-brand-accent), 0 0 8px 1px var(--color-brand-accent), 0 0 4px var(--color-brand-accent)'
               }}
             />

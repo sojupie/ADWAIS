@@ -91,7 +91,7 @@ export function InlineEditField<T>({
   // Special handling for checkbox
   if (type === 'checkbox') {
     return (
-      <div className="flex items-center gap-2 group relative py-1">
+      <div className="flex items-center gap-4 group relative py-1">
         <input
           type="checkbox"
           checked={(isEditing ? draft : value) as unknown as boolean}
@@ -120,7 +120,7 @@ export function InlineEditField<T>({
 
   return (
     <div 
-      className={`flex flex-col gap-1 w-full transition-colors ${
+      className={`flex flex-col gap-2 w-full transition-colors ${
         hideLabel
           ? 'py-0.5'
           : `py-1 px-2 -mx-2 rounded-lg ${isEditing ? 'bg-surface-container-lowest' : 'hover:bg-surface-container-lowest'}`
@@ -140,7 +140,7 @@ export function InlineEditField<T>({
       )}
 
       {isEditing ? (
-        <div className="flex items-center gap-2 w-full">
+        <div className="flex items-center gap-4 w-full">
           {type === 'select' ? (
             <Select
               ref={inputRef as React.RefObject<HTMLSelectElement>}
@@ -170,7 +170,7 @@ export function InlineEditField<T>({
               className={`flex-1 border border-outline-variant bg-surface rounded-md px-2 py-1.5 text-sm font-semibold focus:ring-2 focus:ring-brand-btn-primary focus:outline-none ${type === 'password' ? 'font-mono' : ''}`}
             />
           )}
-          <div className="flex items-center gap-1 shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
             {allowClear && (type === 'password' ? value : draft) && (
               <button
                 onClick={async () => {
@@ -223,7 +223,7 @@ export function InlineEditField<T>({
             )}
           </div>
           {disabled ? (
-            <span className="p-1 text-on-surface-variant cursor-not-allowed opacity-60 flex items-center gap-1 shrink-0" title="Requires Admin privileges">
+            <span className="p-1 text-on-surface-variant cursor-not-allowed opacity-60 flex items-center gap-2 shrink-0" title="Requires Admin privileges">
               <Lock size={12} />
               <span className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">Admin</span>
             </span>

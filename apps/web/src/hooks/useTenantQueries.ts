@@ -28,7 +28,8 @@ export function useCreateTenantMutation(onSuccessCallback?: () => void) {
       },
       onError: (err: Error) => {
         toast.error('Failed to create tenant', {
-          description: err.message || String(err)
+          description: err.message || String(err),
+          duration: Infinity
         });
       }
     }
@@ -58,7 +59,8 @@ export function useDeleteTenantMutation() {
       },
       onError: (err: Error) => {
         toast.error('Failed to delete tenant', {
-          description: err.message || String(err)
+          description: err.message || String(err),
+          duration: Infinity
         });
       }
     }
@@ -86,11 +88,6 @@ export function useUpdateTenantMutation() {
           };
         });
         queryClient.invalidateQueries({ queryKey: ['tenants'] });
-      },
-      onError: (err: Error) => {
-        toast.error('Failed to update tenant', {
-          description: err.message || String(err)
-        });
       }
     }
   });

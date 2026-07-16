@@ -25,17 +25,17 @@ const CustomTooltip = ({ active, payload }: { isLoading?: boolean;  active?: boo
     <div className="bg-surface border border-outline-variant rounded-lg shadow-lg p-4 text-sm animate-in fade-in zoom-in duration-200">
       <p className="font-bold text-on-surface mb-3 border-b border-slate-50 pb-2">{tenant.tenantName}</p>
       <div className="space-y-2">
-        <p className="flex justify-between gap-6 text-on-surface-variant">
+        <p className="flex justify-between gap-12 text-on-surface-variant">
           <span>Growth:</span>
           <strong className={tenant.growthPercentage >= 0 ? 'text-growth' : 'text-[#c92a2a]'}>
             {formatGrowth(tenant.growthPercentage)}
           </strong>
         </p>
-        <p className="flex justify-between gap-6 text-on-surface-variant">
+        <p className="flex justify-between gap-12 text-on-surface-variant">
           <span>Current:</span>
           <strong className="text-on-surface-variant">{formatCompact(tenant.currentRevenue)} SEK</strong>
         </p>
-        <p className="flex justify-between gap-6 text-on-surface-variant">
+        <p className="flex justify-between gap-12 text-on-surface-variant">
           <span>Variance:</span>
           <strong className="text-on-surface-variant">{formatCompact(tenant.absoluteVariance)} SEK</strong>
         </p>

@@ -48,8 +48,9 @@ export function useTriggerJobMutation() {
       toast.success('Job triggered successfully.');
     },
     onError: (err: Error) => {
-      toast.error('Failed to trigger job', {
-        description: err.message || String(err)
+        toast.error('Failed to trigger job', {
+          description: err.message || String(err),
+          duration: Infinity
       });
     }
   });
@@ -64,7 +65,8 @@ export function useBackfillMutation(onSuccessCallback?: () => void) {
       },
       onError: (err: Error) => {
         toast.error('Backfill failed', {
-          description: err.message || String(err)
+          description: err.message || String(err),
+          duration: Infinity
         });
       }
     }
@@ -93,7 +95,8 @@ export function useUpdateConfigMutation() {
       },
       onError: (err: Error) => {
         toast.error('Failed to update configuration', {
-          description: err.message || String(err)
+          description: err.message || String(err),
+          duration: Infinity
         });
       }
     }
@@ -135,7 +138,8 @@ export function useUpdateFetchIntervalsMutation() {
       },
       onError: (err: Error) => {
         toast.error('Failed to update intervals', {
-          description: err.message || String(err)
+          description: err.message || String(err),
+          duration: Infinity
         });
       }
     }

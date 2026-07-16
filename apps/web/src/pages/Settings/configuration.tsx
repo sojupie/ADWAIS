@@ -25,11 +25,11 @@ export function ConfigurationView() {
                 />
                 <div className="flex-1 overflow-y-auto sm:p-4 custom-scrollbar bg-surface rounded-xl shadow-sm border border-outline-variant/60">
                     <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                        <div className="flex flex-col gap-2">
+                        <div className="flex flex-col gap-4">
                             <FetchIntervalsForm intervals={intervals} updateIntervals={updateIntervals} disabled={disabled} />
                             <CalendarSubscriptionsPanel disabled={disabled} />
                         </div>
-                        <div className="flex flex-col gap-2">
+                        <div className="flex flex-col gap-4">
                             <GlobalConfigurationForm config={config} updateConfig={updateConfig} disabled={disabled} />
                         </div>
                     </div>

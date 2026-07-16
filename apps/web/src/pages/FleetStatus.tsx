@@ -18,11 +18,11 @@ export function FleetStatus() {
   const vm = useFleetStatusViewModel();
 
   const matrixActions = (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-4">
       <button
         onClick={() => vm.setSelection(null)}
         disabled={!vm.selection}
-        className="bg-brand-bg-secondary text-white px-4 py-1.5 rounded-full text-sm font-bold tracking-wide hover:bg-brand-text hover:shadow-md transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+        className="bg-surface-container-low hover:m3-elevation-2 m3-elevation-1 px-4 py-1.5 rounded-full text-sm font-bold tracking-wide transition-all cursor-pointer disabled:m3-elevation-0 disabled:text-slate-400 disabled:bg-slate-200 disabled:cursor-not-allowed"
       >
         CLEAR
       </button>
@@ -50,7 +50,7 @@ export function FleetStatus() {
   return (
     <DashboardLayout>
       <div className="min-w-0">
-        <div className="flex items-center gap-3 mb-1">
+        <div className="flex items-center gap-6 mb-1">
           <h1 className="text-2xl font-extrabold text-brand-text tracking-tight m-0">Fleet Status</h1>
         </div>
         <p className="text-sm text-on-surface-variant m-0 font-medium tracking-wide">Endpoint status, uptime%, and response time.</p>
@@ -103,12 +103,12 @@ export function FleetStatus() {
         />
 
         <FactPanel label="Active Incidents">
-          <div className="flex items-baseline gap-6">
-            <div className="flex items-baseline gap-2">
+          <div className="flex items-baseline gap-12">
+            <div className="flex items-baseline gap-4">
               <span className="text-2xl lg:text-3xl xl:text-2xl 2xl:text-4xl font-extrabold tracking-tight text-status-down">{vm.fleetStats.down.length}</span>
               <span className="text-sm font-bold text-on-surface-variant uppercase tracking-widest">DOWN</span>
             </div>
-            <div className="flex items-baseline gap-2">
+            <div className="flex items-baseline gap-4">
               <span className="text-2xl lg:text-3xl xl:text-2xl 2xl:text-4xl font-extrabold tracking-tight text-status-degraded">{vm.fleetStats.degraded.length}</span>
               <span className="text-sm font-bold text-on-surface-variant uppercase tracking-widest">DEGRADED</span>
             </div>
@@ -121,7 +121,7 @@ export function FleetStatus() {
       <DashboardFlexRow weight="flex-1" gridCols="5" className="landscape-contained:min-h-0">
 
         {/* Right Column: Watchlist (Top) & Latency Chart (Bottom) (Takes 40% of width) */}
-        <div className="landscape-lg:col-span-2 flex flex-col gap-2 min-h-[500px] contained:min-h-0 contained:h-full">
+        <div className="landscape-lg:col-span-2 flex flex-col gap-4 min-h-[500px] contained:min-h-0 contained:h-full">
 
           <SlaBreachWatchlist
             monitors={vm.scopedMonitors}

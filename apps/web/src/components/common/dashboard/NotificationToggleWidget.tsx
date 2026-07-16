@@ -8,25 +8,19 @@ export function NotificationToggleWidget() {
     <button
       type="button"
       onClick={toggleNotifications}
-      className={`relative overflow-hidden flex items-center justify-between px-4 py-1.5 rounded-full gap-1 shadow-sm transition-all duration-300 border-none whitespace-nowrap shrink-0 cursor-pointer active:scale-[0.98]
-        ${notificationsEnabled 
-          ? 'bg-status-up hover:bg-status-up/90 text-white' 
-          : 'bg-brand-btn-primary hover:bg-brand-btn-primary/90 text-slate-300'
+      className={`relative overflow-hidden flex min-h-11 items-center justify-between px-4 rounded-full gap-4 transition-all duration-300 border-none whitespace-nowrap shrink-0 cursor-pointer font-bold
+         ${notificationsEnabled 
+          ? 'bg-secondary text-on-secondary hover:opacity-80'
+          : 'bg-surface-container-lowest text-on-primary hover:bg-surface-container-high'
         }`}
       aria-label={notificationsEnabled ? 'Disable notifications' : 'Enable notifications'}
       title={notificationsEnabled ? 'Mute new order notifications' : 'Unmute new order notifications'}
     >
-      <div className="flex items-center w-[88px]">
-        <span className="text-sm font-bold tracking-wider">
-          {notificationsEnabled ? 'ALERTS ON' : 'ALERTS OFF'}
-        </span>
-      </div>
-
       <div className="flex items-center justify-center w-5 h-5 z-10">
         {notificationsEnabled ? (
-          <Bell size={14} fill="currentColor" />
+          <Bell size={16} fill="currentColor" />
         ) : (
-          <BellOff size={14} />
+          <BellOff size={16} />
         )}
       </div>
     </button>

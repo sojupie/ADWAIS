@@ -1,5 +1,8 @@
 import plugin from 'tailwindcss/plugin'
 
+const withOpacity = (variable, defaultOpacity = 1) => ({ opacityValue }) =>
+  `rgba(var(${variable}), ${opacityValue ?? defaultOpacity})`;
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
@@ -10,107 +13,107 @@ export default {
     extend: {
       colors: {
         // Material 3 Semantic Colors mapped directly to CSS variables
-        primary: 'var(--md-sys-color-primary)',
-        'on-primary': 'var(--md-sys-color-on-primary)',
-        'primary-container': 'var(--md-sys-color-primary-container)',
-        'on-primary-container': 'var(--md-sys-color-on-primary-container)',
-        secondary: 'var(--md-sys-color-secondary)',
-        'on-secondary': 'var(--md-sys-color-on-secondary)',
-        'secondary-container': 'var(--md-sys-color-secondary-container)',
-        'on-secondary-container': 'var(--md-sys-color-on-secondary-container)',
-        tertiary: 'var(--md-sys-color-tertiary)',
-        'on-tertiary': 'var(--md-sys-color-on-tertiary)',
-        'tertiary-container': 'var(--md-sys-color-tertiary-container)',
-        'on-tertiary-container': 'var(--md-sys-color-on-tertiary-container)',
-        error: 'var(--md-sys-color-error)',
-        'on-error': 'var(--md-sys-color-on-error)',
-        'error-container': 'var(--md-sys-color-error-container)',
-        'on-error-container': 'var(--md-sys-color-on-error-container)',
-        background: 'var(--md-sys-color-background)',
-        'on-background': 'var(--md-sys-color-on-background)',
-        surface: 'var(--md-sys-color-surface)',
-        'on-surface': 'var(--md-sys-color-on-surface)',
-        'on-surface-variant': 'var(--md-sys-color-on-surface-variant)',
-        'surface-container-lowest': 'var(--md-sys-color-surface-container-lowest)',
-        'surface-container-low': 'var(--md-sys-color-surface-container-low)',
-        'surface-container': 'var(--md-sys-color-surface-container)',
-        'surface-container-high': 'var(--md-sys-color-surface-container-high)',
-        'surface-container-highest': 'var(--md-sys-color-surface-container-highest)',
-        'surface-dim': 'var(--md-sys-color-surface-dim)',
-        'surface-bright': 'var(--md-sys-color-surface-bright)',
-        outline: 'var(--md-sys-color-outline)',
-        'outline-variant': 'var(--md-sys-color-outline-variant)',
-        'inverse-surface': 'var(--md-sys-color-inverse-surface)',
-        'inverse-on-surface': 'var(--md-sys-color-inverse-on-surface)',
-        'inverse-primary': 'var(--md-sys-color-inverse-primary)',
+        primary: withOpacity('--md-sys-color-primary-rgb'),
+        'on-primary': withOpacity('--md-sys-color-on-primary-rgb'),
+        'primary-container': withOpacity('--md-sys-color-primary-container-rgb'),
+        'on-primary-container': withOpacity('--md-sys-color-on-primary-container-rgb'),
+        secondary: withOpacity('--md-sys-color-secondary-rgb'),
+        'on-secondary': withOpacity('--md-sys-color-on-secondary-rgb'),
+        'secondary-container': withOpacity('--md-sys-color-secondary-container-rgb'),
+        'on-secondary-container': withOpacity('--md-sys-color-on-secondary-container-rgb'),
+        tertiary: withOpacity('--md-sys-color-tertiary-rgb'),
+        'on-tertiary': withOpacity('--md-sys-color-on-tertiary-rgb'),
+        'tertiary-container': withOpacity('--md-sys-color-tertiary-container-rgb'),
+        'on-tertiary-container': withOpacity('--md-sys-color-on-tertiary-container-rgb'),
+        error: withOpacity('--md-sys-color-error-rgb'),
+        'on-error': withOpacity('--md-sys-color-on-error-rgb'),
+        'error-container': withOpacity('--md-sys-color-error-container-rgb'),
+        'on-error-container': withOpacity('--md-sys-color-on-error-container-rgb'),
+        background: withOpacity('--md-sys-color-background-rgb'),
+        'on-background': withOpacity('--md-sys-color-on-background-rgb'),
+        surface: withOpacity('--md-sys-color-surface-rgb'),
+        'on-surface': withOpacity('--md-sys-color-on-surface-rgb'),
+        'on-surface-variant': withOpacity('--md-sys-color-on-surface-variant-rgb'),
+        'surface-container-lowest': withOpacity('--md-sys-color-surface-container-lowest-rgb'),
+        'surface-container-low': withOpacity('--md-sys-color-surface-container-low-rgb'),
+        'surface-container': withOpacity('--md-sys-color-surface-container-rgb'),
+        'surface-container-high': withOpacity('--md-sys-color-surface-container-high-rgb'),
+        'surface-container-highest': withOpacity('--md-sys-color-surface-container-highest-rgb'),
+        'surface-dim': withOpacity('--md-sys-color-surface-dim-rgb'),
+        'surface-bright': withOpacity('--md-sys-color-surface-bright-rgb'),
+        outline: withOpacity('--md-sys-color-outline-rgb'),
+        'outline-variant': withOpacity('--md-sys-color-outline-variant-rgb'),
+        'inverse-surface': withOpacity('--md-sys-color-inverse-surface-rgb'),
+        'inverse-on-surface': withOpacity('--md-sys-color-inverse-on-surface-rgb'),
+        'inverse-primary': withOpacity('--md-sys-color-inverse-primary-rgb'),
         // Legacy Brand mappings mapped to CSS variables
-        'brand-bg-primary': 'var(--color-brand-bg-primary)',
-        'brand-bg-secondary': 'var(--color-brand-bg-secondary)',
-        'brand-bg-tertiary': 'var(--color-brand-bg-tertiary)',
-        'brand-bg-quaternary': 'var(--color-brand-bg-quaternary)',
-        'brand-btn-primary': 'var(--color-brand-btn-primary)',
-        'brand-btn-border-primary': 'var(--color-brand-btn-border-primary)',
-        'brand-btn-secondary': 'var(--color-brand-btn-secondary)',
-        'brand-btn-border-secondary': 'var(--color-brand-btn-border-secondary)',
-        'brand-btn-quaternary': 'var(--color-brand-btn-quaternary)',
-        'brand-text': 'var(--color-brand-text)',
-        'brand-accent': 'var(--color-brand-accent)',
-        'brand-link': 'var(--color-brand-link)',
-        'brand-hover': 'var(--color-brand-hover)',
-        'brand-active': 'var(--color-brand-active)',
-        'calendar-today-bg': 'var(--color-calendar-today-bg)',
+        'brand-bg-primary': withOpacity('--color-brand-bg-primary-rgb'),
+        'brand-bg-secondary': withOpacity('--color-brand-bg-secondary-rgb'),
+        'brand-bg-tertiary': withOpacity('--color-brand-bg-tertiary-rgb'),
+        'brand-bg-quaternary': withOpacity('--color-brand-bg-quaternary-rgb'),
+        'brand-btn-primary': withOpacity('--color-brand-btn-primary-rgb'),
+        'brand-btn-border-primary': withOpacity('--color-brand-btn-border-primary-rgb'),
+        'brand-btn-secondary': withOpacity('--color-brand-btn-secondary-rgb'),
+        'brand-btn-border-secondary': withOpacity('--color-brand-btn-border-secondary-rgb'),
+        'brand-btn-quaternary': withOpacity('--color-brand-btn-quaternary-rgb'),
+        'brand-text': withOpacity('--color-brand-text-rgb'),
+        'brand-accent': withOpacity('--color-brand-accent-rgb'),
+        'brand-link': withOpacity('--color-brand-link-rgb'),
+        'brand-hover': withOpacity('--color-brand-hover-rgb'),
+        'brand-active': withOpacity('--color-brand-active-rgb'),
+        'calendar-today-bg': withOpacity('--color-calendar-today-bg-rgb'),
         'status-up': {
-          DEFAULT: 'var(--color-status-up)',
-          container: 'var(--color-status-up-container)',
-          'container-hover': 'var(--color-status-up-container-hover)',
-          'on-container': 'var(--color-status-up-on-container)',
-          muted: 'var(--color-status-up-muted)',
+          DEFAULT: withOpacity('--color-status-up-rgb'),
+          container: withOpacity('--color-status-up-container-rgb', 0.7),
+          'container-hover': withOpacity('--color-status-up-container-rgb', 0.9),
+          'on-container': withOpacity('--color-status-up-on-container-rgb'),
+          muted: withOpacity('--color-status-up-muted-rgb'),
         },
         'status-down': {
-          DEFAULT: 'var(--color-status-down)',
-          container: 'var(--color-status-down-container)',
-          'container-hover': 'var(--color-status-down-container-hover)',
-          'on-container': 'var(--color-status-down-on-container)',
-          muted: 'var(--color-status-down-muted)',
+          DEFAULT: withOpacity('--color-status-down-rgb'),
+          container: withOpacity('--color-status-down-container-rgb', 0.7),
+          'container-hover': withOpacity('--color-status-down-container-rgb', 0.9),
+          'on-container': withOpacity('--color-status-down-on-container-rgb'),
+          muted: withOpacity('--color-status-down-muted-rgb'),
         },
         'status-degraded': {
-          DEFAULT: 'var(--color-status-degraded)',
-          container: 'var(--color-status-degraded-container)',
-          'container-hover': 'var(--color-status-degraded-container-hover)',
-          'on-container': 'var(--color-status-degraded-on-container)',
-          muted: 'var(--color-status-degraded-muted)',
+          DEFAULT: withOpacity('--color-status-degraded-rgb'),
+          container: withOpacity('--color-status-degraded-container-rgb', 0.7),
+          'container-hover': withOpacity('--color-status-degraded-container-rgb', 0.9),
+          'on-container': withOpacity('--color-status-degraded-on-container-rgb'),
+          muted: withOpacity('--color-status-degraded-muted-rgb'),
         },
         'status-paused': {
-          DEFAULT: 'var(--color-status-paused)',
-          container: 'var(--color-status-paused-container)',
-          'container-hover': 'var(--color-status-paused-container-hover)',
-          'on-container': 'var(--color-status-paused-on-container)',
-          muted: 'var(--color-status-paused-muted)',
+          DEFAULT: withOpacity('--color-status-paused-rgb'),
+          container: withOpacity('--color-status-paused-container-rgb', 0.7),
+          'container-hover': withOpacity('--color-status-paused-container-rgb', 0.9),
+          'on-container': withOpacity('--color-status-paused-on-container-rgb'),
+          muted: withOpacity('--color-status-paused-muted-rgb'),
         },
         'status-starting': {
-          DEFAULT: 'var(--color-status-starting)',
-          container: 'var(--color-status-starting-container)',
-          'container-hover': 'var(--color-status-starting-container-hover)',
-          'on-container': 'var(--color-status-starting-on-container)',
-          muted: 'var(--color-status-starting-muted)',
+          DEFAULT: withOpacity('--color-status-starting-rgb'),
+          container: withOpacity('--color-status-starting-container-rgb', 0.7),
+          'container-hover': withOpacity('--color-status-starting-container-rgb', 0.9),
+          'on-container': withOpacity('--color-status-starting-on-container-rgb'),
+          muted: withOpacity('--color-status-starting-muted-rgb'),
         },
         'status-unknown': {
-          DEFAULT: 'var(--color-status-unknown)',
-          container: 'var(--color-status-unknown-container)',
-          'container-hover': 'var(--color-status-unknown-container-hover)',
-          'on-container': 'var(--color-status-unknown-on-container)',
-          muted: 'var(--color-status-unknown-muted)',
+          DEFAULT: withOpacity('--color-status-unknown-rgb'),
+          container: withOpacity('--color-status-unknown-container-rgb', 0.7),
+          'container-hover': withOpacity('--color-status-unknown-container-rgb', 0.9),
+          'on-container': withOpacity('--color-status-unknown-on-container-rgb'),
+          muted: withOpacity('--color-status-unknown-muted-rgb'),
         },
-        'chart-grid': 'var(--color-chart-grid)',
-        'chart-tick': 'var(--color-chart-tick)',
-        'chart-prev-line': 'var(--color-chart-prev-line)',
-        'chart-label': 'var(--color-chart-label)',
-        'chart-1': 'var(--color-chart-1)',
-        'chart-2': 'var(--color-chart-2)',
-        'chart-3': 'var(--color-chart-3)',
-        'growth': 'var(--color-growth)',
-        'decline': 'var(--color-decline)',
-        'decline-warning': 'var(--color-decline-warning)',
+        'chart-grid': withOpacity('--color-chart-grid-rgb'),
+        'chart-tick': withOpacity('--color-chart-tick-rgb'),
+        'chart-prev-line': withOpacity('--color-chart-prev-line-rgb'),
+        'chart-label': withOpacity('--color-chart-label-rgb'),
+        'chart-1': withOpacity('--color-chart-1-rgb'),
+        'chart-2': withOpacity('--color-chart-2-rgb'),
+        'chart-3': withOpacity('--color-chart-3-rgb'),
+        growth: withOpacity('--color-growth-rgb'),
+        decline: withOpacity('--color-decline-rgb'),
+        'decline-warning': withOpacity('--color-decline-warning-rgb'),
       },
       fontFamily: {
         sans: ['Manrope', 'system-ui', 'sans-serif'],
@@ -139,55 +142,37 @@ export default {
     },
   },
   plugins: [
-    plugin(function({ addComponents, theme }) {
+    plugin(function({ addComponents, theme, e }) {
       const spacing = theme('spacing') || {};
+      const screens = theme('screens') || {};
       const flexGapComponents = {};
-      const breakpoints = {
-        'sm': '640px',
-        'md': '768px',
-        'lg': '1024px',
-        'xl': '1280px',
-        '2xl': '1536px'
+
+      const getMediaQuery = (screen) => {
+        if (typeof screen === 'string') return `(min-width: ${screen})`;
+        if (screen?.raw) return screen.raw;
+
+        const conditions = [];
+        if (screen?.min) conditions.push(`(min-width: ${screen.min})`);
+        if (screen?.max) conditions.push(`(max-width: ${screen.max})`);
+        return conditions.join(' and ');
       };
       
       Object.entries(spacing).forEach(([key, value]) => {
         const escapedKey = key.replace('.', '\\.');
-        
-        // Standard Flex Gap Fallback (No-Wrap)
-        flexGapComponents[`.flex.gap-${escapedKey} > :not([hidden]) ~ :not([hidden])`] = {
-          'margin-left': value,
-          'margin-top': '0px',
-        };
-        flexGapComponents[`.flex.flex-col.gap-${escapedKey} > :not([hidden]) ~ :not([hidden])`] = {
-          'margin-top': value,
-          'margin-left': '0px',
-        };
-        flexGapComponents[`.flex.gap-x-${escapedKey} > :not([hidden]) ~ :not([hidden])`] = {
-          'margin-left': value,
-        };
-        flexGapComponents[`.flex.gap-y-${escapedKey} > :not([hidden]) ~ :not([hidden])`] = {
-          'margin-top': value,
-        };
 
-        // Responsive overrides for direction changes (e.g. flex-col sm:flex-row)
-        Object.entries(breakpoints).forEach(([bp, minWidth]) => {
-          const bpKey = `@media (min-width: ${minWidth})`;
-          flexGapComponents[bpKey] = flexGapComponents[bpKey] || {};
-          
-          const escapedBp = bp === '2xl' ? '\\32 xl' : bp;
-          
-          // col -> row at bp
-          flexGapComponents[bpKey][`.flex.flex-col.${escapedBp}\\:flex-row.gap-${escapedKey} > :not([hidden]) ~ :not([hidden])`] = {
-            'margin-top': '0px',
-            'margin-left': value,
-          };
-          
-          // row -> col at bp
-          flexGapComponents[bpKey][`.flex.${escapedBp}\\:flex-col.gap-${escapedKey} > :not([hidden]) ~ :not([hidden])`] = {
-            'margin-top': value,
-            'margin-left': '0px',
-          };
-        });
+        // Store the requested row/column gaps on the flex container. Shared
+        // direction rules below consume these values without multiplying every
+        // spacing value across every responsive breakpoint.
+        flexGapComponents[`.flex.gap-${escapedKey}`] = {
+          '--tw-flex-gap-row': value,
+          '--tw-flex-gap-column': value,
+        };
+        flexGapComponents[`.flex.gap-x-${escapedKey}`] = {
+          '--tw-flex-gap-column': value,
+        };
+        flexGapComponents[`.flex.gap-y-${escapedKey}`] = {
+          '--tw-flex-gap-row': value,
+        };
 
         // Wrap Flex Gap Fallback (Negative Margin Hack)
         flexGapComponents[`.flex.flex-wrap.gap-${escapedKey}`] = {
@@ -226,21 +211,61 @@ export default {
           'margin-top': `calc(${value} / 2)`,
         };
       });
-      
-      addComponents(flexGapComponents);
-    }),
-    plugin(function({ addUtilities, theme }) {
-      const primaryColor = theme('colors.brand-btn-primary') || '#04686D';
-      
-      const hexToRgb = (hex) => {
-        const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-        const fullHex = hex.replace(shorthandRegex, (m, r, g, b) => r + r + g + g + b + b);
-        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(fullHex);
-        return result ? `${parseInt(result[1], 16)} ${parseInt(result[2], 16)} ${parseInt(result[3], 16)}` : '4 104 109';
+
+      const visibleSibling = '> :not([hidden]) ~ :not([hidden])';
+      flexGapComponents['.flex'] = {
+        '--tw-flex-gap-row': '0px',
+        '--tw-flex-gap-column': '0px',
+      };
+      flexGapComponents[`.flex:not(.flex-wrap) ${visibleSibling}`] = {
+        'margin-top': '0px',
+        'margin-left': 'var(--tw-flex-gap-column, 0px)',
+      };
+      flexGapComponents[`.flex.flex-col:not(.flex-wrap) ${visibleSibling}`] = {
+        'margin-top': 'var(--tw-flex-gap-row, 0px)',
+        'margin-left': '0px',
       };
 
-      const rgbValues = hexToRgb(primaryColor);
+      // Respect every configured Tailwind screen, including raw custom screens
+      // such as `contained`, when the responsive utility changes direction.
+      Object.entries(screens).forEach(([bp, screen]) => {
+        const mediaQuery = getMediaQuery(screen);
+        if (!mediaQuery) return;
 
+        const bpKey = `@media ${mediaQuery}`;
+        flexGapComponents[bpKey] = flexGapComponents[bpKey] || {};
+        const rowClass = e(`${bp}:flex-row`);
+        const colClass = e(`${bp}:flex-col`);
+
+        flexGapComponents[bpKey][`.flex.flex-col.${rowClass}:not(.flex-wrap) ${visibleSibling}`] = {
+          'margin-top': '0px',
+          'margin-left': 'var(--tw-flex-gap-column, 0px)',
+        };
+        flexGapComponents[bpKey][`.flex.${colClass}:not(.flex-wrap) ${visibleSibling}`] = {
+          'margin-top': 'var(--tw-flex-gap-row, 0px)',
+          'margin-left': '0px',
+        };
+      });
+
+      // Native flex gap and margin fallbacks must never run together. A small
+      // runtime capability test adds this class only on affected browsers.
+      const scopedFlexGapComponents = {};
+      Object.entries(flexGapComponents).forEach(([selector, rules]) => {
+        if (selector.startsWith('@media')) {
+          scopedFlexGapComponents[selector] = Object.fromEntries(
+            Object.entries(rules).map(([mediaSelector, mediaRules]) => [
+              `.no-flexbox-gap ${mediaSelector}`,
+              mediaRules,
+            ]),
+          );
+        } else {
+          scopedFlexGapComponents[`.no-flexbox-gap ${selector}`] = rules;
+        }
+      });
+
+      addComponents(scopedFlexGapComponents);
+    }),
+    plugin(function({ addUtilities}) {
       const elevations = {
         '.m3-elevation-0': {
           boxShadow: 'none',
@@ -248,27 +273,22 @@ export default {
         },
         '.m3-elevation-1': {
           boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.3), 0 1px 3px 1px rgba(0, 0, 0, 0.15)',
-          backgroundImage: `linear-gradient(rgba(${rgbValues} / 0.05), rgba(${rgbValues} / 0.05))`,
         },
         '.m3-elevation-2': {
           boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.3), 0 2px 6px 2px rgba(0, 0, 0, 0.15)',
-          backgroundImage: `linear-gradient(rgba(${rgbValues} / 0.08), rgba(${rgbValues} / 0.08))`,
         },
         '.m3-elevation-3': {
           boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 4px 8px 3px rgba(0, 0, 0, 0.15)',
-          backgroundImage: `linear-gradient(rgba(${rgbValues} / 0.11), rgba(${rgbValues} / 0.11))`,
         },
         '.m3-elevation-4': {
           boxShadow: '0 2px 3px 0 rgba(0, 0, 0, 0.3), 0 6px 10px 4px rgba(0, 0, 0, 0.15)',
-          backgroundImage: `linear-gradient(rgba(${rgbValues} / 0.12), rgba(${rgbValues} / 0.12))`,
         },
         '.m3-elevation-5': {
           boxShadow: '0 4px 4px 0 rgba(0, 0, 0, 0.3), 0 8px 12px 6px rgba(0, 0, 0, 0.15)',
-          backgroundImage: `linear-gradient(rgba(${rgbValues} / 0.14), rgba(${rgbValues} / 0.14))`,
         },
       };
 
       addUtilities(elevations, ['hover', 'focus', 'responsive']);
-    })
+    }),
   ],
 }

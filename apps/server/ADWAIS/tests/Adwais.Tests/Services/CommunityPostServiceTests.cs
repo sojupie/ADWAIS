@@ -93,4 +93,28 @@ public class CommunityPostServiceTests
         Assert.NotNull(result[0].User);
         Assert.Equal("John Doe", result[0].User.Name);
     }
+
+    [Fact]
+    public async Task DeletePostAsync_RemovesPost_AndReturnsFalseWhenMissing()
+    {
+        var dbName = Guid.NewGuid().ToString();
+        var options = new DbContextOptionsBuilder<AnalyticsDbContext>().UseInMemoryDatabase(dbName).Options;
+        var dbContext = new AnalyticsDbContext(options);
+        var post = new CommunityPost
+        {
+            Id = Guid.NewGuid(),
+            UserId = Guid.NewGuid(),
+            Title = "Title",
+            Body = "Body",
+            CreatedAt = DateTime.UtcNow
+        };
+        dbContext.CommunityPosts.Add(post);
+        await dbContext.SaveChangesAsync();
+
+        var service = new CommunityPostService(dbContext);
+
+        Assert.True(await service.DeletePostAsync(post.Id, CancellationToken.None));
+        Assert.False(await service.DeletePostAsync(post.Id, CancellationToken.None));
+        Assert.Null(await dbContext.CommunityPosts.FindAsync(post.Id));
+    }
 }

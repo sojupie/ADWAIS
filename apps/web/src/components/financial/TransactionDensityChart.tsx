@@ -1,7 +1,7 @@
 import { useMemo, useState, Fragment, memo } from 'react';
 import { createPortal } from 'react-dom';
-import type { TransactionDensityPointDto } from '@types';
-import { formatCurrency } from '@utils';
+import type { TransactionDensityResponse } from '@types';
+import { formatCurrency, formatNumber } from '@utils';
 import { ChartPanel } from '../common/charts/ChartPanel';
 import {EmptyState} from "../common/ui/EmptyState.tsx";
 
@@ -22,9 +22,9 @@ const getColor = (value: number, min: number, max: number) => {
 };
 
 export const TransactionDensityChart = memo(function TransactionDensityChart({
-  isLoading, isStale, points,
+  isLoading, isStale, response,
   className }: { isLoading?: boolean; isStale?: boolean;
-  points: TransactionDensityPointDto[];
+  response: TransactionDensityResponse;
   className?: string;
 }) {
   const [hoverInfo, setHoverInfo] = useState<{
@@ -36,10 +36,9 @@ export const TransactionDensityChart = memo(function TransactionDensityChart({
     y: number;
   } | null>(null);
 
+  const { points, totalCount, minCount, maxCount } = response;
   const isEmpty = points.length === 0;
-  const {matrix, maxCount, minCount} = useMemo(() => {
-    const max = points.length === 0 ? 0 : Math.max(...points.map(p => p.count));
-    const min = points.length === 0 ? 0 : Math.min(...points.map(p => p.count));
+  const matrix = useMemo(() => {
     const nextMatrix = Array.from({ length: 7 }, () => Array.from({ length: 24 }, () => ({ count: 0, totalRevenue: 0 })));
 
     points.forEach(p => {
@@ -49,25 +48,31 @@ export const TransactionDensityChart = memo(function TransactionDensityChart({
       }
     });
 
-    return {matrix: nextMatrix, maxCount: max, minCount: min};
+    return nextMatrix;
   }, [points]);
 
   return (
     <ChartPanel isLoading={isLoading} isStale={isStale}
       title="Transaction Density Matrix"
+      subtitle="30-day rolling density"
       className={className || "h-full relative"}
       bodyClassName={isEmpty ? 'flex items-center h-full justify-center' : 'flex-1 min-h-0 flex flex-col p-4'}
       legend={
-      <div className="flex gap-1 flex-wrap items-center justify-end">
-        <span className="text-sm whitespace-nowrap font-bold text-on-surface-variant uppercase tracking-widest bg-surface-container-low px-3 py-1.5 rounded">
-          30-Day Rolling Density</span>
-        <div
-            className="flex h-full rounded overflow-hidden"
+      <div className="flex flex-wrap items-end justify-end gap-4">
+        <div className="text-right leading-none">
+          <strong className="block text-2xl font-black tabular-nums text-on-surface">{formatNumber(totalCount)}</strong>
+          <span className="mt-1 block text-xs font-bold uppercase tracking-wider text-on-surface-variant">transactions</span>
+        </div>
+        <div className="w-36 min-w-28" aria-label={`Density ranges from ${minCount} to ${maxCount} transactions per bucket`}>
+          <div className="mb-1 flex justify-between text-xs font-bold tabular-nums text-on-surface-variant">
+            <span>{formatNumber(minCount)}</span>
+            <span>{formatNumber(maxCount)}</span>
+          </div>
+          <div
+            className="h-3 rounded-full"
             style={{ background: `linear-gradient(to right, ${PALETTE.join(', ')})` }}
-        >
-          <span className="flex-1 text-center text-sm font-bold uppercase tracking-widest px-3 py-1.5 text-white mix-blend-difference">LOW</span>
-          <span className="flex-1 text-center text-sm font-bold uppercase tracking-widest px-3 py-1.5 text-white mix-blend-difference">MEDIUM</span>
-          <span className="flex-1 text-center text-sm font-bold uppercase tracking-widest px-3 py-1.5 text-white mix-blend-difference">HIGH</span>
+          />
+          <span className="mt-1 block text-right text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">transactions / bucket</span>
         </div>
       </div>}
     >
@@ -131,11 +136,11 @@ export const TransactionDensityChart = memo(function TransactionDensityChart({
                 {DAYS[hoverInfo.day]} at {hoverInfo.hour.toString().padStart(2, '0')}:00
               </p>
               <div className="space-y-2">
-                <p className="flex justify-between gap-6">
+                <p className="flex justify-between gap-12">
                   <span className="text-on-surface-variant">Transactions:</span>
                   <strong className="text-on-surface-variant">{hoverInfo.count}</strong>
                 </p>
-                <p className="flex justify-between gap-6">
+                <p className="flex justify-between gap-12">
                   <span className="text-on-surface-variant">Revenue:</span>
                   <strong className="text-on-surface-variant">{formatCurrency(hoverInfo.revenue)}</strong>
                 </p>

@@ -39,11 +39,11 @@ const CustomTooltip = ({ active, payload }: { isLoading?: boolean;  active?: boo
         </span>
       </div>
       <div className="space-y-2">
-        <p className="flex justify-between gap-6">
+        <p className="flex justify-between gap-12">
           <span className="text-on-surface-variant">Current Revenue:</span>
           <strong className="text-on-surface-variant">{formatCompact(point.currentRevenue)}</strong>
         </p>
-        <p className="flex justify-between gap-6">
+        <p className="flex justify-between gap-12">
           <span className="text-on-surface-variant">Momentum:</span>
           <strong className={point.growthPercentage >= 0 ? 'text-growth' : 'text-[#c92a2a]'}>
             {point.growthPercentage > 0 ? '+' : ''}{point.growthPercentage.toFixed(1)}%

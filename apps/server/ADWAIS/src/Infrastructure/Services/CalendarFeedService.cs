@@ -79,7 +79,8 @@ public class CalendarFeedService(IApplicationDbContext dbContext) : ICalendarFee
         }
 
         var serializer = new CalendarSerializer();
-        var icsString = serializer.SerializeToString(calendar);
+        var icsString = serializer.SerializeToString(calendar)
+            ?? throw new InvalidOperationException("Failed to serialize the calendar feed.");
         return Encoding.UTF8.GetBytes(icsString);
     }
 

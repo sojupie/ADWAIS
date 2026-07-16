@@ -33,7 +33,7 @@ export function TenantFilterMenu({ filters, setFilters }: TenantFilterMenuProps)
     <div className="relative bg-surface border rounded-lg" ref={ref}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`text-sm font-semibold border rounded-lg px-3 py-1.5 transition-colors focus:outline-none flex items-center gap-1 cursor-pointer h-9 ${activeCount > 0 ? 'bg-brand-accent/15 border-brand-accent/20hover:bg-surface-container-low' : 'bg-surface-container-low border-outline-variant text-on-surface-variant hover:bg-surface-container-low'}`}
+        className={`text-sm font-semibold border rounded-lg px-3 py-1.5 transition-colors focus:outline-none flex items-center gap-2 cursor-pointer h-9 ${activeCount > 0 ? 'bg-brand-accent/15 border-brand-accent/20hover:bg-surface-container-low' : 'bg-surface-container-low border-outline-variant text-on-surface-variant hover:bg-surface-container-low'}`}
       >
         <Filter size={14} />
         <span>Filters</span>
@@ -41,12 +41,12 @@ export function TenantFilterMenu({ filters, setFilters }: TenantFilterMenuProps)
       </button>
 
       {isOpen && (
-        <div className="absolute top-full mt-2 right-0 w-[280px] bg-surface border border-outline-variant shadow-xl rounded-xl p-4 flex flex-col gap-5 z-50 animate-in fade-in slide-in-from-top-2">
+        <div className="absolute top-full mt-2 right-0 w-[280px] bg-surface border border-outline-variant shadow-xl rounded-xl p-4 flex flex-col gap-10 z-50 animate-in fade-in slide-in-from-top-2">
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <span className="text-sm font-bold text-on-surface-variant uppercase tracking-wider">Service Token</span>
-              <label className="flex items-center gap-1.5 text-sm font-semibold cursor-pointer select-none">
+              <label className="flex items-center gap-3 text-sm font-semibold cursor-pointer select-none">
                 <input type="checkbox" checked={filters.token === 'all'} onChange={e => setFilters({ ...filters, token: e.target.checked ? 'all' : 'set' })} className="rounded border-outline-variant w-3.5 h-3.5" />
                 All
               </label>
@@ -67,10 +67,10 @@ export function TenantFilterMenu({ filters, setFilters }: TenantFilterMenuProps)
             </div>
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <span className="text-sm font-bold text-on-surface-variant uppercase tracking-wider">Order Fetching</span>
-              <label className="flex items-center gap-1.5 text-sm font-semibold cursor-pointer select-none">
+              <label className="flex items-center gap-3 text-sm font-semibold cursor-pointer select-none">
                 <input type="checkbox" checked={filters.fetch === 'all'} onChange={e => setFilters({ ...filters, fetch: e.target.checked ? 'all' : 'on' })} className="rounded border-outline-variant w-3.5 h-3.5" />
                 All
               </label>

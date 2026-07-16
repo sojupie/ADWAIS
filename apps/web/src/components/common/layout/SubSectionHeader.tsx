@@ -11,7 +11,7 @@ interface SubSectionHeaderProps {
 export function SubSectionHeader({ title, subtitle, icon, children, className = '' }: SubSectionHeaderProps) {
   return (
     <div className={`flex items-center justify-between px-3 py-2 sm:p-4 border-b border-outline-variant bg-surface-container-lowest ${className}`}>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-6">
         <div className="p-2 bg-brand-link/10 text-brand-link rounded-lg shadow-sm">
           {icon}
         </div>
@@ -21,7 +21,7 @@ export function SubSectionHeader({ title, subtitle, icon, children, className = 
         </div>
       </div>
       {children && (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
           {children}
         </div>
       )}

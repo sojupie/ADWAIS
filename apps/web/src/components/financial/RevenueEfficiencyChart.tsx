@@ -33,15 +33,15 @@ const CustomTooltip = ({ active, payload }: { isLoading?: boolean;  active?: boo
         {point.tenantName} <span className="text-on-surface-variant font-normal text-sm ml-2 uppercase tracking-wider">{point.type}</span>
       </p>
       <div className="space-y-2">
-        <p className="flex justify-between gap-6">
+        <p className="flex justify-between gap-12">
           <span className="text-on-surface-variant">Average Order Value:</span>
           <strong className="text-on-surface-variant">{formatCurrency(point.averageOrderValue)}</strong>
         </p>
-        <p className="flex justify-between gap-6">
+        <p className="flex justify-between gap-12">
           <span className="text-on-surface-variant">Portfolio Share:</span>
           <strong className="text-on-surface-variant">{point.portfolioSharePercentage.toFixed(1)}%</strong>
         </p>
-        <p className="flex justify-between gap-6">
+        <p className="flex justify-between gap-12">
           <span className="text-on-surface-variant">Growth Velocity:</span>
           <strong className={point.growthVelocity >= 0 ? 'text-growth' : 'text-[#c92a2a]'}>
             {point.growthVelocity > 0 ? '+' : ''}{point.growthVelocity.toFixed(1)}%

@@ -7,7 +7,7 @@ export function DashboardTopRow({ children }: { children: ReactNode }) {
     if (isMobileView) {
         return (
             <div className="[mask-image:linear-gradient(to_right,black_85%,transparent_100%)] -mx-3">
-                <div className="kpi-carousel flex flex-row overflow-x-auto snap-x snap-mandatory gap-2 shrink px-3 pb-3 scroll-pl-3">
+                <div className="kpi-carousel flex flex-row overflow-x-auto snap-x snap-mandatory gap-4 shrink px-3 pb-3 scroll-pl-3">
                     {children}
                     <div className="w-3 shrink-0" />
                 </div>

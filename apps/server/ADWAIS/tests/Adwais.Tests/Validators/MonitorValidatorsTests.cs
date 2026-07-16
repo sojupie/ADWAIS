@@ -58,15 +58,15 @@ public class MonitorValidatorsTests
     }
 
     [Fact]
-    public void UpdateMonitorRequestDtoValidator_ShouldPass_WhenSlaIsValidOrNegOne()
+    public void UpdateMonitorRequestDtoValidator_ShouldPass_WhenSlaIsValidOrOmitted()
     {
         var modelValid = new UpdateMonitorRequestDto { Sla = 99.0 };
         var resultValid = _updateValidator.TestValidate(modelValid);
         resultValid.ShouldNotHaveAnyValidationErrors();
 
-        var modelNegOne = new UpdateMonitorRequestDto { Sla = -1.0 };
-        var resultNegOne = _updateValidator.TestValidate(modelNegOne);
-        resultNegOne.ShouldNotHaveAnyValidationErrors();
+        var modelOmitted = new UpdateMonitorRequestDto();
+        var resultOmitted = _updateValidator.TestValidate(modelOmitted);
+        resultOmitted.ShouldNotHaveAnyValidationErrors();
     }
 
     [Fact]

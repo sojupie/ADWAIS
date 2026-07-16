@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { CollectionPanel } from '../common/dashboard/CollectionPanel';
 import { useGetApiIntranetFeeds } from '../../api/generated/endpoints';
+import { formatDateTime } from '../../utils/dateTime';
 
 export function MotilloNews() {
   const { data: response, isLoading } = useGetApiIntranetFeeds({ PageSize: 20, AuthorName: 'motillo' });
@@ -11,13 +12,13 @@ export function MotilloNews() {
   const selectedPost = feedItems.find((p) => p.id === selectedPostId) || feedItems[0];
 
   return (
-    <CollectionPanel title="Motillo News" className="h-full relative">
+    <CollectionPanel title="Motillo News" titleClassName="md:text-lg" className="h-full relative">
       {isLoading ? (
         <div className="flex flex-col md:flex-row h-full animate-pulse">
           {/* Skeleton Sidebar */}
-          <div className="flex flex-row md:flex-col w-full md:w-1/3 flex-shrink-0 p-4 gap-4 overflow-hidden">
+          <div className="flex flex-row md:flex-col w-full md:w-1/3 flex-shrink-0 p-4 gap-8 overflow-hidden">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="flex flex-col gap-2 p-4 w-[280px] md:w-auto flex-shrink-0 rounded-xl bg-surface-container/50">
+              <div key={i} className="flex flex-col gap-4 p-4 w-[280px] md:w-auto flex-shrink-0 rounded-xl bg-surface-container/50">
                 <div className="h-3 w-20 bg-surface-container-high rounded-full" />
                 <div className="h-4 w-full bg-surface-container-high rounded-full" />
                 <div className="h-4 w-2/3 bg-surface-container-high rounded-full" />
@@ -25,7 +26,7 @@ export function MotilloNews() {
             ))}
           </div>
           {/* Skeleton Detail */}
-          <div className="flex-1 flex flex-col p-6 gap-4">
+          <div className="flex-1 flex flex-col p-6 gap-8">
             <div className="h-6 w-3/4 bg-surface-container-high rounded" />
             <div className="h-3 w-1/4 bg-surface-container-high rounded" />
             <div className="h-20 w-full bg-surface-container-high rounded" />
@@ -37,25 +38,25 @@ export function MotilloNews() {
           No news available.
         </div>
       ) : (
-        <div className="flex gap-1 px-4 pb-4 flex-col md:flex-row h-full overflow-hidden">
+        <div className="flex gap-2 p-4 flex-col md:flex-row h-full overflow-hidden">
           {/* Sidebar List (Surface Container Low) */}
-          <div className="flex flex-row md:flex-col rounded-2xl w-full md:w-1/3 md:h-full flex-shrink-0 p-3 gap-2 overflow-x-auto md:overflow-x-hidden md:overflow-y-auto custom-scrollbar bg-surface-container snap-x scroll-px-4">
+          <div className="flex flex-row md:flex-col rounded-2xl w-full md:w-1/3 md:h-full flex-shrink-0 p-3 gap-4 overflow-x-auto md:overflow-x-hidden md:overflow-y-auto custom-scrollbar bg-surface-container snap-x scroll-px-4">
             {feedItems.map((post) => {
               const isSelected = selectedPost?.id === post.id;
               return (
                 <button
                   key={post.id}
                   onClick={() => setSelectedPostId(post.id)}
-                  className={`flex flex-col text-left p-4 rounded-xl transition-all w-[280px] md:w-auto flex-shrink-0 snap-start ${
-                    isSelected ? 'bg-surface-container-high' : 'bg-transparent hover:bg-surface-container-high'
+                  className={`flex min-h-20 flex-col justify-center text-left p-4 rounded-xl transition-all w-[280px] md:w-auto flex-shrink-0 snap-start ${
+                    isSelected ? 'bg-primary-container text-on-primary-container shadow-sm' : 'bg-transparent hover:bg-surface-container-high'
                   }`}
                 >
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className={`text-xs font-bold tracking-wide ${isSelected ? 'text-brand-btn-primary' : 'text-on-surface-variant'}`}>
-                      {post.publishDate ? new Date(post.publishDate).toLocaleDateString() : ''}
+                  <div className="flex items-center gap-4 mb-2">
+                    <span className={`text-sm font-bold tracking-wide ${isSelected ? 'text-on-primary-container' : 'text-on-surface-variant'}`}>
+                      {formatDateTime(post.publishDate)}
                     </span>
                   </div>
-                  <p className={`text-base leading-snug transition-colors ${isSelected ? 'text-on-surface font-bold' : 'text-on-surface-variant font-semibold'}`}>
+                  <p className={`text-lg leading-snug transition-colors ${isSelected ? 'text-on-primary-container font-bold' : 'text-on-surface-variant font-semibold'}`}>
                     {post.title}
                   </p>
                 </button>
@@ -67,17 +68,17 @@ export function MotilloNews() {
           <div className="flex-1 flex flex-col p-5 md:p-8 min-h-0 overflow-y-auto custom-scrollbar bg-surface-container rounded-2xl">
             {selectedPost && (
               <>
-                <div className="flex flex-col gap-1 mb-4 shrink-0">
+                <div className="flex flex-col gap-2 mb-4 shrink-0">
                   <a
                       href={selectedPost.link || undefined}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xl md:text-2xl font-black text-brand-text leading-tight hover:underline underline-offset-2"
+                      className="text-2xl md:text-3xl font-black text-brand-text leading-tight hover:text-brand-link hover:underline underline-offset-2"
                   >
                     {selectedPost.title}
                   </a>
-                  <div className="text-sm text-on-surface-variant font-bold uppercase tracking-widest">
-                    {selectedPost.publishDate ? new Date(selectedPost.publishDate).toLocaleDateString() : ''}
+                  <div className="text-base text-on-surface-variant font-bold uppercase tracking-widest">
+                    {formatDateTime(selectedPost.publishDate)}
                     {selectedPost.author ? ` • ${selectedPost.author}` : ''}
                     {selectedPost.feedSource?.name && (
                       <>
@@ -96,7 +97,7 @@ export function MotilloNews() {
                 </div>
 
                 {selectedPost.content && (
-                  <p className="text-sm text-brand-text mb-6 leading-relaxed whitespace-pre-line">
+                  <p className="text-base text-brand-text mb-6 leading-relaxed whitespace-pre-line">
                     {selectedPost.content}
                   </p>
                 )}
@@ -117,7 +118,7 @@ export function MotilloNews() {
                       href={selectedPost.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center h-10 px-6 rounded-full bg-brand-btn-primary hover:bg-brand-btn-quaternary text-white text-sm font-bold transition-all"
+                    className="inline-flex min-h-11 items-center justify-center rounded-full bg-on-primary-container px-5 text-base font-bold text-primary-container transition-colors hover:bg-brand-btn-quaternary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary"
                     >
                       Read Full Article
                     </a>

@@ -26,20 +26,20 @@ export function CalendarSettingsModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in">
-      <div className="bg-surface rounded-3xl shadow-2xl border-0 w-full max-w-lg overflow-hidden flex flex-col animate-in zoom-in-95 max-h-[90vh]">
+      <div className="bg-surface rounded-3xl m3-elevation-4 border-0 w-full max-w-lg overflow-hidden flex flex-col animate-in zoom-in-95 max-h-[90vh]">
         <div className="flex justify-between items-center bg-surface px-6 py-5 pb-2">
-          <h3 className="text-lg font-bold text-on-surface flex items-center gap-2">
+          <h3 className="text-lg font-bold text-on-surface flex items-center gap-4">
             <Settings size={20} className="text-on-surface-variant animate-spin-slow" /> Calendar Settings
           </h3>
-          <button onClick={onClose} className="text-on-surface-variant hover:text-on-surface-variant cursor-pointer p-1 rounded-full hover:bg-surface-container transition-colors">
+          <button onClick={onClose} aria-label="Close calendar settings" className="flex h-11 w-11 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary">
             <X size={20} />
           </button>
         </div>
         
-        <div className="p-6 pt-2 flex flex-col gap-4 overflow-y-auto custom-scrollbar flex-1">
+        <div className="bg-surface p-6 pt-2 flex flex-col gap-8 overflow-y-auto custom-scrollbar flex-1">
           {/* Personal ICS Subscription Feed */}
-          <div className="flex flex-col gap-3">
-            <h4 className="text-base font-bold text-on-surface flex items-center gap-2 pl-1">
+          <div className="flex flex-col gap-6">
+            <h4 className="font-bold text-on-surface flex items-center gap-4 pl-1">
               <Link size={18} className="text-on-surface-variant" /> Subscribe to feed in Outlook / Google
             </h4>
             <p className="text-sm text-on-surface-variant leading-normal">
@@ -50,7 +50,7 @@ export function CalendarSettingsModal({
             </p>
             {isWriter ? (
               token ? (
-                <div className="flex gap-2 animate-in fade-in duration-200">
+                <div className="flex gap-4 animate-in fade-in duration-200">
                   <input 
                     type="text" 
                     readOnly 
@@ -59,39 +59,40 @@ export function CalendarSettingsModal({
                   />
                   <button 
                     onClick={onCopyFeedLink}
-                    className="bg-brand-btn-primary hover:bg-brand-btn-quaternary text-white text-sm font-bold px-5 py-3 rounded-full transition shadow-md hover:shadow-lg cursor-pointer whitespace-nowrap"
+                    className="inline-flex min-h-11 items-center justify-center rounded-full px-5 font-bold bg-secondary-container text-on-secondary-container hover:m3-elevation-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary whitespace-nowrap"
                   >
                     Copy Link
                   </button>
                   <button 
                     onClick={onRegenerateToken}
-                    className="p-3 text-on-surface-variant hover:text-on-surface-variant bg-surface-container hover:bg-surface-container-high rounded-full transition cursor-pointer flex items-center justify-center"
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary"
+                    aria-label="Regenerate calendar feed token"
                     title="Regenerate Token"
                   >
                     <RefreshCw size={16} />
                   </button>
                 </div>
               ) : isTokenRequested ? (
-                <div className="text-sm text-on-surface-variant italic flex items-center gap-1">
+                <div className="text-sm text-on-surface-variant italic flex items-center gap-2">
                   <RefreshCw size={12} className="animate-spin" /> Generating feed token...
                 </div>
               ) : (
                 <button
                   onClick={onGenerateToken}
-                  className="w-full bg-brand-btn-primary hover:bg-brand-btn-quaternary text-white text-sm font-bold px-5 py-3 rounded-full transition shadow-md hover:shadow-lg cursor-pointer flex items-center justify-center gap-2 mt-2"
+                  className="mt-2 inline-flex min-h-11 items-center justify-center rounded-full bg-on-primary-container px-5 font-bold text-primary-container transition-colors hover:bg-brand-btn-quaternary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary"
                 >
                   Generate Feed Link
                 </button>
               )
             ) : (
-              <div className="flex flex-col gap-4 mt-2">
+              <div className="flex flex-col gap-8 mt-2">
                 <button
                   disabled
-                  className="w-full bg-surface-container border-0 text-on-surface-variant text-sm font-bold px-5 py-3 rounded-full transition shadow-sm opacity-60 cursor-not-allowed flex items-center justify-center gap-2"
+                  className="inline-flex min-h-11 w-full items-center justify-center rounded-full bg-on-surface px-5 font-bold text-on-surface opacity-30 cursor-not-allowed"
                 >
                   Generate Feed Link (Access Restricted)
                 </button>
-                <div className="flex gap-3 p-4 rounded-2xl border border-red-200 bg-red-50 text-red-800 text-sm leading-normal font-medium">
+                <div className="flex gap-6 p-4 rounded-2xl border border-red-200 bg-red-50 text-red-800 text-sm leading-normal font-medium">
                   <ShieldAlert size={20} className="text-red-650 shrink-0 mt-0.5" />
                   <div>
                     <span className="font-bold">Access Denied:</span> You are not a configured user with a registered intranet identity or required role (Employee/Admin). Feed subscription generation is disabled.

@@ -521,7 +521,7 @@ public class MonitorOrchestrationService(
             }
         }
 
-        if (uptimeSla != -1)
+        if (uptimeSla.HasValue)
         {
             monitor.UptimeSla = uptimeSla;
         }

@@ -73,7 +73,7 @@ export function TenantTile({ t, deleteTenant, isAdmin = false }: TenantTileProps
 
   const header = (
     <>
-      <span className="font-extrabold text-on-surface text-sm flex items-center gap-2 min-w-0">
+      <span className="font-extrabold text-on-surface text-sm flex items-center gap-4 min-w-0">
         <input
           value={draft.name}
           onChange={e => setDraft({ ...draft, name: e.target.value })}
@@ -119,7 +119,7 @@ export function TenantTile({ t, deleteTenant, isAdmin = false }: TenantTileProps
 
   return (
     <TileCard header={header} headerActions={headerActions}>
-      <div className="flex flex-col gap-1 group">
+      <div className="flex flex-col gap-2 group">
         <label className="text-sm font-bold text-on-surface-variant uppercase tracking-wider">Litium Base URL</label>
         <input
           value={draft.litiumBaseUrl}
@@ -131,10 +131,10 @@ export function TenantTile({ t, deleteTenant, isAdmin = false }: TenantTileProps
         />
       </div>
 
-      <div className="flex flex-col gap-1 group">
+      <div className="flex flex-col gap-2 group">
         <div className="flex justify-between items-center">
           <label className="text-sm font-bold text-on-surface-variant uppercase tracking-wider">Service Account Token</label>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-6">
             {isAdmin && t.hasServiceAccountToken && !draft.clearToken && (
               <button
                 onClick={() => setDraft({ ...draft, clearToken: true, serviceAccountToken: '' })}
@@ -159,7 +159,7 @@ export function TenantTile({ t, deleteTenant, isAdmin = false }: TenantTileProps
         />
       </div>
 
-      <div className="flex items-center gap-2 group relative py-1">
+      <div className="flex items-center gap-4 group relative py-1">
         <input
           type="checkbox"
           checked={draft.orderFetchingEnabled}

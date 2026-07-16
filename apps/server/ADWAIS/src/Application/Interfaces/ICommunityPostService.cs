@@ -10,5 +10,7 @@ public interface ICommunityPostService
 {
     Task<CommunityPost?> GetPostByIdAsync(Guid id, CancellationToken ct = default);
     Task<CommunityPost> CreatePostAsync(Guid userId, string title, string body, CancellationToken ct = default);
+    Task<CommunityPost?> UpdatePostAsync(Guid id, string? title, string? body, CancellationToken ct = default);
     Task<IEnumerable<CommunityPost>> GetPostsAsync(CancellationToken ct = default);
+    Task<bool> DeletePostAsync(Guid id, CancellationToken ct = default);
 }

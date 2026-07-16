@@ -29,7 +29,7 @@ import type {
   BackgroundJobStatusDto,
   CalendarSubscriptionDto,
   CalendarTokenDto,
-  CommunityPost,
+  CommunityPostResponseDto,
   CreateCalendarSubscriptionDto,
   CreateMonitorRequestDto,
   CreateNewsletterDto,
@@ -82,12 +82,13 @@ import type {
   SystemEvent,
   SystemHealthDto,
   TenantResponseDto,
-  TransactionDensityPointResponseDto,
+  TransactionDensityResponseDto,
   UpdateCalendarSubscriptionDto,
   UpdateFetchIntervalsRequestDto,
   UpdateGlobalConfigRequestDto,
   UpdateMonitorRequestDto,
   UpdateOfficeEventDto,
+  UpdatePostDto,
   UpdateTenantRequestDto,
   UpdateUserRequestDto,
   UptimeMonitorDto,
@@ -1781,17 +1782,17 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     }
 
 export type getApiIntranetPostsIdResponse200TextPlain = {
-  data: CommunityPost
+  data: CommunityPostResponseDto
   status: 200
 }
 
 export type getApiIntranetPostsIdResponse200ApplicationJson = {
-  data: CommunityPost
+  data: CommunityPostResponseDto
   status: 200
 }
 
 export type getApiIntranetPostsIdResponse200TextJson = {
-  data: CommunityPost
+  data: CommunityPostResponseDto
   status: 200
 }
 
@@ -1897,18 +1898,181 @@ export function useGetApiIntranetPostsId<TData = Awaited<ReturnType<typeof getAp
 
 
 
+export type patchApiIntranetPostsIdResponse200TextPlain = {
+  data: CommunityPostResponseDto
+  status: 200
+}
+
+export type patchApiIntranetPostsIdResponse200ApplicationJson = {
+  data: CommunityPostResponseDto
+  status: 200
+}
+
+export type patchApiIntranetPostsIdResponse200TextJson = {
+  data: CommunityPostResponseDto
+  status: 200
+}
+
+export type patchApiIntranetPostsIdResponseSuccess = (patchApiIntranetPostsIdResponse200TextPlain | patchApiIntranetPostsIdResponse200ApplicationJson | patchApiIntranetPostsIdResponse200TextJson) & {
+  headers: Headers;
+};
+;
+
+export type patchApiIntranetPostsIdResponse = (patchApiIntranetPostsIdResponseSuccess)
+
+export const getPatchApiIntranetPostsIdUrl = (id: string,) => {
+
+
+
+
+  return `/api/intranet/posts/${id}`
+}
+
+export const patchApiIntranetPostsId = async (id: string,
+    updatePostDto?: UpdatePostDto, options?: RequestInit): Promise<patchApiIntranetPostsIdResponse> => {
+
+  return customClient<patchApiIntranetPostsIdResponse>(getPatchApiIntranetPostsIdUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updatePostDto)
+  }
+);}
+
+
+
+
+export const getPatchApiIntranetPostsIdMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiIntranetPostsId>>, TError,{id: string;data?: UpdatePostDto}, TContext>, request?: SecondParameter<typeof customClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof patchApiIntranetPostsId>>, TError,{id: string;data?: UpdatePostDto}, TContext> => {
+
+const mutationKey = ['patchApiIntranetPostsId'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof patchApiIntranetPostsId>>, {id: string;data?: UpdatePostDto}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  patchApiIntranetPostsId(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PatchApiIntranetPostsIdMutationResult = NonNullable<Awaited<ReturnType<typeof patchApiIntranetPostsId>>>
+    export type PatchApiIntranetPostsIdMutationBody = UpdatePostDto | undefined
+    export type PatchApiIntranetPostsIdMutationError = unknown
+
+    export const usePatchApiIntranetPostsId = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiIntranetPostsId>>, TError,{id: string;data?: UpdatePostDto}, TContext>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof patchApiIntranetPostsId>>,
+        TError,
+        {id: string;data?: UpdatePostDto},
+        TContext
+      > => {
+      return useMutation(getPatchApiIntranetPostsIdMutationOptions(options), queryClient);
+    }
+
+export type deleteApiIntranetPostsIdResponse200 = {
+  data: void
+  status: 200
+}
+
+export type deleteApiIntranetPostsIdResponseSuccess = (deleteApiIntranetPostsIdResponse200) & {
+  headers: Headers;
+};
+;
+
+export type deleteApiIntranetPostsIdResponse = (deleteApiIntranetPostsIdResponseSuccess)
+
+export const getDeleteApiIntranetPostsIdUrl = (id: string,) => {
+
+
+
+
+  return `/api/intranet/posts/${id}`
+}
+
+export const deleteApiIntranetPostsId = async (id: string, options?: RequestInit): Promise<deleteApiIntranetPostsIdResponse> => {
+
+  return customClient<deleteApiIntranetPostsIdResponse>(getDeleteApiIntranetPostsIdUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteApiIntranetPostsIdMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiIntranetPostsId>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteApiIntranetPostsId>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['deleteApiIntranetPostsId'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteApiIntranetPostsId>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteApiIntranetPostsId(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteApiIntranetPostsIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteApiIntranetPostsId>>>
+
+    export type DeleteApiIntranetPostsIdMutationError = unknown
+
+    export const useDeleteApiIntranetPostsId = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiIntranetPostsId>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteApiIntranetPostsId>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+      return useMutation(getDeleteApiIntranetPostsIdMutationOptions(options), queryClient);
+    }
+
 export type getApiIntranetPostsResponse200TextPlain = {
-  data: CommunityPost[]
+  data: CommunityPostResponseDto[]
   status: 200
 }
 
 export type getApiIntranetPostsResponse200ApplicationJson = {
-  data: CommunityPost[]
+  data: CommunityPostResponseDto[]
   status: 200
 }
 
 export type getApiIntranetPostsResponse200TextJson = {
-  data: CommunityPost[]
+  data: CommunityPostResponseDto[]
   status: 200
 }
 
@@ -2015,17 +2179,17 @@ export function useGetApiIntranetPosts<TData = Awaited<ReturnType<typeof getApiI
 
 
 export type postApiIntranetPostsResponse200TextPlain = {
-  data: CommunityPost
+  data: CommunityPostResponseDto
   status: 200
 }
 
 export type postApiIntranetPostsResponse200ApplicationJson = {
-  data: CommunityPost
+  data: CommunityPostResponseDto
   status: 200
 }
 
 export type postApiIntranetPostsResponse200TextJson = {
-  data: CommunityPost
+  data: CommunityPostResponseDto
   status: 200
 }
 
@@ -3405,17 +3569,17 @@ export function useGetApiFinancialOrderDistribution<TData = Awaited<ReturnType<t
 
 
 export type getApiFinancialTransactionDensityResponse200TextPlain = {
-  data: TransactionDensityPointResponseDto[]
+  data: TransactionDensityResponseDto
   status: 200
 }
 
 export type getApiFinancialTransactionDensityResponse200ApplicationJson = {
-  data: TransactionDensityPointResponseDto[]
+  data: TransactionDensityResponseDto
   status: 200
 }
 
 export type getApiFinancialTransactionDensityResponse200TextJson = {
-  data: TransactionDensityPointResponseDto[]
+  data: TransactionDensityResponseDto
   status: 200
 }
 

@@ -4,11 +4,21 @@
   - community post(ing) frontend functionality
   - revamped ui/ux
   - private/public calendar url?
+  - reccurence controls
+  - get rid of vertical scrollbars
+  - refactor calendar.tsx into multiple components/files
+  - make litium news cards bigger
+  - weather sync button/trigger
+  - weekly calendar cards should show end time. span across multiple days and hours
+- better fleet status ui/ux. order tiles by status. group related tiles together. allow filtering by tags.
+- navbar? mobile menu fixes
 - ping litium env for health checks (to see if base url is correct after adding it to a tenant card).
 - revamp settings ui
-- for some strange reason i cant view 
 - modals needs to close when you click outside
-- motillo news: open the "next" article as you scroll and the card snaps into view?
-- does motillo.com use different fonts? different weights? our current is pretty blocky and short, it feels like.
+- motillo news: open the "next" article as you scroll and the card snaps into view? (mobile view)
 - match motillo.com navbar
 - hide or make the FAB useful in intranet/settings
+- make order density matrix prettier
+-- tooltip should go inwards so it doesnt get cut off
+- improve frontend build time
+- create github pipeline

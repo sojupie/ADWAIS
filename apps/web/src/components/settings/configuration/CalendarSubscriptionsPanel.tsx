@@ -31,8 +31,8 @@ export function CalendarSubscriptionsPanel({ disabled }: { disabled?: boolean })
           icon={<Calendar size={20} />}
       >
         {!disabled && (
-          <form onSubmit={handleCreateSub} className="bg-surface-container-low p-4 rounded-xl border border-outline-variant flex flex-col gap-1">
-            <h4 className="text-sm font-black uppercase tracking-widest text-on-surface-variant flex items-center gap-1">
+          <form onSubmit={handleCreateSub} className="bg-surface-container-low p-4 rounded-xl border border-outline-variant flex flex-col gap-2">
+            <h4 className="text-sm font-black uppercase tracking-widest text-on-surface-variant flex items-center gap-2">
               <Globe size={14} className="text-on-surface-variant" /> Connect New Calendar Feed
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -65,7 +65,7 @@ export function CalendarSubscriptionsPanel({ disabled }: { disabled?: boolean })
           </form>
         )}
 
-        <div className="flex flex-col gap-2 mt-2">
+        <div className="flex flex-col gap-4 mt-2">
           {isLoading ? (
             <div className="text-sm text-on-surface-variant italic text-center py-4">Loading subscriptions...</div>
           ) : subscriptions.length === 0 ? (
@@ -73,7 +73,7 @@ export function CalendarSubscriptionsPanel({ disabled }: { disabled?: boolean })
           ) : (
             subscriptions.map((sub) => (
               <div key={sub.id} className="flex items-center justify-between p-3 border border-outline-variant rounded-lg hover:border-outline-variant transition bg-surface shadow-sm">
-                <div className="flex flex-col gap-0.5 max-w-[70%]">
+                <div className="flex flex-col gap-1 max-w-[70%]">
                   <span className="text-sm, font-bold text-on-surface">{sub.name}</span>
                   <span className="text-sm text-on-surface-variant truncate" title={sub.url || undefined}>{sub.url}</span>
                   {sub.lastSyncError && (
@@ -81,7 +81,7 @@ export function CalendarSubscriptionsPanel({ disabled }: { disabled?: boolean })
                   )}
                 </div>
                 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-4">
                   <button 
                     type="button"
                     onClick={() => sub.id && syncSubMutation.mutate(sub.id)}

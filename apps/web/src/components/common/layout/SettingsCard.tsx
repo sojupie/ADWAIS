@@ -29,7 +29,7 @@ export function SettingsCard({
       <SubSectionHeader title={title} subtitle={subtitle} icon={icon}>
         {headerActions}
       </SubSectionHeader>
-      <div className="px-2 py-3 sm:p-4 flex flex-col gap-2 sm:gap-2">
+      <div className="px-2 py-3 sm:p-4 flex flex-col gap-4 sm:gap-4">
         {children}
       </div>
     </div>

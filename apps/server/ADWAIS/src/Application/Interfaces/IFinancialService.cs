@@ -55,7 +55,7 @@ public interface IFinancialService
     /// <summary>
     /// Analyzes transaction density by day of week and hour of day.
     /// </summary>
-    Task<IReadOnlyList<TransactionDensityPointDto>> GetTransactionDensityAsync(ResolvedPeriod period, Guid? tenantId = null, CancellationToken ct = default);
+    Task<TransactionDensityDto> GetTransactionDensityAsync(ResolvedPeriod period, Guid? tenantId = null, CancellationToken ct = default);
 
     /// <summary>
     /// Calculates the cumulative growth delta for the specified timeframe.

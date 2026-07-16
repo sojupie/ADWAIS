@@ -121,7 +121,7 @@ export function SlaBreachWatchlist({
             type="button"
             onClick={onClearSelection}
             disabled={!hasActiveSelection}
-            className="bg-brand-bg-secondary text-white px-4 py-1.5 rounded-full text-sm font-bold tracking-wide hover:bg-brand-text hover:shadow-md transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+            className="bg-surface-container-low hover:m3-elevation-2 m3-elevation-1 px-4 py-1.5 rounded-full text-sm font-bold tracking-wide transition-all cursor-pointer disabled:m3-elevation-0 disabled:text-slate-400 disabled:bg-slate-200 disabled:cursor-not-allowed"
           >
             CLEAR
           </button>
@@ -146,9 +146,9 @@ export function SlaBreachWatchlist({
                 type="button"
                 key={`watch-${issue.id}`}
                 onClick={() => onMonitorSelect?.(issue.monitor)}
-                className={`relative p-2 rounded-lg transition-all text-left w-full shrink-0 flex flex-col gap-0.5 justify-between border
-                  ${theme.bg} ${theme.border}
-                  ${isActive ? 'ring-4 ring-slate-300/40 z-10 shadow-elevation-3' : 'shadow-elevation-2 hover:shadow-elevation-3 cursor-pointer'}
+                className={`relative p-2 rounded-lg transition-all text-left w-full shrink-0 flex flex-col gap-1 justify-between border
+                   ${theme.bg} ${theme.border}
+                  ${isActive ? 'z-10 m3-elevation-3' : 'm3-elevation-2 hover:m3-elevation-3 cursor-pointer'}
                   ${selectedMonitorId && !isActive ? 'opacity-30' : 'opacity-100'}
                 `}
               >
@@ -165,12 +165,12 @@ export function SlaBreachWatchlist({
                   />
                 )}
                 {/* Row 1: title + status badges */}
-                <div className="flex flex-wrap justify-between items-start gap-0.5 relative z-10">
+                <div className="flex flex-wrap justify-between items-start gap-1 relative z-10">
                   <div className="flex flex-col overflow-hidden min-w-0 flex-1 pr-2 min-w-[calc(50%)]">
                     <span className={`text-sm font-black uppercase tracking-tight leading-tight truncate ${theme.text}`}>{issue.tenantName}</span>
                     <span className={`text-xs font-bold uppercase tracking-widest mt-0.5 truncate ${theme.mutedText}`}>{issue.monitorName}</span>
                   </div>
-                  <div className="flex gap-1 flex-wrap justify-end shrink-0">
+                  <div className="flex gap-2 flex-wrap justify-end shrink-0">
                     {issue.isDown && <span className="bg-red-500 text-white text-xs font-black px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest shrink-0">DOWN</span>}
                     {issue.isDegraded && !issue.isDown && <span className="bg-amber-500 text-white text-xs font-black px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest shrink-0">DEGRADED</span>}
                     {issue.isSlaBreach && <span className="bg-slate-700 text-white text-xs font-black px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest shrink-0">SLA BREACH</span>}
@@ -179,14 +179,14 @@ export function SlaBreachWatchlist({
 
                 {/* Row 2: tags */}
                 {issue.tags && issue.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1 relative z-10">
+                  <div className="flex flex-wrap gap-2 relative z-10">
                     {issue.tags.map((tag) => {
                       const name = tag.split(':')[0].trim();
                       const color = getTagColor(tag);
                       return (
                         <span
                           key={tag}
-                          className={`text-xs font-bold px-1.5 py-0.5 rounded uppercase tracking-wider border shadow-sm ${getTagStyle(color)}`}
+                          className={`text-xs font-bold px-1.5 py-0.5 rounded uppercase tracking-wider border ${getTagStyle(color)}`}
                         >
                           {name}
                         </span>
@@ -225,7 +225,7 @@ export function SlaBreachWatchlist({
 
                 {/* Row 4: SLA limit + degraded floor */}
                 {(issue.slaLimit !== undefined && issue.slaLimit !== null || issue.degradedFloor !== undefined && issue.degradedFloor !== null) && (
-                  <div className="pt-1 flex justify-between items-center gap-2 relative z-10">
+                  <div className="pt-1 flex justify-between items-center gap-4 relative z-10">
                     {(issue.slaLimit !== undefined && issue.slaLimit !== null) ? (
                       <div className="flex flex-col">
                         <span className={`text-sm font-bold uppercase tracking-widest ${theme.mutedText}`}>SLA</span>

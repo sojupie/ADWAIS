@@ -25,7 +25,7 @@ export function Settings() {
     return (
         <DashboardLayout>
             <header className="flex justify-between items-start shrink-0">
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-2">
                     <h1 className="text-2xl font-extrabold text-brand-text tracking-tight m-0">Settings & Administration</h1>
                     <p className="text-sm text-on-surface-variant m-0 font-medium tracking-wide">Manage system configuration and entities.</p>
                 </div>
@@ -35,7 +35,7 @@ export function Settings() {
                         await queryClient.invalidateQueries();
                         setTimeout(() => setIsRefreshing(false), 500);
                     }}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-surface border border-outline-variant text-on-surface-variant rounded-lg hover:bg-surface-container-low hover:text-on-surface hover:border-slate-350 transition-colors shadow-sm text-sm font-bold cursor-pointer"
+                    className="flex items-center gap-4 px-3 py-1.5 bg-surface border border-outline-variant text-on-surface-variant rounded-lg hover:bg-surface-container-low hover:text-on-surface hover:border-slate-350 transition-colors shadow-sm text-sm font-bold cursor-pointer"
                 >
                     <RefreshCw size={16} className={isRefreshing ? 'animate-spin' : ''} />
                     <span>Refresh</span>
@@ -43,7 +43,7 @@ export function Settings() {
             </header>
 
             <DashboardFlexRow weight={"flex-1"}>
-                <div className="flex-1 flex flex-col min-h-0 w-full gap-2">
+                <div className="flex-1 flex flex-col min-h-0 w-full gap-4">
                     {/* Mobile Dropdown Navigation */}
                     <div className="block sm:hidden relative group shrink-0">
                         <Select
@@ -59,7 +59,7 @@ export function Settings() {
                     </div>
 
                     {/* Desktop Pill Navigation */}
-                    <div className="hidden sm:flex flex-wrap gap-2 shrink-0">
+                    <div className="hidden sm:flex flex-wrap gap-4 shrink-0">
                         {tabs.map((t) => {
                             const isActive = currentPath.startsWith(t.path);
                             return (

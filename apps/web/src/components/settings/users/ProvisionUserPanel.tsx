@@ -20,8 +20,8 @@ export function ProvisionUserPanel({ createUser }: ProvisionUserPanelProps) {
   };
 
   return (
-    <section className="bg-surface border border-outline-variant rounded-2xl shadow-sm p-4 flex flex-col sm:flex-row gap-6 items-center justify-between shrink-0">
-      <div className="flex items-center gap-4">
+    <section className="bg-surface border border-outline-variant rounded-2xl shadow-sm p-4 flex flex-col sm:flex-row gap-12 items-center justify-between shrink-0">
+      <div className="flex items-center gap-8">
         <div className="p-3 bg-brand-bg-secondary text-white rounded-xl shadow-sm">
           <UserPlus size={24} />
         </div>
@@ -30,7 +30,7 @@ export function ProvisionUserPanel({ createUser }: ProvisionUserPanelProps) {
           <p className="text-sm text-on-surface-variant font-medium mt-0.5">Add a new administrator or user to the system</p>
         </div>
       </div>
-      <div className="flex flex-col sm:flex-row gap-1 w-full sm:w-auto items-center">
+      <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto items-center">
         <Input
           type="email"
           placeholder="Email Address"
@@ -55,7 +55,7 @@ export function ProvisionUserPanel({ createUser }: ProvisionUserPanelProps) {
           disabled={!newUser.email}
           loading={createUser.isPending}
           loadingText="Creating..."
-          className="h-10 bg-brand-btn-primary text-white px-6 text-sm font-semibold rounded-xl hover:bg-brand-btn-quaternary transition-all cursor-pointer flex items-center justify-center gap-2 w-full sm:w-auto shrink-0"
+          className="h-10 bg-brand-btn-primary text-white px-6 text-sm font-semibold rounded-xl hover:bg-brand-btn-quaternary transition-all cursor-pointer flex items-center justify-center gap-4 w-full sm:w-auto shrink-0"
         >
           Create
         </SecureButton>

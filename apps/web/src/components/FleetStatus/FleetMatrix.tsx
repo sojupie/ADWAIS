@@ -27,9 +27,9 @@ function FleetMatrixTile({
     <button
       type="button"
       onClick={() => onMonitorSelect?.(monitor)}
-      className={`w-full h-full p-3 rounded-lg border transition-all text-left relative overflow-hidden group min-h-22.5
+      className={`w-full h-full p-3 rounded-lg transition-all text-left border-2 relative overflow-hidden group min-h-22.5
         ${theme.bg} ${theme.border}
-        ${isActive ? 'ring-4 ring-slate-300/40 z-10 shadow-elevation-2' : 'shadow-elevation-2 hover: hover:shadow-elevation-3'}
+        ${isActive ? 'z-10 m3-elevation-3' : 'm3-elevation-2 hover: hover:m3-elevation-3'}
         ${selectedMonitorId && !isActive ? 'opacity-30' : 'opacity-100'}
         ${!monitor.uptimeMonitorEnabled ? 'grayscale opacity-50' : ''}
       `}
@@ -49,7 +49,7 @@ function FleetMatrixTile({
         )}
       </div>
 
-      <div className="gap-1 relative z-10 flex flex-col h-full justify-between w-full min-w-0">
+      <div className="gap-2 relative z-10 flex flex-col h-full justify-between w-full min-w-0">
         <div className="flex justify-between items-start w-full min-w-0">
           <div className="flex flex-col overflow-hidden min-w-0 flex-1 pr-2">
             <span className={`text-sm font-black ${theme.text} line-clamp-2 uppercase tracking-tight leading-tight`}>
@@ -59,18 +59,18 @@ function FleetMatrixTile({
               {monitor.name}
             </span>
           </div>
-          <div className={`w-2.5 h-2.5 rounded-full shrink-0 mt-1 ${theme.dot}`} />
+          <div className={`w-3 h-3 rounded-full shrink-0 mt-1 ${theme.dot}`} />
         </div>
 
         {monitor.tags && monitor.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 w-full">
+          <div className="flex flex-wrap gap-2 w-full">
             {monitor.tags.map((tag) => {
               const name = tag.split(':')[0].trim();
               const color = getTagColor(tag);
               return (
                 <span
                   key={tag}
-                  className={`text-xs font-bold px-1.5 py-0.5 rounded uppercase tracking-wider border shadow-sm ${getTagStyle(color)}`}
+                  className={`text-xs font-bold px-1.5 py-0.5 rounded uppercase tracking-wider border ${getTagStyle(color)}`}
                 >
                   {name}
                 </span>

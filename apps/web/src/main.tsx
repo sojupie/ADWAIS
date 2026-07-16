@@ -8,6 +8,9 @@ import './index.css';
 
 import { MsalProvider } from '@azure/msal-react';
 import { msalInstance } from './utils/msalConfig';
+import { applyFlexGapFallbackClass } from './utils/flexGapSupport';
+
+applyFlexGapFallbackClass();
 
 const router = createRouter({
   routeTree,

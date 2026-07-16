@@ -22,7 +22,7 @@ import type {
   CumulativeGrowthDeltaPoint,
   OrderBin,
   AccumulatedRevenuePointDto,
-  TransactionDensityPointDto,
+  TransactionDensityResponse,
   Timeframe,
   ComparisonType
 } from '@types';
@@ -172,14 +172,14 @@ export function useOrderDistribution(timeframe: string, tenantId: string, compar
 }
 
 export function useTransactionDensity(timeframe: string, tenantId?: string | null, comparison?: ComparisonPeriod) {
-  return useGetApiFinancialTransactionDensity<TransactionDensityPointDto[], Error>(
+  return useGetApiFinancialTransactionDensity<TransactionDensityResponse, Error>(
     { timeframe: timeframe as Timeframe, tenantId: tenantId || undefined, comparison: comparison as ComparisonType },
     {
       query: {
         queryKey: financialKeys.transactionDensity(timeframe, tenantId, comparison),
         refetchInterval: REFETCH_INTERVAL,
         placeholderData: keepPreviousData,
-        select: (res) => res.data as TransactionDensityPointDto[]
+        select: (res) => res.data as TransactionDensityResponse
       }
     }
   );

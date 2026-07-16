@@ -683,7 +683,7 @@ public class FinancialService(IApplicationDbContext dbContext) : IFinancialServi
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<TransactionDensityPointDto>> GetTransactionDensityAsync(ResolvedPeriod period, Guid? tenantId = null, CancellationToken ct = default)
+    public async Task<TransactionDensityDto> GetTransactionDensityAsync(ResolvedPeriod period, Guid? tenantId = null, CancellationToken ct = default)
     {
         // Force 30-day rolling timeframe for density to ensure statistical volume regardless of global dropdown
         var t30 = TimeframeResolver.Resolve(Timeframe.T30);
@@ -731,7 +731,11 @@ public class FinancialService(IApplicationDbContext dbContext) : IFinancialServi
             }
         }
 
-        return result;
+        return new TransactionDensityDto(
+            result.Sum(point => point.Count),
+            result.Count == 0 ? 0 : result.Min(point => point.Count),
+            result.Count == 0 ? 0 : result.Max(point => point.Count),
+            result);
     }
 
     /// <inheritdoc />

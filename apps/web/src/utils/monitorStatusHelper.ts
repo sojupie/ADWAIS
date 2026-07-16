@@ -11,54 +11,54 @@ export function normalizeStatus(status?: string | number | null): string {
 export type MonitorStatus = 'operational' | 'degraded' | 'down' | 'unknown' | 'paused' | 'starting';
 
 export const STATUS_THEMES = {
-  down: {
-    bg: 'bg-status-down-container hover:bg-status-down-container-hover',
-    border: 'border-0',
-    text: 'text-status-down-on-container font-bold',
-    valueText: 'text-status-down-on-container font-black',
-    mutedText: 'text-status-down-muted font-semibold',
-    dot: 'bg-status-down shadow-status-down-glow animate-pulse'
-  },
-  degraded: {
-    bg: 'bg-status-degraded-container hover:bg-status-degraded-container-hover',
-    border: 'border-0',
-    text: 'text-status-degraded-on-container font-bold',
-    valueText: 'text-status-degraded-on-container font-black',
-    mutedText: 'text-status-degraded-muted font-semibold',
-    dot: 'bg-status-degraded shadow-status-degraded-glow'
-  },
-  operational: {
-    bg: 'bg-status-up-container hover:bg-status-up-container-hover',
-    border: 'border-0',
-    text: 'text-status-up-on-container',
-    valueText: 'text-status-up-on-container font-bold',
-    mutedText: 'text-status-up-muted',
-    dot: 'bg-status-up shadow-status-up-glow'
-  },
-  unknown: {
-    bg: 'bg-status-unknown-container hover:bg-status-unknown-container-hover',
-    border: 'border-0',
-    text: 'text-status-unknown-on-container font-bold',
-    valueText: 'text-status-unknown-on-container font-black',
-    mutedText: 'text-status-unknown-muted font-semibold',
-    dot: 'bg-status-unknown shadow-status-unknown-glow'
-  },
-  paused: {
-    bg: 'bg-status-paused-container hover:bg-status-paused-container-hover',
-    border: 'border-0',
-    text: 'text-status-paused-on-container font-bold',
-    valueText: 'text-status-paused-on-container font-black',
-    mutedText: 'text-status-paused-muted font-semibold',
-    dot: 'bg-status-paused shadow-status-paused-glow'
-  },
-  starting: {
-    bg: 'bg-status-starting-container hover:bg-status-starting-container-hover',
-    border: 'border-0',
-    text: 'text-status-starting-on-container font-bold',
-    valueText: 'text-status-starting-on-container font-black',
-    mutedText: 'text-status-starting-muted font-semibold',
-    dot: 'bg-status-starting shadow-status-starting-glow'
-  }
+    down: {
+      bg: 'bg-red-50',
+      border: 'border-red-200',
+      text: 'text-slate-900',
+      valueText: 'text-red-600',
+      mutedText: 'text-slate-500',
+      dot: 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)] animate-pulse'
+    },
+    degraded: {
+      bg: 'bg-amber-50',
+      border: 'border-amber-200',
+      text: 'text-slate-900',
+      valueText: 'text-amber-600',
+      mutedText: 'text-slate-500',
+      dot: 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]'
+    },
+    operational: {
+      bg: 'bg-surface-container-low',
+      border: 'border-surface-container-low',
+      text: 'text-slate-900',
+      valueText: 'text-slate-900',
+      mutedText: 'text-slate-500',
+      dot: 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]'
+    },
+    unknown: {
+      bg: 'bg-slate-100',
+      border: 'border-slate-300',
+      text: 'text-slate-500',
+      valueText: 'text-slate-500',
+      mutedText: 'text-slate-500',
+      dot: 'bg-slate-400'
+    },
+    paused: {
+      bg: 'bg-blue-50',
+      border: 'border-slate-300',
+      text: 'text-slate-500',
+      valueText: 'text-slate-500',
+      mutedText: 'text-slate-500',
+      dot: 'bg-slate-400'
+    },
+    starting: {
+      bg: 'bg-indigo-50/50',
+      border: 'border-indigo-200',
+      text: 'text-indigo-900',
+      valueText: 'text-indigo-600',
+      mutedText: 'text-indigo-500',
+      dot: 'bg-indigo-400'
+    }
 } as const;
 
 export function getMonitorStatus(

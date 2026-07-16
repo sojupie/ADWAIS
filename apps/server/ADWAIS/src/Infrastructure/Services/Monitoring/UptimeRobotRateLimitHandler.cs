@@ -118,9 +118,9 @@ public class UptimeRobotRateLimitHandler(IMemoryCache cache) : DelegatingHandler
             clone.Headers.TryAddWithoutValidation(header.Key, header.Value);
         }
 
-        foreach (var property in req.Properties)
+        foreach (var option in req.Options)
         {
-            clone.Properties.Add(property.Key, property.Value);
+            clone.Options.Set(new HttpRequestOptionsKey<object?>(option.Key), option.Value);
         }
 
         if (req.Content != null)

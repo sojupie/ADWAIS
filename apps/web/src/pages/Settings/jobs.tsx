@@ -6,6 +6,7 @@ import { ManualBackfillPanel } from '../../components/settings/jobs/ManualBackfi
 import { SectionHeader } from '../../components/common/layout/SectionHeader';
 import { SettingsPanel } from '../../components/common/layout/SettingsPanel';
 import { useCurrentUser } from '../../hooks/useCurrentUser';
+import { formatDateTime } from '../../utils/dateTime';
 
 
 
@@ -53,7 +54,7 @@ export function BackgroundJobsView() {
                                             : 'border-outline-variant hover:border-brand-accent hover:shadow-md cursor-pointer hover:bg-surface'
                                             }`}
                                     >
-                                        <div className="flex items-center gap-2 mb-1">
+                                        <div className="flex items-center gap-4 mb-1">
                                             {isRestricted ? (
                                                 <Lock size={14} className="text-on-surface-variant" />
                                             ) : (
@@ -82,8 +83,8 @@ export function BackgroundJobsView() {
                     subtitle="Recurring intervals & recent executions"
                     icon={<Clock size={24} />}
                 />
-                <div className="flex-1 flex flex-col gap-2 p-4 bg-surface rounded-xl shadow-sm border border-outline-variant/60 min-h-0">
-                    <div className="flex flex-col gap-2 h-full min-h-0">
+                <div className="flex-1 flex flex-col gap-4 p-4 bg-surface rounded-xl shadow-sm border border-outline-variant/60 min-h-0">
+                    <div className="flex flex-col gap-4 h-full min-h-0">
                         {/* Recurring Table */}
                         <div className="flex flex-col bg-surface border border-outline-variant rounded-2xl shadow-sm overflow-hidden shrink-0 max-h-[250px]">
                             <div className="overflow-y-auto custom-scrollbar h-full">
@@ -94,12 +95,12 @@ export function BackgroundJobsView() {
                         {/* Recent Jobs */}
                         <div className="flex flex-col bg-slate-900 border border-slate-800 rounded-2xl shadow-lg overflow-hidden flex-1 min-h-0">
                             <div className="flex items-center justify-between shrink-0 p-4 border-b border-slate-800 bg-slate-900 z-10">
-                                <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-6">
                                     <Activity size={18} className="text-brand-accent" />
                                     <h2 className="text-sm font-bold text-white tracking-wider">RECENT JOB DISPATCHES</h2>
                                 </div>
-                                <div className="flex items-center gap-3">
-                                    <div className="flex gap-1.5">
+                                <div className="flex items-center gap-6">
+                                    <div className="flex gap-3">
                                         <div className="w-3 h-3 rounded-full bg-slate-700"></div>
                                         <div className="w-3 h-3 rounded-full bg-slate-700"></div>
                                         <div className="w-3 h-3 rounded-full bg-slate-700"></div>
@@ -114,9 +115,9 @@ export function BackgroundJobsView() {
                                             const isSucceeded = job.state === 'Succeeded';
                                             const isFailed = job.state === 'Failed';
                                             return (
-                                                <div key={job.jobId} className="flex flex-col p-2.5 hover:bg-surface/5 transition-colors gap-1 group text-slate-300 relative">
-                                                    <div className="flex items-center justify-between gap-4 min-w-0">
-                                                        <div className="flex items-center gap-3 min-w-0">
+                                                <div key={job.jobId} className="flex flex-col p-2.5 hover:bg-surface/5 transition-colors gap-2 group text-slate-300 relative">
+                                                    <div className="flex items-center justify-between gap-8 min-w-0">
+                                                        <div className="flex items-center gap-6 min-w-0">
                                                             <span className="text-on-surface-variant shrink-0 text-xs font-mono">
                                                                 {(() => {
                                                                     if (!job.createdAt) return 'N/A';
@@ -124,11 +125,11 @@ export function BackgroundJobsView() {
                                                                     const year = d.getFullYear();
                                                                     const month = String(d.getMonth() + 1).padStart(2, '0');
                                                                     const day = String(d.getDate()).padStart(2, '0');
-                                                                    const time = d.toLocaleTimeString([], { hour12: false });
+                                                                    const time = formatDateTime(d, { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
                                                                     return `${year}-${month}-${day} ${time}`;
                                                                 })()}
                                                             </span>
-                                                            <div className="flex items-center gap-2 min-w-0">
+                                                            <div className="flex items-center gap-4 min-w-0">
                                                                 {isProcessing && (
                                                                     <span className="flex h-2 w-2 relative shrink-0">
                                                                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
@@ -145,7 +146,7 @@ export function BackgroundJobsView() {
                                                                 </span>
                                                             </div>
                                                         </div>
-                                                        <div className="flex items-center gap-3 text-xs font-bold shrink-0">
+                                                        <div className="flex items-center gap-6 text-xs font-bold shrink-0">
                                                             {job.durationSeconds !== null && (
                                                                 <span className="font-mono text-on-surface-variant font-normal">
                                                                     {job.durationSeconds.toFixed(1)}s
@@ -161,7 +162,7 @@ export function BackgroundJobsView() {
                                                             ({job.jobArgs})
                                                         </div>
                                                     )}
-                                                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-on-surface-variant font-medium">
+                                                    <div className="flex flex-wrap items-center gap-x-8 gap-y-2 text-xs text-on-surface-variant font-medium">
                                                         <span>ID: {job.jobId}</span>
                                                         {job.tenantName && (
                                                             <span className="text-brand-accent">Tenant: <strong className="text-slate-350">{job.tenantName}</strong></span>

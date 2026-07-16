@@ -3,6 +3,7 @@ import type {
   MomentumResponse, 
   RevenueEfficiencyResponse, 
   TransactionDensityPointDto,
+  TransactionDensityResponse,
   VolumeAnomalyResponseDto 
 } from '@types';
 
@@ -75,3 +76,10 @@ export const MOCK_TRANSACTION_DENSITY: TransactionDensityPointDto[] = Array.from
     totalRevenue,
   };
 });
+
+export const MOCK_TRANSACTION_DENSITY_RESPONSE: TransactionDensityResponse = {
+  points: MOCK_TRANSACTION_DENSITY,
+  totalCount: MOCK_TRANSACTION_DENSITY.reduce((sum, point) => sum + point.count, 0),
+  minCount: Math.min(...MOCK_TRANSACTION_DENSITY.map(point => point.count)),
+  maxCount: Math.max(...MOCK_TRANSACTION_DENSITY.map(point => point.count)),
+};

@@ -119,7 +119,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           {children}
         </select>
 
-        <div className="relative w-full flex items-center">
+        <div className="relative flex items-center">
           <button
             type="button"
             disabled={disabled}
@@ -140,7 +140,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           )}
 
           {isOpen && !disabled && (
-            <div className={`absolute ${alignClass} w-full bg-surface border border-outline-variant/50 shadow-lg rounded-lg py-1.5 flex flex-col z-[100] overflow-y-auto custom-scrollbar animate-in fade-in duration-100 ${
+            <div className={`absolute ${alignClass} w-full bg-surface border border-outline-variant/50 m3-elevation-2 rounded-lg py-1.5 flex flex-col z-[100] overflow-y-auto custom-scrollbar animate-in fade-in duration-100 ${
               dropdownClassName ? dropdownClassName : 'top-full mt-1.5 max-h-60 slide-in-from-bottom-1'
             }`}>
               {options.map((opt) => {

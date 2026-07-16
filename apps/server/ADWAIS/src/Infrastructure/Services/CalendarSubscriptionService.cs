@@ -89,7 +89,8 @@ public class CalendarSubscriptionService(
             sub.LastPolledAt = DateTime.UtcNow;
 
             var icsContent = await _httpClient.GetStringAsync(sub.Url, ct);
-            var calendar = Calendar.Load(icsContent);
+            var calendar = Calendar.Load(icsContent)
+                ?? throw new InvalidDataException("The calendar subscription returned invalid iCalendar data.");
 
             var incomingUids = new HashSet<string>();
 
@@ -97,6 +98,15 @@ public class CalendarSubscriptionService(
             {
                 var externalUid = calendarEvent.Uid;
                 if (string.IsNullOrEmpty(externalUid)) continue;
+
+                if (calendarEvent.Start is null)
+                {
+                    _logger.LogWarning(
+                        "Skipping calendar event {Uid} from subscription {Name} because it has no start time",
+                        externalUid,
+                        sub.Name);
+                    continue;
+                }
 
                 incomingUids.Add(externalUid);
 
@@ -108,7 +118,7 @@ public class CalendarSubscriptionService(
                     ? new DateTimeOffset(startTimeVal)
                     : new DateTimeOffset(startTimeVal.ToUniversalTime());
 
-                var endTimeVal = calendarEvent.End.Value;
+                var endTimeVal = calendarEvent.End?.Value ?? startTimeVal;
                 var endTime = endTimeVal.Kind == DateTimeKind.Utc
                     ? new DateTimeOffset(endTimeVal)
                     : new DateTimeOffset(endTimeVal.ToUniversalTime());
@@ -120,7 +130,7 @@ public class CalendarSubscriptionService(
                     existingEvent.Location = calendarEvent.Location;
                     existingEvent.StartTime = startTime;
                     existingEvent.EndTime = endTime;
-                    existingEvent.IsRecurring = calendarEvent.RecurrenceRules != null && calendarEvent.RecurrenceRules.Count > 0;
+                    existingEvent.IsRecurring = calendarEvent.RecurrenceRule is not null;
                 }
                 else
                 {
@@ -134,7 +144,7 @@ public class CalendarSubscriptionService(
                         EndTime = endTime,
                         EventType = EventType.ExternalSync,
                         IsImportant = false,
-                        IsRecurring = calendarEvent.RecurrenceRules != null && calendarEvent.RecurrenceRules.Count > 0,
+                        IsRecurring = calendarEvent.RecurrenceRule is not null,
                         IsSpecial = false,
                         Recurrence = RecurrenceType.None,
                         ExternalUid = externalUid,

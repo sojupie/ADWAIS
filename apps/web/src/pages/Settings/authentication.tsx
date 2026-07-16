@@ -7,6 +7,7 @@ import { SecureButton } from '../../components/common/ui/SecureButton';
 import { Input } from '../../components/common/ui/Input';
 import { removeKioskToken } from '../../utils/auth';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../../components/common/ui/Card';
+import { ErrorAlert } from '../../components/common/ui/ErrorAlert';
 
 export function AuthenticationSettings() {
   const [activationCode, setActivationCode] = useState('');
@@ -66,7 +67,7 @@ export function AuthenticationSettings() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleActivate} className="flex flex-col gap-1">
+          <form onSubmit={handleActivate} className="flex flex-col gap-2">
             <Input
               label="Activation Code"
               type="text"
@@ -78,9 +79,11 @@ export function AuthenticationSettings() {
             />
 
             {errorMsg && (
-              <div className="p-3 bg-red-50 text-red-700 rounded-lg text-sm font-medium border border-red-200">
-                {errorMsg}
-              </div>
+              <ErrorAlert
+                title="Unable to activate kiosk"
+                message={errorMsg}
+                onDismiss={() => setErrorMsg('')}
+              />
             )}
             {successMsg && (
               <div className="p-3 bg-green-50 text-green-700 rounded-lg text-sm font-medium border border-green-200">
@@ -94,7 +97,7 @@ export function AuthenticationSettings() {
               lockTitle="Requires Staff (Employee or Admin) role"
               loading={activateMutation.isPending}
               loadingText="Activating..."
-              className="self-start px-6 py-2 disabled:opacity-50 bg-brand-btn-primary hover:bg-brand-btn-quaternary text-white font-bold rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2"
+              className="self-start px-6 py-2 disabled:opacity-50 bg-brand-btn-primary hover:bg-brand-btn-quaternary text-white font-bold rounded-lg transition-colors shadow-sm flex items-center justify-center gap-4"
               disabled={activationCode.length !== 6}
             >
               Activate Kiosk

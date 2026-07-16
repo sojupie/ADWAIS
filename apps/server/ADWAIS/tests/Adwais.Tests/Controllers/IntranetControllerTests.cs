@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using Adwais.Api.Controllers;
+using Adwais.Api.DTOs.Intranet;
 using Adwais.Application.DTOs.Intranet;
 using Adwais.Application.DTOs.System;
 using Adwais.Application.Interfaces;
@@ -167,8 +168,8 @@ public class IntranetControllerTests
 
         // Assert
         var createdResult = Assert.IsType<CreatedAtActionResult>(result.Result);
-        var returned = Assert.IsType<CommunityPost>(createdResult.Value);
-        Assert.Equal(userId, returned.UserId);
+        var returned = Assert.IsType<CommunityPostResponseDto>(createdResult.Value);
+        Assert.Equal(post.Id, returned.Id);
         Assert.Equal("Announcing Intranet", returned.Title);
         postServiceMock.Verify(s => s.CreatePostAsync(userId, "Announcing Intranet", "Exciting news!", It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -212,9 +213,160 @@ public class IntranetControllerTests
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result.Result);
-        var returned = Assert.IsType<List<CommunityPost>>(okResult.Value);
+        var returned = Assert.IsType<List<CommunityPostResponseDto>>(okResult.Value);
         Assert.Single(returned);
+        Assert.Equal("Post 1", returned[0].Title);
         postServiceMock.Verify(s => s.GetPostsAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task Posts_UpdatePost_ShouldAllowAuthorToEditOwnPost()
+    {
+        var authorId = Guid.NewGuid();
+        var post = new CommunityPost
+        {
+            Id = Guid.NewGuid(),
+            UserId = authorId,
+            Title = "Original",
+            Body = "Original body",
+            CreatedAt = DateTime.UtcNow
+        };
+        var updated = new CommunityPost
+        {
+            Id = post.Id,
+            UserId = authorId,
+            Title = "Updated",
+            Body = "Updated body",
+            CreatedAt = post.CreatedAt,
+            UpdatedAt = DateTime.UtcNow
+        };
+        var postServiceMock = new Mock<ICommunityPostService>();
+        postServiceMock.Setup(s => s.GetPostByIdAsync(post.Id, It.IsAny<CancellationToken>())).ReturnsAsync(post);
+        postServiceMock.Setup(s => s.UpdatePostAsync(post.Id, "Updated", "Updated body", It.IsAny<CancellationToken>())).ReturnsAsync(updated);
+        var controller = CreatePostsController(postServiceMock, authorId, "Employee");
+
+        var result = await controller.UpdatePost(
+            post.Id,
+            new UpdatePostDto { Title = "Updated", Body = "Updated body" },
+            CancellationToken.None);
+
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var response = Assert.IsType<CommunityPostResponseDto>(okResult.Value);
+        Assert.Equal("Updated", response.Title);
+        postServiceMock.Verify(s => s.UpdatePostAsync(post.Id, "Updated", "Updated body", It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task Posts_UpdatePost_ShouldForbidOtherStaffMember()
+    {
+        var post = new CommunityPost
+        {
+            Id = Guid.NewGuid(),
+            UserId = Guid.NewGuid(),
+            Title = "Original",
+            Body = "Original body",
+            CreatedAt = DateTime.UtcNow
+        };
+        var postServiceMock = new Mock<ICommunityPostService>();
+        postServiceMock.Setup(s => s.GetPostByIdAsync(post.Id, It.IsAny<CancellationToken>())).ReturnsAsync(post);
+        var controller = CreatePostsController(postServiceMock, Guid.NewGuid(), "Employee");
+
+        var result = await controller.UpdatePost(
+            post.Id,
+            new UpdatePostDto { Title = "Updated" },
+            CancellationToken.None);
+
+        Assert.IsType<ForbidResult>(result.Result);
+        postServiceMock.Verify(s => s.UpdatePostAsync(It.IsAny<Guid>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task Posts_DeletePost_ShouldAllowAdminToDeleteAnyPost()
+    {
+        var authorId = Guid.NewGuid();
+        var adminId = Guid.NewGuid();
+        var post = new CommunityPost
+        {
+            Id = Guid.NewGuid(),
+            UserId = authorId,
+            Title = "Post",
+            Body = "Body",
+            CreatedAt = DateTime.UtcNow
+        };
+        var postServiceMock = new Mock<ICommunityPostService>();
+        postServiceMock.Setup(s => s.GetPostByIdAsync(post.Id, It.IsAny<CancellationToken>())).ReturnsAsync(post);
+        postServiceMock.Setup(s => s.DeletePostAsync(post.Id, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        var controller = CreatePostsController(postServiceMock, adminId, "Admin");
+
+        var result = await controller.DeletePost(post.Id, CancellationToken.None);
+
+        Assert.IsType<NoContentResult>(result);
+        postServiceMock.Verify(s => s.DeletePostAsync(post.Id, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task Posts_DeletePost_ShouldAllowAuthorToDeleteOwnPost()
+    {
+        var authorId = Guid.NewGuid();
+        var post = new CommunityPost
+        {
+            Id = Guid.NewGuid(),
+            UserId = authorId,
+            Title = "Post",
+            Body = "Body",
+            CreatedAt = DateTime.UtcNow
+        };
+        var postServiceMock = new Mock<ICommunityPostService>();
+        postServiceMock.Setup(s => s.GetPostByIdAsync(post.Id, It.IsAny<CancellationToken>())).ReturnsAsync(post);
+        postServiceMock.Setup(s => s.DeletePostAsync(post.Id, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        var controller = CreatePostsController(postServiceMock, authorId, "Employee");
+
+        var result = await controller.DeletePost(post.Id, CancellationToken.None);
+
+        Assert.IsType<NoContentResult>(result);
+        postServiceMock.Verify(s => s.DeletePostAsync(post.Id, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task Posts_DeletePost_ShouldForbidOtherStaffMember()
+    {
+        var authorId = Guid.NewGuid();
+        var otherUserId = Guid.NewGuid();
+        var post = new CommunityPost
+        {
+            Id = Guid.NewGuid(),
+            UserId = authorId,
+            Title = "Post",
+            Body = "Body",
+            CreatedAt = DateTime.UtcNow
+        };
+        var postServiceMock = new Mock<ICommunityPostService>();
+        postServiceMock.Setup(s => s.GetPostByIdAsync(post.Id, It.IsAny<CancellationToken>())).ReturnsAsync(post);
+        var controller = CreatePostsController(postServiceMock, otherUserId, "Employee");
+
+        var result = await controller.DeletePost(post.Id, CancellationToken.None);
+
+        Assert.IsType<ForbidResult>(result);
+        postServiceMock.Verify(s => s.DeletePostAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    private static CommunityPostController CreatePostsController(
+        Mock<ICommunityPostService> postServiceMock,
+        Guid userId,
+        string role)
+    {
+        var controller = new CommunityPostController(postServiceMock.Object);
+        var claims = new List<Claim>
+        {
+            new(ClaimTypes.NameIdentifier, userId.ToString()),
+            new(ClaimTypes.Role, role)
+        };
+        var identity = new ClaimsIdentity(claims, "TestAuth");
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal(identity) }
+        };
+        return controller;
     }
 
     [Fact]

@@ -116,7 +116,7 @@ export function MonitorTile({
 
   const header = (
     <>
-      <div className="flex items-center gap-2 min-w-0 flex-1">
+      <div className="flex items-center gap-4 min-w-0 flex-1">
         <span className="relative flex h-2 w-2 shrink-0">
           {normalizeStatus(m.currentStatus) === 'UP' && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>}
           <span className={`relative inline-flex rounded-full h-2 w-2 ${normalizeStatus(m.currentStatus) === 'UP' ? 'bg-green-500' : normalizeStatus(m.currentStatus) === 'DOWN' ? 'bg-red-500' : 'bg-slate-400'}`}></span>
@@ -132,9 +132,9 @@ export function MonitorTile({
         />
       </div>
       {isUnassigned ? (
-        <span className="text-sm uppercase font-bold text-orange-500 tracking-wide flex items-center gap-1 shrink-0"><Unlink2 size={10} /> Unassigned</span>
+        <span className="text-sm uppercase font-bold text-orange-500 tracking-wide flex items-center gap-2 shrink-0"><Unlink2 size={10} /> Unassigned</span>
       ) : (
-        <span className="text-sm uppercase font-bold text-brand-link tracking-wide flex items-center gap-1 shrink-0"><Link2 size={10} /> Assigned</span>
+        <span className="text-sm uppercase font-bold text-brand-link tracking-wide flex items-center gap-2 shrink-0"><Link2 size={10} /> Assigned</span>
       )}
     </>
   );
@@ -151,7 +151,7 @@ export function MonitorTile({
 
   return (
     <TileCard header={header} headerActions={headerActions} isUnassigned={isUnassigned}>
-      <div className="flex flex-col gap-1 group">
+      <div className="flex flex-col gap-2 group">
         <label className="text-sm font-bold text-on-surface-variant uppercase tracking-wider">Target URL</label>
         <input
           value={draft.url}
@@ -164,8 +164,8 @@ export function MonitorTile({
         />
       </div>
 
-      <div className="flex gap-4 mt-2">
-        <div className="flex flex-col gap-1 flex-1">
+      <div className="flex gap-8 mt-2">
+        <div className="flex flex-col gap-2 flex-1">
           <label className="text-sm font-bold text-on-surface-variant uppercase tracking-wider">Uptime SLA (%)</label>
           <input
             type="number"
@@ -183,13 +183,13 @@ export function MonitorTile({
         </div>
       </div>
 
-      <div className="flex flex-col gap-1 mt-2">
+      <div className="flex flex-col gap-2 mt-2">
         <label className="text-sm font-bold text-on-surface-variant uppercase tracking-wider">Tags</label>
-        <div className="flex flex-wrap gap-1 mb-1.5 items-center">
+        <div className="flex flex-wrap gap-2 mb-1.5 items-center">
           {draft.tags.map((tag) => (
             <span
               key={tag}
-              className="text-sm font-bold px-2 py-0.5 rounded uppercase tracking-wider bg-surface-container border border-outline-variant text-on-surface-variant flex items-center gap-1"
+              className="text-sm font-bold px-2 py-0.5 rounded uppercase tracking-wider bg-surface-container border border-outline-variant text-on-surface-variant flex items-center gap-2"
             >
               {tag}
               {isAdmin && (
@@ -239,19 +239,19 @@ export function MonitorTile({
       <div className="pt-3 border-t border-outline-variant flex items-center justify-between">
         {!isAdmin ? (
           <div className="flex items-center justify-between w-full">
-            <span className="text-sm font-bold text-on-surface-variant uppercase tracking-wide flex flex-col gap-0.5 min-w-0">
+            <span className="text-sm font-bold text-on-surface-variant uppercase tracking-wide flex flex-col gap-1 min-w-0">
               Linked to
               <span className="text-sm text-on-surface-variant font-mono font-semibold truncate max-w-[250px] select-text cursor-text">
                 {isUnassigned ? 'Unassigned' : ((tenants || []).find((t) => t.id === m.tenantId)?.name || m.tenantName || m.tenantId)}
               </span>
             </span>
-            <span className="p-1 text-on-surface-variant opacity-60 cursor-not-allowed flex items-center gap-1" title="Requires Admin privileges">
+            <span className="p-1 text-on-surface-variant opacity-60 cursor-not-allowed flex items-center gap-2" title="Requires Admin privileges">
               <Lock size={12} />
               <span className="text-sm font-bold uppercase tracking-wider text-on-surface-variant">Admin Only</span>
             </span>
           </div>
         ) : isUnassigned || isAssigning ? (
-          <div className="flex items-center gap-2 w-full items-end">
+          <div className="flex items-center gap-4 w-full items-end">
             <Input
               list={`tenants-${m.id}`}
               value={assignTenantId}
@@ -277,15 +277,15 @@ export function MonitorTile({
           </div>
         ) : (
           <div className="flex items-center justify-between w-full">
-            <span className="text-sm font-bold text-on-surface-variant uppercase tracking-wide flex flex-col gap-0.5 min-w-0">
+            <span className="text-sm font-bold text-on-surface-variant uppercase tracking-wide flex flex-col gap-1 min-w-0">
               Linked to
               <span className="text-sm text-on-surface-variant font-mono font-semibold truncate max-w-[150px] select-text cursor-text">{(tenants || []).find((t) => t.id === m.tenantId)?.name || m.tenantName || m.tenantId}</span>
             </span>
-            <div className="flex gap-2 ml-2">
+            <div className="flex gap-4 ml-2">
               <SecureButton
                 onClick={() => setAssigningMonitorId(m.id)}
                 locked={!isAdmin}
-                className="text-sm font-bold text-on-surface-variant hover:text-on-surface bg-surface-container-low hover:bg-surface-container px-3 py-1.5 rounded-lg transition-colors cursor-pointer border border-outline-variant shadow-sm flex items-center justify-center gap-1.5"
+                className="text-sm font-bold text-on-surface-variant hover:text-on-surface bg-surface-container-low hover:bg-surface-container px-3 py-1.5 rounded-lg transition-colors cursor-pointer border border-outline-variant shadow-sm flex items-center justify-center gap-3"
               >
                 Reassign
               </SecureButton>
@@ -293,7 +293,7 @@ export function MonitorTile({
                 onClick={() => { if(confirm('Unassign monitor?')) unassignMonitor.mutate(m.id); }}
                 locked={!isAdmin}
                 loading={unassignMonitor.isPending}
-                className="text-sm font-bold text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors cursor-pointer border border-red-100 shadow-sm flex items-center justify-center gap-1.5"
+                className="text-sm font-bold text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors cursor-pointer border border-red-100 shadow-sm flex items-center justify-center gap-3"
               >
                 Unassign
               </SecureButton>

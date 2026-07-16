@@ -12,6 +12,7 @@ public class CreatePostDtoValidator : AbstractValidator<CreatePostDto>
             .MaximumLength(255).WithMessage("Title must not exceed 255 characters.");
 
         RuleFor(x => x.Body)
-            .NotEmpty().WithMessage("Body is required.");
+            .NotEmpty().WithMessage("Body is required.")
+            .MaximumLength(5000).WithMessage("Body must not exceed 5000 characters.");
     }
 }

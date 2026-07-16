@@ -26,15 +26,15 @@ const CustomTooltip = ({ active, payload }: { isLoading?: boolean;  active?: boo
         {point.tenantName}
       </p>
       <div className="space-y-2">
-        <p className="flex justify-between gap-6">
+        <p className="flex justify-between gap-12">
           <span className="text-on-surface-variant">Current Volume:</span>
           <strong className="text-on-surface-variant">{formatNumber(point.currentVolume)}</strong>
         </p>
-        <p className="flex justify-between gap-6">
+        <p className="flex justify-between gap-12">
           <span className="text-on-surface-variant">Baseline Volume:</span>
           <strong className="text-on-surface-variant">{formatNumber(point.baselineVolume)}</strong>
         </p>
-        <p className="flex justify-between gap-6">
+        <p className="flex justify-between gap-12">
           <span className="text-on-surface-variant">Deviation:</span>
           <strong className={point.volumeDeviationPercentage >= 0 ? 'text-green-600' : 'text-red-600'}>
             {point.volumeDeviationPercentage > 0 ? '+' : ''}{point.volumeDeviationPercentage.toFixed(1)}%

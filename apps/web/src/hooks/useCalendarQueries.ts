@@ -43,7 +43,8 @@ export function useCreateCalendarEventMutation(onSuccessCallback?: () => void) {
       },
       onError: (err: Error) => {
         toast.error('Failed to create event', {
-          description: err.message || String(err)
+          description: err.message || String(err),
+          duration: Infinity
         });
       }
     }
@@ -68,7 +69,8 @@ export function useUpdateCalendarEventMutation(onSuccessCallback?: () => void) {
       },
       onError: (err: Error) => {
         toast.error('Failed to update event', {
-          description: err.message || String(err)
+          description: err.message || String(err),
+          duration: Infinity
         });
       }
     }
@@ -93,7 +95,8 @@ export function useDeleteCalendarEventMutation(onSuccessCallback?: () => void) {
       },
       onError: (err: Error) => {
         toast.error('Failed to delete event', {
-          description: err.message || String(err)
+          description: err.message || String(err),
+          duration: Infinity
         });
       }
     }
@@ -125,7 +128,8 @@ export function useRegenerateCalendarTokenMutation() {
       },
       onError: (err: Error) => {
         toast.error('Failed to regenerate token', {
-          description: err.message || String(err)
+          description: err.message || String(err),
+          duration: Infinity
         });
       }
     }
@@ -153,7 +157,8 @@ export function useCreateCalendarSubscriptionMutation(onSuccessCallback?: () => 
       },
       onError: (err: Error) => {
         toast.error('Failed to add subscription', {
-          description: err.message || String(err)
+          description: err.message || String(err),
+          duration: Infinity
         });
       }
     }
@@ -178,7 +183,8 @@ export function useDeleteCalendarSubscriptionMutation(onSuccessCallback?: () => 
       },
       onError: (err: Error) => {
         toast.error('Failed to delete subscription', {
-          description: err.message || String(err)
+          description: err.message || String(err),
+          duration: Infinity
         });
       }
     }
@@ -201,7 +207,8 @@ export function useSyncCalendarSubscriptionMutation() {
       },
       onError: (err: Error) => {
         toast.error('Failed to trigger sync', {
-          description: err.message || String(err)
+          description: err.message || String(err),
+          duration: Infinity
         });
       }
     }

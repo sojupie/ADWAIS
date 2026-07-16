@@ -9,7 +9,7 @@ public class UpdateMonitorRequestDtoValidator : AbstractValidator<UpdateMonitorR
     {
         RuleFor(x => x.Sla)
             .InclusiveBetween(0, 100)
-            .When(x => x.Sla.HasValue && x.Sla.Value != -1)
+            .When(x => x.Sla.HasValue)
             .WithMessage("Uptime SLA must be between 0 and 100.");
     }
 }

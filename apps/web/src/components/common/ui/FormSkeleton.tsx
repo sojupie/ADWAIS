@@ -7,7 +7,7 @@ interface FormSkeletonProps {
 
 export function FormSkeleton({ children, className = '' }: FormSkeletonProps) {
   return (
-    <div className={`animate-pulse flex flex-col gap-5 py-2 ${className}`}>
+    <div className={`animate-pulse flex flex-col gap-10 py-2 ${className}`}>
       {children}
     </div>
   );
@@ -15,7 +15,7 @@ export function FormSkeleton({ children, className = '' }: FormSkeletonProps) {
 
 FormSkeleton.Input = function FormSkeletonInput({ labelWidth = 'w-28' }: { labelWidth?: string }) {
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex flex-col gap-3">
       <div className={`h-3 bg-slate-250 rounded ${labelWidth}`} />
       <div className="h-9 bg-surface-container rounded-lg" />
     </div>
@@ -24,7 +24,7 @@ FormSkeleton.Input = function FormSkeletonInput({ labelWidth = 'w-28' }: { label
 
 FormSkeleton.Checkbox = function FormSkeletonCheckbox({ textWidth = 'w-36' }: { textWidth?: string }) {
   return (
-    <div className="flex items-center gap-3 py-1">
+    <div className="flex items-center gap-6 py-1">
       <div className="h-4 bg-slate-250 rounded w-4" />
       <div className={`h-4 bg-surface-container rounded ${textWidth}`} />
     </div>

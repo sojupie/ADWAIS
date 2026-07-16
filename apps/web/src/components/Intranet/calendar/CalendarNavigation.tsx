@@ -1,0 +1,22 @@
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+
+interface CalendarNavigationProps {
+  label: string;
+  onPrevious: () => void;
+  onToday: () => void;
+  onNext: () => void;
+}
+
+export function CalendarNavigation({ label, onPrevious, onToday, onNext }: CalendarNavigationProps) {
+  const buttonClass = 'flex h-9 w-9 items-center justify-center rounded-full bg-surface-container text-on-surface-variant transition-colors hover:bg-primary-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary';
+  return (
+    <div className="flex items-center justify-between bg-surface px-5 pb-2">
+      <h3 className="text-sm font-black uppercase tracking-wider text-on-surface">{label}</h3>
+      <div className="flex items-center gap-2">
+        <button onClick={onPrevious} className={buttonClass} aria-label="Previous period"><ChevronLeft size={20} /></button>
+        <button onClick={onToday} className="inline-flex min-h-9 items-center justify-center rounded-full bg-surface-container px-4 text-md font-bold uppercase tracking-wider text-on-surface transition-colors hover:bg-primary-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary">Today</button>
+        <button onClick={onNext} className={buttonClass} aria-label="Next period"><ChevronRight size={20} /></button>
+      </div>
+    </div>
+  );
+}

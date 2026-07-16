@@ -10,7 +10,7 @@ export function NavLink(props: NavLinkProps) {
     <Link
       {...props}
       activeOptions={{ includeSearch: false }}
-      className="text-sm font-extrabold text-white/60 hover:text-white transition-all no-underline pb-1 border-b-4 border-transparent uppercase tracking-wider"
+      className="inline-flex min-h-11 items-center px-2 text-base font-extrabold text-white/60 transition-colors hover:text-white no-underline border-b-4 border-transparent uppercase tracking-wider"
       activeProps={{ className: '!text-brand-accent !border-brand-accent' }}
     >
       {props.children}

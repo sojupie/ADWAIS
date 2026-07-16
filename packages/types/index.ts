@@ -6,6 +6,9 @@ export type FinancialKpi = GlobalKpi; // Deprecated but maps to KpiResponseDto
 export type FinancialVelocityPoint = Required<Generated.VelocityPointResponseDto>;
 export type CumulativeGrowthDeltaPoint = Required<Generated.CumulativeGrowthDeltaPointResponseDto>;
 export type TransactionDensityPointDto = Required<Generated.TransactionDensityPointResponseDto>;
+export type TransactionDensityResponse = Required<Omit<Generated.TransactionDensityResponseDto, 'points'>> & {
+  points: TransactionDensityPointDto[];
+};
 
 export type OrderBin = Required<Omit<Generated.OrderBinResponseDto, 'binLabel'>> & {
   binLabel: string;

@@ -50,7 +50,7 @@ export function AppShell({
   const [isProgressBarVisible, setIsProgressBarVisible] = useState(false);
 
   useEffect(() => {
-    let timer: any;
+    let timer: ReturnType<typeof setTimeout>;
     
     if (showProgressBar) {
       const defer = setTimeout(() => {
@@ -66,7 +66,7 @@ export function AppShell({
   }, [showProgressBar]);
 
   return (
-    <div className="app-shell flex flex-col bg-brand-bg-tertiary overflow-hidden select-none font-sans text-brand-text">
+    <div className="app-shell flex flex-col bg-brand-bg-tertiary overflow-hidden font-sans text-brand-text">
       {!isKioskRoute && (
         <>
           <SiteHeader
@@ -80,15 +80,13 @@ export function AppShell({
             isProgressBarVisible={isProgressBarVisible}
           />
 
-          {isMobileMenuOpen && (
-            <MobileNavigationMenu
-              pathname={pathname}
-              financialTimeframe={financialTimeframe}
-              fleetTimeframe={fleetTimeframe}
-              onClose={onCloseMobileMenu}
-              userLabel={userLabel}
-            />
-          )}
+          <MobileNavigationMenu
+            isOpen={isMobileMenuOpen}
+            pathname={pathname}
+            financialTimeframe={financialTimeframe}
+            fleetTimeframe={fleetTimeframe}
+            onClose={onCloseMobileMenu}
+          />
 
           {isMobileView && timeframeDomain && (
             <div className="mobile-float-pills">

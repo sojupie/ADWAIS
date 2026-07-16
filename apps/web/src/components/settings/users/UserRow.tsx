@@ -17,7 +17,7 @@ export function UserRow({ u, updateUser, deleteUser, disabled = false }: UserRow
   return (
     <tr className="transition-colors group hover:bg-surface-container-low">
       <td className="px-6 py-3 align-middle">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-8">
           <div className="w-10 h-10 rounded-full bg-brand-accent/10 flex items-center justify-center text-brand-accent font-bold text-lg shrink-0">
             {u.name?.charAt(0).toUpperCase()}
           </div>
@@ -55,7 +55,7 @@ export function UserRow({ u, updateUser, deleteUser, disabled = false }: UserRow
              { label: 'Employee', value: 'Employee' },
            ]}
            displayValue={
-             <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-bold border ${
+             <span className={`inline-flex items-center gap-3 px-3 py-1 rounded-full text-sm font-bold border ${
                u.role === 'Admin' ? 'bg-purple-50 text-purple-700 border-purple-200' : 
                u.role === 'Employee' ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-surface-container text-on-surface-variant border-outline-variant'
              }`}>
@@ -70,7 +70,7 @@ export function UserRow({ u, updateUser, deleteUser, disabled = false }: UserRow
         {!disabled && (
           <button 
             onClick={() => { if(confirm('Revoke access for this user?')) deleteUser.mutate(u.id); }} 
-            className="inline-flex items-center gap-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 px-3 py-2 rounded-lg text-sm font-bold transition-colors group-hover:opacity-100 cursor-pointer"
+            className="inline-flex items-center gap-3 text-red-500 hover:text-red-700 hover:bg-red-50 px-3 py-2 rounded-lg text-sm font-bold transition-colors group-hover:opacity-100 cursor-pointer"
           >
             <Trash2 size={16} /> Revoke
           </button>

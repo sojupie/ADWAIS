@@ -11,7 +11,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ label, error, icon, className = '', disabled, containerClassName = '', ...props }, ref) => {
     const widthClass = containerClassName.includes('w-') ? '' : 'w-full';
     return (
-      <div className={`flex flex-col gap-1 ${widthClass} ${containerClassName}`}>
+      <div className={`flex flex-col gap-2 ${widthClass} ${containerClassName}`}>
         {label && (
           <label className="text-sm font-bold text-on-surface-variant uppercase tracking-wider">
             {label}

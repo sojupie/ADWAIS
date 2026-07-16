@@ -20,7 +20,7 @@ const CustomTooltip = ({ active, payload, label }: { isLoading?: boolean;  activ
       <p className="font-bold text-on-surface mb-3 border-b border-slate-50 pb-2">{label}</p>
       <div className="space-y-2">
         {payload.map((entry) => (
-          <p key={entry.dataKey} className="flex justify-between gap-6">
+          <p key={entry.dataKey} className="flex justify-between gap-12">
             <span className="text-on-surface-variant">{entry.dataKey === 'currentRevenue' ? 'Current' : 'Previous'}:</span>
             <strong className={entry.dataKey === 'currentRevenue' ? 'text-brand-btn-primary' : 'text-on-surface-variant'}>
               {formatCompact(entry.value)} SEK
@@ -49,12 +49,12 @@ export const TenantRevenueVelocityChart = memo(function TenantRevenueVelocityCha
       className={className || ''}
       bodyClassName=""
       legend={
-        <div className="flex items-center gap-6 text-sm font-black text-on-surface-variant uppercase tracking-widest bg-surface-container-low px-4 py-2 rounded-full border border-outline-variant">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center gap-12 text-sm font-black text-on-surface-variant uppercase tracking-widest bg-surface-container-low px-4 py-2 rounded-full border border-outline-variant">
+          <div className="flex items-center gap-4">
             <span className="w-3 h-3 rounded-full bg-brand-btn-primary" />
             <span>Current</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4">
             <span className="w-3 h-3 rounded-full border-2 border-outline-variant border-dashed bg-transparent" />
             <span>Previous</span>
           </div>

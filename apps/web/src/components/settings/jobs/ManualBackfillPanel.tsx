@@ -30,7 +30,7 @@ export function ManualBackfillPanel({ tenants, triggerBackfill, disabled }: Manu
       subtitle="Force massive data ingestion"
       icon={<Database size={20} />}
     >
-      <div className="flex gap-3">
+      <div className="flex gap-6">
         <Select
           value={backfill.tenantId}
           onChange={e => setBackfill({ ...backfill, tenantId: e.target.value })}
@@ -43,7 +43,7 @@ export function ManualBackfillPanel({ tenants, triggerBackfill, disabled }: Manu
           ))}
         </Select>
       </div>
-      <div className="flex flex-col sm:flex-row gap-1">
+      <div className="flex flex-col sm:flex-row gap-2">
         <Input
           label="Start Date"
           type="datetime-local"
@@ -66,12 +66,12 @@ export function ManualBackfillPanel({ tenants, triggerBackfill, disabled }: Manu
         loading={triggerBackfill.isPending}
         loadingText="Initiating..."
         icon={<Play size={16} />}
-        className="text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors shadow-sm flex items-center justify-center gap-1 mt-2 w-full bg-brand-btn-primary hover:bg-brand-btn-quaternary cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        className="text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors shadow-sm flex items-center justify-center gap-2 mt-2 w-full bg-brand-btn-primary hover:bg-brand-btn-quaternary cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         disabled={!backfill.tenantId}
       >
         Execute Backfill
       </SecureButton>
-      <div className="bg-red-50 border border-red-100 rounded-lg p-3 flex items-start gap-2">
+      <div className="bg-red-50 border border-red-100 rounded-lg p-3 flex items-start gap-4">
         <ShieldAlert size={16} className="text-red-500 shrink-0 mt-0.5" />
         <p className="text-sm text-red-700 font-medium leading-relaxed">
           Long backfills require multiple GET requests for pagination that are likely to get rate limited (although automatically managed by back-off and retry policies). <br />Triggering a backfill also drops existing materialized views, potentially making queries slower, expect performance degradation (in ADWAIS).

@@ -20,9 +20,10 @@ import { DashboardFooter } from "../components/common/layout/DashboardFooter.tsx
 import { SyncStatusWidget } from '../components/common/dashboard/SyncStatusWidget';
 import { PeriodSelector } from '../components/common/charts/PeriodSelector';
 import { TenantSelector } from '../components/financial/TenantSelector';
+import type { TransactionDensityResponse } from '@types';
 
 const EMPTY_ACCUMULATED: never[] = [];
-const EMPTY_DENSITY: never[] = [];
+const EMPTY_DENSITY: TransactionDensityResponse = { points: [], totalCount: 0, minCount: 0, maxCount: 0 };
 const EMPTY_DELTA: never[] = [];
 const EMPTY_BINS: never[] = [];
 
@@ -60,9 +61,9 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe 
 
   return (
     <DashboardLayout>
-      <header className="flex items-center justify-between gap-1 shrink-0 flex-wrap w-full">
+      <header className="flex items-center justify-between gap-2 shrink-0 flex-wrap w-full">
         <div className="min-w-0">
-          <div className="flex items-center gap-3 mb-1">
+          <div className="flex items-center gap-6 mb-1">
             <h1 className="text-2xl font-extrabold text-brand-text tracking-tight m-0">{tenantName} Diagnostics</h1>
             <span 
               className={`inline-flex items-center px-3 py-1 rounded-sm text-sm font-black uppercase tracking-widest shadow-sm shrink-0 ${
@@ -76,11 +77,11 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe 
           </div>
           <p className="text-sm text-on-surface-variant m-0 font-medium tracking-wide">Isolated entity performance view for the {timeframe} period. VAT included.</p>
         </div>
-        <div className="flex items-center gap-1 shrink-0 w-full lg:w-auto">
+        <div className="w-full flex items-center justify-end gap-2 shrink-0 lg:w-auto">
           <button
             type="button"
             onClick={handleBackToGlobal}
-            className="w-10 h-10 rounded-full border border-outline-variant bg-surface flex items-center justify-center text-on-surface-variant hover:text-brand-text hover:bg-surface-container-low hover:border-outline-variant active:bg-surface-container transition-all shadow-sm cursor-pointer shrink-0"
+            className="w-10 h-10 rounded-full bg-surface-bright m3-elevation-1 flex items-center justify-center hover:m3-elevation-2 hover:bg-surface-container-low hover:border-outline-variant active:bg-surface-container transition-all cursor-pointer shrink-0"
             aria-label="Back to global portfolio"
           >
             <ArrowLeft size={20} className="stroke-[2.5]" />
@@ -136,7 +137,7 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe 
         />
         
         <TransactionDensityChart
-          points={densityQuery.data || EMPTY_DENSITY}
+          response={densityQuery.data || EMPTY_DENSITY}
           isLoading={densityQuery.isLoading}
           isStale={densityQuery.isPlaceholderData}
           className="h-full min-h-[350px] contained:min-h-0"

@@ -14,22 +14,6 @@ export function useOrderNotifier() {
   const queryClient = useQueryClient();
   const { notificationsEnabled } = useKiosk();
 
-  const formatDate = (dateString?: string | null) => {
-    if (!dateString) return '';
-    try {
-      return new Date(dateString).toLocaleDateString('en-SE', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-        hour: 'numeric',
-        minute: 'numeric',
-        hour12: false,
-      });
-    } catch {
-      return '';
-    }
-  };
-
   const [lastCheckedTime, setLastCheckedTime] = useState<string>(() => new Date().toISOString());
 
   useGetApiFinancialOrders(
@@ -70,7 +54,6 @@ export function useOrderNotifier() {
                           t={t} 
                           faviconUrl={faviconUrl} 
                           displayValue={displayValue} 
-                          formatDate={formatDate} 
                         />
                       ),
                       {

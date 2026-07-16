@@ -22,7 +22,7 @@ const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?:
       <p className="font-bold text-on-surface mb-3 border-b border-slate-50 pb-2">{label}</p>
       <div className="space-y-2">
         {payload.map((entry, index) => (
-          <p key={index} className="flex justify-between gap-6 text-on-surface-variant">
+          <p key={index} className="flex justify-between gap-12 text-on-surface-variant">
             <span>{entry.name}:</span>
             <strong style={{ color: entry.color }}>
               {formatCurrency(entry.value)}

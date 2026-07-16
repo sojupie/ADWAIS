@@ -20,7 +20,7 @@ public record UpdateMonitorRequestDto
     /// <summary>
     /// SLA for the monitor.
     /// </summary>
-    public double? Sla { get; init; } = -1;
+    public double? Sla { get; init; }
 
     /// <summary>
     /// Tags associated with the monitor.

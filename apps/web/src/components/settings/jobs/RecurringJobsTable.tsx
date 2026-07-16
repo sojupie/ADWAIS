@@ -2,6 +2,7 @@ import { CheckCircle2, Activity } from 'lucide-react';
 import { EmptyState } from '../../common/ui/EmptyState';
 import { Skeleton } from '../../common/ui/Skeleton';
 import type { RecurringJobDto } from '@types';
+import { formatDateTime } from '../../../utils/dateTime';
 
 interface RecurringJobsTableProps {
   recurring: RecurringJobDto[] | undefined;
@@ -41,16 +42,22 @@ export function RecurringJobsTable({ recurring }: RecurringJobsTableProps) {
                   </span>
                 </td>
                 <td className="px-3 py-2 text-on-surface-variant font-bold whitespace-nowrap">
-                  {job.lastExecution ? new Date(job.lastExecution).toLocaleString() : 'Never'}
+                  {formatDateTime(job.lastExecution, {
+                    year: 'numeric', month: 'numeric', day: 'numeric',
+                    hour: 'numeric', minute: 'numeric', second: 'numeric',
+                  }) || 'Never'}
                 </td>
                 <td className="px-3 py-2 text-on-surface-variant whitespace-nowrap">
-                  {job.nextExecution ? new Date(job.nextExecution).toLocaleString() : 'Never'}
+                  {formatDateTime(job.nextExecution, {
+                    year: 'numeric', month: 'numeric', day: 'numeric',
+                    hour: 'numeric', minute: 'numeric', second: 'numeric',
+                  }) || 'Never'}
                 </td>
                 <td className="px-3 py-2">
                   {job.lastJobState === 'Succeeded' ? (
-                    <span className="text-green-500 flex items-center gap-1.5 font-bold"><CheckCircle2 size={14} /> Succeeded</span>
+                    <span className="text-green-500 flex items-center gap-3 font-bold"><CheckCircle2 size={14} /> Succeeded</span>
                   ) : (
-                    <span className="text-orange-500 flex items-center gap-1.5 font-bold"><Activity size={14} /> {job.lastJobState || 'Pending'}</span>
+                    <span className="text-orange-500 flex items-center gap-3 font-bold"><Activity size={14} /> {job.lastJobState || 'Pending'}</span>
                   )}
                 </td>
               </tr>

@@ -1,8 +1,8 @@
 
 export function ChartSkeleton() {
   return (
-    <div className="w-full h-full min-h-[300px] flex flex-col justify-end gap-2 p-4 pt-10 animate-pulse">
-      <div className="w-full flex-1 flex items-end gap-2">
+    <div className="w-full h-full min-h-[300px] flex flex-col justify-end gap-4 p-4 pt-10 animate-pulse">
+      <div className="w-full flex-1 flex items-end gap-4">
         <div className="w-full bg-surface-container rounded-t-md h-[40%]"></div>
         <div className="w-full bg-surface-container rounded-t-md h-[70%]"></div>
         <div className="w-full bg-surface-container rounded-t-md h-[50%]"></div>

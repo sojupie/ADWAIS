@@ -5,6 +5,7 @@ import { SectionHeader } from '../../components/common/layout/SectionHeader';
 import { SecureButton } from '../../components/common/ui/SecureButton';
 import { Skeleton } from '../../components/common/ui/Skeleton';
 import { useSystemEventsViewModel, type SystemEvent } from '../../hooks/useSystemEventsViewModel';
+import { formatDateTime } from '../../utils/dateTime';
 
 function timeAgo(date: string | number | null | undefined): string {
     if (!date) return 'Never';
@@ -40,17 +41,17 @@ function HealthStatusCard({ title, subtitle, status, children }: HealthStatusCar
                     <span className="text-sm text-on-surface-variant">{subtitle}</span>
                 </div>
                 {isHealthy && (
-                    <span className="flex items-center gap-1.5 px-2.5 py-1 bg-green-50 text-green-700 rounded-full text-sm font-bold border border-green-200">
+                    <span className="flex items-center gap-3 px-2.5 py-1 bg-green-50 text-green-700 rounded-full text-sm font-bold border border-green-200">
                         <CheckCircle2 size={13} /> <span>OK</span>
                     </span>
                 )}
                 {isWarning && (
-                    <span className="flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-700 rounded-full text-sm font-bold border border-amber-200">
+                    <span className="flex items-center gap-3 px-2.5 py-1 bg-amber-50 text-amber-700 rounded-full text-sm font-bold border border-amber-200">
                         <AlertTriangle size={13} /> <span>WARN</span>
                     </span>
                 )}
                 {isFailed && (
-                    <span className="flex items-center gap-1.5 px-2.5 py-1 bg-red-50 text-red-700 rounded-full text-sm font-bold border border-red-200">
+                    <span className="flex items-center gap-3 px-2.5 py-1 bg-red-50 text-red-700 rounded-full text-sm font-bold border border-red-200">
                         <AlertCircle size={13} /> <span>ERR</span>
                     </span>
                 )}
@@ -79,9 +80,9 @@ export function SystemEventsView() {
                     dark={true}
                 />
 
-                <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 custom-scrollbar bg-surface rounded-xl shadow-sm border border-outline-variant/60">
+                <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-8 custom-scrollbar bg-surface rounded-xl shadow-sm border border-outline-variant/60">
                     {health ? (
-                        <div className="flex flex-col gap-2">
+                        <div className="flex flex-col gap-4">
 
                             {/* Database Health Card */}
                             <HealthStatusCard
@@ -140,13 +141,13 @@ export function SystemEventsView() {
                                 lockTitle="Requires Admin privileges"
                                 loading={clearErrorsMutation.isPending}
                                 loadingText="Clearing Diagnostics..."
-                                className="w-full py-2.5 px-4 bg-slate-150 hover:bg-surface-container-high active:bg-slate-250 text-on-surface-variant font-bold rounded-xl text-sm shadow-sm transition-colors border border-slate-250 cursor-pointer flex items-center justify-center gap-2"
+                                className="w-full py-2.5 px-4 bg-slate-150 hover:bg-surface-container-high active:bg-slate-250 text-on-surface-variant font-bold rounded-xl text-sm shadow-sm transition-colors border border-slate-250 cursor-pointer flex items-center justify-center gap-4"
                             >
                                 Clear Sync Errors
                             </SecureButton>
                         </div>
                     ) : (
-                        <div className="flex flex-col gap-4">
+                        <div className="flex flex-col gap-8">
                             <Skeleton.Card className="h-16" />
                             <Skeleton.Card className="h-28" />
                             <Skeleton.Card className="h-28" />
@@ -185,17 +186,17 @@ export function SystemEventsView() {
             {/* System Logs console */}
             <section className="flex flex-col col-span-1 landscape-contained:col-span-2 bg-slate-900 rounded-2xl shadow-lg border border-slate-800 overflow-hidden h-full min-h-0 max-h-[500px] sm:max-h-[800px] xl:max-h-[calc(100vh-230px)] min-w-[285px] sm:min-w-[320px] min-w-0">
                 <div className="flex items-center justify-between shrink-0 p-4 border-b border-slate-800 bg-slate-900 z-10">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-6">
                         <TerminalSquare size={18} className="text-brand-accent" />
                         <h2 className="text-sm font-bold text-white tracking-wider">SYSTEM LOGS</h2>
                     </div>
-                    <div className="flex gap-1.5">
+                    <div className="flex gap-3">
                         <div className="w-3 h-3 rounded-full bg-slate-700"></div>
                         <div className="w-3 h-3 rounded-full bg-slate-700"></div>
                         <div className="w-3 h-3 rounded-full bg-slate-700"></div>
                     </div>
                 </div>
-                <div className="flex-1 overflow-y-auto p-4 custom-scrollbar flex flex-col gap-2 bg-[#0d1117] font-mono text-sm">
+                <div className="flex-1 overflow-y-auto p-4 custom-scrollbar flex flex-col gap-4 bg-[#0d1117] font-mono text-sm">
                     {(events || []).map((e: SystemEvent, i: number) => (
                         <LogEventRow key={e.id || i} e={e} />
                     ))}
@@ -238,7 +239,7 @@ function LogEventRow({ e }: { e: SystemEvent }) {
         const year = d.getFullYear();
         const month = String(d.getMonth() + 1).padStart(2, '0');
         const day = String(d.getDate()).padStart(2, '0');
-        const time = d.toLocaleTimeString([], { hour12: false });
+        const time = formatDateTime(d, { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
         const dateTimeStr = `${year}-${month}-${day} ${time}`;
         const levelStrFormatted = `[${levelStr.toUpperCase()}]`;
         
@@ -261,16 +262,16 @@ function LogEventRow({ e }: { e: SystemEvent }) {
     };
 
     return (
-        <div className="flex flex-col p-1.5 rounded hover:bg-surface/5 transition-colors group text-slate-300 relative gap-1 select-text">
+        <div className="flex flex-col p-1.5 rounded hover:bg-surface/5 transition-colors group text-slate-300 relative gap-2 select-text">
             {/* First Row: Date, Level icon, Level prefix, Message */}
-            <div className="flex items-center flex-wrap gap-x-2 gap-y-1 pr-8">
+            <div className="flex items-center flex-wrap gap-x-4 gap-y-2 pr-8">
                 <span className="text-on-surface-variant text-xs font-mono shrink-0">
                     {(() => {
                         const d = new Date(e.timestamp);
                         const year = d.getFullYear();
                         const month = String(d.getMonth() + 1).padStart(2, '0');
                         const day = String(d.getDate()).padStart(2, '0');
-                        const time = d.toLocaleTimeString([], { hour12: false });
+                        const time = formatDateTime(d, { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
                         return `${year}-${month}-${day} ${time}`;
                     })()}
                 </span>
@@ -285,7 +286,7 @@ function LogEventRow({ e }: { e: SystemEvent }) {
 
             {/* Second Row: Badges (Source, Tenant) */}
             {(e.source || e.tenant?.name) && (
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-on-surface-variant font-medium">
+                <div className="flex flex-wrap items-center gap-x-8 gap-y-2 text-xs text-on-surface-variant font-medium">
                     {e.source && (
                         <span>Source: <strong className="text-on-surface-variant">{e.source}</strong></span>
                     )}

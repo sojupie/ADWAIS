@@ -13,11 +13,10 @@ export function UserAccountLink({label, variant}: UserAccountLinkProps) {
     <Link
       to="/settings/authentication"
       className={variant === 'mobile'
-        ? 'flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold text-white bg-brand-btn-primary hover:bg-brand-btn-primary/90 active:bg-brand-btn-primary/80 transition-colors whitespace-nowrap shrink-0 max-w-[120px] truncate border-none'
-        : 'flex items-center gap-2 bg-brand-btn-primary hover:bg-brand-btn-primary/90 active:bg-brand-btn-primary/80 border-none px-4 py-1.5 rounded-full shadow-md hover:shadow-lg whitespace-nowrap shrink-0 text-sm font-bold text-white transition-all cursor-pointer'}
+        ? 'inline-flex min-h-10 max-w-[160px] items-center gap-1.5 truncate rounded-full bg-secondary-container px-3 text-sm font-bold hover:bg-surface-container-highest hover:m3-elevation-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary'
+        : 'inline-flex min-h-11 max-w-[220px] items-center gap-2 truncate rounded-full bg-primary-container px-4 font-bold hover:bg-surface-container-highest hover:m3-elevation-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary whitespace-nowrap'}
     >
-      <User size={variant === 'mobile' ? 14 : 16} className="shrink-0" />
-      <span className="truncate">{label}</span>
+      <User size={variant === 'mobile' ? 16 : 16} className="shrink-0" />
     </Link>
   );
 }

@@ -6,7 +6,7 @@ import { TransactionDensityChart } from '../../financial/TransactionDensityChart
 import { RevenueEfficiencyChart } from '../../financial/RevenueEfficiencyChart';
 import { MomentumMatrixChart } from '../../financial/MomentumMatrixChart';
 import motilloLogo from '../../../assets/motillo-logo.svg';
-import { MOCK_ACCUMULATED_REVENUE, MOCK_TRANSACTION_DENSITY, MOCK_EFFICIENCY, MOCK_MOMENTUM } from '../../../utils/mockKioskData';
+import { MOCK_ACCUMULATED_REVENUE, MOCK_TRANSACTION_DENSITY_RESPONSE, MOCK_EFFICIENCY, MOCK_MOMENTUM } from '../../../utils/mockKioskData';
 
 interface AuthLayoutProps {
   children: ReactNode;
@@ -14,23 +14,26 @@ interface AuthLayoutProps {
 
 export function AuthLayout({ children }: AuthLayoutProps) {
   return (
-    <div className="fixed inset-0 flex items-center justify-center font-sans text-brand-text select-none overflow-hidden bg-brand-bg-tertiary z-50">
+    <div className="fixed inset-0 flex items-center justify-center font-sans text-brand-text overflow-hidden bg-brand-bg-tertiary z-50">
       {/* Blurred Dashboard Background */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none flex flex-col">
         <div className="auth-dashboard-mock flex flex-col min-h-full w-full landscape-lg:min-w-[1180px]">
           {/* Mock Header */}
-          <header className="relative flex flex-col md:grid md:grid-cols-[auto_1fr_auto] items-center px-4 md:px-6 py-3 shrink-0 bg-brand-bg-secondary border-b border-brand-bg-secondary/20 shadow-sm z-10 gap-3 md:gap-6 min-w-0">
+          <header
+            className="relative flex flex-col md:grid md:grid-cols-[auto_1fr_auto] items-center px-4 md:px-6 py-3 shrink-0 bg-brand-bg-secondary z-10 gap-3 md:gap-6 min-w-0"
+            style={{ borderBottomColor: 'var(--color-brand-bg-secondary-20)' }}
+          >
             <div className="flex justify-center md:justify-start min-w-0">
               <img className="h-8 w-auto object-contain object-left brightness-0 invert" src={motilloLogo} alt="Motillo" height="32" />
             </div>
-            <nav className="flex justify-center items-center gap-3 md:gap-8 font-black uppercase tracking-widest text-xs md:text-sm min-w-0 max-w-full overflow-hidden">
+            <nav className="flex justify-center items-center gap-6 md:gap-16 font-black uppercase tracking-widest text-xs md:text-sm min-w-0 max-w-full overflow-hidden">
               <span className="text-brand-accent border-b-2 border-brand-accent pb-1">Financial</span>
               <span className="text-white/55 whitespace-nowrap">Fleet status</span>
               <span className="text-white/55">Intranet</span>
               <span className="text-white/55"><Settings size={20} /></span>
             </nav>
-            <div className="flex justify-center md:justify-end items-center gap-4 min-w-0">
-              <div className="flex items-center gap-2 md:gap-3 px-2.5 md:px-3 py-1.5 rounded-lg border bg-amber-100 text-on-surface border-amber-400 shadow-sm cursor-not-allowed opacity-90 max-w-full">
+            <div className="flex justify-center md:justify-end items-center gap-8 min-w-0">
+              <div className="flex items-center gap-4 md:gap-6 px-2.5 md:px-3 py-1.5 rounded-lg border bg-amber-100 text-on-surface border-amber-400 shadow-sm cursor-not-allowed opacity-90 max-w-full">
                 <span className="relative flex h-2.5 w-2.5">
                   <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
                 </span>
@@ -40,7 +43,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
           </header>
 
           <div className="w-full flex-1 min-h-0 p-4 md:p-6 overflow-hidden">
-            <div className="flex flex-col gap-4 min-h-full">
+            <div className="flex flex-col gap-8 min-h-full">
             <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 shrink-0">
               <FactPanel label="Global Revenue (T30)" value="201 634 127 kr" extra={{ type: 'PoP', value: -2.74 }} />
               <FactPanel label="Transaction Volume" value="236 800" extra={{ type: 'PoP', value: -2.58 }} />
@@ -52,7 +55,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
             <div className="flex flex-grow h-full">
               <section className="grid grid-cols-1 landscape-lg:grid-cols-2 gap-4 flex-1 min-h-0 auto-rows-fr">
               <AccumulatedRevenueChart points={MOCK_ACCUMULATED_REVENUE} className="h-full min-h-0" />
-              <TransactionDensityChart points={MOCK_TRANSACTION_DENSITY} className="h-full min-h-0" />
+              <TransactionDensityChart response={MOCK_TRANSACTION_DENSITY_RESPONSE} className="h-full min-h-0" />
               <RevenueEfficiencyChart response={MOCK_EFFICIENCY} onTenantSelect={() => { }} className="h-full min-h-0" />
               <MomentumMatrixChart momentum={MOCK_MOMENTUM} onTenantSelect={() => { }} className="h-full min-h-0" />
               </section>
@@ -62,7 +65,10 @@ export function AuthLayout({ children }: AuthLayoutProps) {
         </div>
 
         {/* Moderate Blur Overlay to preserve vibrant colors */}
-        <div className="absolute inset-0 backdrop-blur-sm bg-surface/45 z-10" />
+        <div
+          className="absolute inset-0 backdrop-blur-sm z-10"
+          style={{ backgroundColor: 'var(--md-sys-color-surface-45)' }}
+        />
       </div>
 
       {/* Auth Content */}

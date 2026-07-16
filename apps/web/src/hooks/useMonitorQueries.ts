@@ -55,7 +55,8 @@ export function useCreateMonitorMutation(onSuccessCallback?: () => void) {
       },
       onError: (err: Error) => {
         toast.error('Failed to create monitor', {
-          description: err.message || String(err)
+          description: err.message || String(err),
+          duration: Infinity
         });
       }
     }
@@ -101,7 +102,8 @@ export function useControlMonitorMutation() {
         onError: (...args) => {
           const err = args[0] as Error;
           toast.error('Failed to control monitor', {
-            description: err.message || String(err)
+            description: err.message || String(err),
+            duration: Infinity
           });
           if (options?.onError) {
             options.onError(...args);
@@ -125,11 +127,6 @@ export function useUpdateMonitorMutation() {
         toast.success('Monitor updated successfully.');
         queryClient.invalidateQueries({ queryKey: ['monitors'] });
         queryClient.invalidateQueries({ queryKey: ['unassigned-monitors'] });
-      },
-      onError: (err: Error) => {
-        toast.error('Failed to update monitor', {
-          description: err.message || String(err)
-        });
       }
     }
   });
@@ -157,7 +154,8 @@ export function useAssignMonitorMutation(onSuccessCallback?: () => void) {
       },
       onError: (err: Error) => {
         toast.error('Failed to assign monitor', {
-          description: err.message || String(err)
+          description: err.message || String(err),
+          duration: Infinity
         });
       }
     }
@@ -185,7 +183,8 @@ export function useUnassignMonitorMutation() {
       },
       onError: (err: Error) => {
         toast.error('Failed to unassign monitor', {
-          description: err.message || String(err)
+          description: err.message || String(err),
+          duration: Infinity
         });
       }
     }

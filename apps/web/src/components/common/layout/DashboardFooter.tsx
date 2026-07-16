@@ -11,7 +11,7 @@ export function DashboardFooter({ children }: DashboardFooterProps) {
   if (isMobileView) return null;
 
   return (
-    <footer className="flex flex-col contained:flex-row justify-between items-center gap-2 w-full shrink-0">
+    <footer className="flex flex-col contained:flex-row justify-between items-center gap-4 w-full shrink-0">
       {children}
     </footer>
   );

@@ -3,6 +3,7 @@ import { useGetApiWeather } from '../../api/generated/endpoints';
 import { useCalendarEventsQuery } from '../../hooks/useCalendarQueries';
 import type { OfficeEventDto } from '@types';
 import { useClock } from '../../hooks/useClock';
+import { formatDateTime } from '../../utils/dateTime';
 
 const getWeatherEmoji = (code?: number | null) => {
   if (code === undefined || code === null) return '🌤️';
@@ -94,23 +95,23 @@ export function OfficeContext() {
 
 
 
-  const dateString = time.toLocaleDateString('en-SE', { weekday: 'long', month: 'long', day: 'numeric' });
-  const timeString = time.toLocaleTimeString('en-SE', { hour: '2-digit', minute: '2-digit', hour12: false });
+  const dateString = formatDateTime(time, { weekday: 'long', month: 'long', day: 'numeric' }, 'en-SE');
+  const timeString = formatDateTime(time, { hour: '2-digit', minute: '2-digit', hour12: false }, 'en-SE');
 
   const formatEventTime = (startTimeStr?: string) => {
     if (!startTimeStr) {
       throw new Error("Cannot format empty event start time string.");
     }
-    const date = new Date(startTimeStr);
-    if (isNaN(date.getTime())) {
+    const formatted = formatDateTime(startTimeStr, { hour: '2-digit', minute: '2-digit', hour12: false });
+    if (!formatted) {
       throw new Error(`Invalid start time string: "${startTimeStr}"`);
     }
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+    return formatted;
   };
 
   return (
-    <section className="gap-2 rounded-2xl border-0 overflow-hidden bg-brand-bg-secondary text-white h-[400px] max-h-[400px] md:max-h-none md:h-full relative flex flex-col md:grid md:grid-rows-[30%_70%] w-full min-w-0 p-6">
-      <div className="relative z-10 flex justify-between items-start gap-4">
+    <section className="gap-8 rounded-2xl border-0 overflow-hidden bg-brand-bg-secondary text-white h-[400px] max-h-[400px] md:max-h-none md:h-full relative flex flex-col md:grid md:grid-rows-[30%_70%] w-full min-w-0 p-6">
+      <div className="relative z-10 flex justify-between items-start gap-8">
         <div className="flex flex-col">
           <span className="text-sm sm:text-base font-black text-brand-accent uppercase tracking-widest mb-1">{dateString}</span>
           <span className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tighter leading-none">{timeString}</span>
@@ -134,7 +135,7 @@ export function OfficeContext() {
       <div className="relative z-10 flex flex-col flex-1 min-h-0 w-full min-w-0">
         <div className="flex items-center justify-between pb-2 mb-1">
           <h3 className="text-sm font-bold text-white/70">Today's Schedule</h3>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             <span className="text-sm font-bold text-white/40">{events.length} Events</span>
           </div>
         </div>
@@ -148,15 +149,15 @@ export function OfficeContext() {
             events.map(e => (
               <div 
                 key={e.id} 
-                className="flex flex-col transition-colors py-4 justify-center w-full min-w-0 shrink-0 gap-1"
+                className="flex flex-col transition-colors py-4 justify-center w-full min-w-0 shrink-0 gap-2"
               >
                 {/* Row 1: icon, time, title */}
-                <div className="flex items-center gap-1 min-w-0 flex-shrink-0">
+                <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
                   <span className="text-sm shrink-0 leading-none pr-1">{getEventEmoji(e.eventType)}</span>
                   <span className="text-sm font-black text-brand-accent whitespace-nowrap leading-none shrink-0">
                     {formatEventTime(e.startTime)}
                   </span>
-                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                  <div className="flex items-center gap-4 min-w-0 flex-1">
                     <span className="text-sm font-bold text-white truncate leading-none flex-1 min-w-0">{e.title}</span>
                     {e.location && (
                       <span className="text-sm text-white/60 font-bold uppercase tracking-wider truncate leading-none max-w-[50%] min-w-0">

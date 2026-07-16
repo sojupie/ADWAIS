@@ -20,12 +20,12 @@ export const RevenueVelocityChart = memo(function RevenueVelocityChart({ isLoadi
           comparison={comparison}
           className={className}
           legend={
-            <div className="flex items-center gap-6 text-sm font-bold text-on-surface-variant uppercase tracking-widest bg-surface-container-low px-3 py-1.5 rounded">
-              <div className="flex items-center gap-2">
+            <div className="flex items-center gap-12 text-sm font-bold text-on-surface-variant uppercase tracking-widest bg-surface-container-low px-3 py-1.5 rounded">
+              <div className="flex items-center gap-4">
                 <span className="w-3 h-3 rounded-full bg-brand-btn-primary" />
                 <span>Current Period</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-4">
                 <span className="w-3 h-3 rounded-full border-2 border-outline-variant border-dashed bg-transparent" />
                 <span>Previous Period</span>
               </div>
@@ -44,11 +44,11 @@ const GraphTooltip = ({ active, payload, label }: { active?: boolean; payload?: 
       <div className="bg-surface border border-outline-variant rounded-lg shadow-lg p-4 text-sm animate-in fade-in zoom-in duration-200">
         <p className="font-bold text-on-surface mb-3 border-b border-slate-50 pb-2">{label}</p>
         <div className="space-y-2">
-          <p className="flex justify-between gap-6">
+          <p className="flex justify-between gap-12">
             <span className="text-on-surface-variant">Previous:</span>
             <strong className="text-on-surface-variant">{formatCompact(point.previousRevenue)} SEK</strong>
           </p>
-          <p className="flex justify-between gap-6">
+          <p className="flex justify-between gap-12">
             <span className="text-on-surface-variant">Current:</span>
             <strong className="text-brand-btn-primary">{formatCompact(point.currentRevenue)} SEK</strong>
           </p>

@@ -34,6 +34,14 @@ public class CommunityPostRequestValidatorTests
     }
 
     [Fact]
+    public void Validator_ShouldHaveError_WhenBodyExceedsMaxLength()
+    {
+        var model = new CreatePostDto { Title = "Title", Body = new string('a', 5001) };
+        var result = _validator.TestValidate(model);
+        result.ShouldHaveValidationErrorFor(x => x.Body);
+    }
+
+    [Fact]
     public void Validator_ShouldNotHaveError_WhenModelIsValid()
     {
         var model = new CreatePostDto { Title = "Valid Title", Body = "Valid Body" };

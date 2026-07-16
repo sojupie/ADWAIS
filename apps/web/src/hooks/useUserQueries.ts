@@ -28,7 +28,8 @@ export function useCreateUserMutation(onSuccessCallback?: () => void) {
       },
       onError: (err: Error) => {
         toast.error('Failed to create user', {
-          description: err.message || String(err)
+          description: err.message || String(err),
+          duration: Infinity
         });
       }
     }
@@ -59,7 +60,8 @@ export function useUpdateUserMutation() {
       },
       onError: (err: Error) => {
         toast.error('Failed to update user', {
-          description: err.message || String(err)
+          description: err.message || String(err),
+          duration: Infinity
         });
       }
     }
@@ -91,7 +93,8 @@ export function useDeleteUserMutation() {
       },
       onError: (err: Error) => {
         toast.error('Failed to delete user', {
-          description: err.message || String(err)
+          description: err.message || String(err),
+          duration: Infinity
         });
       }
     }

@@ -17,6 +17,10 @@
 
   --color-brand-text: #022D2E;
   --color-brand-accent: #FFCE44;
+  --color-brand-accent-transparent: rgba(255, 206, 68, 0);
+  --color-brand-accent-95: rgba(255, 206, 68, 0.95);
+  --color-brand-bg-primary-01: rgba(255, 255, 255, 0.01);
+  --color-brand-bg-secondary-20: rgba(2, 45, 46, 0.2);
   --color-brand-link: #06959B;
 
   /* Dedicated Brand Hover, Active, and Selection Variables */
@@ -85,7 +89,7 @@
   --color-decline-warning: #f59f00;
   
   --md-sys-color-primary: #ffffff;
-  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-on-primary: #5d5f5f;
   --md-sys-color-primary-container: #e1eeee;
   --md-sys-color-on-primary-container: #022D2E;
   
@@ -108,6 +112,7 @@
   --md-sys-color-on-background: #022D2E;
   
   --md-sys-color-surface: #ffffff;
+  --md-sys-color-surface-45: rgba(255, 255, 255, 0.45);
   --md-sys-color-on-surface: #022D2E;
   --md-sys-color-on-surface-variant: #475569;
   
@@ -128,8 +133,95 @@
   --md-sys-color-surface-container-high: #e2e8f0;
   --md-sys-color-surface-container-highest: #cbd5e1;
 
+  /* RGB channel companions let Tailwind v3 apply arbitrary alpha modifiers
+     while the complete color variables above remain usable by CSS and SVG. */
+  --md-sys-color-primary-rgb: 255, 255, 255;
+  --md-sys-color-on-primary-rgb: 93, 95, 95;
+  --md-sys-color-primary-container-rgb: 225, 238, 238;
+  --md-sys-color-on-primary-container-rgb: 2, 45, 46;
+  --md-sys-color-secondary-rgb: 6, 149, 155;
+  --md-sys-color-on-secondary-rgb: 255, 255, 255;
+  --md-sys-color-secondary-container-rgb: 237, 245, 246;
+  --md-sys-color-on-secondary-container-rgb: 2, 45, 46;
+  --md-sys-color-tertiary-rgb: 255, 206, 68;
+  --md-sys-color-on-tertiary-rgb: 2, 45, 46;
+  --md-sys-color-tertiary-container-rgb: 255, 249, 230;
+  --md-sys-color-on-tertiary-container-rgb: 69, 26, 3;
+  --md-sys-color-error-rgb: 239, 68, 68;
+  --md-sys-color-on-error-rgb: 255, 255, 255;
+  --md-sys-color-error-container-rgb: 254, 226, 226;
+  --md-sys-color-on-error-container-rgb: 69, 10, 10;
+  --md-sys-color-background-rgb: 248, 250, 252;
+  --md-sys-color-on-background-rgb: 2, 45, 46;
+  --md-sys-color-surface-rgb: 255, 255, 255;
+  --md-sys-color-on-surface-rgb: 2, 45, 46;
+  --md-sys-color-on-surface-variant-rgb: 71, 85, 105;
+  --md-sys-color-outline-rgb: 203, 213, 225;
+  --md-sys-color-outline-variant-rgb: 226, 232, 240;
+  --md-sys-color-inverse-surface-rgb: 2, 45, 46;
+  --md-sys-color-inverse-on-surface-rgb: 255, 255, 255;
+  --md-sys-color-inverse-primary-rgb: 128, 212, 216;
+  --md-sys-color-surface-dim-rgb: 241, 245, 249;
+  --md-sys-color-surface-bright-rgb: 255, 255, 255;
+  --md-sys-color-surface-container-lowest-rgb: 255, 255, 255;
+  --md-sys-color-surface-container-low-rgb: 248, 250, 252;
+  --md-sys-color-surface-container-rgb: 241, 245, 249;
+  --md-sys-color-surface-container-high-rgb: 226, 232, 240;
+  --md-sys-color-surface-container-highest-rgb: 203, 213, 225;
+
+  --color-brand-bg-primary-rgb: 255, 255, 255;
+  --color-brand-bg-secondary-rgb: 2, 45, 46;
+  --color-brand-bg-tertiary-rgb: 255, 255, 255;
+  --color-brand-bg-quaternary-rgb: 3, 75, 78;
+  --color-brand-btn-primary-rgb: 4, 104, 109;
+  --color-brand-btn-border-primary-rgb: 4, 104, 109;
+  --color-brand-btn-secondary-rgb: 255, 255, 255;
+  --color-brand-btn-border-secondary-rgb: 6, 149, 155;
+  --color-brand-btn-quaternary-rgb: 3, 75, 78;
+  --color-brand-text-rgb: 2, 45, 46;
+  --color-brand-accent-rgb: 255, 206, 68;
+  --color-brand-link-rgb: 6, 149, 155;
+  --color-brand-hover-rgb: 237, 245, 246;
+  --color-brand-active-rgb: 225, 238, 238;
+  --color-calendar-today-bg-rgb: 237, 245, 246;
+
+  --color-status-up-rgb: 16, 185, 129;
+  --color-status-down-rgb: 239, 68, 68;
+  --color-status-degraded-rgb: 245, 158, 11;
+  --color-status-paused-rgb: 14, 165, 233;
+  --color-status-starting-rgb: 99, 102, 241;
+  --color-status-unknown-rgb: 148, 163, 184;
+  --color-status-up-container-rgb: 209, 250, 229;
+  --color-status-up-on-container-rgb: 2, 44, 34;
+  --color-status-up-muted-rgb: 6, 78, 59;
+  --color-status-down-container-rgb: 254, 226, 226;
+  --color-status-down-on-container-rgb: 69, 10, 10;
+  --color-status-down-muted-rgb: 127, 29, 29;
+  --color-status-degraded-container-rgb: 254, 243, 199;
+  --color-status-degraded-on-container-rgb: 69, 26, 3;
+  --color-status-degraded-muted-rgb: 120, 53, 15;
+  --color-status-paused-container-rgb: 224, 242, 254;
+  --color-status-paused-on-container-rgb: 8, 47, 73;
+  --color-status-paused-muted-rgb: 12, 74, 110;
+  --color-status-starting-container-rgb: 224, 231, 255;
+  --color-status-starting-on-container-rgb: 30, 27, 75;
+  --color-status-starting-muted-rgb: 49, 46, 129;
+  --color-status-unknown-container-rgb: 241, 245, 249;
+  --color-status-unknown-on-container-rgb: 15, 23, 42;
+  --color-status-unknown-muted-rgb: 51, 65, 85;
+
+  --color-chart-grid-rgb: 241, 245, 249;
+  --color-chart-tick-rgb: 148, 163, 184;
+  --color-chart-prev-line-rgb: 203, 213, 225;
+  --color-chart-label-rgb: 26, 26, 26;
+  --color-chart-1-rgb: 14, 165, 233;
+  --color-chart-2-rgb: 139, 92, 246;
+  --color-chart-3-rgb: 81, 181, 185;
+  --color-growth-rgb: 55, 178, 77;
+  --color-decline-rgb: 240, 62, 62;
+  --color-decline-warning-rgb: 245, 159, 0;
+
   --font-sans: "Manrope", system-ui, sans-serif;
-  --shadow-card: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --app-viewport-width: 100vw;
   --app-viewport-height: 100vh;
 }
@@ -139,15 +231,45 @@
 /* ── Base Styles ── */
 @layer base {
   html, body, #root {
-    @apply h-full w-full m-0 p-0 overflow-hidden select-none;
+    @apply h-full w-full m-0 p-0 overflow-hidden;
   }
 
   body {
-    @apply bg-brand-bg-tertiary text-brand-text font-sans antialiased;
+    @apply bg-surface text-on-surface font-sans antialiased select-text;
   }
 
   button {
     @apply cursor-pointer;
+  }
+
+  /* Application content is selectable by default. Controls and navigation
+     opt out centrally so individual components rarely need selection classes. */
+  button,
+  a,
+  nav,
+  summary,
+  label,
+  [role='button'],
+  [role='tab'],
+  [role='menuitem'],
+  [draggable='true'],
+  img,
+  svg {
+    user-select: none;
+  }
+
+  input,
+  textarea,
+  pre,
+  code,
+  [contenteditable='true'],
+  [data-selectable] {
+    user-select: text;
+  }
+
+  ::selection {
+    background-color: var(--color-brand-active);
+    color: var(--color-brand-text);
   }
 }
 

@@ -32,10 +32,10 @@ export function ManualBackfillPanel({ tenants, triggerBackfill, disabled }: Manu
     >
       <div className="flex gap-6">
         <Select
-          value={backfill.tenantId}
-          onChange={e => setBackfill({ ...backfill, tenantId: e.target.value })}
-          disabled={disabled}
-          optionClassName="h-12 py-2"
+            value={backfill.tenantId}
+            onChange={e => setBackfill({ ...backfill, tenantId: e.target.value })}
+            disabled={disabled}
+            size="lg"
         >
           <option value="" disabled>Select a tenant...</option>
           {(tenants || []).map((t) => (

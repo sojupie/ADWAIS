@@ -47,10 +47,10 @@ export function TenantSelector() {
       value={activeValue}
       onChange={handleSelect}
       disabled={isLoading}
-      containerClassName="min-w-0 lg:w-64 lg:flex-initial shrink-0"
-      className="border-none text-sm font-bold bg-secondary text-on-secondary rounded-full pl-4 pr-10 h-10 outline-none m3-elevation-1 selected:m3-elevation-2 hover:m3-elevation-2 cursor-pointer flex items-center"
-      dropdownAlign="left-0 origin-top-left lg:left-auto lg:right-0 lg:origin-top-right"
-      icon={dropdownIcon}
+      containerClassName="min-w-0 flex-1 shrink lg:w-64 lg:flex-none"
+      variant="pill"
+      size="md"
+      indicator={dropdownIcon}
     >
       <option value="global">Global Portfolio</option>
       {sortedTenants.map((t) => (

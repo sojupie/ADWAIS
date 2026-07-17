@@ -88,10 +88,11 @@ export function MonitorFilterMenu({ filters, setFilters, tags }: MonitorFilterMe
               </label>
             </div>
             <Select
-              value={filters.tag}
-              disabled={filters.tag === 'all'}
-              onChange={e => setFilters({ ...filters, tag: e.target.value })}
-              className={`text-sm font-semibold h-9 rounded-lg border border-outline-variant bg-surface ${filters.tag === 'all' ? 'opacity-50' : ''}`}
+                value={filters.tag}
+                disabled={filters.tag === 'all'}
+                onChange={e => setFilters({ ...filters, tag: e.target.value })}
+                variant="outlined"
+                size="sm"
             >
               <option value="all">All Tags</option>
               {tags.map(tag => (

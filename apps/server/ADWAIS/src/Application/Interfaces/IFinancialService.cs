@@ -1,5 +1,6 @@
 using Adwais.Application.Common.Models;
 using Adwais.Application.DTOs.Financial;
+using Adwais.Domain.Enums;
 using Adwais.Domain.Entities;
 using Adwais.Domain.Entities.OrderData;
 
@@ -55,7 +56,7 @@ public interface IFinancialService
     /// <summary>
     /// Analyzes transaction density by day of week and hour of day.
     /// </summary>
-    Task<TransactionDensityDto> GetTransactionDensityAsync(ResolvedPeriod period, Guid? tenantId = null, CancellationToken ct = default);
+    Task<TransactionDensityDto> GetTransactionDensityAsync(TransactionDensityPeriod period, Guid? tenantId = null, CancellationToken ct = default);
 
     /// <summary>
     /// Calculates the cumulative growth delta for the specified timeframe.

@@ -3,6 +3,16 @@ import plugin from 'tailwindcss/plugin'
 const withOpacity = (variable, defaultOpacity = 1) => ({ opacityValue }) =>
   `rgba(var(${variable}), ${opacityValue ?? defaultOpacity})`;
 
+const halveCssLength = (value) => {
+  const match = String(value).trim().match(/^(-?(?:\d+|\d*\.\d+))([a-z%]*)$/i);
+
+  if (!match) {
+    throw new Error(`Flex gap fallback cannot halve the spacing value "${value}" at build time.`);
+  }
+
+  return `${Number(match[1]) / 2}${match[2]}`;
+};
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
@@ -159,70 +169,71 @@ export default {
       
       Object.entries(spacing).forEach(([key, value]) => {
         const escapedKey = key.replace('.', '\\.');
+        const halfValue = halveCssLength(value);
 
-        // Store the requested row/column gaps on the flex container. Shared
-        // direction rules below consume these values without multiplying every
-        // spacing value across every responsive breakpoint.
-        flexGapComponents[`.flex.gap-${escapedKey}`] = {
-          '--tw-flex-gap-row': value,
-          '--tw-flex-gap-column': value,
+        // Store the parent's requested gap on each child. The fallback margin
+        // is applied to the child, so resolving a variable from the container
+        // breaks whenever that child is itself another `.flex` element.
+        flexGapComponents[`.flex.gap-${escapedKey} > *`] = {
+          '--tw-parent-flex-gap-row': value,
+          '--tw-parent-flex-gap-column': value,
         };
-        flexGapComponents[`.flex.gap-x-${escapedKey}`] = {
-          '--tw-flex-gap-column': value,
+        flexGapComponents[`.flex.gap-x-${escapedKey} > *`] = {
+          '--tw-parent-flex-gap-column': value,
         };
-        flexGapComponents[`.flex.gap-y-${escapedKey}`] = {
-          '--tw-flex-gap-row': value,
+        flexGapComponents[`.flex.gap-y-${escapedKey} > *`] = {
+          '--tw-parent-flex-gap-row': value,
         };
 
         // Wrap Flex Gap Fallback (Negative Margin Hack)
         flexGapComponents[`.flex.flex-wrap.gap-${escapedKey}`] = {
-          'margin': `calc(${value} / -2)`,
+          'margin': `-${halfValue}`,
         };
         flexGapComponents[`.flex.flex-wrap.gap-x-${escapedKey}`] = {
-          'margin-left': `calc(${value} / -2)`,
-          'margin-right': `calc(${value} / -2)`,
+          'margin-left': `-${halfValue}`,
+          'margin-right': `-${halfValue}`,
         };
         flexGapComponents[`.flex.flex-wrap.gap-y-${escapedKey}`] = {
-          'margin-top': `calc(${value} / -2)`,
-          'margin-bottom': `calc(${value} / -2)`,
+          'margin-top': `-${halfValue}`,
+          'margin-bottom': `-${halfValue}`,
         };
 
         // Children positive margins
         flexGapComponents[`.flex.flex-wrap.gap-${escapedKey} > *`] = {
-          'margin': `calc(${value} / 2)`,
+          'margin': halfValue,
         };
         flexGapComponents[`.flex.flex-wrap.gap-x-${escapedKey} > *`] = {
-          'margin-left': `calc(${value} / 2)`,
-          'margin-right': `calc(${value} / 2)`,
+          'margin-left': halfValue,
+          'margin-right': halfValue,
         };
         flexGapComponents[`.flex.flex-wrap.gap-y-${escapedKey} > *`] = {
-          'margin-top': `calc(${value} / 2)`,
-          'margin-bottom': `calc(${value} / 2)`,
+          'margin-top': halfValue,
+          'margin-bottom': halfValue,
         };
 
         // Re-assert wrapping margins on siblings (overrides non-wrapping sibling rules)
         flexGapComponents[`.flex.flex-wrap.gap-${escapedKey} > :not([hidden]) ~ :not([hidden])`] = {
-          'margin': `calc(${value} / 2)`,
+          'margin': halfValue,
         };
         flexGapComponents[`.flex.flex-wrap.gap-x-${escapedKey} > :not([hidden]) ~ :not([hidden])`] = {
-          'margin-left': `calc(${value} / 2)`,
+          'margin-left': halfValue,
         };
         flexGapComponents[`.flex.flex-wrap.gap-y-${escapedKey} > :not([hidden]) ~ :not([hidden])`] = {
-          'margin-top': `calc(${value} / 2)`,
+          'margin-top': halfValue,
         };
       });
 
       const visibleSibling = '> :not([hidden]) ~ :not([hidden])';
-      flexGapComponents['.flex'] = {
-        '--tw-flex-gap-row': '0px',
-        '--tw-flex-gap-column': '0px',
+      flexGapComponents['.flex > *'] = {
+        '--tw-parent-flex-gap-row': '0px',
+        '--tw-parent-flex-gap-column': '0px',
       };
       flexGapComponents[`.flex:not(.flex-wrap) ${visibleSibling}`] = {
         'margin-top': '0px',
-        'margin-left': 'var(--tw-flex-gap-column, 0px)',
+        'margin-left': 'var(--tw-parent-flex-gap-column, 0px)',
       };
       flexGapComponents[`.flex.flex-col:not(.flex-wrap) ${visibleSibling}`] = {
-        'margin-top': 'var(--tw-flex-gap-row, 0px)',
+        'margin-top': 'var(--tw-parent-flex-gap-row, 0px)',
         'margin-left': '0px',
       };
 
@@ -239,10 +250,10 @@ export default {
 
         flexGapComponents[bpKey][`.flex.flex-col.${rowClass}:not(.flex-wrap) ${visibleSibling}`] = {
           'margin-top': '0px',
-          'margin-left': 'var(--tw-flex-gap-column, 0px)',
+          'margin-left': 'var(--tw-parent-flex-gap-column, 0px)',
         };
         flexGapComponents[bpKey][`.flex.${colClass}:not(.flex-wrap) ${visibleSibling}`] = {
-          'margin-top': 'var(--tw-flex-gap-row, 0px)',
+          'margin-top': 'var(--tw-parent-flex-gap-row, 0px)',
           'margin-left': '0px',
         };
       });

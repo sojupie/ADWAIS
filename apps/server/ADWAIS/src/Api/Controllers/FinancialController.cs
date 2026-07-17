@@ -187,14 +187,18 @@ public class FinancialController(IFinancialService financialService) : Controlle
     /// Scopes to a single tenant if tenantId is provided, otherwise portfolio-wide.
     /// </summary>
     [HttpGet("transaction-density")]
-    public async Task<ActionResult<TransactionDensityResponseDto>> GetTransactionDensity([FromQuery] FinancialRequestDto request, CancellationToken ct = default)
+    public async Task<ActionResult<TransactionDensityResponseDto>> GetTransactionDensity([FromQuery] TransactionDensityRequestDto request, CancellationToken ct = default)
     {
-        var period = TimeframeResolver.Resolve(request.Timeframe, request.Comparison);
-        var result = await financialService.GetTransactionDensityAsync(period, request.TenantId, ct);
+        var result = await financialService.GetTransactionDensityAsync(request.Period, request.TenantId, ct);
         return Ok(new TransactionDensityResponseDto(
             result.TotalCount,
             result.MinCount,
             result.MaxCount,
+            result.AverageCountPerBucket,
+            result.SampleQuality,
+            result.RequestedPeriod,
+            result.EffectivePeriod,
+            result.TimeZoneId,
             result.PeriodStart,
             result.PeriodEnd,
             result.Points.Select(p => new TransactionDensityPointResponseDto(

@@ -68,11 +68,12 @@ export function TenantsMonitorsView() {
                     />
                     <TenantFilterMenu filters={tenantFilters} setFilters={setTenantFilters} />
                     <Select
-                        value={tenantSort}
-                        onChange={e => setTenantSort(e.target.value as 'asc' | 'desc')}
-                        dropdownAlign="right"
-                        containerClassName="w-auto shrink-0"
-                        className="text-sm font-semibold pl-3 pr-8 py-1.5 bg-surface border border-outline-variant text-on-surface-variant hover:bg-surface-container-low focus:ring-2 h-9 rounded-lg"
+                          value={tenantSort}
+                          onChange={e => setTenantSort(e.target.value as 'asc' | 'desc')}
+                          variant="outlined"
+                          size="sm"
+                          fullWidth={false}
+                          containerClassName="w-auto shrink-0"
                     >
                         <option value="asc">A-Z</option>
                         <option value="desc">Z-A</option>
@@ -145,11 +146,12 @@ export function TenantsMonitorsView() {
                         tags={allUniqueTags}
                     />
                     <Select
-                        value={monitorSort}
-                        onChange={e => setMonitorSort(e.target.value as 'asc' | 'desc')}
-                        dropdownAlign="right"
-                        containerClassName="w-auto shrink-0"
-                        className="text-sm font-semibold pl-3 pr-8 py-1.5 bg-surface border border-outline-variant text-on-surface-variant hover:bg-surface-container-low focus:ring-2 h-9 rounded-lg"
+                          value={monitorSort}
+                          onChange={e => setMonitorSort(e.target.value as 'asc' | 'desc')}
+                          variant="outlined"
+                          size="sm"
+                          fullWidth={false}
+                          containerClassName="w-auto shrink-0"
                     >
                         <option value="asc">A-Z</option>
                         <option value="desc">Z-A</option>

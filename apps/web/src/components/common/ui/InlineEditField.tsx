@@ -34,7 +34,7 @@ export function InlineEditField<T>({
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState(value);
   const [isSaving, setIsSaving] = useState(false);
-  const inputRef = useRef<HTMLInputElement | HTMLSelectElement>(null);
+  const inputRef = useRef<HTMLInputElement | HTMLButtonElement>(null);
 
   const [prevValue, setPrevValue] = useState(value);
   if (value !== prevValue) {
@@ -143,13 +143,13 @@ export function InlineEditField<T>({
         <div className="flex items-center gap-4 w-full">
           {type === 'select' ? (
             <Select
-              ref={inputRef as React.RefObject<HTMLSelectElement>}
+              triggerRef={inputRef as React.RefObject<HTMLButtonElement>}
               value={draft as unknown as string}
               onChange={(e) => setDraft(e.target.value as unknown as T)}
-              disabled={isSaving}
-              onKeyDown={handleKeyDown}
-              containerClassName="flex-1"
-              className="pl-3 pr-10 py-1.5 h-9 text-sm font-semibold rounded-lg border border-outline-variant bg-surface-container-low focus:ring-2 focus:ring-brand-btn-primary"
+                disabled={isSaving}
+                onKeyDown={handleKeyDown}
+                containerClassName="flex-1"
+                size="sm"
             >
               {options.map((opt) => (
                 <option key={opt.value as React.Key} value={opt.value as unknown as string}>{opt.label}</option>

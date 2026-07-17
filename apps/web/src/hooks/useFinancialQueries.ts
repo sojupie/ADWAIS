@@ -22,7 +22,8 @@ import type {
   CumulativeGrowthDeltaPoint,
   OrderBin,
   AccumulatedRevenuePointDto,
-  TransactionDensityResponse,
+  TransactionDensityResponseDto,
+  TransactionDensityPeriod,
   Timeframe,
   ComparisonType
 } from '@types';
@@ -38,7 +39,7 @@ export const financialKeys = {
   delta: (timeframe: string, tenantId?: string | null, comparison?: ComparisonPeriod) => [...financialKeys.all, 'delta', timeframe, tenantId, comparison] as const,
   orders: (timeframe: string, tenantId?: string | null, comparison?: ComparisonPeriod) => [...financialKeys.all, 'orders', timeframe, tenantId, comparison] as const,
   accumulatedRevenue: (timeframe: string, tenantId?: string | null, comparison?: ComparisonPeriod) => [...financialKeys.all, 'accumulatedRevenue', timeframe, tenantId, comparison] as const,
-  transactionDensity: (timeframe: string, tenantId?: string | null, comparison?: ComparisonPeriod) => [...financialKeys.all, 'transactionDensity', timeframe, tenantId, comparison] as const,
+  transactionDensity: (period: TransactionDensityPeriod, tenantId?: string | null) => [...financialKeys.all, 'transactionDensity', period, tenantId] as const,
 };
 
 const REFETCH_INTERVAL = 60000;
@@ -171,15 +172,15 @@ export function useOrderDistribution(timeframe: string, tenantId: string, compar
   );
 }
 
-export function useTransactionDensity(timeframe: string, tenantId?: string | null, comparison?: ComparisonPeriod) {
-  return useGetApiFinancialTransactionDensity<TransactionDensityResponse, Error>(
-    { timeframe: timeframe as Timeframe, tenantId: tenantId || undefined, comparison: comparison as ComparisonType },
+export function useTransactionDensity(period: TransactionDensityPeriod, tenantId?: string | null) {
+  return useGetApiFinancialTransactionDensity<TransactionDensityResponseDto, Error>(
+    { period, tenantId: tenantId || undefined },
     {
       query: {
-        queryKey: financialKeys.transactionDensity(timeframe, tenantId, comparison),
+        queryKey: financialKeys.transactionDensity(period, tenantId),
         refetchInterval: REFETCH_INTERVAL,
         placeholderData: keepPreviousData,
-        select: (res) => res.data as TransactionDensityResponse
+        select: (res) => res.data
       }
     }
   );

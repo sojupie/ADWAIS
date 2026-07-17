@@ -1,5 +1,5 @@
 import { useSearch, useNavigate } from '@tanstack/react-router';
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useState } from 'react';
 import { 
   useGlobalKpis, 
   useAccumulatedRevenue, 
@@ -8,6 +8,7 @@ import {
   useTransactionDensity
 } from './useFinancialQueries';
 import type { Timeframe } from '../schemas';
+import type { TransactionDensityPeriod } from '@types';
 
 export function useFinancialViewModel() {
   const search = useSearch({ strict: false }) as { tenantId?: string, timeframe: Timeframe };
@@ -15,12 +16,13 @@ export function useFinancialViewModel() {
   const timeframe = search.timeframe; // Re-hydrated by beforeLoad
   
   const navigate = useNavigate({ from: '/financial' });
+  const [densityPeriod, setDensityPeriod] = useState<TransactionDensityPeriod>('Auto');
 
   const kpiQuery = useGlobalKpis(timeframe);
   const velocityQuery = useAccumulatedRevenue(timeframe, undefined, 'YearOverYear');
   const momentumQuery = useMomentum(timeframe, 'YearOverYear');
   const efficiencyQuery = useRevenueEfficiency(timeframe, 'YearOverYear');
-  const densityQuery = useTransactionDensity(timeframe);
+  const densityQuery = useTransactionDensity(densityPeriod);
 
   const selectedTenantDetails = useMemo(() => {
     const efficiencyTenants = efficiencyQuery.data?.tenants;
@@ -54,6 +56,8 @@ export function useFinancialViewModel() {
     momentumQuery,
     efficiencyQuery,
     densityQuery,
+    densityPeriod,
+    setDensityPeriod,
     handleTenantSelect,
     handleBackToGlobal
   };

@@ -2,8 +2,8 @@ import type {
   AccumulatedRevenuePointDto, 
   MomentumResponse, 
   RevenueEfficiencyResponse, 
-  TransactionDensityPointDto,
-  TransactionDensityResponse,
+  TransactionDensityPointResponseDto,
+  TransactionDensityResponseDto,
   VolumeAnomalyResponseDto 
 } from '@types';
 
@@ -62,7 +62,7 @@ export const MOCK_ANOMALIES: VolumeAnomalyResponseDto[] = Array.from({ length: 4
   status: 'Active'
 }));
 
-export const MOCK_TRANSACTION_DENSITY: TransactionDensityPointDto[] = Array.from({ length: 7 * 24 }).map((_, i) => {
+export const MOCK_TRANSACTION_DENSITY: TransactionDensityPointResponseDto[] = Array.from({ length: 7 * 24 }).map((_, i) => {
   const dayOfWeek = Math.floor(i / 24) + 1;
   const hour = i % 24;
   const timeFactor = Math.sin((hour - 6) / 24 * 2 * Math.PI) + 1.2;
@@ -77,11 +77,16 @@ export const MOCK_TRANSACTION_DENSITY: TransactionDensityPointDto[] = Array.from
   };
 });
 
-export const MOCK_TRANSACTION_DENSITY_RESPONSE: TransactionDensityResponse = {
+export const MOCK_TRANSACTION_DENSITY_RESPONSE: TransactionDensityResponseDto = {
   points: MOCK_TRANSACTION_DENSITY,
   totalCount: MOCK_TRANSACTION_DENSITY.reduce((sum, point) => sum + point.count, 0),
   minCount: Math.min(...MOCK_TRANSACTION_DENSITY.map(point => point.count)),
   maxCount: Math.max(...MOCK_TRANSACTION_DENSITY.map(point => point.count)),
+  averageCountPerBucket: MOCK_TRANSACTION_DENSITY.reduce((sum, point) => sum + point.count, 0) / (7 * 24),
+  sampleQuality: 'Stable',
+  requestedPeriod: 'Auto',
+  effectivePeriod: 'T30',
+  timeZoneId: 'Europe/Stockholm',
   periodStart: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
   periodEnd: new Date().toISOString(),
 };

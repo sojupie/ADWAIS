@@ -14,10 +14,22 @@ import { SyncStatusWidget } from '../components/common/dashboard/SyncStatusWidge
 import { PeriodSelector } from '../components/common/charts/PeriodSelector';
 import { TenantSelector } from '../components/financial/TenantSelector';
 import { useFinancialViewModel } from "../hooks/useFinancialViewModel.ts";
-import type { RevenueEfficiencyResponse, MomentumResponse, TransactionDensityResponse } from '@types';
+import type { RevenueEfficiencyResponse, MomentumResponse, TransactionDensityResponseDto } from '@types';
 
 const EMPTY_VELOCITY: never[] = [];
-const EMPTY_DENSITY: TransactionDensityResponse = { points: [], totalCount: 0, minCount: 0, maxCount: 0, periodStart: '', periodEnd: '' };
+const EMPTY_DENSITY: TransactionDensityResponseDto = {
+  points: [],
+  totalCount: 0,
+  minCount: 0,
+  maxCount: 0,
+  averageCountPerBucket: 0,
+  sampleQuality: 'Sparse',
+  requestedPeriod: 'Auto',
+  effectivePeriod: 'T30',
+  timeZoneId: 'Europe/Stockholm',
+  periodStart: '',
+  periodEnd: '',
+};
 const EMPTY_EFFICIENCY: RevenueEfficiencyResponse = { tenants: [], globalAverageOrderValue: 0, medianPortfolioShare: 0 };
 const EMPTY_MOMENTUM: MomentumResponse = { tenants: [], medianBaselineRevenue: 0, globalGrowthPercentage: 0 };
 
@@ -118,6 +130,8 @@ export function Financial() {
 
         <TransactionDensityChart 
           response={vm.densityQuery.data || EMPTY_DENSITY}
+          selectedPeriod={vm.densityPeriod}
+          onPeriodChange={vm.setDensityPeriod}
           isLoading={vm.densityQuery.isLoading} 
           isStale={vm.densityQuery.isPlaceholderData}
           className="h-full min-h-[350px] contained:min-h-0"

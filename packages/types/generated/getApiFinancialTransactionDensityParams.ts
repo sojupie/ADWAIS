@@ -4,23 +4,16 @@
  * Adwais.Api
  * OpenAPI spec version: 1.0
  */
-import type { ComparisonType } from './comparisonType';
-import type { Timeframe } from './timeframe';
+import type { TransactionDensityPeriod } from './transactionDensityPeriod';
 
 export type GetApiFinancialTransactionDensityParams = {
 /**
- * The primary timeframe for the calculation (e.g., T7, T30).
- * Defaults to T30.
+ * Requested analysis window. Auto selects the shortest supported period
+ * with enough observations for a stable 168-bucket matrix.
  */
-timeframe?: Timeframe;
+period?: TransactionDensityPeriod;
 /**
- * Optional. Scopes the metrics to a specific tenant.
- * If null, metrics represent the global portfolio total.
+ * Optional tenant scope. If omitted, the matrix represents the portfolio.
  */
 tenantId?: string;
-/**
- * The comparison period for the timeframe.
- * Defaults to Preceding.
- */
-comparison?: ComparisonType;
 };

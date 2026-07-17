@@ -16,6 +16,11 @@ namespace Adwais.Application.Services;
 /// </summary>
 public class FinancialService(IApplicationDbContext dbContext) : IFinancialService
 {
+    private const int DensityBucketCount = 7 * 24;
+    private const int SparseDensityThreshold = DensityBucketCount * 5;
+    private const int StableDensityThreshold = DensityBucketCount * 20;
+    private const string DensityTimeZoneId = "Europe/Stockholm";
+    private static readonly TimeZoneInfo DensityTimeZone = TimeZoneInfo.FindSystemTimeZoneById(DensityTimeZoneId);
     private readonly IApplicationDbContext _dbContext = dbContext;
 
     #region Internal data model for the merge layer
@@ -683,35 +688,93 @@ public class FinancialService(IApplicationDbContext dbContext) : IFinancialServi
     }
 
     /// <inheritdoc />
-    public async Task<TransactionDensityDto> GetTransactionDensityAsync(ResolvedPeriod period, Guid? tenantId = null, CancellationToken ct = default)
+    public async Task<TransactionDensityDto> GetTransactionDensityAsync(TransactionDensityPeriod requestedPeriod, Guid? tenantId = null, CancellationToken ct = default)
     {
-        // Force 30-day rolling timeframe for density to ensure statistical volume regardless of global dropdown
-        var t30 = TimeframeResolver.Resolve(Timeframe.T30);
-        var currentStart = t30.CurrentStart;
-        var currentEnd = t30.CurrentEnd;
         var context = _dbContext;
+        var currentEnd = DateTimeOffset.UtcNow;
 
         var query = context.Orders
-            .AsNoTracking()
-            .Where(o => o.CreatedDate >= currentStart && o.CreatedDate < currentEnd);
+            .AsNoTracking();
 
         if (tenantId.HasValue)
             query = query.Where(o => o.TenantId == tenantId.Value);
         else
             query = query.Where(o => o.TenantId != IApplicationDbContext.SystemTenantGuid);
 
-        
-        var data = await query
-            .GroupBy(o => new { DayOfWeek = (int)o.CreatedDate.DayOfWeek, o.CreatedDate.Hour })
+        var starts = new Dictionary<TransactionDensityPeriod, DateTimeOffset>
+        {
+            [TransactionDensityPeriod.T30] = GetDensityPeriodStart(currentEnd, 30),
+            [TransactionDensityPeriod.T90] = GetDensityPeriodStart(currentEnd, 90),
+            [TransactionDensityPeriod.T180] = GetDensityPeriodStart(currentEnd, 180),
+            [TransactionDensityPeriod.T365] = GetDensityPeriodStart(currentEnd, 365)
+        };
+
+        var effectivePeriod = requestedPeriod;
+        if (requestedPeriod == TransactionDensityPeriod.Auto)
+        {
+            var oldestStart = starts[TransactionDensityPeriod.T365];
+            var sampleCounts = await query
+                .Where(o => o.CreatedDate >= oldestStart && o.CreatedDate < currentEnd)
+                .GroupBy(_ => 1)
+                .Select(group => new
+                {
+                    T30 = group.Count(o => o.CreatedDate >= starts[TransactionDensityPeriod.T30]),
+                    T90 = group.Count(o => o.CreatedDate >= starts[TransactionDensityPeriod.T90]),
+                    T180 = group.Count(o => o.CreatedDate >= starts[TransactionDensityPeriod.T180]),
+                    T365 = group.Count()
+                })
+                .SingleOrDefaultAsync(ct);
+
+            effectivePeriod = sampleCounts switch
+            {
+                { T30: >= StableDensityThreshold } => TransactionDensityPeriod.T30,
+                { T90: >= StableDensityThreshold } => TransactionDensityPeriod.T90,
+                { T180: >= StableDensityThreshold } => TransactionDensityPeriod.T180,
+                _ => TransactionDensityPeriod.T365
+            };
+        }
+
+        var currentStart = starts[effectivePeriod];
+        var utcHourlyData = await query
+            .Where(o => o.CreatedDate >= currentStart && o.CreatedDate < currentEnd)
+            .GroupBy(o => new
+            {
+                o.CreatedDate.Year,
+                o.CreatedDate.Month,
+                o.CreatedDate.Day,
+                o.CreatedDate.Hour
+            })
             .Select(g => new {
-                g.Key.DayOfWeek,
+                g.Key.Year,
+                g.Key.Month,
+                g.Key.Day,
                 g.Key.Hour,
                 Count = g.Count(),
                 TotalRevenue = g.Sum(o => o.TotalValueIncVat)
             })
             .ToListAsync(ct);
 
-        var dataMap = data.ToDictionary(x => (x.DayOfWeek, x.Hour));
+        var dataMap = utcHourlyData
+            .Select(point =>
+            {
+                var utcHour = new DateTimeOffset(point.Year, point.Month, point.Day, point.Hour, 0, 0, TimeSpan.Zero);
+                var localHour = TimeZoneInfo.ConvertTime(utcHour, DensityTimeZone);
+                return new
+                {
+                    DayOfWeek = (int)localHour.DayOfWeek,
+                    localHour.Hour,
+                    point.Count,
+                    point.TotalRevenue
+                };
+            })
+            .GroupBy(point => (point.DayOfWeek, point.Hour))
+            .ToDictionary(
+                group => group.Key,
+                group => new
+                {
+                    Count = group.Sum(point => point.Count),
+                    TotalRevenue = group.Sum(point => point.TotalRevenue)
+                });
         var result = new List<TransactionDensityPointDto>(168);
 
         var days = new[] { 1, 2, 3, 4, 5, 6, 0 }; // 0 is Sunday in DayOfWeek
@@ -731,13 +794,33 @@ public class FinancialService(IApplicationDbContext dbContext) : IFinancialServi
             }
         }
 
+        var totalCount = result.Sum(point => point.Count);
+        var sampleQuality = totalCount < SparseDensityThreshold
+            ? TransactionDensitySampleQuality.Sparse
+            : totalCount < StableDensityThreshold
+                ? TransactionDensitySampleQuality.Indicative
+                : TransactionDensitySampleQuality.Stable;
+
         return new TransactionDensityDto(
-            result.Sum(point => point.Count),
+            totalCount,
             result.Count == 0 ? 0 : result.Min(point => point.Count),
             result.Count == 0 ? 0 : result.Max(point => point.Count),
+            totalCount / (double)DensityBucketCount,
+            sampleQuality,
+            requestedPeriod,
+            effectivePeriod,
+            DensityTimeZoneId,
             currentStart,
             currentEnd,
             result);
+    }
+
+    private static DateTimeOffset GetDensityPeriodStart(DateTimeOffset utcNow, int days)
+    {
+        var localNow = TimeZoneInfo.ConvertTime(utcNow, DensityTimeZone);
+        var localStart = new DateTime(localNow.Year, localNow.Month, localNow.Day, 0, 0, 0, DateTimeKind.Unspecified)
+            .AddDays(-(days - 1));
+        return new DateTimeOffset(TimeZoneInfo.ConvertTimeToUtc(localStart, DensityTimeZone), TimeSpan.Zero);
     }
 
     /// <inheritdoc />

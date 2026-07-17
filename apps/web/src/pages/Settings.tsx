@@ -46,12 +46,12 @@ export function Settings() {
                 <div className="flex-1 flex flex-col min-h-0 w-full gap-4">
                     {/* Mobile Dropdown Navigation */}
                     <div className="block sm:hidden relative group shrink-0">
-                        <Select
-                            className="w-full bg-brand-btn-primary border-none text-white text-sm font-bold rounded-xl pl-4 pr-10 py-3.5 outline-none shadow-md cursor-pointer hover:bg-brand-btn-primary/95"
-                            value={tabs.find(t => currentPath.startsWith(t.path))?.path || tabs[0].path}
-                            onChange={(e) => navigate({ to: e.target.value })}
-                            icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-white/70"><path d="m6 9 6 6 6-6" /></svg>}
-                        >
+                          <Select
+                              variant="brand"
+                              size="lg"
+                              value={tabs.find(t => currentPath.startsWith(t.path))?.path || tabs[0].path}
+                              onChange={(e) => navigate({ to: e.target.value })}
+                          >
                             {tabs.map(t => (
                                 <option key={t.id} value={t.path}>{t.label}</option>
                             ))}

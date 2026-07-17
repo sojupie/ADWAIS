@@ -1,35 +1,33 @@
 import { useEffect, useMemo, useRef, useState, Fragment, memo } from 'react';
 import { createPortal } from 'react-dom';
-import type { TransactionDensityResponse } from '@types';
+import type { TransactionDensityPeriod, TransactionDensityResponseDto } from '@types';
 import { formatCurrency, formatNumber } from '@utils';
 import { formatDateTime } from '../../utils/dateTime';
 import { ChartPanel } from '../common/charts/ChartPanel';
 import {EmptyState} from "../common/ui/EmptyState.tsx";
+import { Select } from '../common/ui/Select';
+import { TransactionDensityHeatmapCanvas } from './TransactionDensityHeatmapCanvas';
+import { getDiscreteDensityColor, TRANSACTION_DENSITY_PALETTE } from './transactionDensityPalette';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const TOOLTIP_WIDTH = 208;
 const TOOLTIP_ESTIMATED_HEIGHT = 150;
 const TOOLTIP_VIEWPORT_MARGIN = 8;
 const TOOLTIP_OFFSET = 10;
-
-// High contrast palette from yellow > purple > black
-const PALETTE = [
-  '#000004', '#1b0c42', '#4b0c6b', '#781c6d', 
-  '#a52c60', '#cf4446', '#ed6925', '#fb9b06', 
-  '#f7d03c', '#fcffa4'
+const PERIOD_OPTIONS: Array<{ value: TransactionDensityPeriod; label: string }> = [
+  { value: 'Auto', label: 'Auto' },
+  { value: 'T30', label: '30 days' },
+  { value: 'T90', label: '90 days' },
+  { value: 'T180', label: '180 days' },
+  { value: 'T365', label: '365 days' },
 ];
 
-const getColor = (value: number, min: number, max: number) => {
-  if (max === min) return PALETTE[0];
-  const normalized = (value - min) / (max - min);
-  const index = Math.min(Math.floor(normalized * PALETTE.length), PALETTE.length - 1);
-  return PALETTE[index];
-};
-
 export const TransactionDensityChart = memo(function TransactionDensityChart({
-  isLoading, isStale, response,
+  isLoading, isStale, response, selectedPeriod, onPeriodChange,
   className }: { isLoading?: boolean; isStale?: boolean;
-  response: TransactionDensityResponse;
+  response: TransactionDensityResponseDto;
+  selectedPeriod?: TransactionDensityPeriod;
+  onPeriodChange?: (period: TransactionDensityPeriod) => void;
   className?: string;
 }) {
   const [hoverInfo, setHoverInfo] = useState<{
@@ -64,21 +62,42 @@ export const TransactionDensityChart = memo(function TransactionDensityChart({
     };
   }, [hoverInfo?.pinned]);
 
-  const { points, totalCount, minCount, maxCount, periodStart, periodEnd } = response;
-  const isEmpty = points.length === 0;
-  const periodLabel = `${formatDateTime(periodStart, { day: 'numeric', month: 'short' })}–${formatDateTime(periodEnd, { day: 'numeric', month: 'short' })}`;
+  const {
+    points,
+    totalCount,
+    minCount,
+    maxCount,
+    averageCountPerBucket,
+    sampleQuality,
+    effectivePeriod,
+    timeZoneId,
+    periodStart,
+    periodEnd,
+  } = response;
+  const isEmpty = points.length === 0 || totalCount === 0;
+  const timeZoneLabel = timeZoneId === 'Europe/Stockholm' ? 'Stockholm time' : timeZoneId;
+  const periodLabel = periodStart && periodEnd
+    ? `${formatDateTime(periodStart, { day: 'numeric', month: 'short', timeZone: timeZoneId })}–${formatDateTime(periodEnd, { day: 'numeric', month: 'short', timeZone: timeZoneId })} · ${timeZoneLabel}`
+    : undefined;
+  const isSparse = sampleQuality === 'Sparse';
+  const isIndicative = sampleQuality === 'Indicative';
   const matrix = useMemo(() => {
     const nextMatrix = Array.from({ length: 7 }, () => Array.from({ length: 24 }, () => ({ count: 0, totalRevenue: 0 })));
 
     points.forEach(p => {
       const dayIndex = p.dayOfWeek - 1;
-      if (dayIndex >= 0 && dayIndex <= 6 && p.hour >= 0 && p.hour <= 23) {
-        nextMatrix[dayIndex][p.hour] = { count: p.count, totalRevenue: p.totalRevenue };
+      const hour = p.hour;
+      if (dayIndex >= 0 && dayIndex <= 6 && hour >= 0 && hour <= 23) {
+        nextMatrix[dayIndex][hour] = { count: p.count, totalRevenue: p.totalRevenue };
       }
     });
 
     return nextMatrix;
   }, [points]);
+  const countMatrix = useMemo(
+    () => matrix.map(row => row.map(cell => cell.count)),
+    [matrix],
+  );
 
   const getTooltipInfo = (
     element: HTMLElement,
@@ -128,6 +147,25 @@ export const TransactionDensityChart = memo(function TransactionDensityChart({
       bodyClassName={isEmpty ? 'flex items-center h-full justify-center' : 'flex-1 min-h-0 flex flex-col p-4'}
       legend={
       <div className="flex flex-wrap items-end justify-end items-center gap-4">
+        {selectedPeriod && onPeriodChange && (
+          <Select
+            aria-label="Transaction density period"
+            value={selectedPeriod}
+            onChange={(event) => onPeriodChange(event.target.value as TransactionDensityPeriod)}
+            variant="outlined"
+            size="sm"
+            fullWidth={false}
+            containerClassName="shrink-0"
+          >
+            {PERIOD_OPTIONS.map(option => (
+              <option key={option.value} value={option.value}>
+                {option.value === 'Auto'
+                  ? `Auto · ${effectivePeriod === 'T365' ? '1y' : `${effectivePeriod.slice(1)}d`}`
+                  : option.label}
+              </option>
+            ))}
+          </Select>
+        )}
         <div className="text-right leading-none border-r border-r border-outline pr-4">
           <strong className="block text-2xl font-black tabular-nums text-on-surface">{formatNumber(totalCount)}</strong>
           <span className="mt-1 block text-xs font-bold uppercase tracking-wider text-on-surface-variant">transactions</span>
@@ -139,7 +177,7 @@ export const TransactionDensityChart = memo(function TransactionDensityChart({
           </div>
           <div
             className="h-5 rounded-md"
-            style={{ background: `linear-gradient(to right, ${PALETTE.join(', ')})` }}
+            style={{ background: `linear-gradient(to right, ${TRANSACTION_DENSITY_PALETTE.join(', ')})` }}
           />
         </div>
       </div>}
@@ -148,48 +186,78 @@ export const TransactionDensityChart = memo(function TransactionDensityChart({
         <EmptyState message={"No data available"} variant={"minimal"}/>
       ) : (
         <div ref={viewportRef} onScroll={() => setHoverInfo(null)} className="flex-1 flex flex-col h-full w-full relative overflow-x-auto custom-scrollbar">
+          {(isSparse || isIndicative) && (
+            <div className="mb-2 flex min-w-[600px] items-center justify-between gap-4 rounded-lg bg-tertiary-container px-3 py-2 text-sm text-on-tertiary-container lg:min-w-0">
+              <span className="font-bold">
+                {isSparse
+                  ? 'Sparse sample — individual peaks may not represent a stable pattern.'
+                  : 'Indicative sample — use the broader pattern rather than individual peaks.'}
+              </span>
+              <span className="shrink-0 tabular-nums">
+                {averageCountPerBucket.toFixed(1)} per bucket · {effectivePeriod.slice(1)} days
+              </span>
+            </div>
+          )}
           
-          <div className="flex-1 grid grid-cols-[40px_repeat(24,_1fr)] min-w-[600px] lg:min-w-0 pb-2">
-            {/* Header row for Hours */}
-            <div className="col-span-1"></div>
-            {Array.from({ length: 24 }).map((_, h) => (
-              <div key={h} className="text-center text-xs lg:text-sm text-on-surface-variant font-bold self-end pb-1">
-                {h.toString().padStart(2, '0')}
-              </div>
-            ))}
-
-            {/* Matrix rows */}
-            {DAYS.map((day, dayIndex) => (
-              <Fragment key={day}>
-                {/* Day Label */}
-                <div className="flex items-center justify-end pr-2 text-sm text-on-surface-variant font-bold">
-                  {day}
+          <div className="flex min-h-[180px] min-w-[600px] flex-1 flex-col pb-2 lg:min-w-0">
+            <div className="grid grid-cols-[40px_repeat(24,_minmax(0,_1fr))]">
+              <div />
+              {Array.from({ length: 24 }).map((_, hour) => (
+                <div key={hour} className="pb-1 text-center text-xs font-bold text-on-surface-variant lg:text-sm">
+                  {hour.toString().padStart(2, '0')}
                 </div>
-                {/* 24 Hour Cells for the Day */}
-                {Array.from({ length: 24 }).map((_, hourIndex) => {
-                  const cellData = matrix[dayIndex][hourIndex];
-                  const color = cellData.count > 0 ? getColor(cellData.count, minCount, maxCount) : '#f8fafc'; // empty cells get faint background
-                  
-                  return (
-                    <div
-                      key={hourIndex}
-                      data-density-cell
-                      className="w-full h-full min-h-[20px] transition-opacity cursor-pointer hover:opacity-80 hover:ring-1 ring-slate-400"
-                      style={{ backgroundColor: color }}
-                      onMouseEnter={(e) => {
-                        const info = getTooltipInfo(e.currentTarget, dayIndex, hourIndex, cellData.count, cellData.totalRevenue || 0, false);
-                        setHoverInfo(current => current?.pinned ? current : info);
-                      }}
-                      onMouseLeave={() => setHoverInfo(current => current?.pinned ? current : null)}
-                      onClick={(e) => {
-                        const info = getTooltipInfo(e.currentTarget, dayIndex, hourIndex, cellData.count, cellData.totalRevenue || 0, true);
-                        setHoverInfo(current => current?.pinned && current.day === dayIndex && current.hour === hourIndex ? null : info);
-                      }}
-                    />
-                  );
-                })}
-              </Fragment>
-            ))}
+              ))}
+            </div>
+
+            <div className="grid min-h-[140px] flex-1 grid-cols-[40px_minmax(0,_1fr)]">
+              <div className="grid grid-rows-[repeat(7,_minmax(0,_1fr))]">
+                {DAYS.map(day => (
+                  <div key={day} className="flex items-center justify-end pr-2 text-sm font-bold text-on-surface-variant">
+                    {day}
+                  </div>
+                ))}
+              </div>
+
+              <div className="relative min-h-0 overflow-hidden">
+                {!isSparse && (
+                  <TransactionDensityHeatmapCanvas values={countMatrix} min={minCount} max={maxCount} />
+                )}
+
+                <div className="relative z-10 grid h-full grid-cols-[repeat(24,_minmax(0,_1fr))] grid-rows-[repeat(7,_minmax(0,_1fr))]">
+                  {DAYS.map((day, dayIndex) => (
+                    <Fragment key={day}>
+                      {Array.from({ length: 24 }).map((_, hourIndex) => {
+                        const cellData = matrix[dayIndex][hourIndex];
+                        const isActive = hoverInfo?.day === dayIndex && hoverInfo.hour === hourIndex;
+                        const backgroundColor = isSparse
+                          ? getDiscreteDensityColor(cellData.count, minCount, maxCount)
+                          : undefined;
+
+                        return (
+                          <button
+                            key={hourIndex}
+                            type="button"
+                            data-density-cell
+                            aria-label={`${day} at ${hourIndex.toString().padStart(2, '0')}:00: ${cellData.count} transactions`}
+                            className={`min-h-[20px] cursor-pointer p-0 transition-colors focus-visible:outline-none ${isIndicative ? 'border-b border-r border-white/10' : 'border-0'} ${isActive ? 'ring-2 ring-inset ring-on-surface' : isSparse ? 'hover:opacity-80 hover:ring-1 hover:ring-inset hover:ring-white/70 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-on-surface' : 'hover:bg-white/10 hover:ring-1 hover:ring-inset hover:ring-white/70 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-on-surface'}`}
+                            style={{ backgroundColor }}
+                            onMouseEnter={(event) => {
+                              const info = getTooltipInfo(event.currentTarget, dayIndex, hourIndex, cellData.count, cellData.totalRevenue || 0, false);
+                              setHoverInfo(current => current?.pinned ? current : info);
+                            }}
+                            onMouseLeave={() => setHoverInfo(current => current?.pinned ? current : null)}
+                            onClick={(event) => {
+                              const info = getTooltipInfo(event.currentTarget, dayIndex, hourIndex, cellData.count, cellData.totalRevenue || 0, true);
+                              setHoverInfo(current => current?.pinned && current.day === dayIndex && current.hour === hourIndex ? null : info);
+                            }}
+                          />
+                        );
+                      })}
+                    </Fragment>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Custom Tooltip */}

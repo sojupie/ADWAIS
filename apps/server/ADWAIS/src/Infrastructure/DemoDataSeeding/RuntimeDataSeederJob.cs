@@ -14,6 +14,9 @@ public class RuntimeDataSeederJob(
     ILogger<RuntimeDataSeederJob> logger,
     IConfiguration configuration)
 {
+    private const int RunsPerHour = 60;
+    private const string ReportingTimeZoneId = "Europe/Stockholm";
+    private static readonly TimeZoneInfo ReportingTimeZone = TimeZoneInfo.FindSystemTimeZoneById(ReportingTimeZoneId);
     private record TenantProfile(string Name, int MinAov, int MaxAov, int DailyVolume);
 
     private static readonly List<TenantProfile> Profiles = new()
@@ -94,10 +97,11 @@ public class RuntimeDataSeederJob(
 
         var random = new Random();
         var now = DateTimeOffset.UtcNow;
+        var reportingNow = TimeZoneInfo.ConvertTime(now, ReportingTimeZone);
         var orders = new List<Order>();
 
-        double currentHourWeight = HourlyWeights[now.Hour];
-        double currentDayWeight = DailyWeights[(int)now.DayOfWeek];
+        double currentHourWeight = HourlyWeights[reportingNow.Hour] / HourlyWeights.Sum();
+        double currentDayWeight = DailyWeights[(int)reportingNow.DayOfWeek];
 
         foreach (var tenant in tenants)
         {
@@ -109,7 +113,7 @@ public class RuntimeDataSeederJob(
             double expectedOrdersToday = weeklyVolume * currentDayWeight;
             double expectedOrdersThisHour = expectedOrdersToday * currentHourWeight;
             
-            double expectedOrdersPerRun = expectedOrdersThisHour / 12.0;
+            double expectedOrdersPerRun = expectedOrdersThisHour / RunsPerHour;
             int count = (int)expectedOrdersPerRun + (random.NextDouble() < (expectedOrdersPerRun % 1.0) ? 1 : 0);
 
             if (count > 0)

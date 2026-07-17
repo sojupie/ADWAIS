@@ -4,12 +4,21 @@
  * Adwais.Api
  * OpenAPI spec version: 1.0
  */
+import type { TransactionDensityPeriod } from './transactionDensityPeriod';
 import type { TransactionDensityPointResponseDto } from './transactionDensityPointResponseDto';
+import type { TransactionDensitySampleQuality } from './transactionDensitySampleQuality';
 
 export interface TransactionDensityResponseDto {
-  totalCount?: number;
-  minCount?: number;
-  maxCount?: number;
-  /** @nullable */
-  points?: TransactionDensityPointResponseDto[] | null;
+  totalCount: number;
+  minCount: number;
+  maxCount: number;
+  averageCountPerBucket: number;
+  sampleQuality: TransactionDensitySampleQuality;
+  requestedPeriod: TransactionDensityPeriod;
+  effectivePeriod: TransactionDensityPeriod;
+  /** @minLength 1 */
+  timeZoneId: string;
+  periodStart: string;
+  periodEnd: string;
+  points: TransactionDensityPointResponseDto[];
 }

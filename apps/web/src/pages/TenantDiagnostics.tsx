@@ -20,10 +20,24 @@ import { DashboardFooter } from "../components/common/layout/DashboardFooter.tsx
 import { SyncStatusWidget } from '../components/common/dashboard/SyncStatusWidget';
 import { PeriodSelector } from '../components/common/charts/PeriodSelector';
 import { TenantSelector } from '../components/financial/TenantSelector';
-import type { TransactionDensityResponse } from '@types';
+import type { TransactionDensityResponseDto } from '@types';
+import type { TransactionDensityPeriod } from '@types';
+import { useState } from 'react';
 
 const EMPTY_ACCUMULATED: never[] = [];
-const EMPTY_DENSITY: TransactionDensityResponse = { points: [], totalCount: 0, minCount: 0, maxCount: 0, periodStart: '', periodEnd: '' };
+const EMPTY_DENSITY: TransactionDensityResponseDto = {
+  points: [],
+  totalCount: 0,
+  minCount: 0,
+  maxCount: 0,
+  averageCountPerBucket: 0,
+  sampleQuality: 'Sparse',
+  requestedPeriod: 'Auto',
+  effectivePeriod: 'T30',
+  timeZoneId: 'Europe/Stockholm',
+  periodStart: '',
+  periodEnd: '',
+};
 const EMPTY_DELTA: never[] = [];
 const EMPTY_BINS: never[] = [];
 
@@ -35,10 +49,11 @@ interface Props {
 }
 
 export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe }: Props) {
+  const [densityPeriod, setDensityPeriod] = useState<TransactionDensityPeriod>('Auto');
   const kpiQuery = useGlobalKpis(timeframe, tenantId);
   const globalKpiQuery = useGlobalKpis(timeframe);
   const accumulatedQuery = useAccumulatedRevenue(timeframe, tenantId, 'YearOverYear');
-  const densityQuery = useTransactionDensity(timeframe, tenantId);
+  const densityQuery = useTransactionDensity(densityPeriod, tenantId);
   const deltaQuery = useCumulativeGrowthDelta(timeframe, tenantId, 'YearOverYear');
   const orderQuery = useOrderDistribution(timeframe, tenantId);
 
@@ -138,6 +153,8 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe 
         
         <TransactionDensityChart
           response={densityQuery.data || EMPTY_DENSITY}
+          selectedPeriod={densityPeriod}
+          onPeriodChange={setDensityPeriod}
           isLoading={densityQuery.isLoading}
           isStale={densityQuery.isPlaceholderData}
           className="h-full min-h-[350px] contained:min-h-0"

@@ -9,6 +9,8 @@ namespace Adwais.Infrastructure.DemoDataSeeding;
 
 public static class DatabaseSeeder
 {
+    private const string ReportingTimeZoneId = "Europe/Stockholm";
+    private static readonly TimeZoneInfo ReportingTimeZone = TimeZoneInfo.FindSystemTimeZoneById(ReportingTimeZoneId);
     private record TenantProfile(string Name, string Type, int MinAov, int MaxAov, int DailyVolume, int VolumeVariance, decimal SeasonalMultiplier);
 
     private static readonly double[] HourlyWeights = 
@@ -95,7 +97,7 @@ public static class DatabaseSeeder
 
     private static int GetWeightedHour(Random random)
     {
-        double r = random.NextDouble();
+        double r = random.NextDouble() * HourlyWeights.Sum();
         double sum = 0;
         for (int i = 0; i < HourlyWeights.Length; i++)
         {
@@ -124,20 +126,31 @@ public static class DatabaseSeeder
 
         for (var date = startDate; date <= endDate; date = date.AddDays(1))
         {
-            double dayWeight = DailyWeights[(int)date.DayOfWeek];
+            var localDate = TimeZoneInfo.ConvertTime(date, ReportingTimeZone);
+            double dayWeight = DailyWeights[(int)localDate.DayOfWeek];
             double expectedBaseDailyVolume = weeklyVolume * dayWeight;
             
             var dailyVolume = (int)expectedBaseDailyVolume + random.Next(-profile.VolumeVariance, profile.VolumeVariance + 1);
             if (dailyVolume < 0) dailyVolume = 0;
             
-            var isHolidaySeason = date.Month == 11 || date.Month == 12;
+            var isHolidaySeason = localDate.Month == 11 || localDate.Month == 12;
             if (isHolidaySeason) dailyVolume = (int)(dailyVolume * (double)profile.SeasonalMultiplier);
 
             for (int i = 0; i < dailyVolume; i++)
             {
                 int hour = GetWeightedHour(random);
-                var orderDate = new DateTimeOffset(date.Year, date.Month, date.Day, 
-                    hour, random.Next(0, 60), random.Next(0, 60), TimeSpan.Zero);
+                var localOrderDate = new DateTime(
+                    localDate.Year,
+                    localDate.Month,
+                    localDate.Day,
+                    hour,
+                    random.Next(0, 60),
+                    random.Next(0, 60),
+                    DateTimeKind.Unspecified);
+                if (ReportingTimeZone.IsInvalidTime(localOrderDate)) localOrderDate = localOrderDate.AddHours(1);
+                var orderDate = new DateTimeOffset(
+                    TimeZoneInfo.ConvertTimeToUtc(localOrderDate, ReportingTimeZone),
+                    TimeSpan.Zero);
 
                 double u1 = 1.0 - random.NextDouble();
                 double u2 = 1.0 - random.NextDouble();

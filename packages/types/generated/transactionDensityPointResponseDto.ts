@@ -6,8 +6,8 @@
  */
 
 export interface TransactionDensityPointResponseDto {
-  dayOfWeek?: number;
-  hour?: number;
-  count?: number;
-  totalRevenue?: number;
+  dayOfWeek: number;
+  hour: number;
+  count: number;
+  totalRevenue: number;
 }

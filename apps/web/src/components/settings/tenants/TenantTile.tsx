@@ -82,16 +82,18 @@ export function TenantTile({ t, deleteTenant, isAdmin = false }: TenantTileProps
             }`}
         />
         <Select
-          value={draft.type}
-          onChange={e => setDraft({ ...draft, type: e.target.value as 'Mixed' | 'B2B' | 'B2C' })}
-          disabled={!isAdmin}
-          icon={null}
-          dropdownAlign="right"
-          containerClassName="w-auto shrink-0"
-          className={`px-1.5 py-0.5 h-6 text-[11px] uppercase font-bold tracking-widest shadow-sm text-white outline-none rounded-[4px] border-none ${isAdmin ? 'cursor-pointer hover:opacity-90' : 'cursor-not-allowed opacity-50'
-            } ${draft.type === 'B2B' ? '!bg-[var(--color-brand-btn-primary)]' :
-              draft.type === 'B2C' ? '!bg-[#0ea5e9]' :
-                '!bg-[#8b5cf6]'
+            value={draft.type}
+            onChange={e => setDraft({ ...draft, type: e.target.value as 'Mixed' | 'B2B' | 'B2C' })}
+            disabled={!isAdmin}
+            indicator={null}
+            variant="plain"
+            size="xs"
+            fullWidth={false}
+            containerClassName="w-auto shrink-0"
+            className={`uppercase tracking-widest shadow-sm text-white ${isAdmin ? 'hover:opacity-90' : ''
+              } ${draft.type === 'B2B' ? '!bg-[var(--color-brand-btn-primary)]' :
+                draft.type === 'B2C' ? '!bg-[#0ea5e9]' :
+                  '!bg-[#8b5cf6]'
             }`}
         >
           <option value="Mixed">MIXED</option>

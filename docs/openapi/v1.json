@@ -1260,28 +1260,20 @@
         "summary": "Heatmap data: transaction count and revenue grouped by day of week and hour.\r\nScopes to a single tenant if tenantId is provided, otherwise portfolio-wide.",
         "parameters": [
           {
-            "name": "timeframe",
+            "name": "period",
             "in": "query",
-            "description": "The primary timeframe for the calculation (e.g., T7, T30). \r\nDefaults to T30.",
+            "description": "Requested analysis window. Auto selects the shortest supported period\r\nwith enough observations for a stable 168-bucket matrix.",
             "schema": {
-              "$ref": "#/components/schemas/Timeframe"
+              "$ref": "#/components/schemas/TransactionDensityPeriod"
             }
           },
           {
             "name": "tenantId",
             "in": "query",
-            "description": "Optional. Scopes the metrics to a specific tenant. \r\nIf null, metrics represent the global portfolio total.",
+            "description": "Optional tenant scope. If omitted, the matrix represents the portfolio.",
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
-          },
-          {
-            "name": "comparison",
-            "in": "query",
-            "description": "The comparison period for the timeframe.\r\nDefaults to Preceding.",
-            "schema": {
-              "$ref": "#/components/schemas/ComparisonType"
             }
           }
         ],
@@ -4726,7 +4718,23 @@
         ],
         "type": "string"
       },
+      "TransactionDensityPeriod": {
+        "enum": [
+          "Auto",
+          "T30",
+          "T90",
+          "T180",
+          "T365"
+        ],
+        "type": "string"
+      },
       "TransactionDensityPointResponseDto": {
+        "required": [
+          "count",
+          "dayOfWeek",
+          "hour",
+          "totalRevenue"
+        ],
         "type": "object",
         "properties": {
           "dayOfWeek": {
@@ -4749,6 +4757,19 @@
         "additionalProperties": false
       },
       "TransactionDensityResponseDto": {
+        "required": [
+          "averageCountPerBucket",
+          "effectivePeriod",
+          "maxCount",
+          "minCount",
+          "periodEnd",
+          "periodStart",
+          "points",
+          "requestedPeriod",
+          "sampleQuality",
+          "timeZoneId",
+          "totalCount"
+        ],
         "type": "object",
         "properties": {
           "totalCount": {
@@ -4763,15 +4784,47 @@
             "type": "integer",
             "format": "int32"
           },
+          "averageCountPerBucket": {
+            "type": "number",
+            "format": "double"
+          },
+          "sampleQuality": {
+            "$ref": "#/components/schemas/TransactionDensitySampleQuality"
+          },
+          "requestedPeriod": {
+            "$ref": "#/components/schemas/TransactionDensityPeriod"
+          },
+          "effectivePeriod": {
+            "$ref": "#/components/schemas/TransactionDensityPeriod"
+          },
+          "timeZoneId": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "periodStart": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "periodEnd": {
+            "type": "string",
+            "format": "date-time"
+          },
           "points": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/TransactionDensityPointResponseDto"
-            },
-            "nullable": true
+            }
           }
         },
         "additionalProperties": false
+      },
+      "TransactionDensitySampleQuality": {
+        "enum": [
+          "Sparse",
+          "Indicative",
+          "Stable"
+        ],
+        "type": "string"
       },
       "UpdateCalendarSubscriptionDto": {
         "type": "object",

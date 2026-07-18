@@ -7,7 +7,8 @@ import { ChartPanel } from '../common/charts/ChartPanel';
 import {EmptyState} from "../common/ui/EmptyState.tsx";
 import { Select } from '../common/ui/Select';
 import { TransactionDensityHeatmapCanvas } from './TransactionDensityHeatmapCanvas';
-import { getDiscreteDensityColor, TRANSACTION_DENSITY_PALETTE } from './transactionDensityPalette';
+import { TRANSACTION_DENSITY_HEATMAP_TUNING } from './transactionDensityHeatmapTuning';
+import { TRANSACTION_DENSITY_PALETTE } from './transactionDensityPalette';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const TOOLTIP_WIDTH = 208;
@@ -219,9 +220,16 @@ export const TransactionDensityChart = memo(function TransactionDensityChart({
               </div>
 
               <div className="relative min-h-0 overflow-hidden">
-                {!isSparse && (
-                  <TransactionDensityHeatmapCanvas values={countMatrix} min={minCount} max={maxCount} />
-                )}
+                <TransactionDensityHeatmapCanvas
+                  values={countMatrix}
+                  min={minCount}
+                  max={maxCount}
+                  interpolationSteps={isSparse
+                    ? TRANSACTION_DENSITY_HEATMAP_TUNING.sparseInterpolationSteps
+                    : isIndicative
+                      ? TRANSACTION_DENSITY_HEATMAP_TUNING.indicativeInterpolationSteps
+                      : null}
+                />
 
                 <div className="relative z-10 grid h-full grid-cols-[repeat(24,_minmax(0,_1fr))] grid-rows-[repeat(7,_minmax(0,_1fr))]">
                   {DAYS.map((day, dayIndex) => (
@@ -229,18 +237,13 @@ export const TransactionDensityChart = memo(function TransactionDensityChart({
                       {Array.from({ length: 24 }).map((_, hourIndex) => {
                         const cellData = matrix[dayIndex][hourIndex];
                         const isActive = hoverInfo?.day === dayIndex && hoverInfo.hour === hourIndex;
-                        const backgroundColor = isSparse
-                          ? getDiscreteDensityColor(cellData.count, minCount, maxCount)
-                          : undefined;
-
                         return (
                           <button
                             key={hourIndex}
                             type="button"
                             data-density-cell
                             aria-label={`${day} at ${hourIndex.toString().padStart(2, '0')}:00: ${cellData.count} transactions`}
-                            className={`min-h-[20px] cursor-pointer p-0 transition-colors focus-visible:outline-none ${isIndicative ? 'border-b border-r border-white/10' : 'border-0'} ${isActive ? 'ring-2 ring-inset ring-on-surface' : isSparse ? 'hover:opacity-80 hover:ring-1 hover:ring-inset hover:ring-white/70 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-on-surface' : 'hover:bg-white/10 hover:ring-1 hover:ring-inset hover:ring-white/70 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-on-surface'}`}
-                            style={{ backgroundColor }}
+                            className={`min-h-[20px] cursor-pointer p-0 transition-colors focus-visible:outline-none ${isIndicative || isSparse ? 'border-b border-r border-white/10' : 'border-0'} ${isActive ? 'ring-2 ring-inset ring-on-surface' : 'hover:bg-white/10 hover:ring-1 hover:ring-inset hover:ring-white/70 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-on-surface'}`}
                             onMouseEnter={(event) => {
                               const info = getTooltipInfo(event.currentTarget, dayIndex, hourIndex, cellData.count, cellData.totalRevenue || 0, false);
                               setHoverInfo(current => current?.pinned ? current : info);

@@ -15,21 +15,24 @@ interface TransactionDensityHeatmapCanvasProps {
   values: number[][];
   min: number;
   max: number;
+  interpolationSteps?: number | null;
 }
 
 function createGaussianKernel(sigma: number, radius: number) {
-  if (sigma <= 0 || radius <= 0) return [1];
+  const normalizedSigma = Math.max(0, sigma);
+  const normalizedRadius = Math.max(0, Math.trunc(radius));
+  if (normalizedSigma === 0 || normalizedRadius === 0) return [1];
 
-  const kernel = Array.from({ length: radius * 2 + 1 }, (_, index) => {
-    const offset = index - radius;
-    return Math.exp(-(offset * offset) / (2 * sigma * sigma));
+  const kernel = Array.from({ length: normalizedRadius * 2 + 1 }, (_, index) => {
+    const offset = index - normalizedRadius;
+    return Math.exp(-(offset * offset) / (2 * normalizedSigma * normalizedSigma));
   });
   const total = kernel.reduce((sum, weight) => sum + weight, 0);
   return kernel.map(weight => weight / total);
 }
 
 function resolveIndex(index: number, length: number, wrap: boolean) {
-  if (wrap) return (index + length) % length;
+  if (wrap) return ((index % length) + length) % length;
   return Math.max(0, Math.min(length - 1, index));
 }
 
@@ -88,10 +91,16 @@ function blurValues(values: number[][]) {
 function transitionMix(mix: number, width: number) {
   if (width <= 0) return mix < 0.5 ? 0 : 1;
 
-  const clampedWidth = Math.min(1, width);
+  const clampedWidth = Math.max(0, Math.min(1, width));
   const start = (1 - clampedWidth) / 2;
   const progress = Math.max(0, Math.min(1, (mix - start) / clampedWidth));
   return progress * progress * (3 - 2 * progress);
+}
+
+function quantizeMix(mix: number, steps: number | null | undefined) {
+  if (steps == null || steps < 1) return mix;
+  const normalizedSteps = Math.max(1, Math.trunc(steps));
+  return Math.round(mix * normalizedSteps) / normalizedSteps;
 }
 
 /**
@@ -103,6 +112,7 @@ export const TransactionDensityHeatmapCanvas = memo(function TransactionDensityH
   values,
   min,
   max,
+  interpolationSteps,
 }: TransactionDensityHeatmapCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -133,18 +143,24 @@ export const TransactionDensityHeatmapCanvas = memo(function TransactionDensityH
         const sourceY = Math.max(0, Math.min(rowCount - 1, ((y + 0.5) / height) * rowCount - 0.5));
         const top = Math.floor(sourceY);
         const bottom = Math.min(top + 1, rowCount - 1);
-        const verticalMix = transitionMix(
-          sourceY - top,
-          TRANSACTION_DENSITY_HEATMAP_TUNING.verticalTransitionWidth,
+        const verticalMix = quantizeMix(
+          transitionMix(
+            sourceY - top,
+            TRANSACTION_DENSITY_HEATMAP_TUNING.verticalTransitionWidth,
+          ),
+          interpolationSteps,
         );
 
         for (let x = 0; x < width; x += 1) {
           const sourceX = Math.max(0, Math.min(columnCount - 1, ((x + 0.5) / width) * columnCount - 0.5));
           const left = Math.floor(sourceX);
           const right = Math.min(left + 1, columnCount - 1);
-          const horizontalMix = transitionMix(
-            sourceX - left,
-            TRANSACTION_DENSITY_HEATMAP_TUNING.horizontalTransitionWidth,
+          const horizontalMix = quantizeMix(
+            transitionMix(
+              sourceX - left,
+              TRANSACTION_DENSITY_HEATMAP_TUNING.horizontalTransitionWidth,
+            ),
+            interpolationSteps,
           );
 
           const topValue = displayValues[top][left] + (displayValues[top][right] - displayValues[top][left]) * horizontalMix;
@@ -190,7 +206,7 @@ export const TransactionDensityHeatmapCanvas = memo(function TransactionDensityH
       cancelAnimationFrame(animationFrame);
       window.removeEventListener('resize', scheduleDraw);
     };
-  }, [max, min, values]);
+  }, [interpolationSteps, max, min, values]);
 
   return (
     <canvas

@@ -145,7 +145,7 @@ export function InternalAnnouncements() {
 
   return (
     <>
-      <CollectionPanel title="Internal Announcements" titleClassName="text-base md:text-lg" actions={actions} className="relative flex h-full flex-col">
+      <CollectionPanel title="Internal Announcements" actions={actions} className="relative flex h-full flex-col">
         {postsQuery.isLoading ? (
           <div className="flex items-start gap-8 overflow-hidden p-4" aria-label="Loading announcements">
             {[1, 2].map(item => <div key={item} className="w-[calc(100%-3.5rem)] max-w-[22rem] shrink-0 space-y-3 rounded-xl bg-surface-container p-4 animate-pulse">

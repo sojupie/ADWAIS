@@ -1,95 +1,49 @@
 import { memo, useMemo } from 'react';
-import {
-  CartesianGrid,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
+import type { ChartData, ChartOptions } from 'chart.js';
 import type { CumulativeGrowthDeltaPoint, ComparisonPeriod } from '@types';
-import {
-  formatChartLabel,
-  inferBinSize,
-  formatCompact
-} from '@utils';
+import { formatChartLabel, inferBinSize, formatCompact } from '@utils';
 import { ChartPanel } from '../common/charts/ChartPanel';
+import { ChartJsCanvas } from '../common/charts/ChartJsCanvas';
+import { chartColor, chartTick, chartTooltip, horizontalGrid } from '../common/charts/chartJs';
 
-const CustomTooltip = ({ active, payload, label }: { isLoading?: boolean;  active?: boolean; payload?: { payload: unknown }[]; label?: string }) => {
-  if (!active || !payload?.length) return null;
-
-  const point = payload[0].payload as CumulativeGrowthDeltaPoint;
-
-  return (
-    <div className="bg-surface border border-outline-variant rounded-lg shadow-lg p-4 text-sm animate-in fade-in zoom-in duration-200">
-      <p className="font-bold text-on-surface mb-3 border-b border-slate-50 pb-2">{label}</p>
-      <div className="space-y-2">
-        <p className="flex justify-between gap-12">
-          <span className="text-on-surface-variant">Current Cumulative:</span>
-          <strong className="text-on-surface-variant">{formatCompact(point.currentCumulative)} SEK</strong>
-        </p>
-        <p className="flex justify-between gap-12">
-          <span className="text-on-surface-variant">Previous Cumulative:</span>
-          <strong className="text-on-surface-variant">{formatCompact(point.previousCumulative)} SEK</strong>
-        </p>
-        <p className="flex justify-between gap-12 pt-1 border-t border-slate-50">
-          <span className="text-on-surface-variant">Delta:</span>
-          <strong className={point.cumulativeGrowthDelta >= 0 ? 'text-growth' : 'text-[#c92a2a]'}>
-            {point.cumulativeGrowthDelta > 0 ? '+' : ''}{formatCompact(point.cumulativeGrowthDelta)} SEK
-          </strong>
-        </p>
-      </div>
-    </div>
-  );
-};
-
-export const CumulativeGrowthDeltaChart = memo(function CumulativeGrowthDeltaChart({ isLoading, isStale, points, comparison, className }: { isLoading?: boolean; isStale?: boolean; points: CumulativeGrowthDeltaPoint[], comparison?: ComparisonPeriod, className?: string }) {
+export const CumulativeGrowthDeltaChart = memo(function CumulativeGrowthDeltaChart({ isLoading, isStale, points, comparison, className }: {
+  isLoading?: boolean; isStale?: boolean; points: CumulativeGrowthDeltaPoint[]; comparison?: ComparisonPeriod; className?: string;
+}) {
   const chartData = useMemo(() => {
-    const isHourly = points.length > 0 && points.length <= 24;
-    const binSize = inferBinSize(points.map(p => p.timestamp), isHourly);
-    return points.map((p, i) => ({
-      ...p,
-      label: formatChartLabel(p.timestamp, binSize, i)
-    }));
+    const binSize = inferBinSize(points.map(point => point.timestamp), points.length > 0 && points.length <= 24);
+    return points.map((point, index) => ({ ...point, label: formatChartLabel(point.timestamp, binSize, index) }));
   }, [points]);
-
+  const data: ChartData<'line', number[], string> = {
+    labels: chartData.map(point => point.label),
+    datasets: [{ label: 'Cumulative Growth Delta', data: chartData.map(point => point.cumulativeGrowthDelta), borderColor: chartColor('--color-brand-btn-primary', '#2563eb'), borderWidth: 2.4, pointRadius: 0, pointHoverRadius: 7, pointHoverBackgroundColor: chartColor('--color-brand-btn-primary', '#2563eb'), pointHoverBorderColor: '#fff', pointHoverBorderWidth: 3, stepped: 'after' }],
+  };
+  const options: ChartOptions<'line'> = {
+    responsive: true, maintainAspectRatio: false, animation: false, interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        ...chartTooltip,
+        callbacks: {
+          title: items => chartData[items[0].dataIndex]?.label || '',
+          label: context => {
+            const point = chartData[context.dataIndex];
+            return [
+              `Current Cumulative: ${formatCompact(point.currentCumulative)} SEK`,
+              `Previous Cumulative: ${formatCompact(point.previousCumulative)} SEK`,
+              `Delta: ${point.cumulativeGrowthDelta > 0 ? '+' : ''}${formatCompact(point.cumulativeGrowthDelta)} SEK`,
+            ];
+          },
+        },
+      },
+    },
+    scales: {
+      x: { border: { display: false }, grid: { display: false }, ticks: { ...chartTick(14, 700), autoSkip: true, maxRotation: 0 } },
+      y: { border: { display: false }, grid: horizontalGrid, ticks: { ...chartTick(14), callback: value => `${Number(value) > 0 ? '+' : ''}${formatCompact(Math.abs(Number(value)))}` } },
+    },
+  };
   return (
-    <ChartPanel isLoading={isLoading} isStale={isStale}
-      title="Cumulative Growth Delta (Absolute)"
-      comparison={comparison}
-      className={className || ''}
-      bodyClassName=""
-    >
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={chartData} margin={{ top: 8, right: 10, left: 10, bottom: 10 }}>
-          <CartesianGrid stroke="var(--color-chart-grid)" strokeDasharray="3 4" vertical={false} />
-          <XAxis
-            dataKey="label"
-            tick={{ fill: 'var(--color-chart-tick)', fontSize: 11, fontWeight: 700, fontFamily: 'Manrope, sans-serif' }}
-            axisLine={false}
-            tickLine={false}
-            interval="preserveStartEnd"
-          />
-          <YAxis
-            tickFormatter={(value) => `${value > 0 ? '+' : ''}${formatCompact(Math.abs(value))}`}
-            tick={{ fill: 'var(--color-chart-tick)', fontSize: 12 }}
-            minTickGap={20}
-            axisLine={false}
-            tickLine={false}
-          />
-          <Tooltip content={<CustomTooltip />} useTranslate3d={true} isAnimationActive={false} />
-          <Line
-            type="stepAfter"
-            dataKey="cumulativeGrowthDelta"
-            stroke="var(--color-brand-btn-primary)"
-            strokeWidth={2.4}
-            dot={false}
-            activeDot={{ r: 4, strokeWidth: 0 }}
-            isAnimationActive={false}
-          />
-        </LineChart>
-      </ResponsiveContainer>
+    <ChartPanel isLoading={isLoading} isStale={isStale} title="Cumulative Growth Delta (Absolute)" comparison={comparison} className={className || ''}>
+      <div className="absolute inset-0"><ChartJsCanvas type="line" data={data} options={options} /></div>
     </ChartPanel>
   );
 });

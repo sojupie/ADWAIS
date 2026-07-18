@@ -8,7 +8,7 @@ export function SeoRssAggregator() {
   const feedItems = response?.data || [];
 
   return (
-    <CollectionPanel title="Litium News – Click to read" titleClassName="md:text-lg" className="h-full relative">
+    <CollectionPanel title="Litium News – Click to read" className="h-full relative">
       {isLoading ? (
         <div className="flex flex-col animate-pulse">
           {[1, 2, 3].map((i) => (
@@ -23,7 +23,7 @@ export function SeoRssAggregator() {
           No feeds available.
         </div>
       ) : (
-        <div className="flex flex-col p-4 flex-1 gap-4 min-h-0 overflow-y-auto custom-scrollbar px-4">
+        <div className="flex flex-col p-4 pt-0 flex-1 gap-4 min-h-0 overflow-y-auto custom-scrollbar px-4">
           {feedItems.map(item => (
             <div key={item.id} className="flex rounded-xl flex-col gap-2 p-4 bg-surface-container hover:bg-surface-container-high hover:m3-elevation-1 transition-colors">
               <div className="flex justify-between items-center mb-0.5">

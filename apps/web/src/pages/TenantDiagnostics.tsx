@@ -83,8 +83,9 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe 
             <span 
               className={`inline-flex items-center px-3 py-1 rounded-sm text-sm font-black uppercase tracking-widest shadow-sm shrink-0 ${
                 tenantType === 'B2C' ? 'bg-chart-1 text-white' : 
-                tenantType === 'Mixed' ? 'bg-chart-2 text-white' : 
-                'bg-(--color-brand-btn-primary) text-white'
+                tenantType === 'Mixed' ? 'bg-chart-2 text-white' :
+                tenantType === 'B2B' ? 'bg-chart-3 text-white' :    
+                'bg-tertiary-container text-white'
               }`}
             >
               {tenantType}

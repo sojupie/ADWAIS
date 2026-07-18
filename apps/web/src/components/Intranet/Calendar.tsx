@@ -369,7 +369,6 @@ export function Calendar() {
   return (
       <CollectionPanel
         title="Company Calendar"
-        titleClassName="text-base md:text-lg"
       isLoading={isLoading}
       className="h-full relative select-none"
       actions={

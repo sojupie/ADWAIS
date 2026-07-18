@@ -92,5 +92,5 @@ export const TRANSACTION_DENSITY_HEATMAP_TUNING = {
    * whole numbers make finer blocks. `null` selects continuous interpolation.
    * Fractional values are truncated. This affects presentation, not source data.
    */
-  indicativeInterpolationSteps: 10,
+  indicativeInterpolationSteps: 7,
 } as const;

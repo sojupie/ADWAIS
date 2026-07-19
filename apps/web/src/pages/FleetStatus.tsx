@@ -163,6 +163,43 @@ export function FleetStatus() {
 
       {/* ── Footer Widgets (All Resolutions) ── */}
       <DashboardFooter>
+        <div className="flex items-center gap-4 flex-1">
+          <div className="flex items-center gap-2">
+            <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Status Filter:</label>
+            <select 
+              className="bg-surface-container border border-outline rounded text-sm px-2 py-1 h-8 max-w-[150px]"
+              value={vm.selectedStatuses[0] || ''}
+              onChange={(e) => {
+                const val = e.target.value;
+                vm.setSelectedStatuses(val ? [val] : []);
+              }}
+            >
+              <option value="">All Statuses</option>
+              <option value="UP">Up</option>
+              <option value="DOWN">Down</option>
+              <option value="PAUSED">Paused</option>
+              <option value="UNKNOWN">Unknown</option>
+            </select>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Tag Filter:</label>
+            <select 
+              className="bg-surface-container border border-outline rounded text-sm px-2 py-1 h-8 max-w-[150px]"
+              value={vm.selectedTags[0] || ''}
+              onChange={(e) => {
+                const val = e.target.value;
+                vm.setSelectedTags(val ? [val] : []);
+              }}
+            >
+              <option value="">All Tags</option>
+              {Array.from(new Set(vm.tenantMonitors.flatMap(m => m.tags || []).map(t => t.split(':')[0].trim()))).sort().map(tag => (
+                <option key={tag} value={tag}>{tag}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
         <SyncStatusWidget />
         <PeriodSelector from="/fleet-status" />
       </DashboardFooter>

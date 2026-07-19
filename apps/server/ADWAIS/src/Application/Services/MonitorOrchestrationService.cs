@@ -19,7 +19,7 @@ public class MonitorOrchestrationService(
 {
     private record LatencyRow(DateTimeOffset Timestamp, double? Average, double? P10, double? P90);
 
-    public async Task<MonitorAnalyticsDto> GetAnalyticsAsync(ResolvedPeriod period, Guid? tenantId = null, int? monitorId = null, CancellationToken ct = default)
+    public async Task<MonitorAnalyticsDto> GetAnalyticsAsync(ResolvedPeriod period, Guid? tenantId = null, int? monitorId = null, string[]? tags = null, string[]? statuses = null, CancellationToken ct = default)
     {
         var currentStart = period.CurrentStart;
         var currentEnd = period.CurrentEnd;
@@ -28,8 +28,33 @@ public class MonitorOrchestrationService(
         var isHourly = period.IsHourly;
         var includeActualTime = period.IncludeActualTime;
 
-        var currentRows = await GetMergedLatencyDataAsync(dbContext, currentStart, currentEnd, isHourly, tenantId, monitorId, ct);
-        var previousRows = await GetMergedLatencyDataAsync(dbContext, previousStart, period.PreviousEnd, isHourly, tenantId, monitorId, ct);
+        IQueryable<UptimeMonitor> monitorQuery = dbContext.Monitors.AsNoTracking().Include(m => m.Tenant);
+        if (monitorId.HasValue) 
+            monitorQuery = monitorQuery.Where(m => m.Id == monitorId.Value);
+        else if (tenantId.HasValue) 
+            monitorQuery = monitorQuery.Where(m => m.TenantId == tenantId.Value);
+        else 
+            monitorQuery = monitorQuery.Where(m => m.TenantId != IApplicationDbContext.SystemTenantGuid);
+
+        var monitors = await monitorQuery.ToListAsync(ct);
+        foreach (var m in monitors)
+        {
+            HydrateLiveStatus(m);
+        }
+
+        if (tags != null && tags.Any())
+        {
+            monitors = monitors.Where(m => m.Tags != null && m.Tags.Intersect(tags, StringComparer.OrdinalIgnoreCase).Any()).ToList();
+        }
+        if (statuses != null && statuses.Any())
+        {
+            monitors = monitors.Where(m => statuses.Contains(m.StatusStr, StringComparer.OrdinalIgnoreCase)).ToList();
+        }
+
+        var allowedMonitorIds = monitors.Select(m => m.Id).ToList();
+
+        var currentRows = await GetMergedLatencyDataAsync(dbContext, currentStart, currentEnd, isHourly, allowedMonitorIds, ct);
+        var previousRows = await GetMergedLatencyDataAsync(dbContext, previousStart, period.PreviousEnd, isHourly, allowedMonitorIds, ct);
 
         var roundedTotalHours = Math.Ceiling((currentEnd - currentStart).TotalHours);
         var binSizeHours = isHourly 
@@ -73,28 +98,17 @@ public class MonitorOrchestrationService(
                 data?.P90));
         }
         
-        IQueryable<UptimeMonitor> monitorQuery = dbContext.Monitors.AsNoTracking().Include(m => m.Tenant);
-        if (monitorId.HasValue) 
-            monitorQuery = monitorQuery.Where(m => m.Id == monitorId.Value);
-        else if (tenantId.HasValue) 
-            monitorQuery = monitorQuery.Where(m => m.TenantId == tenantId.Value);
-        else 
-            monitorQuery = monitorQuery.Where(m => m.TenantId != IApplicationDbContext.SystemTenantGuid);
-
-        var monitors = await monitorQuery.ToListAsync(ct);
-
-        var periodUptimes = await GetPeriodUptimesAsync(currentStart, currentEnd, tenantId, monitorId, ct);
+        var periodUptimes = await GetPeriodUptimesAsync(currentStart, currentEnd, allowedMonitorIds, ct);
 
         foreach (var m in monitors)
         {
-            HydrateLiveStatus(m);
             if (periodUptimes.TryGetValue(m.Id, out var periodUptime))
             {
                 m.CurrentUptimePercentage = periodUptime;
             }
         }
 
-        var previousPeriodUptimes = await GetPeriodUptimesAsync(previousStart, period.PreviousEnd, tenantId, monitorId, ct);
+        var previousPeriodUptimes = await GetPeriodUptimesAsync(previousStart, period.PreviousEnd, allowedMonitorIds, ct);
 
         var currentEnabledUptimes = monitors
             .Where(m => m.UptimeMonitorEnabled && periodUptimes.TryGetValue(m.Id, out var u) && u.HasValue)
@@ -146,7 +160,7 @@ public class MonitorOrchestrationService(
         return new MonitorAnalyticsDto(globalAvgLatency, latencyPoints, monitors, kpis);
     }
 
-    private async Task<Dictionary<int, double?>> GetPeriodUptimesAsync(DateTimeOffset start, DateTimeOffset end, Guid? tenantId, int? monitorId, CancellationToken ct = default)
+    private async Task<Dictionary<int, double?>> GetPeriodUptimesAsync(DateTimeOffset start, DateTimeOffset end, List<int>? allowedMonitorIds, CancellationToken ct = default)
     {
         // Floor start boundary to UTC midnight to capture preceding time-series buckets
         var queryStart = new DateTimeOffset(start.UtcDateTime.Date, TimeSpan.Zero);
@@ -158,10 +172,10 @@ public class MonitorOrchestrationService(
             .AsNoTracking()
             .Where(r => r.Date >= queryStart && r.Date < histEnd);
 
-        if (monitorId.HasValue)
-            histQuery = histQuery.Where(r => r.MonitorId == monitorId.Value);
-        else if (tenantId.HasValue)
-            histQuery = histQuery.Where(r => r.UptimeMonitor.TenantId == tenantId.Value);
+        if (allowedMonitorIds != null && allowedMonitorIds.Any())
+            histQuery = histQuery.Where(r => allowedMonitorIds.Contains(r.MonitorId));
+        else if (allowedMonitorIds != null && !allowedMonitorIds.Any())
+            histQuery = histQuery.Where(r => false); // no allowed monitors
         else
             histQuery = histQuery.Where(r => r.UptimeMonitor.TenantId != IApplicationDbContext.SystemTenantGuid);
 
@@ -182,10 +196,10 @@ public class MonitorOrchestrationService(
                 .AsNoTracking()
                 .Where(ma => ma.Date >= liveStart && ma.Date < end);
 
-            if (monitorId.HasValue)
-                liveQuery = liveQuery.Where(ma => ma.MonitorId == monitorId.Value);
-            else if (tenantId.HasValue)
-                liveQuery = liveQuery.Where(ma => ma.UptimeMonitor!.TenantId == tenantId.Value);
+            if (allowedMonitorIds != null && allowedMonitorIds.Any())
+                liveQuery = liveQuery.Where(ma => allowedMonitorIds.Contains(ma.MonitorId));
+            else if (allowedMonitorIds != null && !allowedMonitorIds.Any())
+                liveQuery = liveQuery.Where(ma => false);
             else
                 liveQuery = liveQuery.Where(ma => ma.UptimeMonitor!.TenantId != IApplicationDbContext.SystemTenantGuid);
 
@@ -227,15 +241,15 @@ public class MonitorOrchestrationService(
     }
 
     private async Task<List<LatencyRow>> GetMergedLatencyDataAsync(
-        IApplicationDbContext db, DateTimeOffset start, DateTimeOffset end, bool isHourly, Guid? tenantId = null, int? monitorId = null, CancellationToken ct = default)
+        IApplicationDbContext db, DateTimeOffset start, DateTimeOffset end, bool isHourly, List<int>? allowedMonitorIds, CancellationToken ct = default)
     {
         if (isHourly)
         {
             var query = db.ResponseTimes.AsNoTracking().Where(rt => rt.Date >= start && rt.Date < end);
-            if (monitorId.HasValue) 
-                query = query.Where(rt => rt.MonitorId == monitorId.Value);
-            else if (tenantId.HasValue) 
-                query = query.Where(rt => rt.UptimeMonitor!.TenantId == tenantId.Value);
+            if (allowedMonitorIds != null && allowedMonitorIds.Any()) 
+                query = query.Where(rt => allowedMonitorIds.Contains(rt.MonitorId));
+            else if (allowedMonitorIds != null && !allowedMonitorIds.Any())
+                query = query.Where(rt => false);
             else 
                 query = query.Where(rt => rt.UptimeMonitor!.TenantId != IApplicationDbContext.SystemTenantGuid);
 
@@ -263,10 +277,10 @@ public class MonitorOrchestrationService(
         var viewEnd = yesterday < end ? yesterday : end;
 
         var histQuery = db.DailyLatencyMonitorRollups.AsNoTracking().Where(r => r.Date >= start && r.Date < viewEnd);
-        if (monitorId.HasValue)
-            histQuery = histQuery.Where(r => r.MonitorId == monitorId.Value);
-        else if (tenantId.HasValue)
-            histQuery = histQuery.Where(r => r.UptimeMonitor.TenantId == tenantId.Value);
+        if (allowedMonitorIds != null && allowedMonitorIds.Any())
+            histQuery = histQuery.Where(r => allowedMonitorIds.Contains(r.MonitorId));
+        else if (allowedMonitorIds != null && !allowedMonitorIds.Any())
+            histQuery = histQuery.Where(r => false);
         else
             histQuery = histQuery.Where(r => r.UptimeMonitor.TenantId != IApplicationDbContext.SystemTenantGuid);
 
@@ -277,10 +291,10 @@ public class MonitorOrchestrationService(
         if (yesterday < end)
         {
             var liveQuery = db.ResponseTimes.AsNoTracking().Where(rt => rt.Date >= yesterday && rt.Date < end);
-            if (monitorId.HasValue)
-                liveQuery = liveQuery.Where(rt => rt.MonitorId == monitorId.Value);
-            else if (tenantId.HasValue)
-                liveQuery = liveQuery.Where(rt => rt.UptimeMonitor!.TenantId == tenantId.Value);
+            if (allowedMonitorIds != null && allowedMonitorIds.Any())
+                liveQuery = liveQuery.Where(rt => allowedMonitorIds.Contains(rt.MonitorId));
+            else if (allowedMonitorIds != null && !allowedMonitorIds.Any())
+                liveQuery = liveQuery.Where(rt => false);
             else
                 liveQuery = liveQuery.Where(rt => rt.UptimeMonitor!.TenantId != IApplicationDbContext.SystemTenantGuid);
 
@@ -366,7 +380,7 @@ public class MonitorOrchestrationService(
             .Where(m => m.TenantId == tenantId)
             .ToListAsync(ct);
 
-        var uptimes = await GetPeriodUptimesAsync(start, end, tenantId, null, ct);
+        var uptimes = await GetPeriodUptimesAsync(start, end, null, ct);
 
         foreach (var m in monitors)
         {
@@ -392,7 +406,7 @@ public class MonitorOrchestrationService(
 
         if (monitor == null) throw new KeyNotFoundException($"Monitor {id} not found.");
 
-        var uptimes = await GetPeriodUptimesAsync(start, end, null, id, ct);
+        var uptimes = await GetPeriodUptimesAsync(start, end, new List<int> { id }, ct);
         if (uptimes.TryGetValue(id, out var uptime))
         {
             monitor.CurrentUptimePercentage = uptime;

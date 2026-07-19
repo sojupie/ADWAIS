@@ -29,4 +29,12 @@ timeframe?: Timeframe;
  * Defaults to Preceding.
  */
 comparison?: ComparisonType;
+/**
+ * Optional. Filters the monitors by specific tags.
+ */
+tags?: string[];
+/**
+ * Optional. Filters the monitors by specific statuses.
+ */
+statuses?: string[];
 };

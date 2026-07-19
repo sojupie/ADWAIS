@@ -1816,6 +1816,28 @@
             "schema": {
               "$ref": "#/components/schemas/ComparisonType"
             }
+          },
+          {
+            "name": "tags",
+            "in": "query",
+            "description": "Optional. Filters the monitors by specific tags.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "statuses",
+            "in": "query",
+            "description": "Optional. Filters the monitors by specific statuses.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
           }
         ],
         "responses": {
@@ -1881,6 +1903,28 @@
             "description": "The comparison period for the timeframe.\r\nDefaults to Preceding.",
             "schema": {
               "$ref": "#/components/schemas/ComparisonType"
+            }
+          },
+          {
+            "name": "tags",
+            "in": "query",
+            "description": "Optional. Filters the monitors by specific tags.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "statuses",
+            "in": "query",
+            "description": "Optional. Filters the monitors by specific statuses.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             }
           }
         ],

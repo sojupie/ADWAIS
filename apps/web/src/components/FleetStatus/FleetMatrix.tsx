@@ -107,9 +107,18 @@ export function FleetMatrix({
   onMonitorSelect?: (monitor: UptimeMonitorDto) => void,
   selectedMonitorId?: number | null
 }) {
+  const sortedMonitors = [...monitors].sort((a, b) => {
+    const sA = getMonitorStatus(a.currentStatus, a.currentLatency, a.latencyDegradedFloor);
+    const sB = getMonitorStatus(b.currentStatus, b.currentLatency, b.latencyDegradedFloor);
+    const wA = sA === 'down' ? 300 : sA === 'degraded' ? 200 : (a.currentUptimePercentage !== null && a.currentUptimePercentage !== undefined && a.uptimeSla !== null && a.uptimeSla !== undefined && a.currentUptimePercentage < a.uptimeSla) ? 100 : 0;
+    const wB = sB === 'down' ? 300 : sB === 'degraded' ? 200 : (b.currentUptimePercentage !== null && b.currentUptimePercentage !== undefined && b.uptimeSla !== null && b.uptimeSla !== undefined && b.currentUptimePercentage < b.uptimeSla) ? 100 : 0;
+    
+    return wB - wA || (a.currentUptimePercentage ?? 100) - (b.currentUptimePercentage ?? 100);
+  });
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 portrait-lg:grid-cols-4 landscape-lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 pt-1 pb-4">
-      {monitors.map((monitor) => (
+      {sortedMonitors.map((monitor) => (
         <FleetMatrixTile
           key={`${monitor.tenantId}-${monitor.id}`}
           monitor={monitor}

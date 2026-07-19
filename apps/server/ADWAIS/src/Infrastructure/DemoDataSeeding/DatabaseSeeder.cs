@@ -9,8 +9,6 @@ namespace Adwais.Infrastructure.DemoDataSeeding;
 
 public static class DatabaseSeeder
 {
-    private const string ReportingTimeZoneId = "Europe/Stockholm";
-    private static readonly TimeZoneInfo ReportingTimeZone = TimeZoneInfo.FindSystemTimeZoneById(ReportingTimeZoneId);
     private record TenantProfile(string Name, string Type, int MinAov, int MaxAov, int DailyVolume, int VolumeVariance, decimal SeasonalMultiplier);
 
     private static readonly double[] HourlyWeights = 
@@ -28,6 +26,10 @@ public static class DatabaseSeeder
     public static async Task SeedSampleDataAsync(AnalyticsDbContext context)
     {
         var random = new Random(42);
+        var reportingTimeZoneId = await context.GlobalConfigs
+            .Select(config => config.ReportingTimeZoneId)
+            .SingleAsync();
+        var reportingTimeZone = TimeZoneInfo.FindSystemTimeZoneById(reportingTimeZoneId);
         var profiles = GenerateProfiles();
         var tenants = await SeedTenantsAsync(context, profiles);
 
@@ -70,7 +72,7 @@ public static class DatabaseSeeder
         {
             var baseName = tenant.Name.Replace(" [MOCK]", "");
             var profile = profiles.First(p => p.Name == baseName);
-            await BulkInsertOrdersForTenantAsync(context, tenant, profile, startDate, endDate, random);
+            await BulkInsertOrdersForTenantAsync(context, tenant, profile, startDate, endDate, random, reportingTimeZone);
         }
 
         var views = new[]
@@ -113,7 +115,8 @@ public static class DatabaseSeeder
         TenantProfile profile,
         DateTimeOffset startDate,
         DateTimeOffset endDate,
-        Random random)
+        Random random,
+        TimeZoneInfo reportingTimeZone)
     {
         var connection = (NpgsqlConnection)context.Database.GetDbConnection();
         if (connection.State != System.Data.ConnectionState.Open) await connection.OpenAsync();
@@ -126,7 +129,7 @@ public static class DatabaseSeeder
 
         for (var date = startDate; date <= endDate; date = date.AddDays(1))
         {
-            var localDate = TimeZoneInfo.ConvertTime(date, ReportingTimeZone);
+            var localDate = TimeZoneInfo.ConvertTime(date, reportingTimeZone);
             double dayWeight = DailyWeights[(int)localDate.DayOfWeek];
             double expectedBaseDailyVolume = weeklyVolume * dayWeight;
             
@@ -147,9 +150,9 @@ public static class DatabaseSeeder
                     random.Next(0, 60),
                     random.Next(0, 60),
                     DateTimeKind.Unspecified);
-                if (ReportingTimeZone.IsInvalidTime(localOrderDate)) localOrderDate = localOrderDate.AddHours(1);
+                if (reportingTimeZone.IsInvalidTime(localOrderDate)) localOrderDate = localOrderDate.AddHours(1);
                 var orderDate = new DateTimeOffset(
-                    TimeZoneInfo.ConvertTimeToUtc(localOrderDate, ReportingTimeZone),
+                    TimeZoneInfo.ConvertTimeToUtc(localOrderDate, reportingTimeZone),
                     TimeSpan.Zero);
 
                 double u1 = 1.0 - random.NextDouble();

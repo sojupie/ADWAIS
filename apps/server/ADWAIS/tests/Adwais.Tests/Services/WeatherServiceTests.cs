@@ -50,7 +50,8 @@ public class WeatherServiceTests
             DefaultUptimeSla: 99.9,
             FeedFetchIntervalHours: 2,
             WeatherLocation: null, // Null location
-            WeatherFetchIntervalMinutes: 15
+            WeatherFetchIntervalMinutes: 15,
+            ReportingTimeZoneId: "Europe/Stockholm"
         );
 
         _configServiceMock.Setup(c => c.GetConfigAsync(It.IsAny<CancellationToken>()))
@@ -85,7 +86,8 @@ public class WeatherServiceTests
             DefaultUptimeSla: 99.9,
             FeedFetchIntervalHours: 2,
             WeatherLocation: "Karlstad",
-            WeatherFetchIntervalMinutes: 15
+            WeatherFetchIntervalMinutes: 15,
+            ReportingTimeZoneId: "Europe/Stockholm"
         );
 
         _configServiceMock.Setup(c => c.GetConfigAsync(It.IsAny<CancellationToken>()))

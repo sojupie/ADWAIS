@@ -7,6 +7,7 @@ public record RevenueEfficiencyTenantResponseDto(
     string TenantName,
     TenantType Type,
     decimal AverageOrderValue,
+    decimal OrderVolume,
     decimal PortfolioSharePercentage,
     decimal GrowthVelocity,
     string? LitiumBaseUrl
@@ -14,6 +15,7 @@ public record RevenueEfficiencyTenantResponseDto(
 
 public record RevenueEfficiencyResponseDto(
     decimal GlobalAverageOrderValue,
+    decimal MedianOrderVolume,
     decimal MedianPortfolioShare,
     IReadOnlyList<RevenueEfficiencyTenantResponseDto> Tenants
 );

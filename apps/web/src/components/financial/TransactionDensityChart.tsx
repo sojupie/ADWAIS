@@ -11,6 +11,7 @@ import { TRANSACTION_DENSITY_HEATMAP_TUNING } from './transactionDensityHeatmapT
 import { TRANSACTION_DENSITY_PALETTE } from './transactionDensityPalette';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const HOUR_LABEL_INTERVAL = 2;
 const TOOLTIP_WIDTH = 208;
 const TOOLTIP_ESTIMATED_HEIGHT = 150;
 const TOOLTIP_VIEWPORT_MARGIN = 8;
@@ -22,6 +23,10 @@ const PERIOD_OPTIONS: Array<{ value: TransactionDensityPeriod; label: string }> 
   { value: 'T180', label: '180 days' },
   { value: 'T365', label: '365 days' },
 ];
+
+function formatHour(hour: number) {
+  return `${hour.toString().padStart(2, '0')}:00`;
+}
 
 export const TransactionDensityChart = memo(function TransactionDensityChart({
   isLoading, isStale, response, selectedPeriod, onPeriodChange,
@@ -145,7 +150,7 @@ export const TransactionDensityChart = memo(function TransactionDensityChart({
       title="Transaction Density Matrix"
       subtitle={periodLabel}
       className={className || "h-full relative"}
-      bodyClassName={isEmpty ? 'flex items-center h-full justify-center' : 'flex-1 min-h-0 flex flex-col p-4'}
+      bodyClassName={isEmpty ? 'flex items-center h-full justify-center' : 'flex-1 min-h-0 flex flex-col'}
       legend={
       <div className="flex flex-wrap items-end justify-end items-center gap-4">
         {selectedPeriod && onPeriodChange && (
@@ -200,17 +205,17 @@ export const TransactionDensityChart = memo(function TransactionDensityChart({
             </div>
           )}
           
-          <div className="flex min-h-[180px] min-w-[600px] flex-1 flex-col pb-2 lg:min-w-0">
+          <div className="flex min-h-[180px] min-w-[600px] flex-1 flex-col lg:min-w-0">
             <div className="grid grid-cols-[40px_repeat(24,_minmax(0,_1fr))]">
               <div />
               {Array.from({ length: 24 }).map((_, hour) => (
                 <div key={hour} className="pb-1 text-center text-xs font-bold text-on-surface-variant lg:text-sm">
-                  {hour.toString().padStart(2, '0')}
+                  {hour % HOUR_LABEL_INTERVAL === 0 ? formatHour(hour) : null}
                 </div>
               ))}
             </div>
 
-            <div className="grid min-h-[140px] flex-1 grid-cols-[40px_minmax(0,_1fr)]">
+            <div className="h-full grid min-h-[140px] flex-1 grid-cols-[40px_minmax(0,_1fr)]">
               <div className="grid grid-rows-[repeat(7,_minmax(0,_1fr))]">
                 {DAYS.map(day => (
                   <div key={day} className="flex items-center justify-end pr-2 text-sm font-bold text-on-surface-variant">
@@ -242,7 +247,7 @@ export const TransactionDensityChart = memo(function TransactionDensityChart({
                             key={hourIndex}
                             type="button"
                             data-density-cell
-                            aria-label={`${day} at ${hourIndex.toString().padStart(2, '0')}:00: ${cellData.count} transactions`}
+                            aria-label={`${day} at ${formatHour(hourIndex)}: ${cellData.count} transactions`}
                             className={`min-h-[20px] cursor-pointer p-0 transition-colors focus-visible:outline-none ${isIndicative || isSparse ? 'border-b border-r border-white/10' : 'border-0'} ${isActive ? 'ring-2 ring-inset ring-on-surface' : 'hover:bg-white/10 hover:ring-1 hover:ring-inset hover:ring-white/70 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-on-surface'}`}
                             onMouseEnter={(event) => {
                               const info = getTooltipInfo(event.currentTarget, dayIndex, hourIndex, cellData.count, cellData.totalRevenue || 0, false);
@@ -266,11 +271,11 @@ export const TransactionDensityChart = memo(function TransactionDensityChart({
           {/* Custom Tooltip */}
           {hoverInfo && createPortal(
             <div 
-              className={`fixed z-50 w-52 max-w-[calc(100vw-16px)] -translate-y-1/2 rounded-lg border border-outline-variant bg-surface p-4 text-sm shadow-lg pointer-events-none ${hoverInfo.placement === 'left' ? '-translate-x-full' : hoverInfo.placement === 'center' ? '-translate-x-1/2' : ''}`}
+              className={`fixed z-50 w-52 max-w-[calc(100vw-16px)] -translate-y-1/2 rounded-lg border border-outline-variant bg-surface p-4 text-md shadow-lg pointer-events-none ${hoverInfo.placement === 'left' ? '-translate-x-full' : hoverInfo.placement === 'center' ? '-translate-x-1/2' : ''}`}
               style={{ left: hoverInfo.x, top: hoverInfo.y }}
             >
               <p className="font-bold text-on-surface mb-3 border-b border-slate-50 pb-2">
-                {DAYS[hoverInfo.day]} at {hoverInfo.hour.toString().padStart(2, '0')}:00
+                {DAYS[hoverInfo.day]} at {formatHour(hoverInfo.hour)}
               </p>
               <div className="space-y-2">
                 <p className="flex min-w-0 justify-between gap-4">

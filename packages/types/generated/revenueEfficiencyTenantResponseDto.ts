@@ -12,6 +12,7 @@ export interface RevenueEfficiencyTenantResponseDto {
   tenantName?: string | null;
   type?: TenantType;
   averageOrderValue?: number;
+  orderVolume?: number;
   portfolioSharePercentage?: number;
   growthVelocity?: number;
   /** @nullable */

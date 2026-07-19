@@ -8,13 +8,18 @@ public class RefreshFinancialMaterializedViewJob(IDbContextFactory<AnalyticsDbCo
 {
     public async Task ExecuteAsync()
     {
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        await RefreshAsync();
+    }
+
+    public async Task RefreshAsync(CancellationToken ct = default)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(ct);
 
         // Refresh materialized views in sequential order to respect data dependencies.
         await dbContext.Database.ExecuteSqlRawAsync(
-            "REFRESH MATERIALIZED VIEW CONCURRENTLY v_mat_financial_daily_tenant_rollup;");
+            "REFRESH MATERIALIZED VIEW CONCURRENTLY v_mat_financial_daily_tenant_rollup;", ct);
         await dbContext.Database.ExecuteSqlRawAsync(
-            "REFRESH MATERIALIZED VIEW CONCURRENTLY v_mat_financial_daily_global_rollup;");
+            "REFRESH MATERIALIZED VIEW CONCURRENTLY v_mat_financial_daily_global_rollup;", ct);
     }
 }
 

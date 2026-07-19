@@ -12,7 +12,7 @@ export function MotilloNews() {
   const selectedPost = feedItems.find((p) => p.id === selectedPostId) || feedItems[0];
 
   return (
-    <CollectionPanel title="Motillo News" titleClassName="md:text-lg" className="h-full relative">
+    <CollectionPanel title="Motillo News" className="h-full relative">
       {isLoading ? (
         <div className="flex flex-col md:flex-row h-full animate-pulse">
           {/* Skeleton Sidebar */}
@@ -38,7 +38,7 @@ export function MotilloNews() {
           No news available.
         </div>
       ) : (
-        <div className="flex gap-2 p-4 flex-col md:flex-row h-full overflow-hidden">
+        <div className="flex gap-2 p-4 pt-0 flex-col md:flex-row h-full overflow-hidden">
           {/* Sidebar List (Surface Container Low) */}
           <div className="flex flex-row md:flex-col rounded-2xl w-full md:w-1/3 md:h-full flex-shrink-0 p-3 gap-4 overflow-x-auto md:overflow-x-hidden md:overflow-y-auto custom-scrollbar bg-surface-container snap-x scroll-px-4">
             {feedItems.map((post) => {

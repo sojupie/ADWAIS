@@ -1,125 +1,67 @@
 import { memo } from 'react';
-import {
-  Bar,
-  ComposedChart,
-  CartesianGrid,
-  Legend,
-  Line,
-  ReferenceLine,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
+import type { ChartData, ChartOptions, Plugin } from 'chart.js';
 import type { OrderBin } from '@types';
 import { formatNumber } from '@utils';
 import { ChartPanel } from '../common/charts/ChartPanel';
+import { ChartJsCanvas } from '../common/charts/ChartJsCanvas';
+import { chartColor, chartLegendLabels, chartTick, chartTooltip, horizontalGrid } from '../common/charts/chartJs';
 
-const CustomTooltip = ({ active, payload, label }: { isLoading?: boolean;  active?: boolean; payload?: { dataKey?: string | number; value: number }[]; label?: string }) => {
-  if (!active || !payload?.length) return null;
+type MixedChart = 'bar' | 'line';
 
-  const orderCount = payload.find(p => p.dataKey === 'orderCount')?.value;
-  const cdf = payload.find(p => p.dataKey === 'cumulativePercentage')?.value;
-  const kde = payload.find(p => p.dataKey === 'kdeDensity')?.value;
-
-  return (
-    <div className="bg-surface border border-outline-variant rounded-lg shadow-lg p-4 text-sm animate-in fade-in zoom-in duration-200 min-w-[200px]">
-      <p className="font-bold text-on-surface mb-3 border-b border-slate-50 pb-2">{label}</p>
-      <div className="flex flex-col gap-4">
-        <p className="flex justify-between gap-12">
-          <span className="text-on-surface-variant">Volume:</span>
-          <strong className="text-brand-btn-primary">{formatNumber(orderCount || 0)}</strong>
-        </p>
-        <p className="flex justify-between gap-12">
-          <span className="text-on-surface-variant">Density (KDE):</span>
-          <strong className="text-teal-600">{formatNumber(kde || 0)}</strong>
-        </p>
-        <p className="flex justify-between gap-12 mt-1 pt-2 border-t border-slate-50">
-          <span className="text-on-surface-variant">Cumulative:</span>
-          <strong className="text-orange-500">{cdf?.toFixed(1) || 0}%</strong>
-        </p>
-      </div>
-    </div>
-  );
+const thresholdLines: Plugin<MixedChart> = {
+  id: 'distributionThresholds',
+  beforeDatasetsDraw(chart) {
+    const scale = chart.scales.right;
+    if (!scale) return;
+    const { ctx, chartArea } = chart;
+    ctx.save();
+    ctx.strokeStyle = '#ef444499';
+    ctx.setLineDash([3, 3]);
+    [70, 80].forEach(value => {
+      const y = scale.getPixelForValue(value);
+      ctx.beginPath(); ctx.moveTo(chartArea.left, y); ctx.lineTo(chartArea.right, y); ctx.stroke();
+    });
+    ctx.restore();
+  },
 };
 
-export const OrderValueDistributionChart = memo(function OrderValueDistributionChart({ isLoading, isStale, bins, className }: { isLoading?: boolean; isStale?: boolean; bins: OrderBin[], className?: string }) {
+export const OrderValueDistributionChart = memo(function OrderValueDistributionChart({ isLoading, isStale, bins, className }: {
+  isLoading?: boolean; isStale?: boolean; bins: OrderBin[]; className?: string;
+}) {
+  const data: ChartData<MixedChart, number[], string> = {
+    labels: bins.map(bin => bin.binLabel),
+    datasets: [
+      { type: 'bar', label: 'Volume (Orders)', data: bins.map(bin => bin.orderCount), yAxisID: 'left', backgroundColor: chartColor('--color-brand-btn-primary', '#2563eb') + '99', borderRadius: 4, maxBarThickness: 60 },
+      { type: 'line', label: 'Density Curve', data: bins.map(bin => bin.kdeDensity), yAxisID: 'left', borderColor: '#0d9488', borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 7, pointHoverBackgroundColor: '#0d9488', pointHoverBorderColor: '#fff', pointHoverBorderWidth: 3, tension: 0.35 },
+      { type: 'line', label: 'Cumulative %', data: bins.map(bin => bin.cumulativePercentage), yAxisID: 'right', borderColor: '#f97316', borderWidth: 2, borderDash: [4, 4], pointRadius: 0, pointHoverRadius: 6, pointHoverBackgroundColor: '#f97316', pointHoverBorderColor: '#fff', pointHoverBorderWidth: 2, tension: 0.35 },
+    ],
+  };
+  const options: ChartOptions<MixedChart> = {
+    responsive: true, maintainAspectRatio: false, animation: false, interaction: { mode: 'index', intersect: false },
+    layout: { padding: { top: 12, bottom: 4 } },
+    plugins: {
+      legend: { position: 'bottom', labels: chartLegendLabels },
+      tooltip: {
+        ...chartTooltip,
+        callbacks: {
+          title: items => bins[items[0].dataIndex]?.binLabel || '',
+          label: context => context.datasetIndex === 0
+            ? `Volume: ${formatNumber(Number(context.raw))}`
+            : context.datasetIndex === 1
+              ? `Density (KDE): ${formatNumber(Number(context.raw))}`
+              : `Cumulative: ${Number(context.raw).toFixed(1)}%`,
+        },
+      },
+    },
+    scales: {
+      x: { border: { display: false }, grid: { display: false }, ticks: { ...chartTick(14, 700), autoSkip: true, maxTicksLimit: 8, sampleSize: 8, minRotation: 0, maxRotation: 45, padding: 6 } },
+      left: { position: 'left', border: { display: false }, grid: horizontalGrid, ticks: chartTick(14, 700) },
+      right: { position: 'right', min: 0, max: 100, border: { display: false }, grid: { display: false }, ticks: { ...chartTick(14, 700), color: '#f97316', callback: value => `${value}%` } },
+    },
+  };
   return (
-    <ChartPanel isLoading={isLoading} isStale={isStale}
-      title="Order Distribution & Shipping Threshold"
-      className={className || ''}
-      bodyClassName=""
-    >
-      <ResponsiveContainer width="100%" height="100%">
-        <ComposedChart data={bins} margin={{ top: 16, right: 10, left: 10, bottom: 20 }}>
-          <CartesianGrid stroke="var(--color-chart-grid)" strokeDasharray="3 4" vertical={false} />
-          <XAxis
-            dataKey="binLabel"
-            tick={{ fill: 'var(--color-chart-tick)', fontSize: 11, fontWeight: 700, fontFamily: 'Manrope, sans-serif' }}
-            axisLine={false}
-            tickLine={false}
-            angle={-45}
-            textAnchor="end"
-            height={70}
-            interval={0}
-          />
-          <YAxis
-            yAxisId="left"
-            tick={{ fill: 'var(--color-chart-tick)', fontSize: 11, fontWeight: 700, fontFamily: 'Manrope, sans-serif' }}
-            axisLine={false}
-            tickLine={false}
-          />
-          <YAxis
-            yAxisId="right"
-            orientation="right"
-            domain={[0, 100]}
-            tick={{ fill: '#f97316', fontSize: 11, fontWeight: 700, fontFamily: 'Manrope, sans-serif' }}
-            tickFormatter={(value) => `${value}%`}
-            axisLine={false}
-            tickLine={false}
-          />
-          <Tooltip content={<CustomTooltip />} useTranslate3d={true} isAnimationActive={false} />
-          <Legend wrapperStyle={{ bottom: 0, fontSize: '12px', fontWeight: 600, fontFamily: 'Manrope, sans-serif' }} />
-          
-          <Bar
-            yAxisId="left"
-            name="Volume (Orders)"
-            dataKey="orderCount"
-            fill="var(--color-brand-btn-primary)"
-            fillOpacity={0.6}
-            radius={[4, 4, 0, 0]}
-            maxBarSize={60}
-            isAnimationActive={false}
-          />
-          
-          <Line
-            yAxisId="left"
-            name="Density Curve"
-            type="monotone"
-            dataKey="kdeDensity"
-            stroke="#0d9488"
-            strokeWidth={2.5}
-            dot={false}
-            activeDot={{ r: 4, fill: '#0d9488', stroke: '#fff', strokeWidth: 2 }}
-            isAnimationActive={false}
-          />
-
-          <Line
-            yAxisId="right"
-            name="Cumulative % (Right Axis)"
-            type="monotone"
-            dataKey="cumulativePercentage"
-            stroke="#f97316"
-            strokeWidth={2}
-            strokeDasharray="4 4"
-            dot={false}
-            isAnimationActive={false}
-          />
-
-          <ReferenceLine yAxisId="right" y={70} stroke="#ef4444" strokeDasharray="3 3" opacity={0.6} />
-          <ReferenceLine yAxisId="right" y={80} stroke="#ef4444" strokeDasharray="3 3" opacity={0.6} />
-        </ComposedChart>
-      </ResponsiveContainer>
+    <ChartPanel isLoading={isLoading} isStale={isStale} title="Order Distribution & Shipping Threshold" className={className || ''}>
+      <div className="absolute inset-0"><ChartJsCanvas type="bar" data={data} options={options} plugins={[thresholdLines]} /></div>
     </ChartPanel>
   );
 });

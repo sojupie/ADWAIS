@@ -16,10 +16,12 @@ namespace Adwais.Infrastructure.Services;
 
 public class GlobalConfigService(
     IApplicationDbContext dbContext,
-    ISystemEventService eventService) : IGlobalConfigService
+    ISystemEventService eventService,
+    IReportingRollupRefresher reportingRollupRefresher) : IGlobalConfigService
 {
     private readonly IApplicationDbContext _dbContext = dbContext;
     private readonly ISystemEventService _eventService = eventService;
+    private readonly IReportingRollupRefresher _reportingRollupRefresher = reportingRollupRefresher;
 
     public async Task<GlobalConfigResponseDto> GetConfigAsync(CancellationToken ct = default)
     {
@@ -50,8 +52,13 @@ public class GlobalConfigService(
         }
         if (!string.IsNullOrWhiteSpace(request.WeatherLocation)) config.WeatherLocation = request.WeatherLocation.Trim();
         if (request.WeatherFetchIntervalMinutes.HasValue) config.WeatherFetchIntervalMinutes = request.WeatherFetchIntervalMinutes.Value;
+        var reportingTimeZoneChanged = request.ReportingTimeZoneId is not null
+            && !string.Equals(config.ReportingTimeZoneId, request.ReportingTimeZoneId.Trim(), StringComparison.Ordinal);
+        if (request.ReportingTimeZoneId is not null) config.ReportingTimeZoneId = request.ReportingTimeZoneId.Trim();
 
         await _dbContext.SaveChangesAsync(ct);
+        // Once the config is persisted, finish rebuilding even if the HTTP request is cancelled.
+        if (reportingTimeZoneChanged) await _reportingRollupRefresher.RefreshAsync(CancellationToken.None);
         await _eventService.LogAsync(nameof(GlobalConfigService), "Global configuration updated.");
 
         return MapToDto(config);
@@ -207,7 +214,8 @@ public class GlobalConfigService(
             config.DefaultUptimeSla,
             config.FeedFetchIntervalHours,
             config.WeatherLocation,
-            config.WeatherFetchIntervalMinutes
+            config.WeatherFetchIntervalMinutes,
+            config.ReportingTimeZoneId
         );
     }
 

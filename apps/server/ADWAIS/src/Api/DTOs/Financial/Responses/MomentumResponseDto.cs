@@ -9,6 +9,7 @@ public record MomentumTenantResponseDto(
     decimal BaselineRevenue,
     decimal GrowthPercentage,
     decimal CurrentRevenue,
+    decimal OrderVolume,
     string? LitiumBaseUrl);
 
 public record MomentumResponseDto(

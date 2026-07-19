@@ -8,6 +8,7 @@ import type { RevenueEfficiencyTenantResponseDto } from './revenueEfficiencyTena
 
 export interface RevenueEfficiencyResponseDto {
   globalAverageOrderValue?: number;
+  medianOrderVolume?: number;
   medianPortfolioShare?: number;
   /** @nullable */
   tenants?: RevenueEfficiencyTenantResponseDto[] | null;

@@ -24,6 +24,7 @@ export const MOCK_MOMENTUM: MomentumResponse = {
     baselineRevenue: 1000000 + Math.random() * 8000000,
     growthPercentage: -15 + Math.random() * 35,
     currentRevenue: 1100000 + Math.random() * 9000000,
+    orderVolume: 5000 + Math.random() * 20000,
     previousRevenue: 1000000 + Math.random() * 8000000,
     type: 'B2C',
     vertical: 'Retail',
@@ -34,11 +35,13 @@ export const MOCK_MOMENTUM: MomentumResponse = {
 
 export const MOCK_EFFICIENCY: RevenueEfficiencyResponse = {
   globalAverageOrderValue: 850,
+  medianOrderVolume: 12000,
   medianPortfolioShare: 0.05,
   tenants: Array.from({ length: 45 }).map((_, i) => ({
     tenantId: `t-${i}`,
     tenantName: `Mock Store ${i + 1}`,
     averageOrderValue: 200 + Math.random() * 1600,
+    orderVolume: 5000 + Math.random() * 20000,
     portfolioShare: 0.01 + Math.random() * 0.15,
     portfolioSharePercentage: 1 + Math.random() * 15,
     growthVelocity: -5 + Math.random() * 25,

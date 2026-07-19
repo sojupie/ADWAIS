@@ -1,148 +1,90 @@
 import { memo, useMemo } from 'react';
-import {
-  Cell,
-  ReferenceLine,
-  ResponsiveContainer,
-  Scatter,
-  ScatterChart,
-  Tooltip,
-  XAxis,
-  YAxis,
-  ZAxis,
-} from 'recharts';
-import type { RevenueEfficiencyResponse, RevenueEfficiencyTenant, ComparisonPeriod } from '@types';
+import type { BubbleDataPoint, ChartData, ChartDataset, ChartOptions } from 'chart.js';
+import type { RevenueEfficiencyResponse, ComparisonPeriod } from '@types';
 import { formatCompact, formatCurrency } from '@utils';
 import { ChartPanel } from '../common/charts/ChartPanel';
-import {EmptyState} from "../common/ui/EmptyState.tsx";
-import { ChartFaviconDot } from '../common/charts/ChartFaviconDot';
+import { EmptyState } from '../common/ui/EmptyState';
+import { chartColor, chartTick, chartTooltip, horizontalGrid, matrixQuadrantsPlugin, referenceLinesPlugin, scaleBubbleRadii, tenantMarkerPlugin } from '../common/charts/chartJs';
+import { ChartJsCanvas } from '../common/charts/ChartJsCanvas';
 
-const TYPE_COLORS: Record<string, string> = {
-  'B2C': 'var(--color-chart-1)',
-  'Mixed': 'var(--color-chart-2)',
-  'B2B': 'var(--color-chart-3)',
-};
-
-const CustomTooltip = ({ active, payload }: { isLoading?: boolean;  active?: boolean; payload?: { payload: unknown }[] }) => {
-  if (!active || !payload?.length) return null;
-
-  const point = payload[0].payload as RevenueEfficiencyTenant;
-
-  return (
-    <div className="bg-surface border border-outline-variant rounded-lg shadow-lg p-4 text-sm animate-in fade-in zoom-in duration-200">
-      <p className="font-bold text-on-surface mb-3 border-b border-slate-50 pb-2">
-        {point.tenantName} <span className="text-on-surface-variant font-normal text-sm ml-2 uppercase tracking-wider">{point.type}</span>
-      </p>
-      <div className="space-y-2">
-        <p className="flex justify-between gap-12">
-          <span className="text-on-surface-variant">Average Order Value:</span>
-          <strong className="text-on-surface-variant">{formatCurrency(point.averageOrderValue)}</strong>
-        </p>
-        <p className="flex justify-between gap-12">
-          <span className="text-on-surface-variant">Portfolio Share:</span>
-          <strong className="text-on-surface-variant">{point.portfolioSharePercentage.toFixed(1)}%</strong>
-        </p>
-        <p className="flex justify-between gap-12">
-          <span className="text-on-surface-variant">Growth Velocity:</span>
-          <strong className={point.growthVelocity >= 0 ? 'text-growth' : 'text-[#c92a2a]'}>
-            {point.growthVelocity > 0 ? '+' : ''}{point.growthVelocity.toFixed(1)}%
-          </strong>
-        </p>
-      </div>
-    </div>
-  );
+const TYPE_COLORS: Record<string, [string, string]> = {
+  B2C: ['--color-chart-1', '#0ea5e9'],
+  Mixed: ['--color-chart-2', '#8b5cf6'],
+  B2B: ['--color-chart-3', '#2563eb'],
 };
 
 export const RevenueEfficiencyChart = memo(function RevenueEfficiencyChart({
-  isLoading, isStale, response,
-  comparison,
-  onTenantSelect,
-  className }: { isLoading?: boolean; isStale?: boolean;
-  response: RevenueEfficiencyResponse;
-  comparison?: ComparisonPeriod;
-  onTenantSelect?: (tenantId: string) => void;
-  className?: string;
+  isLoading, isStale, response, comparison, onTenantSelect, className,
+}: {
+  isLoading?: boolean; isStale?: boolean; response: RevenueEfficiencyResponse;
+  comparison?: ComparisonPeriod; onTenantSelect?: (tenantId: string) => void; className?: string;
 }) {
-  const isEmpty = !response || response.tenants.length === 0;
-  const chartData = useMemo(
-    () => response.tenants.map((tenant) => ({ ...tenant, absoluteGrowth: Math.abs(tenant.growthVelocity) })),
-    [response.tenants]
+  const tenants = useMemo(
+    () => response.tenants.filter(tenant => tenant.orderVolume > 0 && tenant.averageOrderValue > 0),
+    [response.tenants],
   );
+  const isEmpty = tenants.length === 0;
+  const radii = useMemo(() => scaleBubbleRadii(tenants.map(tenant => tenant.portfolioSharePercentage), 5, 22), [tenants]);
+  const points: BubbleDataPoint[] = tenants.map((tenant, index) => ({
+    x: tenant.orderVolume,
+    y: tenant.averageOrderValue,
+    r: radii[index],
+  }));
+  const dataset = {
+    label: 'Tenants',
+    data: points,
+    backgroundColor: tenants.map(tenant => {
+      const [variable, fallback] = TYPE_COLORS[tenant.type] || TYPE_COLORS.Mixed;
+      return chartColor(variable, fallback) + 'B3';
+    }),
+    borderColor: '#fff',
+    borderWidth: 2,
+    hoverBorderWidth: 3,
+    tenantMeta: tenants,
+  } as ChartDataset<'bubble', BubbleDataPoint[]> & { tenantMeta: typeof tenants };
+  const data: ChartData<'bubble'> = { datasets: [dataset] };
+  const options: ChartOptions<'bubble'> = {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: false,
+    onClick: (_event, elements) => {
+      const tenant = elements[0] ? tenants[elements[0].index] : undefined;
+      if (tenant?.tenantId) onTenantSelect?.(tenant.tenantId);
+    },
+    onHover: (event, elements) => {
+      if (event.native) (event.native.target as HTMLElement).style.cursor = elements.length ? 'pointer' : 'default';
+    },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        ...chartTooltip,
+        callbacks: {
+          title: items => tenants[items[0].dataIndex]?.tenantName || '',
+          label: context => {
+            const tenant = tenants[context.dataIndex];
+            return [
+              `Average Order Value: ${formatCurrency(tenant.averageOrderValue)}`,
+              `Order Volume: ${formatCompact(tenant.orderVolume)}`,
+              `Portfolio Share: ${tenant.portfolioSharePercentage.toFixed(1)}%`,
+              `Growth Velocity: ${tenant.growthVelocity > 0 ? '+' : ''}${tenant.growthVelocity.toFixed(1)}%`,
+            ];
+          },
+        },
+      },
+    },
+    scales: {
+      x: { border: { display: false }, grid: horizontalGrid, title: { display: true, text: 'Order Volume (Transactions) →', color: chartColor('--color-chart-label', '#475569'), font: { family: 'Manrope, sans-serif', size: 14, weight: 800 } }, ticks: { ...chartTick(14), callback: value => formatCompact(Number(value)) } },
+      y: { type: 'logarithmic', border: { display: false }, grid: horizontalGrid, title: { display: true, text: 'Average Order Value (SEK, log scale) →', color: chartColor('--color-chart-label', '#475569'), font: { family: 'Manrope, sans-serif', size: 14, weight: 800 } }, ticks: { ...chartTick(14), callback: value => formatCompact(Number(value)) } },
+    },
+  };
 
   return (
-    <ChartPanel isLoading={isLoading} isStale={isStale}
-      title="Revenue Efficiency Matrix"
-      comparison={comparison}
-      className={className || "h-full"}
-      bodyClassName={isEmpty ? 'flex items-center justify-center' : 'flex-1 min-h-0'}
-      legend={<span className="text-sm font-bold text-on-surface-variant uppercase tracking-widest bg-surface-container-low px-3 py-1.5 rounded">Size = Relative Revenue Growth</span>}
+    <ChartPanel isLoading={isLoading} isStale={isStale} title="Revenue Efficiency Matrix" comparison={comparison}
+      className={className || 'h-full'} bodyClassName={isEmpty ? 'flex items-center justify-center' : 'flex-1 min-h-0'}
+      legend={<span className="text-sm font-bold text-on-surface-variant uppercase tracking-widest bg-surface-container-low px-3 py-1.5 rounded">Size = % of Portfolio Revenue</span>}
     >
-      {isEmpty ? (
-        <EmptyState message={"No data available"} variant={"minimal"}/>
-      ) : (
-        <ResponsiveContainer width="100%" height="100%">
-          <ScatterChart margin={{ top: 15, right: 20, left: 15, bottom: 20 }}>
-            <XAxis
-              type="number"
-              dataKey="averageOrderValue"
-              name="AOV"
-              tickFormatter={(value) => formatCompact(value)}
-              tick={{ fill: 'var(--color-chart-tick)', fontSize: 13, fontWeight: 600, fontFamily: 'Manrope, sans-serif' }}
-              axisLine={false}
-              tickLine={false}
-              label={{
-                value: 'Average Order Value (SEK) →',
-                position: 'insideBottom',
-                offset: -5,
-                fill: 'var(--color-chart-label)',
-                fontSize: 13,
-                fontWeight: 800,
-                fontFamily: 'Manrope, sans-serif'
-              }}
-            />
-            <YAxis
-              type="number"
-              dataKey="portfolioSharePercentage"
-              name="Portfolio Share"
-              tickFormatter={(value) => `${value.toFixed(0)}%`}
-              tick={{ fill: 'var(--color-chart-tick)', fontSize: 13, fontWeight: 600, fontFamily: 'Manrope, sans-serif' }}
-              axisLine={false}
-              tickLine={false}
-              label={{
-                value: 'Share of portfolio (%) →',
-                position: 'insideLeft',
-                offset: -10,
-                angle: -90,
-                fill: 'var(--color-chart-label)',
-                style: { textAnchor: 'middle' },
-                fontSize: 13,
-                fontWeight: 800,
-                fontFamily: 'Manrope, sans-serif'
-              }}
-            />
-            {/* We map growthVelocity to bubble area. We take absolute value to ensure sizes are positive,
-                but users still see negative growth via tooltip. */}
-            <ZAxis type="number" dataKey="growthVelocity" range={[50, 1500]} name="Growth Velocity" />
-            <ReferenceLine x={response.globalAverageOrderValue} stroke="var(--color-chart-prev-line)" strokeWidth={2} strokeDasharray="5 5" />
-            <ReferenceLine y={response.medianPortfolioShare} stroke="var(--color-chart-prev-line)" strokeWidth={2} strokeDasharray="5 5" />
-            <Tooltip content={<CustomTooltip />} cursor={{ strokeDasharray: '3 3' }} useTranslate3d={true} isAnimationActive={false} />
-            <Scatter
-              data={chartData}
-              dataKey="absoluteGrowth"
-              shape={<ChartFaviconDot />}
-              isAnimationActive={false}
-              onClick={(point) => {
-                const payload = point?.payload as RevenueEfficiencyTenant | undefined;
-                if (payload?.tenantId) {
-                  onTenantSelect?.(payload.tenantId);
-                }
-              }}
-            >
-              {response.tenants.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={TYPE_COLORS[entry.type] || TYPE_COLORS['Mixed']} />
-              ))}
-            </Scatter>
-          </ScatterChart>
-        </ResponsiveContainer>
+      {isEmpty ? <EmptyState message="No data available" variant="minimal" /> : (
+        <div className="absolute inset-0"><ChartJsCanvas type="bubble" data={data} options={options} plugins={[matrixQuadrantsPlugin(response.medianOrderVolume, response.globalAverageOrderValue), referenceLinesPlugin(response.medianOrderVolume, response.globalAverageOrderValue), tenantMarkerPlugin]} /></div>
       )}
     </ChartPanel>
   );

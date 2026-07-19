@@ -22,7 +22,8 @@ namespace Adwais.Api.Controllers;
 [Route("api/monitors")]
 public class MonitorController(
     IApplicationDbContext dbContext,
-    IMonitorOrchestrationService monitorService) : ControllerBase
+    IMonitorOrchestrationService monitorService,
+    IReportingCalendar reportingCalendar) : ControllerBase
 {
     private readonly IApplicationDbContext _dbContext = dbContext;
     private readonly IMonitorOrchestrationService _monitorService = monitorService;
@@ -42,7 +43,7 @@ public class MonitorController(
     [Authorize(Policy = "KioskOrStaffAccess")]
     public async Task<ActionResult<MonitorAnalyticsResponseDto>> GetAnalytics([FromQuery] MonitorRequestDto request, CancellationToken ct = default)
     {
-        var period = TimeframeResolver.Resolve(request.Timeframe, request.Comparison);
+        var period = await reportingCalendar.ResolvePeriodAsync(request.Timeframe, request.Comparison, ct);
         var result = await _monitorService.GetAnalyticsAsync(period, request.TenantId, request.MonitorId, ct);
 
         return Ok(new MonitorAnalyticsResponseDto(
@@ -80,7 +81,7 @@ public class MonitorController(
     [Authorize(Policy = "KioskOrStaffAccess")]
     public async Task<ActionResult<IEnumerable<UptimeMonitorDto>>> GetMonitors([FromQuery] MonitorRequestDto request, CancellationToken ct = default)
     {
-        var period = TimeframeResolver.Resolve(request.Timeframe, request.Comparison);
+        var period = await reportingCalendar.ResolvePeriodAsync(request.Timeframe, request.Comparison, ct);
 
         if (request.MonitorId.HasValue)
         {
@@ -125,7 +126,7 @@ public class MonitorController(
     [Authorize(Policy = "KioskOrStaffAccess")]
     public async Task<ActionResult<IEnumerable<UptimeMonitorDto>>> GetUnassignedMonitors([FromQuery] Timeframe timeframe = Timeframe.T30, [FromQuery] ComparisonType comparison = ComparisonType.Preceding, CancellationToken ct = default)
     {
-        var period = TimeframeResolver.Resolve(timeframe, comparison);
+        var period = await reportingCalendar.ResolvePeriodAsync(timeframe, comparison, ct);
         var monitors = await _monitorService.GetMonitorsByTenantAsync(IApplicationDbContext.SystemTenantGuid, period, ct);
         return Ok(monitors.Select(ToDto));
     }
@@ -250,7 +251,8 @@ public class MonitorController(
         var tenantId = await db.Monitors.Where(m => m.Id == id).Select(m => (Guid?)m.TenantId).SingleOrDefaultAsync(ct);
         if (tenantId == null) return NotFound();
 
-        var m = await _monitorService.GetMonitorAsync(tenantId.Value, id, TimeframeResolver.Resolve(Timeframe.T30), ct);
+        var period = await reportingCalendar.ResolvePeriodAsync(Timeframe.T30, ct: ct);
+        var m = await _monitorService.GetMonitorAsync(tenantId.Value, id, period, ct);
         return Ok(ToDto(m));
     }
 

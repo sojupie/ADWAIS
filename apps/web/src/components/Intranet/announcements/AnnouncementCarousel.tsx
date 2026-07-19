@@ -58,7 +58,7 @@ export function AnnouncementCarousel({ children }: AnnouncementCarouselProps) {
       <div
         ref={viewportRef}
         onScroll={updateOverflow}
-        className="grid h-full min-h-0 snap-x snap-mandatory grid-flow-col content-start items-start gap-4 overflow-x-auto overflow-y-hidden overscroll-x-contain px-4 pb-4 pt-2 scroll-px-4 custom-scrollbar md:snap-proximity"
+        className="grid h-full min-h-0 snap-x snap-mandatory grid-flow-col content-start items-start gap-4 overflow-x-auto overflow-y-hidden overscroll-x-contain p-4 pt-0 scroll-px-4 custom-scrollbar md:snap-proximity"
         style={{
           gridTemplateRows: `repeat(${rowCount}, ${CARD_HEIGHT}px)`,
           gridAutoColumns: 'minmax(17rem, 22rem)',

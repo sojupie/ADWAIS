@@ -1,197 +1,148 @@
 import { memo, useMemo } from 'react';
-import {
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-  Line,
-  Area,
-  ComposedChart
-} from 'recharts';
+import type { ChartData, ChartOptions, Plugin } from 'chart.js';
 import { LTTB } from 'downsample';
 import type { LatencyPoint, ComparisonPeriod } from '@types';
 import { formatChartLabel, inferBinSize } from '@utils';
-
-function formatLatency(value: number | null | undefined): string {
-  if (value == null) return 'N/A';
-  return `${Math.round(value)}ms`;
-}
-
-interface GraphTooltipProps {
-  isLoading?: boolean;
-  active?: boolean;
-  label?: string;
-  payload?: Array<{ payload: LatencyPoint, name: string, color: string }>;
-}
-
-const GraphTooltip = ({ active, payload, label }: GraphTooltipProps) => {
-  if (!active || !payload?.length) return null;
-  const point = payload[0].payload as LatencyPoint;
-
-  return (
-      <div className="bg-surface border border-outline-variant rounded-lg shadow-lg p-4 text-sm">
-        <p className="font-bold text-brand-text mb-3 border-b border-slate-50 pb-2 uppercase tracking-widest text-sm">{label}</p>
-        <div className="space-y-2">
-          <p className="flex justify-between gap-16">
-            <span className="text-on-surface-variant font-bold uppercase text-sm tracking-widest">Current Avg</span>
-            <strong className="text-brand-btn-primary">{formatLatency(point.average)}</strong>
-          </p>
-          <p className="flex justify-between gap-16">
-            <span className="text-on-surface-variant font-bold uppercase text-sm tracking-widest">Previous Avg</span>
-            <strong className="text-on-surface-variant">{formatLatency(point.previousAverage)}</strong>
-          </p>
-          <div className="pt-2 border-t border-slate-50 mt-2 space-y-1">
-            <p className="flex justify-between gap-16">
-              <span className="text-on-surface-variant font-bold uppercase text-sm tracking-widest">90th Percentile</span>
-              <strong className="text-red-500 text-sm">{formatLatency(point.highest)}</strong>
-            </p>
-            <p className="flex justify-between gap-16">
-              <span className="text-on-surface-variant font-bold uppercase text-sm tracking-widest">10th Percentile</span>
-              <strong className="text-emerald-500 text-sm">{formatLatency(point.lowest)}</strong>
-            </p>
-          </div>
-        </div>
-      </div>
-  );
-};
-
 import { ChartPanel } from '../common/charts/ChartPanel';
 import { EmptyState } from '../common/ui/EmptyState';
+import { ChartJsCanvas } from '../common/charts/ChartJsCanvas';
+import { chartColor, chartTick, chartTooltip, horizontalGrid } from '../common/charts/chartJs';
 
-export const NetworkLatencyChart = memo(function NetworkLatencyChart({
-                                                                       isLoading,
-                                                                       isStale,
-                                                                       points,
-                                                                       title = "Network Latency",
-                                                                       className,
-                                                                       comparison = 'Preceding'
-                                                                     }: {
-  isLoading?: boolean;
-  isStale?: boolean;
-  points: LatencyPoint[];
-  title?: string;
-  className?: string;
-  comparison?: ComparisonPeriod;
+function formatLatency(value: number | null | undefined): string {
+  return value == null ? 'N/A' : `${Math.round(value)}ms`;
+}
+
+type LatencyChartPoint = LatencyPoint & { label: string };
+
+function latencyGapPlugin(points: LatencyChartPoint[]): Plugin<'line'> {
+  return {
+    id: 'latencyGaps',
+    beforeDatasetsDraw(chart) {
+      const { ctx, scales } = chart;
+      let index = 0;
+      while (index < points.length) {
+        if (points[index].average != null) {
+          index += 1;
+          continue;
+        }
+        const gapStart = index;
+        while (index < points.length && points[index].average == null) index += 1;
+        const leftIndex = gapStart - 1;
+        const rightIndex = index;
+        if (leftIndex < 0 || rightIndex >= points.length) continue;
+
+        const leftValue = points[leftIndex].average;
+        const rightValue = points[rightIndex].average;
+        if (leftValue == null || rightValue == null) continue;
+        const x1 = scales.x.getPixelForValue(leftIndex);
+        const y1 = scales.y.getPixelForValue(leftValue);
+        const x2 = scales.x.getPixelForValue(rightIndex);
+        const y2 = scales.y.getPixelForValue(rightValue);
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const length = Math.hypot(dx, dy) || 1;
+        const alongX = dx / length;
+        const alongY = dy / length;
+        const perpendicularX = -alongY;
+        const perpendicularY = alongX;
+        const middleX = (x1 + x2) / 2;
+        const middleY = (y1 + y2) / 2;
+
+        ctx.save();
+        ctx.strokeStyle = chartColor('--color-chart-prev-line', '#94a3b8');
+        ctx.globalAlpha = 0.65;
+        ctx.lineWidth = 3;
+        ctx.setLineDash([]);
+        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+
+        [-5, 5].forEach(offset => {
+          const markerX = middleX + alongX * offset;
+          const markerY = middleY + alongY * offset;
+          ctx.globalAlpha = 1;
+          ctx.strokeStyle = chartColor('--color-surface', '#fff');
+          ctx.lineWidth = 5;
+          ctx.beginPath();
+          ctx.moveTo(markerX - perpendicularX * 6, markerY - perpendicularY * 6);
+          ctx.lineTo(markerX + perpendicularX * 6, markerY + perpendicularY * 6);
+          ctx.stroke();
+          ctx.strokeStyle = chartColor('--color-chart-prev-line', '#64748b');
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        });
+        if (Math.abs(dx) > 30) {
+          ctx.fillStyle = chartColor('--color-chart-label', '#475569');
+          ctx.font = '800 9px Manrope, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'bottom';
+          ctx.fillText('GAP', middleX, middleY - 9);
+        }
+        ctx.restore();
+      }
+    },
+  };
+}
+
+export const NetworkLatencyChart = memo(function NetworkLatencyChart({ isLoading, isStale, points, title = 'Network Latency', className, comparison = 'Preceding' }: {
+  isLoading?: boolean; isStale?: boolean; points: LatencyPoint[]; title?: string; className?: string; comparison?: ComparisonPeriod;
 }) {
   const chartData = useMemo(() => {
     if (!points.length) return [];
-
-    const targetPointCount = 50;
     let sampledPoints = points;
-
-    if (points.length > targetPointCount) {
-      const tupleData = points.map((p, i) => [i, p.average || 0] as [number, number]);
-      const sampledTuples = LTTB(tupleData, targetPointCount) as Array<[number, number]>;
-      const sampledIndices = new Set(sampledTuples.map(t => t[0]));
-      sampledPoints = points.filter((_, i) => sampledIndices.has(i));
+    if (points.length > 50) {
+      const sampled = LTTB(points.map((point, index) => [index, point.average ?? point.previousAverage ?? 0] as [number, number]), 50) as Array<[number, number]>;
+      const indices = new Set(sampled.map(tuple => tuple[0]));
+      points.forEach((point, index) => {
+        if (point.average == null || points[index - 1]?.average == null || points[index + 1]?.average == null) indices.add(index);
+      });
+      sampledPoints = points.filter((_, index) => indices.has(index));
     }
-
-    const isHourly = sampledPoints.length > 0 && sampledPoints.length <= 24;
-    const binSize = inferBinSize(sampledPoints.map(p => p.timestamp), isHourly);
-
-    return sampledPoints.map((p, i) => ({
-      ...p,
-      band: p.lowest != null && p.highest != null ? [p.lowest, p.highest] : null,
-      label: formatChartLabel(p.timestamp, binSize, i)
-    }));
+    const binSize = inferBinSize(sampledPoints.map(point => point.timestamp), sampledPoints.length <= 24);
+    return sampledPoints.map((point, index) => ({ ...point, label: formatChartLabel(point.timestamp, binSize, index) }));
   }, [points]);
-
   const yAxisMax = useMemo(() => {
-    if (!points.length) return 'auto';
-    const maxAvg = Math.max(...points.map(p => Math.max(p.average || 0, p.previousAverage || 0)));
-    return maxAvg > 0 ? Math.ceil(maxAvg * 1.5) : 'auto';
+    const maximum = Math.max(0, ...points.map(point => Math.max(point.average || 0, point.previousAverage || 0)));
+    return maximum > 0 ? Math.ceil(maximum * 1.5) : undefined;
   }, [points]);
-
-  const legend = (
-      <div className="flex gap-8 text-sm font-black text-on-surface-variant uppercase tracking-widest bg-surface-container-low px-3 py-1 rounded-full border border-outline-variant">
-        <div className="flex items-center gap-3">
-          <div className="w-2.5 h-2.5 rounded-full bg-brand-btn-primary"></div>
-          <span>Current</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="w-2.5 h-2.5 rounded-full border-2 border-outline-variant border-dashed bg-transparent"></div>
-          <span>Previous</span>
-        </div>
-      </div>
-  );
-
-  const isEmpty = points.length === 0;
+  const data: ChartData<'line', (number | null)[], string> = {
+    labels: chartData.map(point => point.label),
+    datasets: [
+      { label: '10th Percentile', data: chartData.map(point => point.lowest), borderColor: 'transparent', pointRadius: 0 },
+      { label: '90th Percentile', data: chartData.map(point => point.highest), borderColor: 'transparent', backgroundColor: chartColor('--color-brand-btn-primary', '#2563eb') + '26', pointRadius: 0, fill: '-1', tension: 0.3 },
+      { label: 'Previous Period', data: chartData.map(point => point.previousAverage), borderColor: chartColor('--color-chart-prev-line', '#94a3b8'), borderWidth: 2, borderDash: [6, 6], pointRadius: 0, pointHoverRadius: 5, pointHoverBackgroundColor: chartColor('--color-chart-prev-line', '#94a3b8'), pointHoverBorderColor: '#fff', pointHoverBorderWidth: 2, tension: 0.3, spanGaps: true },
+      { label: 'Current Period', data: chartData.map(point => point.average), borderColor: chartColor('--color-brand-btn-primary', '#2563eb'), borderWidth: 4, pointRadius: 0, pointHoverRadius: 7, pointHoverBackgroundColor: chartColor('--color-brand-btn-primary', '#2563eb'), pointHoverBorderColor: '#fff', pointHoverBorderWidth: 3, tension: 0.3, spanGaps: false },
+    ],
+  };
+  const options: ChartOptions<'line'> = {
+    responsive: true, maintainAspectRatio: false, animation: false, interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        ...chartTooltip,
+        filter: context => context.datasetIndex >= 2,
+        callbacks: {
+          title: items => chartData[items[0].dataIndex]?.label || '',
+          label: context => {
+            const point = chartData[context.dataIndex];
+            if (context.datasetIndex === 2 && point.average == null) {
+              return [`Current Avg: N/A (data gap)`, `Previous Avg: ${formatLatency(point.previousAverage)}`];
+            }
+            return context.datasetIndex === 3
+              ? [`Current Avg: ${formatLatency(point.average)}`, `90th Percentile: ${formatLatency(point.highest)}`, `10th Percentile: ${formatLatency(point.lowest)}`]
+              : `Previous Avg: ${formatLatency(point.previousAverage)}`;
+          },
+        },
+      },
+    },
+    scales: {
+      x: { border: { display: false }, grid: { display: false }, ticks: { ...chartTick(12, 700), autoSkip: true, maxRotation: 0, padding: 10 } },
+      y: { min: 0, max: yAxisMax, border: { display: false }, grid: horizontalGrid, ticks: { ...chartTick(12), callback: value => `${value}ms` } },
+    },
+  };
+  const legend = <div className="flex flex-wrap justify-end gap-x-5 gap-y-1.5 text-sm font-black text-on-surface-variant uppercase tracking-widest bg-surface-container-low px-3 py-1.5 rounded-xl border border-outline-variant"><div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-brand-btn-primary" /><span>Current</span></div><div className="flex items-center gap-2"><div className="w-4 border-t-2 border-outline border-dashed" /><span>Previous</span></div><div className="flex items-center gap-2"><span className="relative inline-flex w-5 justify-center overflow-hidden text-base leading-none text-outline">//</span><span>Gap</span></div></div>;
 
   return (
-      <ChartPanel
-          isLoading={isLoading}
-          isStale={isStale}
-          title={title}
-          comparison={comparison}
-          legend={legend}
-          className={className}
-          bodyClassName={isEmpty ? "flex items-center justify-center" : ""}
-      >
-        {isEmpty ? (
-            <EmptyState message="No latency data available" variant="minimal" />
-        ) : (
-            <div className="absolute inset-0">
-              <ResponsiveContainer width="100%" height="100%" minHeight={280}>
-                <ComposedChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
-                  <CartesianGrid vertical={false} stroke="var(--color-chart-grid)" strokeDasharray="3 3" />
-                  <XAxis
-                      dataKey="label"
-                      fontSize={12}
-                      tick={{ fill: 'var(--color-chart-tick)', fontWeight: 700, fontFamily: 'Manrope, sans-serif' }}
-                      tickMargin={15}
-                      axisLine={false}
-                      tickLine={false}
-                      minTickGap={40}
-                  />
-                  <YAxis
-                      domain={[0, yAxisMax]}
-                      allowDataOverflow={true}
-                      tickLine={false}
-                      tick={{ fill: 'var(--color-chart-tick)', fontSize: 12 }}
-                      axisLine={false}
-                      minTickGap={30}
-                      tickFormatter={(value) => `${value}ms`}
-                  />
-                  <Tooltip content={<GraphTooltip />} useTranslate3d={true} isAnimationActive={false} />
-
-                  <Area
-                      type="monotone"
-                      dataKey="band"
-                      fill="var(--color-brand-btn-primary)"
-                      fillOpacity={0.15}
-                      stroke="none"
-                      isAnimationActive={false}
-                      connectNulls={true}
-                  />
-
-                  <Line
-                      type="monotone"
-                      dataKey="previousAverage"
-                      name="Previous Period"
-                      stroke="var(--color-chart-prev-line)"
-                      strokeWidth={2}
-                      strokeDasharray="6 6"
-                      dot={false}
-                      connectNulls={true}
-                      activeDot={false}
-                      isAnimationActive={false}
-                  />
-                  <Line
-                      type="monotone"
-                      dataKey="average"
-                      name="Current Period"
-                      stroke="var(--color-brand-btn-primary)"
-                      strokeWidth={4}
-                      dot={false}
-                      connectNulls={true}
-                      activeDot={{ r: 6, fill: 'var(--color-brand-btn-primary)', stroke: '#fff', strokeWidth: 3 }}
-                      isAnimationActive={false}
-                  />
-                </ComposedChart>
-              </ResponsiveContainer>
-            </div>
-        )}
-      </ChartPanel>
+    <ChartPanel isLoading={isLoading} isStale={isStale} title={title} comparison={comparison} legend={legend} className={className} bodyClassName={!points.length ? 'flex items-center justify-center' : ''}>
+      {!points.length ? <EmptyState message="No latency data available" variant="minimal" /> : <div className="absolute inset-0"><ChartJsCanvas type="line" data={data} options={options} plugins={[latencyGapPlugin(chartData)]} /></div>}
+    </ChartPanel>
   );
 });

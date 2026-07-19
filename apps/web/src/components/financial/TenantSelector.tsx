@@ -47,7 +47,7 @@ export function TenantSelector() {
       value={activeValue}
       onChange={handleSelect}
       disabled={isLoading}
-      containerClassName="min-w-0 flex-1 shrink lg:w-64 lg:flex-none"
+      containerClassName="min-w-0 flex-1 shrink sm:w-64 sm:flex-none"
       variant="pill"
       size="md"
       indicator={dropdownIcon}

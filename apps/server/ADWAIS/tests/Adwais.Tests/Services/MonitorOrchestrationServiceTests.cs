@@ -85,7 +85,7 @@ public class MonitorOrchestrationServiceTests
         );
 
         // Act
-        var result = await _service.GetAnalyticsAsync(period, tenantId, null, CancellationToken.None);
+        var result = await _service.GetAnalyticsAsync(period, tenantId, null, null, null, CancellationToken.None);
 
         // Assert
         Assert.NotNull(result);
@@ -133,7 +133,7 @@ public class MonitorOrchestrationServiceTests
         );
 
         // Act
-        var result = await _service.GetAnalyticsAsync(period, tenantId, null, CancellationToken.None);
+        var result = await _service.GetAnalyticsAsync(period, tenantId, null, null, null, CancellationToken.None);
 
         // Assert
         Assert.NotNull(result);

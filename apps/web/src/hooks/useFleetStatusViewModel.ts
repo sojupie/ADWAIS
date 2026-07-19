@@ -6,6 +6,32 @@ import { useSearch } from "@tanstack/react-router";
 import type { Timeframe } from "../schemas";
 import { useGlobalConfigQuery } from "./useJobSettingsQueries.ts";
 
+function useLocalStorage<T>(key: string, initialValue: T) {
+  const [storedValue, setStoredValue] = useState<T>(() => {
+    if (typeof window === "undefined") return initialValue;
+    try {
+      const item = window.localStorage.getItem(key);
+      return item ? JSON.parse(item) : initialValue;
+    } catch (error) {
+      console.error(error);
+      return initialValue;
+    }
+  });
+
+  const setValue = (value: T | ((val: T) => T)) => {
+    try {
+      const valueToStore = value instanceof Function ? value(storedValue) : value;
+      setStoredValue(valueToStore);
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(key, JSON.stringify(valueToStore));
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  return [storedValue, setValue] as const;
+}
+
 export function useFleetStatusViewModel() {
     // Reactively subscribe to the URL state. 
     // The route's beforeLoad guarantees this will be populated.
@@ -14,8 +40,14 @@ export function useFleetStatusViewModel() {
 
     const [selection, setSelection] = useState<{ tenantId: string, monitorId: number | null } | null>(null);
 
-    const analyticsQuery = useFleetAnalytics(timeframe, selection?.tenantId, selection?.monitorId);
-    const globalMonitorsQuery = useFleetMonitors(timeframe);
+    const [selectedTags, setSelectedTags] = useLocalStorage<string[]>('fleet-filter-tags', []);
+    const [selectedStatuses, setSelectedStatuses] = useLocalStorage<string[]>('fleet-filter-statuses', []);
+
+    const tagsArg = selectedTags.length > 0 ? selectedTags : undefined;
+    const statusesArg = selectedStatuses.length > 0 ? selectedStatuses : undefined;
+
+    const analyticsQuery = useFleetAnalytics(timeframe, selection?.tenantId, selection?.monitorId, undefined, tagsArg, statusesArg);
+    const globalMonitorsQuery = useFleetMonitors(timeframe, undefined, undefined, tagsArg, statusesArg);
     const { data: config } = useGlobalConfigQuery();
 
     const defaultSla = config?.defaultUptimeSla ?? null;
@@ -101,6 +133,10 @@ export function useFleetStatusViewModel() {
         selectedTenantName,
         activeScopeName,
         defaultSla,
-        defaultDegradedFloor
+        defaultDegradedFloor,
+        selectedTags,
+        setSelectedTags,
+        selectedStatuses,
+        setSelectedStatuses
     }
 }

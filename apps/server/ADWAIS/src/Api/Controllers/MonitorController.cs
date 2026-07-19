@@ -44,7 +44,7 @@ public class MonitorController(
     public async Task<ActionResult<MonitorAnalyticsResponseDto>> GetAnalytics([FromQuery] MonitorRequestDto request, CancellationToken ct = default)
     {
         var period = await reportingCalendar.ResolvePeriodAsync(request.Timeframe, request.Comparison, ct);
-        var result = await _monitorService.GetAnalyticsAsync(period, request.TenantId, request.MonitorId, ct);
+        var result = await _monitorService.GetAnalyticsAsync(period, request.TenantId, request.MonitorId, request.Tags, request.Statuses, ct);
 
         return Ok(new MonitorAnalyticsResponseDto(
             result.GlobalAverageLatency,
@@ -83,6 +83,8 @@ public class MonitorController(
     {
         var period = await reportingCalendar.ResolvePeriodAsync(request.Timeframe, request.Comparison, ct);
 
+        IEnumerable<UptimeMonitorDto> resultDtos;
+
         if (request.MonitorId.HasValue)
         {
             var db = _dbContext;
@@ -90,30 +92,42 @@ public class MonitorController(
             if (tid == null) return Ok(Enumerable.Empty<UptimeMonitorDto>());
 
             var m = await _monitorService.GetMonitorAsync(tid.Value, request.MonitorId.Value, period, ct);
-            return Ok(new[] { ToDto(m) });
+            resultDtos = new[] { ToDto(m) };
         }
-
-        if (request.TenantId.HasValue)
+        else if (request.TenantId.HasValue)
         {
             var monitors = await _monitorService.GetMonitorsByTenantAsync(request.TenantId.Value, period, ct);
-            return Ok(monitors.Select(ToDto));
+            resultDtos = monitors.Select(ToDto);
         }
-
-        var dbCtx = _dbContext;
-        var allMonitorIds = await dbCtx.Monitors
-            .AsNoTracking()
-            .Where(m => m.TenantId != IApplicationDbContext.SystemTenantGuid)
-            .Select(m => new { m.Id, m.TenantId })
-            .ToListAsync(ct);
-        
-        var dtos = new List<UptimeMonitorDto>();
-        foreach (var m in allMonitorIds)
+        else 
         {
-            var hydrated = await _monitorService.GetMonitorAsync(m.TenantId, m.Id, period, ct);
-            dtos.Add(ToDto(hydrated));
+            var dbCtx = _dbContext;
+            var allMonitorIds = await dbCtx.Monitors
+                .AsNoTracking()
+                .Where(m => m.TenantId != IApplicationDbContext.SystemTenantGuid)
+                .Select(m => new { m.Id, m.TenantId })
+                .ToListAsync(ct);
+            
+            var dtos = new List<UptimeMonitorDto>();
+            foreach (var m in allMonitorIds)
+            {
+                var hydrated = await _monitorService.GetMonitorAsync(m.TenantId, m.Id, period, ct);
+                dtos.Add(ToDto(hydrated));
+            }
+            resultDtos = dtos;
         }
 
-        return Ok(dtos);
+        if (request.Tags != null && request.Tags.Any())
+        {
+            resultDtos = resultDtos.Where(m => m.Tags != null && m.Tags.Intersect(request.Tags, StringComparer.OrdinalIgnoreCase).Any());
+        }
+
+        if (request.Statuses != null && request.Statuses.Any())
+        {
+            resultDtos = resultDtos.Where(m => request.Statuses.Contains(m.CurrentStatus, StringComparer.OrdinalIgnoreCase));
+        }
+
+        return Ok(resultDtos);
     }
 
     /// <summary>

@@ -77,8 +77,8 @@ function buildIssues(
 
   return issues
     .sort((a, b) => {
-      const weightA = (a.isDown ? 300 : 0) + (a.isSlaBreach ? 200 : 0) + (a.isDegraded ? 100 : 0);
-      const weightB = (b.isDown ? 300 : 0) + (b.isSlaBreach ? 200 : 0) + (b.isDegraded ? 100 : 0);
+      const weightA = (a.isDown ? 300 : 0) + (a.isDegraded ? 200 : 0) + (a.isSlaBreach ? 100 : 0);
+      const weightB = (b.isDown ? 300 : 0) + (b.isDegraded ? 200 : 0) + (b.isSlaBreach ? 100 : 0);
       const uptimeA = a.uptime != null ? a.uptime : 100;
       const uptimeB = b.uptime != null ? b.uptime : 100;
       return weightB - weightA || uptimeA - uptimeB;

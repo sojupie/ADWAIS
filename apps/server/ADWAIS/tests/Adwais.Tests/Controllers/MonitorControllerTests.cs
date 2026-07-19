@@ -81,7 +81,7 @@ public class MonitorControllerTests
             Kpis: new MonitorKpiDto(99.9, 99.8, 0.1, 120.5, 115.0, 4.7, 150.0, 145.0, 3.4, 100.0, 95.0, 5.2)
         );
 
-        _monitorServiceMock.Setup(s => s.GetAnalyticsAsync(It.IsAny<ResolvedPeriod>(), request.TenantId, request.MonitorId, It.IsAny<CancellationToken>()))
+        _monitorServiceMock.Setup(s => s.GetAnalyticsAsync(It.IsAny<ResolvedPeriod>(), request.TenantId, request.MonitorId, It.IsAny<string[]?>(), It.IsAny<string[]?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(mockResult);
 
         // Act

@@ -37,5 +37,17 @@ public record MonitorRequestDto
     /// </summary>
     [FromQuery(Name = "comparison")]
     public ComparisonType Comparison { get; init; } = ComparisonType.Preceding;
+
+    /// <summary>
+    /// Optional. Filters the monitors by specific tags.
+    /// </summary>
+    [FromQuery(Name = "tags")]
+    public string[]? Tags { get; init; }
+
+    /// <summary>
+    /// Optional. Filters the monitors by specific statuses.
+    /// </summary>
+    [FromQuery(Name = "statuses")]
+    public string[]? Statuses { get; init; }
 }
 

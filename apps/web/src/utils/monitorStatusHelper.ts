@@ -14,7 +14,7 @@ export const STATUS_THEMES = {
     down: {
       bg: 'bg-error-container',
       border: 'border-error/40',
-      text: 'text-on-error-container',
+      text: 'text-red-600',
       valueText: 'text-red-600',
       mutedText: 'text-slate-500',
       dot: 'bg-red-500'

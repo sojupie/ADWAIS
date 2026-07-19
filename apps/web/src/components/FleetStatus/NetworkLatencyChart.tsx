@@ -6,7 +6,7 @@ import { formatChartLabel, inferBinSize } from '@utils';
 import { ChartPanel } from '../common/charts/ChartPanel';
 import { EmptyState } from '../common/ui/EmptyState';
 import { ChartJsCanvas } from '../common/charts/ChartJsCanvas';
-import { chartColor, chartTick, chartTooltip, horizontalGrid } from '../common/charts/chartJs';
+import { chartColor, chartTick, createHtmlTooltip, horizontalGrid } from '../common/charts/chartJs';
 
 function formatLatency(value: number | null | undefined): string {
   return value == null ? 'N/A' : `${Math.round(value)}ms`;
@@ -117,20 +117,24 @@ export const NetworkLatencyChart = memo(function NetworkLatencyChart({ isLoading
     plugins: {
       legend: { display: false },
       tooltip: {
-        ...chartTooltip,
-        filter: context => context.datasetIndex >= 2,
-        callbacks: {
-          title: items => chartData[items[0].dataIndex]?.label || '',
-          label: context => {
-            const point = chartData[context.dataIndex];
-            if (context.datasetIndex === 2 && point.average == null) {
-              return [`Current Avg: N/A (data gap)`, `Previous Avg: ${formatLatency(point.previousAverage)}`];
-            }
-            return context.datasetIndex === 3
-              ? [`Current Avg: ${formatLatency(point.average)}`, `90th Percentile: ${formatLatency(point.highest)}`, `10th Percentile: ${formatLatency(point.lowest)}`]
-              : `Previous Avg: ${formatLatency(point.previousAverage)}`;
-          },
-        },
+        enabled: false,
+        external: createHtmlTooltip(tooltip => {
+          const point = chartData[tooltip.dataPoints[0]?.dataIndex];
+          if (!point) return null;
+          return {
+            title: point.label,
+            groups: [
+              [
+                { label: 'Current Avg', value: point.average == null ? 'N/A (data gap)' : formatLatency(point.average), tone: point.average == null ? 'muted' : 'primary' },
+                { label: 'Previous Avg', value: formatLatency(point.previousAverage), tone: 'muted' },
+              ],
+              [
+                { label: '90th Percentile', value: formatLatency(point.highest), tone: 'negative' },
+                { label: '10th Percentile', value: formatLatency(point.lowest), tone: 'positive' },
+              ],
+            ],
+          };
+        }),
       },
     },
     scales: {

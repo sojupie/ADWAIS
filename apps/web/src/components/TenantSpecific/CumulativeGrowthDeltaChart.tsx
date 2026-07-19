@@ -4,7 +4,7 @@ import type { CumulativeGrowthDeltaPoint, ComparisonPeriod } from '@types';
 import { formatChartLabel, inferBinSize, formatCompact } from '@utils';
 import { ChartPanel } from '../common/charts/ChartPanel';
 import { ChartJsCanvas } from '../common/charts/ChartJsCanvas';
-import { chartColor, chartTick, chartTooltip, horizontalGrid } from '../common/charts/chartJs';
+import { chartColor, chartTick, createHtmlTooltip, horizontalGrid } from '../common/charts/chartJs';
 
 export const CumulativeGrowthDeltaChart = memo(function CumulativeGrowthDeltaChart({ isLoading, isStale, points, comparison, className }: {
   isLoading?: boolean; isStale?: boolean; points: CumulativeGrowthDeltaPoint[]; comparison?: ComparisonPeriod; className?: string;
@@ -22,18 +22,25 @@ export const CumulativeGrowthDeltaChart = memo(function CumulativeGrowthDeltaCha
     plugins: {
       legend: { display: false },
       tooltip: {
-        ...chartTooltip,
-        callbacks: {
-          title: items => chartData[items[0].dataIndex]?.label || '',
-          label: context => {
-            const point = chartData[context.dataIndex];
-            return [
-              `Current Cumulative: ${formatCompact(point.currentCumulative)} SEK`,
-              `Previous Cumulative: ${formatCompact(point.previousCumulative)} SEK`,
-              `Delta: ${point.cumulativeGrowthDelta > 0 ? '+' : ''}${formatCompact(point.cumulativeGrowthDelta)} SEK`,
-            ];
-          },
-        },
+        enabled: false,
+        external: createHtmlTooltip(tooltip => {
+          const point = chartData[tooltip.dataPoints[0]?.dataIndex];
+          if (!point) return null;
+          return {
+            title: point.label,
+            groups: [
+              [
+                { label: 'Current Cumulative', value: `${formatCompact(point.currentCumulative)} SEK`, tone: 'primary' },
+                { label: 'Previous Cumulative', value: `${formatCompact(point.previousCumulative)} SEK`, tone: 'muted' },
+              ],
+              [{
+                label: 'Delta',
+                value: `${point.cumulativeGrowthDelta > 0 ? '+' : ''}${formatCompact(point.cumulativeGrowthDelta)} SEK`,
+                tone: point.cumulativeGrowthDelta > 0 ? 'positive' : point.cumulativeGrowthDelta < 0 ? 'negative' : 'default',
+              }],
+            ],
+          };
+        }),
       },
     },
     scales: {

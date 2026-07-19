@@ -4,7 +4,7 @@ import type { OrderBin } from '@types';
 import { formatNumber } from '@utils';
 import { ChartPanel } from '../common/charts/ChartPanel';
 import { ChartJsCanvas } from '../common/charts/ChartJsCanvas';
-import { chartColor, chartLegendLabels, chartTick, chartTooltip, horizontalGrid } from '../common/charts/chartJs';
+import { chartColor, chartLegendLabels, chartTick, createHtmlTooltip, horizontalGrid } from '../common/charts/chartJs';
 
 type MixedChart = 'bar' | 'line';
 
@@ -42,15 +42,21 @@ export const OrderValueDistributionChart = memo(function OrderValueDistributionC
     plugins: {
       legend: { position: 'bottom', labels: chartLegendLabels },
       tooltip: {
-        ...chartTooltip,
-        callbacks: {
-          title: items => bins[items[0].dataIndex]?.binLabel || '',
-          label: context => context.datasetIndex === 0
-            ? `Volume: ${formatNumber(Number(context.raw))}`
-            : context.datasetIndex === 1
-              ? `Density (KDE): ${formatNumber(Number(context.raw))}`
-              : `Cumulative: ${Number(context.raw).toFixed(1)}%`,
-        },
+        enabled: false,
+        external: createHtmlTooltip(tooltip => {
+          const bin = bins[tooltip.dataPoints[0]?.dataIndex];
+          if (!bin) return null;
+          return {
+            title: bin.binLabel,
+            groups: [
+              [
+                { label: 'Volume', value: formatNumber(bin.orderCount), tone: 'primary' },
+                { label: 'Density (KDE)', value: formatNumber(bin.kdeDensity), tone: 'primary' },
+              ],
+              [{ label: 'Cumulative', value: `${bin.cumulativePercentage.toFixed(1)}%`, tone: 'warning' }],
+            ],
+          };
+        }),
       },
     },
     scales: {

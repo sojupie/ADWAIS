@@ -20,7 +20,8 @@ function LoginComponent() {
   return (
     <>
       <div className="flex flex-col items-center animate-stagger delay-100">
-        <h1 className="text-7xl font-extrabold mb-3 text-brand-text tracking-tight relative z-10"><i>ADWAIS</i></h1>
+        <h1 className="text-7xl font-extrabold text-brand-text tracking-tight relative z-10"><i>ADWAIS</i></h1>
+        <h2 className="text-4xl font-bold mb-3 text-on-tertiary-container tracking-tight relative z-10"><i>/ədˈvaɪs/</i></h2>
         <p className="text-brand-text text-xl mb-0 font-semibold tracking-wide uppercase relative z-10">
           A Dashboard Without AI Summaries
         </p>

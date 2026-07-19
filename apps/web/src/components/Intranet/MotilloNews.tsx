@@ -12,7 +12,7 @@ export function MotilloNews() {
   const selectedPost = feedItems.find((p) => p.id === selectedPostId) || feedItems[0];
 
   return (
-    <CollectionPanel title="Motillo News" className="h-full relative">
+    <CollectionPanel title="Motillo News" className="h-full relative" titleClassName={""}>
       {isLoading ? (
         <div className="flex flex-col md:flex-row h-full animate-pulse">
           {/* Skeleton Sidebar */}

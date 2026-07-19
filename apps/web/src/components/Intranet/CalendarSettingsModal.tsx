@@ -25,7 +25,11 @@ export function CalendarSettingsModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in"
+      role="presentation"
+      onMouseDown={event => { if (event.target === event.currentTarget) onClose(); }}
+    >
       <div className="bg-surface rounded-3xl m3-elevation-4 border-0 w-full max-w-lg overflow-hidden flex flex-col animate-in zoom-in-95 max-h-[90vh]">
         <div className="flex items-center justify-between bg-surface px-6 py-5">
           <h3 className="flex items-center gap-4 text-xl font-bold text-on-surface">

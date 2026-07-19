@@ -152,6 +152,7 @@ export function FleetStatus() {
               className="flex-grow min-h-[59px]"
               isLoading={vm.globalMonitorsQuery.isLoading}
               actions={matrixActions}
+              titleClassName={"!text-sm !md:text-md"}
           >
             <div className="px-4 pb-4 h-full flex flex-col min-h-0">
               {matrixContent}

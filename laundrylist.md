@@ -1,17 +1,13 @@
 - system logs (message/info) horizontal text overflow
 - add an about/info page with good to know info and links
 - intranet api
-  - community post(ing) frontend functionality
-  - revamped ui/ux
   - private/public calendar url?
   - reccurence controls
   - get rid of vertical scrollbars
-  - refactor calendar.tsx into multiple components/files
-  - make litium news cards bigger
   - weather sync button/trigger
   - weekly calendar cards should show end time. span across multiple days and hours
 - better fleet status ui/ux. order tiles by status. group related tiles together. allow filtering by tags.
-- navbar? mobile menu fixes
+- navbar?
 - ping litium env for health checks (to see if base url is correct after adding it to a tenant card).
 - revamp settings ui
 - modals needs to close when you click outside
@@ -20,5 +16,4 @@
 - hide or make the FAB useful in intranet/settings
 - make order density matrix prettier
 -- tooltip should go inwards so it doesnt get cut off
-- improve frontend build time
 - create github pipeline

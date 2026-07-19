@@ -4,7 +4,7 @@ import type { AccumulatedRevenuePointDto, ComparisonPeriod } from '@types';
 import { ChartPanel } from '../common/charts/ChartPanel';
 import { formatCurrency, formatChartLabel, inferBinSize, formatCompact } from '@utils';
 import { EmptyState } from '../common/ui/EmptyState';
-import { chartColor, chartLegendLabels, chartTick, chartTooltip, horizontalGrid } from '../common/charts/chartJs';
+import { chartColor, chartLegendLabels, chartTick, createHtmlTooltip, horizontalGrid } from '../common/charts/chartJs';
 import { ChartJsCanvas } from '../common/charts/ChartJsCanvas';
 
 interface AccumulatedRevenueChartProps {
@@ -82,8 +82,22 @@ export const AccumulatedRevenueChart = memo(function AccumulatedRevenueChart({ i
     plugins: {
       legend: { position: 'bottom', labels: chartLegendLabels },
       tooltip: {
-        ...chartTooltip,
-        callbacks: { label: context => `${context.dataset.label}: ${formatCurrency(Number(context.raw))}` },
+        enabled: false,
+        external: createHtmlTooltip(tooltip => {
+          const index = tooltip.dataPoints[0]?.dataIndex;
+          const point = chartData[index];
+          if (!point) return null;
+          return {
+            title: point.label,
+            groups: [
+              [{ label: 'Current Revenue', value: formatCurrency(point.currentRevenue), tone: 'primary' }],
+              [
+                { label: 'Current Accumulated', value: formatCurrency(point.currentAccumulated), tone: 'primary' },
+                { label: 'Previous Accumulated', value: formatCurrency(point.previousAccumulated), tone: 'muted' },
+              ],
+            ],
+          };
+        }),
       },
     },
     scales: {

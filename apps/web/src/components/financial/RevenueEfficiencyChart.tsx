@@ -4,7 +4,7 @@ import type { RevenueEfficiencyResponse, ComparisonPeriod } from '@types';
 import { formatCompact, formatCurrency } from '@utils';
 import { ChartPanel } from '../common/charts/ChartPanel';
 import { EmptyState } from '../common/ui/EmptyState';
-import { chartColor, chartTick, chartTooltip, horizontalGrid, matrixQuadrantsPlugin, referenceLinesPlugin, scaleBubbleRadii, tenantMarkerPlugin } from '../common/charts/chartJs';
+import { chartColor, chartTick, createHtmlTooltip, horizontalGrid, matrixQuadrantsPlugin, referenceLinesPlugin, scaleBubbleRadii, tenantMarkerPlugin } from '../common/charts/chartJs';
 import { ChartJsCanvas } from '../common/charts/ChartJsCanvas';
 
 const TYPE_COLORS: Record<string, [string, string]> = {
@@ -57,19 +57,28 @@ export const RevenueEfficiencyChart = memo(function RevenueEfficiencyChart({
     plugins: {
       legend: { display: false },
       tooltip: {
-        ...chartTooltip,
-        callbacks: {
-          title: items => tenants[items[0].dataIndex]?.tenantName || '',
-          label: context => {
-            const tenant = tenants[context.dataIndex];
-            return [
-              `Average Order Value: ${formatCurrency(tenant.averageOrderValue)}`,
-              `Order Volume: ${formatCompact(tenant.orderVolume)}`,
-              `Portfolio Share: ${tenant.portfolioSharePercentage.toFixed(1)}%`,
-              `Growth Velocity: ${tenant.growthVelocity > 0 ? '+' : ''}${tenant.growthVelocity.toFixed(1)}%`,
-            ];
-          },
-        },
+        enabled: false,
+        external: createHtmlTooltip(tooltip => {
+          const tenant = tenants[tooltip.dataPoints[0]?.dataIndex];
+          if (!tenant) return null;
+          const [typeVariable, typeFallback] = TYPE_COLORS[tenant.type] || TYPE_COLORS.Mixed;
+          return {
+            title: tenant.tenantName,
+            tag: { label: tenant.type, color: chartColor(typeVariable, typeFallback) },
+            groups: [
+              [
+                { label: 'Average Order Value', value: formatCurrency(tenant.averageOrderValue) },
+                { label: 'Order Volume', value: formatCompact(tenant.orderVolume) },
+                { label: 'Portfolio Share', value: `${tenant.portfolioSharePercentage.toFixed(1)}%` },
+              ],
+              [{
+                label: 'Growth Velocity',
+                value: `${tenant.growthVelocity > 0 ? '+' : ''}${tenant.growthVelocity.toFixed(1)}%`,
+                tone: tenant.growthVelocity > 0 ? 'positive' : tenant.growthVelocity < 0 ? 'negative' : 'default',
+              }],
+            ],
+          };
+        }),
       },
     },
     scales: {

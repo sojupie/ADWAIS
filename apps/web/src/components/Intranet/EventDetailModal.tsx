@@ -35,7 +35,11 @@ export function EventDetailModal({
   const badgeClass = BADGE_STYLES[event.eventType || ''] ?? DEFAULT_BADGE;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in"
+      role="presentation"
+      onMouseDown={event => { if (event.target === event.currentTarget) onClose(); }}
+    >
       <div className="bg-surface rounded-3xl m3-elevation-4 border-0 w-full max-w-md overflow-hidden flex flex-col animate-in zoom-in-95">
         <div className="flex justify-between items-center bg-surface px-6 py-5">
           <span className={`text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full ${badgeClass}`}>

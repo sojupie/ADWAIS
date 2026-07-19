@@ -34,7 +34,11 @@ export function EventFormModal({ mode, isOpen, onClose, onSubmit, form, onChange
   const Icon = isEditing ? Edit : Calendar;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm animate-in fade-in">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm animate-in fade-in"
+      role="presentation"
+      onMouseDown={event => { if (event.target === event.currentTarget) onClose(); }}
+    >
       <form
         onSubmit={onSubmit}
         className="m3-elevation-4 flex w-full max-w-md flex-col overflow-hidden rounded-3xl border-0 bg-surface animate-in zoom-in-95"

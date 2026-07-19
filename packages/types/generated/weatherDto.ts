@@ -9,7 +9,9 @@ export interface WeatherDto {
   /** @nullable */
   location?: string | null;
   temperature?: number;
+  apparentTemperature?: number;
+  precipitationProbability?: number;
+  precipitation?: number;
   weatherCode?: number;
-  windSpeed?: number;
   fetchedAt?: string;
 }

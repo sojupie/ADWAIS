@@ -4,7 +4,7 @@ import type { MomentumResponse, ComparisonPeriod } from '@types';
 import { formatCompact, formatNumber } from '@utils';
 import { ChartPanel } from '../common/charts/ChartPanel';
 import { EmptyState } from '../common/ui/EmptyState';
-import { chartColor, chartTick, chartTooltip, horizontalGrid, matrixQuadrantsPlugin, referenceLinesPlugin, scaleBubbleRadii, tenantMarkerPlugin } from '../common/charts/chartJs';
+import { chartColor, chartTick, createHtmlTooltip, horizontalGrid, matrixQuadrantsPlugin, referenceLinesPlugin, scaleBubbleRadii, tenantMarkerPlugin } from '../common/charts/chartJs';
 import { ChartJsCanvas } from '../common/charts/ChartJsCanvas';
 
 const TYPE_COLORS: Record<string, [string, string]> = {
@@ -43,18 +43,27 @@ export const MomentumMatrixChart = memo(function MomentumMatrixChart({ isLoading
     plugins: {
       legend: { display: false },
       tooltip: {
-        ...chartTooltip,
-        callbacks: {
-          title: items => points[items[0].dataIndex]?.tenantName || '',
-          label: context => {
-            const point = points[context.dataIndex];
-            return [
-              `Current Revenue: ${formatCompact(point.currentRevenue)}`,
-              `Order Volume: ${formatNumber(point.orderVolume)}`,
-              `Momentum: ${point.growthPercentage > 0 ? '+' : ''}${point.growthPercentage.toFixed(1)}%`,
-            ];
-          },
-        },
+        enabled: false,
+        external: createHtmlTooltip(tooltip => {
+          const point = points[tooltip.dataPoints[0]?.dataIndex];
+          if (!point) return null;
+          const [typeVariable, typeFallback] = TYPE_COLORS[point.type] || TYPE_COLORS.Mixed;
+          return {
+            title: point.tenantName,
+            tag: { label: point.type, color: chartColor(typeVariable, typeFallback) },
+            groups: [
+              [
+                { label: 'Current Revenue', value: formatCompact(point.currentRevenue) },
+                { label: 'Order Volume', value: formatNumber(point.orderVolume) },
+              ],
+              [{
+                label: 'Momentum',
+                value: `${point.growthPercentage > 0 ? '+' : ''}${point.growthPercentage.toFixed(1)}%`,
+                tone: point.growthPercentage > 0 ? 'positive' : point.growthPercentage < 0 ? 'negative' : 'default',
+              }],
+            ],
+          };
+        }),
       },
     },
     scales: {

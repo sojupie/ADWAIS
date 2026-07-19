@@ -5343,13 +5343,21 @@
             "type": "number",
             "format": "double"
           },
-          "weatherCode": {
+          "apparentTemperature": {
+            "type": "number",
+            "format": "double"
+          },
+          "precipitationProbability": {
             "type": "integer",
             "format": "int32"
           },
-          "windSpeed": {
+          "precipitation": {
             "type": "number",
             "format": "double"
+          },
+          "weatherCode": {
+            "type": "integer",
+            "format": "int32"
           },
           "fetchedAt": {
             "type": "string",

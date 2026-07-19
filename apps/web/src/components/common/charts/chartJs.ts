@@ -13,7 +13,9 @@ import {
   PointElement,
   ScatterController,
   Tooltip,
+  type ChartType,
   type Plugin,
+  type TooltipModel,
 } from 'chart.js';
 import { getTenantFaviconUrl } from '../../../utils/tenantHelper';
 
@@ -60,6 +62,139 @@ export const chartTooltip = {
   displayColors: true,
   usePointStyle: true,
 };
+
+export type ChartTooltipTone = 'default' | 'primary' | 'positive' | 'negative' | 'warning' | 'muted';
+
+export type ChartTooltipRow = {
+  label: string;
+  value: string;
+  tone?: ChartTooltipTone;
+};
+
+export type ChartTooltipContent = {
+  title: string;
+  tag?: { label: string; color?: string };
+  groups: ChartTooltipRow[][];
+};
+
+const htmlTooltips = new WeakMap<object, HTMLDivElement>();
+
+const tooltipToneColor = (tone: ChartTooltipTone | undefined): string => {
+  switch (tone) {
+    case 'primary': return chartColor('--color-brand-btn-primary', '#0f766e');
+    case 'positive': return chartColor('--color-success', '#16a34a');
+    case 'negative': return chartColor('--color-error', '#ef4444');
+    case 'warning': return chartColor('--color-warning', '#f97316');
+    case 'muted': return chartColor('--color-on-surface-variant', '#64748b');
+    default: return chartColor('--color-on-surface', '#1f2937');
+  }
+};
+
+function getHtmlTooltip<TType extends ChartType>(chart: ChartJS<TType>): HTMLDivElement {
+  const existing = htmlTooltips.get(chart);
+  if (existing?.isConnected) return existing;
+
+  const element = document.createElement('div');
+  Object.assign(element.style, {
+    position: 'absolute',
+    zIndex: '30',
+    minWidth: '230px',
+    maxWidth: 'min(300px, calc(100% - 16px))',
+    padding: '14px 16px',
+    border: `1px solid ${chartColor('--color-outline-variant', '#e2e8f0')}`,
+    borderRadius: '10px',
+    background: chartColor('--color-surface', '#fff'),
+    boxShadow: '0 8px 20px rgba(15, 23, 42, 0.13)',
+    color: chartColor('--color-on-surface', '#1f2937'),
+    fontFamily: CHART_FONT,
+    fontSize: '14px',
+    lineHeight: '1.35',
+    pointerEvents: 'none',
+    opacity: '0',
+    transition: 'opacity 80ms ease',
+  });
+  chart.canvas.parentElement?.appendChild(element);
+  htmlTooltips.set(chart, element);
+  return element;
+}
+
+function renderHtmlTooltip(element: HTMLDivElement, content: ChartTooltipContent) {
+  element.replaceChildren();
+
+  const header = document.createElement('div');
+  Object.assign(header.style, { display: 'flex', alignItems: 'center', gap: '10px', paddingBottom: '10px' });
+  const title = document.createElement('strong');
+  title.textContent = content.title;
+  Object.assign(title.style, { flex: '1', minWidth: '0', fontSize: '14px', fontWeight: '800' });
+  header.appendChild(title);
+  if (content.tag) {
+    const tag = document.createElement('span');
+    tag.textContent = content.tag.label;
+    Object.assign(tag.style, {
+      flexShrink: '0', padding: '2px 7px', borderRadius: '4px', color: '#fff',
+      background: content.tag.color || chartColor('--color-on-surface-variant', '#64748b'),
+      fontSize: '10px', fontWeight: '800', letterSpacing: '0.08em', textTransform: 'uppercase',
+    });
+    header.appendChild(tag);
+  }
+  element.appendChild(header);
+
+  content.groups.filter(group => group.length > 0).forEach((group, groupIndex) => {
+    const groupElement = document.createElement('div');
+    Object.assign(groupElement.style, {
+      display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', columnGap: '18px', rowGap: '7px',
+      paddingTop: groupIndex === 0 ? '10px' : '11px',
+      marginTop: groupIndex === 0 ? '0' : '10px',
+      borderTop: `1px solid ${chartColor('--color-outline-variant', '#e2e8f0')}`,
+    });
+    group.forEach(row => {
+      const label = document.createElement('span');
+      label.textContent = row.label;
+      Object.assign(label.style, { color: chartColor('--color-on-surface-variant', '#64748b'), fontWeight: '500' });
+      const value = document.createElement('strong');
+      value.textContent = row.value;
+      Object.assign(value.style, {
+        color: tooltipToneColor(row.tone), fontWeight: '750', textAlign: 'right',
+        fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap',
+      });
+      groupElement.append(label, value);
+    });
+    element.appendChild(groupElement);
+  });
+}
+
+export function createHtmlTooltip<TType extends ChartType>(
+  getContent: (tooltip: TooltipModel<TType>) => ChartTooltipContent | null,
+) {
+  return ({ chart, tooltip }: { chart: ChartJS<TType>; tooltip: TooltipModel<TType> }) => {
+    const element = getHtmlTooltip(chart);
+    if (tooltip.opacity === 0 || tooltip.dataPoints.length === 0) {
+      element.style.opacity = '0';
+      return;
+    }
+
+    const content = getContent(tooltip);
+    if (!content) {
+      element.style.opacity = '0';
+      return;
+    }
+    renderHtmlTooltip(element, content);
+    element.style.opacity = '1';
+
+    const parent = chart.canvas.parentElement;
+    if (!parent) return;
+    const margin = 8;
+    const preferredLeft = chart.canvas.offsetLeft + tooltip.caretX + 14;
+    const tooltipWidth = element.offsetWidth;
+    const tooltipHeight = element.offsetHeight;
+    const left = preferredLeft + tooltipWidth <= parent.clientWidth - margin
+      ? preferredLeft
+      : chart.canvas.offsetLeft + tooltip.caretX - tooltipWidth - 14;
+    const preferredTop = chart.canvas.offsetTop + tooltip.caretY - tooltipHeight / 2;
+    element.style.left = `${Math.max(margin, Math.min(left, parent.clientWidth - tooltipWidth - margin))}px`;
+    element.style.top = `${Math.max(margin, Math.min(preferredTop, parent.clientHeight - tooltipHeight - margin))}px`;
+  };
+}
 
 export function chartTick(fontSize = 12, fontWeight: 600 | 700 = 600) {
   return {

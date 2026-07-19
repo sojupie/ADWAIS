@@ -274,18 +274,14 @@ export const TransactionDensityChart = memo(function TransactionDensityChart({
               className={`fixed z-50 w-52 max-w-[calc(100vw-16px)] -translate-y-1/2 rounded-lg border border-outline-variant bg-surface p-4 text-md shadow-lg pointer-events-none ${hoverInfo.placement === 'left' ? '-translate-x-full' : hoverInfo.placement === 'center' ? '-translate-x-1/2' : ''}`}
               style={{ left: hoverInfo.x, top: hoverInfo.y }}
             >
-              <p className="font-bold text-on-surface mb-3 border-b border-slate-50 pb-2">
+              <p className="mb-0 border-b border-outline-variant pb-2.5 font-extrabold text-on-surface">
                 {DAYS[hoverInfo.day]} at {formatHour(hoverInfo.hour)}
               </p>
-              <div className="space-y-2">
-                <p className="flex min-w-0 justify-between gap-4">
-                  <span className="text-on-surface-variant">Transactions:</span>
-                  <strong className="shrink-0 text-on-surface-variant">{hoverInfo.count}</strong>
-                </p>
-                <p className="flex min-w-0 justify-between gap-4">
-                  <span className="text-on-surface-variant">Revenue:</span>
-                  <strong className="shrink-0 text-right text-on-surface-variant">{formatCurrency(hoverInfo.revenue)}</strong>
-                </p>
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-2 pt-2.5">
+                <span className="font-medium text-on-surface-variant">Transactions</span>
+                <strong className="text-right font-bold tabular-nums text-brand-btn-primary">{hoverInfo.count}</strong>
+                <span className="font-medium text-on-surface-variant">Revenue</span>
+                <strong className="text-right font-bold tabular-nums text-brand-btn-primary">{formatCurrency(hoverInfo.revenue)}</strong>
               </div>
             </div>,
             document.body

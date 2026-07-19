@@ -1,5 +1,6 @@
 import { Calendar, Edit, X } from 'lucide-react';
 import { EventType, RecurrenceType } from '@types';
+import { DatePickerField, TimePickerField } from '../common/ui/DateTimePickerField';
 
 export type EventForm = {
   title: string;
@@ -62,15 +63,11 @@ export function EventFormModal({ mode, isOpen, onClose, onSubmit, form, onChange
             <input id={`${mode}-event-title`} type="text" placeholder="Weekly Sync / Launch / etc." value={form.title} onChange={event => onChange({ ...form, title: event.target.value })} className={inputClass} required />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className={fieldClass}>
-              <label className={labelClass} htmlFor={`${mode}-event-start`}>Start Time</label>
-              <input id={`${mode}-event-start`} type="datetime-local" value={form.startTime} onChange={event => onChange({ ...form, startTime: event.target.value })} className={`${inputClass} cursor-pointer`} required />
-            </div>
-            <div className={fieldClass}>
-              <label className={labelClass} htmlFor={`${mode}-event-end`}>End Time</label>
-              <input id={`${mode}-event-end`} type="datetime-local" value={form.endTime} onChange={event => onChange({ ...form, endTime: event.target.value })} className={`${inputClass} cursor-pointer`} required />
-            </div>
+          <div className="grid grid-cols-[minmax(0,1fr)_minmax(112px,0.65fr)] gap-3">
+            <DatePickerField id={`${mode}-event-start-date`} label="Start date" value={form.startTime.split('T')[0] || ''} onChange={date => onChange({ ...form, startTime: `${date}T${form.startTime.split('T')[1] || '00:00'}` })} />
+            <TimePickerField id={`${mode}-event-start-time`} label="Start time" value={form.startTime.split('T')[1] || ''} onChange={time => onChange({ ...form, startTime: `${form.startTime.split('T')[0] || new Date().toISOString().split('T')[0]}T${time}` })} />
+            <DatePickerField id={`${mode}-event-end-date`} label="End date" value={form.endTime.split('T')[0] || ''} onChange={date => onChange({ ...form, endTime: `${date}T${form.endTime.split('T')[1] || '00:00'}` })} />
+            <TimePickerField id={`${mode}-event-end-time`} label="End time" value={form.endTime.split('T')[1] || ''} onChange={time => onChange({ ...form, endTime: `${form.endTime.split('T')[0] || new Date().toISOString().split('T')[0]}T${time}` })} />
           </div>
 
           <div className="grid grid-cols-2 gap-3">

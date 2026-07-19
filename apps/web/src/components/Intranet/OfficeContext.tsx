@@ -118,28 +118,28 @@ export function OfficeContext() {
   };
 
   return (
-    <section className="gap-8 rounded-2xl border-0 overflow-hidden bg-brand-bg-secondary text-primary-container h-[400px] max-h-[400px] md:max-h-none md:h-full relative flex flex-col md:grid md:grid-rows-[30%_70%] w-full min-w-0 p-6">
-      <div className="relative z-10 flex justify-between items-start gap-8">
-        <div className="flex flex-col">
+    <section className="gap-6 md:gap-8 rounded-2xl border-0 overflow-hidden bg-brand-bg-secondary text-primary-container h-[400px] max-h-[400px] md:max-h-none md:h-full relative flex flex-col w-full min-w-0 p-6">
+      <div className="relative z-10 flex flex-wrap justify-between items-start gap-6 shrink-0">
+        <div className="flex flex-col min-w-[150px]">
           <span className="text-md md:text-lg font-black text-brand-accent uppercase tracking-widest mb-1">{dateString}</span>
           <span className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter leading-none">{timeString}</span>
         </div>
         {isWeatherLoading ? (
-          <div className="shrink-0 text-right text-md md:text-lg font-bold text-primary-container" role="status">
+          <div className="flex flex-col items-start sm:items-end text-left sm:text-right shrink-0 text-md md:text-lg font-bold text-primary-container" role="status">
             Loading weather…
           </div>
         ) : isWeatherError ? (
-          <div className="shrink-0 text-right" role="alert">
+          <div className="flex flex-col items-start sm:items-end text-left sm:text-right shrink-0" role="alert">
             <span className="block text-md md:text-lg font-bold text-error-container">Weather unavailable</span>
             <span className="block text-md md:text-lg font-medium text-primary-container">API request failed</span>
           </div>
         ) : !hasCompleteWeather(weather) ? (
-          <div className="shrink-0 text-right" role="alert">
+          <div className="flex flex-col items-start sm:items-end text-left sm:text-right shrink-0" role="alert">
             <span className="block text-md md:text-lg font-bold text-error-container">Weather unavailable</span>
             <span className="block text-md md:text-lg font-medium text-primary-container">Incomplete API response</span>
           </div>
         ) : (
-          <div className="flex flex-col items-end text-right shrink-0">
+          <div className="flex flex-col items-start sm:items-end text-left sm:text-right shrink-0">
             <span className="text-2xl md:text-3xl">
               {getWeatherEmoji(weather.weatherCode)}
             </span>
@@ -156,7 +156,7 @@ export function OfficeContext() {
         )}
       </div>
 
-      {/* Bottom 70% — event list */}
+      {/* Event list */}
       <div className="relative z-10 flex flex-col flex-1 min-h-0 w-full min-w-0">
         <div className="flex items-center justify-between pb-2 mb-1">
           <h3 className="text-md md:text-lg font-bold text-primary-container">Today's Schedule</h3>
@@ -174,10 +174,10 @@ export function OfficeContext() {
             events.map(e => (
               <div 
                 key={e.id} 
-                className="flex flex-col transition-colors py-4 justify-center w-full min-w-0 shrink-0 gap-2"
+                className="flex flex-col transition-colors py-4 justify-center w-full min-w-0 shrink-0 gap-1"
               >
                 {/* Row 1: icon, time, title */}
-                <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
+                <div className="flex items-center gap-1 min-w-0 flex-shrink-0">
                   <span className="text-sm md:text-md shrink-0 leading-none pr-1">{getEventEmoji(e.eventType)}</span>
                   <span className="text-sm md:text-md font-black text-brand-accent whitespace-nowrap leading-none shrink-0">
                     {formatEventTime(e.startTime)}

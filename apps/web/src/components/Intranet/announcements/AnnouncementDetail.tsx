@@ -36,7 +36,7 @@ export function AnnouncementDetail({ post, canManage, deleting, onClose, onEdit,
               {post.updatedAt ? ' · Edited' : ''}
             </p>
           </div>
-          <div className="flex shrink-0 gap-2">
+          <div className="flex flex-wrap justify-end shrink-0 gap-2 max-w-[100px] sm:max-w-none">
             {canManage && <button type="button" onClick={onEdit} aria-label={`Edit ${post.title || 'announcement'}`} className="flex h-11 w-11 items-center justify-center rounded-full text-on-surface-variant hover:bg-primary-container hover:text-on-primary-container"><Pencil className="h-5 w-5" aria-hidden="true" /></button>}
             {canManage && <button type="button" onClick={() => setConfirmingDelete(true)} aria-label={`Delete ${post.title || 'announcement'}`} className="flex h-11 w-11 items-center justify-center rounded-full text-on-surface-variant hover:bg-error-container hover:text-error"><Trash2 className="h-5 w-5" aria-hidden="true" /></button>}
             <button ref={closeRef} type="button" onClick={onClose} aria-label="Close announcement" className="flex h-11 w-11 items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-high"><X className="h-5 w-5" aria-hidden="true" /></button>

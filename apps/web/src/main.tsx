@@ -9,6 +9,7 @@ import './index.css';
 import { MsalProvider } from '@azure/msal-react';
 import { msalInstance } from './utils/msalConfig';
 import { applyFlexGapFallbackClass } from './utils/flexGapSupport';
+import { Md3RippleProvider } from './components/common/ui/Md3RippleProvider';
 
 applyFlexGapFallbackClass();
 
@@ -32,7 +33,9 @@ msalInstance.initialize().then(() => {
     <StrictMode>
       <MsalProvider instance={msalInstance}>
         <QueryClientProvider client={queryClient}>
-          <RouterProvider router={router} />
+          <Md3RippleProvider>
+            <RouterProvider router={router} />
+          </Md3RippleProvider>
         </QueryClientProvider>
       </MsalProvider>
     </StrictMode>,

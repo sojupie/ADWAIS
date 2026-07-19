@@ -1,6 +1,6 @@
 import type { UptimeMonitorDto } from '@types';
 import { useMemo, useState } from 'react';
-import { ChartPanel } from '../common/charts/ChartPanel';
+import { CollectionPanel } from '../common/dashboard/CollectionPanel';
 import { EmptyState } from "../common/ui/EmptyState.tsx";
 import { getTenantFaviconUrl } from '../../utils/tenantHelper';
 import { getTagColor, getTagStyle } from '../../utils/tagHelper';
@@ -110,12 +110,12 @@ export function SlaBreachWatchlist({
   const [failedFavicons, setFailedFavicons] = useState<Set<number>>(new Set());
 
   return (
-    <ChartPanel
+    <CollectionPanel
       isLoading={isLoading}
       title="Endpoint Watchlist"
       className={className}
-      bodyClassName=""
-      legend={
+      titleClassName="!text-sm !md:text-md"
+      actions={
         onClearSelection ? (
           <button
             type="button"
@@ -128,7 +128,7 @@ export function SlaBreachWatchlist({
         ) : undefined
       }
     >
-      <div className="flex-1 overflow-y-auto px-2 pt-1.5 pb-4 custom-scrollbar grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-2 gap-4 content-start">
+      <div className="p-4 pt-1 grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-2 gap-4 content-start">
         {issues.length === 0 ? (
           <div className="col-span-full h-full">
             <EmptyState message={"No issues detected"} variant={"minimal"} />
@@ -146,8 +146,8 @@ export function SlaBreachWatchlist({
                 type="button"
                 key={`watch-${issue.id}`}
                 onClick={() => onMonitorSelect?.(issue.monitor)}
-                className={`relative p-2 rounded-lg transition-all text-left w-full shrink-0 flex flex-col gap-1 justify-between border
-                   ${theme.bg} ${theme.border}
+                className={`relative p-2 rounded-lg transition-all text-left w-full h-full min-h-fit shrink-0 flex flex-col gap-1.5 justify-between border
+                   ${theme.bg} ${theme.border} ${theme.text}
                   ${isActive ? 'z-10 m3-elevation-3' : 'm3-elevation-2 hover:m3-elevation-3 cursor-pointer'}
                   ${selectedMonitorId && !isActive ? 'opacity-30' : 'opacity-100'}
                 `}
@@ -245,6 +245,6 @@ export function SlaBreachWatchlist({
           })
         )}
       </div>
-    </ChartPanel>
+    </CollectionPanel>
   );
 }

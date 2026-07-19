@@ -1,0 +1,210 @@
+name: Deploy production
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Component or operation to deploy
+        required: true
+        type: choice
+        default: frontend
+        options:
+          - frontend
+          - backend
+          - infrastructure
+          - restart-api
+          - restart-stack
+          - reload-nginx
+          - all
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: production-deployment
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy ${{ inputs.target }}
+    runs-on: ubuntu-latest
+    environment: production
+    defaults:
+      run:
+        shell: bash
+    env:
+      SSH_DESTINATION: motillo@${{ secrets.SERVER_IP }}
+      REMOTE_COMPOSE_DIR: /opt/adwais
+      REMOTE_WEB_ROOT: /var/www/kpi.motillo.com
+
+    steps:
+      - name: Require main branch
+        env:
+          DEPLOY_REF: ${{ github.ref }}
+        run: |
+          if [[ "$DEPLOY_REF" != "refs/heads/main" ]]; then
+            echo "Production deployments must run from main; selected ref was $DEPLOY_REF." >&2
+            exit 1
+          fi
+
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Configure SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+        run: |
+          install -d -m 700 "$HOME/.ssh"
+          printf '%s\n' "$SSH_PRIVATE_KEY" > "$HOME/.ssh/id_ed25519"
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/id_ed25519" "$HOME/.ssh/known_hosts"
+          ssh -o BatchMode=yes "$SSH_DESTINATION" true
+
+      - name: Set up pnpm
+        if: inputs.target == 'frontend' || inputs.target == 'all'
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11.9.0
+
+      - name: Set up Node.js
+        if: inputs.target == 'frontend' || inputs.target == 'all'
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.15.0
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Build frontend
+        if: inputs.target == 'frontend' || inputs.target == 'all'
+        env:
+          VITE_AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          VITE_AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          VITE_AZURE_API_SCOPE: api://${{ secrets.AZURE_CLIENT_ID }}/.default
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm --filter web build
+
+      - name: Set up Docker Buildx
+        if: inputs.target == 'backend' || inputs.target == 'all'
+        uses: docker/setup-buildx-action@v4
+
+      - name: Sign in to GHCR for publishing
+        if: inputs.target == 'backend' || inputs.target == 'all'
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Build and publish backend
+        if: inputs.target == 'backend' || inputs.target == 'all'
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: apps/server/ADWAIS/src/Api/Dockerfile
+          push: true
+          tags: ghcr.io/sojupie/adwais-api:latest
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+          cache-from: type=gha,scope=adwais-api
+          cache-to: type=gha,mode=max,scope=adwais-api
+
+      - name: Prepare production environment file
+        if: inputs.target == 'backend' || inputs.target == 'infrastructure' || inputs.target == 'all'
+        env:
+          DASHBOARD_USER: ${{ secrets.DASHBOARD_USER }}
+          DASHBOARD_PASS: ${{ secrets.DASHBOARD_PASS }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          MOTASTIC_API_KEY: ${{ secrets.MOTASTIC_API_KEY }}
+          NEWSLETTER_API_KEY: ${{ secrets.NEWSLETTER_API_KEY }}
+          KIOSK_JWT_SECRET: ${{ secrets.KIOSK_JWT_SECRET }}
+        run: |
+          umask 077
+          write_dotenv() {
+            local key="$1"
+            local value="$2"
+            if [[ "$value" == *$'\n'* || "$value" == *$'\r'* ]]; then
+              echo "$key cannot contain a newline." >&2
+              exit 1
+            fi
+            value="${value//\\/\\\\}"
+            value="${value//\'/\\\'}"
+            printf "%s='%s'\n" "$key" "$value"
+          }
+          {
+            write_dotenv DASHBOARD_USER "$DASHBOARD_USER"
+            write_dotenv DASHBOARD_PASS "$DASHBOARD_PASS"
+            write_dotenv DB_PASSWORD "$DB_PASSWORD"
+            write_dotenv AZURE_TENANT_ID "$AZURE_TENANT_ID"
+            write_dotenv AZURE_CLIENT_ID "$AZURE_CLIENT_ID"
+            write_dotenv MOTASTIC_API_KEY "$MOTASTIC_API_KEY"
+            write_dotenv NEWSLETTER_API_KEY "$NEWSLETTER_API_KEY"
+            write_dotenv KIOSK_JWT_SECRET "$KIOSK_JWT_SECRET"
+          } > production.env
+
+      - name: Upload runtime configuration
+        if: inputs.target == 'backend' || inputs.target == 'infrastructure' || inputs.target == 'all'
+        env:
+          REMOTE_STAGE: /tmp/adwais-deploy-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          ssh "$SSH_DESTINATION" "mkdir -p '$REMOTE_STAGE'"
+          scp docker-compose.prod.yml production.env "$SSH_DESTINATION:$REMOTE_STAGE/"
+          ssh "$SSH_DESTINATION" "sudo mkdir -p '$REMOTE_COMPOSE_DIR' && sudo install -m 644 '$REMOTE_STAGE/docker-compose.prod.yml' '$REMOTE_COMPOSE_DIR/docker-compose.prod.yml' && sudo install -m 600 '$REMOTE_STAGE/production.env' '$REMOTE_COMPOSE_DIR/.env' && rm -rf '$REMOTE_STAGE'"
+
+      - name: Sign in Hetzner to GHCR
+        if: inputs.target == 'backend' || inputs.target == 'infrastructure' || inputs.target == 'all'
+        env:
+          GHCR_PULL_USERNAME: ${{ secrets.GHCR_PULL_USERNAME }}
+          GHCR_PULL_TOKEN: ${{ secrets.GHCR_PULL_TOKEN }}
+        run: |
+          printf '%s' "$GHCR_PULL_TOKEN" | ssh "$SSH_DESTINATION" "sudo docker login ghcr.io --username '$GHCR_PULL_USERNAME' --password-stdin"
+
+      - name: Apply infrastructure
+        if: inputs.target == 'infrastructure' || inputs.target == 'all'
+        env:
+          REMOTE_STAGE: /tmp/adwais-nginx-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          ssh "$SSH_DESTINATION" "mkdir -p '$REMOTE_STAGE'"
+          scp infrastructure/nginx/kpi.motillo.com.conf "$SSH_DESTINATION:$REMOTE_STAGE/"
+          ssh "$SSH_DESTINATION" "set -e; cd '$REMOTE_COMPOSE_DIR'; sudo docker compose -f docker-compose.prod.yml up -d; sudo install -m 644 '$REMOTE_STAGE/kpi.motillo.com.conf' /etc/nginx/sites-available/kpi.motillo.com.conf; sudo ln -sfn /etc/nginx/sites-available/kpi.motillo.com.conf /etc/nginx/sites-enabled/kpi.motillo.com.conf; sudo nginx -t; sudo systemctl reload nginx; rm -rf '$REMOTE_STAGE'"
+
+      - name: Deploy backend
+        if: inputs.target == 'backend' || inputs.target == 'all'
+        run: |
+          ssh "$SSH_DESTINATION" "set -e; cd '$REMOTE_COMPOSE_DIR'; sudo docker compose -f docker-compose.prod.yml pull api; sudo docker compose -f docker-compose.prod.yml up -d --no-deps --force-recreate api"
+
+      - name: Remove obsolete GHCR image versions
+        if: inputs.target == 'backend' || inputs.target == 'all'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api --paginate "/users/sojupie/packages/container/adwais-api/versions?per_page=100" \
+            --jq '.[] | select((.metadata.container.tags // []) | length == 0) | .id' |
+          while read -r version_id; do
+            [[ -z "$version_id" ]] && continue
+            gh api --method DELETE "/users/sojupie/packages/container/adwais-api/versions/$version_id"
+          done
+
+      - name: Deploy frontend
+        if: inputs.target == 'frontend' || inputs.target == 'all'
+        run: |
+          ssh "$SSH_DESTINATION" "sudo mkdir -p '$REMOTE_WEB_ROOT' && sudo chown -R 'motillo:motillo' '$REMOTE_WEB_ROOT'"
+          rsync -az --delete --chmod=D755,F644 -e ssh apps/web/dist/ "$SSH_DESTINATION:$REMOTE_WEB_ROOT/"
+          ssh "$SSH_DESTINATION" "sudo find '$REMOTE_WEB_ROOT' -type d -exec chmod 755 {} +; sudo find '$REMOTE_WEB_ROOT' -type f -exec chmod 644 {} +"
+
+      - name: Restart API
+        if: inputs.target == 'restart-api'
+        run: ssh "$SSH_DESTINATION" "cd '$REMOTE_COMPOSE_DIR' && sudo docker compose -f docker-compose.prod.yml restart api"
+
+      - name: Restart stack
+        if: inputs.target == 'restart-stack'
+        run: ssh "$SSH_DESTINATION" "cd '$REMOTE_COMPOSE_DIR' && sudo docker compose -f docker-compose.prod.yml restart"
+
+      - name: Reload nginx
+        if: inputs.target == 'reload-nginx'
+        run: ssh "$SSH_DESTINATION" "sudo nginx -t && sudo systemctl reload nginx"

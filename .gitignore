@@ -61,6 +61,3 @@ TEST*.xml
 
 # Docker override
 docker-compose.override.yml
-
-
-deploy.ps1

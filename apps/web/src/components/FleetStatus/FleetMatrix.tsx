@@ -28,7 +28,7 @@ function FleetMatrixTile({
       type="button"
       onClick={() => onMonitorSelect?.(monitor)}
       className={`w-full h-full p-3 rounded-lg transition-all text-left border-2 relative overflow-hidden group min-h-22.5
-        ${theme.bg} ${theme.border}
+        ${theme.bg} ${theme.border} ${theme.text}
         ${isActive ? 'z-10 m3-elevation-3' : 'm3-elevation-2 hover: hover:m3-elevation-3'}
         ${selectedMonitorId && !isActive ? 'opacity-30' : 'opacity-100'}
         ${!monitor.uptimeMonitorEnabled ? 'grayscale opacity-50' : ''}
@@ -108,7 +108,7 @@ export function FleetMatrix({
   selectedMonitorId?: number | null
 }) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 portrait-lg:grid-cols-4 landscape-lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 p-1.5 pb-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 portrait-lg:grid-cols-4 landscape-lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 pt-1 pb-4">
       {monitors.map((monitor) => (
         <FleetMatrixTile
           key={`${monitor.tenantId}-${monitor.id}`}

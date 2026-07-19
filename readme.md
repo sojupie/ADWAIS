@@ -113,3 +113,27 @@ To update both after modifying endpoints or backend DTOs, run:
 pnpm codegen
 ```
 
+---
+
+## Production Deployment
+
+Production deployment is manual and component-selective. In GitHub, open **Actions → Deploy production → Run workflow**, select the `main` branch, and choose one target:
+
+- `frontend`, `backend`, or `infrastructure`
+- `restart-api`, `restart-stack`, or `reload-nginx`
+- `all`
+
+The `production` GitHub environment must define `SERVER_IP`, `SSH_PRIVATE_KEY`, `SSH_KNOWN_HOSTS`, `GHCR_PULL_USERNAME`, `GHCR_PULL_TOKEN`, `DASHBOARD_USER`, `DASHBOARD_PASS`, `DB_PASSWORD`, `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`, `MOTASTIC_API_KEY`, `NEWSLETTER_API_KEY`, and `KIOSK_JWT_SECRET`. The GHCR pull token only needs `read:packages`.
+
+For a zero-runner-credit local deployment, set `ADWAIS_SERVER_IP` and ensure `ssh` and `scp` are available. On Windows, install MSYS2 and run `pacman -S rsync`; the deployment script automatically detects the standard `C:\msys64\usr\bin\rsync.exe` installation without adding the full MSYS2 toolchain to `PATH`.
+
+Then run, for example:
+
+```powershell
+.\deploy.ps1 -Target Frontend
+.\deploy.ps1 -Target Backend
+.\deploy.ps1 -Target RestartApi
+```
+
+`Infrastructure` and `All` additionally require an ignored `.env.production` file based on `.env.example`. Local backend publishing requires an existing `docker login ghcr.io`; remote pulls use `GHCR_PULL_USERNAME` and `GHCR_PULL_TOKEN` when those environment variables are set.
+

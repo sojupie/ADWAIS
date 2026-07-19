@@ -1,8 +1,6 @@
-version: '3.8'
-
 services:
   api:
-    image: ${DOCKER_HUB_USER}/adwais-api:latest
+    image: ghcr.io/sojupie/adwais-api:latest
     container_name: adwais-api-prod
     ports:
       - "127.0.0.1:5002:8080"

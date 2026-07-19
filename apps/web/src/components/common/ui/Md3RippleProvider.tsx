@@ -6,17 +6,12 @@ const RIPPLE_SELECTOR = [
   '[data-md3-ripple]:not([data-md3-ripple="off"]):not([aria-disabled="true"])',
 ].join(',');
 
-const ACTIVE_CLASS = 'md3-ripple-active';
-const RELEASING_CLASS = 'md3-ripple-releasing';
-const RIPPLE_LIFETIME_MS = 750;
 const MIN_VISIBLE_MS = 90;
 
 type RippleState = {
   element: HTMLElement;
-  startFrame: number;
-  startedAt: number | null;
-  releaseTimer: number | null;
-  cleanupTimer: number | null;
+  rippleSpan: HTMLSpanElement;
+  startedAt: number;
   released: boolean;
 };
 
@@ -24,78 +19,78 @@ function findRippleTarget(target: EventTarget | null): HTMLElement | null {
   return target instanceof Element ? target.closest<HTMLElement>(RIPPLE_SELECTOR) : null;
 }
 
-function setRippleOrigin(element: HTMLElement, clientX?: number, clientY?: number) {
-  const rect = element.getBoundingClientRect();
-  const x = clientX == null ? rect.width / 2 : clientX - rect.left;
-  const y = clientY == null ? rect.height / 2 : clientY - rect.top;
-  const radius = Math.hypot(Math.max(x, rect.width - x), Math.max(y, rect.height - y));
-  element.style.setProperty('--md3-ripple-x', `${x}px`);
-  element.style.setProperty('--md3-ripple-y', `${y}px`);
-  element.style.setProperty('--md3-ripple-size', `${radius * 2}px`);
-  element.style.setProperty('--md3-ripple-color', getComputedStyle(element).color);
-}
-
 export function Md3RippleProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const pointerRipples = new Map<number, RippleState>();
     const keyboardRipples = new Map<HTMLElement, RippleState>();
-    const elementRipples = new WeakMap<HTMLElement, RippleState>();
 
-    const clearState = (state: RippleState) => {
-      window.cancelAnimationFrame(state.startFrame);
-      if (state.releaseTimer !== null) window.clearTimeout(state.releaseTimer);
-      if (state.cleanupTimer !== null) window.clearTimeout(state.cleanupTimer);
-      state.element.classList.remove(ACTIVE_CLASS, RELEASING_CLASS);
-      if (elementRipples.get(state.element) === state) elementRipples.delete(state.element);
+    const begin = (element: HTMLElement, clientX?: number, clientY?: number): RippleState => {
+      const rect = element.getBoundingClientRect();
+      const x = clientX == null ? rect.width / 2 : clientX - rect.left;
+      const y = clientY == null ? rect.height / 2 : clientY - rect.top;
+      const radius = Math.hypot(Math.max(x, rect.width - x), Math.max(y, rect.height - y));
+      const size = radius * 2;
+
+      const rippleSpan = document.createElement('span');
+      rippleSpan.className = 'md3-ripple-span';
+      rippleSpan.style.width = `${size}px`;
+      rippleSpan.style.height = `${size}px`;
+      rippleSpan.style.left = `${x - radius}px`;
+      rippleSpan.style.top = `${y - radius}px`;
+      rippleSpan.style.backgroundColor = getComputedStyle(element).color;
+
+      element.appendChild(rippleSpan);
+
+      rippleSpan.animate(
+        [{ transform: 'scale(0)' }, { transform: 'scale(1)' }],
+        { duration: 700, easing: 'cubic-bezier(0.4, 0, 0.2, 1)', fill: 'forwards' }
+      );
+      
+      rippleSpan.animate(
+        [{ opacity: 0 }, { opacity: 0.12 }],
+        { duration: 90, easing: 'linear', fill: 'forwards' }
+      );
+
+      return {
+        element,
+        rippleSpan,
+        startedAt: performance.now(),
+        released: false,
+      };
     };
 
     const finishRelease = (state: RippleState) => {
-      if (elementRipples.get(state.element) !== state || state.releaseTimer !== null) return;
-      const elapsed = state.startedAt === null ? 0 : performance.now() - state.startedAt;
-      state.releaseTimer = window.setTimeout(() => {
-        state.releaseTimer = null;
-        if (elementRipples.get(state.element) !== state) return;
-        state.element.classList.add(RELEASING_CLASS);
-        state.cleanupTimer = window.setTimeout(() => clearState(state), RIPPLE_LIFETIME_MS);
-      }, Math.max(0, MIN_VISIBLE_MS - elapsed));
-    };
+      const elapsed = performance.now() - state.startedAt;
+      const delay = Math.max(0, MIN_VISIBLE_MS - elapsed);
 
-    const begin = (element: HTMLElement, clientX?: number, clientY?: number): RippleState => {
-      const previous = elementRipples.get(element);
-      if (previous) clearState(previous);
-      setRippleOrigin(element, clientX, clientY);
-      element.classList.remove(ACTIVE_CLASS, RELEASING_CLASS);
-      void getComputedStyle(element, '::before').transform;
-      const state: RippleState = {
-        element,
-        startFrame: 0,
-        startedAt: null,
-        releaseTimer: null,
-        cleanupTimer: null,
-        released: false,
-      };
-      elementRipples.set(element, state);
-      state.startFrame = window.requestAnimationFrame(() => {
-        state.startFrame = window.requestAnimationFrame(() => {
-          if (elementRipples.get(element) !== state) return;
-          element.classList.add(ACTIVE_CLASS);
-          state.startedAt = performance.now();
-          if (state.released) finishRelease(state);
-        });
-      });
-      return state;
+      setTimeout(() => {
+        if (!document.body.contains(state.rippleSpan)) return;
+        const fade = state.rippleSpan.animate(
+          [{ opacity: 0.12 }, { opacity: 0 }],
+          { duration: 280, easing: 'cubic-bezier(0.4, 0, 0.2, 1)', fill: 'forwards' }
+        );
+        fade.onfinish = () => {
+          if (state.rippleSpan.parentNode) {
+            state.rippleSpan.remove();
+          }
+        };
+      }, delay);
     };
 
     const release = (state: RippleState) => {
       if (state.released) return;
       state.released = true;
-      if (state.startedAt !== null) finishRelease(state);
+      finishRelease(state);
     };
 
     const handlePointerDown = (event: PointerEvent) => {
       if (event.pointerType === 'mouse' && event.button !== 0) return;
       const element = findRippleTarget(event.target);
       if (!element) return;
+      
+      const existing = pointerRipples.get(event.pointerId);
+      if (existing) release(existing);
+      
       pointerRipples.set(event.pointerId, begin(element, event.clientX, event.clientY));
     };
 
@@ -128,6 +123,7 @@ export function Md3RippleProvider({ children }: { children: ReactNode }) {
       keyboardRipples.delete(element);
       release(state);
     };
+    
     const handleKeyUp = (event: KeyboardEvent) => releaseKeyboardRipple(event.target);
     const handleFocusOut = (event: FocusEvent) => releaseKeyboardRipple(event.target);
 
@@ -147,8 +143,9 @@ export function Md3RippleProvider({ children }: { children: ReactNode }) {
       document.removeEventListener('keydown', handleKeyDown);
       document.removeEventListener('keyup', handleKeyUp);
       document.removeEventListener('focusout', handleFocusOut);
-      pointerRipples.forEach(clearState);
-      keyboardRipples.forEach(clearState);
+      
+      pointerRipples.forEach(release);
+      keyboardRipples.forEach(release);
     };
   }, []);
 

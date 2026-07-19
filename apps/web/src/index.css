@@ -309,38 +309,12 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  :where(
-    button:not(:disabled):not([data-md3-ripple='off']),
-    [role='button']:not([aria-disabled='true']):not([data-md3-ripple='off']),
-    [data-md3-ripple]:not([data-md3-ripple='off']):not([aria-disabled='true'])
-  )::before {
-    content: '';
+  .md3-ripple-span {
     position: absolute;
     z-index: 0;
-    left: var(--md3-ripple-x, 50%);
-    top: var(--md3-ripple-y, 50%);
-    width: var(--md3-ripple-size, 0px);
-    height: var(--md3-ripple-size, 0px);
     border-radius: 9999px;
-    background: var(--md3-ripple-color, currentColor);
-    opacity: 0;
     pointer-events: none;
-    transform: translate(-50%, -50%) scale(0);
-    transition:
-      transform 700ms cubic-bezier(0.4, 0, 0.2, 1),
-      opacity 90ms linear;
-  }
-
-  :where(button, [role='button'], [data-md3-ripple]).md3-ripple-active::before {
-    opacity: 0.18;
-    transform: translate(-50%, -50%) scale(1);
-  }
-
-  :where(button, [role='button'], [data-md3-ripple]).md3-ripple-active.md3-ripple-releasing::before {
-    opacity: 0;
-    transition:
-      transform 700ms cubic-bezier(0.4, 0, 0.2, 1),
-      opacity 280ms cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: center;
   }
 
   [data-md3-ripple='unbounded'] {
@@ -410,11 +384,6 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  :where(button, [role='button'], [data-md3-ripple]).md3-ripple-active::before {
-    transition-duration: 1ms;
-  }
-}
 
 @media (max-width: 1279px) {
   .auth-dashboard-mock {

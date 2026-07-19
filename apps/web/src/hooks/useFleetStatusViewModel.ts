@@ -21,7 +21,59 @@ export function useFleetStatusViewModel() {
     const defaultSla = config?.defaultUptimeSla ?? null;
     const defaultDegradedFloor = config?.latencyDegradedFloor ?? null;
 
-    const allMonitorsInSystem = globalMonitorsQuery.data ?? [];
+    const fetchedMonitors = globalMonitorsQuery.data ?? [];
+    
+    const allMonitorsInSystem = useMemo(() => {
+        if (import.meta.env.PROD) return fetchedMonitors;
+        
+        const mockMonitors: UptimeMonitorDto[] = [
+            {
+                id: -9001, tenantId: "mock-1", tenantName: "MOCK: UP", name: "Up Storefront",
+                url: "https://example.com", uptimeMonitorEnabled: true, currentStatus: "UP",
+                currentLatency: 120, currentUptimePercentage: 99.99, tags: ["status:up"],
+                updateInterval: 300, latencyDegradedFloor: 500, uptimeSla: 99.0
+            },
+            {
+                id: -9002, tenantId: "mock-2", tenantName: "MOCK: DOWN", name: "Down Storefront",
+                url: "https://example.com", uptimeMonitorEnabled: true, currentStatus: "DOWN",
+                currentLatency: null, currentUptimePercentage: 97.5, tags: ["status:down"],
+                updateInterval: 300, latencyDegradedFloor: 500, uptimeSla: 99.0, lastSyncError: "Connection timeout"
+            },
+            {
+                id: -9003, tenantId: "mock-3", tenantName: "MOCK: DEGRADED", name: "Degraded Storefront",
+                url: "https://example.com", uptimeMonitorEnabled: true, currentStatus: "UP",
+                currentLatency: 850, currentUptimePercentage: 99.99, tags: ["status:degraded"],
+                updateInterval: 300, latencyDegradedFloor: 500, uptimeSla: 99.0
+            },
+            {
+                id: -9004, tenantId: "mock-4", tenantName: "MOCK: SLA BREACH", name: "Breached Storefront",
+                url: "https://example.com", uptimeMonitorEnabled: true, currentStatus: "UP",
+                currentLatency: 150, currentUptimePercentage: 98.2, tags: ["status:sla-breach"],
+                updateInterval: 300, latencyDegradedFloor: 500, uptimeSla: 99.5
+            },
+            {
+                id: -9005, tenantId: "mock-5", tenantName: "MOCK: PAUSED", name: "Paused Storefront",
+                url: "https://example.com", uptimeMonitorEnabled: true, currentStatus: "PAUSED",
+                currentLatency: null, currentUptimePercentage: null, tags: ["status:paused"],
+                updateInterval: 300, latencyDegradedFloor: 500, uptimeSla: 99.0
+            },
+            {
+                id: -9006, tenantId: "mock-6", tenantName: "MOCK: STARTING", name: "Starting Storefront",
+                url: "https://example.com", uptimeMonitorEnabled: true, currentStatus: "STARTING",
+                currentLatency: null, currentUptimePercentage: null, tags: ["status:starting"],
+                updateInterval: 300, latencyDegradedFloor: 500, uptimeSla: 99.0
+            },
+            {
+                id: -9007, tenantId: "mock-7", tenantName: "MOCK: UNKNOWN", name: "Unknown Storefront",
+                url: "https://example.com", uptimeMonitorEnabled: true, currentStatus: "UNKNOWN",
+                currentLatency: null, currentUptimePercentage: null, tags: ["status:unknown"],
+                updateInterval: 300, latencyDegradedFloor: 500, uptimeSla: 99.0
+            }
+        ] as UptimeMonitorDto[];
+
+        return [...fetchedMonitors, ...mockMonitors];
+    }, [fetchedMonitors]);
+
     const tenantMonitors = selection ? allMonitorsInSystem.filter(m => m.tenantId === selection.tenantId) : allMonitorsInSystem;
     const scopedMonitors = selection?.monitorId ? tenantMonitors.filter(m => m.id === selection.monitorId) : tenantMonitors;
 

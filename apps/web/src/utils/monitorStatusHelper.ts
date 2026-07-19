@@ -12,44 +12,44 @@ export type MonitorStatus = 'operational' | 'degraded' | 'down' | 'unknown' | 'p
 
 export const STATUS_THEMES = {
     down: {
-      bg: 'bg-red-50',
-      border: 'border-red-200',
-      text: 'text-slate-900',
+      bg: 'bg-error-container',
+      border: 'border-error/40',
+      text: 'text-on-error-container',
       valueText: 'text-red-600',
       mutedText: 'text-slate-500',
-      dot: 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)] animate-pulse'
+      dot: 'bg-red-500'
     },
     degraded: {
       bg: 'bg-amber-50',
       border: 'border-amber-200',
-      text: 'text-slate-900',
+      text: 'text-amber-600',
       valueText: 'text-amber-600',
       mutedText: 'text-slate-500',
-      dot: 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]'
+      dot: 'bg-amber-500'
     },
     operational: {
-      bg: 'bg-surface-container-low',
-      border: 'border-surface-container-low',
-      text: 'text-slate-900',
-      valueText: 'text-slate-900',
+      bg: 'bg-surface',
+      border: 'border-surface',
+      text: '',
+      valueText: 'text-slate-600',
       mutedText: 'text-slate-500',
-      dot: 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]'
+      dot: 'bg-teal-500'
     },
     unknown: {
-      bg: 'bg-slate-100',
+      bg: 'bg-slate-200',
       border: 'border-slate-300',
       text: 'text-slate-500',
       valueText: 'text-slate-500',
       mutedText: 'text-slate-500',
-      dot: 'bg-slate-400'
+      dot: 'bg-slate-500'
     },
     paused: {
       bg: 'bg-blue-50',
-      border: 'border-slate-300',
-      text: 'text-slate-500',
-      valueText: 'text-slate-500',
+      border: 'border-blue-200',
+      text: 'text-blue-600',
+      valueText: 'text-blue-600',
       mutedText: 'text-slate-500',
-      dot: 'bg-slate-400'
+      dot: 'bg-blue-500'
     },
     starting: {
       bg: 'bg-indigo-50/50',

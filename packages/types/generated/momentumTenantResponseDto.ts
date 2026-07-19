@@ -14,6 +14,7 @@ export interface MomentumTenantResponseDto {
   baselineRevenue?: number;
   growthPercentage?: number;
   currentRevenue?: number;
+  orderVolume?: number;
   /** @nullable */
   litiumBaseUrl?: string | null;
 }

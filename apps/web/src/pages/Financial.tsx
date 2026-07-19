@@ -30,7 +30,7 @@ const EMPTY_DENSITY: TransactionDensityResponseDto = {
   periodStart: '',
   periodEnd: '',
 };
-const EMPTY_EFFICIENCY: RevenueEfficiencyResponse = { tenants: [], globalAverageOrderValue: 0, medianPortfolioShare: 0 };
+const EMPTY_EFFICIENCY: RevenueEfficiencyResponse = { tenants: [], globalAverageOrderValue: 0, medianOrderVolume: 0, medianPortfolioShare: 0 };
 const EMPTY_MOMENTUM: MomentumResponse = { tenants: [], medianBaselineRevenue: 0, globalGrowthPercentage: 0 };
 
 export function Financial() {

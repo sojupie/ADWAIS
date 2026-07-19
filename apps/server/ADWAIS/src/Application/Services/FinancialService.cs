@@ -441,15 +441,23 @@ public class FinancialService(
                 var growth = CalculateGrowthPercentage(curRev, prevRev);
                 var details = tenantDetails[tid];
 
-                return new RevenueEfficiencyTenantDto(tid, details.Name, details.Type, aov, share, growth, details.LitiumBaseUrl);
+                return new RevenueEfficiencyTenantDto(tid, details.Name, details.Type, aov, curVol, share, growth, details.LitiumBaseUrl);
             })
             .ToList();
 
+        var activeOrderVolumes = tenants
+            .Where(tenant => tenant.OrderVolume > 0)
+            .Select(tenant => tenant.OrderVolume)
+            .OrderBy(volume => volume)
+            .ToList();
+        var medianOrderVolume = activeOrderVolumes.Count > 0
+            ? CalculateMedian(activeOrderVolumes)
+            : 0m;
         var medianPortfolioShare = tenants.Count > 0 
             ? CalculateMedian(tenants.Select(t => t.PortfolioSharePercentage).OrderBy(r => r).ToList()) 
             : 0m;
 
-        return new RevenueEfficiencyDto(globalAov, medianPortfolioShare, tenants);
+        return new RevenueEfficiencyDto(globalAov, medianOrderVolume, medianPortfolioShare, tenants);
     }
 
     /// <inheritdoc />
@@ -526,13 +534,13 @@ public class FinancialService(
 
         var currentByTenant = currentRows
             .GroupBy(r => r.TenantId!.Value)
-            .ToDictionary(g => g.Key, g => g.Sum(r => r.Revenue));
+            .ToDictionary(g => g.Key, g => new { Revenue = g.Sum(r => r.Revenue), Volume = g.Sum(r => r.Volume) });
 
         var previousByTenant = previousRows
             .GroupBy(r => r.TenantId!.Value)
             .ToDictionary(g => g.Key, g => g.Sum(r => r.Revenue));
 
-        var totalCurrentRevenue = currentByTenant.Values.Sum();
+        var totalCurrentRevenue = currentByTenant.Values.Sum(value => value.Revenue);
         var totalPreviousRevenue = previousByTenant.Values.Sum();
         var globalGrowthPct = CalculateGrowthPercentage(totalCurrentRevenue, totalPreviousRevenue);
 
@@ -541,12 +549,14 @@ public class FinancialService(
         var tenants = allTenantIds
             .Select(tid =>
             {
-                var cur = currentByTenant.GetValueOrDefault(tid, 0m);
+                var current = currentByTenant.GetValueOrDefault(tid);
+                var cur = current?.Revenue ?? 0m;
+                var volume = current?.Volume ?? 0m;
                 var prev = previousByTenant.GetValueOrDefault(tid, 0m);
                 var growth = CalculateGrowthPercentage(cur, prev);
                 var details = tenantDetails[tid];
 
-                return new MomentumTenantDto(tid, details.Name, details.Type, prev, growth, cur, details.LitiumBaseUrl);
+                return new MomentumTenantDto(tid, details.Name, details.Type, prev, growth, cur, volume, details.LitiumBaseUrl);
             })
             .ToList();
 

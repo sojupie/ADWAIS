@@ -961,7 +961,7 @@
         "tags": [
           "Financial"
         ],
-        "summary": "Scatter plot data: revenue efficiency across all tenants. X: AOV, Y: Portfolio share, Bubble: Growth velocity.\r\nPortfolio view only.",
+        "summary": "Scatter plot data: revenue efficiency across all tenants. X: order volume, Y: AOV, Bubble: portfolio revenue share.\r\nPortfolio view only.",
         "parameters": [
           {
             "name": "timeframe",
@@ -1066,7 +1066,7 @@
         "tags": [
           "Financial"
         ],
-        "summary": "Scatter: baseline revenue × growth % × current volume. Portfolio view only.",
+        "summary": "Scatter: baseline revenue × growth % with bubble size representing order volume. Portfolio view only.",
         "parameters": [
           {
             "name": "timeframe",
@@ -4045,6 +4045,10 @@
             "type": "number",
             "format": "double"
           },
+          "orderVolume": {
+            "type": "number",
+            "format": "double"
+          },
           "litiumBaseUrl": {
             "type": "string",
             "nullable": true
@@ -4419,6 +4423,10 @@
             "type": "number",
             "format": "double"
           },
+          "medianOrderVolume": {
+            "type": "number",
+            "format": "double"
+          },
           "medianPortfolioShare": {
             "type": "number",
             "format": "double"
@@ -4448,6 +4456,10 @@
             "$ref": "#/components/schemas/TenantType"
           },
           "averageOrderValue": {
+            "type": "number",
+            "format": "double"
+          },
+          "orderVolume": {
             "type": "number",
             "format": "double"
           },

@@ -2952,7 +2952,7 @@ export const getGetApiFinancialRevenueEfficiencyUrl = (params?: GetApiFinancialR
 }
 
 /**
- * @summary Scatter plot data: revenue efficiency across all tenants. X: AOV, Y: Portfolio share, Bubble: Growth velocity.
+ * @summary Scatter plot data: revenue efficiency across all tenants. X: order volume, Y: AOV, Bubble: portfolio revenue share.
 Portfolio view only.
  */
 export const getApiFinancialRevenueEfficiency = async (params?: GetApiFinancialRevenueEfficiencyParams, options?: RequestInit): Promise<getApiFinancialRevenueEfficiencyResponse> => {
@@ -3024,7 +3024,7 @@ export function useGetApiFinancialRevenueEfficiency<TData = Awaited<ReturnType<t
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary Scatter plot data: revenue efficiency across all tenants. X: AOV, Y: Portfolio share, Bubble: Growth velocity.
+ * @summary Scatter plot data: revenue efficiency across all tenants. X: order volume, Y: AOV, Bubble: portfolio revenue share.
 Portfolio view only.
  */
 
@@ -3216,7 +3216,7 @@ export const getGetApiFinancialMomentumUrl = (params?: GetApiFinancialMomentumPa
 }
 
 /**
- * @summary Scatter: baseline revenue × growth % × current volume. Portfolio view only.
+ * @summary Scatter: baseline revenue × growth % with bubble size representing order volume. Portfolio view only.
  */
 export const getApiFinancialMomentum = async (params?: GetApiFinancialMomentumParams, options?: RequestInit): Promise<getApiFinancialMomentumResponse> => {
 
@@ -3287,7 +3287,7 @@ export function useGetApiFinancialMomentum<TData = Awaited<ReturnType<typeof get
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary Scatter: baseline revenue × growth % × current volume. Portfolio view only.
+ * @summary Scatter: baseline revenue × growth % with bubble size representing order volume. Portfolio view only.
  */
 
 export function useGetApiFinancialMomentum<TData = Awaited<ReturnType<typeof getApiFinancialMomentum>>, TError = unknown>(

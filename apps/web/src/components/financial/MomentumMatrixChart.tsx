@@ -1,10 +1,10 @@
 import { memo, useMemo } from 'react';
 import type { BubbleDataPoint, ChartData, ChartDataset, ChartOptions } from 'chart.js';
 import type { MomentumResponse, ComparisonPeriod } from '@types';
-import { formatCompact } from '@utils';
+import { formatCompact, formatNumber } from '@utils';
 import { ChartPanel } from '../common/charts/ChartPanel';
 import { EmptyState } from '../common/ui/EmptyState';
-import { chartColor, chartTick, chartTooltip, horizontalGrid, referenceLinesPlugin, scaleBubbleRadii, tenantInitialsPlugin } from '../common/charts/chartJs';
+import { chartColor, chartTick, chartTooltip, horizontalGrid, matrixQuadrantsPlugin, referenceLinesPlugin, scaleBubbleRadii, tenantMarkerPlugin } from '../common/charts/chartJs';
 import { ChartJsCanvas } from '../common/charts/ChartJsCanvas';
 
 const TYPE_COLORS: Record<string, [string, string]> = {
@@ -19,7 +19,7 @@ export const MomentumMatrixChart = memo(function MomentumMatrixChart({ isLoading
 }) {
   const points = momentum.tenants;
   const isEmpty = points.length === 0;
-  const radii = useMemo(() => scaleBubbleRadii(points.map(point => point.currentRevenue), 6, 20), [points]);
+  const radii = useMemo(() => scaleBubbleRadii(points.map(point => point.orderVolume), 6, 20), [points]);
   const bubbles: BubbleDataPoint[] = points.map((point, index) => ({ x: point.baselineRevenue, y: point.growthPercentage, r: radii[index] }));
   const dataset = {
     label: 'Tenants',
@@ -48,7 +48,11 @@ export const MomentumMatrixChart = memo(function MomentumMatrixChart({ isLoading
           title: items => points[items[0].dataIndex]?.tenantName || '',
           label: context => {
             const point = points[context.dataIndex];
-            return [`Current Revenue: ${formatCompact(point.currentRevenue)}`, `Momentum: ${point.growthPercentage > 0 ? '+' : ''}${point.growthPercentage.toFixed(1)}%`];
+            return [
+              `Current Revenue: ${formatCompact(point.currentRevenue)}`,
+              `Order Volume: ${formatNumber(point.orderVolume)}`,
+              `Momentum: ${point.growthPercentage > 0 ? '+' : ''}${point.growthPercentage.toFixed(1)}%`,
+            ];
           },
         },
       },
@@ -62,10 +66,10 @@ export const MomentumMatrixChart = memo(function MomentumMatrixChart({ isLoading
   return (
     <ChartPanel isLoading={isLoading} isStale={isStale} title="Momentum Matrix" comparison={comparison}
       className={className || 'h-full'} bodyClassName={isEmpty ? 'flex items-center justify-center' : 'flex-1 min-h-0'}
-      legend={<span className="text-sm font-bold text-on-surface-variant uppercase tracking-widest bg-surface-container-low px-3 py-1.5 rounded">Size = % of portfolio revenue</span>}
+      legend={<span className="text-sm font-bold text-on-surface-variant uppercase tracking-widest bg-surface-container-low px-3 py-1.5 rounded">Size = Order Volume</span>}
     >
       {isEmpty ? <EmptyState message="No previous-period baseline data" variant="minimal" /> : (
-        <div className="absolute inset-0"><ChartJsCanvas type="bubble" data={data} options={options} plugins={[referenceLinesPlugin(momentum.medianBaselineRevenue, momentum.globalGrowthPercentage), tenantInitialsPlugin]} /></div>
+        <div className="absolute inset-0"><ChartJsCanvas type="bubble" data={data} options={options} plugins={[matrixQuadrantsPlugin(momentum.medianBaselineRevenue, momentum.globalGrowthPercentage), referenceLinesPlugin(momentum.medianBaselineRevenue, momentum.globalGrowthPercentage), tenantMarkerPlugin]} /></div>
       )}
     </ChartPanel>
   );

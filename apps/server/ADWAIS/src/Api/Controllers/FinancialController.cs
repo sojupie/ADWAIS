@@ -91,7 +91,7 @@ public class FinancialController(
     }
 
     /// <summary>
-    /// Scatter plot data: revenue efficiency across all tenants. X: AOV, Y: Portfolio share, Bubble: Growth velocity.
+    /// Scatter plot data: revenue efficiency across all tenants. X: order volume, Y: AOV, Bubble: portfolio revenue share.
     /// Portfolio view only.
     /// </summary>
     [HttpGet("revenue-efficiency")]
@@ -101,12 +101,14 @@ public class FinancialController(
         var result = await financialService.GetRevenueEfficiencyAsync(period, ct);
         return Ok(new RevenueEfficiencyResponseDto(
             result.GlobalAverageOrderValue,
+            result.MedianOrderVolume,
             result.MedianPortfolioShare,
             result.Tenants.Select(r => new RevenueEfficiencyTenantResponseDto(
                 r.TenantId,
                 r.TenantName,
                 r.Type,
                 r.AverageOrderValue,
+                r.OrderVolume,
                 r.PortfolioSharePercentage,
                 r.GrowthVelocity,
                 r.LitiumBaseUrl
@@ -134,7 +136,7 @@ public class FinancialController(
     }
 
     /// <summary>
-    /// Scatter: baseline revenue × growth % × current volume. Portfolio view only.
+    /// Scatter: baseline revenue × growth % with bubble size representing order volume. Portfolio view only.
     /// </summary>
     [HttpGet("momentum")]
     public async Task<ActionResult<MomentumResponseDto>> GetMomentum([FromQuery] PortfolioRequestDto request, CancellationToken ct = default)
@@ -151,6 +153,7 @@ public class FinancialController(
                 t.BaselineRevenue,
                 t.GrowthPercentage,
                 t.CurrentRevenue,
+                t.OrderVolume,
                 t.LitiumBaseUrl)).ToList()));
     }
 

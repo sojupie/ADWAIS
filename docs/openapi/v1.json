@@ -3787,6 +3787,10 @@
           "weatherFetchIntervalMinutes": {
             "type": "integer",
             "format": "int32"
+          },
+          "reportingTimeZoneId": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -4917,6 +4921,10 @@
           "weatherFetchIntervalMinutes": {
             "type": "integer",
             "format": "int32",
+            "nullable": true
+          },
+          "reportingTimeZoneId": {
+            "type": "string",
             "nullable": true
           }
         },

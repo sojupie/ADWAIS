@@ -78,6 +78,16 @@ export function GlobalConfigurationForm({ config, updateConfig, disabled }: Glob
             onSave={(val) => updateConfig.mutate({ systemEventRetentionDays: val })}
           />
           <InlineEditField
+            label="Reporting Timezone"
+            value={config.reportingTimeZoneId || 'Europe/Stockholm'}
+            type="text"
+            required
+            requiredCondition="Valid IANA timezone identifier"
+            placeholder="e.g. Europe/Stockholm"
+            disabled={disabled}
+            onSave={(val) => updateConfig.mutate({ reportingTimeZoneId: val })}
+          />
+          <InlineEditField
             label="Weather Location"
             value={config.weatherLocation || ''}
             type="text"
@@ -106,6 +116,7 @@ export function GlobalConfigurationForm({ config, updateConfig, disabled }: Glob
           <FormSkeleton.Input labelWidth="w-40" />
           <FormSkeleton.Input labelWidth="w-36" />
           <FormSkeleton.Input labelWidth="w-32" />
+          <FormSkeleton.Input labelWidth="w-36" />
         </FormSkeleton>
       )}
     </SettingsCard>

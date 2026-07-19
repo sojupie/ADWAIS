@@ -32,4 +32,6 @@ export interface GlobalConfigResponseDto {
   /** @nullable */
   weatherLocation?: string | null;
   weatherFetchIntervalMinutes?: number;
+  /** @nullable */
+  reportingTimeZoneId?: string | null;
 }

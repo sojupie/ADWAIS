@@ -18,7 +18,7 @@ namespace Adwais.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.7")
+                .HasAnnotation("ProductVersion", "10.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "uuid-ossp");
@@ -81,6 +81,14 @@ namespace Adwais.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("monitors_limit");
 
+                    b.Property<string>("ReportingTimeZoneId")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasDefaultValue("Europe/Stockholm")
+                        .HasColumnName("reporting_time_zone_id");
+
                     b.Property<int>("SystemEventRetentionDays")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
@@ -138,6 +146,7 @@ namespace Adwais.Infrastructure.Migrations
                             LatencyFetchIntervalMinutes = 10,
                             LitiumFetchEnabled = true,
                             LitiumFetchIntervalMinutes = 60,
+                            ReportingTimeZoneId = "Europe/Stockholm",
                             SystemEventRetentionDays = 2,
                             UptimeFetchIntervalMinutes = 60,
                             UptimeRobotFetchEnabled = true,

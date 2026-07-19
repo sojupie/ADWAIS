@@ -4,63 +4,69 @@ using Adwais.Domain.Enums;
 namespace Adwais.Application.Services;
 
 /// <summary>
-/// Converts a <see cref="Timeframe"/> enum into concrete UTC date boundaries
-/// for the current period and its immediately preceding comparison period.
+/// Converts a <see cref="Timeframe"/> enum into concrete UTC instants using a
+/// supplied reporting time zone for local calendar boundaries.
 /// </summary>
 public static class TimeframeResolver
 {
     /// <summary>
     /// Resolves the current and previous period date ranges for a given timeframe.
-    /// All dates are UTC midnight-aligned.
+    /// Calendar boundaries are aligned in <paramref name="timeZone"/> and then
+    /// converted to UTC. An explicit <paramref name="now"/> can be supplied for
+    /// deterministic tests.
     /// </summary>
-    public static ResolvedPeriod Resolve(Timeframe timeframe, ComparisonType comparisonType = ComparisonType.Preceding)
+    public static ResolvedPeriod Resolve(
+        Timeframe timeframe,
+        ComparisonType comparisonType = ComparisonType.Preceding,
+        TimeZoneInfo? timeZone = null,
+        DateTimeOffset? now = null)
     {
-        var now = DateTimeOffset.UtcNow;
-        var today = new DateTimeOffset(now.Year, now.Month, now.Day, 0, 0, 0, TimeSpan.Zero);
-        var tomorrow = today.AddDays(1);
-        var currentEnd = now;
+        timeZone ??= TimeZoneInfo.Utc;
+        var currentEnd = now ?? DateTimeOffset.UtcNow;
+        var localNow = TimeZoneInfo.ConvertTime(currentEnd, timeZone);
+        var today = localNow.Date;
 
         return timeframe switch
         {
-            Timeframe.Today => BuildRollingHourlyPeriod(currentEnd, now, 1, comparisonType),
-            Timeframe.T7 => BuildRollingHourlyPeriod(currentEnd, now, 7, comparisonType),
-            Timeframe.T30 => BuildFixedPeriod(today, currentEnd, 30, comparisonType),
-            Timeframe.T90 => BuildFixedPeriod(today, currentEnd, 90, comparisonType),
-            Timeframe.Ytd => BuildYtdPeriod(today, tomorrow, currentEnd, comparisonType),
-            Timeframe.T365 => BuildFixedPeriod(today, currentEnd, 365, comparisonType),
-            _ => BuildFixedPeriod(today, currentEnd, 30, comparisonType)
+            Timeframe.Today => BuildRollingHourlyPeriod(currentEnd, localNow, 1, comparisonType, timeZone),
+            Timeframe.T7 => BuildRollingHourlyPeriod(currentEnd, localNow, 7, comparisonType, timeZone),
+            Timeframe.T30 => BuildFixedPeriod(today, currentEnd, 30, comparisonType, timeZone),
+            Timeframe.T90 => BuildFixedPeriod(today, currentEnd, 90, comparisonType, timeZone),
+            Timeframe.Ytd => BuildYtdPeriod(today, currentEnd, comparisonType, timeZone),
+            Timeframe.T365 => BuildFixedPeriod(today, currentEnd, 365, comparisonType, timeZone),
+            _ => BuildFixedPeriod(today, currentEnd, 30, comparisonType, timeZone)
         };
     }
 
     /// <summary>
     /// Builds a fixed-length period (e.g., trailing 30 days) and its previous comparison period.
     /// </summary>
-    private static ResolvedPeriod BuildFixedPeriod(DateTimeOffset today, DateTimeOffset currentEnd, int days, ComparisonType comparisonType, bool isHourly = false)
+    private static ResolvedPeriod BuildFixedPeriod(DateTime today, DateTimeOffset currentEnd, int days, ComparisonType comparisonType, TimeZoneInfo timeZone)
     {
-        var currentStart = today.AddDays(-(days - 1));
-        var previousStart = comparisonType == ComparisonType.YearOverYear
+        var currentStartLocal = today.AddDays(-(days - 1));
+        var previousStartLocal = comparisonType == ComparisonType.YearOverYear
             ? today.AddYears(-1).AddDays(-(days - 1))
-            : currentStart.AddDays(-days);
+            : currentStartLocal.AddDays(-days);
+        var currentStart = ConvertLocalToUtc(currentStartLocal, timeZone);
+        var previousStart = ConvertLocalToUtc(previousStartLocal, timeZone);
         var previousEnd = previousStart + (currentEnd - currentStart);
-        
-        var steps = isHourly ? 48 : days;
-        if (isHourly && steps == 0) steps = 1;
 
-        return new ResolvedPeriod(currentStart, currentEnd, previousStart, previousEnd, steps, isHourly, false);
+        return new ResolvedPeriod(currentStart, currentEnd, previousStart, previousEnd, days, false, false);
     }
 
     /// <summary>
     /// Builds a rolling hourly period and its previous comparison period.
     /// </summary>
-    private static ResolvedPeriod BuildRollingHourlyPeriod(DateTimeOffset currentEnd, DateTimeOffset now, int days, ComparisonType comparisonType)
+    private static ResolvedPeriod BuildRollingHourlyPeriod(DateTimeOffset currentEnd, DateTimeOffset localNow, int days, ComparisonType comparisonType, TimeZoneInfo timeZone)
     {
-        var currentHour = new DateTimeOffset(now.Year, now.Month, now.Day, now.Hour, 0, 0, TimeSpan.Zero);
+        var currentHourLocal = new DateTime(localNow.Year, localNow.Month, localNow.Day, localNow.Hour, 0, 0, DateTimeKind.Unspecified);
         var hoursToSubtract = (days * 24) - 1;
-        var currentStart = currentHour.AddHours(-hoursToSubtract);
-        
-        var previousStart = comparisonType == ComparisonType.YearOverYear
-            ? currentStart.AddYears(-1)
-            : currentStart.AddDays(-days);
+        var currentStartLocal = currentHourLocal.AddHours(-hoursToSubtract);
+        var previousStartLocal = comparisonType == ComparisonType.YearOverYear
+            ? currentStartLocal.AddYears(-1)
+            : currentStartLocal.AddDays(-days);
+        var currentStart = ConvertLocalToUtc(currentStartLocal, timeZone);
+        var previousStart = ConvertLocalToUtc(previousStartLocal, timeZone);
             
         var previousEnd = previousStart + (currentEnd - currentStart);
         
@@ -71,15 +77,31 @@ public static class TimeframeResolver
     /// <summary>
     /// Builds a Year-to-Date (YTD) period and an equivalent-length comparison period.
     /// </summary>
-    private static ResolvedPeriod BuildYtdPeriod(DateTimeOffset today, DateTimeOffset tomorrow, DateTimeOffset currentEnd, ComparisonType comparisonType)
+    private static ResolvedPeriod BuildYtdPeriod(DateTime today, DateTimeOffset currentEnd, ComparisonType comparisonType, TimeZoneInfo timeZone)
     {
-        var currentStart = new DateTimeOffset(today.Year, 1, 1, 0, 0, 0, TimeSpan.Zero);
-        var daysInPeriod = (tomorrow - currentStart).Days;
-        
-        var previousStart = comparisonType == ComparisonType.YearOverYear
-            ? currentStart.AddYears(-1)
-            : currentStart.AddDays(-daysInPeriod);
+        var currentStartLocal = new DateTime(today.Year, 1, 1);
+        var daysInPeriod = (today.AddDays(1) - currentStartLocal).Days;
+        var previousStartLocal = comparisonType == ComparisonType.YearOverYear
+            ? currentStartLocal.AddYears(-1)
+            : currentStartLocal.AddDays(-daysInPeriod);
+        var currentStart = ConvertLocalToUtc(currentStartLocal, timeZone);
+        var previousStart = ConvertLocalToUtc(previousStartLocal, timeZone);
         var previousEnd = previousStart + (currentEnd - currentStart);
         return new ResolvedPeriod(currentStart, currentEnd, previousStart, previousEnd, daysInPeriod, false, false);
+    }
+
+    /// <summary>
+    /// Converts an unspecified local wall-clock value to UTC. If a zone has a
+    /// rare DST transition at that exact time, advances to its first valid minute.
+    /// </summary>
+    public static DateTimeOffset ConvertLocalToUtc(DateTime localDateTime, TimeZoneInfo timeZone)
+    {
+        var local = DateTime.SpecifyKind(localDateTime, DateTimeKind.Unspecified);
+        while (timeZone.IsInvalidTime(local))
+        {
+            local = local.AddMinutes(1);
+        }
+
+        return new DateTimeOffset(TimeZoneInfo.ConvertTimeToUtc(local, timeZone), TimeSpan.Zero);
     }
 }

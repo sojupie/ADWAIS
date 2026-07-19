@@ -9,5 +9,6 @@ public record UpdateGlobalConfigRequestDto(
     double? DefaultUptimeSla = null,
     int? FeedFetchIntervalHours = null,
     string? WeatherLocation = null,
-    int? WeatherFetchIntervalMinutes = null
+    int? WeatherFetchIntervalMinutes = null,
+    string? ReportingTimeZoneId = null
 );

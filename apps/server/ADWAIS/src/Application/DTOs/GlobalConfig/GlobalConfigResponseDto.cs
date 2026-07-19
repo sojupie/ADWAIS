@@ -20,5 +20,6 @@ public record GlobalConfigResponseDto(
     double? DefaultUptimeSla,
     int FeedFetchIntervalHours,
     string? WeatherLocation,
-    int WeatherFetchIntervalMinutes
+    int WeatherFetchIntervalMinutes,
+    string ReportingTimeZoneId
 );

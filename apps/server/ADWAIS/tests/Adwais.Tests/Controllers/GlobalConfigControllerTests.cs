@@ -43,7 +43,8 @@ public class GlobalConfigControllerTests
             DefaultUptimeSla: null,
             FeedFetchIntervalHours: 2,
             WeatherLocation: "Karlstad",
-            WeatherFetchIntervalMinutes: 15
+            WeatherFetchIntervalMinutes: 15,
+            ReportingTimeZoneId: "Europe/Stockholm"
         );
 
         _configServiceMock.Setup(s => s.GetConfigAsync(It.IsAny<CancellationToken>()))
@@ -82,7 +83,8 @@ public class GlobalConfigControllerTests
             DefaultUptimeSla: null,
             FeedFetchIntervalHours: 6,
             WeatherLocation: "Karlstad",
-            WeatherFetchIntervalMinutes: 15
+            WeatherFetchIntervalMinutes: 15,
+            ReportingTimeZoneId: "Europe/Stockholm"
         );
 
         _configServiceMock.Setup(s => s.UpdateConfigAsync(request, It.IsAny<CancellationToken>()))

@@ -18,12 +18,14 @@ public class GlobalConfigServiceTests
 {
     private readonly DbContextOptions<AnalyticsDbContext> _options;
     private readonly Mock<ISystemEventService> _eventServiceMock;
+    private readonly Mock<IReportingRollupRefresher> _reportingRollupRefresherMock;
 
     public GlobalConfigServiceTests()
     {
         var dbName = Guid.NewGuid().ToString();
         _options = new DbContextOptionsBuilder<AnalyticsDbContext>().UseInMemoryDatabase(dbName).Options;
         _eventServiceMock = new Mock<ISystemEventService>();
+        _reportingRollupRefresherMock = new Mock<IReportingRollupRefresher>();
 
         // Setup mock Hangfire JobStorage to avoid "JobStorage.Current has not been initialized" exception
         var jobStorageMock = new Mock<JobStorage>();
@@ -51,7 +53,7 @@ public class GlobalConfigServiceTests
         dbContext.GlobalConfigs.Add(config);
         await dbContext.SaveChangesAsync();
 
-        var service = new GlobalConfigService(dbContext, _eventServiceMock.Object);
+        var service = new GlobalConfigService(dbContext, _eventServiceMock.Object, _reportingRollupRefresherMock.Object);
 
         // Act
         var result = await service.GetConfigAsync();
@@ -79,7 +81,7 @@ public class GlobalConfigServiceTests
         dbContext.GlobalConfigs.Add(config);
         await dbContext.SaveChangesAsync();
 
-        var service = new GlobalConfigService(dbContext, _eventServiceMock.Object);
+        var service = new GlobalConfigService(dbContext, _eventServiceMock.Object, _reportingRollupRefresherMock.Object);
         var request = new UpdateGlobalConfigRequestDto(FeedFetchIntervalHours: 4, LitiumFetchEnabled: false);
 
         // Act
@@ -94,6 +96,35 @@ public class GlobalConfigServiceTests
         Assert.NotNull(configDb);
         Assert.Equal(4, configDb.FeedFetchIntervalHours);
         Assert.False(configDb.LitiumFetchEnabled);
+    }
+
+    [Fact]
+    public async Task UpdateConfigAsync_WhenReportingTimeZoneChanges_ShouldRefreshFinancialRollups()
+    {
+        var dbContext = new AnalyticsDbContext(_options);
+        dbContext.GlobalConfigs.Add(new GlobalConfig
+        {
+            Id = 1,
+            ReportingTimeZoneId = "Europe/Stockholm",
+            LitiumFetchIntervalMinutes = 60,
+            UptimeFetchIntervalMinutes = 60,
+            LatencyFetchIntervalMinutes = 10,
+            UserStatsFetchIntervalMinutes = 60
+        });
+        await dbContext.SaveChangesAsync();
+
+        var service = new GlobalConfigService(
+            dbContext,
+            _eventServiceMock.Object,
+            _reportingRollupRefresherMock.Object);
+
+        var result = await service.UpdateConfigAsync(
+            new UpdateGlobalConfigRequestDto(ReportingTimeZoneId: "UTC"));
+
+        Assert.Equal("UTC", result.ReportingTimeZoneId);
+        _reportingRollupRefresherMock.Verify(
+            refresher => refresher.RefreshAsync(It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 
     [Fact]
@@ -113,7 +144,7 @@ public class GlobalConfigServiceTests
         dbContext.GlobalConfigs.Add(config);
         await dbContext.SaveChangesAsync();
 
-        var service = new GlobalConfigService(dbContext, _eventServiceMock.Object);
+        var service = new GlobalConfigService(dbContext, _eventServiceMock.Object, _reportingRollupRefresherMock.Object);
 
         // Act
         await service.UpdateFeedIntervalAsync(12);
@@ -142,7 +173,7 @@ public class GlobalConfigServiceTests
         dbContext.GlobalConfigs.Add(config);
         await dbContext.SaveChangesAsync();
 
-        var service = new GlobalConfigService(dbContext, _eventServiceMock.Object);
+        var service = new GlobalConfigService(dbContext, _eventServiceMock.Object, _reportingRollupRefresherMock.Object);
 
         // Act
         var result = await service.GetFetchIntervalsAsync();
@@ -173,7 +204,7 @@ public class GlobalConfigServiceTests
         dbContext.GlobalConfigs.Add(config);
         await dbContext.SaveChangesAsync();
 
-        var service = new GlobalConfigService(dbContext, _eventServiceMock.Object);
+        var service = new GlobalConfigService(dbContext, _eventServiceMock.Object, _reportingRollupRefresherMock.Object);
         var request = new UpdateFetchIntervalsRequestDto(
             LitiumFetchIntervalMinutes: 120,
             UptimeFetchIntervalMinutes: 30,

@@ -15,8 +15,6 @@ public class RuntimeDataSeederJob(
     IConfiguration configuration)
 {
     private const int RunsPerHour = 60;
-    private const string ReportingTimeZoneId = "Europe/Stockholm";
-    private static readonly TimeZoneInfo ReportingTimeZone = TimeZoneInfo.FindSystemTimeZoneById(ReportingTimeZoneId);
     private record TenantProfile(string Name, int MinAov, int MaxAov, int DailyVolume);
 
     private static readonly List<TenantProfile> Profiles = new()
@@ -88,6 +86,10 @@ public class RuntimeDataSeederJob(
     public async Task ExecuteAsync()
     {
         await using var db = await dbContextFactory.CreateDbContextAsync();
+        var reportingTimeZoneId = await db.GlobalConfigs
+            .Select(config => config.ReportingTimeZoneId)
+            .SingleAsync();
+        var reportingTimeZone = TimeZoneInfo.FindSystemTimeZoneById(reportingTimeZoneId);
         
         var tenants = await db.Tenants
             .Where(t => t.Id != AnalyticsDbContext.SystemTenantGuid && t.Name.EndsWith(" [MOCK]"))
@@ -97,7 +99,7 @@ public class RuntimeDataSeederJob(
 
         var random = new Random();
         var now = DateTimeOffset.UtcNow;
-        var reportingNow = TimeZoneInfo.ConvertTime(now, ReportingTimeZone);
+        var reportingNow = TimeZoneInfo.ConvertTime(now, reportingTimeZone);
         var orders = new List<Order>();
 
         double currentHourWeight = HourlyWeights[reportingNow.Hour] / HourlyWeights.Sum();

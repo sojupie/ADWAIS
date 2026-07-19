@@ -8,23 +8,28 @@ public class RefreshMonitoringMaterializedViewJob(IDbContextFactory<AnalyticsDbC
 {
     public async Task ExecuteAsync()
     {
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        await RefreshAsync();
+    }
+
+    public async Task RefreshAsync(CancellationToken ct = default)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(ct);
 
         // 1. Latency Views
         await dbContext.Database.ExecuteSqlRawAsync(
-            "REFRESH MATERIALIZED VIEW CONCURRENTLY v_mat_daily_latency_monitor_rollup;");
+            "REFRESH MATERIALIZED VIEW CONCURRENTLY v_mat_daily_latency_monitor_rollup;", ct);
         await dbContext.Database.ExecuteSqlRawAsync(
-            "REFRESH MATERIALIZED VIEW CONCURRENTLY v_mat_daily_latency_tenant_rollup;");
+            "REFRESH MATERIALIZED VIEW CONCURRENTLY v_mat_daily_latency_tenant_rollup;", ct);
         await dbContext.Database.ExecuteSqlRawAsync(
-            "REFRESH MATERIALIZED VIEW CONCURRENTLY v_mat_daily_latency_global_rollup;");
+            "REFRESH MATERIALIZED VIEW CONCURRENTLY v_mat_daily_latency_global_rollup;", ct);
 
         // 2. Availability Views
         await dbContext.Database.ExecuteSqlRawAsync(
-            "REFRESH MATERIALIZED VIEW CONCURRENTLY v_mat_daily_availability_monitor_rollup;");
+            "REFRESH MATERIALIZED VIEW CONCURRENTLY v_mat_daily_availability_monitor_rollup;", ct);
         await dbContext.Database.ExecuteSqlRawAsync(
-            "REFRESH MATERIALIZED VIEW CONCURRENTLY v_mat_daily_availability_tenant_rollup;");
+            "REFRESH MATERIALIZED VIEW CONCURRENTLY v_mat_daily_availability_tenant_rollup;", ct);
         await dbContext.Database.ExecuteSqlRawAsync(
-            "REFRESH MATERIALIZED VIEW CONCURRENTLY v_mat_daily_availability_global_rollup;");
+            "REFRESH MATERIALIZED VIEW CONCURRENTLY v_mat_daily_availability_global_rollup;", ct);
     }
 }
 

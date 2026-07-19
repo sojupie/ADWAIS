@@ -22,4 +22,5 @@ public class GlobalConfig
     public int FeedFetchIntervalHours { get; set; } = 2;
     public string? WeatherLocation { get; set; }
     public int WeatherFetchIntervalMinutes { get; set; } = 15;
+    public string ReportingTimeZoneId { get; set; } = "Europe/Stockholm";
 }

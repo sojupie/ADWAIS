@@ -16,6 +16,7 @@ using Adwais.Domain.Entities.Monitoring;
 using Adwais.Domain.Enums;
 using Adwais.Infrastructure.Persistence;
 using Adwais.Application.Common.Models;
+using Adwais.Application.Services;
 
 namespace Adwais.Tests.Controllers;
 
@@ -24,6 +25,7 @@ public class MonitorControllerTests
     private readonly DbContextOptions<AnalyticsDbContext> _dbOptions;
     private readonly AnalyticsDbContext _dbContext;
     private readonly Mock<IMonitorOrchestrationService> _monitorServiceMock;
+    private readonly Mock<IReportingCalendar> _reportingCalendarMock;
     private readonly MonitorController _controller;
 
     public MonitorControllerTests()
@@ -34,8 +36,19 @@ public class MonitorControllerTests
 
         _dbContext = new AnalyticsDbContext(_dbOptions);
         _monitorServiceMock = new Mock<IMonitorOrchestrationService>();
+        _reportingCalendarMock = new Mock<IReportingCalendar>();
+        _reportingCalendarMock
+            .Setup(calendar => calendar.ResolvePeriodAsync(
+                It.IsAny<Timeframe>(),
+                It.IsAny<ComparisonType>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Timeframe timeframe, ComparisonType comparison, CancellationToken _) =>
+                TimeframeResolver.Resolve(timeframe, comparison));
 
-        _controller = new MonitorController(_dbContext, _monitorServiceMock.Object);
+        _controller = new MonitorController(
+            _dbContext,
+            _monitorServiceMock.Object,
+            _reportingCalendarMock.Object);
 
         // Seed global config for IsUptimeRobotConfiguredAsync
         using var db = new AnalyticsDbContext(_dbOptions);

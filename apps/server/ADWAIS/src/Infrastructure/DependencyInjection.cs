@@ -1,9 +1,11 @@
 using Adwais.Application.Common.Interfaces;
 using Adwais.Application.Interfaces;
+using Adwais.Application.Services;
 using Adwais.Infrastructure.Caching;
 using Adwais.Infrastructure.Persistence;
 using Adwais.Infrastructure.Services;
 using Adwais.Infrastructure.Services.Monitoring;
+using Adwais.Infrastructure.Jobs.MaterializedViews;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -34,6 +36,10 @@ public static class DependencyInjection
         services.AddScoped<IKioskService, KioskService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IGlobalConfigService, GlobalConfigService>();
+        services.AddScoped<IReportingCalendar, ReportingCalendar>();
+        services.AddScoped<RefreshFinancialMaterializedViewJob>();
+        services.AddScoped<RefreshMonitoringMaterializedViewJob>();
+        services.AddScoped<IReportingRollupRefresher, ReportingRollupRefresher>();
 
         // Register Typed HTTP Clients with resilience policies
         services.AddTransient<UptimeRobotRateLimitHandler>();

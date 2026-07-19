@@ -245,6 +245,7 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
             entity.Property(x => x.DefaultUptimeSla);
             entity.Property(x => x.WeatherLocation).HasDefaultValue("Karlstad");
             entity.Property(x => x.WeatherFetchIntervalMinutes).HasDefaultValue(15);
+            entity.Property(x => x.ReportingTimeZoneId).HasMaxLength(100).HasDefaultValue("Europe/Stockholm");
 
             entity.HasData(new GlobalConfig
             {
@@ -258,7 +259,8 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
                 SystemEventRetentionDays = 2,
                 FeedFetchIntervalHours = 2,
                 WeatherLocation = "Karlstad",
-                WeatherFetchIntervalMinutes = 15
+                WeatherFetchIntervalMinutes = 15,
+                ReportingTimeZoneId = "Europe/Stockholm"
             });
         });
         

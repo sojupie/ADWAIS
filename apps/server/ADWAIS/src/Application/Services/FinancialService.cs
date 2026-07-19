@@ -14,14 +14,15 @@ namespace Adwais.Application.Services;
 /// <summary>
 /// Provides financial analytics and KPI calculations by merging historical rollup data with real-time order data.
 /// </summary>
-public class FinancialService(IApplicationDbContext dbContext) : IFinancialService
+public class FinancialService(
+    IApplicationDbContext dbContext,
+    IReportingCalendar reportingCalendar) : IFinancialService
 {
     private const int DensityBucketCount = 7 * 24;
     private const int SparseDensityThreshold = DensityBucketCount * 5;
     private const int StableDensityThreshold = DensityBucketCount * 20;
-    private const string DensityTimeZoneId = "Europe/Stockholm";
-    private static readonly TimeZoneInfo DensityTimeZone = TimeZoneInfo.FindSystemTimeZoneById(DensityTimeZoneId);
     private readonly IApplicationDbContext _dbContext = dbContext;
+    private readonly IReportingCalendar _reportingCalendar = reportingCalendar;
 
     #region Internal data model for the merge layer
 
@@ -64,8 +65,9 @@ public class FinancialService(IApplicationDbContext dbContext) : IFinancialServi
             )).ToList();
         }
 
-        var yesterday = new DateTimeOffset(DateTimeOffset.UtcNow.Date);
-        var viewEnd = yesterday < end ? yesterday : end;
+        var timeZone = await _reportingCalendar.GetTimeZoneAsync(ct);
+        var currentDayStart = _reportingCalendar.GetStartOfDayUtc(DateTimeOffset.UtcNow, timeZone);
+        var viewEnd = currentDayStart < end ? currentDayStart : end;
         
         var historicalQuery = context.DailyTenantRollups
             .AsNoTracking()
@@ -82,12 +84,12 @@ public class FinancialService(IApplicationDbContext dbContext) : IFinancialServi
         
         var historical = rawHist.Select(r => new DataRow(r.CreatedDate, r.TenantId, r.Revenue, (int)r.Volume)).ToList();
         
-        if (yesterday < end)
+        if (currentDayStart < end)
         {
             var freshQuery = context.Orders
                 .AsNoTracking()
                 .Where(o => o.OrderState != OrderState.Cancelled)
-                .Where(o => o.CreatedDate >= yesterday && o.CreatedDate < end);
+                .Where(o => o.CreatedDate >= currentDayStart && o.CreatedDate < end);
 
             if (tenantId.HasValue)
                 freshQuery = freshQuery.Where(o => o.TenantId == tenantId.Value);
@@ -138,8 +140,9 @@ public class FinancialService(IApplicationDbContext dbContext) : IFinancialServi
             )).ToList();
         }
 
-        var yesterday = new DateTimeOffset(DateTimeOffset.UtcNow.Date);
-        var viewEnd = yesterday < end ? yesterday : end;
+        var timeZone = await _reportingCalendar.GetTimeZoneAsync(ct);
+        var currentDayStart = _reportingCalendar.GetStartOfDayUtc(DateTimeOffset.UtcNow, timeZone);
+        var viewEnd = currentDayStart < end ? currentDayStart : end;
 
         var rawHist = await context.DailyGlobalRollups
             .AsNoTracking()
@@ -149,12 +152,12 @@ public class FinancialService(IApplicationDbContext dbContext) : IFinancialServi
 
         var historical = rawHist.Select(r => new DataRow(r.CreatedDate, null, r.GlobalRevenue, (int)r.GlobalVolume)).ToList();
 
-        if (yesterday < end)
+        if (currentDayStart < end)
         {
             var freshRows = await context.Orders
                 .AsNoTracking()
                 .Where(o => o.OrderState != OrderState.Cancelled)
-                .Where(o => o.CreatedDate >= yesterday && o.CreatedDate < end)
+                .Where(o => o.CreatedDate >= currentDayStart && o.CreatedDate < end)
                 .Where(o => o.TenantId != IApplicationDbContext.SystemTenantGuid)
                 .GroupBy(o => new { o.CreatedDate.Year, o.CreatedDate.Month, o.CreatedDate.Day })
                 .Select(g => new {
@@ -692,9 +695,11 @@ public class FinancialService(IApplicationDbContext dbContext) : IFinancialServi
     {
         var context = _dbContext;
         var currentEnd = DateTimeOffset.UtcNow;
+        var timeZone = await _reportingCalendar.GetTimeZoneAsync(ct);
 
         var query = context.Orders
-            .AsNoTracking();
+            .AsNoTracking()
+            .Where(o => o.OrderState != OrderState.Cancelled);
 
         if (tenantId.HasValue)
             query = query.Where(o => o.TenantId == tenantId.Value);
@@ -703,10 +708,10 @@ public class FinancialService(IApplicationDbContext dbContext) : IFinancialServi
 
         var starts = new Dictionary<TransactionDensityPeriod, DateTimeOffset>
         {
-            [TransactionDensityPeriod.T30] = GetDensityPeriodStart(currentEnd, 30),
-            [TransactionDensityPeriod.T90] = GetDensityPeriodStart(currentEnd, 90),
-            [TransactionDensityPeriod.T180] = GetDensityPeriodStart(currentEnd, 180),
-            [TransactionDensityPeriod.T365] = GetDensityPeriodStart(currentEnd, 365)
+            [TransactionDensityPeriod.T30] = GetDensityPeriodStart(currentEnd, 30, timeZone),
+            [TransactionDensityPeriod.T90] = GetDensityPeriodStart(currentEnd, 90, timeZone),
+            [TransactionDensityPeriod.T180] = GetDensityPeriodStart(currentEnd, 180, timeZone),
+            [TransactionDensityPeriod.T365] = GetDensityPeriodStart(currentEnd, 365, timeZone)
         };
 
         var effectivePeriod = requestedPeriod;
@@ -758,7 +763,7 @@ public class FinancialService(IApplicationDbContext dbContext) : IFinancialServi
             .Select(point =>
             {
                 var utcHour = new DateTimeOffset(point.Year, point.Month, point.Day, point.Hour, 0, 0, TimeSpan.Zero);
-                var localHour = TimeZoneInfo.ConvertTime(utcHour, DensityTimeZone);
+                var localHour = TimeZoneInfo.ConvertTime(utcHour, timeZone);
                 return new
                 {
                     DayOfWeek = (int)localHour.DayOfWeek,
@@ -809,18 +814,18 @@ public class FinancialService(IApplicationDbContext dbContext) : IFinancialServi
             sampleQuality,
             requestedPeriod,
             effectivePeriod,
-            DensityTimeZoneId,
+            timeZone.Id,
             currentStart,
             currentEnd,
             result);
     }
 
-    private static DateTimeOffset GetDensityPeriodStart(DateTimeOffset utcNow, int days)
+    private static DateTimeOffset GetDensityPeriodStart(DateTimeOffset utcNow, int days, TimeZoneInfo timeZone)
     {
-        var localNow = TimeZoneInfo.ConvertTime(utcNow, DensityTimeZone);
+        var localNow = TimeZoneInfo.ConvertTime(utcNow, timeZone);
         var localStart = new DateTime(localNow.Year, localNow.Month, localNow.Day, 0, 0, 0, DateTimeKind.Unspecified)
             .AddDays(-(days - 1));
-        return new DateTimeOffset(TimeZoneInfo.ConvertTimeToUtc(localStart, DensityTimeZone), TimeSpan.Zero);
+        return TimeframeResolver.ConvertLocalToUtc(localStart, timeZone);
     }
 
     /// <inheritdoc />

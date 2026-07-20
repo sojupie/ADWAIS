@@ -9,6 +9,7 @@ import { MobileNavigationMenu } from './MobileNavigationMenu';
 import { useMediaQuery } from '../../../hooks/useMediaQuery';
 import { useVisualViewportCssVars } from '../../../hooks/useVisualViewportCssVars';
 import { useOrderNotifier } from '../../../hooks/useOrderNotifier';
+import { MobileFooterActionsSlotContext } from '../ui/MobileFooterActionsContext';
 
 type AppShellProps = {
   pathname: string;
@@ -48,6 +49,7 @@ export function AppShell({
   const showProgressBar = isNavigating || isFetching > 0 || isMutating > 0;
 
   const [isProgressBarVisible, setIsProgressBarVisible] = useState(false);
+  const [mobileFooterActionsSlot, setMobileFooterActionsSlot] = useState<HTMLDivElement | null>(null);
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
@@ -66,6 +68,7 @@ export function AppShell({
   }, [showProgressBar]);
 
   return (
+    <MobileFooterActionsSlotContext.Provider value={mobileFooterActionsSlot}>
     <div className="app-shell flex flex-col bg-brand-bg-tertiary overflow-hidden font-sans text-brand-text">
       {!isKioskRoute && (
         <>
@@ -90,7 +93,11 @@ export function AppShell({
 
           {isMobileView && timeframeDomain && (
             <div className="mobile-float-pills">
-              <MobileFooterPill domain={timeframeDomain} />
+              <MobileFooterPill
+                domain={timeframeDomain}
+                hasPageActions={pathname.includes('/fleet-status')}
+                pageActionsRef={setMobileFooterActionsSlot}
+              />
             </div>
           )}
         </>
@@ -104,5 +111,6 @@ export function AppShell({
         </div>
       </main>
     </div>
+    </MobileFooterActionsSlotContext.Provider>
   );
 }

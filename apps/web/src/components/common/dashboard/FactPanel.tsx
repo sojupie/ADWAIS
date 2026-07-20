@@ -65,10 +65,10 @@ export function FactPanel({ label, value = '', isLoading, valueColor, extra, has
                     {value}
                 </span>
 
-                    {extraText !== '' && (
-                        <span className={`text-sm 2xl:text-base font-bold tracking-wider ${extraColor} whitespace-nowrap`}>
-                        {extraText}
-                    </span>
+                    {showExtra && (
+                        <span className={`text-sm 2xl:text-base font-bold tracking-wider ${extraColor || 'text-on-surface-variant'} whitespace-nowrap`}>
+                        {extraText || 'N/A'}
+                        </span>
                     )}
                 </div>
             )}

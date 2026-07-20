@@ -68,6 +68,7 @@ describe('Select', () => {
 
     fireEvent.click(screen.getByRole('combobox', { name: 'Period' }));
 
+    expect(screen.getByRole('listbox')).toHaveAttribute('data-select-menu');
     expect(screen.getByRole('listbox')).toHaveClass('rounded-2xl', 'p-2');
     expect(screen.getByRole('option', { name: '365 days' })).toHaveClass('rounded-xl', 'px-3', 'py-2.5');
   });

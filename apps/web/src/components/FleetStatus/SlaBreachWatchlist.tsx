@@ -92,8 +92,6 @@ export function SlaBreachWatchlist({
   defaultDegradedFloor,
   onMonitorSelect,
   selectedMonitorId,
-  onClearSelection,
-  hasActiveSelection,
   className = "flex-1 h-full min-h-[350px] contained:min-h-0 max-h-[600px] xl:max-h-none"
 }: {
   isLoading?: boolean;
@@ -102,8 +100,6 @@ export function SlaBreachWatchlist({
   defaultDegradedFloor?: number | null;
   onMonitorSelect?: (monitor: UptimeMonitorDto) => void;
   selectedMonitorId?: number | null;
-  onClearSelection?: () => void;
-  hasActiveSelection?: boolean;
   className?: string;
 }) {
   const issues = useMemo(() => buildIssues(monitors, defaultSla, defaultDegradedFloor), [monitors, defaultSla, defaultDegradedFloor]);
@@ -115,18 +111,6 @@ export function SlaBreachWatchlist({
       title="Endpoint Watchlist"
       className={className}
       titleClassName="!text-sm !md:text-md"
-      actions={
-        onClearSelection ? (
-          <button
-            type="button"
-            onClick={onClearSelection}
-            disabled={!hasActiveSelection}
-            className="bg-surface-container-low hover:m3-elevation-2 m3-elevation-1 px-4 py-1.5 rounded-full text-sm font-bold tracking-wide transition-all cursor-pointer disabled:m3-elevation-0 disabled:text-slate-400 disabled:bg-slate-200 disabled:cursor-not-allowed"
-          >
-            CLEAR
-          </button>
-        ) : undefined
-      }
     >
       <div className="p-4 pt-1 grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-2 gap-4 content-start">
         {issues.length === 0 ? (

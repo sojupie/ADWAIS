@@ -331,6 +331,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
       {isOpen && menuPosition && createPortal(
         <div
           ref={menuRef}
+          data-select-menu
           id={listboxId}
           role="listbox"
           aria-label={ariaLabel ?? label}

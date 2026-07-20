@@ -4,25 +4,23 @@ import type { UptimeMonitorDto, MonitorAnalyticsDto, ComparisonPeriod, Timeframe
 
 export const fleetKeys = {
   all: ['fleet'] as const,
-  monitors: (timeframe: string, tenantId?: string | null, comparison?: ComparisonPeriod, tags?: string[], statuses?: string[]) => [...fleetKeys.all, 'monitors', timeframe, tenantId, comparison, tags, statuses] as const,
+  monitors: (timeframe: string, tenantId?: string | null, comparison?: ComparisonPeriod) => [...fleetKeys.all, 'monitors', timeframe, tenantId, comparison] as const,
   analytics: (timeframe: string, tenantId?: string | null, monitorId?: number | null, comparison?: ComparisonPeriod, tags?: string[], statuses?: string[]) => 
     [...fleetKeys.all, 'analytics', timeframe, tenantId, monitorId, comparison, tags, statuses] as const,
 };
 
 const REFETCH_INTERVAL = 30000;
 
-export function useFleetMonitors(timeframe: string, tenantId?: string | null, comparison?: ComparisonPeriod, tags?: string[], statuses?: string[]) {
+export function useFleetMonitors(timeframe: string, tenantId?: string | null, comparison?: ComparisonPeriod) {
   return useGetApiMonitors<UptimeMonitorDto[], Error>(
     {
       timeframe: timeframe as Timeframe,
       tenantId: tenantId || undefined,
-      comparison: comparison as ComparisonType,
-      tags: tags,
-      statuses: statuses
+      comparison: comparison as ComparisonType
     },
     {
       query: {
-        queryKey: fleetKeys.monitors(timeframe, tenantId, comparison, tags, statuses),
+        queryKey: fleetKeys.monitors(timeframe, tenantId, comparison),
         refetchInterval: REFETCH_INTERVAL,
         select: (res) => res.data as UptimeMonitorDto[]
       }

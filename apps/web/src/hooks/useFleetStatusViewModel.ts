@@ -1,10 +1,11 @@
 import { useFleetAnalytics, useFleetMonitors } from "./useFleetQueries.ts";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { normalizeStatus } from "../utils/monitorStatusHelper.ts";
 import type { UptimeMonitorDto } from "@types";
 import { useSearch } from "@tanstack/react-router";
 import type { Timeframe } from "../schemas";
 import { useGlobalConfigQuery } from "./useJobSettingsQueries.ts";
+import { filterFleetMonitors, getFleetTags, isFleetSelectionVisible } from "../utils/fleetFilters.ts";
 
 function useLocalStorage<T>(key: string, initialValue: T) {
   const [storedValue, setStoredValue] = useState<T>(() => {
@@ -18,17 +19,21 @@ function useLocalStorage<T>(key: string, initialValue: T) {
     }
   });
 
-  const setValue = (value: T | ((val: T) => T)) => {
+  const setValue = useCallback((value: T | ((val: T) => T)) => {
+    setStoredValue(currentValue =>
+      value instanceof Function ? value(currentValue) : value,
+    );
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
     try {
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
-      setStoredValue(valueToStore);
-      if (typeof window !== "undefined") {
-        window.localStorage.setItem(key, JSON.stringify(valueToStore));
-      }
+      window.localStorage.setItem(key, JSON.stringify(storedValue));
     } catch (error) {
       console.error(error);
     }
-  };
+  }, [key, storedValue]);
+
   return [storedValue, setValue] as const;
 }
 
@@ -38,7 +43,7 @@ export function useFleetStatusViewModel() {
     const search = useSearch({ strict: false }) as { timeframe: Timeframe };
     const timeframe = search.timeframe;
 
-    const [selection, setSelection] = useState<{ tenantId: string, monitorId: number | null } | null>(null);
+    const [selectionIntent, setSelection] = useState<{ tenantId: string, monitorId: number | null } | null>(null);
 
     const [selectedTags, setSelectedTags] = useLocalStorage<string[]>('fleet-filter-tags', []);
     const [selectedStatuses, setSelectedStatuses] = useLocalStorage<string[]>('fleet-filter-statuses', []);
@@ -46,16 +51,14 @@ export function useFleetStatusViewModel() {
     const tagsArg = selectedTags.length > 0 ? selectedTags : undefined;
     const statusesArg = selectedStatuses.length > 0 ? selectedStatuses : undefined;
 
-    const analyticsQuery = useFleetAnalytics(timeframe, selection?.tenantId, selection?.monitorId, undefined, tagsArg, statusesArg);
-    const globalMonitorsQuery = useFleetMonitors(timeframe, undefined, undefined, tagsArg, statusesArg);
+    const globalMonitorsQuery = useFleetMonitors(timeframe);
     const { data: config } = useGlobalConfigQuery();
 
     const defaultSla = config?.defaultUptimeSla ?? null;
     const defaultDegradedFloor = config?.latencyDegradedFloor ?? null;
 
-    const fetchedMonitors = globalMonitorsQuery.data ?? [];
-    
     const allMonitorsInSystem = useMemo(() => {
+        const fetchedMonitors = globalMonitorsQuery.data ?? [];
         if (import.meta.env.PROD) return fetchedMonitors;
         
         const mockMonitors: UptimeMonitorDto[] = [
@@ -104,9 +107,51 @@ export function useFleetStatusViewModel() {
         ] as UptimeMonitorDto[];
 
         return [...fetchedMonitors, ...mockMonitors];
-    }, [fetchedMonitors]);
+    }, [globalMonitorsQuery.data]);
 
-    const tenantMonitors = selection ? allMonitorsInSystem.filter(m => m.tenantId === selection.tenantId) : allMonitorsInSystem;
+    const availableTags = useMemo(() => getFleetTags(allMonitorsInSystem), [allMonitorsInSystem]);
+    const filteredMonitors = useMemo(
+        () => filterFleetMonitors(allMonitorsInSystem, {
+            tags: selectedTags,
+            statuses: selectedStatuses,
+        }),
+        [allMonitorsInSystem, selectedStatuses, selectedTags],
+    );
+
+    const selection = selectionIntent && (
+        globalMonitorsQuery.isLoading || isFleetSelectionVisible(filteredMonitors, selectionIntent)
+    )
+        ? selectionIntent
+        : null;
+
+    const analyticsQuery = useFleetAnalytics(
+        timeframe,
+        selection?.tenantId,
+        selection?.monitorId,
+        undefined,
+        tagsArg,
+        statusesArg,
+    );
+
+    const updateSelectedTags = useCallback((nextTags: string[]) => {
+        const nextMonitors = filterFleetMonitors(allMonitorsInSystem, {
+            tags: nextTags,
+            statuses: selectedStatuses,
+        });
+        if (selection && !isFleetSelectionVisible(nextMonitors, selection)) return;
+        setSelectedTags(nextTags);
+    }, [allMonitorsInSystem, selectedStatuses, selection, setSelectedTags]);
+
+    const updateSelectedStatuses = useCallback((nextStatuses: string[]) => {
+        const nextMonitors = filterFleetMonitors(allMonitorsInSystem, {
+            tags: selectedTags,
+            statuses: nextStatuses,
+        });
+        if (selection && !isFleetSelectionVisible(nextMonitors, selection)) return;
+        setSelectedStatuses(nextStatuses);
+    }, [allMonitorsInSystem, selectedTags, selection, setSelectedStatuses]);
+
+    const tenantMonitors = selection ? filteredMonitors.filter(m => m.tenantId === selection.tenantId) : filteredMonitors;
     const scopedMonitors = selection?.monitorId ? tenantMonitors.filter(m => m.id === selection.monitorId) : tenantMonitors;
 
     const kpis = analyticsQuery.data?.kpis;
@@ -140,10 +185,10 @@ export function useFleetStatusViewModel() {
             down, 
             degraded, 
             avgUptime,
-            uptimeGrowth: kpis?.uptimeGrowthPercentage ?? 0,
-            latencyGrowth: kpis?.latencyGrowthPercentage ?? 0,
-            highestLatencyGrowth: kpis?.highestLatencyGrowthPercentage ?? 0,
-            lowestLatencyGrowth: kpis?.lowestLatencyGrowthPercentage ?? 0
+            uptimeGrowth: kpis?.uptimeGrowthPercentage ?? null,
+            latencyGrowth: kpis?.latencyGrowthPercentage ?? null,
+            highestLatencyGrowth: kpis?.highestLatencyGrowthPercentage ?? null,
+            lowestLatencyGrowth: kpis?.lowestLatencyGrowthPercentage ?? null
         };
     }, [scopedMonitors, defaultDegradedFloor, kpis]);
 
@@ -186,9 +231,12 @@ export function useFleetStatusViewModel() {
         activeScopeName,
         defaultSla,
         defaultDegradedFloor,
+        allMonitors: allMonitorsInSystem,
+        availableTags,
+        filteredMonitors,
         selectedTags,
-        setSelectedTags,
+        setSelectedTags: updateSelectedTags,
         selectedStatuses,
-        setSelectedStatuses
+        setSelectedStatuses: updateSelectedStatuses
     }
 }

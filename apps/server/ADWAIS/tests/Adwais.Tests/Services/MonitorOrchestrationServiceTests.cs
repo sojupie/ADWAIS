@@ -145,6 +145,65 @@ public class MonitorOrchestrationServiceTests
     }
 
     [Fact]
+    public async Task GetAnalyticsAsync_MultipleTags_ShouldMatchAnySelectedTag()
+    {
+        var tenantId = Guid.NewGuid();
+        _dbContext.Tenants.Add(new Tenant
+        {
+            Id = tenantId,
+            Name = "Tag Filter Tenant",
+            Type = TenantType.B2C,
+            LitiumBaseUrl = "tags.test"
+        });
+        _dbContext.Monitors.AddRange(
+            new UptimeMonitor
+            {
+                Id = 1,
+                TenantId = tenantId,
+                Name = "Prod and Dev",
+                Url = "https://both.test",
+                Tags = new List<string> { "prod", "dev" }
+            },
+            new UptimeMonitor
+            {
+                Id = 2,
+                TenantId = tenantId,
+                Name = "Prod Only",
+                Url = "https://prod.test",
+                Tags = new List<string> { "prod" }
+            },
+            new UptimeMonitor
+            {
+                Id = 3,
+                TenantId = tenantId,
+                Name = "QA Only",
+                Url = "https://qa.test",
+                Tags = new List<string> { "qa" }
+            });
+        await _dbContext.SaveChangesAsync();
+
+        var now = DateTimeOffset.UtcNow;
+        var period = new ResolvedPeriod(
+            currentStart: now.AddDays(-1),
+            currentEnd: now,
+            previousStart: now.AddDays(-2),
+            previousEnd: now.AddDays(-1),
+            stepsInPeriod: 24,
+            isHourly: true,
+            includeActualTime: false);
+
+        var result = await _service.GetAnalyticsAsync(
+            period,
+            tenantId,
+            null,
+            new[] { "prod", "dev" },
+            null,
+            CancellationToken.None);
+
+        Assert.Equal(new[] { 1, 2 }, result.Monitors.Select(monitor => monitor.Id).OrderBy(id => id));
+    }
+
+    [Fact]
     public async Task CreateMonitorAsync_ShouldInvokeUptimeRobot_AndAddToDatabase()
     {
         // Arrange

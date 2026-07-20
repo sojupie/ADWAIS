@@ -1,51 +1,73 @@
-import type {PersistentDomain} from "../../../utils/timeframeStorage.ts";
-import {useState} from "react";
-import {PeriodSelector} from "../charts/PeriodSelector.tsx";
-import {SyncStatusWidget} from "../dashboard/SyncStatusWidget.tsx";
-import {SlidersHorizontal} from "lucide-react";
+import { useState, type Ref } from 'react';
+import { SlidersHorizontal, X } from 'lucide-react';
+import type { PersistentDomain } from '../../../utils/timeframeStorage.ts';
+import { PeriodSelector } from '../charts/PeriodSelector.tsx';
+import { SyncStatusWidget } from '../dashboard/SyncStatusWidget.tsx';
 
-/** Single floating action pill - mobile equivalent of the desktop DashboardFooter.
- *  Expands upward to show PeriodSelector + SyncStatusWidget. Closes on backdrop click.
- */
-export function MobileFooterPill({domain}: { domain: PersistentDomain }) {
-    const [isOpen, setIsOpen] = useState(false);
-    return (
-        <>
-            {isOpen && (
-                <div
-                    className="fixed inset-0 z-30"
-                    onClick={() => setIsOpen(false)}
-                    aria-hidden="true"
-                />
+interface MobileFooterPillProps {
+  domain: PersistentDomain;
+  hasPageActions?: boolean;
+  pageActionsRef?: Ref<HTMLDivElement>;
+}
+
+/** Mobile equivalent of the desktop dashboard footer. */
+export function MobileFooterPill({
+  domain,
+  hasPageActions = false,
+  pageActionsRef,
+}: MobileFooterPillProps) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <>
+      {isOpen && (
+        <button
+          type="button"
+          className="fixed inset-0 z-30 cursor-default bg-scrim"
+          data-md3-ripple="off"
+          onClick={() => setIsOpen(false)}
+          aria-label="Close dashboard controls"
+        />
+      )}
+
+      <div className="relative z-40 flex flex-col items-start gap-2">
+        {isOpen && (
+          <div className="custom-scrollbar max-h-[calc(100dvh-5rem-env(safe-area-inset-bottom,0px))] w-[calc(100vw-1.5rem)] max-w-[440px] overflow-y-auto rounded-3xl border border-outline-variant bg-surface text-on-surface m3-elevation-4">
+            {hasPageActions && (
+              <>
+                <div ref={pageActionsRef} />
+                <div className="mx-4 h-px bg-outline-variant" />
+              </>
             )}
 
-            <div className="relative z-40 flex flex-col items-end gap-6">
-                {isOpen && (
-                    <div
-                        className="flex flex-col gap-0 bg-brand-bg-secondary rounded-2xl overflow-hidden m3-elevation-3 w-[min(90vw,360px)]">
-                        <div className="flex flex-col gap-4 px-4 pt-4 pb-3">
-                            <span
-                                className="text-xs font-black text-white/70 uppercase tracking-widest">Timeframe</span>
-                            <PeriodSelector from={domain} embedded={true}/>
-                        </div>
-                        <div className="h-px bg-surface/10 mx-4"/>
-                        <div className="flex flex-col gap-4 px-4 pt-3 pb-4">
-                            <span
-                                className="text-xs font-black text-white/70 uppercase tracking-widest">Sync Status</span>
-                            <SyncStatusWidget embedded={true}/>
-                        </div>
-                    </div>
-                )}
+            <section className="flex flex-col gap-3 p-4">
+              <h2 className="m-0 text-sm font-black uppercase tracking-widest text-on-surface-variant">Timeframe</h2>
+              <PeriodSelector from={domain} embedded />
+            </section>
 
-                <button
-                    onClick={() => setIsOpen(v => !v)}
-                    className={`w-16 h-16 flex items-center justify-center rounded-3xl transition-all duration-200 cursor-pointer m3-elevation-2 hover:m3-elevation-3 bg-brand-accent text-brand-bg-secondary }`}
-                    aria-label="Toggle timeframe and sync panel"
-                    aria-expanded={isOpen}
-                >
-                    <SlidersHorizontal size={28} className={`transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`} />
-                </button>
-            </div>
-        </>
-    );
+            <div className="mx-4 h-px bg-outline-variant" />
+
+            <section className="flex flex-col gap-3 p-4">
+              <h2 className="m-0 text-sm font-black uppercase tracking-widest text-on-surface-variant">Sync status</h2>
+              <SyncStatusWidget embedded />
+            </section>
+          </div>
+        )}
+
+        <button
+          type="button"
+          onClick={() => setIsOpen(open => !open)}
+          className={`flex h-14 w-14 cursor-pointer items-center justify-center rounded-full border transition-all duration-200 m3-elevation-2 hover:m3-elevation-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
+            isOpen
+              ? 'border-primary bg-primary text-on-primary'
+              : 'border-outline-variant bg-surface-container-high text-on-surface'
+          }`}
+          aria-label={isOpen ? 'Close dashboard controls' : 'Open dashboard controls'}
+          aria-expanded={isOpen}
+        >
+          {isOpen ? <X size={22} /> : <SlidersHorizontal size={22} />}
+        </button>
+      </div>
+    </>
+  );
 }

@@ -11,34 +11,23 @@ import { SyncStatusWidget } from '../components/common/dashboard/SyncStatusWidge
 import { PeriodSelector } from '../components/common/charts/PeriodSelector';
 import { useFleetStatusViewModel } from "../hooks/useFleetStatusViewModel.ts";
 import { EmptyState } from "../components/common/ui/EmptyState.tsx";
-import { Filter, Tag } from 'lucide-react';
-import { MultiSelectFilter } from '../components/common/ui/MultiSelectFilter.tsx';
-
-const STATUS_OPTIONS = [
-  { label: 'Up', value: 'UP' },
-  { label: 'Down', value: 'DOWN' },
-  { label: 'Paused', value: 'PAUSED' },
-  { label: 'Unknown', value: 'UNKNOWN' },
-];
+import { FleetFilterMenu, FleetFilterPanel } from '../components/FleetStatus/FleetFilterMenu.tsx';
+import { MobileFooterActions } from '../components/common/ui/MobileFooterActions.tsx';
 
 const EMPTY_LATENCY: never[] = [];
 
 export function FleetStatus() {
   const vm = useFleetStatusViewModel();
+  const clearAllFilters = () => {
+    vm.setSelection(null);
+    vm.setSelectedTags([]);
+    vm.setSelectedStatuses([]);
+  };
 
   const matrixActions = (
-    <div className="flex items-center gap-4">
-      <button
-        onClick={() => vm.setSelection(null)}
-        disabled={!vm.selection}
-        className="bg-surface-container-low hover:m3-elevation-2 m3-elevation-1 px-4 py-1.5 rounded-full text-sm font-bold tracking-wide transition-all cursor-pointer disabled:m3-elevation-0 disabled:text-slate-400 disabled:bg-slate-200 disabled:cursor-not-allowed"
-      >
-        CLEAR
-      </button>
-      <span className="text-sm font-bold text-on-surface-variant">
-        {vm.fleetStats.enabled.length} Online
-      </span>
-    </div>
+    <span className="text-sm font-bold text-on-surface-variant">
+      {vm.fleetStats.enabled.length} Online
+    </span>
   );
 
   const matrixContent = vm.tenantMonitors.length === 0 ? (
@@ -70,7 +59,7 @@ export function FleetStatus() {
           label={`Uptime: ${vm.activeScopeName}`}
           value={vm.globalMonitorsQuery.isLoading ? '...' : (vm.fleetStats.avgUptime !== null && vm.fleetStats.avgUptime !== undefined ? `${vm.fleetStats.avgUptime.toFixed(3)}%` : 'N/A')}
           isLoading={vm.globalMonitorsQuery.isLoading || vm.analyticsQuery.isLoading}
-          extra={vm.fleetStats.avgUptime !== null && vm.fleetStats.avgUptime !== undefined
+          extra={vm.fleetStats.uptimeGrowth !== null
             ? { type: 'PoP', value: vm.fleetStats.uptimeGrowth }
             : undefined}
           hasExtra={true}
@@ -80,7 +69,7 @@ export function FleetStatus() {
           label={`Latency: ${vm.activeScopeName}`}
           value={vm.analyticsQuery.isLoading ? '...' : `${Math.round(vm.fleetStats.avgLatency)}ms`}
           isLoading={vm.analyticsQuery.isLoading}
-          extra={vm.fleetStats.avgLatency > 0
+          extra={vm.fleetStats.latencyGrowth !== null
             ? { type: 'PoP', value: vm.fleetStats.latencyGrowth }
             : undefined}
           hasExtra={true}
@@ -92,7 +81,7 @@ export function FleetStatus() {
           value={vm.analyticsQuery.isLoading ? '...' : `${Math.round(vm.fleetStats.highestLatency)}ms`}
           isLoading={vm.analyticsQuery.isLoading}
           valueColor="red"
-          extra={vm.fleetStats.highestLatency > 0
+          extra={vm.fleetStats.highestLatencyGrowth !== null
             ? { type: 'PoP', value: vm.fleetStats.highestLatencyGrowth }
             : undefined}
           hasExtra={true}
@@ -104,7 +93,7 @@ export function FleetStatus() {
           value={vm.analyticsQuery.isLoading ? '...' : `${Math.round(vm.fleetStats.lowestLatency)}ms`}
           isLoading={vm.analyticsQuery.isLoading}
           valueColor="green"
-          extra={vm.fleetStats.lowestLatency > 0
+          extra={vm.fleetStats.lowestLatencyGrowth !== null
             ? { type: 'PoP', value: vm.fleetStats.lowestLatencyGrowth }
             : undefined}
           hasExtra={true}
@@ -138,8 +127,6 @@ export function FleetStatus() {
             defaultDegradedFloor={vm.defaultDegradedFloor}
             onMonitorSelect={vm.handleMonitorSelect}
             selectedMonitorId={vm.selection?.monitorId}
-            onClearSelection={() => vm.setSelection(null)}
-            hasActiveSelection={!!vm.selection}
             className="flex-1 min-h-[350px] contained:min-h-0 max-h-[600px] xl:max-h-none"
           />
 
@@ -172,29 +159,40 @@ export function FleetStatus() {
 
       {/* ── Footer Widgets (All Resolutions) ── */}
       <DashboardFooter>
-        <div className="flex flex-1 items-center min-w-0">
+        <div className="flex shrink-0 items-center">
           <SyncStatusWidget />
         </div>
 
-        <div className="flex items-center gap-2">
-          <MultiSelectFilter
-            label="Tags"
-            icon={<Tag size={16} />}
-            options={Array.from(new Set(vm.tenantMonitors.flatMap(m => m.tags || []).map(t => t.split(':')[0].trim()))).sort().map(tag => ({ label: tag, value: tag }))}
-            value={vm.selectedTags}
-            onChange={vm.setSelectedTags}
-          />
-          <MultiSelectFilter
-            label="Status"
-            icon={<Filter size={16} />}
-            options={STATUS_OPTIONS}
-            value={vm.selectedStatuses}
-            onChange={vm.setSelectedStatuses}
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <FleetFilterMenu
+            monitors={vm.allMonitors}
+            availableTags={vm.availableTags}
+            selection={vm.selection}
+            selectedTags={vm.selectedTags}
+            selectedStatuses={vm.selectedStatuses}
+            onSelectionChange={vm.setSelection}
+            onTagsChange={vm.setSelectedTags}
+            onStatusesChange={vm.setSelectedStatuses}
+            onClearAll={clearAllFilters}
           />
           <div className="w-px h-6 bg-outline-variant mx-1 shrink-0" aria-hidden="true" />
           <PeriodSelector from="/fleet-status" />
         </div>
       </DashboardFooter>
+
+      <MobileFooterActions>
+        <FleetFilterPanel
+          embedded
+          monitors={vm.allMonitors}
+          availableTags={vm.availableTags}
+          selection={vm.selection}
+          selectedTags={vm.selectedTags}
+          selectedStatuses={vm.selectedStatuses}
+          onSelectionChange={vm.setSelection}
+          onTagsChange={vm.setSelectedTags}
+          onStatusesChange={vm.setSelectedStatuses}
+        />
+      </MobileFooterActions>
     </DashboardLayout>
   );
 }

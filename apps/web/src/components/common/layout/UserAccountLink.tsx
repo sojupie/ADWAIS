@@ -10,7 +10,7 @@ export function UserAccountLink({label, variant}: UserAccountLinkProps) {
   if (!label) return null;
 
   return (
-    <Link
+    <Link data-md3-ripple
       to="/settings/authentication"
       className={variant === 'mobile'
         ? 'inline-flex min-h-10 max-w-[160px] items-center gap-1.5 truncate rounded-full bg-secondary-container px-3 text-sm font-bold hover:bg-surface-container-highest hover:m3-elevation-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary'

@@ -6,9 +6,10 @@
   - get rid of vertical scrollbars
   - weather sync button/trigger
   - weekly calendar cards should show end time. span across multiple days and hours
-- better fleet status ui/ux. order tiles by status. group related tiles together. allow filtering by tags.
 - ping litium env for health checks (to see if base url is correct after adding it to a tenant card).
 - revamp settings ui
 - hide or make the FAB useful in intranet/settings
-- make order density matrix prettier
+- uptime graph 
+  - ![img.png](img.png)
+- fleet status, instead of showing monitor name, show monitor type and url
 - create github pipeline

@@ -17,4 +17,11 @@ public record TransactionDensityRequestDto
     /// </summary>
     [FromQuery(Name = "tenantId")]
     public Guid? TenantId { get; init; }
+
+    /// <summary>
+    /// Optional. Restricts the portfolio matrix to tenants with one of these business models.
+    /// Ignored when tenantId is provided.
+    /// </summary>
+    [FromQuery(Name = "tenantTypes")]
+    public IReadOnlyList<TenantType>? TenantTypes { get; init; }
 }

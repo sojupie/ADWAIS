@@ -1,3 +1,13 @@
 import { createContext } from 'react';
 
-export const MobileFooterActionsSlotContext = createContext<HTMLElement | null>(null);
+export interface MobileFooterActionsSlots {
+  panel: HTMLElement | null;
+  indicator: HTMLElement | null;
+  quickAction: HTMLElement | null;
+}
+
+export const MobileFooterActionsSlotContext = createContext<MobileFooterActionsSlots>({
+  panel: null,
+  indicator: null,
+  quickAction: null,
+});

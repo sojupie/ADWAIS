@@ -19,6 +19,41 @@ import {
 } from 'chart.js';
 import { getTenantFaviconUrl } from '../../../utils/tenantHelper';
 
+const htmlTooltips = new WeakMap<object, HTMLDivElement>();
+const activeTooltipElements = new Set<HTMLDivElement>();
+
+export const htmlTooltipPlugin: Plugin = {
+  id: 'htmlTooltipCleanup',
+  beforeDestroy(chart) {
+    const element = htmlTooltips.get(chart);
+    if (element) {
+      element.remove();
+      activeTooltipElements.delete(element);
+      htmlTooltips.delete(chart);
+    }
+  },
+};
+
+if (typeof document !== 'undefined') {
+  const dismissTooltips = (e: Event) => {
+    if (e.type === 'pointerdown') {
+      const target = e.target as HTMLElement | null;
+      if (target?.closest('canvas') || target?.closest('.chartjs-html-tooltip')) return;
+    }
+    activeTooltipElements.forEach((element) => {
+      if (element.isConnected) {
+        element.style.opacity = '0';
+      } else {
+        activeTooltipElements.delete(element);
+      }
+    });
+  };
+  document.addEventListener('pointerdown', dismissTooltips, true);
+  document.addEventListener('keydown', (e) => {
+    if ((e as KeyboardEvent).key === 'Escape') dismissTooltips(e);
+  });
+}
+
 ChartJS.register(
   BarController,
   BarElement,
@@ -33,6 +68,7 @@ ChartJS.register(
   PointElement,
   ScatterController,
   Tooltip,
+  htmlTooltipPlugin,
 );
 
 export const CHART_FONT = 'Manrope, sans-serif';
@@ -51,11 +87,11 @@ export const chartTooltip = {
   borderColor: chartColor('--color-outline-variant', '#e2e8f0'),
   borderWidth: 1,
   cornerRadius: 10,
-  padding: 14,
+  padding: { x: 16, y: 12 },
   caretPadding: 10,
   boxPadding: 7,
   titleSpacing: 4,
-  titleMarginBottom: 10,
+  titleMarginBottom: 4,
   bodySpacing: 7,
   titleFont: { family: CHART_FONT, size: 16, weight: 'bold' as const },
   bodyFont: { family: CHART_FONT, size: 14, weight: 'bold' as const, lineHeight: 1.35 },
@@ -77,8 +113,6 @@ export type ChartTooltipContent = {
   groups: ChartTooltipRow[][];
 };
 
-const htmlTooltips = new WeakMap<object, HTMLDivElement>();
-
 const tooltipToneColor = (tone: ChartTooltipTone | undefined): string => {
   switch (tone) {
     case 'primary': return chartColor('--color-brand-btn-primary', '#0f766e');
@@ -95,12 +129,13 @@ function getHtmlTooltip<TType extends ChartType>(chart: ChartJS<TType>): HTMLDiv
   if (existing?.isConnected) return existing;
 
   const element = document.createElement('div');
+  element.classList.add('chartjs-html-tooltip');
   Object.assign(element.style, {
     position: 'absolute',
     zIndex: '30',
     minWidth: '230px',
     maxWidth: 'min(300px, calc(100% - 16px))',
-    padding: '14px 16px',
+    padding: '12px 16px',
     border: `1px solid ${chartColor('--color-outline-variant', '#e2e8f0')}`,
     borderRadius: '10px',
     background: chartColor('--color-surface', '#fff'),
@@ -115,6 +150,7 @@ function getHtmlTooltip<TType extends ChartType>(chart: ChartJS<TType>): HTMLDiv
   });
   chart.canvas.parentElement?.appendChild(element);
   htmlTooltips.set(chart, element);
+  activeTooltipElements.add(element);
   return element;
 }
 
@@ -122,7 +158,7 @@ function renderHtmlTooltip(element: HTMLDivElement, content: ChartTooltipContent
   element.replaceChildren();
 
   const header = document.createElement('div');
-  Object.assign(header.style, { display: 'flex', alignItems: 'center', gap: '10px', paddingBottom: '10px' });
+  Object.assign(header.style, { display: 'flex', alignItems: 'center', gap: '10px', paddingBottom: '4px' });
   const title = document.createElement('strong');
   title.textContent = content.title;
   Object.assign(title.style, { flex: '1', minWidth: '0', fontSize: '14px', fontWeight: '800' });
@@ -143,9 +179,9 @@ function renderHtmlTooltip(element: HTMLDivElement, content: ChartTooltipContent
     const groupElement = document.createElement('div');
     Object.assign(groupElement.style, {
       display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', columnGap: '18px', rowGap: '7px',
-      paddingTop: groupIndex === 0 ? '10px' : '11px',
+      paddingTop: groupIndex === 0 ? '0' : '11px',
       marginTop: groupIndex === 0 ? '0' : '10px',
-      borderTop: `1px solid ${chartColor('--color-outline-variant', '#e2e8f0')}`,
+      borderTop: groupIndex === 0 ? 'none' : `1px solid ${chartColor('--color-outline-variant', '#e2e8f0')}`,
     });
     group.forEach(row => {
       const label = document.createElement('span');

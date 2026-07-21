@@ -27,14 +27,14 @@ function FleetMatrixTile({
     <button
       type="button"
       onClick={() => onMonitorSelect?.(monitor)}
-      className={`w-full h-full p-3 rounded-lg transition-all text-left border-2 relative overflow-hidden group min-h-22.5
+      className={`flex-1 min-w-[200px] max-w-[300px] p-3 rounded-lg transition-all text-left border-2 relative overflow-hidden group min-h-22.5 shrink-0 flex flex-col justify-between min-w-0
         ${theme.bg} ${theme.border} ${theme.text}
-        ${isActive ? 'z-10 m3-elevation-3' : 'm3-elevation-2 hover: hover:m3-elevation-3'}
+        ${isActive ? 'z-10 m3-elevation-3' : 'm3-elevation-2 hover:m3-elevation-3'}
         ${selectedMonitorId && !isActive ? 'opacity-30' : 'opacity-100'}
         ${!monitor.uptimeMonitorEnabled ? 'grayscale opacity-50' : ''}
       `}
     >
-      <div className="absolute right-2 bottom-2  z-0 flex items-center justify-end pointer-events-none">
+      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-12 h-12 pointer-events-none select-none">
         {showLetter ? (
           <span className={`text-5xl font-black opacity-[0.15] select-none leading-none ${theme.text}`}>
             {tenantDisplay.charAt(0).toUpperCase()}
@@ -63,7 +63,7 @@ function FleetMatrixTile({
         </div>
 
         {monitor.tags && monitor.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 w-full">
+          <div className="flex flex-wrap gap-2 w-full min-w-0">
             {monitor.tags.map((tag) => {
               const name = tag.split(':')[0].trim();
               const color = getTagColor(tag);
@@ -79,20 +79,22 @@ function FleetMatrixTile({
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-x-2 mt-auto w-full">
+        <div className="flex justify-between items-end mt-auto w-full min-w-0 gap-2">
           <div className="flex flex-col gap-0 min-w-0">
             <span className={`text-xs ${theme.mutedText} uppercase font-bold tracking-wider truncate`}>Uptime</span>
             <span className={`text-sm font-black ${theme.valueText} truncate`}>
               {monitor.currentUptimePercentage != null ? `${monitor.currentUptimePercentage.toFixed(2)}%` : 'N/A'}
             </span>
           </div>
-          <div className="flex flex-col gap-0 min-w-0">
+          <div className="flex flex-col items-end gap-0 min-w-0 text-right">
             <span className={`text-xs ${theme.mutedText} uppercase font-bold tracking-wider truncate`}>Latency</span>
             <span className={`text-sm font-black ${theme.valueText} truncate`}>
               {(status === 'down' || status === 'unknown' || status === 'paused' || status === 'starting' || !Number(monitor.currentLatency)) ? 'N/A' : `${Math.round(Number(monitor.currentLatency))}ms`}
             </span>
           </div>
         </div>
+        
+          
       </div>
     </button>
   );
@@ -117,7 +119,7 @@ export function FleetMatrix({
   });
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 portrait-lg:grid-cols-4 landscape-lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 pt-1 pb-4">
+    <div className="flex flex-wrap gap-4 content-start w-full min-w-0 pt-1 pb-4">
       {sortedMonitors.map((monitor) => (
         <FleetMatrixTile
           key={`${monitor.tenantId}-${monitor.id}`}

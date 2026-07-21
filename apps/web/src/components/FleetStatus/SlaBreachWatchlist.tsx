@@ -112,9 +112,9 @@ export function SlaBreachWatchlist({
       className={className}
       titleClassName="!text-sm !md:text-md"
     >
-      <div className="p-4 pt-1 grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-2 gap-4 content-start">
+      <div className="p-4 pt-1 flex flex-wrap gap-4 justify-even content-start w-full min-w-0">
         {issues.length === 0 ? (
-          <div className="col-span-full h-full">
+          <div className="w-full h-full">
             <EmptyState message={"No issues detected"} variant={"minimal"} />
           </div>
         ) : (
@@ -130,7 +130,7 @@ export function SlaBreachWatchlist({
                 type="button"
                 key={`watch-${issue.id}`}
                 onClick={() => onMonitorSelect?.(issue.monitor)}
-                className={`relative p-2 rounded-lg transition-all text-left w-full h-full min-h-fit shrink-0 flex flex-col gap-1.5 justify-between border
+                className={`relative p-2.5 rounded-lg transition-all text-left flex-1 min-w-[200px] max-w-[300px] min-h-fit shrink-0 flex flex-col gap-1.5 justify-between border min-w-0
                    ${theme.bg} ${theme.border} ${theme.text}
                   ${isActive ? 'z-10 m3-elevation-3' : 'm3-elevation-2 hover:m3-elevation-3 cursor-pointer'}
                   ${selectedMonitorId && !isActive ? 'opacity-30' : 'opacity-100'}
@@ -149,12 +149,12 @@ export function SlaBreachWatchlist({
                   />
                 )}
                 {/* Row 1: title + status badges */}
-                <div className="flex flex-wrap justify-between items-start gap-1 relative z-10">
-                  <div className="flex flex-col overflow-hidden min-w-0 flex-1 pr-2 min-w-[calc(50%)]">
+                <div className="flex flex-wrap justify-between items-start gap-1 relative z-10 min-w-0">
+                  <div className="flex flex-col overflow-hidden min-w-0 flex-1 pr-1">
                     <span className={`text-sm font-black uppercase tracking-tight leading-tight truncate ${theme.text}`}>{issue.tenantName}</span>
                     <span className={`text-xs font-bold uppercase tracking-widest mt-0.5 truncate ${theme.mutedText}`}>{issue.monitorName}</span>
                   </div>
-                  <div className="flex gap-2 flex-wrap justify-end shrink-0">
+                  <div className="flex gap-1.5 flex-wrap justify-end shrink-0">
                     {issue.isDown && <span className="bg-red-500 text-white text-xs font-black px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest shrink-0">DOWN</span>}
                     {issue.isDegraded && !issue.isDown && <span className="bg-amber-500 text-white text-xs font-black px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest shrink-0">DEGRADED</span>}
                     {issue.isSlaBreach && <span className="bg-slate-700 text-white text-xs font-black px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest shrink-0">SLA BREACH</span>}
@@ -163,7 +163,7 @@ export function SlaBreachWatchlist({
 
                 {/* Row 2: tags */}
                 {issue.tags && issue.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2 relative z-10">
+                  <div className="flex flex-wrap gap-2 relative z-10 min-w-0">
                     {issue.tags.map((tag) => {
                       const name = tag.split(':')[0].trim();
                       const color = getTagColor(tag);
@@ -180,10 +180,10 @@ export function SlaBreachWatchlist({
                 )}
 
                 {/* Row 3: uptime + latency */}
-                <div className="flex justify-between items-end relative z-10">
-                  <div className="flex flex-col">
-                    <span className={`text-sm font-bold uppercase tracking-widest ${theme.mutedText}`}>Uptime</span>
-                    <span className={`text-base font-black ${
+                <div className="flex justify-between items-end relative z-10 min-w-0 gap-2">
+                  <div className="flex flex-col min-w-0">
+                    <span className={`text-xs font-bold uppercase tracking-widest ${theme.mutedText}`}>Uptime</span>
+                    <span className={`text-base font-black truncate ${
                       issue.isDown
                         ? 'text-red-600'
                         : (issue.slaLimit && issue.uptime !== null && issue.uptime < issue.slaLimit)
@@ -193,9 +193,9 @@ export function SlaBreachWatchlist({
                       {issue.uptime !== null ? `${formatPercent(issue.uptime)}%` : 'N/A'}
                     </span>
                   </div>
-                  <div className="flex flex-col items-end">
-                    <span className={`text-sm font-bold uppercase tracking-widest ${theme.mutedText}`}>Latency</span>
-                    <span className={`text-base font-black ${
+                  <div className="flex flex-col items-end min-w-0">
+                    <span className={`text-xs font-bold uppercase tracking-widest ${theme.mutedText}`}>Latency</span>
+                    <span className={`text-base font-black truncate ${
                       issue.isDown
                         ? 'text-on-surface-variant'
                         : issue.isDegraded
@@ -209,17 +209,17 @@ export function SlaBreachWatchlist({
 
                 {/* Row 4: SLA limit + degraded floor */}
                 {(issue.slaLimit !== undefined && issue.slaLimit !== null || issue.degradedFloor !== undefined && issue.degradedFloor !== null) && (
-                  <div className="pt-1 flex justify-between items-center gap-4 relative z-10">
+                  <div className="pt-1 flex justify-between items-center gap-2 relative z-10 min-w-0">
                     {(issue.slaLimit !== undefined && issue.slaLimit !== null) ? (
-                      <div className="flex flex-col">
-                        <span className={`text-sm font-bold uppercase tracking-widest ${theme.mutedText}`}>SLA</span>
-                        <span className={`text-sm font-black uppercase ${theme.mutedText}`}>{formatPercent(issue.slaLimit)}%</span>
+                      <div className="flex flex-col min-w-0">
+                        <span className={`text-xs font-bold uppercase tracking-widest ${theme.mutedText}`}>SLA</span>
+                        <span className={`text-xs font-black uppercase ${theme.mutedText} truncate`}>{formatPercent(issue.slaLimit)}%</span>
                       </div>
                     ) : <div />}
                     {(issue.degradedFloor !== undefined && issue.degradedFloor !== null) ? (
-                      <div className="flex flex-col items-end text-right">
-                        <span className={`text-sm font-bold uppercase tracking-widest ${theme.mutedText}`}>THRESHOLD</span>
-                        <span className={`text-sm font-black uppercase ${theme.mutedText}`}>{issue.degradedFloor}ms</span>
+                      <div className="flex flex-col items-end text-right min-w-0">
+                        <span className={`text-xs font-bold uppercase tracking-widest ${theme.mutedText}`}>THRESHOLD</span>
+                        <span className={`text-xs font-black uppercase ${theme.mutedText} truncate`}>{issue.degradedFloor}ms</span>
                       </div>
                     ) : <div />}
                   </div>

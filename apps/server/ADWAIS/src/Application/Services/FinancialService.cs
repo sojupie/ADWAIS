@@ -33,8 +33,13 @@ public class FinancialService(
     #region Historical + Fresh Data Merge
 
     private async Task<List<DataRow>> GetMergedTenantDataAsync(
-        IApplicationDbContext context, DateTimeOffset start, DateTimeOffset end, bool isHourly, Guid? tenantId = null, CancellationToken ct = default)
+        IApplicationDbContext context, DateTimeOffset start, DateTimeOffset end, bool isHourly,
+        Guid? tenantId = null, IReadOnlyCollection<TenantType>? tenantTypes = null, CancellationToken ct = default)
     {
+        var scopedTenantTypes = !tenantId.HasValue && tenantTypes is { Count: > 0 }
+            ? tenantTypes.Distinct().ToArray()
+            : [];
+
         if (tenantId.HasValue)
         {
             var tenantExists = await context.Tenants.AnyAsync(t => t.Id == tenantId.Value, ct);
@@ -51,7 +56,11 @@ public class FinancialService(
             if (tenantId.HasValue)
                 query = query.Where(o => o.TenantId == tenantId.Value);
             else
+            {
                 query = query.Where(o => o.TenantId != IApplicationDbContext.SystemTenantGuid);
+                if (scopedTenantTypes.Length > 0)
+                    query = query.Where(o => o.Tenant != null && scopedTenantTypes.Contains(o.Tenant.Type));
+            }
 
             var rows = await query
                 .Select(o => new { o.CreatedDate, o.TenantId, o.TotalValueIncVat })
@@ -76,7 +85,16 @@ public class FinancialService(
         if (tenantId.HasValue)
             historicalQuery = historicalQuery.Where(r => r.TenantId == tenantId.Value);
         else
+        {
             historicalQuery = historicalQuery.Where(r => r.TenantId != IApplicationDbContext.SystemTenantGuid);
+            if (scopedTenantTypes.Length > 0)
+            {
+                historicalQuery = historicalQuery.Where(r => context.Tenants
+                    .Where(t => scopedTenantTypes.Contains(t.Type))
+                    .Select(t => t.Id)
+                    .Contains(r.TenantId));
+            }
+        }
 
         var rawHist = await historicalQuery
             .Select(r => new { r.CreatedDate, r.TenantId, r.Revenue, r.Volume })
@@ -94,7 +112,11 @@ public class FinancialService(
             if (tenantId.HasValue)
                 freshQuery = freshQuery.Where(o => o.TenantId == tenantId.Value);
             else
+            {
                 freshQuery = freshQuery.Where(o => o.TenantId != IApplicationDbContext.SystemTenantGuid);
+                if (scopedTenantTypes.Length > 0)
+                    freshQuery = freshQuery.Where(o => o.Tenant != null && scopedTenantTypes.Contains(o.Tenant.Type));
+            }
 
             var freshRows = await freshQuery
                 .GroupBy(o => new { o.CreatedDate.Year, o.CreatedDate.Month, o.CreatedDate.Day, o.TenantId })
@@ -185,7 +207,7 @@ public class FinancialService(
     #region Widget Implementations
 
     /// <inheritdoc />
-    public async Task<KpiDto> GetKpisAsync(ResolvedPeriod period, Guid? tenantId = null, CancellationToken ct = default)
+    public async Task<KpiDto> GetKpisAsync(ResolvedPeriod period, Guid? tenantId = null, IReadOnlyCollection<TenantType>? tenantTypes = null, CancellationToken ct = default)
     {
         var currentStart = period.CurrentStart;
         var currentEnd = period.CurrentEnd;
@@ -193,8 +215,8 @@ public class FinancialService(
         var isHourly = period.IsHourly;
         var context = _dbContext;
 
-        var currentRows = await GetMergedTenantDataAsync(context, currentStart, currentEnd, isHourly, tenantId, ct);
-        var previousRows = await GetMergedTenantDataAsync(context, previousStart, period.PreviousEnd, isHourly, tenantId, ct);
+        var currentRows = await GetMergedTenantDataAsync(context, currentStart, currentEnd, isHourly, tenantId, tenantTypes, ct);
+        var previousRows = await GetMergedTenantDataAsync(context, previousStart, period.PreviousEnd, isHourly, tenantId, tenantTypes, ct);
 
         var currentRevenue = currentRows.Sum(r => r.Revenue);
         var previousRevenue = previousRows.Sum(r => r.Revenue);
@@ -220,7 +242,7 @@ public class FinancialService(
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<VelocityPointDto>> GetVelocityAsync(ResolvedPeriod period, Guid? tenantId = null, CancellationToken ct = default)
+    public async Task<IReadOnlyList<VelocityPointDto>> GetVelocityAsync(ResolvedPeriod period, Guid? tenantId = null, IReadOnlyCollection<TenantType>? tenantTypes = null, CancellationToken ct = default)
     {
         var currentStart = period.CurrentStart;
         var currentEnd = period.CurrentEnd;
@@ -232,10 +254,10 @@ public class FinancialService(
 
         List<DataRow> currentRows, previousRows;
 
-        if (tenantId.HasValue)
+        if (tenantId.HasValue || tenantTypes is { Count: > 0 })
         {
-            currentRows = await GetMergedTenantDataAsync(context, currentStart, currentEnd, isHourly, tenantId, ct);
-            previousRows = await GetMergedTenantDataAsync(context, previousStart, period.PreviousEnd, isHourly, tenantId, ct);
+            currentRows = await GetMergedTenantDataAsync(context, currentStart, currentEnd, isHourly, tenantId, tenantTypes, ct);
+            previousRows = await GetMergedTenantDataAsync(context, previousStart, period.PreviousEnd, isHourly, tenantId, tenantTypes, ct);
         }
         else
         {
@@ -281,7 +303,7 @@ public class FinancialService(
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<AccumulatedRevenuePointDto>> GetAccumulatedRevenueAsync(ResolvedPeriod period, Guid? tenantId = null, CancellationToken ct = default)
+    public async Task<IReadOnlyList<AccumulatedRevenuePointDto>> GetAccumulatedRevenueAsync(ResolvedPeriod period, Guid? tenantId = null, IReadOnlyCollection<TenantType>? tenantTypes = null, CancellationToken ct = default)
     {
         var currentStart = period.CurrentStart;
         var currentEnd = period.CurrentEnd;
@@ -293,10 +315,10 @@ public class FinancialService(
 
         List<DataRow> currentRows, previousRows;
 
-        if (tenantId.HasValue)
+        if (tenantId.HasValue || tenantTypes is { Count: > 0 })
         {
-            currentRows = await GetMergedTenantDataAsync(context, currentStart, currentEnd, isHourly, tenantId, ct);
-            previousRows = await GetMergedTenantDataAsync(context, previousStart, period.PreviousEnd, isHourly, tenantId, ct);
+            currentRows = await GetMergedTenantDataAsync(context, currentStart, currentEnd, isHourly, tenantId, tenantTypes, ct);
+            previousRows = await GetMergedTenantDataAsync(context, previousStart, period.PreviousEnd, isHourly, tenantId, tenantTypes, ct);
         }
         else
         {
@@ -359,7 +381,7 @@ public class FinancialService(
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<GrowthExtremeDto>> GetGrowthExtremesAsync(ResolvedPeriod period, CancellationToken ct = default)
+    public async Task<IReadOnlyList<GrowthExtremeDto>> GetGrowthExtremesAsync(ResolvedPeriod period, IReadOnlyCollection<TenantType>? tenantTypes = null, CancellationToken ct = default)
     {
         var currentStart = period.CurrentStart;
         var currentEnd = period.CurrentEnd;
@@ -367,8 +389,8 @@ public class FinancialService(
         var isHourly = period.IsHourly;
         var context = _dbContext;
 
-        var currentRows = await GetMergedTenantDataAsync(context, currentStart, currentEnd, isHourly, ct: ct);
-        var previousRows = await GetMergedTenantDataAsync(context, previousStart, period.PreviousEnd, isHourly, ct: ct);
+        var currentRows = await GetMergedTenantDataAsync(context, currentStart, currentEnd, isHourly, tenantTypes: tenantTypes, ct: ct);
+        var previousRows = await GetMergedTenantDataAsync(context, previousStart, period.PreviousEnd, isHourly, tenantTypes: tenantTypes, ct: ct);
 
         var tenantNames = await GetTenantNameMapAsync(context, ct);
 
@@ -396,7 +418,7 @@ public class FinancialService(
     }
 
     /// <inheritdoc />
-    public async Task<RevenueEfficiencyDto> GetRevenueEfficiencyAsync(ResolvedPeriod period, CancellationToken ct = default)
+    public async Task<RevenueEfficiencyDto> GetRevenueEfficiencyAsync(ResolvedPeriod period, IReadOnlyCollection<TenantType>? tenantTypes = null, CancellationToken ct = default)
     {
         var currentStart = period.CurrentStart;
         var currentEnd = period.CurrentEnd;
@@ -404,8 +426,8 @@ public class FinancialService(
         var isHourly = period.IsHourly;
         var context = _dbContext;
 
-        var currentRows = await GetMergedTenantDataAsync(context, currentStart, currentEnd, isHourly, ct: ct);
-        var previousRows = await GetMergedTenantDataAsync(context, previousStart, period.PreviousEnd, isHourly, ct: ct);
+        var currentRows = await GetMergedTenantDataAsync(context, currentStart, currentEnd, isHourly, tenantTypes: tenantTypes, ct: ct);
+        var previousRows = await GetMergedTenantDataAsync(context, previousStart, period.PreviousEnd, isHourly, tenantTypes: tenantTypes, ct: ct);
         
         var tenantDetails = await context.Tenants
             .AsNoTracking()
@@ -461,7 +483,7 @@ public class FinancialService(
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<VolumeAnomalyDto>> GetVolumeAnomalyAsync(ResolvedPeriod period, CancellationToken ct = default)
+    public async Task<IReadOnlyList<VolumeAnomalyDto>> GetVolumeAnomalyAsync(ResolvedPeriod period, IReadOnlyCollection<TenantType>? tenantTypes = null, CancellationToken ct = default)
     {
         var currentStart = period.CurrentStart;
         var currentEnd = period.CurrentEnd;
@@ -481,12 +503,18 @@ public class FinancialService(
         // Volume anomaly only calculates aggregate totals and does not need hourly resolution. 
         // Forcing 'false' ensures we use the fast DailyTenantRollups materialized view for the 30-day baseline 
         // instead of doing an expensive raw query on the Orders table when the timeframe is "Today" (1d).
-        var currentRows = await GetMergedTenantDataAsync(context, currentStart, currentEnd, false, ct: ct);
-        var previousRows = await GetMergedTenantDataAsync(context, previousStart, period.PreviousEnd, false, ct: ct);
-        
-        var tenantDetails = await context.Tenants
+        var currentRows = await GetMergedTenantDataAsync(context, currentStart, currentEnd, false, tenantTypes: tenantTypes, ct: ct);
+        var previousRows = await GetMergedTenantDataAsync(context, previousStart, period.PreviousEnd, false, tenantTypes: tenantTypes, ct: ct);
+
+        var tenantQuery = context.Tenants
             .AsNoTracking()
-            .Where(t => t.Id != IApplicationDbContext.SystemTenantGuid)
+            .Where(t => t.Id != IApplicationDbContext.SystemTenantGuid);
+        if (tenantTypes is { Count: > 0 })
+        {
+            var scopedTenantTypes = tenantTypes.Distinct().ToArray();
+            tenantQuery = tenantQuery.Where(t => scopedTenantTypes.Contains(t.Type));
+        }
+        var tenantDetails = await tenantQuery
             .Select(t => new { t.Id, t.Name })
             .ToDictionaryAsync(t => t.Id, ct);
 
@@ -516,7 +544,7 @@ public class FinancialService(
     }
 
     /// <inheritdoc />
-    public async Task<MomentumDto> GetMomentumAsync(ResolvedPeriod period, CancellationToken ct = default)
+    public async Task<MomentumDto> GetMomentumAsync(ResolvedPeriod period, IReadOnlyCollection<TenantType>? tenantTypes = null, CancellationToken ct = default)
     {
         var currentStart = period.CurrentStart;
         var currentEnd = period.CurrentEnd;
@@ -524,8 +552,8 @@ public class FinancialService(
         var isHourly = period.IsHourly;
         var context = _dbContext;
 
-        var currentRows = await GetMergedTenantDataAsync(context, currentStart, currentEnd, isHourly, ct: ct);
-        var previousRows = await GetMergedTenantDataAsync(context, previousStart, period.PreviousEnd, isHourly, ct: ct);
+        var currentRows = await GetMergedTenantDataAsync(context, currentStart, currentEnd, isHourly, tenantTypes: tenantTypes, ct: ct);
+        var previousRows = await GetMergedTenantDataAsync(context, previousStart, period.PreviousEnd, isHourly, tenantTypes: tenantTypes, ct: ct);
         var tenantDetails = await context.Tenants
             .AsNoTracking()
             .Where(t => t.Id != IApplicationDbContext.SystemTenantGuid)
@@ -577,10 +605,10 @@ public class FinancialService(
         var includeActualTime = period.IncludeActualTime;
         var context = _dbContext;
 
-        var currentRows = await GetMergedTenantDataAsync(context, currentStart, currentEnd, isHourly, tenantId, ct);
+        var currentRows = await GetMergedTenantDataAsync(context, currentStart, currentEnd, isHourly, tenantId, ct: ct);
 
         var lookbackStart = isHourly ? currentStart.AddHours(-1) : currentStart.AddDays(-1);
-        var beforeStartRows = await GetMergedTenantDataAsync(context, lookbackStart, currentStart, isHourly, tenantId, ct);
+        var beforeStartRows = await GetMergedTenantDataAsync(context, lookbackStart, currentStart, isHourly, tenantId, ct: ct);
         var previousValue = beforeStartRows.Sum(r => r.Revenue);
 
         var currentByStep = currentRows
@@ -701,7 +729,7 @@ public class FinancialService(
     }
 
     /// <inheritdoc />
-    public async Task<TransactionDensityDto> GetTransactionDensityAsync(TransactionDensityPeriod requestedPeriod, Guid? tenantId = null, CancellationToken ct = default)
+    public async Task<TransactionDensityDto> GetTransactionDensityAsync(TransactionDensityPeriod requestedPeriod, Guid? tenantId = null, IReadOnlyCollection<TenantType>? tenantTypes = null, CancellationToken ct = default)
     {
         var context = _dbContext;
         var currentEnd = DateTimeOffset.UtcNow;
@@ -714,7 +742,14 @@ public class FinancialService(
         if (tenantId.HasValue)
             query = query.Where(o => o.TenantId == tenantId.Value);
         else
+        {
             query = query.Where(o => o.TenantId != IApplicationDbContext.SystemTenantGuid);
+            if (tenantTypes is { Count: > 0 })
+            {
+                var scopedTenantTypes = tenantTypes.Distinct().ToArray();
+                query = query.Where(o => o.Tenant != null && scopedTenantTypes.Contains(o.Tenant.Type));
+            }
+        }
 
         var starts = new Dictionary<TransactionDensityPeriod, DateTimeOffset>
         {
@@ -839,7 +874,7 @@ public class FinancialService(
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<CumulativeGrowthDeltaPointDto>> GetCumulativeGrowthDeltaAsync(ResolvedPeriod period, Guid? tenantId = null, CancellationToken ct = default)
+    public async Task<IReadOnlyList<CumulativeGrowthDeltaPointDto>> GetCumulativeGrowthDeltaAsync(ResolvedPeriod period, Guid? tenantId = null, IReadOnlyCollection<TenantType>? tenantTypes = null, CancellationToken ct = default)
     {
         var currentStart = period.CurrentStart;
         var currentEnd = period.CurrentEnd;
@@ -851,10 +886,10 @@ public class FinancialService(
 
         List<DataRow> currentRows, previousRows;
 
-        if (tenantId.HasValue)
+        if (tenantId.HasValue || tenantTypes is { Count: > 0 })
         {
-            currentRows = await GetMergedTenantDataAsync(context, currentStart, currentEnd, isHourly, tenantId, ct);
-            previousRows = await GetMergedTenantDataAsync(context, previousStart, period.PreviousEnd, isHourly, tenantId, ct);
+            currentRows = await GetMergedTenantDataAsync(context, currentStart, currentEnd, isHourly, tenantId, tenantTypes, ct);
+            previousRows = await GetMergedTenantDataAsync(context, previousStart, period.PreviousEnd, isHourly, tenantId, tenantTypes, ct);
         }
         else
         {

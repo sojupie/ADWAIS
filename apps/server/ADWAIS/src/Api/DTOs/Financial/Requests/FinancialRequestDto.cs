@@ -24,6 +24,13 @@ public record FinancialRequestDto
     public Guid? TenantId { get; init; }
 
     /// <summary>
+    /// Optional. Restricts portfolio metrics to tenants with one of these business models.
+    /// Ignored when tenantId is provided.
+    /// </summary>
+    [FromQuery(Name = "tenantTypes")]
+    public IReadOnlyList<TenantType>? TenantTypes { get; init; }
+
+    /// <summary>
     /// The comparison period for the timeframe.
     /// Defaults to Preceding.
     /// </summary>

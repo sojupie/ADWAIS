@@ -18,14 +18,14 @@ const VIEW_OPTIONS = [
 
 export function CalendarToolbar({ viewMode, isWriter, onViewModeChange, onAddEvent, onOpenSettings }: CalendarToolbarProps) {
   return (
-    <div className="flex items-center gap-2">
-      <div className="flex h-11 items-center rounded-full border border-outline-variant bg-surface-container p-1" role="group" aria-label="Calendar view">
+    <div className="flex items-center flex-wrap gap-2">
+      <div className="flex h-11 items-center rounded-full border border-outline p-1" role="group" aria-label="Calendar view">
         {VIEW_OPTIONS.map(({ mode, label, title, Icon }) => (
           <button
             key={mode}
             onClick={() => onViewModeChange(mode)}
             aria-label={label}
-            className={`flex h-full w-10 items-center justify-center rounded-full transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary ${viewMode === mode ? 'bg-brand-accent text-brand-text' : 'text-on-surface-variant hover:bg-brand-active hover:text-brand-text'}`}
+            className={`flex h-full w-10 items-center justify-center rounded-full transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary ${viewMode === mode ? 'bg-secondary text-on-secondary' : 'text-on-surface-variant hover:bg-brand-active hover:text-brand-text'}`}
             title={title}
           >
             <Icon size={18} />
@@ -35,8 +35,8 @@ export function CalendarToolbar({ viewMode, isWriter, onViewModeChange, onAddEve
       <button
         onClick={onAddEvent}
         className={isWriter
-          ? 'inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 font-bold bg-secondary-container text-on-secondary-container hover:m3-elevation-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary'
-          : 'inline-flex min-h-11 cursor-not-allowed items-center justify-center gap-2 rounded-full border border-outline px-5 bg-surface-dim font-bold text-slate-500'}
+          ? 'whitespace-nowrap inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 font-bold bg-secondary-container text-on-secondary-container hover:m3-elevation-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary'
+          : 'whitespace-nowrap inline-flex min-h-11 cursor-not-allowed items-center justify-center gap-2 rounded-full border border-outline px-5 bg-surface-dim font-bold text-slate-500'}
         title={isWriter ? undefined : 'Add Event (requires Employee/Admin permissions)'}
       >
         <Plus size={16} /> Add Event

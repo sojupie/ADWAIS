@@ -4,6 +4,7 @@
  * Adwais.Api
  * OpenAPI spec version: 1.0
  */
+import type { TenantType } from './tenantType';
 import type { TransactionDensityPeriod } from './transactionDensityPeriod';
 
 export type GetApiFinancialTransactionDensityParams = {
@@ -16,4 +17,9 @@ period?: TransactionDensityPeriod;
  * Optional tenant scope. If omitted, the matrix represents the portfolio.
  */
 tenantId?: string;
+/**
+ * Optional. Restricts the portfolio matrix to tenants with one of these business models.
+ * Ignored when tenantId is provided.
+ */
+tenantTypes?: TenantType[];
 };

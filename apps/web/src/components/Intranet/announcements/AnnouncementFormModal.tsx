@@ -38,7 +38,7 @@ function AnnouncementFormDialog({ mode, isPending, error, initialTitle = '', ini
           </button>
         </div>
 
-        <div className="flex flex-col gap-8 px-6 pb-6">
+        <div className="flex flex-col gap-4 px-6 pb-6">
           {error && <ErrorAlert title={isEditing ? 'Unable to update announcement' : 'Unable to create announcement'} message={error} />}
           <label className="flex flex-col gap-3 text-sm font-bold text-on-surface-variant">
             Title
@@ -62,7 +62,7 @@ function AnnouncementFormDialog({ mode, isPending, error, initialTitle = '', ini
             </div>
           </footer>
         ) : (
-          <footer className="flex flex-wrap items-center justify-between gap-3 px-6 py-4">
+          <footer className="flex flex-wrap items-center justify-between gap-3 px-6 pb-4">
             <div>
               {isEditing && canDelete && <button type="button" onClick={() => setConfirmingDelete(true)} disabled={isPending || isDeleting} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-4 text-base font-bold text-error transition-colors hover:bg-error-container active:bg-error-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-error disabled:cursor-not-allowed disabled:opacity-50"><Trash2 className="h-4 w-4" aria-hidden="true" /> Delete</button>}
             </div>

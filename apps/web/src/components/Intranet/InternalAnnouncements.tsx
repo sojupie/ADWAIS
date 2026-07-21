@@ -164,7 +164,7 @@ export function InternalAnnouncements() {
         ) : (
           <AnnouncementCarousel>
             {posts.map(post => (
-              <div key={post.id} data-announcement-card className="h-[234px] min-w-0 snap-start">
+              <div key={post.id} data-announcement-card className="h-full min-w-0 snap-start">
                 {renderPost(post)}
               </div>
             ))}

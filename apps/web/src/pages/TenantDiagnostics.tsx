@@ -1,6 +1,4 @@
 import { formatCurrency, formatNumber } from '@utils';
-import { ArrowLeft } from 'lucide-react';
-import { Route } from '../routes/financial';
 import { FactPanel } from '../components/common/dashboard/FactPanel';
 import { CumulativeGrowthDeltaChart } from '../components/TenantSpecific/CumulativeGrowthDeltaChart';
 import { OrderValueDistributionChart } from '../components/TenantSpecific/OrderValueDistributionChart';
@@ -19,10 +17,15 @@ import {DashboardFlexRow} from "../components/common/layout/DashboardFlexRow.tsx
 import { DashboardFooter } from "../components/common/layout/DashboardFooter.tsx";
 import { SyncStatusWidget } from '../components/common/dashboard/SyncStatusWidget';
 import { PeriodSelector } from '../components/common/charts/PeriodSelector';
-import { TenantSelector } from '../components/financial/TenantSelector';
-import type { TransactionDensityResponseDto } from '@types';
-import type { TransactionDensityPeriod } from '@types';
+import type { TenantType, TransactionDensityPeriod, TransactionDensityResponseDto } from '@types';
 import { useState } from 'react';
+import {
+  FinancialFilterMenu,
+  FinancialFilterPanel,
+  type FinancialTenantOption,
+} from '../components/financial/FinancialFilterMenu.tsx';
+import { MobileFooterActions } from '../components/common/ui/MobileFooterActions.tsx';
+import { countActiveFilterGroups } from '../utils/filterCounts.ts';
 
 const EMPTY_ACCUMULATED: never[] = [];
 const EMPTY_DENSITY: TransactionDensityResponseDto = {
@@ -44,28 +47,35 @@ const EMPTY_BINS: never[] = [];
 interface Props {
   tenantId: string;
   tenantName: string;
-  tenantType: string;
+  tenantType: TenantType;
   timeframe: string;
+  tenantOptions: FinancialTenantOption[];
+  selectedTenantTypes: TenantType[];
+  tenantsLoading: boolean;
+  onTenantChange: (tenantId: string | null) => void;
+  onTypesChange: (types: TenantType[]) => void;
+  onClearFilters: () => void;
 }
 
-export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe }: Props) {
+export function TenantDiagnostics({
+  tenantId,
+  tenantName,
+  tenantType,
+  timeframe,
+  tenantOptions,
+  selectedTenantTypes,
+  tenantsLoading,
+  onTenantChange,
+  onTypesChange,
+  onClearFilters,
+}: Props) {
   const [densityPeriod, setDensityPeriod] = useState<TransactionDensityPeriod>('Auto');
   const kpiQuery = useGlobalKpis(timeframe, tenantId);
-  const globalKpiQuery = useGlobalKpis(timeframe);
+  const globalKpiQuery = useGlobalKpis(timeframe, undefined, undefined, selectedTenantTypes);
   const accumulatedQuery = useAccumulatedRevenue(timeframe, tenantId, 'YearOverYear');
   const densityQuery = useTransactionDensity(densityPeriod, tenantId);
   const deltaQuery = useCumulativeGrowthDelta(timeframe, tenantId, 'YearOverYear');
   const orderQuery = useOrderDistribution(timeframe, tenantId);
-
-  const navigate = Route.useNavigate();
-  const handleBackToGlobal = () => {
-    void navigate({
-      search: (prev) => ({
-        ...prev,
-        tenantId: undefined,
-      }),
-    });
-  };
 
   const kpis = kpiQuery.data;
   const globalKpis = globalKpiQuery.data;
@@ -74,14 +84,18 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe 
     ? (kpis.currentRevenue / globalKpis.currentRevenue) * 100 
     : undefined;
 
+  const shareOfRevenueDesc = selectedTenantTypes.length > 0
+    ? `of ${selectedTenantTypes.join(', ')} Portfolio`
+    : 'of Global Portfolio';
+
   return (
     <DashboardLayout>
-      <header className="flex items-center justify-between gap-2 shrink-0 flex-wrap w-full">
+      <header className="flex w-full shrink-0 flex-wrap items-center justify-between gap-2">
         <div className="min-w-0">
           <div className="flex items-center gap-6 mb-1">
             <h1 className="text-2xl font-extrabold text-brand-text tracking-tight m-0">{tenantName} Diagnostics</h1>
             <span 
-              className={`inline-flex items-center px-3 py-1 rounded-sm text-sm font-black uppercase tracking-widest shadow-sm shrink-0 ${
+              className={`inline-flex items-center px-4 py-1 rounded-2xl text-md font-black uppercase tracking-widest shadow-sm shrink-0 ${
                 tenantType === 'B2C' ? 'bg-chart-1 text-white' : 
                 tenantType === 'Mixed' ? 'bg-chart-2 text-white' :
                 tenantType === 'B2B' ? 'bg-chart-3 text-white' :    
@@ -92,17 +106,6 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe 
             </span>
           </div>
           <p className="text-sm text-on-surface-variant m-0 font-medium tracking-wide">Isolated entity performance view for the {timeframe} period. VAT included.</p>
-        </div>
-        <div className="w-full flex items-center justify-end gap-2 shrink-0 lg:w-auto">
-          <button
-            type="button"
-            onClick={handleBackToGlobal}
-            className="w-10 h-10 rounded-full bg-surface-bright m3-elevation-1 flex items-center justify-center hover:m3-elevation-2 hover:bg-surface-container-low hover:border-outline-variant active:bg-surface-container transition-all cursor-pointer shrink-0"
-            aria-label="Back to global portfolio"
-          >
-            <ArrowLeft size={20} className="stroke-[2.5]" />
-          </button>
-          <TenantSelector />
         </div>
       </header>
 
@@ -120,7 +123,7 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe 
           label="Share of Revenue"
           value={shareOfRevenue !== undefined ? `${shareOfRevenue.toFixed(1)}%` : '\u2014'}
           isLoading={kpiQuery.isLoading || globalKpiQuery.isLoading}
-          extra={{ type: 'Desc', value: 'of Global Portfolio' }}
+          extra={{ type: 'Desc', value: shareOfRevenueDesc }}
           hasExtra={true}
         />
         <FactPanel
@@ -180,8 +183,37 @@ export function TenantDiagnostics({ tenantId, tenantName, tenantType, timeframe 
       {/* ── Footer Widgets (All Resolutions) ── */}
       <DashboardFooter>
         <SyncStatusWidget />
-        <PeriodSelector from="/financial" />
+        <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+          <FinancialFilterMenu
+            tenants={tenantOptions}
+            selectedTenantId={tenantId}
+            selectedTypes={selectedTenantTypes}
+            isLoading={tenantsLoading}
+            onTenantChange={onTenantChange}
+            onTypesChange={onTypesChange}
+            onClearAll={onClearFilters}
+          />
+          <div className="mx-1 h-6 w-px shrink-0 bg-outline-variant" aria-hidden="true" />
+          <PeriodSelector from="/financial" />
+        </div>
       </DashboardFooter>
+
+      <MobileFooterActions
+        activeCount={countActiveFilterGroups(Boolean(tenantId), selectedTenantTypes.length > 0)}
+        clearLabel="Clear all financial filters"
+        onClearAll={onClearFilters}
+      >
+        <FinancialFilterPanel
+          embedded
+          tenants={tenantOptions}
+          selectedTenantId={tenantId}
+          selectedTypes={selectedTenantTypes}
+          isLoading={tenantsLoading}
+          onTenantChange={onTenantChange}
+          onTypesChange={onTypesChange}
+          onClearAll={onClearFilters}
+        />
+      </MobileFooterActions>
     </DashboardLayout>
   );
 }

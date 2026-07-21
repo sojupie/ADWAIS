@@ -21,6 +21,12 @@ public record PortfolioRequestDto
     /// </summary>
     [FromQuery(Name = "comparison")]
     public ComparisonType Comparison { get; init; } = ComparisonType.Preceding;
+
+    /// <summary>
+    /// Optional. Restricts portfolio metrics to tenants with one of these business models.
+    /// </summary>
+    [FromQuery(Name = "tenantTypes")]
+    public IReadOnlyList<TenantType>? TenantTypes { get; init; }
 }
 
 

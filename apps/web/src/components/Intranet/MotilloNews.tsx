@@ -115,6 +115,7 @@ export function MotilloNews() {
                 {selectedPost.link && (
                   <div className="mt-2 shrink-0">
                     <a
+                      data-md3-ripple
                       href={selectedPost.link}
                       target="_blank"
                       rel="noopener noreferrer"

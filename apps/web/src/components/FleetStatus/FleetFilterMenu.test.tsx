@@ -28,7 +28,7 @@ describe('FleetFilterMenu', () => {
 
     fireEvent.click(screen.getByText('Filters'));
     expect(screen.getByRole('button', { name: /^filters(?:, \d+ active)?$/i })).toHaveAttribute('aria-expanded', 'true');
-    expect(screen.getByRole('group', { name: 'Fleet filter controls' })).toHaveClass('ring-2', 'ring-secondary');
+    expect(screen.getByRole('combobox', { name: 'Tenant' })).toHaveFocus();
 
     expect(screen.getByRole('combobox', { name: 'Monitor' })).toBeDisabled();
 

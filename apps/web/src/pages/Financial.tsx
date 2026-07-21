@@ -1,5 +1,4 @@
 import { formatCurrency, formatCompact, formatNumber } from '@utils';
-import { ArrowLeft } from 'lucide-react';
 import { FactPanel } from '../components/common/dashboard/FactPanel';
 import { MomentumMatrixChart } from '../components/financial/MomentumMatrixChart';
 import { RevenueEfficiencyChart } from '../components/financial/RevenueEfficiencyChart';
@@ -12,9 +11,11 @@ import { DashboardFlexRow } from "../components/common/layout/DashboardFlexRow.t
 import { DashboardFooter } from "../components/common/layout/DashboardFooter.tsx";
 import { SyncStatusWidget } from '../components/common/dashboard/SyncStatusWidget';
 import { PeriodSelector } from '../components/common/charts/PeriodSelector';
-import { TenantSelector } from '../components/financial/TenantSelector';
 import { useFinancialViewModel } from "../hooks/useFinancialViewModel.ts";
 import type { RevenueEfficiencyResponse, MomentumResponse, TransactionDensityResponseDto } from '@types';
+import { FinancialFilterMenu, FinancialFilterPanel } from '../components/financial/FinancialFilterMenu.tsx';
+import { MobileFooterActions } from '../components/common/ui/MobileFooterActions.tsx';
+import { countActiveFilterGroups } from '../utils/filterCounts.ts';
 
 const EMPTY_VELOCITY: never[] = [];
 const EMPTY_DENSITY: TransactionDensityResponseDto = {
@@ -43,36 +44,26 @@ export function Financial() {
         tenantName={vm.selectedTenantDetails.tenantName}
         tenantType={vm.selectedTenantDetails.type}
         timeframe={vm.timeframe}
+        tenantOptions={vm.tenantOptions}
+        selectedTenantTypes={vm.selectedTenantTypes}
+        tenantsLoading={vm.tenantsQuery.isLoading}
+        onTenantChange={vm.handleTenantChange}
+        onTypesChange={vm.setSelectedTenantTypes}
+        onClearFilters={vm.clearFinancialFilters}
       />
     );
   }
 
+  const revenueLabel = vm.selectedTenantTypes.length > 0
+    ? `${vm.selectedTenantTypes.join(', ')} Revenue (${vm.timeframe})`
+    : `Global Revenue (${vm.timeframe})`;
+
   return (
     <DashboardLayout>
-      <header className="flex items-center justify-between gap-2 shrink-0 w-full flex-wrap">
-        <div className="min-w-0">
-          <div className="flex items-center gap-6 mb-1">
-            <h1 className="text-2xl font-extrabold text-brand-text tracking-tight m-0">Global Portfolio</h1>
-          </div>
-          <p className="text-sm text-on-surface-variant m-0 font-medium tracking-wide">Performance overview across all active tenants. VAT included.</p>
-        </div>
-        <div className="flex items-center gap-2 shrink-0 w-full lg:w-auto">
-          <button
-            type="button"
-            disabled
-            className="w-10 h-10 rounded-full border border-outline-variant bg-slate-300 flex items-center justify-center text-slate-400 cursor-not-allowed shrink-0"
-            aria-label="Already at global portfolio"
-          >
-            <ArrowLeft size={20} className="stroke-[2.5]" />
-          </button>
-          <TenantSelector />
-        </div>
-      </header>
-
       {/* KPI Section */}
       <DashboardTopRow>
         <FactPanel
-          label={`Global Revenue (${vm.timeframe})`}
+          label={revenueLabel}
           value={vm.kpiQuery.data ? formatCurrency(vm.kpiQuery.data.currentRevenue) : '\u2014'}
           isLoading={vm.kpiQuery.isLoading}
           extra={vm.kpiQuery.data?.revenueGrowthPercentage !== undefined
@@ -138,7 +129,7 @@ export function Financial() {
         />
 
         <RevenueEfficiencyChart 
-          response={vm.efficiencyQuery.data || EMPTY_EFFICIENCY}
+          response={vm.efficiencyData || EMPTY_EFFICIENCY}
           comparison="YearOverYear"
           onTenantSelect={vm.handleTenantSelect} 
           isLoading={vm.efficiencyQuery.isLoading} 
@@ -147,7 +138,7 @@ export function Financial() {
         />
 
         <MomentumMatrixChart 
-          momentum={vm.momentumQuery.data || EMPTY_MOMENTUM}
+          momentum={vm.momentumData || EMPTY_MOMENTUM}
           comparison="YearOverYear"
           onTenantSelect={vm.handleTenantSelect} 
           isLoading={vm.momentumQuery.isLoading} 
@@ -159,8 +150,36 @@ export function Financial() {
       {/* ── Footer Widgets (All Resolutions) ── */}
       <DashboardFooter>
         <SyncStatusWidget />
-        <PeriodSelector from="/financial" />
+        <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+          <FinancialFilterMenu
+            tenants={vm.tenantOptions}
+            selectedTenantId={vm.tenantId ?? null}
+            selectedTypes={vm.selectedTenantTypes}
+            isLoading={vm.tenantsQuery.isLoading}
+            onTenantChange={vm.handleTenantChange}
+            onTypesChange={vm.setSelectedTenantTypes}
+            onClearAll={vm.clearFinancialFilters}
+          />
+          <div className="mx-1 h-6 w-px shrink-0 bg-outline-variant" aria-hidden="true" />
+          <PeriodSelector from="/financial" />
+        </div>
       </DashboardFooter>
+      <MobileFooterActions
+        activeCount={countActiveFilterGroups(Boolean(vm.tenantId), vm.selectedTenantTypes.length > 0)}
+        clearLabel="Clear all financial filters"
+        onClearAll={vm.clearFinancialFilters}
+      >
+        <FinancialFilterPanel
+          embedded
+          tenants={vm.tenantOptions}
+          selectedTenantId={vm.tenantId ?? null}
+          selectedTypes={vm.selectedTenantTypes}
+          isLoading={vm.tenantsQuery.isLoading}
+          onTenantChange={vm.handleTenantChange}
+          onTypesChange={vm.setSelectedTenantTypes}
+          onClearAll={vm.clearFinancialFilters}
+        />
+      </MobileFooterActions>
     </DashboardLayout>
   );
 }

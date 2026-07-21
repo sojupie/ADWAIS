@@ -153,7 +153,7 @@ export function SyncStatusWidget({ embedded = false }: { embedded?: boolean }) {
  return (
     <div
       className={embedded 
-        ? "flex items-center gap-2 px-5 w-full min-w-0" 
+        ? "flex items-center gap-2 w-full min-w-0" 
         : "flex items-center gap-2 px-5 rounded-full m3-elevation-1 bg-surface min-h-14 min-w-0"
       }
     >

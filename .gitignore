@@ -26,7 +26,8 @@ Thumbs.db
 # IDEs
 .idea/
 .vscode/
-
+../server/ADWAIS/.vs/
+apps/server/ADWAIS/.vs/
 # Unit test reports
 TEST*.xml
 

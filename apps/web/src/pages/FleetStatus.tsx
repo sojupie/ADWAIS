@@ -13,6 +13,7 @@ import { useFleetStatusViewModel } from "../hooks/useFleetStatusViewModel.ts";
 import { EmptyState } from "../components/common/ui/EmptyState.tsx";
 import { FleetFilterMenu, FleetFilterPanel } from '../components/FleetStatus/FleetFilterMenu.tsx';
 import { MobileFooterActions } from '../components/common/ui/MobileFooterActions.tsx';
+import { countActiveFilterGroups } from '../utils/filterCounts.ts';
 
 const EMPTY_LATENCY: never[] = [];
 
@@ -47,12 +48,6 @@ export function FleetStatus() {
 
   return (
     <DashboardLayout>
-      <div className="min-w-0">
-        <div className="flex items-center gap-6 mb-1">
-          <h1 className="text-2xl font-extrabold text-brand-text tracking-tight m-0">Fleet Status</h1>
-        </div>
-        <p className="text-sm text-on-surface-variant m-0 font-medium tracking-wide">Endpoint status, uptime%, and response time.</p>
-      </div>
       {/* Top Row: Macro Stats */}
       <DashboardTopRow>
         <FactPanel
@@ -180,7 +175,16 @@ export function FleetStatus() {
         </div>
       </DashboardFooter>
 
-      <MobileFooterActions>
+      <MobileFooterActions
+        activeCount={countActiveFilterGroups(
+          Boolean(vm.selection?.tenantId),
+          vm.selection?.monitorId != null,
+          vm.selectedTags.length > 0,
+          vm.selectedStatuses.length > 0,
+        )}
+        clearLabel="Clear all fleet filters"
+        onClearAll={clearAllFilters}
+      >
         <FleetFilterPanel
           embedded
           monitors={vm.allMonitors}

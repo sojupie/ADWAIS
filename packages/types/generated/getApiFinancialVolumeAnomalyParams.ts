@@ -5,6 +5,7 @@
  * OpenAPI spec version: 1.0
  */
 import type { ComparisonType } from './comparisonType';
+import type { TenantType } from './tenantType';
 import type { Timeframe } from './timeframe';
 
 export type GetApiFinancialVolumeAnomalyParams = {
@@ -18,4 +19,8 @@ timeframe?: Timeframe;
  * Defaults to Preceding.
  */
 comparison?: ComparisonType;
+/**
+ * Optional. Restricts portfolio metrics to tenants with one of these business models.
+ */
+tenantTypes?: TenantType[];
 };

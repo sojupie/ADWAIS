@@ -55,8 +55,8 @@ const MIN_MENU_WIDTH = 160;
 const MAX_MENU_HEIGHT = 320;
 
 const variantClasses: Record<SelectVariant, string> = {
-  filled: 'rounded-xl border-outline-variant bg-surface-container-low text-on-surface hover:border-outline hover:bg-surface-container',
-  outlined: 'rounded-xl border-outline-variant bg-surface text-on-surface hover:border-outline hover:bg-surface-container-low',
+  filled: 'rounded-xl border-outline bg-surface-container-low text-on-surface hover:border-outline hover:bg-surface-container',
+  outlined: 'rounded-xl border-outline bg-surface text-on-surface hover:border-outline hover:bg-surface-container-low',
   pill: 'rounded-full border-transparent bg-secondary text-on-secondary m3-elevation-1 hover:m3-elevation-2',
   brand: 'rounded-xl border-transparent bg-brand-btn-primary text-white shadow-sm hover:bg-brand-btn-primary/90 active:bg-brand-btn-primary/80',
   plain: 'rounded-md border-transparent bg-transparent text-inherit hover:bg-surface/20',

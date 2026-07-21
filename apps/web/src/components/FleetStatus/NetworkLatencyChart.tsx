@@ -142,7 +142,26 @@ export const NetworkLatencyChart = memo(function NetworkLatencyChart({ isLoading
       y: { min: 0, max: yAxisMax, border: { display: false }, grid: horizontalGrid, ticks: { ...chartTick(12), callback: value => `${value}ms` } },
     },
   };
-  const legend = <div className="flex flex-wrap justify-end gap-x-5 gap-y-1.5 text-sm font-black text-on-surface-variant uppercase tracking-widest bg-surface-container-low px-3 py-1.5 rounded-xl border border-outline-variant"><div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-brand-btn-primary" /><span>Current</span></div><div className="flex items-center gap-2"><div className="w-4 border-t-2 border-outline border-dashed" /><span>Previous</span></div><div className="flex items-center gap-2"><span className="relative inline-flex w-5 justify-center overflow-hidden text-base leading-none text-outline">//</span><span>Gap</span></div></div>;
+  const legend = (
+    <div className="flex flex-wrap justify-end gap-x-5 gap-y-1.5 text-sm font-bold text-on-surface-variant uppercase tracking-widest bg-surface-container-low px-3 py-1.5 rounded-xl border border-outline-variant">
+      <div className="flex items-center gap-2">
+        <div className="w-3 h-3 rounded-full bg-brand-btn-primary" />
+        <span>Current</span>
+      </div>
+      <div className="flex items-center gap-2">
+        <div className="w-3.5 h-3.5 rounded bg-brand-btn-primary/25 border border-brand-btn-primary/40" />
+        <span>P10–P90 Band</span>
+      </div>
+      <div className="flex items-center gap-2">
+        <div className="w-4 border-t-2 border-outline border-dashed" />
+        <span>Previous</span>
+      </div>
+      <div className="flex items-center gap-2">
+        <span className="relative inline-flex w-5 justify-center overflow-hidden text-base leading-none text-outline">//</span>
+        <span>Gap</span>
+      </div>
+    </div>
+  );
 
   return (
     <ChartPanel isLoading={isLoading} isStale={isStale} title={title} comparison={comparison} legend={legend} className={className} bodyClassName={!points.length ? 'flex items-center justify-center' : ''}>

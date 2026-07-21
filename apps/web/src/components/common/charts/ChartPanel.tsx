@@ -26,12 +26,12 @@ export function ChartPanel({ title, subtitle, comparison, legend, bodyClassName 
                 </div>
             )}
             <div className="flex justify-between items-start my-1 z-10">
-                <div className="flex flex-col gap-1">
-                <span className="text-sm md:text-md font-bold text-on-surface-variant uppercase tracking-widest">
-                    {title}
-                </span>
+                <div className="min-w-[35%] flex flex-col gap-1">
+                    <span className="text-sm md:text-md font-bold text-on-surface-variant uppercase tracking-widest">
+                        {title}
+                    </span>
                     {displaySubtitle && (
-                        <span className="text-sm md:text-md font-medium text-on-surface-variant">
+                    <span className="text-sm md:text-md font-medium text-on-surface-variant">
                         {displaySubtitle}
                     </span>
                     )}

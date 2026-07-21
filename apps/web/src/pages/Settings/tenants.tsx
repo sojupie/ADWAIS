@@ -1,15 +1,16 @@
 import { Building2, Activity, Plus, X } from 'lucide-react';
 import { TenantTile } from '../../components/settings/tenants/TenantTile';
 import { MonitorTile } from '../../components/settings/tenants/MonitorTile';
-import { TenantFilterMenu } from '../../components/settings/tenants/TenantFilterMenu';
-import { MonitorFilterMenu } from '../../components/settings/tenants/MonitorFilterMenu';
+import {
+    MonitorSettingsFilterMenu,
+    TenantSettingsFilterMenu,
+} from '../../components/settings/tenants/SettingsFilterMenu';
 import { SectionHeader } from '../../components/common/layout/SectionHeader';
 import { SearchInput } from '../../components/common/ui/SearchInput';
 import { SettingsPanel } from '../../components/common/layout/SettingsPanel';
 import { EmptyState } from '../../components/common/ui/EmptyState';
 import { SecureButton } from '../../components/common/ui/SecureButton';
 import { Input } from '../../components/common/ui/Input';
-import { Select } from '../../components/common/ui/Select';
 import { useTenantsViewModel } from '../../hooks/useTenantsViewModel';
 
 export function TenantsMonitorsView() {
@@ -66,18 +67,12 @@ export function TenantsMonitorsView() {
                         onChange={setTenantSearch}
                         placeholder="Search tenants..."
                     />
-                    <TenantFilterMenu filters={tenantFilters} setFilters={setTenantFilters} />
-                    <Select
-                          value={tenantSort}
-                          onChange={e => setTenantSort(e.target.value as 'asc' | 'desc')}
-                          variant="outlined"
-                          size="sm"
-                          fullWidth={false}
-                          containerClassName="w-auto shrink-0"
-                    >
-                        <option value="asc">A-Z</option>
-                        <option value="desc">Z-A</option>
-                    </Select>
+                    <TenantSettingsFilterMenu
+                        filters={tenantFilters}
+                        setFilters={setTenantFilters}
+                        sort={tenantSort}
+                        setSort={setTenantSort}
+                    />
                     <SecureButton
                         onClick={() => setIsCreatingTenant(true)}
                         locked={!isAdmin}
@@ -140,22 +135,13 @@ export function TenantsMonitorsView() {
                         onChange={setMonitorSearch}
                         placeholder="Search monitors..."
                     />
-                    <MonitorFilterMenu
+                    <MonitorSettingsFilterMenu
                         filters={monitorFilters}
                         setFilters={setMonitorFilters}
                         tags={allUniqueTags}
+                        sort={monitorSort}
+                        setSort={setMonitorSort}
                     />
-                    <Select
-                          value={monitorSort}
-                          onChange={e => setMonitorSort(e.target.value as 'asc' | 'desc')}
-                          variant="outlined"
-                          size="sm"
-                          fullWidth={false}
-                          containerClassName="w-auto shrink-0"
-                    >
-                        <option value="asc">A-Z</option>
-                        <option value="desc">Z-A</option>
-                    </Select>
                     <SecureButton
                         onClick={() => setIsCreatingMonitor(true)}
                         locked={!isAdmin}

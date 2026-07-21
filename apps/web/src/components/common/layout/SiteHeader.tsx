@@ -32,12 +32,12 @@ export function SiteHeader({
   const isMobileView = useMediaQuery('(max-width: 767px)');
 
   return (
-    <header className="site-header relative shrink-0 bg-brand-bg-secondary z-10 px-6 py-3">
+    <header className="relative z-10 shrink-0 bg-brand-bg-secondary px-6 py-3">
       {isMobileView ? (
-        <div className="site-header__mobile-bar" data-header="mobile-bar">
+        <div className="flex w-full items-center justify-between" data-header="mobile-bar">
           <MotilloLogoLink
             timeframe={financialTimeframe}
-            className="h-7 object-contain object-left brightness-0 invert"
+            className="h-8 object-contain object-left brightness-0 invert"
             height={28}
           />
           <div className="flex items-center gap-4">
@@ -54,16 +54,16 @@ export function SiteHeader({
           </div>
         </div>
       ) : (
-        <>
-          <div className="site-header__logo flex justify-start shrink-0" data-header="logo">
+        <div className="flex w-full flex-wrap items-center justify-end gap-x-8 gap-y-4">
+          <div className="flex flex-1 min-w-[100px] shrink-0" data-header="logo">
             <MotilloLogoLink
               timeframe={financialTimeframe}
-              className="h-8 w-auto object-contain object-left brightness-0 invert shrink-0"
+              className="h-8 w-auto shrink-0 object-contain object-left brightness-0 invert"
               height={32}
             />
           </div>
 
-          <nav className="site-header__nav flex items-center gap-4" data-header="nav">
+          <nav className="flex flex-0 whitespace-nowrap items-center justify-center gap-4" data-header="nav">
             <NavLink to="/financial" search={{timeframe: financialTimeframe}}>
               Financial
             </NavLink>
@@ -74,7 +74,7 @@ export function SiteHeader({
             <NavLink to="/settings"><Settings size={20} /></NavLink>
           </nav>
 
-          <div className="site-header__controls flex justify-center items-center gap-2" data-header="controls">
+          <div className="flex flex-1 shrink-0 items-center justify-end gap-2" data-header="controls">
             <div className="flex items-center gap-8">
               <ConnectivityStatus isOnline={isOnline} isBackendOnline={isBackendOnline} variant="desktop" />
               <UserAccountLink label={userLabel} variant="desktop" />
@@ -105,7 +105,7 @@ export function SiteHeader({
               }}
             />
           </div>
-        </>
+        </div>
       )}
     </header>
   );

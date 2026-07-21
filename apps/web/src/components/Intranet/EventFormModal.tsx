@@ -57,7 +57,7 @@ export function EventFormModal({ mode, isOpen, onClose, onSubmit, form, onChange
           </button>
         </div>
 
-        <div className="flex max-h-[75vh] flex-col gap-6 overflow-y-auto bg-surface px-6 pb-6 custom-scrollbar">
+        <div className="flex max-h-[75vh] flex-col gap-4 overflow-y-auto bg-surface px-6 pb-6 custom-scrollbar">
           <div className={fieldClass}>
             <label className={labelClass} htmlFor={`${mode}-event-title`}>Event Title</label>
             <input id={`${mode}-event-title`} type="text" placeholder="Weekly Sync / Launch / etc." value={form.title} onChange={event => onChange({ ...form, title: event.target.value })} className={inputClass} required />

@@ -31,7 +31,7 @@ export const AccumulatedRevenueChart = memo(function AccumulatedRevenueChart({ i
     datasets: [
       {
         type: 'bar',
-        label: 'Current Revenue',
+        label: 'Current Revenue (Left)',
         data: chartData.map(point => point.currentRevenue),
         yAxisID: 'left',
         backgroundColor: chartColor('--color-brand-btn-primary', '#2563eb') + '40',
@@ -58,7 +58,7 @@ export const AccumulatedRevenueChart = memo(function AccumulatedRevenueChart({ i
       },
       {
         type: 'line',
-        label: 'Current Accumulated',
+        label: 'Current Accumulated (Right)',
         data: chartData.map(point => point.currentAccumulated),
         yAxisID: 'right',
         borderColor: chartColor('--color-brand-btn-primary', '#2563eb'),
@@ -102,8 +102,18 @@ export const AccumulatedRevenueChart = memo(function AccumulatedRevenueChart({ i
     },
     scales: {
       x: { border: { display: false }, grid: { display: false }, ticks: { ...chartTick(14), autoSkip: true, maxRotation: 0 } },
-      left: { position: 'left', border: { display: false }, grid: horizontalGrid, ticks: { ...chartTick(14), callback: value => formatCompact(Number(value)) } },
-      right: { position: 'right', border: { display: false }, grid: { display: false }, ticks: { ...chartTick(14), callback: value => formatCompact(Number(value)) } },
+      left: {
+        position: 'left',
+        border: { display: false },
+        grid: horizontalGrid,
+        ticks: { ...chartTick(14), callback: value => formatCompact(Number(value)) },
+      },
+      right: {
+        position: 'right',
+        border: { display: false },
+        grid: { display: false },
+        ticks: { ...chartTick(14), callback: value => formatCompact(Number(value)) },
+      },
     },
   };
 
@@ -113,7 +123,6 @@ export const AccumulatedRevenueChart = memo(function AccumulatedRevenueChart({ i
       comparison={comparison}
       className={className}
       bodyClassName={points.length === 0 ? 'flex items-center justify-center' : ''}
-      legend={<span className="text-sm font-bold text-on-surface-variant uppercase tracking-widest bg-surface-container-low px-3 py-1.5 rounded">L = Current rev, R = Accumulated Rev</span>}
     >
       {points.length === 0 ? (
         <EmptyState message="No revenue data available" variant="minimal" />

@@ -19,7 +19,7 @@ export function WeekCalendarView({ days, isWriter, todayRef, getEventsForDay, on
         const dayEvents = getEventsForDay(day);
         const isToday = day.toDateString() === new Date().toDateString();
         return (
-          <div key={day.toISOString()} ref={isToday ? todayRef : undefined} onClick={() => onDayClick(day)} className={`flex h-full w-[200px] shrink-0 flex-col bg-surface p-2 transition-colors hover:bg-surface-container-low ${isWriter ? 'cursor-pointer' : ''}`}>
+          <div data-md3-ripple key={day.toISOString()} ref={isToday ? todayRef : undefined} onClick={() => onDayClick(day)} className={`flex text-on-surface-variant h-full w-[200px] shrink-0 flex-col bg-surface p-2 transition-colors hover:bg-surface-container-low ${isWriter ? 'cursor-pointer' : ''}`}>
             <div className="mb-2 flex items-start justify-between gap-3 border-b border-outline-variant pb-2">
               <div className="flex min-w-0 flex-col">
                 <span className="truncate text-sm font-black uppercase leading-tight tracking-widest text-on-surface-variant">{formatDateTime(day, { weekday: 'short' }, 'en-SE')}</span>
@@ -29,7 +29,7 @@ export function WeekCalendarView({ days, isWriter, todayRef, getEventsForDay, on
             </div>
             <div className="flex flex-1 flex-col gap-2 overflow-y-auto p-1 custom-scrollbar">
               {dayEvents.map(event => (
-                <div key={event.id} onClick={e => { e.stopPropagation(); onEventClick(event); }} className={`m3-elevation-1 flex cursor-pointer flex-col gap-2 rounded-xl p-3 text-sm font-bold leading-tight transition-all hover:m3-elevation-2 ${getEventBadgeClass(event.eventType)}`}>
+                <div data-md3-ripple key={event.id} onClick={e => { e.stopPropagation(); onEventClick(event); }} className={`m3-elevation-1 flex cursor-pointer flex-col gap-2 rounded-xl p-3 text-sm font-bold leading-tight transition-all hover:m3-elevation-2 ${getEventBadgeClass(event.eventType)}`}>
                   <div className="flex items-center gap-2"><span>{getEventEmoji(event.eventType)}</span><span className="opacity-70">{formatDateTime(event.startTime, { hour: '2-digit', minute: '2-digit' })}</span></div>
                   <span className="truncate">{event.title}</span>
                 </div>

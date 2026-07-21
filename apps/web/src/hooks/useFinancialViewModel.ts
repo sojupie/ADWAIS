@@ -8,7 +8,8 @@ import {
   useTransactionDensity
 } from './useFinancialQueries';
 import type { Timeframe } from '../schemas';
-import type { TransactionDensityPeriod } from '@types';
+import type { TenantType, TransactionDensityPeriod } from '@types';
+import { useTenantsQuery } from './useTenantQueries';
 
 export function useFinancialViewModel() {
   const search = useSearch({ strict: false }) as { tenantId?: string, timeframe: Timeframe };
@@ -17,33 +18,58 @@ export function useFinancialViewModel() {
   
   const navigate = useNavigate({ from: '/financial' });
   const [densityPeriod, setDensityPeriod] = useState<TransactionDensityPeriod>('Auto');
+  const [selectedTenantTypes, setSelectedTenantTypesState] = useState<TenantType[]>([]);
 
-  const kpiQuery = useGlobalKpis(timeframe);
-  const velocityQuery = useAccumulatedRevenue(timeframe, undefined, 'YearOverYear');
-  const momentumQuery = useMomentum(timeframe, 'YearOverYear');
-  const efficiencyQuery = useRevenueEfficiency(timeframe, 'YearOverYear');
-  const densityQuery = useTransactionDensity(densityPeriod);
+  const tenantsQuery = useTenantsQuery();
+  const kpiQuery = useGlobalKpis(timeframe, undefined, undefined, selectedTenantTypes);
+  const velocityQuery = useAccumulatedRevenue(timeframe, undefined, 'YearOverYear', selectedTenantTypes);
+  const momentumQuery = useMomentum(timeframe, 'YearOverYear', selectedTenantTypes);
+  const efficiencyQuery = useRevenueEfficiency(timeframe, 'YearOverYear', selectedTenantTypes);
+  const densityQuery = useTransactionDensity(densityPeriod, undefined, selectedTenantTypes);
+
+  const tenantOptions = useMemo(() => (tenantsQuery.data ?? [])
+    .filter(tenant => tenant.id && tenant.name)
+    .map(tenant => ({
+      id: tenant.id!,
+      name: tenant.name!,
+      type: tenant.type ?? 'Mixed',
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name)), [tenantsQuery.data]);
 
   const selectedTenantDetails = useMemo(() => {
     const efficiencyTenants = efficiencyQuery.data?.tenants;
     const momentumTenants = momentumQuery.data?.tenants;
+    const tenant = tenantOptions.find(option => option.id === tenantId);
 
-    const tenantName = efficiencyTenants?.find((d) => d.tenantId === tenantId)?.tenantName
+    const tenantName = tenant?.name
+      || efficiencyTenants?.find((d) => d.tenantId === tenantId)?.tenantName
       || momentumTenants?.find((t) => t.tenantId === tenantId)?.tenantName
       || 'Unknown Tenant';
 
-    const type = efficiencyTenants?.find((d) => d.tenantId === tenantId)?.type
+    const type = tenant?.type
+      || efficiencyTenants?.find((d) => d.tenantId === tenantId)?.type
       || momentumTenants?.find((t) => t.tenantId === tenantId)?.type
       || 'Mixed';
       
     return { tenantName, type };
-  }, [tenantId, efficiencyQuery.data, momentumQuery.data]);
+  }, [tenantId, efficiencyQuery.data, momentumQuery.data, tenantOptions]);
 
   const handleTenantSelect = useCallback((id: string) => {
     void navigate({ search: (prev: Record<string, unknown>) => ({ ...prev, tenantId: id }) });
   }, [navigate]);
 
-  const handleBackToGlobal = useCallback(() => {
+  const handleTenantChange = useCallback((id: string | null) => {
+    void navigate({ search: (prev: Record<string, unknown>) => ({ ...prev, tenantId: id ?? undefined }) });
+  }, [navigate]);
+
+  const setSelectedTenantTypes = useCallback((types: TenantType[]) => {
+    const selectedTenant = tenantOptions.find(option => option.id === tenantId);
+    if (selectedTenant && types.length > 0 && !types.includes(selectedTenant.type)) return;
+    setSelectedTenantTypesState(types);
+  }, [tenantId, tenantOptions]);
+
+  const clearFinancialFilters = useCallback(() => {
+    setSelectedTenantTypesState([]);
     void navigate({ search: (prev: Record<string, unknown>) => ({ ...prev, tenantId: undefined }) });
   }, [navigate]);
 
@@ -51,6 +77,12 @@ export function useFinancialViewModel() {
     timeframe,
     tenantId,
     selectedTenantDetails,
+    tenantsQuery,
+    tenantOptions,
+    selectedTenantTypes,
+    setSelectedTenantTypes,
+    efficiencyData: efficiencyQuery.data,
+    momentumData: momentumQuery.data,
     kpiQuery,
     velocityQuery,
     momentumQuery,
@@ -59,6 +91,7 @@ export function useFinancialViewModel() {
     densityPeriod,
     setDensityPeriod,
     handleTenantSelect,
-    handleBackToGlobal
+    handleTenantChange,
+    clearFinancialFilters
   };
 }

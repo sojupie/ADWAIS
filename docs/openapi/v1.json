@@ -735,6 +735,17 @@
             }
           },
           {
+            "name": "tenantTypes",
+            "in": "query",
+            "description": "Optional. Restricts portfolio metrics to tenants with one of these business models.\r\nIgnored when tenantId is provided.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/TenantType"
+              }
+            }
+          },
+          {
             "name": "comparison",
             "in": "query",
             "description": "The comparison period for the timeframe.\r\nDefaults to Preceding.",
@@ -789,6 +800,17 @@
             "schema": {
               "type": "string",
               "format": "uuid"
+            }
+          },
+          {
+            "name": "tenantTypes",
+            "in": "query",
+            "description": "Optional. Restricts portfolio metrics to tenants with one of these business models.\r\nIgnored when tenantId is provided.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/TenantType"
+              }
             }
           },
           {
@@ -858,6 +880,17 @@
             }
           },
           {
+            "name": "tenantTypes",
+            "in": "query",
+            "description": "Optional. Restricts portfolio metrics to tenants with one of these business models.\r\nIgnored when tenantId is provided.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/TenantType"
+              }
+            }
+          },
+          {
             "name": "comparison",
             "in": "query",
             "description": "The comparison period for the timeframe.\r\nDefaults to Preceding.",
@@ -921,6 +954,17 @@
             "schema": {
               "$ref": "#/components/schemas/ComparisonType"
             }
+          },
+          {
+            "name": "tenantTypes",
+            "in": "query",
+            "description": "Optional. Restricts portfolio metrics to tenants with one of these business models.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/TenantType"
+              }
+            }
           }
         ],
         "responses": {
@@ -978,6 +1022,17 @@
             "schema": {
               "$ref": "#/components/schemas/ComparisonType"
             }
+          },
+          {
+            "name": "tenantTypes",
+            "in": "query",
+            "description": "Optional. Restricts portfolio metrics to tenants with one of these business models.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/TenantType"
+              }
+            }
           }
         ],
         "responses": {
@@ -1025,6 +1080,17 @@
             "description": "The comparison period for the timeframe.\r\nDefaults to Preceding.",
             "schema": {
               "$ref": "#/components/schemas/ComparisonType"
+            }
+          },
+          {
+            "name": "tenantTypes",
+            "in": "query",
+            "description": "Optional. Restricts portfolio metrics to tenants with one of these business models.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/TenantType"
+              }
             }
           }
         ],
@@ -1082,6 +1148,17 @@
             "description": "The comparison period for the timeframe.\r\nDefaults to Preceding.",
             "schema": {
               "$ref": "#/components/schemas/ComparisonType"
+            }
+          },
+          {
+            "name": "tenantTypes",
+            "in": "query",
+            "description": "Optional. Restricts portfolio metrics to tenants with one of these business models.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/TenantType"
+              }
             }
           }
         ],
@@ -1275,6 +1352,17 @@
               "type": "string",
               "format": "uuid"
             }
+          },
+          {
+            "name": "tenantTypes",
+            "in": "query",
+            "description": "Optional. Restricts the portfolio matrix to tenants with one of these business models.\r\nIgnored when tenantId is provided.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/TenantType"
+              }
+            }
           }
         ],
         "responses": {
@@ -1323,6 +1411,17 @@
             "schema": {
               "type": "string",
               "format": "uuid"
+            }
+          },
+          {
+            "name": "tenantTypes",
+            "in": "query",
+            "description": "Optional. Restricts portfolio metrics to tenants with one of these business models.\r\nIgnored when tenantId is provided.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/TenantType"
+              }
             }
           },
           {

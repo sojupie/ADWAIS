@@ -5,6 +5,7 @@
  * OpenAPI spec version: 1.0
  */
 import type { ComparisonType } from './comparisonType';
+import type { TenantType } from './tenantType';
 import type { Timeframe } from './timeframe';
 
 export type GetApiFinancialAccumulatedRevenueParams = {
@@ -18,6 +19,11 @@ timeframe?: Timeframe;
  * If null, metrics represent the global portfolio total.
  */
 tenantId?: string;
+/**
+ * Optional. Restricts portfolio metrics to tenants with one of these business models.
+ * Ignored when tenantId is provided.
+ */
+tenantTypes?: TenantType[];
 /**
  * The comparison period for the timeframe.
  * Defaults to Preceding.

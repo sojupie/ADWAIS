@@ -49,7 +49,9 @@ export function AppShell({
   const showProgressBar = isNavigating || isFetching > 0 || isMutating > 0;
 
   const [isProgressBarVisible, setIsProgressBarVisible] = useState(false);
-  const [mobileFooterActionsSlot, setMobileFooterActionsSlot] = useState<HTMLDivElement | null>(null);
+  const [mobileFooterActionsPanel, setMobileFooterActionsPanel] = useState<HTMLDivElement | null>(null);
+  const [mobileFooterActionsIndicator, setMobileFooterActionsIndicator] = useState<HTMLSpanElement | null>(null);
+  const [mobileFooterQuickAction, setMobileFooterQuickAction] = useState<HTMLDivElement | null>(null);
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
@@ -68,7 +70,11 @@ export function AppShell({
   }, [showProgressBar]);
 
   return (
-    <MobileFooterActionsSlotContext.Provider value={mobileFooterActionsSlot}>
+    <MobileFooterActionsSlotContext.Provider value={{
+      panel: mobileFooterActionsPanel,
+      indicator: mobileFooterActionsIndicator,
+      quickAction: mobileFooterQuickAction,
+    }}>
     <div className="app-shell flex flex-col bg-brand-bg-tertiary overflow-hidden font-sans text-brand-text">
       {!isKioskRoute && (
         <>
@@ -95,8 +101,10 @@ export function AppShell({
             <div className="mobile-float-pills">
               <MobileFooterPill
                 domain={timeframeDomain}
-                hasPageActions={pathname.includes('/fleet-status')}
-                pageActionsRef={setMobileFooterActionsSlot}
+                hasPageActions={pathname.includes('/fleet-status') || pathname.includes('/financial')}
+                pageActionsPanelRef={setMobileFooterActionsPanel}
+                pageActionsIndicatorRef={setMobileFooterActionsIndicator}
+                pageActionsQuickRef={setMobileFooterQuickAction}
               />
             </div>
           )}

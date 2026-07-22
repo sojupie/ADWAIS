@@ -1,6 +1,5 @@
 import { memo, useMemo } from 'react';
 import type { ChartData, ChartOptions, Plugin } from 'chart.js';
-import { LTTB } from 'downsample';
 import type { LatencyPoint, ComparisonPeriod } from '@types';
 import { formatChartLabel, inferBinSize } from '@utils';
 import { ChartPanel } from '../common/charts/ChartPanel';
@@ -12,7 +11,7 @@ function formatLatency(value: number | null | undefined): string {
   return value == null ? 'N/A' : `${Math.round(value)}ms`;
 }
 
-type LatencyChartPoint = LatencyPoint & { label: string };
+type LatencyChartPoint = LatencyPoint & { label: string; tooltipTitle: string };
 
 function latencyGapPlugin(points: LatencyChartPoint[]): Plugin<'line'> {
   return {
@@ -87,31 +86,64 @@ export const NetworkLatencyChart = memo(function NetworkLatencyChart({ isLoading
 }) {
   const chartData = useMemo(() => {
     if (!points.length) return [];
-    let sampledPoints = points;
-    if (points.length > 50) {
-      const sampled = LTTB(points.map((point, index) => [index, point.average ?? point.previousAverage ?? 0] as [number, number]), 50) as Array<[number, number]>;
-      const indices = new Set(sampled.map(tuple => tuple[0]));
-      points.forEach((point, index) => {
-        if (point.average == null || points[index - 1]?.average == null || points[index + 1]?.average == null) indices.add(index);
-      });
-      sampledPoints = points.filter((_, index) => indices.has(index));
-    }
-    const binSize = inferBinSize(sampledPoints.map(point => point.timestamp), sampledPoints.length <= 24);
-    return sampledPoints.map((point, index) => ({ ...point, label: formatChartLabel(point.timestamp, binSize, index) }));
+
+    // Weekly fold for 365D / large YTD — reduces visual noise at small widths.
+    // Only applied for daily data (non-hourly) with enough points to warrant it.
+    const needsFold = points.length > 90 &&
+      points.length > 1 &&
+      (new Date(points[1].timestamp).getTime() - new Date(points[0].timestamp).getTime()) < 2 * 24 * 60 * 60 * 1000;
+
+    const foldedPoints: LatencyPoint[] = needsFold ? (() => {
+      const avg = (vals: (number | null)[]): number | null => {
+        const nonNull = vals.filter((v): v is number => v != null);
+        return nonNull.length ? nonNull.reduce((s, v) => s + v, 0) / nonNull.length : null;
+      };
+      const result: LatencyPoint[] = [];
+      for (let i = 0; i < points.length; i += 7) {
+        const chunk = points.slice(i, i + 7);
+        result.push({
+          timestamp: chunk[0].timestamp,
+          average: avg(chunk.map(p => p.average)),
+          previousAverage: avg(chunk.map(p => p.previousAverage)),
+          p10: avg(chunk.map(p => p.p10)),
+          p90: avg(chunk.map(p => p.p90)),
+        });
+      }
+      return result;
+    })() : points;
+
+    const formatDate = (ts: string) =>
+      new Date(ts).toLocaleString('en-SE', { month: 'short', day: 'numeric', timeZone: 'Europe/Stockholm' });
+
+    const binSize = needsFold ? 'day' : inferBinSize(foldedPoints.map(point => point.timestamp), foldedPoints.length <= 24);
+    return foldedPoints.map((point, index) => {
+      const label = formatChartLabel(point.timestamp, binSize, index);
+      const tooltipTitle = needsFold
+        ? (() => {
+            const weekEndMs = new Date(point.timestamp).getTime() + 6 * 24 * 60 * 60 * 1000;
+            const weekEnd = formatDate(new Date(weekEndMs).toISOString());
+            return `${label} – ${weekEnd}`;
+          })()
+        : label;
+      return { ...point, label, tooltipTitle };
+    });
   }, [points]);
+
   const yAxisMax = useMemo(() => {
-    const maximum = Math.max(0, ...points.map(point => Math.max(point.average || 0, point.previousAverage || 0)));
-    return maximum > 0 ? Math.ceil(maximum * 1.5) : undefined;
+    const maximum = Math.max(0, ...points.map(point => Math.max(point.average || 0, (((point.p90 || 0) + (point.previousAverage || 0) + (point.average || 0)) / 3) * 1.05 || 0)));
+    return maximum > 0 ? Math.ceil(maximum * 1) : undefined;
   }, [points]);
+  
   const data: ChartData<'line', (number | null)[], string> = {
     labels: chartData.map(point => point.label),
     datasets: [
-      { label: '10th Percentile', data: chartData.map(point => point.lowest), borderColor: 'transparent', pointRadius: 0 },
-      { label: '90th Percentile', data: chartData.map(point => point.highest), borderColor: 'transparent', backgroundColor: chartColor('--color-brand-btn-primary', '#2563eb') + '26', pointRadius: 0, fill: '-1', tension: 0.3 },
+      { label: '10th Percentile', data: chartData.map(point => point.p10), borderColor: 'transparent', pointRadius: 0 },
+      { label: '90th Percentile', data: chartData.map(point => point.p90), borderColor: 'transparent', backgroundColor: chartColor('--color-brand-btn-primary', '#2563eb') + '26', pointRadius: 0, fill: '-1', tension: 0.3 },
       { label: 'Previous Period', data: chartData.map(point => point.previousAverage), borderColor: chartColor('--color-chart-prev-line', '#94a3b8'), borderWidth: 2, borderDash: [6, 6], pointRadius: 0, pointHoverRadius: 5, pointHoverBackgroundColor: chartColor('--color-chart-prev-line', '#94a3b8'), pointHoverBorderColor: '#fff', pointHoverBorderWidth: 2, tension: 0.3, spanGaps: true },
       { label: 'Current Period', data: chartData.map(point => point.average), borderColor: chartColor('--color-brand-btn-primary', '#2563eb'), borderWidth: 4, pointRadius: 0, pointHoverRadius: 7, pointHoverBackgroundColor: chartColor('--color-brand-btn-primary', '#2563eb'), pointHoverBorderColor: '#fff', pointHoverBorderWidth: 3, tension: 0.3, spanGaps: false },
     ],
   };
+  
   const options: ChartOptions<'line'> = {
     responsive: true, maintainAspectRatio: false, animation: false, interaction: { mode: 'index', intersect: false },
     plugins: {
@@ -122,15 +154,15 @@ export const NetworkLatencyChart = memo(function NetworkLatencyChart({ isLoading
           const point = chartData[tooltip.dataPoints[0]?.dataIndex];
           if (!point) return null;
           return {
-            title: point.label,
+            title: point.tooltipTitle,
             groups: [
               [
-                { label: 'Current Avg', value: point.average == null ? 'N/A (data gap)' : formatLatency(point.average), tone: point.average == null ? 'muted' : 'primary' },
-                { label: 'Previous Avg', value: formatLatency(point.previousAverage), tone: 'muted' },
+                { label: 'Current avg', value: point.average == null ? 'N/A (data gap)' : formatLatency(point.average), tone: point.average == null ? 'muted' : 'primary' },
+                { label: 'Previous avg', value: formatLatency(point.previousAverage), tone: 'muted' },
               ],
               [
-                { label: '90th Percentile', value: formatLatency(point.highest), tone: 'negative' },
-                { label: '10th Percentile', value: formatLatency(point.lowest), tone: 'positive' },
+                { label: '90th percentile', value: formatLatency(point.p90), tone: 'negative' },
+                { label: '10th percentile', value: formatLatency(point.p10), tone: 'positive' },
               ],
             ],
           };
@@ -139,9 +171,10 @@ export const NetworkLatencyChart = memo(function NetworkLatencyChart({ isLoading
     },
     scales: {
       x: { border: { display: false }, grid: { display: false }, ticks: { ...chartTick(12, 700), autoSkip: true, maxRotation: 0, padding: 10 } },
-      y: { min: 0, max: yAxisMax, border: { display: false }, grid: horizontalGrid, ticks: { ...chartTick(12), callback: value => `${value}ms` } },
+      y: { max: yAxisMax, border: { display: false }, grid: horizontalGrid, ticks: { ...chartTick(12), callback: value => `${value}ms` } },
     },
   };
+  
   const legend = (
     <div className="flex flex-wrap justify-end gap-x-5 gap-y-1.5 text-sm font-bold text-on-surface-variant uppercase tracking-widest bg-surface-container-low px-3 py-1.5 rounded-xl border border-outline-variant">
       <div className="flex items-center gap-2">

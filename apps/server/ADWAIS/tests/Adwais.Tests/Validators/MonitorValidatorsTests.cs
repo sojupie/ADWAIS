@@ -16,11 +16,11 @@ public class MonitorValidatorsTests
     [Fact]
     public void CreateMonitorRequestDtoValidator_ShouldFail_WhenNameIsEmptyOrTooLong()
     {
-        var modelEmpty = new CreateMonitorRequestDto(string.Empty, "https://url.com", null);
+        var modelEmpty = CreateMonitorRequest(name: string.Empty);
         var resultEmpty = _createValidator.TestValidate(modelEmpty);
         resultEmpty.ShouldHaveValidationErrorFor(x => x.Name);
 
-        var modelLong = new CreateMonitorRequestDto(new string('a', 101), "https://url.com", null);
+        var modelLong = CreateMonitorRequest(name: new string('a', 101));
         var resultLong = _createValidator.TestValidate(modelLong);
         resultLong.ShouldHaveValidationErrorFor(x => x.Name);
     }
@@ -28,7 +28,7 @@ public class MonitorValidatorsTests
     [Fact]
     public void CreateMonitorRequestDtoValidator_ShouldFail_WhenUrlIsInvalid()
     {
-        var model = new CreateMonitorRequestDto("Monitor", "invalid-url", null);
+        var model = CreateMonitorRequest(url: "invalid-url");
         var result = _createValidator.TestValidate(model);
         result.ShouldHaveValidationErrorFor(x => x.Url);
     }
@@ -36,7 +36,7 @@ public class MonitorValidatorsTests
     [Fact]
     public void CreateMonitorRequestDtoValidator_ShouldFail_WhenSlaIsOutOfRange()
     {
-        var model = new CreateMonitorRequestDto("Monitor", "https://url.com", -10.0);
+        var model = CreateMonitorRequest(uptimeSla: -10.0);
         var result = _createValidator.TestValidate(model);
         result.ShouldHaveValidationErrorFor(x => x.UptimeSla);
     }
@@ -44,9 +44,18 @@ public class MonitorValidatorsTests
     [Fact]
     public void CreateMonitorRequestDtoValidator_ShouldPass_WhenModelIsValid()
     {
-        var model = new CreateMonitorRequestDto("Monitor", "https://url.com", 99.5);
+        var model = CreateMonitorRequest(type: null, uptimeSla: 99.5);
         var result = _createValidator.TestValidate(model);
         result.ShouldNotHaveAnyValidationErrors();
+    }
+
+    [Fact]
+    public void MonitorRequestValidators_ShouldRejectBlankType_WhenProvided()
+    {
+        _createValidator.TestValidate(CreateMonitorRequest(type: ""))
+            .ShouldHaveValidationErrorFor(x => x.Type);
+        _updateValidator.TestValidate(new UpdateMonitorRequestDto { Type = "" })
+            .ShouldHaveValidationErrorFor(x => x.Type);
     }
 
     [Fact]
@@ -87,6 +96,7 @@ public class MonitorValidatorsTests
             Id: id,
             TenantId: Guid.NewGuid(),
             TenantName: "Tenant",
+            Type: "HTTP",
             Name: name,
             Url: url,
             UpdateInterval: 300,
@@ -104,4 +114,16 @@ public class MonitorValidatorsTests
             Tags: new List<string>()
         );
     }
+
+    private static CreateMonitorRequestDto CreateMonitorRequest(
+        string name = "Monitor",
+        string url = "https://url.com",
+        string? type = "HTTP",
+        double? uptimeSla = null) => new()
+    {
+        Name = name,
+        Url = url,
+        Type = type,
+        UptimeSla = uptimeSla
+    };
 }

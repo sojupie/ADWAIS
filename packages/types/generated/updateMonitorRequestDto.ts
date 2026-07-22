@@ -20,6 +20,11 @@ export interface UpdateMonitorRequestDto {
      */
   url?: string | null;
   /**
+     * UptimeRobot monitor type. Omit to leave the type unchanged.
+     * @nullable
+     */
+  type?: string | null;
+  /**
      * SLA for the monitor.
      * @nullable
      */

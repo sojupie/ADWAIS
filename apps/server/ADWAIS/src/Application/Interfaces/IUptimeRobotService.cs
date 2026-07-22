@@ -5,9 +5,9 @@ namespace Adwais.Application.Interfaces;
 
 public interface IUptimeRobotService
 {
-    Task<UptimeRobotMonitorDto> CreateMonitorAsync(string name, string url);
+    Task<UptimeRobotMonitorDto> CreateMonitorAsync(string name, string url, string? type);
 
-    Task UpdateMonitorAsync(int monitorId, string? name, string? url, List<string>? tags);
+    Task UpdateMonitorAsync(int monitorId, string? name, string? url, string? type, List<string>? tags);
 
     Task<List<UptimeRobotMonitorDto>> GetMonitorsAsync(int[]? monitorIds = null);
 

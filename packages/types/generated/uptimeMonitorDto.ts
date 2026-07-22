@@ -10,6 +10,8 @@ export interface UptimeMonitorDto {
   tenantId?: string;
   /** @nullable */
   tenantName?: string | null;
+  /** @minLength 1 */
+  type: string;
   /** @nullable */
   name?: string | null;
   /** @nullable */

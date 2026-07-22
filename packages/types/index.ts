@@ -39,6 +39,7 @@ export type UptimeMonitorDto = {
   id: number;
   tenantId: string;
   tenantName?: string;
+  type: string;
   name: string;
   url: string;
   updateInterval: number;

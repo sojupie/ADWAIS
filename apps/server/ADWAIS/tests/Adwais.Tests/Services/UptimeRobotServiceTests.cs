@@ -59,6 +59,7 @@ public class UptimeRobotServiceTests
         var monitorJson = @"
         {
             ""id"": 12345,
+            ""type"": ""PING"",
             ""friendlyName"": ""Test Monitor"",
             ""url"": ""https://test.com"",
             ""status"": ""paused"",
@@ -82,11 +83,12 @@ public class UptimeRobotServiceTests
             .ReturnsAsync(mockResponse);
 
         // Act
-        var result = await _service.CreateMonitorAsync("Test Monitor", "https://test.com");
+        var result = await _service.CreateMonitorAsync("Test Monitor", "https://test.com", "ping");
 
         // Assert
         Assert.NotNull(result);
         Assert.Equal(12345, result.Id);
+        Assert.Equal("PING", result.Type);
         Assert.Equal("Test Monitor", result.FriendlyName);
         Assert.Equal("https://test.com", result.Url);
         Assert.Equal("paused", result.Status);
@@ -132,6 +134,34 @@ public class UptimeRobotServiceTests
         Assert.Equal(150, avg);
         Assert.Equal(110, lowest);
         Assert.Equal(320, highest);
+    }
+
+    [Fact]
+    public async Task UpdateMonitorAsync_ShouldSendNormalizedType()
+    {
+        string? requestBody = null;
+        var mockResponse = new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = new StringContent("{}")
+        };
+
+        _httpHandlerMock.Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.Is<HttpRequestMessage>(request =>
+                    request.Method == HttpMethod.Patch &&
+                    request.RequestUri != null &&
+                    request.RequestUri.ToString() == "https://api.uptimerobot.com/v3/monitors/12345"),
+                ItExpr.IsAny<CancellationToken>())
+            .Callback<HttpRequestMessage, CancellationToken>((request, _) =>
+                requestBody = request.Content!.ReadAsStringAsync().GetAwaiter().GetResult())
+            .ReturnsAsync(mockResponse);
+
+        await _service.UpdateMonitorAsync(12345, null, null, "ping", null);
+
+        Assert.NotNull(requestBody);
+        using var payload = JsonDocument.Parse(requestBody);
+        Assert.Equal("PING", payload.RootElement.GetProperty("type").GetString());
     }
 
     [Fact]
@@ -183,7 +213,7 @@ public class UptimeRobotServiceTests
 
         // Act & Assert
         await Assert.ThrowsAsync<HttpRequestException>(() =>
-            _service.CreateMonitorAsync("Fail Monitor", "https://fail.com"));
+            _service.CreateMonitorAsync("Fail Monitor", "https://fail.com", null));
 
         _eventServiceMock.Verify(s => s.LogErrorAsync(
             nameof(UptimeRobotService),
@@ -202,6 +232,7 @@ public class UptimeRobotServiceTests
             ""data"": [
                 {
                     ""id"": 1,
+                    ""type"": ""HTTP"",
                     ""friendlyName"": ""Monitor 1"",
                     ""url"": ""https://test1.com"",
                     ""status"": ""up"",
@@ -217,6 +248,7 @@ public class UptimeRobotServiceTests
             ""data"": [
                 {
                     ""id"": 2,
+                    ""type"": ""PING"",
                     ""friendlyName"": ""Monitor 2"",
                     ""url"": ""https://test2.com"",
                     ""status"": ""paused"",
@@ -244,8 +276,10 @@ public class UptimeRobotServiceTests
         Assert.NotNull(result);
         Assert.Equal(2, result.Count);
         Assert.Equal(1, result[0].Id);
+        Assert.Equal("HTTP", result[0].Type);
         Assert.Equal("Monitor 1", result[0].FriendlyName);
         Assert.Equal(2, result[1].Id);
+        Assert.Equal("PING", result[1].Type);
         Assert.Equal("Monitor 2", result[1].FriendlyName);
 
         _httpHandlerMock.Protected().Verify(

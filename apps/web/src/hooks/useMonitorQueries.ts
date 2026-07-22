@@ -65,7 +65,7 @@ export function useCreateMonitorMutation(onSuccessCallback?: () => void) {
   return {
     ...mutation,
     mutate: (
-      payload: { name: string; url: string; uptimeSla: number | null },
+      payload: { name: string; url: string; type?: string | null; uptimeSla: number | null },
       options?: Parameters<typeof mutation.mutate>[1]
     ) => 
       mutation.mutate({ 

@@ -11,16 +11,21 @@
 export interface CreateMonitorRequestDto {
   /**
      * The display name for the monitor.
+     * @minLength 1
+     */
+  name: string;
+  /**
+     * The absolute URL or host to monitor.
+     * @minLength 1
+     */
+  url: string;
+  /**
+     * Optional UptimeRobot monitor type. Defaults to HTTP when omitted.
      * @nullable
      */
-  name?: string | null;
+  type?: string | null;
   /**
-     * The absolute URL to monitor.
-     * @nullable
-     */
-  url?: string | null;
-  /**
-     * Optional target uptime percentage (0-1).
+     * Optional target uptime percentage (0-100).
      * @nullable
      */
   uptimeSla?: number | null;

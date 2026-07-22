@@ -210,6 +210,7 @@ public class MonitorOrchestrationServiceTests
         var tenantId = Guid.NewGuid();
         var remoteMonitor = new Adwais.Application.DTOs.Monitoring.Upstream.UptimeRobotMonitorDto(
             Id: 9876,
+            Type: "PING",
             FriendlyName: "New Monitor",
             Url: "https://new.com",
             Status: "up",
@@ -218,21 +219,54 @@ public class MonitorOrchestrationServiceTests
             Tags: new List<string>()
         );
 
-        _uptimeRobotServiceMock.Setup(s => s.CreateMonitorAsync("New Monitor", "https://new.com"))
+        _uptimeRobotServiceMock.Setup(s => s.CreateMonitorAsync("New Monitor", "https://new.com", "PING"))
             .ReturnsAsync(remoteMonitor);
 
         // Act
-        var result = await _service.CreateMonitorAsync(tenantId, "New Monitor", "https://new.com", 99.5, CancellationToken.None);
+        var result = await _service.CreateMonitorAsync(tenantId, "New Monitor", "https://new.com", "ping", 99.5, CancellationToken.None);
 
         // Assert
         Assert.NotNull(result);
         Assert.Equal(9876, result.Id);
         Assert.Equal(tenantId, result.TenantId);
+        Assert.Equal("PING", result.Type);
         Assert.Equal(99.5, result.UptimeSla);
 
         var dbMonitor = await _dbContext.Monitors.FindAsync(9876);
         Assert.NotNull(dbMonitor);
         Assert.Equal("New Monitor", dbMonitor.Name);
+    }
+
+    [Fact]
+    public async Task CreateMonitorAsync_ShouldDefaultTypeToHttp_WhenOmitted()
+    {
+        var tenantId = Guid.NewGuid();
+        var remoteMonitor = new Adwais.Application.DTOs.Monitoring.Upstream.UptimeRobotMonitorDto(
+            Id: 9877,
+            Type: "HTTP",
+            FriendlyName: "Default Monitor",
+            Url: "https://default.com",
+            Status: "up",
+            CreatedDate: DateTimeOffset.UtcNow,
+            UpdateInterval: 300,
+            Tags: new List<string>());
+
+        _uptimeRobotServiceMock
+            .Setup(service => service.CreateMonitorAsync("Default Monitor", "https://default.com", "HTTP"))
+            .ReturnsAsync(remoteMonitor);
+
+        var result = await _service.CreateMonitorAsync(
+            tenantId,
+            "Default Monitor",
+            "https://default.com",
+            null,
+            null,
+            CancellationToken.None);
+
+        Assert.Equal("HTTP", result.Type);
+        _uptimeRobotServiceMock.Verify(
+            service => service.CreateMonitorAsync("Default Monitor", "https://default.com", "HTTP"),
+            Times.Once);
     }
 
     [Fact]
@@ -310,24 +344,26 @@ public class MonitorOrchestrationServiceTests
             TenantId = Guid.NewGuid(), 
             Name = "Old Name", 
             Url = "https://old.com", 
+            Type = "HTTP",
             UptimeSla = 99.0, 
             Tags = new List<string> { "tag1" } 
         };
         _dbContext.Monitors.Add(monitor);
         await _dbContext.SaveChangesAsync();
 
-        _uptimeRobotServiceMock.Setup(s => s.UpdateMonitorAsync(80, "New Name", "https://new.com", It.IsAny<List<string>>()))
+        _uptimeRobotServiceMock.Setup(s => s.UpdateMonitorAsync(80, "New Name", "https://new.com", "PING", It.IsAny<List<string>>()))
             .Returns(Task.CompletedTask);
 
         // Act
-        var result = await _service.UpdateMonitorAsync(80, "New Name", "https://new.com", 99.9, new List<string> { "tag2" }, CancellationToken.None);
+        var result = await _service.UpdateMonitorAsync(80, "New Name", "https://new.com", "ping", 99.9, new List<string> { "tag2" }, CancellationToken.None);
 
         // Assert
         Assert.NotNull(result);
         Assert.Equal("New Name", result.Name);
         Assert.Equal("https://new.com", result.Url);
+        Assert.Equal("PING", result.Type);
         Assert.Equal(99.9, result.UptimeSla);
         Assert.Contains("tag2", result.Tags);
-        _uptimeRobotServiceMock.Verify(s => s.UpdateMonitorAsync(80, "New Name", "https://new.com", It.IsAny<List<string>>()), Times.Once);
+        _uptimeRobotServiceMock.Verify(s => s.UpdateMonitorAsync(80, "New Name", "https://new.com", "PING", It.IsAny<List<string>>()), Times.Once);
     }
 }

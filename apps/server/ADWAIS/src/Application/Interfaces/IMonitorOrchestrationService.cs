@@ -25,7 +25,7 @@ public interface IMonitorOrchestrationService
     /// <summary>
     /// Creates a new uptime monitor for a tenant.
     /// </summary>
-    Task<UptimeMonitor> CreateMonitorAsync(Guid tenantId, string name, string url, double? uptimeSla, CancellationToken ct = default); 
+    Task<UptimeMonitor> CreateMonitorAsync(Guid tenantId, string name, string url, string? type, double? uptimeSla, CancellationToken ct = default);
 
     /// <summary>
     /// Assigns an existing monitor to a specific tenant.
@@ -60,5 +60,5 @@ public interface IMonitorOrchestrationService
     /// <summary>
     /// Updates a specific monitor.
     /// </summary>
-    Task<UptimeMonitor> UpdateMonitorAsync(int id, string? name, string? url, double? uptimeSla, List<string>? tags, CancellationToken ct = default);
+    Task<UptimeMonitor> UpdateMonitorAsync(int id, string? name, string? url, string? type, double? uptimeSla, List<string>? tags, CancellationToken ct = default);
 }

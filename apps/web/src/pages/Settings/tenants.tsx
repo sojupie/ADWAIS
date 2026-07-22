@@ -11,7 +11,9 @@ import { SettingsPanel } from '../../components/common/layout/SettingsPanel';
 import { EmptyState } from '../../components/common/ui/EmptyState';
 import { SecureButton } from '../../components/common/ui/SecureButton';
 import { Input } from '../../components/common/ui/Input';
+import { Select } from '../../components/common/ui/Select';
 import { useTenantsViewModel } from '../../hooks/useTenantsViewModel';
+import { UPTIME_MONITOR_TYPES } from '../../utils/monitorTypeHelper';
 
 export function TenantsMonitorsView() {
     const {
@@ -163,6 +165,9 @@ export function TenantsMonitorsView() {
                             <div className="p-4 flex flex-col gap-2">
                                 <Input label="Name" placeholder="Monitor Name" value={newMonitorDraft.name} onChange={e => setNewMonitorDraft({ ...newMonitorDraft, name: e.target.value })} />
                                 <Input label="URL" placeholder="https://example.com" value={newMonitorDraft.url} onChange={e => setNewMonitorDraft({ ...newMonitorDraft, url: e.target.value })} />
+                                <Select label="Monitor Type" value={newMonitorDraft.type} onChange={e => setNewMonitorDraft({ ...newMonitorDraft, type: e.target.value })}>
+                                    {UPTIME_MONITOR_TYPES.map(type => <option key={type} value={type}>{type}</option>)}
+                                </Select>
                                 <Input label="Uptime SLA (%)" type="number" step="0.1" value={newMonitorDraft.uptimeSla} onChange={e => setNewMonitorDraft({ ...newMonitorDraft, uptimeSla: e.target.value === '' ? '' : parseFloat(e.target.value) })} placeholder="e.g. 99.9" />
                                 <SecureButton
                                     className="mt-2 bg-brand-btn-primary hover:bg-brand-btn-quaternary text-white font-bold text-sm px-4 py-2 rounded-lg cursor-pointer flex items-center justify-center gap-4 w-full"
@@ -171,6 +176,7 @@ export function TenantsMonitorsView() {
                                     onClick={() => createMonitor.mutate({
                                         name: newMonitorDraft.name,
                                         url: newMonitorDraft.url,
+                                        type: newMonitorDraft.type,
                                         uptimeSla: newMonitorDraft.uptimeSla === '' ? null : newMonitorDraft.uptimeSla
                                     })}
                                 >

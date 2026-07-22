@@ -1,14 +1,33 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Adwais.Api.DTOs.Monitoring;
 
 /// <summary>
 /// Data transfer object for creating a new uptime monitor.
 /// </summary>
-/// <param name="Name">The display name for the monitor.</param>
-/// <param name="Url">The absolute URL to monitor.</param>
-/// <param name="UptimeSla">Optional target uptime percentage (0-1).</param>
-public record CreateMonitorRequestDto(
-    string Name, 
-    string Url, 
-    double? UptimeSla);
+public sealed record CreateMonitorRequestDto
+{
+    /// <summary>
+    /// The display name for the monitor.
+    /// </summary>
+    [Required]
+    public required string Name { get; init; }
+
+    /// <summary>
+    /// The absolute URL or host to monitor.
+    /// </summary>
+    [Required]
+    public required string Url { get; init; }
+
+    /// <summary>
+    /// Optional UptimeRobot monitor type. Defaults to HTTP when omitted.
+    /// </summary>
+    public string? Type { get; init; }
+
+    /// <summary>
+    /// Optional target uptime percentage (0-100).
+    /// </summary>
+    public double? UptimeSla { get; init; }
+}
 
 

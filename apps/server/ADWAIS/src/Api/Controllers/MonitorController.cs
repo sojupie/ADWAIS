@@ -156,7 +156,7 @@ public class MonitorController(
         CancellationToken ct = default)
     {
         if (!await IsUptimeRobotConfiguredAsync(ct)) return BadRequest("UptimeRobot API key is not configured.");
-        var m = await _monitorService.CreateMonitorAsync(tenantId, request.Name, request.Url, request.UptimeSla, ct);
+        var m = await _monitorService.CreateMonitorAsync(tenantId, request.Name, request.Url, request.Type, request.UptimeSla, ct);
         return CreatedAtAction(nameof(GetMonitors), new { id = m.Id }, ToDto(m));
     }
 
@@ -259,7 +259,7 @@ public class MonitorController(
     public async Task<ActionResult<UptimeMonitorDto>> UpdateMonitor(int id, [FromBody] UpdateMonitorRequestDto request, CancellationToken ct = default)
     {
         if (!await IsUptimeRobotConfiguredAsync(ct)) return BadRequest("UptimeRobot API key is not configured.");
-        await _monitorService.UpdateMonitorAsync(id, request.Name, request.Url, request.Sla, request.Tags, ct);
+        await _monitorService.UpdateMonitorAsync(id, request.Name, request.Url, request.Type, request.Sla, request.Tags, ct);
         
         var db = _dbContext;
         var tenantId = await db.Monitors.Where(m => m.Id == id).Select(m => (Guid?)m.TenantId).SingleOrDefaultAsync(ct);
@@ -276,6 +276,7 @@ public class MonitorController(
             Id: m.Id,
             TenantId: m.TenantId,
             TenantName: m.Tenant?.Name,
+            Type: m.Type,
             Name: m.Name,
             Url: m.Url,
             UpdateInterval: m.UpdateInterval,

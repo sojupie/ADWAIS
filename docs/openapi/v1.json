@@ -3354,21 +3354,30 @@
         "additionalProperties": false
       },
       "CreateMonitorRequestDto": {
+        "required": [
+          "name",
+          "url"
+        ],
         "type": "object",
         "properties": {
           "name": {
+            "minLength": 1,
             "type": "string",
-            "description": "The display name for the monitor.",
-            "nullable": true
+            "description": "The display name for the monitor."
           },
           "url": {
+            "minLength": 1,
             "type": "string",
-            "description": "The absolute URL to monitor.",
+            "description": "The absolute URL or host to monitor."
+          },
+          "type": {
+            "type": "string",
+            "description": "Optional UptimeRobot monitor type. Defaults to HTTP when omitted.",
             "nullable": true
           },
           "uptimeSla": {
             "type": "number",
-            "description": "Optional target uptime percentage (0-1).",
+            "description": "Optional target uptime percentage (0-100).",
             "format": "double",
             "nullable": true
           }
@@ -4975,6 +4984,11 @@
             "description": "URL for the monitor.",
             "nullable": true
           },
+          "type": {
+            "type": "string",
+            "description": "UptimeRobot monitor type. Omit to leave the type unchanged.",
+            "nullable": true
+          },
           "sla": {
             "type": "number",
             "description": "SLA for the monitor.",
@@ -5106,6 +5120,10 @@
             "type": "string",
             "format": "uuid"
           },
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
           "name": {
             "type": "string",
             "nullable": true
@@ -5189,6 +5207,9 @@
         "additionalProperties": false
       },
       "UptimeMonitorDto": {
+        "required": [
+          "type"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -5202,6 +5223,10 @@
           "tenantName": {
             "type": "string",
             "nullable": true
+          },
+          "type": {
+            "minLength": 1,
+            "type": "string"
           },
           "name": {
             "type": "string",

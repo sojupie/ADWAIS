@@ -67,6 +67,7 @@ public class MonitorSynchronizationJob(
             );
             if (localMonitors.TryGetValue(remote.Id, out var local))
             {
+                local.Type = remote.Type;
                 local.Name = remote.FriendlyName;
                 local.Url = remote.Url;
                 local.UpdateInterval = remote.UpdateInterval;
@@ -82,6 +83,7 @@ public class MonitorSynchronizationJob(
                 {
                     Id = remote.Id,
                     TenantId = AnalyticsDbContext.SystemTenantGuid,
+                    Type = remote.Type,
                     Name = remote.FriendlyName,
                     Url = remote.Url,
                     UpdateInterval = remote.UpdateInterval,

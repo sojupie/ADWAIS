@@ -1,9 +1,12 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Adwais.Api.DTOs.Monitoring;
 
 public record UptimeMonitorDto(
     int Id, 
     Guid TenantId,
     string? TenantName,
+    [property: Required] string Type,
     string Name, 
     string Url, 
     int UpdateInterval,

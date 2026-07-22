@@ -320,13 +320,15 @@ public class MonitorOrchestrationService(
         return historical;
     }
 
-    public async Task<UptimeMonitor> CreateMonitorAsync(Guid tenantId, string name, string url, double? uptimeSla, CancellationToken ct = default)
+    public async Task<UptimeMonitor> CreateMonitorAsync(Guid tenantId, string name, string url, string? type, double? uptimeSla, CancellationToken ct = default)
     {
-        var remoteMonitor = await uptimeRobotService.CreateMonitorAsync(name, url);
+        var normalizedType = UptimeMonitorTypes.Normalize(type);
+        var remoteMonitor = await uptimeRobotService.CreateMonitorAsync(name, url, normalizedType);
         
         var monitor = new UptimeMonitor
         {
             Id = remoteMonitor.Id,
+            Type = remoteMonitor.Type,
             TenantId = tenantId,
             Name = remoteMonitor.FriendlyName,
             Url = remoteMonitor.Url,
@@ -495,7 +497,7 @@ public class MonitorOrchestrationService(
             .ToListAsync(ct);
     }
 
-    public async Task<UptimeMonitor> UpdateMonitorAsync(int id, string? name, string? url, double? uptimeSla, List<string>? tags, CancellationToken ct = default)
+    public async Task<UptimeMonitor> UpdateMonitorAsync(int id, string? name, string? url, string? type, double? uptimeSla, List<string>? tags, CancellationToken ct = default)
     {
         var monitor = await dbContext.Monitors.SingleOrDefaultAsync(m => m.Id == id, ct);
         if (monitor == null) throw new KeyNotFoundException($"Monitor {id} not found.");
@@ -511,14 +513,17 @@ public class MonitorOrchestrationService(
 
         bool nameChanged = name != null && name != monitor.Name;
         bool urlChanged = url != null && url != monitor.Url;
+        var normalizedType = type is null ? null : UptimeMonitorTypes.Normalize(type);
+        bool typeChanged = normalizedType != null && normalizedType != monitor.Type;
         bool tagsChanged = cleanedTags != null && !cleanedTags.SequenceEqual(monitor.Tags);
 
-        if (nameChanged || urlChanged || tagsChanged)
+        if (nameChanged || urlChanged || typeChanged || tagsChanged)
         {
             await uptimeRobotService.UpdateMonitorAsync(
                 id,
                 nameChanged ? name : null,
                 urlChanged ? url : null,
+                typeChanged ? normalizedType : null,
                 tagsChanged ? cleanedTags : null);
 
             if (nameChanged)
@@ -528,6 +533,10 @@ public class MonitorOrchestrationService(
             if (urlChanged)
             {
                 monitor.Url = url!;
+            }
+            if (typeChanged)
+            {
+                monitor.Type = normalizedType!;
             }
             if (tagsChanged && cleanedTags != null)
             {

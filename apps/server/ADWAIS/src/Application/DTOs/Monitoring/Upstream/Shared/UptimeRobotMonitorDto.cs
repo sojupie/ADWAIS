@@ -2,6 +2,7 @@ namespace Adwais.Application.DTOs.Monitoring.Upstream;
 
 public record UptimeRobotMonitorDto(
     int Id,
+    string Type,
     string FriendlyName,
     string Url,
     string Status,

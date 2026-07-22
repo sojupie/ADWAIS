@@ -6,6 +6,8 @@ import { TileSaveBar } from '../../common/ui/TileSaveBar';
 import { useUpdateMonitorMutation } from '../../../hooks/useMonitorQueries';
 import { Input } from '../../common/ui/Input';
 import { SecureButton } from '../../common/ui/SecureButton';
+import { Select } from '../../common/ui/Select';
+import { getMonitorType, UPTIME_MONITOR_TYPES } from '../../../utils/monitorTypeHelper';
 
 const SYSTEM_TENANT_ID = '00000000-0000-0000-0000-000000000001';
 
@@ -57,11 +59,13 @@ export function MonitorTile({
   const [draft, setDraft] = useState<{
     name: string;
     url: string;
+    type: string;
     uptimeSla: number | '';
     tags: string[];
   }>({
     name: m.name || '',
     url: m.url || '',
+    type: getMonitorType(m.type),
     uptimeSla: m.uptimeSla ?? '',
     tags: m.tags || []
   });
@@ -76,6 +80,7 @@ export function MonitorTile({
   const isDirty =
     draft.name !== (m.name || '') ||
     draft.url !== (m.url || '') ||
+    draft.type !== getMonitorType(m.type) ||
     draft.uptimeSla !== (m.uptimeSla ?? '') ||
     !tagsEqual(draft.tags, m.tags || []);
 
@@ -83,6 +88,7 @@ export function MonitorTile({
     const payload: UpdateMonitorRequestDto = {};
     if (draft.name !== (m.name || '')) payload.name = draft.name;
     if (draft.url !== (m.url || '')) payload.url = draft.url;
+    if (draft.type !== getMonitorType(m.type)) payload.type = draft.type;
     if (draft.uptimeSla !== (m.uptimeSla ?? '')) {
       payload.sla = draft.uptimeSla === '' ? null : Number(draft.uptimeSla);
     }
@@ -106,6 +112,7 @@ export function MonitorTile({
     setDraft({
       name: m.name || '',
       url: m.url || '',
+      type: getMonitorType(m.type),
       uptimeSla: m.uptimeSla ?? '',
       tags: m.tags || []
     });
@@ -165,7 +172,20 @@ export function MonitorTile({
       </div>
 
       <div className="flex gap-8 mt-2">
-        <div className="flex flex-col gap-2 flex-1">
+        <Select
+          label="Monitor Type"
+          value={draft.type}
+          onChange={e => setDraft({ ...draft, type: e.target.value })}
+          disabled={!isAdmin}
+          size="sm"
+          containerClassName="flex-1"
+        >
+          {!UPTIME_MONITOR_TYPES.includes(draft.type as typeof UPTIME_MONITOR_TYPES[number]) && (
+            <option value={draft.type}>{draft.type}</option>
+          )}
+          {UPTIME_MONITOR_TYPES.map(type => <option key={type} value={type}>{type}</option>)}
+        </Select>
+        <div className="flex flex-col gap-2 flex-1 min-w-0">
           <label className="text-sm font-bold text-on-surface-variant uppercase tracking-wider">Uptime SLA (%)</label>
           <input
             type="number"

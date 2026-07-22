@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace Adwais.Api.DTOs.Monitoring;
 
 /// <summary>
@@ -16,6 +14,11 @@ public record UpdateMonitorRequestDto
     /// URL for the monitor.
     /// </summary>
     public string? Url { get; init; }
+
+    /// <summary>
+    /// UptimeRobot monitor type. Omit to leave the type unchanged.
+    /// </summary>
+    public string? Type { get; init; }
 
     /// <summary>
     /// SLA for the monitor.

@@ -3,6 +3,7 @@ import type { UptimeMonitorDto } from '@types';
 import { getMonitorStatus, STATUS_THEMES } from "../../utils/monitorStatusHelper.ts";
 import { getTenantFaviconUrl } from "../../utils/tenantHelper.ts";
 import { getTagColor, getTagStyle } from "../../utils/tagHelper.ts";
+import { getMonitorType } from '../../utils/monitorTypeHelper.ts';
 
 function FleetMatrixTile({
   monitor,
@@ -34,32 +35,32 @@ function FleetMatrixTile({
         ${!monitor.uptimeMonitorEnabled ? 'grayscale opacity-50' : ''}
       `}
     >
-      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-12 h-12 pointer-events-none select-none">
+      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-12 h-12 pointer-events-none select-none">
         {showLetter ? (
-          <span className={`text-5xl font-black opacity-[0.15] select-none leading-none ${theme.text}`}>
+          <span className={`text-5xl font-black opacity-10 select-none leading-none ${theme.text}`}>
             {tenantDisplay.charAt(0).toUpperCase()}
           </span>
         ) : (
           <img
             src={faviconUrl!}
             alt=""
-            className={`w-12 h-12 object-contain opacity-[0.2] mix-blend-multiply`}
+            className="w-12 h-12 object-contain opacity-10 mix-blend-multiply"
             onError={() => setImgError(true)}
           />
         )}
       </div>
 
       <div className="gap-2 relative z-10 flex flex-col h-full justify-between w-full min-w-0">
-        <div className="flex justify-between items-start w-full min-w-0">
-          <div className="flex flex-col overflow-hidden min-w-0 flex-1 pr-2">
-            <span className={`text-sm font-black ${theme.text} line-clamp-2 uppercase tracking-tight leading-tight`}>
-              {tenantDisplay}
+        <div className="flex flex-col w-full min-w-0">
+          <span className={`text-sm font-black ${theme.text} break-all tracking-tight leading-tight`}>
+            {monitor.url}
+          </span>
+          <div className="flex items-start justify-between gap-2 mt-0.5 min-w-0">
+            <span className={`text-xs font-bold ${theme.mutedText} tracking-wider min-w-0 break-words`}>
+              <span className="uppercase">{getMonitorType(monitor.type)}</span> · {tenantDisplay}
             </span>
-            <span className={`text-xs font-bold ${theme.mutedText} uppercase tracking-wider mt-0.5 truncate`}>
-              {monitor.name}
-            </span>
+            <span className={`w-3 h-3 rounded-full shrink-0 mt-0.5 ${theme.dot}`} aria-label={status} />
           </div>
-          <div className={`w-3 h-3 rounded-full shrink-0 mt-1 ${theme.dot}`} />
         </div>
 
         {monitor.tags && monitor.tags.length > 0 && (
@@ -79,7 +80,7 @@ function FleetMatrixTile({
           </div>
         )}
 
-        <div className="flex justify-between items-end mt-auto w-full min-w-0 gap-2">
+        <div className="grid grid-cols-2 items-end mt-auto w-full min-w-0 gap-2">
           <div className="flex flex-col gap-0 min-w-0">
             <span className={`text-xs ${theme.mutedText} uppercase font-bold tracking-wider truncate`}>Uptime</span>
             <span className={`text-sm font-black ${theme.valueText} truncate`}>

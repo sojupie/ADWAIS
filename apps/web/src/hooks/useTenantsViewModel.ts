@@ -3,6 +3,7 @@ import { useTenantsQuery, useCreateTenantMutation, useDeleteTenantMutation } fro
 import { useMonitorsQuery, useUnassignedMonitorsQuery, useCreateMonitorMutation, useControlMonitorMutation, useAssignMonitorMutation, useUnassignMonitorMutation } from './useMonitorQueries';
 import { useCurrentUser } from './useCurrentUser';
 import type { UptimeMonitorDto } from '@types';
+import { DEFAULT_UPTIME_MONITOR_TYPE } from '../utils/monitorTypeHelper';
 
 export function useTenantsViewModel() {
     const { role } = useCurrentUser();
@@ -15,7 +16,12 @@ export function useTenantsViewModel() {
     const [newTenantDraft, setNewTenantDraft] = useState({ name: '', litiumBaseUrl: '', serviceAccountToken: '' });
 
     const [isCreatingMonitor, setIsCreatingMonitor] = useState(false);
-    const [newMonitorDraft, setNewMonitorDraft] = useState<{ name: string; url: string; uptimeSla: number | '' }>({ name: '', url: '', uptimeSla: '' });
+    const [newMonitorDraft, setNewMonitorDraft] = useState<{ name: string; url: string; type: string; uptimeSla: number | '' }>({
+        name: '',
+        url: '',
+        type: DEFAULT_UPTIME_MONITOR_TYPE,
+        uptimeSla: ''
+    });
 
     const [tenantSort, setTenantSort] = useState<'asc' | 'desc'>('asc');
     const [tenantSearch, setTenantSearch] = useState('');
@@ -38,7 +44,7 @@ export function useTenantsViewModel() {
 
     const createMonitor = useCreateMonitorMutation(() => {
         setIsCreatingMonitor(false);
-        setNewMonitorDraft({ name: '', url: '', uptimeSla: '' });
+        setNewMonitorDraft({ name: '', url: '', type: DEFAULT_UPTIME_MONITOR_TYPE, uptimeSla: '' });
     });
     const toggleMonitor = useControlMonitorMutation();
     const assignMonitor = useAssignMonitorMutation(() => {
@@ -103,8 +109,9 @@ export function useTenantsViewModel() {
                 const q = monitorSearch.toLowerCase();
                 const matchName = (m.name || '').toLowerCase().includes(q);
                 const matchUrl = m.url?.toLowerCase().includes(q);
+                const matchType = m.type?.toLowerCase().includes(q);
                 const matchTenant = m.tenantName?.toLowerCase().includes(q);
-                if (!matchName && !matchUrl && !matchTenant) return false;
+                if (!matchName && !matchUrl && !matchType && !matchTenant) return false;
             }
             if (monitorFilters.assignment === 'assigned') return m.tenantId != null && m.tenantId !== SYSTEM_TENANT_ID;
             if (monitorFilters.assignment === 'unassigned') return m.tenantId == null || m.tenantId === SYSTEM_TENANT_ID;

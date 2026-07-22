@@ -99,17 +99,24 @@ public class MonitorControllerTests
     {
         // Arrange
         var tenantId = Guid.NewGuid();
-        var request = new CreateMonitorRequestDto("New Monitor", "https://test.com", 99.5);
+        var request = new CreateMonitorRequestDto
+        {
+            Name = "New Monitor",
+            Url = "https://test.com",
+            Type = "PING",
+            UptimeSla = 99.5
+        };
         var createdMonitor = new UptimeMonitor
         {
             Id = 123,
             TenantId = tenantId,
+            Type = "PING",
             Name = "New Monitor",
             Url = "https://test.com",
             UptimeSla = 99.5
         };
 
-        _monitorServiceMock.Setup(s => s.CreateMonitorAsync(tenantId, request.Name, request.Url, request.UptimeSla, It.IsAny<CancellationToken>()))
+        _monitorServiceMock.Setup(s => s.CreateMonitorAsync(tenantId, request.Name, request.Url, request.Type, request.UptimeSla, It.IsAny<CancellationToken>()))
             .ReturnsAsync(createdMonitor);
 
         // Act
@@ -119,6 +126,7 @@ public class MonitorControllerTests
         var createdResult = Assert.IsType<CreatedAtActionResult>(result.Result);
         var response = Assert.IsType<UptimeMonitorDto>(createdResult.Value);
         Assert.Equal(123, response.Id);
+        Assert.Equal("PING", response.Type);
         Assert.Equal("New Monitor", response.Name);
     }
 

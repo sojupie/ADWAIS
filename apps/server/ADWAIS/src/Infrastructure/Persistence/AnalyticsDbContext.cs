@@ -375,6 +375,10 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
             entity.Ignore(m => m.StatusStr);
             entity.Ignore(m => m.CurrentUptimePercentage);
             entity.Ignore(m => m.CurrentLatency);
+            entity.Property(m => m.Type)
+                .HasMaxLength(50)
+                .HasDefaultValue(UptimeMonitorTypes.Http)
+                .IsRequired();
             entity.Property(m => m.Name).HasMaxLength(255);
             entity.Property(m => m.Url).HasMaxLength(2048);
             entity.HasOne(m => m.Tenant)

@@ -16,6 +16,11 @@ public class CreateMonitorRequestDtoValidator : AbstractValidator<CreateMonitorR
             .Must(uri => Uri.TryCreate(uri, UriKind.Absolute, out _))
             .WithMessage("A valid absolute URL is required.");
 
+        RuleFor(x => x.Type)
+            .NotEmpty().When(x => x.Type is not null)
+            .MaximumLength(50)
+            .WithMessage("Monitor type must not exceed 50 characters.");
+
         RuleFor(x => x.UptimeSla)
             .InclusiveBetween(0, 100).When(x => x.UptimeSla.HasValue)
             .WithMessage("Uptime SLA must be between 0 and 100.");

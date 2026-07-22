@@ -4,6 +4,7 @@ public class UptimeMonitor
 {
     public int Id { get; set; } // External ID from UptimeRobot
     public Guid TenantId { get; set; }
+    public string Type { get; set; } = UptimeMonitorTypes.Http;
     public required string Name { get; set; }
     public required string Url { get; set; }
     public double? UptimeSla { get; set; }

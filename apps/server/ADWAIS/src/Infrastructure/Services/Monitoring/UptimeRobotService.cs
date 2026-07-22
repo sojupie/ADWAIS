@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Adwais.Application.DTOs.Monitoring.Upstream;
 using Adwais.Application.Interfaces;
+using Adwais.Domain.Entities.Monitoring;
 using Adwais.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -43,14 +44,16 @@ public class UptimeRobotService(
         return JsonDocument.Parse(responseContent);
     }
 
-    public async Task<UptimeRobotMonitorDto> CreateMonitorAsync(string name, string url)
+    public async Task<UptimeRobotMonitorDto> CreateMonitorAsync(string name, string url, string? type)
     {
+        var normalizedType = UptimeMonitorTypes.Normalize(type);
         var request = new HttpRequestMessage(HttpMethod.Post, "https://api.uptimerobot.com/v3/monitors");
-        request.Content = JsonContent.Create(new { friendlyName = name, url, type = "HTTP", interval = 300, timeout = 60 });
+        request.Content = JsonContent.Create(new { friendlyName = name, url, type = normalizedType, interval = 300, timeout = 60 });
         using var response = await GetResponseAsync(request, $"Create: {name}");
         
         var monitor = new UptimeRobotMonitorDto(
             Id: response.RootElement.GetProperty("id").GetInt32(),
+            Type: ParseType(response.RootElement, normalizedType),
             FriendlyName: response.RootElement.GetProperty("friendlyName").GetString()!,
             Url: response.RootElement.GetProperty("url").GetString()!,
             Status: response.RootElement.GetProperty("status").GetString()!,
@@ -61,7 +64,7 @@ public class UptimeRobotService(
         return monitor;
     }
 
-    public async Task UpdateMonitorAsync(int monitorId, string? name, string? url, List<string>? tags)
+    public async Task UpdateMonitorAsync(int monitorId, string? name, string? url, string? type, List<string>? tags)
     {
         var payload = new Dictionary<string, object>();
         if (name != null)
@@ -71,6 +74,10 @@ public class UptimeRobotService(
         if (url != null)
         {
             payload.Add("url", url);
+        }
+        if (type != null)
+        {
+            payload.Add("type", UptimeMonitorTypes.Normalize(type));
         }
         if (tags != null)
         {
@@ -114,6 +121,7 @@ public class UptimeRobotService(
                 {
                     monitors.Add(new UptimeRobotMonitorDto(
                         Id: monitor.GetProperty("id").GetInt32(),
+                        Type: ParseType(monitor),
                         FriendlyName: monitor.GetProperty("friendlyName").GetString()!,
                         Url: monitor.GetProperty("url").GetString()!,
                         Status: monitor.GetProperty("status").GetString()!,
@@ -158,6 +166,21 @@ public class UptimeRobotService(
             }
         }
         return tagsList;
+    }
+
+    private static string ParseType(JsonElement monitorElement, string fallback = UptimeMonitorTypes.Http)
+    {
+        if (!monitorElement.TryGetProperty("type", out var typeElement))
+        {
+            return fallback;
+        }
+
+        return typeElement.ValueKind switch
+        {
+            JsonValueKind.String => UptimeMonitorTypes.Normalize(typeElement.GetString()),
+            JsonValueKind.Number => typeElement.GetRawText(),
+            _ => fallback
+        };
     }
     
     public async Task<double> GetUptimeAsync(int monitorId, DateTimeOffset? startDate = null, DateTimeOffset? endDate = null, string? monitorName = null)

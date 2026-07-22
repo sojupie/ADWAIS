@@ -5,12 +5,13 @@ import { EmptyState } from "../common/ui/EmptyState.tsx";
 import { getTenantFaviconUrl } from '../../utils/tenantHelper';
 import { getTagColor, getTagStyle } from '../../utils/tagHelper';
 import { STATUS_THEMES } from '../../utils/monitorStatusHelper';
+import { getMonitorType } from '../../utils/monitorTypeHelper';
 
 interface MonitorIssue {
   id: number;
   tenantId: string;
   tenantName: string;
-  monitorName: string;
+  monitorType: string;
   uptime: number | null;
   isDown: boolean;
   isDegraded: boolean;
@@ -61,7 +62,7 @@ function buildIssues(
         id: m.id ?? 0,
         tenantId: m.tenantId || '',
         tenantName: tenantName,
-        monitorName: m.name || '',
+        monitorType: getMonitorType(m.type),
         uptime: uptime ?? null,
         latency: m.currentLatency ?? null,
         isDown,
@@ -139,7 +140,7 @@ export function SlaBreachWatchlist({
                 {showFavicon && (
                   <img
                     src={faviconUrl}
-                    className="absolute bottom-2 left-1/2 -translate-x-1/2 w-16 h-16 opacity-20 pointer-events-none select-none mix-blend-multiply"
+                    className="absolute bottom-3 left-1/2 -translate-x-1/2 w-14 h-14 opacity-10 pointer-events-none select-none mix-blend-multiply"
                     onError={() => setFailedFavicons(prev => {
                       const next = new Set(prev);
                       next.add(issue.id);
@@ -148,39 +149,41 @@ export function SlaBreachWatchlist({
                     alt=""
                   />
                 )}
-                {/* Row 1: title + status badges */}
-                <div className="flex flex-wrap justify-between items-start gap-1 relative z-10 min-w-0">
-                  <div className="flex flex-col overflow-hidden min-w-0 flex-1 pr-1">
-                    <span className={`text-sm font-black uppercase tracking-tight leading-tight truncate ${theme.text}`}>{issue.tenantName}</span>
-                    <span className={`text-xs font-bold uppercase tracking-widest mt-0.5 truncate ${theme.mutedText}`}>{issue.monitorName}</span>
-                  </div>
-                  <div className="flex gap-1.5 flex-wrap justify-end shrink-0">
+                {/* Identity */}
+                <div className="flex flex-col relative z-10 min-w-0">
+                  <span className={`text-sm font-black tracking-tight leading-tight break-all ${theme.text}`}>{issue.url}</span>
+                  <span className={`text-xs font-bold tracking-widest mt-0.5 break-words ${theme.mutedText}`}>
+                    <span className="uppercase">{issue.monitorType}</span> · {issue.tenantName}
+                  </span>
+                </div>
+
+                {/* Labels: tags wrap independently; statuses move below when needed. */}
+                <div className="flex flex-wrap items-start gap-1.5 relative z-10 min-w-0">
+                  {issue.tags && issue.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 flex-1 basis-[100px] min-w-0">
+                      {issue.tags.map((tag) => {
+                        const name = tag.split(':')[0].trim();
+                        const color = getTagColor(tag);
+                        return (
+                          <span
+                            key={tag}
+                            className={`text-xs font-bold px-1.5 py-0.5 rounded uppercase tracking-wider border ${getTagStyle(color)}`}
+                          >
+                            {name}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
+                  <div className="flex gap-1.5 flex-wrap justify-end shrink-0 ml-auto">
                     {issue.isDown && <span className="bg-red-500 text-white text-xs font-black px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest shrink-0">DOWN</span>}
                     {issue.isDegraded && !issue.isDown && <span className="bg-amber-500 text-white text-xs font-black px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest shrink-0">DEGRADED</span>}
                     {issue.isSlaBreach && <span className="bg-slate-700 text-white text-xs font-black px-1.5 py-0.5 rounded-[3px] uppercase tracking-widest shrink-0">SLA BREACH</span>}
                   </div>
                 </div>
 
-                {/* Row 2: tags */}
-                {issue.tags && issue.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2 relative z-10 min-w-0">
-                    {issue.tags.map((tag) => {
-                      const name = tag.split(':')[0].trim();
-                      const color = getTagColor(tag);
-                      return (
-                        <span
-                          key={tag}
-                          className={`text-xs font-bold px-1.5 py-0.5 rounded uppercase tracking-wider border ${getTagStyle(color)}`}
-                        >
-                          {name}
-                        </span>
-                      );
-                    })}
-                  </div>
-                )}
-
-                {/* Row 3: uptime + latency */}
-                <div className="flex justify-between items-end relative z-10 min-w-0 gap-2">
+                {/* Primary metrics */}
+                <div className="grid grid-cols-2 items-end relative z-10 min-w-0 gap-2">
                   <div className="flex flex-col min-w-0">
                     <span className={`text-xs font-bold uppercase tracking-widest ${theme.mutedText}`}>Uptime</span>
                     <span className={`text-base font-black truncate ${
@@ -207,9 +210,9 @@ export function SlaBreachWatchlist({
                   </div>
                 </div>
 
-                {/* Row 4: SLA limit + degraded floor */}
+                {/* Threshold metrics */}
                 {(issue.slaLimit !== undefined && issue.slaLimit !== null || issue.degradedFloor !== undefined && issue.degradedFloor !== null) && (
-                  <div className="pt-1 flex justify-between items-center gap-2 relative z-10 min-w-0">
+                  <div className="pt-1 grid grid-cols-2 items-center gap-2 relative z-10 min-w-0">
                     {(issue.slaLimit !== undefined && issue.slaLimit !== null) ? (
                       <div className="flex flex-col min-w-0">
                         <span className={`text-xs font-bold uppercase tracking-widest ${theme.mutedText}`}>SLA</span>

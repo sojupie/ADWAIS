@@ -1,7 +1,7 @@
 import { formatCurrency, formatCompact, formatNumber } from '@utils';
 import { FactPanel } from '../components/common/dashboard/FactPanel';
-import { MomentumMatrixChart } from '../components/financial/MomentumMatrixChart';
-import { RevenueEfficiencyChart } from '../components/financial/RevenueEfficiencyChart';
+import { PortfolioImpactMatrixChart } from '../components/financial/PortfolioImpactMatrixChart';
+import { CrossSegmentDistributionChart } from '../components/financial/CrossSegmentDistributionChart';
 import { TransactionDensityChart } from '../components/financial/TransactionDensityChart';
 import { AccumulatedRevenueChart } from '../components/financial/AccumulatedRevenueChart';
 import { TenantDiagnostics } from './TenantDiagnostics';
@@ -12,7 +12,7 @@ import { DashboardFooter } from "../components/common/layout/DashboardFooter.tsx
 import { SyncStatusWidget } from '../components/common/dashboard/SyncStatusWidget';
 import { PeriodSelector } from '../components/common/charts/PeriodSelector';
 import { useFinancialViewModel } from "../hooks/useFinancialViewModel.ts";
-import type { RevenueEfficiencyResponse, MomentumResponse, TransactionDensityResponseDto } from '@types';
+import type { PortfolioImpactResponse, TransactionDensityResponseDto, CrossSegmentDistributionResponse } from '@types';
 import { FinancialFilterMenu, FinancialFilterPanel } from '../components/financial/FinancialFilterMenu.tsx';
 import { MobileFooterActions } from '../components/common/ui/MobileFooterActions.tsx';
 import { countActiveFilterGroups } from '../utils/filterCounts.ts';
@@ -31,8 +31,8 @@ const EMPTY_DENSITY: TransactionDensityResponseDto = {
   periodStart: '',
   periodEnd: '',
 };
-const EMPTY_EFFICIENCY: RevenueEfficiencyResponse = { tenants: [], globalAverageOrderValue: 0, medianOrderVolume: 0, medianPortfolioShare: 0 };
-const EMPTY_MOMENTUM: MomentumResponse = { tenants: [], medianBaselineRevenue: 0, globalGrowthPercentage: 0 };
+const EMPTY_PORTFOLIO_IMPACT: PortfolioImpactResponse = { tenants: [], medianBaselineRevenue: 0, globalGrowthPercentage: 0, medianPortfolioShare: 0 };
+const EMPTY_CROSS_SEGMENT_DISTRIBUTION: CrossSegmentDistributionResponse = { cohorts: [], tenants: [] };
 
 export function Financial() {
   const vm = useFinancialViewModel();
@@ -128,21 +128,20 @@ export function Financial() {
           className="h-full min-h-[350px] contained:min-h-0"
         />
 
-        <RevenueEfficiencyChart 
-          response={vm.efficiencyData || EMPTY_EFFICIENCY}
-          comparison="YearOverYear"
+        <CrossSegmentDistributionChart 
+          response={vm.crossSegmentDistributionData || EMPTY_CROSS_SEGMENT_DISTRIBUTION}
           onTenantSelect={vm.handleTenantSelect} 
-          isLoading={vm.efficiencyQuery.isLoading} 
-          isStale={vm.efficiencyQuery.isPlaceholderData}
+          isLoading={vm.crossSegmentDistributionQuery.isLoading} 
+          isStale={vm.crossSegmentDistributionQuery.isPlaceholderData}
           className="h-full min-h-[350px] contained:min-h-0"
         />
 
-        <MomentumMatrixChart 
-          momentum={vm.momentumData || EMPTY_MOMENTUM}
+        <PortfolioImpactMatrixChart 
+          portfolioImpact={vm.portfolioImpactData || EMPTY_PORTFOLIO_IMPACT}
           comparison="YearOverYear"
           onTenantSelect={vm.handleTenantSelect} 
-          isLoading={vm.momentumQuery.isLoading} 
-          isStale={vm.momentumQuery.isPlaceholderData}
+          isLoading={vm.portfolioImpactQuery.isLoading} 
+          isStale={vm.portfolioImpactQuery.isPlaceholderData}
           className="h-full min-h-[350px] contained:min-h-0"
         />
       </DashboardFlexRow>

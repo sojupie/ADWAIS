@@ -2,7 +2,8 @@ import { memo, useMemo } from 'react';
 import type { ChartData, ChartOptions } from 'chart.js';
 import type { AccumulatedRevenuePointDto, ComparisonPeriod } from '@types';
 import { ChartPanel } from '../common/charts/ChartPanel';
-import { formatCurrency, formatChartLabel, inferBinSize, formatCompact } from '@utils';
+import { formatCurrency, formatCompact } from '@utils';
+import { formatDateTime } from '../../utils/dateTime';
 import { EmptyState } from '../common/ui/EmptyState';
 import { chartColor, chartLegendLabels, chartTick, createHtmlTooltip, horizontalGrid } from '../common/charts/chartJs';
 import { ChartJsCanvas } from '../common/charts/ChartJsCanvas';
@@ -18,24 +19,120 @@ interface AccumulatedRevenueChartProps {
 type MixedChart = 'bar' | 'line';
 
 export const AccumulatedRevenueChart = memo(function AccumulatedRevenueChart({ isLoading, isStale, points, comparison, className }: AccumulatedRevenueChartProps) {
-  const chartData = useMemo(() => {
-    const binSize = inferBinSize(points.map(point => point.timestamp), false);
-    return points.map((point, index) => ({
-      ...point,
-      label: formatChartLabel(point.timestamp, binSize, index),
-    }));
+  const { chartData, isSubDaily } = useMemo(() => {
+    if (!points.length) return { chartData: [], isSubDaily: false };
+
+    const formatDate = (ts: string | number) =>
+      formatDateTime(ts, { month: 'short', day: 'numeric', timeZone: 'Europe/Stockholm' }, 'en-SE');
+    const formatTime = (ts: string | number) =>
+      formatDateTime(ts, { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Stockholm' }, 'en-SE');
+
+    // Weekly fold for 365D / large YTD — reduces visual noise at small widths.
+    const gapMs = points.length > 1
+      ? new Date(points[1].timestamp).getTime() - new Date(points[0].timestamp).getTime()
+      : 0;
+    const isDaily = gapMs >= 20 * 60 * 60 * 1000 && gapMs < 2 * 24 * 60 * 60 * 1000;
+    const needsFold = isDaily && points.length > 90;
+
+    const workingPoints = needsFold ? (() => {
+      const result: typeof points = [];
+      for (let i = 0; i < points.length; i += 7) {
+        const chunk = points.slice(i, i + 7);
+        const last = chunk[chunk.length - 1];
+        const sum = (key: keyof typeof chunk[0]) =>
+          chunk.reduce((acc, p) => acc + (p[key] as number ?? 0), 0);
+        result.push({
+          timestamp: chunk[0].timestamp,
+          currentRevenue: sum('currentRevenue'),
+          currentRevenueB2C: sum('currentRevenueB2C'),
+          currentRevenueB2B: sum('currentRevenueB2B'),
+          currentRevenueMixed: sum('currentRevenueMixed'),
+          previousRevenue: sum('previousRevenue'),
+          currentAccumulated: last.currentAccumulated,
+          previousAccumulated: last.previousAccumulated,
+        });
+      }
+      return result;
+    })() : points;
+
+    // Re-derive gap from working points so isWeekly fires for folded data.
+    const workingGapMs = workingPoints.length > 1
+      ? new Date(workingPoints[1].timestamp).getTime() - new Date(workingPoints[0].timestamp).getTime()
+      : 0;
+    const isHourly   = workingGapMs > 0 && workingGapMs < 2 * 60 * 60 * 1000;
+    const isSubDaily = workingGapMs >= 2 * 60 * 60 * 1000 && workingGapMs < 24 * 60 * 60 * 1000;
+    const isWeekly   = workingGapMs >= 5 * 24 * 60 * 60 * 1000;
+
+    const chartData = workingPoints.map((point, i) => {
+      const ts = point.timestamp;
+      let label: string;
+      let tooltipTitle: string;
+
+      if (isHourly) {
+        label = formatTime(ts);
+        tooltipTitle = formatDateTime(ts, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Stockholm' }, 'en-SE');
+      } else if (isSubDaily) {
+        label = formatDate(ts);
+        const binEndMs = new Date(ts).getTime() + workingGapMs;
+        tooltipTitle = `${formatDate(ts)} ${formatTime(ts)} – ${formatTime(binEndMs)}`;
+      } else if (isWeekly) {
+        const weekStart = formatDate(ts);
+        const nextTs = workingPoints[i + 1]?.timestamp;
+        const weekEnd = nextTs
+          ? formatDate(new Date(new Date(nextTs).getTime() - 24 * 60 * 60 * 1000).toISOString())
+          : weekStart;
+        label = weekStart;
+        tooltipTitle = weekEnd !== weekStart ? `${weekStart} – ${weekEnd}` : weekStart;
+      } else {
+        label = formatDate(ts);
+        tooltipTitle = label;
+      }
+
+      return { ...point, label, tooltipTitle };
+    });
+
+    return { chartData, isSubDaily };
   }, [points]);
+
+
 
   const data: ChartData<MixedChart, (number | null)[], string> = {
     labels: chartData.map(point => point.label),
     datasets: [
       {
         type: 'bar',
-        label: 'Current Revenue (Left)',
-        data: chartData.map(point => point.currentRevenue),
+        label: 'B2C Revenue',
+        data: chartData.map(point => point.currentRevenueB2C),
         yAxisID: 'left',
-        backgroundColor: chartColor('--color-brand-btn-primary', '#2563eb') + '40',
-        borderRadius: 4,
+        stack: 'revenue',
+        backgroundColor: chartColor('--color-chart-1', '#0ea5e9') + 'a0',
+        borderRadius: 0,
+        maxBarThickness: 20,
+        categoryPercentage: 0.9,
+        barPercentage: 0.82,
+        borderSkipped: false,
+      },
+      {
+        type: 'bar',
+        label: 'B2B Revenue',
+        data: chartData.map(point => point.currentRevenueB2B),
+        yAxisID: 'left',
+        stack: 'revenue',
+        backgroundColor: chartColor('--color-chart-3', '#2563eb') + 'a0',
+        borderRadius: 0,
+        maxBarThickness: 20,
+        categoryPercentage: 0.9,
+        barPercentage: 0.82,
+        borderSkipped: false,
+      },
+      {
+        type: 'bar',
+        label: 'Mixed Revenue',
+        data: chartData.map(point => point.currentRevenueMixed),
+        yAxisID: 'left',
+        stack: 'revenue',
+        backgroundColor: chartColor('--color-chart-2', '#8b5cf6') + 'a0',
+        borderRadius: 0,
         maxBarThickness: 20,
         categoryPercentage: 0.9,
         barPercentage: 0.82,
@@ -88,9 +185,14 @@ export const AccumulatedRevenueChart = memo(function AccumulatedRevenueChart({ i
           const point = chartData[index];
           if (!point) return null;
           return {
-            title: point.label,
+            title: point.tooltipTitle,
             groups: [
-              [{ label: 'Current Revenue', value: formatCurrency(point.currentRevenue), tone: 'primary' }],
+              [
+                { label: 'Total Revenue', value: formatCurrency(point.currentRevenue), tone: 'primary' },
+                { label: 'B2C Revenue', value: formatCurrency(point.currentRevenueB2C) },
+                { label: 'B2B Revenue', value: formatCurrency(point.currentRevenueB2B) },
+                { label: 'Mixed Revenue', value: formatCurrency(point.currentRevenueMixed) },
+              ],
               [
                 { label: 'Current Accumulated', value: formatCurrency(point.currentAccumulated), tone: 'primary' },
                 { label: 'Previous Accumulated', value: formatCurrency(point.previousAccumulated), tone: 'muted' },
@@ -101,9 +203,27 @@ export const AccumulatedRevenueChart = memo(function AccumulatedRevenueChart({ i
       },
     },
     scales: {
-      x: { border: { display: false }, grid: { display: false }, ticks: { ...chartTick(14), autoSkip: true, maxRotation: 0 } },
+      x: {
+        stacked: true,
+        border: { display: false },
+        grid: { display: false },
+        ticks: {
+          ...chartTick(14),
+          autoSkip: !isSubDaily,
+          maxRotation: 0,
+          // For sub-daily (T7) data: suppress repeated date labels within the same day.
+          ...(isSubDaily && {
+            callback: function(_value, index) {
+              const label = chartData[index]?.label ?? '';
+              const prevLabel = chartData[index - 1]?.label;
+              return label !== prevLabel ? label : '';
+            },
+          }),
+        },
+      },
       left: {
         position: 'left',
+        stacked: true,
         border: { display: false },
         grid: horizontalGrid,
         ticks: { ...chartTick(14), callback: value => formatCompact(Number(value)) },

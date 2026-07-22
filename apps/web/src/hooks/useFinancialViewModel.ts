@@ -3,8 +3,9 @@ import { useMemo, useCallback, useState } from 'react';
 import { 
   useGlobalKpis, 
   useAccumulatedRevenue, 
-  useMomentum, 
+  usePortfolioImpact, 
   useRevenueEfficiency,
+  useCrossSegmentDistribution,
   useTransactionDensity
 } from './useFinancialQueries';
 import type { Timeframe } from '../schemas';
@@ -23,8 +24,9 @@ export function useFinancialViewModel() {
   const tenantsQuery = useTenantsQuery();
   const kpiQuery = useGlobalKpis(timeframe, undefined, undefined, selectedTenantTypes);
   const velocityQuery = useAccumulatedRevenue(timeframe, undefined, 'YearOverYear', selectedTenantTypes);
-  const momentumQuery = useMomentum(timeframe, 'YearOverYear', selectedTenantTypes);
+  const portfolioImpactQuery = usePortfolioImpact(timeframe, 'YearOverYear', selectedTenantTypes);
   const efficiencyQuery = useRevenueEfficiency(timeframe, 'YearOverYear', selectedTenantTypes);
+  const crossSegmentDistributionQuery = useCrossSegmentDistribution(timeframe, 'YearOverYear', selectedTenantTypes);
   const densityQuery = useTransactionDensity(densityPeriod, undefined, selectedTenantTypes);
 
   const tenantOptions = useMemo(() => (tenantsQuery.data ?? [])
@@ -38,21 +40,21 @@ export function useFinancialViewModel() {
 
   const selectedTenantDetails = useMemo(() => {
     const efficiencyTenants = efficiencyQuery.data?.tenants;
-    const momentumTenants = momentumQuery.data?.tenants;
+    const portfolioImpactTenants = portfolioImpactQuery.data?.tenants;
     const tenant = tenantOptions.find(option => option.id === tenantId);
 
     const tenantName = tenant?.name
       || efficiencyTenants?.find((d) => d.tenantId === tenantId)?.tenantName
-      || momentumTenants?.find((t) => t.tenantId === tenantId)?.tenantName
+      || portfolioImpactTenants?.find((t) => t.tenantId === tenantId)?.tenantName
       || 'Unknown Tenant';
 
     const type = tenant?.type
       || efficiencyTenants?.find((d) => d.tenantId === tenantId)?.type
-      || momentumTenants?.find((t) => t.tenantId === tenantId)?.type
+      || portfolioImpactTenants?.find((t) => t.tenantId === tenantId)?.type
       || 'Mixed';
       
     return { tenantName, type };
-  }, [tenantId, efficiencyQuery.data, momentumQuery.data, tenantOptions]);
+  }, [tenantId, efficiencyQuery.data, portfolioImpactQuery.data, tenantOptions]);
 
   const handleTenantSelect = useCallback((id: string) => {
     void navigate({ search: (prev: Record<string, unknown>) => ({ ...prev, tenantId: id }) });
@@ -82,11 +84,13 @@ export function useFinancialViewModel() {
     selectedTenantTypes,
     setSelectedTenantTypes,
     efficiencyData: efficiencyQuery.data,
-    momentumData: momentumQuery.data,
+    portfolioImpactData: portfolioImpactQuery.data,
+    crossSegmentDistributionData: crossSegmentDistributionQuery.data,
     kpiQuery,
     velocityQuery,
-    momentumQuery,
+    portfolioImpactQuery,
     efficiencyQuery,
+    crossSegmentDistributionQuery,
     densityQuery,
     densityPeriod,
     setDensityPeriod,

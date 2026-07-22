@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "codegen": "orval",
+    "codegen": "npx rimraf ../../packages/types/generated ./src/api/generated && orval",
     "double:flex-gaps": "node scripts/double-flex-gaps.mjs --write",
     "test": "vitest run"
   },
@@ -19,18 +19,15 @@
     "@tanstack/react-query-devtools": "^5.100.14",
     "@tanstack/react-router": "^1.170.8",
     "chart.js": "^4.5.1",
-    "downsample": "^1.4.0",
     "lucide-react": "^1.16.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "recharts": "^3.8.1",
     "sonner": "^2.0.7",
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
     "@tanstack/eslint-plugin-query": "^5.100.14",
-    "@tanstack/react-router-devtools": "^1.167.0",
     "@tanstack/router-vite-plugin": "^1.167.11",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",

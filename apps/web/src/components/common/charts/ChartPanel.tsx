@@ -16,9 +16,9 @@ interface ChartPanelProps {
 }
 
 export function ChartPanel({ title, subtitle, comparison, legend, bodyClassName = '', className = '', isLoading = false, isStale = false, children }: ChartPanelProps) {
-    const displaySubtitle = subtitle || (comparison ? (comparison === 'YearOverYear' ? 'vs. Same Period Last Year' : 'vs. Preceding Period') : undefined);
+    const displaySubtitle = subtitle || (comparison ? (comparison === 'YearOverYear' ? 'vs. same period last year' : 'vs. preceding period') : undefined);
     return (
-        <div className={`bg-surface m3-elevation-1 rounded-2xl p-4 flex flex-col min-h-[350px] contained:min-h-0 relative overflow-hidden ${className}`}>
+        <div className={`bg-surface border border-outline rounded-2xl sm:p-4 p-2 flex flex-col min-h-[600px] contained:min-h-0 relative overflow-hidden ${className}`}>
             {isStale && !isLoading && (
                 <div className="absolute inset-0 bg-surface/50 backdrop-blur-[1px] z-20 flex flex-col flex-wrap items-center justify-center animate-in fade-in duration-200">
                     <Loader2 size={32} className="text-on-surface-variant animate-spin opacity-80" />
@@ -26,7 +26,7 @@ export function ChartPanel({ title, subtitle, comparison, legend, bodyClassName 
                 </div>
             )}
             <div className="flex justify-between items-start my-1 z-10">
-                <div className="min-w-[35%] flex flex-col gap-1">
+                <div className="min-w-[35%] flex flex-col pl-1 sm:p-0 gap-1">
                     <span className="text-sm md:text-md font-bold text-on-surface-variant uppercase tracking-widest">
                         {title}
                     </span>

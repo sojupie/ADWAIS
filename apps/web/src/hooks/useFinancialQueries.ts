@@ -1,24 +1,20 @@
 import { keepPreviousData } from '@tanstack/react-query';
 import { 
   useGetApiFinancialKpis,
-  useGetApiFinancialVelocity,
   useGetApiFinancialAccumulatedRevenue,
-  useGetApiFinancialGrowthExtremes,
-  useGetApiFinancialMomentum,
+  useGetApiFinancialPortfolioImpact,
   useGetApiFinancialRevenueEfficiency,
-  useGetApiFinancialVolumeAnomaly,
+  useGetApiFinancialCrossSegmentDistribution,
   useGetApiFinancialCumulativeGrowthDelta,
   useGetApiFinancialOrderDistribution,
   useGetApiFinancialTransactionDensity
 } from '../api/generated/endpoints';
 import type { 
   ComparisonPeriod,
-  GlobalKpi, 
-  GrowthExtreme, 
-  FinancialVelocityPoint, 
-  MomentumResponse,
+  GlobalKpi,
+  PortfolioImpactResponse,
   RevenueEfficiencyResponse,
-  VolumeAnomalyResponseDto,
+  CrossSegmentDistributionResponse,
   CumulativeGrowthDeltaPoint,
   OrderBin,
   AccumulatedRevenuePointDto,
@@ -34,8 +30,9 @@ export const financialKeys = {
   kpis: (timeframe: string, tenantId?: string | null, comparison?: ComparisonPeriod, tenantTypes?: TenantType[]) => [...financialKeys.all, 'kpis', timeframe, tenantId, comparison, tenantTypes] as const,
   velocity: (timeframe: string, tenantId?: string | null, comparison?: ComparisonPeriod, tenantTypes?: TenantType[]) => [...financialKeys.all, 'velocity', timeframe, tenantId, comparison, tenantTypes] as const,
   extremes: (timeframe: string, comparison?: ComparisonPeriod, tenantTypes?: TenantType[]) => [...financialKeys.all, 'extremes', timeframe, comparison, tenantTypes] as const,
-  momentum: (timeframe: string, comparison?: ComparisonPeriod, tenantTypes?: TenantType[]) => [...financialKeys.all, 'momentum', timeframe, comparison, tenantTypes] as const,
+  portfolioImpact: (timeframe: string, comparison?: ComparisonPeriod, tenantTypes?: TenantType[]) => [...financialKeys.all, 'portfolioImpact', timeframe, comparison, tenantTypes] as const,
   revenueEfficiency: (timeframe: string, comparison?: ComparisonPeriod, tenantTypes?: TenantType[]) => [...financialKeys.all, 'revenueEfficiency', timeframe, comparison, tenantTypes] as const,
+  crossSegmentDistribution: (timeframe: string, comparison?: ComparisonPeriod, tenantTypes?: TenantType[]) => [...financialKeys.all, 'crossSegmentDistribution', timeframe, comparison, tenantTypes] as const,
   volumeAnomaly: (timeframe: string, comparison?: ComparisonPeriod, tenantTypes?: TenantType[]) => [...financialKeys.all, 'volumeAnomaly', timeframe, comparison, tenantTypes] as const,
   delta: (timeframe: string, tenantId?: string | null, comparison?: ComparisonPeriod, tenantTypes?: TenantType[]) => [...financialKeys.all, 'delta', timeframe, tenantId, comparison, tenantTypes] as const,
   orders: (timeframe: string, tenantId?: string | null, comparison?: ComparisonPeriod) => [...financialKeys.all, 'orders', timeframe, tenantId, comparison] as const,
@@ -59,23 +56,9 @@ export function useGlobalKpis(timeframe: string, tenantId?: string | null, compa
   );
 }
 
-export function useFinancialVelocity(timeframe: string, tenantId?: string | null, comparison?: ComparisonPeriod, tenantTypes?: TenantType[]) {
-  return useGetApiFinancialVelocity<FinancialVelocityPoint[], Error>(
-    { timeframe: timeframe as Timeframe, tenantId: tenantId || undefined, comparison: comparison as ComparisonType, tenantTypes: tenantTypes?.length ? tenantTypes : undefined },
-    {
-      query: {
-        queryKey: financialKeys.velocity(timeframe, tenantId, comparison, tenantTypes),
-        refetchInterval: REFETCH_INTERVAL,
-        placeholderData: keepPreviousData,
-        select: (res) => res.data as FinancialVelocityPoint[]
-      }
-    }
-  );
-}
-
-export function useAccumulatedRevenue(timeframe: string, tenantId?: string, comparison?: ComparisonPeriod, tenantTypes?: TenantType[]) {
+export function useAccumulatedRevenue(timeframe: string, tenantId?: string | null, comparison?: ComparisonPeriod, tenantTypes?: TenantType[]) {
   return useGetApiFinancialAccumulatedRevenue<AccumulatedRevenuePointDto[], Error>(
-    { timeframe: timeframe as Timeframe, tenantId, comparison: comparison as ComparisonType, tenantTypes: tenantTypes?.length ? tenantTypes : undefined },
+    { timeframe: timeframe as Timeframe, tenantId: tenantId || undefined, comparison: comparison as ComparisonType, tenantTypes: tenantTypes?.length ? tenantTypes : undefined },
     {
       query: {
         queryKey: financialKeys.accumulatedRevenue(timeframe, tenantId, comparison, tenantTypes),
@@ -87,29 +70,15 @@ export function useAccumulatedRevenue(timeframe: string, tenantId?: string, comp
   );
 }
 
-export function useGrowthExtremes(timeframe: string, comparison?: ComparisonPeriod, tenantTypes?: TenantType[]) {
-  return useGetApiFinancialGrowthExtremes<GrowthExtreme[], Error>(
+export function usePortfolioImpact(timeframe: string, comparison?: ComparisonPeriod, tenantTypes?: TenantType[]) {
+  return useGetApiFinancialPortfolioImpact<PortfolioImpactResponse, Error>(
     { timeframe: timeframe as Timeframe, comparison: comparison as ComparisonType, tenantTypes: tenantTypes?.length ? tenantTypes : undefined },
     {
       query: {
-        queryKey: financialKeys.extremes(timeframe, comparison, tenantTypes),
+        queryKey: financialKeys.portfolioImpact(timeframe, comparison, tenantTypes),
         refetchInterval: REFETCH_INTERVAL,
         placeholderData: keepPreviousData,
-        select: (res) => res.data as GrowthExtreme[]
-      }
-    }
-  );
-}
-
-export function useMomentum(timeframe: string, comparison?: ComparisonPeriod, tenantTypes?: TenantType[]) {
-  return useGetApiFinancialMomentum<MomentumResponse, Error>(
-    { timeframe: timeframe as Timeframe, comparison: comparison as ComparisonType, tenantTypes: tenantTypes?.length ? tenantTypes : undefined },
-    {
-      query: {
-        queryKey: financialKeys.momentum(timeframe, comparison, tenantTypes),
-        refetchInterval: REFETCH_INTERVAL,
-        placeholderData: keepPreviousData,
-        select: (res) => res.data as MomentumResponse
+        select: (res) => res.data as PortfolioImpactResponse
       }
     }
   );
@@ -129,15 +98,15 @@ export function useRevenueEfficiency(timeframe: string, comparison?: ComparisonP
   );
 }
 
-export function useVolumeAnomaly(timeframe: string, comparison?: ComparisonPeriod, tenantTypes?: TenantType[]) {
-  return useGetApiFinancialVolumeAnomaly<VolumeAnomalyResponseDto[], Error>(
+export function useCrossSegmentDistribution(timeframe: string, comparison?: ComparisonPeriod, tenantTypes?: TenantType[]) {
+  return useGetApiFinancialCrossSegmentDistribution<CrossSegmentDistributionResponse, Error>(
     { timeframe: timeframe as Timeframe, comparison: comparison as ComparisonType, tenantTypes: tenantTypes?.length ? tenantTypes : undefined },
     {
       query: {
-        queryKey: financialKeys.volumeAnomaly(timeframe, comparison, tenantTypes),
+        queryKey: financialKeys.crossSegmentDistribution(timeframe, comparison, tenantTypes),
         refetchInterval: REFETCH_INTERVAL,
         placeholderData: keepPreviousData,
-        select: (res) => res.data as VolumeAnomalyResponseDto[]
+        select: (res) => res.data as CrossSegmentDistributionResponse
       }
     }
   );

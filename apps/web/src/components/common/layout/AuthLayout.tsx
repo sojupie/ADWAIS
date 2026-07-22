@@ -4,9 +4,9 @@ import { FactPanel } from '../dashboard/FactPanel';
 import { AccumulatedRevenueChart } from '../../financial/AccumulatedRevenueChart';
 import { TransactionDensityChart } from '../../financial/TransactionDensityChart';
 import { RevenueEfficiencyChart } from '../../financial/RevenueEfficiencyChart';
-import { MomentumMatrixChart } from '../../financial/MomentumMatrixChart';
+import { PortfolioImpactMatrixChart } from '../../financial/PortfolioImpactMatrixChart';
 import motilloLogo from '../../../assets/motillo-logo.svg';
-import { MOCK_ACCUMULATED_REVENUE, MOCK_TRANSACTION_DENSITY_RESPONSE, MOCK_EFFICIENCY, MOCK_MOMENTUM } from '../../../utils/mockKioskData';
+import { MOCK_ACCUMULATED_REVENUE, MOCK_TRANSACTION_DENSITY_RESPONSE, MOCK_EFFICIENCY, MOCK_PORTFOLIO_IMPACT } from '../../../utils/mockKioskData';
 
 interface AuthLayoutProps {
   children: ReactNode;
@@ -57,7 +57,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
               <AccumulatedRevenueChart points={MOCK_ACCUMULATED_REVENUE} className="h-full min-h-0" />
               <TransactionDensityChart response={MOCK_TRANSACTION_DENSITY_RESPONSE} className="h-full min-h-0" />
               <RevenueEfficiencyChart response={MOCK_EFFICIENCY} onTenantSelect={() => { }} className="h-full min-h-0" />
-              <MomentumMatrixChart momentum={MOCK_MOMENTUM} onTenantSelect={() => { }} className="h-full min-h-0" />
+              <PortfolioImpactMatrixChart portfolioImpact={MOCK_PORTFOLIO_IMPACT} onTenantSelect={() => { }} className="h-full min-h-0" />
               </section>
             </div>
             </div>

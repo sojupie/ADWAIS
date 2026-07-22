@@ -254,8 +254,11 @@ export const horizontalGrid = {
   drawTicks: false,
 };
 
-export function scaleBubbleRadii(values: number[], minRadius = 5, maxRadius = 20): number[] {
-  const normalized = values.map(value => Math.sqrt(Math.max(0, value)));
+export function scaleBubbleRadii(values: number[], minRadius = 5, maxRadius = 20, useLog = false): number[] {
+  const transform = useLog
+    ? (v: number) => Math.log10(Math.max(1, v))
+    : (v: number) => Math.sqrt(Math.max(0, v));
+  const normalized = values.map(transform);
   const min = Math.min(...normalized);
   const max = Math.max(...normalized);
   if (min === max) return normalized.map(() => (minRadius + maxRadius) / 2);
@@ -340,12 +343,12 @@ export const tenantMarkerPlugin: Plugin<'bubble'> = {
 
         context.save();
         if (favicon?.status === 'loaded') {
-          const imageSize = radius * 1.5;
+          const imageSize = radius * 1.2;
           context.beginPath();
           context.arc(element.x, element.y, Math.max(1, radius - 2), 0, Math.PI * 2);
           context.clip();
-          context.globalAlpha = 0.7;
-          context.globalCompositeOperation = 'luminosity';
+          context.globalAlpha = 0.9;
+          // context.globalCompositeOperation = 'luminosity';
           context.drawImage(
             favicon.image,
             element.x - imageSize / 2,
@@ -388,7 +391,14 @@ export function referenceLinesPlugin(xValue?: number, yValue?: number): Plugin<'
   };
 }
 
-export function matrixQuadrantsPlugin(xValue: number, yValue: number): Plugin<'bubble'> {
+export type QuadrantLabels = {
+  topLeft?: string;
+  topRight?: string;
+  bottomLeft?: string;
+  bottomRight?: string;
+};
+
+export function matrixQuadrantsPlugin(xValue: number, yValue: number, labels?: QuadrantLabels): Plugin<'bubble'> {
   return {
     id: `matrixQuadrants-${xValue}-${yValue}`,
     beforeDraw(chart) {
@@ -409,7 +419,193 @@ export function matrixQuadrantsPlugin(xValue: number, yValue: number): Plugin<'b
         ctx.fillStyle = quadrant.color;
         ctx.fillRect(quadrant.x, quadrant.y, quadrant.width, quadrant.height);
       });
+
+      if (labels) {
+        ctx.font = `800 11px ${CHART_FONT}`;
+        ctx.fillStyle = chartColor('--color-on-surface-variant', '#64748b');
+        ctx.globalAlpha = 0.55;
+
+        if (labels.topLeft && splitX > chartArea.left + 80 && splitY > chartArea.top + 30) {
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'top';
+          ctx.fillText(labels.topLeft.toUpperCase(), chartArea.left + 14, chartArea.top + 12);
+        }
+        if (labels.topRight && chartArea.right - splitX > 80 && splitY > chartArea.top + 30) {
+          ctx.textAlign = 'right';
+          ctx.textBaseline = 'top';
+          ctx.fillText(labels.topRight.toUpperCase(), chartArea.right - 14, chartArea.top + 12);
+        }
+        if (labels.bottomLeft && splitX > chartArea.left + 80 && chartArea.bottom - splitY > 30) {
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'bottom';
+          ctx.fillText(labels.bottomLeft.toUpperCase(), chartArea.left + 14, chartArea.bottom - 12);
+        }
+        if (labels.bottomRight && chartArea.right - splitX > 80 && chartArea.bottom - splitY > 30) {
+          ctx.textAlign = 'right';
+          ctx.textBaseline = 'bottom';
+          ctx.fillText(labels.bottomRight.toUpperCase(), chartArea.right - 14, chartArea.bottom - 12);
+        }
+      }
       ctx.restore();
+    },
+  };
+}
+
+type HullPoint = { x: number; y: number; r: number };
+
+function computeConvexHull(pts: HullPoint[]): HullPoint[] {
+  if (pts.length <= 2) return pts;
+  const sorted = [...pts].sort((a, b) => a.x === b.x ? a.y - b.y : a.x - b.x);
+  const lower: HullPoint[] = [];
+  for (const p of sorted) {
+    while (lower.length >= 2) {
+      const o = lower[lower.length - 2];
+      const a = lower[lower.length - 1];
+      if ((a.x - o.x) * (p.y - o.y) - (a.y - o.y) * (p.x - o.x) <= 0) lower.pop();
+      else break;
+    }
+    lower.push(p);
+  }
+  const upper: HullPoint[] = [];
+  for (let i = sorted.length - 1; i >= 0; i--) {
+    const p = sorted[i];
+    while (upper.length >= 2) {
+      const o = upper[upper.length - 2];
+      const a = upper[upper.length - 1];
+      if ((a.x - o.x) * (p.y - o.y) - (a.y - o.y) * (p.x - o.x) <= 0) upper.pop();
+      else break;
+    }
+    upper.push(p);
+  }
+  lower.pop();
+  upper.pop();
+  return lower.concat(upper);
+}
+
+export function cohortHullPlugin(cohortColors: Record<string, string>): Plugin<'bubble'> {
+  return {
+    id: 'cohortHull',
+    beforeDatasetsDraw(chart) {
+      const { ctx, chartArea } = chart;
+      if (!chartArea) return;
+
+      chart.data.datasets.forEach((dataset, datasetIndex) => {
+        const meta = chart.getDatasetMeta(datasetIndex);
+        const tenantMeta = (dataset as typeof dataset & { tenantMeta?: { type?: string }[] }).tenantMeta;
+        if (!tenantMeta || meta.hidden) return;
+
+        const cohortPoints: Record<string, HullPoint[]> = {};
+        meta.data.forEach((element, index) => {
+          const type = tenantMeta[index]?.type || 'Mixed';
+          const r = (dataset.data[index] as { r?: number } | undefined)?.r ?? 8;
+          if (!cohortPoints[type]) cohortPoints[type] = [];
+          cohortPoints[type].push({ x: element.x, y: element.y, r });
+        });
+
+        ctx.save();
+        Object.entries(cohortPoints).forEach(([type, pts]) => {
+          if (pts.length === 0) return;
+          const colorHex = cohortColors[type] || cohortColors.Mixed || '#8b5cf6';
+          ctx.fillStyle = colorHex + '14'; // ~8% opacity fill
+          ctx.strokeStyle = colorHex + '66'; // ~40% opacity stroke
+          ctx.lineWidth = 1.5;
+          ctx.setLineDash([4, 4]);
+
+          const padding = 14;
+
+          if (pts.length === 1) {
+            const p = pts[0];
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r + padding, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+          } else if (pts.length === 2) {
+            const [p1, p2] = pts;
+            const dx = p2.x - p1.x;
+            const dy = p2.y - p1.y;
+            const dist = Math.hypot(dx, dy);
+            if (dist < 1) {
+              ctx.beginPath();
+              ctx.arc(p1.x, p1.y, Math.max(p1.r, p2.r) + padding, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.stroke();
+            } else {
+              const nx = -dy / dist;
+              const ny = dx / dist;
+              const r1 = p1.r + padding;
+              const r2 = p2.r + padding;
+              ctx.beginPath();
+              ctx.arc(p1.x, p1.y, r1, Math.atan2(ny, nx), Math.atan2(-ny, -nx));
+              ctx.arc(p2.x, p2.y, r2, Math.atan2(-ny, -nx), Math.atan2(ny, nx));
+              ctx.closePath();
+              ctx.fill();
+              ctx.stroke();
+            }
+          } else {
+            const hull = computeConvexHull(pts);
+            if (hull.length < 3) {
+              const p1 = hull[0];
+              ctx.beginPath();
+              ctx.arc(p1.x, p1.y, p1.r + padding, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.stroke();
+              return;
+            }
+
+            // Offset vertices outwards
+            const n = hull.length;
+            const expandedPts: { x: number; y: number }[] = [];
+            for (let i = 0; i < n; i++) {
+              const prev = hull[(i - 1 + n) % n];
+              const curr = hull[i];
+              const next = hull[(i + 1) % n];
+
+              // Normal vector of edge (prev -> curr)
+              const v1x = curr.x - prev.x;
+              const v1y = curr.y - prev.y;
+              const len1 = Math.hypot(v1x, v1y) || 1;
+              const n1x = -v1y / len1;
+              const n1y = v1x / len1;
+
+              // Normal vector of edge (curr -> next)
+              const v2x = next.x - curr.x;
+              const v2y = next.y - curr.y;
+              const len2 = Math.hypot(v2x, v2y) || 1;
+              const n2x = -v2y / len2;
+              const n2y = v2x / len2;
+
+              // Bisector normal
+              let bisX = n1x + n2x;
+              let bisY = n1y + n2y;
+              const bisLen = Math.hypot(bisX, bisY);
+              if (bisLen < 0.01) {
+                bisX = n1x;
+                bisY = n1y;
+              } else {
+                bisX /= bisLen;
+                bisY /= bisLen;
+              }
+
+              const rPadded = curr.r + padding;
+              expandedPts.push({
+                x: curr.x + bisX * rPadded,
+                y: curr.y + bisY * rPadded,
+              });
+            }
+
+            ctx.beginPath();
+            ctx.lineJoin = 'round';
+            ctx.moveTo(expandedPts[0].x, expandedPts[0].y);
+            for (let i = 1; i < expandedPts.length; i++) {
+              ctx.lineTo(expandedPts[i].x, expandedPts[i].y);
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+          }
+        });
+        ctx.restore();
+      });
     },
   };
 }

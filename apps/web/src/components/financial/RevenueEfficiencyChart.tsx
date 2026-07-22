@@ -10,7 +10,7 @@ import { ChartJsCanvas } from '../common/charts/ChartJsCanvas';
 const TYPE_COLORS: Record<string, [string, string]> = {
   B2C: ['--color-chart-1', '#0ea5e9'],
   Mixed: ['--color-chart-2', '#8b5cf6'],
-  B2B: ['--color-chart-3', '#2563eb'],
+  B2B: ['--color-chart-3', '#51B5B9'],
 };
 
 export const RevenueEfficiencyChart = memo(function RevenueEfficiencyChart({

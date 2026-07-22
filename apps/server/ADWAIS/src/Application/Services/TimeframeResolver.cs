@@ -87,6 +87,7 @@ public static class TimeframeResolver
         var currentStart = ConvertLocalToUtc(currentStartLocal, timeZone);
         var previousStart = ConvertLocalToUtc(previousStartLocal, timeZone);
         var previousEnd = previousStart + (currentEnd - currentStart);
+
         return new ResolvedPeriod(currentStart, currentEnd, previousStart, previousEnd, daysInPeriod, false, false);
     }
 

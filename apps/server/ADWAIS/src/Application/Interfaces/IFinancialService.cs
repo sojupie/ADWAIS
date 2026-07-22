@@ -12,42 +12,25 @@ public interface IFinancialService
     /// Calculates key performance indicators (KPIs) for the specified timeframe and tenant.
     /// </summary>
     Task<KpiDto> GetKpisAsync(ResolvedPeriod period, Guid? tenantId = null, IReadOnlyCollection<TenantType>? tenantTypes = null, CancellationToken ct = default);
-
-    /// <summary>
-    /// Retrieves revenue velocity points for the specified timeframe.
-    /// </summary>
-    Task<IReadOnlyList<VelocityPointDto>> GetVelocityAsync(ResolvedPeriod period, Guid? tenantId = null, IReadOnlyCollection<TenantType>? tenantTypes = null, CancellationToken ct = default);
-
+    
     /// <summary>
     /// Retrieves running accumulated revenue for current and previous periods.
     /// </summary>
     Task<IReadOnlyList<AccumulatedRevenuePointDto>> GetAccumulatedRevenueAsync(ResolvedPeriod period, Guid? tenantId = null, IReadOnlyCollection<TenantType>? tenantTypes = null, CancellationToken ct = default);
-
-    /// <summary>
-    /// Identifies tenants with the most extreme growth.
-    /// </summary>
-    Task<IReadOnlyList<GrowthExtremeDto>> GetGrowthExtremesAsync(ResolvedPeriod period, IReadOnlyCollection<TenantType>? tenantTypes = null, CancellationToken ct = default);
-
     /// <summary>
     /// Analyzes revenue efficiency across all tenants, returning AOV, portfolio share, and growth velocity.
     /// </summary>
     Task<RevenueEfficiencyDto> GetRevenueEfficiencyAsync(ResolvedPeriod period, IReadOnlyCollection<TenantType>? tenantTypes = null, CancellationToken ct = default);
 
     /// <summary>
-    /// Analyzes order volume anomalies by comparing current volume against a baseline period.
+    /// Analyzes cross-segment distribution stats (AOV, Volume, Revenue, Q1/Q2/Q3) grouped by business model cohort.
     /// </summary>
-    Task<IReadOnlyList<VolumeAnomalyDto>> GetVolumeAnomalyAsync(ResolvedPeriod period, IReadOnlyCollection<TenantType>? tenantTypes = null, CancellationToken ct = default);
-
+    Task<CrossSegmentDistributionDto> GetCrossSegmentDistributionAsync(ResolvedPeriod period, IReadOnlyCollection<TenantType>? tenantTypes = null, CancellationToken ct = default);
     /// <summary>
-    /// Analyzes revenue momentum across all tenants.
+    /// Analyzes revenue growth velocity and portfolio share for the Portfolio Impact Matrix across all tenants.
     /// </summary>
-    Task<MomentumDto> GetMomentumAsync(ResolvedPeriod period, IReadOnlyCollection<TenantType>? tenantTypes = null, CancellationToken ct = default);
-
-    /// <summary>
-    /// Calculates net growth addition (revenue delta) for a specific tenant.
-    /// </summary>
-    Task<IReadOnlyList<NetGrowthAdditionPointDto>> GetNetGrowthAdditionAsync(ResolvedPeriod period, Guid tenantId, CancellationToken ct = default);
-
+    Task<PortfolioImpactDto> GetPortfolioImpactAsync(ResolvedPeriod period, IReadOnlyCollection<TenantType>? tenantTypes = null, CancellationToken ct = default);
+    
     /// <summary>
     /// Generates a distribution histogram of order values for a specific tenant.
     /// </summary>

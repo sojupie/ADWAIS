@@ -855,151 +855,6 @@
         }
       }
     },
-    "/api/financial/velocity": {
-      "get": {
-        "tags": [
-          "Financial"
-        ],
-        "summary": "Daily/Hourly time-series: current vs. previous period revenue.\r\nScopes to a single tenant if tenantId is provided, otherwise portfolio-wide.",
-        "parameters": [
-          {
-            "name": "timeframe",
-            "in": "query",
-            "description": "The primary timeframe for the calculation (e.g., T7, T30). \r\nDefaults to T30.",
-            "schema": {
-              "$ref": "#/components/schemas/Timeframe"
-            }
-          },
-          {
-            "name": "tenantId",
-            "in": "query",
-            "description": "Optional. Scopes the metrics to a specific tenant. \r\nIf null, metrics represent the global portfolio total.",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "tenantTypes",
-            "in": "query",
-            "description": "Optional. Restricts portfolio metrics to tenants with one of these business models.\r\nIgnored when tenantId is provided.",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/TenantType"
-              }
-            }
-          },
-          {
-            "name": "comparison",
-            "in": "query",
-            "description": "The comparison period for the timeframe.\r\nDefaults to Preceding.",
-            "schema": {
-              "$ref": "#/components/schemas/ComparisonType"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/VelocityPointResponseDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/VelocityPointResponseDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/VelocityPointResponseDto"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/financial/growth-extremes": {
-      "get": {
-        "tags": [
-          "Financial"
-        ],
-        "summary": "Per-tenant growth %, sorted descending. Portfolio view only.",
-        "parameters": [
-          {
-            "name": "timeframe",
-            "in": "query",
-            "description": "The primary timeframe for the calculation (e.g., T7, T30). \r\nDefaults to T30.",
-            "schema": {
-              "$ref": "#/components/schemas/Timeframe"
-            }
-          },
-          {
-            "name": "comparison",
-            "in": "query",
-            "description": "The comparison period for the timeframe.\r\nDefaults to Preceding.",
-            "schema": {
-              "$ref": "#/components/schemas/ComparisonType"
-            }
-          },
-          {
-            "name": "tenantTypes",
-            "in": "query",
-            "description": "Optional. Restricts portfolio metrics to tenants with one of these business models.",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/TenantType"
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/GrowthExtremeResponseDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/GrowthExtremeResponseDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/GrowthExtremeResponseDto"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/financial/revenue-efficiency": {
       "get": {
         "tags": [
@@ -1059,12 +914,12 @@
         }
       }
     },
-    "/api/financial/volume-anomaly": {
+    "/api/financial/cross-segment-distribution": {
       "get": {
         "tags": [
           "Financial"
         ],
-        "summary": "Diverging bar chart data: volume anomalies compared to a baseline period.\r\nPortfolio view only.",
+        "summary": "Distribution metrics (AOV, Volume, Revenue, Q1/Q2/Q3 statistics) across business model cohorts.\r\nPortfolio view only.",
         "parameters": [
           {
             "name": "timeframe",
@@ -1100,26 +955,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/VolumeAnomalyResponseDto"
-                  }
+                  "$ref": "#/components/schemas/CrossSegmentDistributionResponseDto"
                 }
               },
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/VolumeAnomalyResponseDto"
-                  }
+                  "$ref": "#/components/schemas/CrossSegmentDistributionResponseDto"
                 }
               },
               "text/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/VolumeAnomalyResponseDto"
-                  }
+                  "$ref": "#/components/schemas/CrossSegmentDistributionResponseDto"
                 }
               }
             }
@@ -1127,12 +973,12 @@
         }
       }
     },
-    "/api/financial/momentum": {
+    "/api/financial/portfolio-impact": {
       "get": {
         "tags": [
           "Financial"
         ],
-        "summary": "Scatter: baseline revenue × growth % with bubble size representing order volume. Portfolio view only.",
+        "summary": "Scatter plot data for Portfolio Impact Matrix: Growth % across all tenants. X: Portfolio share %, Y: Revenue growth %, Bubble: Current revenue.\r\nPortfolio view only.",
         "parameters": [
           {
             "name": "timeframe",
@@ -1168,84 +1014,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/MomentumResponseDto"
+                  "$ref": "#/components/schemas/PortfolioImpactResponseDto"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/MomentumResponseDto"
+                  "$ref": "#/components/schemas/PortfolioImpactResponseDto"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/MomentumResponseDto"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/financial/daily-revenue-delta": {
-      "get": {
-        "tags": [
-          "Financial"
-        ],
-        "summary": "Step-line: running tally of daily growth delta. Drilldown view only.",
-        "parameters": [
-          {
-            "name": "timeframe",
-            "in": "query",
-            "description": "The primary timeframe for the calculation (e.g., T7, T30). \r\nDefaults to T30.",
-            "schema": {
-              "$ref": "#/components/schemas/Timeframe"
-            }
-          },
-          {
-            "name": "tenantId",
-            "in": "query",
-            "description": "The unique identifier of the tenant.",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "comparison",
-            "in": "query",
-            "description": "The comparison period for the timeframe.\r\nDefaults to Preceding.",
-            "schema": {
-              "$ref": "#/components/schemas/ComparisonType"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/NetGrowthAdditionPointResponseDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/NetGrowthAdditionPointResponseDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/NetGrowthAdditionPointResponseDto"
-                  }
+                  "$ref": "#/components/schemas/PortfolioImpactResponseDto"
                 }
               }
             }
@@ -3377,6 +3156,18 @@
             "type": "number",
             "format": "double"
           },
+          "currentRevenueB2C": {
+            "type": "number",
+            "format": "double"
+          },
+          "currentRevenueB2B": {
+            "type": "number",
+            "format": "double"
+          },
+          "currentRevenueMixed": {
+            "type": "number",
+            "format": "double"
+          },
           "previousRevenue": {
             "type": "number",
             "format": "double"
@@ -3704,6 +3495,124 @@
         },
         "additionalProperties": false
       },
+      "CrossSegmentCohortGroupResponseDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/TenantType"
+          },
+          "tenantCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "medianAov": {
+            "type": "number",
+            "format": "double"
+          },
+          "q1Aov": {
+            "type": "number",
+            "format": "double"
+          },
+          "q3Aov": {
+            "type": "number",
+            "format": "double"
+          },
+          "medianVolume": {
+            "type": "number",
+            "format": "double"
+          },
+          "q1Volume": {
+            "type": "number",
+            "format": "double"
+          },
+          "q3Volume": {
+            "type": "number",
+            "format": "double"
+          },
+          "medianRevenue": {
+            "type": "number",
+            "format": "double"
+          },
+          "q1Revenue": {
+            "type": "number",
+            "format": "double"
+          },
+          "q3Revenue": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CrossSegmentCohortTenantResponseDto": {
+        "type": "object",
+        "properties": {
+          "tenantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tenantName": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "$ref": "#/components/schemas/TenantType"
+          },
+          "averageOrderValue": {
+            "type": "number",
+            "format": "double"
+          },
+          "orderVolume": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "periodRevenue": {
+            "type": "number",
+            "format": "double"
+          },
+          "portfolioSharePercentage": {
+            "type": "number",
+            "format": "double"
+          },
+          "aovPercentileRank": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "volumePercentileRank": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "revenuePercentileRank": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "litiumBaseUrl": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CrossSegmentDistributionResponseDto": {
+        "type": "object",
+        "properties": {
+          "cohorts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CrossSegmentCohortGroupResponseDto"
+            },
+            "nullable": true
+          },
+          "tenants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CrossSegmentCohortTenantResponseDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "CumulativeGrowthDeltaPointResponseDto": {
         "type": "object",
         "properties": {
@@ -3938,36 +3847,6 @@
         },
         "additionalProperties": false
       },
-      "GrowthExtremeResponseDto": {
-        "type": "object",
-        "properties": {
-          "tenantId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "tenantName": {
-            "type": "string",
-            "nullable": true
-          },
-          "currentRevenue": {
-            "type": "number",
-            "format": "double"
-          },
-          "previousRevenue": {
-            "type": "number",
-            "format": "double"
-          },
-          "growthPercentage": {
-            "type": "number",
-            "format": "double"
-          },
-          "absoluteVariance": {
-            "type": "number",
-            "format": "double"
-          }
-        },
-        "additionalProperties": false
-      },
       "HangfireHealthDto": {
         "type": "object",
         "properties": {
@@ -4086,12 +3965,12 @@
             "format": "double",
             "nullable": true
           },
-          "lowest": {
+          "p10": {
             "type": "number",
             "format": "double",
             "nullable": true
           },
-          "highest": {
+          "p90": {
             "type": "number",
             "format": "double",
             "nullable": true
@@ -4135,64 +4014,6 @@
             "nullable": true
           },
           "currency": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "MomentumResponseDto": {
-        "type": "object",
-        "properties": {
-          "medianBaselineRevenue": {
-            "type": "number",
-            "format": "double"
-          },
-          "globalGrowthPercentage": {
-            "type": "number",
-            "format": "double"
-          },
-          "tenants": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/MomentumTenantResponseDto"
-            },
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "MomentumTenantResponseDto": {
-        "type": "object",
-        "properties": {
-          "tenantId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "tenantName": {
-            "type": "string",
-            "nullable": true
-          },
-          "type": {
-            "$ref": "#/components/schemas/TenantType"
-          },
-          "baselineRevenue": {
-            "type": "number",
-            "format": "double"
-          },
-          "growthPercentage": {
-            "type": "number",
-            "format": "double"
-          },
-          "currentRevenue": {
-            "type": "number",
-            "format": "double"
-          },
-          "orderVolume": {
-            "type": "number",
-            "format": "double"
-          },
-          "litiumBaseUrl": {
             "type": "string",
             "nullable": true
           }
@@ -4289,20 +4110,6 @@
             "type": "number",
             "format": "double",
             "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "NetGrowthAdditionPointResponseDto": {
-        "type": "object",
-        "properties": {
-          "timestamp": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "netGrowthAddition": {
-            "type": "number",
-            "format": "double"
           }
         },
         "additionalProperties": false
@@ -4499,6 +4306,76 @@
           "Cancelled"
         ],
         "type": "string"
+      },
+      "PortfolioImpactResponseDto": {
+        "type": "object",
+        "properties": {
+          "medianBaselineRevenue": {
+            "type": "number",
+            "format": "double"
+          },
+          "globalGrowthPercentage": {
+            "type": "number",
+            "format": "double"
+          },
+          "medianPortfolioShare": {
+            "type": "number",
+            "format": "double"
+          },
+          "tenants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PortfolioImpactTenantResponseDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PortfolioImpactTenantResponseDto": {
+        "type": "object",
+        "properties": {
+          "tenantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tenantName": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "$ref": "#/components/schemas/TenantType"
+          },
+          "baselineRevenue": {
+            "type": "number",
+            "format": "double"
+          },
+          "growthPercentage": {
+            "type": "number",
+            "format": "double"
+          },
+          "currentRevenue": {
+            "type": "number",
+            "format": "double"
+          },
+          "orderVolume": {
+            "type": "number",
+            "format": "double"
+          },
+          "volumeGrowthPercentage": {
+            "type": "number",
+            "format": "double"
+          },
+          "portfolioSharePercentage": {
+            "type": "number",
+            "format": "double"
+          },
+          "litiumBaseUrl": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
       },
       "RecurrenceType": {
         "enum": [
@@ -5426,54 +5303,6 @@
           "Employee"
         ],
         "type": "string"
-      },
-      "VelocityPointResponseDto": {
-        "type": "object",
-        "properties": {
-          "timestamp": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "currentRevenue": {
-            "type": "number",
-            "format": "double"
-          },
-          "previousRevenue": {
-            "type": "number",
-            "format": "double"
-          },
-          "absoluteVariance": {
-            "type": "number",
-            "format": "double"
-          }
-        },
-        "additionalProperties": false
-      },
-      "VolumeAnomalyResponseDto": {
-        "type": "object",
-        "properties": {
-          "tenantId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "tenantName": {
-            "type": "string",
-            "nullable": true
-          },
-          "volumeDeviationPercentage": {
-            "type": "number",
-            "format": "double"
-          },
-          "currentVolume": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "baselineVolume": {
-            "type": "number",
-            "format": "double"
-          }
-        },
-        "additionalProperties": false
       },
       "WeatherDto": {
         "type": "object",

@@ -8,7 +8,7 @@ public record LatencyPointResponseDto(
     DateTimeOffset Timestamp,
     double? Average,
     double? PreviousAverage,
-    double? Lowest,
-    double? Highest);
+    double? P10,
+    double? P90);
 
 

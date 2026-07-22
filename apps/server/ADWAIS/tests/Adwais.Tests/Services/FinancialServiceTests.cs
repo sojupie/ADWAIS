@@ -73,7 +73,12 @@ public class FinancialServiceTests : IDisposable
             _period,
             [TenantType.B2B],
             CancellationToken.None);
-        var momentum = await _service.GetMomentumAsync(
+        var portfolioImpact = await _service.GetPortfolioImpactAsync(
+            _period,
+            [TenantType.B2B],
+            CancellationToken.None);
+
+        var distribution = await _service.GetCrossSegmentDistributionAsync(
             _period,
             [TenantType.B2B],
             CancellationToken.None);
@@ -83,9 +88,18 @@ public class FinancialServiceTests : IDisposable
         Assert.Equal(_b2bTenantId, efficiency.Tenants[0].TenantId);
         Assert.Equal(100m, efficiency.GlobalAverageOrderValue);
         Assert.Equal(100m, efficiency.Tenants[0].PortfolioSharePercentage);
-        Assert.Single(momentum.Tenants);
-        Assert.Equal(100m, momentum.GlobalGrowthPercentage);
-        Assert.Equal(50m, momentum.MedianBaselineRevenue);
+        Assert.Single(portfolioImpact.Tenants);
+        Assert.Equal(100m, portfolioImpact.GlobalGrowthPercentage);
+        Assert.Equal(50m, portfolioImpact.MedianBaselineRevenue);
+        Assert.Equal(100m, portfolioImpact.Tenants[0].PortfolioSharePercentage);
+        Assert.Equal(100m, portfolioImpact.MedianPortfolioShare);
+
+        Assert.Single(distribution.Cohorts);
+        Assert.Equal(TenantType.B2B, distribution.Cohorts[0].Type);
+        Assert.Equal(100m, distribution.Cohorts[0].MedianAov);
+        Assert.Single(distribution.Tenants);
+        Assert.Equal(_b2bTenantId, distribution.Tenants[0].TenantId);
+        Assert.Equal(100m, distribution.Tenants[0].PeriodRevenue);
     }
 
     private void AddOrder(Guid tenantId, DateTimeOffset createdDate, decimal value, string litiumOrderId)

@@ -12,7 +12,7 @@ export interface LatencyPointResponseDto {
   /** @nullable */
   previousAverage?: number | null;
   /** @nullable */
-  lowest?: number | null;
+  p10?: number | null;
   /** @nullable */
-  highest?: number | null;
+  p90?: number | null;
 }

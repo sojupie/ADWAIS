@@ -1,8 +1,8 @@
 using Adwais.Domain.Enums;
 
-namespace Adwais.Application.DTOs.Financial;
+namespace Adwais.Api.DTOs.Financial;
 
-public record MomentumTenantDto(
+public record PortfolioImpactTenantResponseDto(
     Guid TenantId,
     string TenantName,
     TenantType Type,
@@ -10,11 +10,12 @@ public record MomentumTenantDto(
     decimal GrowthPercentage,
     decimal CurrentRevenue,
     decimal OrderVolume,
+    decimal VolumeGrowthPercentage,
+    decimal PortfolioSharePercentage,
     string? LitiumBaseUrl);
 
-public record MomentumDto(
+public record PortfolioImpactResponseDto(
     decimal MedianBaselineRevenue,
     decimal GlobalGrowthPercentage,
-    IReadOnlyList<MomentumTenantDto> Tenants);
-
-
+    decimal MedianPortfolioShare,
+    IReadOnlyList<PortfolioImpactTenantResponseDto> Tenants);

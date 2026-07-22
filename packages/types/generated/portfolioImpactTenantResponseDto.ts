@@ -6,7 +6,7 @@
  */
 import type { TenantType } from './tenantType';
 
-export interface MomentumTenantResponseDto {
+export interface PortfolioImpactTenantResponseDto {
   tenantId?: string;
   /** @nullable */
   tenantName?: string | null;
@@ -15,6 +15,8 @@ export interface MomentumTenantResponseDto {
   growthPercentage?: number;
   currentRevenue?: number;
   orderVolume?: number;
+  volumeGrowthPercentage?: number;
+  portfolioSharePercentage?: number;
   /** @nullable */
   litiumBaseUrl?: string | null;
 }

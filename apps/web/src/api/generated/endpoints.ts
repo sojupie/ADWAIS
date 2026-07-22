@@ -37,23 +37,21 @@ import type {
   CreatePostDto,
   CreateTenantRequestDto,
   CreateUserRequestDto,
+  CrossSegmentDistributionResponseDto,
   CumulativeGrowthDeltaPointResponseDto,
   DeleteApiMonitorsIdParams,
   DeleteApiSystemEventClearParams,
   FeedItem,
   FetchIntervalsDto,
   GetApiFinancialAccumulatedRevenueParams,
+  GetApiFinancialCrossSegmentDistributionParams,
   GetApiFinancialCumulativeGrowthDeltaParams,
-  GetApiFinancialDailyRevenueDeltaParams,
-  GetApiFinancialGrowthExtremesParams,
   GetApiFinancialKpisParams,
-  GetApiFinancialMomentumParams,
   GetApiFinancialOrderDistributionParams,
   GetApiFinancialOrdersParams,
+  GetApiFinancialPortfolioImpactParams,
   GetApiFinancialRevenueEfficiencyParams,
   GetApiFinancialTransactionDensityParams,
-  GetApiFinancialVelocityParams,
-  GetApiFinancialVolumeAnomalyParams,
   GetApiIntranetCalendarFeedIcsParams,
   GetApiIntranetEventsParams,
   GetApiIntranetFeedsParams,
@@ -65,16 +63,14 @@ import type {
   GetApiSystemEventParams,
   GetApiTenantsParams,
   GlobalConfigResponseDto,
-  GrowthExtremeResponseDto,
   KpiResponseDto,
   LatencyMetricsDto,
   LitiumOrderDto,
-  MomentumResponseDto,
   MonitorAnalyticsResponseDto,
-  NetGrowthAdditionPointResponseDto,
   OfficeEventDto,
   OrderBinResponseDto,
   OrderDto,
+  PortfolioImpactResponseDto,
   PostApiIngestionBackfillParams,
   PostApiMonitorsParams,
   RegisterKioskRequestDto,
@@ -93,8 +89,6 @@ import type {
   UpdateUserRequestDto,
   UptimeMonitorDto,
   UserResponseDto,
-  VelocityPointResponseDto,
-  VolumeAnomalyResponseDto,
   WeatherDto
 } from '../../../../../packages/types/generated';
 
@@ -2668,284 +2662,6 @@ export function useGetApiFinancialAccumulatedRevenue<TData = Awaited<ReturnType<
 
 
 
-export type getApiFinancialVelocityResponse200TextPlain = {
-  data: VelocityPointResponseDto[]
-  status: 200
-}
-
-export type getApiFinancialVelocityResponse200ApplicationJson = {
-  data: VelocityPointResponseDto[]
-  status: 200
-}
-
-export type getApiFinancialVelocityResponse200TextJson = {
-  data: VelocityPointResponseDto[]
-  status: 200
-}
-
-export type getApiFinancialVelocityResponseSuccess = (getApiFinancialVelocityResponse200TextPlain | getApiFinancialVelocityResponse200ApplicationJson | getApiFinancialVelocityResponse200TextJson) & {
-  headers: Headers;
-};
-;
-
-export type getApiFinancialVelocityResponse = (getApiFinancialVelocityResponseSuccess)
-
-export const getGetApiFinancialVelocityUrl = (params?: GetApiFinancialVelocityParams,) => {
-  const normalizedParams = new URLSearchParams();
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-    const explodeParameters = ["tenantTypes"];
-
-    if (Array.isArray(value) && explodeParameters.includes(key)) {
-      value.forEach((v) => {
-        normalizedParams.append(key, v === null ? 'null' : String(v));
-      });
-      return;
-    }
-
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : String(value))
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0 ? `/api/financial/velocity?${stringifiedParams}` : `/api/financial/velocity`
-}
-
-/**
- * @summary Daily/Hourly time-series: current vs. previous period revenue.
-Scopes to a single tenant if tenantId is provided, otherwise portfolio-wide.
- */
-export const getApiFinancialVelocity = async (params?: GetApiFinancialVelocityParams, options?: RequestInit): Promise<getApiFinancialVelocityResponse> => {
-
-  return customClient<getApiFinancialVelocityResponse>(getGetApiFinancialVelocityUrl(params),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getGetApiFinancialVelocityQueryKey = (params?: GetApiFinancialVelocityParams,) => {
-    return [
-    `/api/financial/velocity`, ...(params ? [params] : [])
-    ] as const;
-    }
-
-
-export const getGetApiFinancialVelocityQueryOptions = <TData = Awaited<ReturnType<typeof getApiFinancialVelocity>>, TError = unknown>(params?: GetApiFinancialVelocityParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialVelocity>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetApiFinancialVelocityQueryKey(params);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiFinancialVelocity>>> = ({ signal }) => getApiFinancialVelocity(params, { signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialVelocity>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetApiFinancialVelocityQueryResult = NonNullable<Awaited<ReturnType<typeof getApiFinancialVelocity>>>
-export type GetApiFinancialVelocityQueryError = unknown
-
-
-export function useGetApiFinancialVelocity<TData = Awaited<ReturnType<typeof getApiFinancialVelocity>>, TError = unknown>(
- params: undefined |  GetApiFinancialVelocityParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialVelocity>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiFinancialVelocity>>,
-          TError,
-          Awaited<ReturnType<typeof getApiFinancialVelocity>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customClient>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiFinancialVelocity<TData = Awaited<ReturnType<typeof getApiFinancialVelocity>>, TError = unknown>(
- params?: GetApiFinancialVelocityParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialVelocity>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiFinancialVelocity>>,
-          TError,
-          Awaited<ReturnType<typeof getApiFinancialVelocity>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customClient>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiFinancialVelocity<TData = Awaited<ReturnType<typeof getApiFinancialVelocity>>, TError = unknown>(
- params?: GetApiFinancialVelocityParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialVelocity>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-/**
- * @summary Daily/Hourly time-series: current vs. previous period revenue.
-Scopes to a single tenant if tenantId is provided, otherwise portfolio-wide.
- */
-
-export function useGetApiFinancialVelocity<TData = Awaited<ReturnType<typeof getApiFinancialVelocity>>, TError = unknown>(
- params?: GetApiFinancialVelocityParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialVelocity>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetApiFinancialVelocityQueryOptions(params,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-
-
-
-
-export type getApiFinancialGrowthExtremesResponse200TextPlain = {
-  data: GrowthExtremeResponseDto[]
-  status: 200
-}
-
-export type getApiFinancialGrowthExtremesResponse200ApplicationJson = {
-  data: GrowthExtremeResponseDto[]
-  status: 200
-}
-
-export type getApiFinancialGrowthExtremesResponse200TextJson = {
-  data: GrowthExtremeResponseDto[]
-  status: 200
-}
-
-export type getApiFinancialGrowthExtremesResponseSuccess = (getApiFinancialGrowthExtremesResponse200TextPlain | getApiFinancialGrowthExtremesResponse200ApplicationJson | getApiFinancialGrowthExtremesResponse200TextJson) & {
-  headers: Headers;
-};
-;
-
-export type getApiFinancialGrowthExtremesResponse = (getApiFinancialGrowthExtremesResponseSuccess)
-
-export const getGetApiFinancialGrowthExtremesUrl = (params?: GetApiFinancialGrowthExtremesParams,) => {
-  const normalizedParams = new URLSearchParams();
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-    const explodeParameters = ["tenantTypes"];
-
-    if (Array.isArray(value) && explodeParameters.includes(key)) {
-      value.forEach((v) => {
-        normalizedParams.append(key, v === null ? 'null' : String(v));
-      });
-      return;
-    }
-
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : String(value))
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0 ? `/api/financial/growth-extremes?${stringifiedParams}` : `/api/financial/growth-extremes`
-}
-
-/**
- * @summary Per-tenant growth %, sorted descending. Portfolio view only.
- */
-export const getApiFinancialGrowthExtremes = async (params?: GetApiFinancialGrowthExtremesParams, options?: RequestInit): Promise<getApiFinancialGrowthExtremesResponse> => {
-
-  return customClient<getApiFinancialGrowthExtremesResponse>(getGetApiFinancialGrowthExtremesUrl(params),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getGetApiFinancialGrowthExtremesQueryKey = (params?: GetApiFinancialGrowthExtremesParams,) => {
-    return [
-    `/api/financial/growth-extremes`, ...(params ? [params] : [])
-    ] as const;
-    }
-
-
-export const getGetApiFinancialGrowthExtremesQueryOptions = <TData = Awaited<ReturnType<typeof getApiFinancialGrowthExtremes>>, TError = unknown>(params?: GetApiFinancialGrowthExtremesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialGrowthExtremes>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetApiFinancialGrowthExtremesQueryKey(params);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiFinancialGrowthExtremes>>> = ({ signal }) => getApiFinancialGrowthExtremes(params, { signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialGrowthExtremes>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetApiFinancialGrowthExtremesQueryResult = NonNullable<Awaited<ReturnType<typeof getApiFinancialGrowthExtremes>>>
-export type GetApiFinancialGrowthExtremesQueryError = unknown
-
-
-export function useGetApiFinancialGrowthExtremes<TData = Awaited<ReturnType<typeof getApiFinancialGrowthExtremes>>, TError = unknown>(
- params: undefined |  GetApiFinancialGrowthExtremesParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialGrowthExtremes>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiFinancialGrowthExtremes>>,
-          TError,
-          Awaited<ReturnType<typeof getApiFinancialGrowthExtremes>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customClient>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiFinancialGrowthExtremes<TData = Awaited<ReturnType<typeof getApiFinancialGrowthExtremes>>, TError = unknown>(
- params?: GetApiFinancialGrowthExtremesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialGrowthExtremes>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiFinancialGrowthExtremes>>,
-          TError,
-          Awaited<ReturnType<typeof getApiFinancialGrowthExtremes>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customClient>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiFinancialGrowthExtremes<TData = Awaited<ReturnType<typeof getApiFinancialGrowthExtremes>>, TError = unknown>(
- params?: GetApiFinancialGrowthExtremesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialGrowthExtremes>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-/**
- * @summary Per-tenant growth %, sorted descending. Portfolio view only.
- */
-
-export function useGetApiFinancialGrowthExtremes<TData = Awaited<ReturnType<typeof getApiFinancialGrowthExtremes>>, TError = unknown>(
- params?: GetApiFinancialGrowthExtremesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialGrowthExtremes>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetApiFinancialGrowthExtremesQueryOptions(params,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-
-
-
-
 export type getApiFinancialRevenueEfficiencyResponse200TextPlain = {
   data: RevenueEfficiencyResponseDto
   status: 200
@@ -3086,29 +2802,29 @@ export function useGetApiFinancialRevenueEfficiency<TData = Awaited<ReturnType<t
 
 
 
-export type getApiFinancialVolumeAnomalyResponse200TextPlain = {
-  data: VolumeAnomalyResponseDto[]
+export type getApiFinancialCrossSegmentDistributionResponse200TextPlain = {
+  data: CrossSegmentDistributionResponseDto
   status: 200
 }
 
-export type getApiFinancialVolumeAnomalyResponse200ApplicationJson = {
-  data: VolumeAnomalyResponseDto[]
+export type getApiFinancialCrossSegmentDistributionResponse200ApplicationJson = {
+  data: CrossSegmentDistributionResponseDto
   status: 200
 }
 
-export type getApiFinancialVolumeAnomalyResponse200TextJson = {
-  data: VolumeAnomalyResponseDto[]
+export type getApiFinancialCrossSegmentDistributionResponse200TextJson = {
+  data: CrossSegmentDistributionResponseDto
   status: 200
 }
 
-export type getApiFinancialVolumeAnomalyResponseSuccess = (getApiFinancialVolumeAnomalyResponse200TextPlain | getApiFinancialVolumeAnomalyResponse200ApplicationJson | getApiFinancialVolumeAnomalyResponse200TextJson) & {
+export type getApiFinancialCrossSegmentDistributionResponseSuccess = (getApiFinancialCrossSegmentDistributionResponse200TextPlain | getApiFinancialCrossSegmentDistributionResponse200ApplicationJson | getApiFinancialCrossSegmentDistributionResponse200TextJson) & {
   headers: Headers;
 };
 ;
 
-export type getApiFinancialVolumeAnomalyResponse = (getApiFinancialVolumeAnomalyResponseSuccess)
+export type getApiFinancialCrossSegmentDistributionResponse = (getApiFinancialCrossSegmentDistributionResponseSuccess)
 
-export const getGetApiFinancialVolumeAnomalyUrl = (params?: GetApiFinancialVolumeAnomalyParams,) => {
+export const getGetApiFinancialCrossSegmentDistributionUrl = (params?: GetApiFinancialCrossSegmentDistributionParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
@@ -3128,16 +2844,16 @@ export const getGetApiFinancialVolumeAnomalyUrl = (params?: GetApiFinancialVolum
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `/api/financial/volume-anomaly?${stringifiedParams}` : `/api/financial/volume-anomaly`
+  return stringifiedParams.length > 0 ? `/api/financial/cross-segment-distribution?${stringifiedParams}` : `/api/financial/cross-segment-distribution`
 }
 
 /**
- * @summary Diverging bar chart data: volume anomalies compared to a baseline period.
+ * @summary Distribution metrics (AOV, Volume, Revenue, Q1/Q2/Q3 statistics) across business model cohorts.
 Portfolio view only.
  */
-export const getApiFinancialVolumeAnomaly = async (params?: GetApiFinancialVolumeAnomalyParams, options?: RequestInit): Promise<getApiFinancialVolumeAnomalyResponse> => {
+export const getApiFinancialCrossSegmentDistribution = async (params?: GetApiFinancialCrossSegmentDistributionParams, options?: RequestInit): Promise<getApiFinancialCrossSegmentDistributionResponse> => {
 
-  return customClient<getApiFinancialVolumeAnomalyResponse>(getGetApiFinancialVolumeAnomalyUrl(params),
+  return customClient<getApiFinancialCrossSegmentDistributionResponse>(getGetApiFinancialCrossSegmentDistributionUrl(params),
   {
     ...options,
     method: 'GET'
@@ -3150,70 +2866,70 @@ export const getApiFinancialVolumeAnomaly = async (params?: GetApiFinancialVolum
 
 
 
-export const getGetApiFinancialVolumeAnomalyQueryKey = (params?: GetApiFinancialVolumeAnomalyParams,) => {
+export const getGetApiFinancialCrossSegmentDistributionQueryKey = (params?: GetApiFinancialCrossSegmentDistributionParams,) => {
     return [
-    `/api/financial/volume-anomaly`, ...(params ? [params] : [])
+    `/api/financial/cross-segment-distribution`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getGetApiFinancialVolumeAnomalyQueryOptions = <TData = Awaited<ReturnType<typeof getApiFinancialVolumeAnomaly>>, TError = unknown>(params?: GetApiFinancialVolumeAnomalyParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialVolumeAnomaly>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+export const getGetApiFinancialCrossSegmentDistributionQueryOptions = <TData = Awaited<ReturnType<typeof getApiFinancialCrossSegmentDistribution>>, TError = unknown>(params?: GetApiFinancialCrossSegmentDistributionParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialCrossSegmentDistribution>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetApiFinancialVolumeAnomalyQueryKey(params);
+  const queryKey =  queryOptions?.queryKey ?? getGetApiFinancialCrossSegmentDistributionQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiFinancialVolumeAnomaly>>> = ({ signal }) => getApiFinancialVolumeAnomaly(params, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiFinancialCrossSegmentDistribution>>> = ({ signal }) => getApiFinancialCrossSegmentDistribution(params, { signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialVolumeAnomaly>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialCrossSegmentDistribution>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type GetApiFinancialVolumeAnomalyQueryResult = NonNullable<Awaited<ReturnType<typeof getApiFinancialVolumeAnomaly>>>
-export type GetApiFinancialVolumeAnomalyQueryError = unknown
+export type GetApiFinancialCrossSegmentDistributionQueryResult = NonNullable<Awaited<ReturnType<typeof getApiFinancialCrossSegmentDistribution>>>
+export type GetApiFinancialCrossSegmentDistributionQueryError = unknown
 
 
-export function useGetApiFinancialVolumeAnomaly<TData = Awaited<ReturnType<typeof getApiFinancialVolumeAnomaly>>, TError = unknown>(
- params: undefined |  GetApiFinancialVolumeAnomalyParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialVolumeAnomaly>>, TError, TData>> & Pick<
+export function useGetApiFinancialCrossSegmentDistribution<TData = Awaited<ReturnType<typeof getApiFinancialCrossSegmentDistribution>>, TError = unknown>(
+ params: undefined |  GetApiFinancialCrossSegmentDistributionParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialCrossSegmentDistribution>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiFinancialVolumeAnomaly>>,
+          Awaited<ReturnType<typeof getApiFinancialCrossSegmentDistribution>>,
           TError,
-          Awaited<ReturnType<typeof getApiFinancialVolumeAnomaly>>
+          Awaited<ReturnType<typeof getApiFinancialCrossSegmentDistribution>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiFinancialVolumeAnomaly<TData = Awaited<ReturnType<typeof getApiFinancialVolumeAnomaly>>, TError = unknown>(
- params?: GetApiFinancialVolumeAnomalyParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialVolumeAnomaly>>, TError, TData>> & Pick<
+export function useGetApiFinancialCrossSegmentDistribution<TData = Awaited<ReturnType<typeof getApiFinancialCrossSegmentDistribution>>, TError = unknown>(
+ params?: GetApiFinancialCrossSegmentDistributionParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialCrossSegmentDistribution>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiFinancialVolumeAnomaly>>,
+          Awaited<ReturnType<typeof getApiFinancialCrossSegmentDistribution>>,
           TError,
-          Awaited<ReturnType<typeof getApiFinancialVolumeAnomaly>>
+          Awaited<ReturnType<typeof getApiFinancialCrossSegmentDistribution>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiFinancialVolumeAnomaly<TData = Awaited<ReturnType<typeof getApiFinancialVolumeAnomaly>>, TError = unknown>(
- params?: GetApiFinancialVolumeAnomalyParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialVolumeAnomaly>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+export function useGetApiFinancialCrossSegmentDistribution<TData = Awaited<ReturnType<typeof getApiFinancialCrossSegmentDistribution>>, TError = unknown>(
+ params?: GetApiFinancialCrossSegmentDistributionParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialCrossSegmentDistribution>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary Diverging bar chart data: volume anomalies compared to a baseline period.
+ * @summary Distribution metrics (AOV, Volume, Revenue, Q1/Q2/Q3 statistics) across business model cohorts.
 Portfolio view only.
  */
 
-export function useGetApiFinancialVolumeAnomaly<TData = Awaited<ReturnType<typeof getApiFinancialVolumeAnomaly>>, TError = unknown>(
- params?: GetApiFinancialVolumeAnomalyParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialVolumeAnomaly>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+export function useGetApiFinancialCrossSegmentDistribution<TData = Awaited<ReturnType<typeof getApiFinancialCrossSegmentDistribution>>, TError = unknown>(
+ params?: GetApiFinancialCrossSegmentDistributionParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialCrossSegmentDistribution>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetApiFinancialVolumeAnomalyQueryOptions(params,options)
+  const queryOptions = getGetApiFinancialCrossSegmentDistributionQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -3226,29 +2942,29 @@ export function useGetApiFinancialVolumeAnomaly<TData = Awaited<ReturnType<typeo
 
 
 
-export type getApiFinancialMomentumResponse200TextPlain = {
-  data: MomentumResponseDto
+export type getApiFinancialPortfolioImpactResponse200TextPlain = {
+  data: PortfolioImpactResponseDto
   status: 200
 }
 
-export type getApiFinancialMomentumResponse200ApplicationJson = {
-  data: MomentumResponseDto
+export type getApiFinancialPortfolioImpactResponse200ApplicationJson = {
+  data: PortfolioImpactResponseDto
   status: 200
 }
 
-export type getApiFinancialMomentumResponse200TextJson = {
-  data: MomentumResponseDto
+export type getApiFinancialPortfolioImpactResponse200TextJson = {
+  data: PortfolioImpactResponseDto
   status: 200
 }
 
-export type getApiFinancialMomentumResponseSuccess = (getApiFinancialMomentumResponse200TextPlain | getApiFinancialMomentumResponse200ApplicationJson | getApiFinancialMomentumResponse200TextJson) & {
+export type getApiFinancialPortfolioImpactResponseSuccess = (getApiFinancialPortfolioImpactResponse200TextPlain | getApiFinancialPortfolioImpactResponse200ApplicationJson | getApiFinancialPortfolioImpactResponse200TextJson) & {
   headers: Headers;
 };
 ;
 
-export type getApiFinancialMomentumResponse = (getApiFinancialMomentumResponseSuccess)
+export type getApiFinancialPortfolioImpactResponse = (getApiFinancialPortfolioImpactResponseSuccess)
 
-export const getGetApiFinancialMomentumUrl = (params?: GetApiFinancialMomentumParams,) => {
+export const getGetApiFinancialPortfolioImpactUrl = (params?: GetApiFinancialPortfolioImpactParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
@@ -3268,15 +2984,16 @@ export const getGetApiFinancialMomentumUrl = (params?: GetApiFinancialMomentumPa
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `/api/financial/momentum?${stringifiedParams}` : `/api/financial/momentum`
+  return stringifiedParams.length > 0 ? `/api/financial/portfolio-impact?${stringifiedParams}` : `/api/financial/portfolio-impact`
 }
 
 /**
- * @summary Scatter: baseline revenue × growth % with bubble size representing order volume. Portfolio view only.
+ * @summary Scatter plot data for Portfolio Impact Matrix: Growth % across all tenants. X: Portfolio share %, Y: Revenue growth %, Bubble: Current revenue.
+Portfolio view only.
  */
-export const getApiFinancialMomentum = async (params?: GetApiFinancialMomentumParams, options?: RequestInit): Promise<getApiFinancialMomentumResponse> => {
+export const getApiFinancialPortfolioImpact = async (params?: GetApiFinancialPortfolioImpactParams, options?: RequestInit): Promise<getApiFinancialPortfolioImpactResponse> => {
 
-  return customClient<getApiFinancialMomentumResponse>(getGetApiFinancialMomentumUrl(params),
+  return customClient<getApiFinancialPortfolioImpactResponse>(getGetApiFinancialPortfolioImpactUrl(params),
   {
     ...options,
     method: 'GET'
@@ -3289,199 +3006,70 @@ export const getApiFinancialMomentum = async (params?: GetApiFinancialMomentumPa
 
 
 
-export const getGetApiFinancialMomentumQueryKey = (params?: GetApiFinancialMomentumParams,) => {
+export const getGetApiFinancialPortfolioImpactQueryKey = (params?: GetApiFinancialPortfolioImpactParams,) => {
     return [
-    `/api/financial/momentum`, ...(params ? [params] : [])
+    `/api/financial/portfolio-impact`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getGetApiFinancialMomentumQueryOptions = <TData = Awaited<ReturnType<typeof getApiFinancialMomentum>>, TError = unknown>(params?: GetApiFinancialMomentumParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialMomentum>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+export const getGetApiFinancialPortfolioImpactQueryOptions = <TData = Awaited<ReturnType<typeof getApiFinancialPortfolioImpact>>, TError = unknown>(params?: GetApiFinancialPortfolioImpactParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialPortfolioImpact>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetApiFinancialMomentumQueryKey(params);
+  const queryKey =  queryOptions?.queryKey ?? getGetApiFinancialPortfolioImpactQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiFinancialMomentum>>> = ({ signal }) => getApiFinancialMomentum(params, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiFinancialPortfolioImpact>>> = ({ signal }) => getApiFinancialPortfolioImpact(params, { signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialMomentum>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialPortfolioImpact>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type GetApiFinancialMomentumQueryResult = NonNullable<Awaited<ReturnType<typeof getApiFinancialMomentum>>>
-export type GetApiFinancialMomentumQueryError = unknown
+export type GetApiFinancialPortfolioImpactQueryResult = NonNullable<Awaited<ReturnType<typeof getApiFinancialPortfolioImpact>>>
+export type GetApiFinancialPortfolioImpactQueryError = unknown
 
 
-export function useGetApiFinancialMomentum<TData = Awaited<ReturnType<typeof getApiFinancialMomentum>>, TError = unknown>(
- params: undefined |  GetApiFinancialMomentumParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialMomentum>>, TError, TData>> & Pick<
+export function useGetApiFinancialPortfolioImpact<TData = Awaited<ReturnType<typeof getApiFinancialPortfolioImpact>>, TError = unknown>(
+ params: undefined |  GetApiFinancialPortfolioImpactParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialPortfolioImpact>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiFinancialMomentum>>,
+          Awaited<ReturnType<typeof getApiFinancialPortfolioImpact>>,
           TError,
-          Awaited<ReturnType<typeof getApiFinancialMomentum>>
+          Awaited<ReturnType<typeof getApiFinancialPortfolioImpact>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiFinancialMomentum<TData = Awaited<ReturnType<typeof getApiFinancialMomentum>>, TError = unknown>(
- params?: GetApiFinancialMomentumParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialMomentum>>, TError, TData>> & Pick<
+export function useGetApiFinancialPortfolioImpact<TData = Awaited<ReturnType<typeof getApiFinancialPortfolioImpact>>, TError = unknown>(
+ params?: GetApiFinancialPortfolioImpactParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialPortfolioImpact>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiFinancialMomentum>>,
+          Awaited<ReturnType<typeof getApiFinancialPortfolioImpact>>,
           TError,
-          Awaited<ReturnType<typeof getApiFinancialMomentum>>
+          Awaited<ReturnType<typeof getApiFinancialPortfolioImpact>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiFinancialMomentum<TData = Awaited<ReturnType<typeof getApiFinancialMomentum>>, TError = unknown>(
- params?: GetApiFinancialMomentumParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialMomentum>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+export function useGetApiFinancialPortfolioImpact<TData = Awaited<ReturnType<typeof getApiFinancialPortfolioImpact>>, TError = unknown>(
+ params?: GetApiFinancialPortfolioImpactParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialPortfolioImpact>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary Scatter: baseline revenue × growth % with bubble size representing order volume. Portfolio view only.
+ * @summary Scatter plot data for Portfolio Impact Matrix: Growth % across all tenants. X: Portfolio share %, Y: Revenue growth %, Bubble: Current revenue.
+Portfolio view only.
  */
 
-export function useGetApiFinancialMomentum<TData = Awaited<ReturnType<typeof getApiFinancialMomentum>>, TError = unknown>(
- params?: GetApiFinancialMomentumParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialMomentum>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+export function useGetApiFinancialPortfolioImpact<TData = Awaited<ReturnType<typeof getApiFinancialPortfolioImpact>>, TError = unknown>(
+ params?: GetApiFinancialPortfolioImpactParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialPortfolioImpact>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetApiFinancialMomentumQueryOptions(params,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-
-
-
-
-export type getApiFinancialDailyRevenueDeltaResponse200TextPlain = {
-  data: NetGrowthAdditionPointResponseDto[]
-  status: 200
-}
-
-export type getApiFinancialDailyRevenueDeltaResponse200ApplicationJson = {
-  data: NetGrowthAdditionPointResponseDto[]
-  status: 200
-}
-
-export type getApiFinancialDailyRevenueDeltaResponse200TextJson = {
-  data: NetGrowthAdditionPointResponseDto[]
-  status: 200
-}
-
-export type getApiFinancialDailyRevenueDeltaResponseSuccess = (getApiFinancialDailyRevenueDeltaResponse200TextPlain | getApiFinancialDailyRevenueDeltaResponse200ApplicationJson | getApiFinancialDailyRevenueDeltaResponse200TextJson) & {
-  headers: Headers;
-};
-;
-
-export type getApiFinancialDailyRevenueDeltaResponse = (getApiFinancialDailyRevenueDeltaResponseSuccess)
-
-export const getGetApiFinancialDailyRevenueDeltaUrl = (params: GetApiFinancialDailyRevenueDeltaParams,) => {
-  const normalizedParams = new URLSearchParams();
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : String(value))
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0 ? `/api/financial/daily-revenue-delta?${stringifiedParams}` : `/api/financial/daily-revenue-delta`
-}
-
-/**
- * @summary Step-line: running tally of daily growth delta. Drilldown view only.
- */
-export const getApiFinancialDailyRevenueDelta = async (params: GetApiFinancialDailyRevenueDeltaParams, options?: RequestInit): Promise<getApiFinancialDailyRevenueDeltaResponse> => {
-
-  return customClient<getApiFinancialDailyRevenueDeltaResponse>(getGetApiFinancialDailyRevenueDeltaUrl(params),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getGetApiFinancialDailyRevenueDeltaQueryKey = (params?: GetApiFinancialDailyRevenueDeltaParams,) => {
-    return [
-    `/api/financial/daily-revenue-delta`, ...(params ? [params] : [])
-    ] as const;
-    }
-
-
-export const getGetApiFinancialDailyRevenueDeltaQueryOptions = <TData = Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>, TError = unknown>(params: GetApiFinancialDailyRevenueDeltaParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetApiFinancialDailyRevenueDeltaQueryKey(params);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>> = ({ signal }) => getApiFinancialDailyRevenueDelta(params, { signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetApiFinancialDailyRevenueDeltaQueryResult = NonNullable<Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>>
-export type GetApiFinancialDailyRevenueDeltaQueryError = unknown
-
-
-export function useGetApiFinancialDailyRevenueDelta<TData = Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>, TError = unknown>(
- params: GetApiFinancialDailyRevenueDeltaParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>,
-          TError,
-          Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customClient>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiFinancialDailyRevenueDelta<TData = Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>, TError = unknown>(
- params: GetApiFinancialDailyRevenueDeltaParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>,
-          TError,
-          Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customClient>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiFinancialDailyRevenueDelta<TData = Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>, TError = unknown>(
- params: GetApiFinancialDailyRevenueDeltaParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-/**
- * @summary Step-line: running tally of daily growth delta. Drilldown view only.
- */
-
-export function useGetApiFinancialDailyRevenueDelta<TData = Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>, TError = unknown>(
- params: GetApiFinancialDailyRevenueDeltaParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetApiFinancialDailyRevenueDeltaQueryOptions(params,options)
+  const queryOptions = getGetApiFinancialPortfolioImpactQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

@@ -8,7 +8,7 @@ import type { ComparisonType } from './comparisonType';
 import type { TenantType } from './tenantType';
 import type { Timeframe } from './timeframe';
 
-export type GetApiFinancialMomentumParams = {
+export type GetApiFinancialPortfolioImpactParams = {
 /**
  * The primary timeframe for the calculation (e.g., T7, T30).
  * Defaults to T30.

@@ -52,44 +52,14 @@ public class FinancialController(
         return Ok(result.Select(v => new AccumulatedRevenuePointResponseDto(
                 v.Timestamp,
                 v.CurrentRevenue,
+                v.CurrentRevenueB2C,
+                v.CurrentRevenueB2B,
+                v.CurrentRevenueMixed,
                 v.PreviousRevenue,
                 v.CurrentAccumulated,
                 v.PreviousAccumulated)).ToList());
     }
-
-    /// <summary>
-    /// Daily/Hourly time-series: current vs. previous period revenue.
-    /// Scopes to a single tenant if tenantId is provided, otherwise portfolio-wide.
-    /// </summary>
-    [HttpGet("velocity")]
-    public async Task<ActionResult<IEnumerable<VelocityPointResponseDto>>> GetVelocity([FromQuery] FinancialRequestDto request, CancellationToken ct = default)
-    {
-        var period = await reportingCalendar.ResolvePeriodAsync(request.Timeframe, request.Comparison, ct);
-        var result = await financialService.GetVelocityAsync(period, request.TenantId, request.TenantTypes, ct);
-        return Ok(result.Select(v => new VelocityPointResponseDto(
-                v.Timestamp,
-                v.CurrentRevenue,
-                v.PreviousRevenue,
-                v.AbsoluteVariance)).ToList());
-    }
-
-    /// <summary>
-    /// Per-tenant growth %, sorted descending. Portfolio view only.
-    /// </summary>
-    [HttpGet("growth-extremes")]
-    public async Task<ActionResult<IEnumerable<GrowthExtremeResponseDto>>> GetGrowthExtremes([FromQuery] PortfolioRequestDto request, CancellationToken ct = default)
-    {
-        var period = await reportingCalendar.ResolvePeriodAsync(request.Timeframe, request.Comparison, ct);
-        var result = await financialService.GetGrowthExtremesAsync(period, request.TenantTypes, ct);
-        return Ok(result.Select(g => new GrowthExtremeResponseDto(
-            g.TenantId,
-            g.TenantName,
-            g.CurrentRevenue,
-            g.PreviousRevenue,
-            g.GrowthPercentage,
-            g.AbsoluteVariance)));
-    }
-
+    
     /// <summary>
     /// Scatter plot data: revenue efficiency across all tenants. X: order volume, Y: AOV, Bubble: portfolio revenue share.
     /// Portfolio view only.
@@ -117,36 +87,52 @@ public class FinancialController(
     }
 
     /// <summary>
-    /// Diverging bar chart data: volume anomalies compared to a baseline period.
+    /// Distribution metrics (AOV, Volume, Revenue, Q1/Q2/Q3 statistics) across business model cohorts.
     /// Portfolio view only.
     /// </summary>
-    [HttpGet("volume-anomaly")]
-    public async Task<ActionResult<IEnumerable<VolumeAnomalyResponseDto>>> GetVolumeAnomaly([FromQuery] PortfolioRequestDto request, CancellationToken ct = default)
+    [HttpGet("cross-segment-distribution")]
+    public async Task<ActionResult<CrossSegmentDistributionResponseDto>> GetCrossSegmentDistribution([FromQuery] PortfolioRequestDto request, CancellationToken ct = default)
     {
         var period = await reportingCalendar.ResolvePeriodAsync(request.Timeframe, request.Comparison, ct);
-        var result = await financialService.GetVolumeAnomalyAsync(period, request.TenantTypes, ct);
-        return Ok(result.Select(r => new VolumeAnomalyResponseDto
-        {
-            TenantId = r.TenantId,
-            TenantName = r.TenantName,
-            VolumeDeviationPercentage = r.VolumeDeviationPercentage,
-            CurrentVolume = r.CurrentVolume,
-            BaselineVolume = r.BaselineVolume
-        }));
+        var result = await financialService.GetCrossSegmentDistributionAsync(period, request.TenantTypes, ct);
+        return Ok(new CrossSegmentDistributionResponseDto(
+            result.Cohorts.Select(c => new CrossSegmentCohortGroupResponseDto(
+                c.Type,
+                c.TenantCount,
+                c.MedianAov, c.Q1Aov, c.Q3Aov,
+                c.MedianVolume, c.Q1Volume, c.Q3Volume,
+                c.MedianRevenue, c.Q1Revenue, c.Q3Revenue
+            )).ToList(),
+            result.Tenants.Select(t => new CrossSegmentCohortTenantResponseDto(
+                t.TenantId,
+                t.TenantName,
+                t.Type,
+                t.AverageOrderValue,
+                t.OrderVolume,
+                t.PeriodRevenue,
+                t.PortfolioSharePercentage,
+                t.AovPercentileRank,
+                t.VolumePercentileRank,
+                t.RevenuePercentileRank,
+                t.LitiumBaseUrl
+            )).ToList()
+        ));
     }
-
+    
     /// <summary>
-    /// Scatter: baseline revenue × growth % with bubble size representing order volume. Portfolio view only.
+    /// Scatter plot data for Portfolio Impact Matrix: Growth % across all tenants. X: Portfolio share %, Y: Revenue growth %, Bubble: Current revenue.
+    /// Portfolio view only.
     /// </summary>
-    [HttpGet("momentum")]
-    public async Task<ActionResult<MomentumResponseDto>> GetMomentum([FromQuery] PortfolioRequestDto request, CancellationToken ct = default)
+    [HttpGet("portfolio-impact")]
+    public async Task<ActionResult<PortfolioImpactResponseDto>> GetPortfolioImpact([FromQuery] PortfolioRequestDto request, CancellationToken ct = default)
     {
         var period = await reportingCalendar.ResolvePeriodAsync(request.Timeframe, request.Comparison, ct);
-        var result = await financialService.GetMomentumAsync(period, request.TenantTypes, ct);
-        return Ok(new MomentumResponseDto(
+        var result = await financialService.GetPortfolioImpactAsync(period, request.TenantTypes, ct);
+        return Ok(new PortfolioImpactResponseDto(
             result.MedianBaselineRevenue,
             result.GlobalGrowthPercentage,
-            result.Tenants.Select(t => new MomentumTenantResponseDto(
+            result.MedianPortfolioShare,
+            result.Tenants.Select(t => new PortfolioImpactTenantResponseDto(
                 t.TenantId,
                 t.TenantName,
                 t.Type,
@@ -154,20 +140,9 @@ public class FinancialController(
                 t.GrowthPercentage,
                 t.CurrentRevenue,
                 t.OrderVolume,
+                t.VolumeGrowthPercentage,
+                t.PortfolioSharePercentage,
                 t.LitiumBaseUrl)).ToList()));
-    }
-
-    /// <summary>
-    /// Step-line: running tally of daily growth delta. Drilldown view only.
-    /// </summary>
-    [HttpGet("daily-revenue-delta")]
-    public async Task<ActionResult<IEnumerable<NetGrowthAdditionPointResponseDto>>> GetNetGrowthAddition([FromQuery] DrilldownRequestDto request, CancellationToken ct = default)
-    {
-        var period = await reportingCalendar.ResolvePeriodAsync(request.Timeframe, request.Comparison, ct);
-        var result = await financialService.GetNetGrowthAdditionAsync(period, request.TenantId, ct);
-        return Ok(result.Select(n => new NetGrowthAdditionPointResponseDto(
-                n.Timestamp,
-                n.NetGrowthAddition)).ToList());
     }
 
     /// <summary>

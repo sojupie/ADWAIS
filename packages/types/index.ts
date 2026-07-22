@@ -3,22 +3,17 @@ import * as Generated from './generated';
 export type ComparisonPeriod = Generated.ComparisonType;
 export type GlobalKpi = Required<Generated.KpiResponseDto>;
 export type FinancialKpi = GlobalKpi; // Deprecated but maps to KpiResponseDto
-export type FinancialVelocityPoint = Required<Generated.VelocityPointResponseDto>;
 export type CumulativeGrowthDeltaPoint = Required<Generated.CumulativeGrowthDeltaPointResponseDto>;
 export type OrderBin = Required<Omit<Generated.OrderBinResponseDto, 'binLabel'>> & {
   binLabel: string;
 };
 
-export type GrowthExtreme = Required<Omit<Generated.GrowthExtremeResponseDto, 'tenantName'>> & {
+export type PortfolioImpactTenant = Required<Omit<Generated.PortfolioImpactTenantResponseDto, 'tenantName'>> & {
   tenantName: string;
 };
 
-export type MomentumTenant = Required<Omit<Generated.MomentumTenantResponseDto, 'tenantName'>> & {
-  tenantName: string;
-};
-
-export type MomentumResponse = Required<Omit<Generated.MomentumResponseDto, 'tenants'>> & {
-  tenants: MomentumTenant[];
+export type PortfolioImpactResponse = Required<Omit<Generated.PortfolioImpactResponseDto, 'tenants'>> & {
+  tenants: PortfolioImpactTenant[];
 };
 
 export type RevenueEfficiencyTenant = Required<Omit<Generated.RevenueEfficiencyTenantResponseDto, 'tenantName'>> & {
@@ -29,8 +24,15 @@ export type RevenueEfficiencyResponse = Required<Omit<Generated.RevenueEfficienc
   tenants: RevenueEfficiencyTenant[];
 };
 
-export type VolumeAnomalyResponseDto = Required<Omit<Generated.VolumeAnomalyResponseDto, 'tenantName'>> & {
+export type CrossSegmentCohortTenant = Required<Omit<Generated.CrossSegmentCohortTenantResponseDto, 'tenantName'>> & {
   tenantName: string;
+};
+
+export type CrossSegmentCohortGroup = Required<Generated.CrossSegmentCohortGroupResponseDto>;
+
+export type CrossSegmentDistributionResponse = Required<Omit<Generated.CrossSegmentDistributionResponseDto, 'cohorts' | 'tenants'>> & {
+  cohorts: CrossSegmentCohortGroup[];
+  tenants: CrossSegmentCohortTenant[];
 };
 
 export type UptimeMonitorDto = {

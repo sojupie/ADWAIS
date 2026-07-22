@@ -8,6 +8,9 @@
 export interface AccumulatedRevenuePointResponseDto {
   timestamp?: string;
   currentRevenue?: number;
+  currentRevenueB2C?: number;
+  currentRevenueB2B?: number;
+  currentRevenueMixed?: number;
   previousRevenue?: number;
   currentAccumulated?: number;
   previousAccumulated?: number;

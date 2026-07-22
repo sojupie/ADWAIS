@@ -8,25 +8,19 @@ import type { ComparisonType } from './comparisonType';
 import type { TenantType } from './tenantType';
 import type { Timeframe } from './timeframe';
 
-export type GetApiFinancialVelocityParams = {
+export type GetApiFinancialCrossSegmentDistributionParams = {
 /**
  * The primary timeframe for the calculation (e.g., T7, T30).
  * Defaults to T30.
  */
 timeframe?: Timeframe;
 /**
- * Optional. Scopes the metrics to a specific tenant.
- * If null, metrics represent the global portfolio total.
- */
-tenantId?: string;
-/**
- * Optional. Restricts portfolio metrics to tenants with one of these business models.
- * Ignored when tenantId is provided.
- */
-tenantTypes?: TenantType[];
-/**
  * The comparison period for the timeframe.
  * Defaults to Preceding.
  */
 comparison?: ComparisonType;
+/**
+ * Optional. Restricts portfolio metrics to tenants with one of these business models.
+ */
+tenantTypes?: TenantType[];
 };

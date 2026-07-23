@@ -10,7 +10,7 @@ interface RecurringJobsTableProps {
 
 export function RecurringJobsTable({ recurring }: RecurringJobsTableProps) {
   return (
-    <div className="w-full text-left text-sm overflow-x-auto">
+    <div className="custom-scrollbar w-full text-left text-sm overflow-x-auto">
       <table className="w-full">
         <thead className="bg-surface-container-low border-b border-outline-variant text-on-surface-variant font-semibold uppercase text-xs">
           <tr>

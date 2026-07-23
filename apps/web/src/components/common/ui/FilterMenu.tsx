@@ -87,7 +87,7 @@ export function FilterPanelFrame({ title, children, embedded = false, floatingSt
       style={floatingStyle}
       className={embedded
         ? 'flex flex-col gap-4 p-4'
-        : 'fixed z-[200] flex flex-col gap-4 overflow-y-auto rounded-3xl border border-outline-variant bg-surface p-4 m3-elevation-4'}
+        : 'custom-scrollbar fixed z-[200] flex flex-col gap-4 overflow-y-auto rounded-3xl border border-outline-variant bg-surface p-4 m3-elevation-4'}
     >
       <div className="flex items-center gap-4 border-b border-outline-variant pb-3">
         <h2 className="m-0 text-md font-black text-on-surface">{title}</h2>

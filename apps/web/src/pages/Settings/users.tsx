@@ -27,7 +27,7 @@ export function UsersView() {
                     icon={<Users size={24} />}
                 />
                 <div className="flex-1 overflow-y-auto custom-scrollbar bg-surface rounded-xl shadow-sm border border-outline-variant/60">
-                    <div className="overflow-x-auto">
+                    <div className="custom-scrollbar overflow-x-auto">
                         <table className="w-full text-left text-sm whitespace-nowrap">
                             <thead className="bg-surface text-on-surface-variant border-b border-outline-variant">
                                 <tr>

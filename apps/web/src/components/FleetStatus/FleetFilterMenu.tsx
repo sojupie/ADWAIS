@@ -1,14 +1,11 @@
-import { useMemo, type CSSProperties } from 'react';
-import type { UptimeMonitorDto } from '@types';
-import { filterFleetMonitors, isFleetSelectionVisible, type FleetSelection } from '../../utils/fleetFilters';
-import { countActiveFilterGroups } from '../../utils/filterCounts';
+import type { CSSProperties, ReactNode } from 'react';
+import { BookmarkCheck, RotateCcw, Trash2, X } from 'lucide-react';
 import {
   FilterChip,
   FilterPanelFrame,
   FilterSectionHeader,
   FloatingFilterMenu,
 } from '../common/ui/FilterMenu';
-import { Select } from '../common/ui/Select';
 
 const STATUS_OPTIONS = [
   { label: 'Up', value: 'UP' },
@@ -19,207 +16,228 @@ const STATUS_OPTIONS = [
 ] as const;
 
 export interface FleetFilterMenuProps {
-  monitors: UptimeMonitorDto[];
   availableTags: string[];
-  selection: FleetSelection | null;
-  selectedTags: string[];
-  selectedStatuses: string[];
-  onSelectionChange: (selection: FleetSelection | null) => void;
-  onTagsChange: (tags: string[]) => void;
-  onStatusesChange: (statuses: string[]) => void;
+  includedTags: string[];
+  excludedTags: string[];
+  unavailableIncludedTags: string[];
+  unavailableExcludedTags: string[];
+  hiddenStatuses: string[];
+  onIncludedTagsChange: (tags: string[]) => void;
+  onExcludedTagsChange: (tags: string[]) => void;
+  onHiddenStatusesChange: (statuses: string[]) => void;
+  onClearActive: () => void;
+  onSaveDefault: () => void;
+  onRestoreSaved: () => void;
+  onForgetSaved: () => void;
+  hasSavedPreferences: boolean;
+  hasUnsavedChanges: boolean;
 }
 
-function monitorKey(monitor: UptimeMonitorDto) {
-  return `${monitor.tenantId}:${monitor.id}`;
+function UnavailableTag({ tag, onRemove }: { tag: string; onRemove: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onRemove}
+      aria-label={`Remove unavailable tag ${tag}`}
+      title="This tag is not present on any currently available monitor"
+      className="inline-flex min-h-8 cursor-pointer items-center gap-1.5 rounded-lg border border-dashed border-error bg-error-container px-2 text-sm font-bold text-on-error-container transition-colors hover:bg-error/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary md:text-md"
+    >
+      <span>{tag}</span>
+      <span className="font-medium">(unavailable)</span>
+      <X size={15} aria-hidden="true" />
+    </button>
+  );
 }
 
-function tenantLabel(monitor: UptimeMonitorDto) {
-  return monitor.tenantName || monitor.name?.split('-')[0]?.trim() || 'Tenant';
-}
-
-function toggleFilterValue(values: string[], value: string) {
+function toggleValue(values: string[], value: string) {
   return values.includes(value) ? values.filter(item => item !== value) : [...values, value];
 }
 
-function activeFilterCount({
-  selection,
-  selectedTags,
-  selectedStatuses,
-}: Pick<FleetFilterMenuProps, 'selection' | 'selectedTags' | 'selectedStatuses'>) {
-  return countActiveFilterGroups(
-    Boolean(selection?.tenantId),
-    selection?.monitorId != null,
-    selectedTags.length > 0,
-    selectedStatuses.length > 0,
+function getFleetActiveFilterCount({
+  includedTags,
+  excludedTags,
+  hiddenStatuses,
+}: Pick<FleetFilterMenuProps, 'includedTags' | 'excludedTags' | 'hiddenStatuses'>) {
+  return Number(includedTags.length > 0 || excludedTags.length > 0)
+    + Number(hiddenStatuses.length > 0);
+}
+
+function PreferenceButton({
+  children,
+  disabled,
+  onClick,
+}: {
+  children: ReactNode;
+  disabled?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-full border border-outline-variant bg-surface px-4 text-sm font-bold text-on-surface transition-colors hover:bg-surface-container-high focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary disabled:cursor-not-allowed disabled:bg-on-surface/[0.10] disabled:text-on-surface/[0.38] md:text-md"
+    >
+      {children}
+    </button>
   );
 }
 
 export function FleetFilterPanel({
-  monitors,
   availableTags,
-  selection,
-  selectedTags,
-  selectedStatuses,
-  onSelectionChange,
-  onTagsChange,
-  onStatusesChange,
+  includedTags,
+  excludedTags,
+  unavailableIncludedTags,
+  unavailableExcludedTags,
+  hiddenStatuses,
+  onIncludedTagsChange,
+  onExcludedTagsChange,
+  onHiddenStatusesChange,
+  onSaveDefault,
+  onRestoreSaved,
+  onForgetSaved,
+  hasSavedPreferences,
+  hasUnsavedChanges,
   embedded = false,
   floatingStyle,
 }: FleetFilterMenuProps & { embedded?: boolean; floatingStyle?: CSSProperties }) {
-  const eligibleMonitors = useMemo(
-    () => filterFleetMonitors(monitors, { tags: selectedTags, statuses: selectedStatuses }),
-    [monitors, selectedStatuses, selectedTags],
-  );
-  const tenants = useMemo(() => {
-    const labels = new Map<string, string>();
-    for (const monitor of eligibleMonitors) {
-      if (!labels.has(monitor.tenantId)) labels.set(monitor.tenantId, tenantLabel(monitor));
+  const toggleIncludedTag = (tag: string) => {
+    const willInclude = !includedTags.includes(tag);
+    onIncludedTagsChange(toggleValue(includedTags, tag));
+    if (willInclude && excludedTags.includes(tag)) {
+      onExcludedTagsChange(excludedTags.filter(item => item !== tag));
     }
-    return [...labels].sort(([, a], [, b]) => a.localeCompare(b));
-  }, [eligibleMonitors]);
-  const monitorOptions = useMemo(
-    () => selection?.tenantId ? eligibleMonitors
-      .filter(monitor => monitor.tenantId === selection.tenantId)
-      .sort((a, b) => (a.name ?? '').localeCompare(b.name ?? '')) : [],
-    [eligibleMonitors, selection],
-  );
-  const disabledTags = useMemo(() => {
-    const disabledValues = new Set<string>();
-    for (const tag of availableTags) {
-      const isSelected = selectedTags.includes(tag);
-      const candidateTags = isSelected ? selectedTags.filter(item => item !== tag) : [tag];
-      const matchingMonitors = filterFleetMonitors(monitors, {
-        tags: candidateTags,
-        statuses: selectedStatuses,
-      });
-      const valid = selection
-        ? isFleetSelectionVisible(matchingMonitors, selection)
-        : matchingMonitors.length > 0;
-      if (!valid) disabledValues.add(tag);
+  };
+  const toggleExcludedTag = (tag: string) => {
+    const willExclude = !excludedTags.includes(tag);
+    onExcludedTagsChange(toggleValue(excludedTags, tag));
+    if (willExclude && includedTags.includes(tag)) {
+      onIncludedTagsChange(includedTags.filter(item => item !== tag));
     }
-    return disabledValues;
-  }, [availableTags, monitors, selectedStatuses, selectedTags, selection]);
-  const disabledStatuses = useMemo(() => {
-    const disabledValues = new Set<string>();
-    for (const { value } of STATUS_OPTIONS) {
-      const isSelected = selectedStatuses.includes(value);
-      const candidateStatuses = isSelected
-        ? selectedStatuses.filter(item => item !== value)
-        : [value];
-      const matchingMonitors = filterFleetMonitors(monitors, {
-        tags: selectedTags,
-        statuses: candidateStatuses,
-      });
-      const valid = selection
-        ? isFleetSelectionVisible(matchingMonitors, selection)
-        : matchingMonitors.length > 0;
-      if (!valid) disabledValues.add(value);
-    }
-    return disabledValues;
-  }, [monitors, selectedStatuses, selectedTags, selection]);
+  };
 
   return (
     <FilterPanelFrame title="Filter fleet" embedded={embedded} floatingStyle={floatingStyle}>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="min-w-0">
-          <FilterSectionHeader label="Tenant" active={Boolean(selection?.tenantId)} onClear={() => onSelectionChange(null)} />
-          <Select
-            aria-label="Tenant"
-            value={selection?.tenantId ?? ''}
-            onChange={event => onSelectionChange(event.target.value
-              ? { tenantId: event.target.value, monitorId: null }
-              : null)}
-            variant="outlined"
-            size="md"
-            containerClassName="mt-1"
-            className="md:text-md"
-          >
-            <option value="">All tenants</option>
-            {tenants.map(([tenantId, label]) => <option key={tenantId} value={tenantId}>{label}</option>)}
-          </Select>
-        </div>
-
-        <div className="min-w-0">
-          <FilterSectionHeader
-            label="Monitor"
-            active={selection?.monitorId != null}
-            onClear={() => onSelectionChange(selection?.tenantId
-              ? { tenantId: selection.tenantId, monitorId: null }
-              : null)}
-          />
-          <Select
-            aria-label="Monitor"
-            disabled={!selection?.tenantId}
-            value={selection?.monitorId != null ? `${selection.tenantId}:${selection.monitorId}` : ''}
-            onChange={event => {
-              const monitor = eligibleMonitors.find(item => monitorKey(item) === event.target.value);
-              onSelectionChange(monitor
-                ? { tenantId: monitor.tenantId, monitorId: monitor.id }
-                : selection?.tenantId
-                  ? { tenantId: selection.tenantId, monitorId: null }
-                  : null);
-            }}
-            variant="outlined"
-            size="md"
-            containerClassName="mt-1"
-            className="md:text-md"
-          >
-            <option value="">{selection?.tenantId ? 'All monitors' : 'Select a tenant first'}</option>
-            {monitorOptions.map(monitor => (
-              <option key={monitorKey(monitor)} value={monitorKey(monitor)}>{monitor.name}</option>
-            ))}
-          </Select>
-        </div>
-      </div>
-
       <div>
-        <FilterSectionHeader label="Status" active={selectedStatuses.length > 0} onClear={() => onStatusesChange([])} />
-        <div className="mt-1 flex flex-wrap gap-2">
+        <FilterSectionHeader
+          label="Show statuses"
+          active={hiddenStatuses.length > 0}
+          onClear={() => onHiddenStatusesChange([])}
+        />
+        <p className="mb-2 text-sm text-on-surface-variant md:text-md">
+          Uncheck a status to hide it from the matrix and aggregate facts.
+        </p>
+        <div className="flex flex-wrap gap-2">
           {STATUS_OPTIONS.map(option => (
             <FilterChip
               key={option.value}
               label={option.label}
-              checked={selectedStatuses.includes(option.value)}
-              disabled={disabledStatuses.has(option.value)}
-              onChange={() => onStatusesChange(toggleFilterValue(selectedStatuses, option.value))}
+              checked={!hiddenStatuses.includes(option.value)}
+              onChange={() => onHiddenStatusesChange(toggleValue(hiddenStatuses, option.value))}
             />
           ))}
         </div>
       </div>
 
       <div className="min-h-0">
-        <FilterSectionHeader label="Tags" active={selectedTags.length > 0} onClear={() => onTagsChange([])} />
-        <div className="custom-scrollbar mt-1 flex max-h-36 flex-wrap gap-2 overflow-y-auto pr-1">
-          {availableTags.length > 0 ? availableTags.map(tag => (
+        <FilterSectionHeader
+          label="Include tags"
+          active={includedTags.length > 0}
+          onClear={() => onIncludedTagsChange([])}
+        />
+        <p className="mb-2 text-sm text-on-surface-variant md:text-md">
+          When selected, monitors matching any included tag are shown.
+        </p>
+        <div className="custom-scrollbar flex max-h-28 flex-wrap gap-2 overflow-y-auto pr-1">
+          {availableTags.map(tag => (
             <FilterChip
               key={tag}
               label={tag}
-              checked={selectedTags.includes(tag)}
-              disabled={disabledTags.has(tag)}
-              onChange={() => onTagsChange(toggleFilterValue(selectedTags, tag))}
+              checked={includedTags.includes(tag)}
+              onChange={() => toggleIncludedTag(tag)}
             />
-          )) : (
+          ))}
+          {unavailableIncludedTags.map(tag => (
+            <UnavailableTag
+              key={`unavailable-included-${tag}`}
+              tag={tag}
+              onRemove={() => onIncludedTagsChange(includedTags.filter(item => item !== tag))}
+            />
+          ))}
+          {availableTags.length === 0 && unavailableIncludedTags.length === 0 && (
             <span className="text-sm italic text-on-surface-variant md:text-md">No tags available</span>
           )}
+        </div>
+      </div>
+
+      <div className="min-h-0">
+        <FilterSectionHeader
+          label="Exclude tags"
+          active={excludedTags.length > 0}
+          onClear={() => onExcludedTagsChange([])}
+        />
+        <p className="mb-2 text-sm text-on-surface-variant md:text-md">
+          Excluded tags take precedence over included tags.
+        </p>
+        <div className="custom-scrollbar flex max-h-28 flex-wrap gap-2 overflow-y-auto pr-1">
+          {availableTags.map(tag => (
+            <FilterChip
+              key={tag}
+              label={tag}
+              checked={excludedTags.includes(tag)}
+              onChange={() => toggleExcludedTag(tag)}
+            />
+          ))}
+          {unavailableExcludedTags.map(tag => (
+            <UnavailableTag
+              key={`unavailable-excluded-${tag}`}
+              tag={tag}
+              onRemove={() => onExcludedTagsChange(excludedTags.filter(item => item !== tag))}
+            />
+          ))}
+          {availableTags.length === 0 && unavailableExcludedTags.length === 0 && (
+            <span className="text-sm italic text-on-surface-variant md:text-md">No tags available</span>
+          )}
+        </div>
+      </div>
+
+      <div className="border-t border-outline-variant pt-4">
+        <h3 className="text-sm font-black uppercase tracking-widest text-on-surface-variant md:text-md">
+          Saved defaults
+        </h3>
+        <p className="mt-1 text-sm text-on-surface-variant md:text-md">
+          Saved defaults are restored the next time you open Fleet Status.
+        </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <PreferenceButton disabled={!hasUnsavedChanges} onClick={onSaveDefault}>
+            <BookmarkCheck size={17} aria-hidden="true" />
+            Save as default
+          </PreferenceButton>
+          <PreferenceButton
+            disabled={!hasSavedPreferences || !hasUnsavedChanges}
+            onClick={onRestoreSaved}
+          >
+            <RotateCcw size={17} aria-hidden="true" />
+            Restore saved
+          </PreferenceButton>
+          <PreferenceButton disabled={!hasSavedPreferences} onClick={onForgetSaved}>
+            <Trash2 size={17} aria-hidden="true" />
+            Forget default
+          </PreferenceButton>
         </div>
       </div>
     </FilterPanelFrame>
   );
 }
 
-export function FleetFilterMenu({
-  onClearAll,
-  ...props
-}: FleetFilterMenuProps & { onClearAll: () => void }) {
-  const count = activeFilterCount(props);
-
+export function FleetFilterMenu(props: FleetFilterMenuProps) {
   return (
     <FloatingFilterMenu
-      activeCount={count}
+      activeCount={getFleetActiveFilterCount(props)}
       ariaLabel="Fleet filter controls"
-      clearLabel="Reset all fleet filters"
-      onClearAll={onClearAll}
-      width={520}
+      clearLabel="Clear active fleet filters"
+      onClearAll={props.onClearActive}
+      width={560}
       placement="top"
       renderPanel={floatingStyle => <FleetFilterPanel {...props} floatingStyle={floatingStyle} />}
     />

@@ -44,7 +44,15 @@ public class MonitorController(
     public async Task<ActionResult<MonitorAnalyticsResponseDto>> GetAnalytics([FromQuery] MonitorRequestDto request, CancellationToken ct = default)
     {
         var period = await reportingCalendar.ResolvePeriodAsync(request.Timeframe, request.Comparison, ct);
-        var result = await _monitorService.GetAnalyticsAsync(period, request.TenantId, request.MonitorId, request.Tags, request.Statuses, ct);
+        var result = await _monitorService.GetAnalyticsAsync(
+            period,
+            request.TenantId,
+            request.MonitorId,
+            request.Tags,
+            request.Statuses,
+            ct,
+            excludedTags: request.ExcludedTags,
+            excludedStatuses: request.ExcludedStatuses);
 
         return Ok(new MonitorAnalyticsResponseDto
         {
@@ -93,7 +101,9 @@ public class MonitorController(
             request.MonitorId,
             request.Tags,
             request.Statuses,
-            ct);
+            ct,
+            excludedTags: request.ExcludedTags,
+            excludedStatuses: request.ExcludedStatuses);
 
         return Ok(new MonitorAvailabilitySeriesResponseDto
         {
@@ -155,6 +165,19 @@ public class MonitorController(
         if (request.Statuses != null && request.Statuses.Any())
         {
             resultDtos = resultDtos.Where(m => request.Statuses.Contains(m.CurrentStatus, StringComparer.OrdinalIgnoreCase));
+        }
+
+        if (request.ExcludedTags is { Length: > 0 })
+        {
+            resultDtos = resultDtos.Where(m =>
+                m.Tags == null
+                || !m.Tags.Intersect(request.ExcludedTags, StringComparer.OrdinalIgnoreCase).Any());
+        }
+
+        if (request.ExcludedStatuses is { Length: > 0 })
+        {
+            resultDtos = resultDtos.Where(m =>
+                !request.ExcludedStatuses.Contains(m.CurrentStatus, StringComparer.OrdinalIgnoreCase));
         }
 
         return Ok(resultDtos);

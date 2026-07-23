@@ -4649,7 +4649,7 @@ export const getGetApiMonitorsAnalyticsUrl = (params?: GetApiMonitorsAnalyticsPa
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    const explodeParameters = ["tags","statuses"];
+    const explodeParameters = ["tags","excludedTags","statuses","excludedStatuses"];
 
     if (Array.isArray(value) && explodeParameters.includes(key)) {
       value.forEach((v) => {
@@ -4789,7 +4789,7 @@ export const getGetApiMonitorsAvailabilityUrl = (params?: GetApiMonitorsAvailabi
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    const explodeParameters = ["tags","statuses"];
+    const explodeParameters = ["tags","excludedTags","statuses","excludedStatuses"];
 
     if (Array.isArray(value) && explodeParameters.includes(key)) {
       value.forEach((v) => {
@@ -4927,7 +4927,7 @@ export const getGetApiMonitorsUrl = (params?: GetApiMonitorsParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    const explodeParameters = ["tags","statuses"];
+    const explodeParameters = ["tags","excludedTags","statuses","excludedStatuses"];
 
     if (Array.isArray(value) && explodeParameters.includes(key)) {
       value.forEach((v) => {

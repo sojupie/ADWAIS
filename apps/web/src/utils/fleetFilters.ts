@@ -2,8 +2,9 @@ import type { UptimeMonitorDto } from '@types';
 import { normalizeStatus } from './monitorStatusHelper';
 
 export interface FleetFilters {
-  tags: string[];
-  statuses: string[];
+  includedTags: string[];
+  excludedTags: string[];
+  hiddenStatuses: string[];
 }
 
 export interface FleetSelection {
@@ -30,21 +31,25 @@ export function getFleetTags(monitors: UptimeMonitorDto[]): string[] {
 
 export function filterFleetMonitors(
   monitors: UptimeMonitorDto[],
-  { tags, statuses }: FleetFilters,
+  { includedTags, excludedTags, hiddenStatuses }: FleetFilters,
 ): UptimeMonitorDto[] {
-  const selectedTags = new Set(tags.map(normalizeFilterValue));
-  const selectedStatuses = new Set(statuses.map(normalizeStatus));
+  const includedTagSet = new Set(includedTags.map(normalizeFilterValue));
+  const excludedTagSet = new Set(excludedTags.map(normalizeFilterValue));
+  const hiddenStatusSet = new Set(hiddenStatuses.map(normalizeStatus));
 
-  if (selectedTags.size === 0 && selectedStatuses.size === 0) return monitors;
+  if (includedTagSet.size === 0 && excludedTagSet.size === 0 && hiddenStatusSet.size === 0) {
+    return monitors;
+  }
 
   return monitors.filter(monitor => {
-    const matchesTag = selectedTags.size === 0 || (monitor.tags ?? []).some(tag =>
-      selectedTags.has(normalizeFilterValue(tag)),
+    const normalizedTags = (monitor.tags ?? []).map(normalizeFilterValue);
+    const matchesIncludedTags = includedTagSet.size === 0 || normalizedTags.some(tag =>
+      includedTagSet.has(tag),
     );
-    const matchesStatus = selectedStatuses.size === 0 ||
-      selectedStatuses.has(normalizeStatus(monitor.currentStatus));
+    const matchesExcludedTags = !normalizedTags.some(tag => excludedTagSet.has(tag));
+    const matchesStatus = !hiddenStatusSet.has(normalizeStatus(monitor.currentStatus));
 
-    return matchesTag && matchesStatus;
+    return matchesIncludedTags && matchesExcludedTags && matchesStatus;
   });
 }
 

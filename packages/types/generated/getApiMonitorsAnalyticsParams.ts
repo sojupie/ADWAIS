@@ -34,7 +34,15 @@ comparison?: ComparisonType;
  */
 tags?: string[];
 /**
+ * Optional. Excludes monitors matching any of these tags. Exclusion takes precedence.
+ */
+excludedTags?: string[];
+/**
  * Optional. Filters the monitors by specific statuses.
  */
 statuses?: string[];
+/**
+ * Optional. Excludes monitors with any of these statuses.
+ */
+excludedStatuses?: string[];
 };

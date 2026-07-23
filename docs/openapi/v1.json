@@ -1707,9 +1707,31 @@
             }
           },
           {
+            "name": "excludedTags",
+            "in": "query",
+            "description": "Optional. Excludes monitors matching any of these tags. Exclusion takes precedence.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
             "name": "statuses",
             "in": "query",
             "description": "Optional. Filters the monitors by specific statuses.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "excludedStatuses",
+            "in": "query",
+            "description": "Optional. Excludes monitors with any of these statuses.",
             "schema": {
               "type": "array",
               "items": {
@@ -1795,9 +1817,31 @@
             }
           },
           {
+            "name": "excludedTags",
+            "in": "query",
+            "description": "Optional. Excludes monitors matching any of these tags. Exclusion takes precedence.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
             "name": "statuses",
             "in": "query",
             "description": "Optional. Filters the monitors by specific statuses.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "excludedStatuses",
+            "in": "query",
+            "description": "Optional. Excludes monitors with any of these statuses.",
             "schema": {
               "type": "array",
               "items": {
@@ -1883,9 +1927,31 @@
             }
           },
           {
+            "name": "excludedTags",
+            "in": "query",
+            "description": "Optional. Excludes monitors matching any of these tags. Exclusion takes precedence.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
             "name": "statuses",
             "in": "query",
             "description": "Optional. Filters the monitors by specific statuses.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "excludedStatuses",
+            "in": "query",
+            "description": "Optional. Excludes monitors with any of these statuses.",
             "schema": {
               "type": "array",
               "items": {

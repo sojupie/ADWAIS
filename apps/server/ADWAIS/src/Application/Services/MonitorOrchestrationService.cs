@@ -18,7 +18,15 @@ public class MonitorOrchestrationService(
     private record LatencyRow(DateTimeOffset Timestamp, double? Average, double? P10, double? P90);
     private record AvailabilityRow(int MonitorId, DateTimeOffset Timestamp, double? UptimePercentage);
 
-    public async Task<MonitorAnalyticsDto> GetAnalyticsAsync(ResolvedPeriod period, Guid? tenantId = null, int? monitorId = null, string[]? tags = null, string[]? statuses = null, CancellationToken ct = default)
+    public async Task<MonitorAnalyticsDto> GetAnalyticsAsync(
+        ResolvedPeriod period,
+        Guid? tenantId = null,
+        int? monitorId = null,
+        string[]? tags = null,
+        string[]? statuses = null,
+        CancellationToken ct = default,
+        string[]? excludedTags = null,
+        string[]? excludedStatuses = null)
     {
         var currentStart = period.CurrentStart;
         var currentEnd = period.CurrentEnd;
@@ -41,14 +49,7 @@ public class MonitorOrchestrationService(
             HydrateLiveStatus(m);
         }
 
-        if (tags != null && tags.Any())
-        {
-            monitors = monitors.Where(m => m.Tags != null && m.Tags.Intersect(tags, StringComparer.OrdinalIgnoreCase).Any()).ToList();
-        }
-        if (statuses != null && statuses.Any())
-        {
-            monitors = monitors.Where(m => statuses.Contains(m.StatusStr, StringComparer.OrdinalIgnoreCase)).ToList();
-        }
+        monitors = ApplyMonitorFilters(monitors, tags, statuses, excludedTags, excludedStatuses);
 
         var allowedMonitorIds = monitors.Select(m => m.Id).ToList();
 
@@ -232,7 +233,9 @@ public class MonitorOrchestrationService(
         int? monitorId = null,
         string[]? tags = null,
         string[]? statuses = null,
-        CancellationToken ct = default)
+        CancellationToken ct = default,
+        string[]? excludedTags = null,
+        string[]? excludedStatuses = null)
     {
         IQueryable<UptimeMonitor> monitorQuery = dbContext.Monitors.AsNoTracking();
         if (monitorId.HasValue)
@@ -248,19 +251,7 @@ public class MonitorOrchestrationService(
             HydrateLiveStatus(monitor);
         }
 
-        if (tags is { Length: > 0 })
-        {
-            monitors = monitors
-                .Where(m => m.Tags != null && m.Tags.Intersect(tags, StringComparer.OrdinalIgnoreCase).Any())
-                .ToList();
-        }
-
-        if (statuses is { Length: > 0 })
-        {
-            monitors = monitors
-                .Where(m => statuses.Contains(m.StatusStr, StringComparer.OrdinalIgnoreCase))
-                .ToList();
-        }
+        monitors = ApplyMonitorFilters(monitors, tags, statuses, excludedTags, excludedStatuses);
 
         var monitorIds = monitors.Select(m => m.Id).ToList();
         var queryStart = period.CurrentStart.AddDays(-1);
@@ -444,6 +435,44 @@ public class MonitorOrchestrationService(
     {
         var present = values.Where(value => value.HasValue).Select(value => value!.Value).ToList();
         return present.Count == 0 ? null : present.Average();
+    }
+
+    private static List<UptimeMonitor> ApplyMonitorFilters(
+        IEnumerable<UptimeMonitor> monitors,
+        string[]? includedTags,
+        string[]? includedStatuses,
+        string[]? excludedTags,
+        string[]? excludedStatuses)
+    {
+        var filtered = monitors;
+
+        if (includedTags is { Length: > 0 })
+        {
+            filtered = filtered.Where(monitor =>
+                monitor.Tags != null
+                && monitor.Tags.Intersect(includedTags, StringComparer.OrdinalIgnoreCase).Any());
+        }
+
+        if (includedStatuses is { Length: > 0 })
+        {
+            filtered = filtered.Where(monitor =>
+                includedStatuses.Contains(monitor.StatusStr, StringComparer.OrdinalIgnoreCase));
+        }
+
+        if (excludedTags is { Length: > 0 })
+        {
+            filtered = filtered.Where(monitor =>
+                monitor.Tags == null
+                || !monitor.Tags.Intersect(excludedTags, StringComparer.OrdinalIgnoreCase).Any());
+        }
+
+        if (excludedStatuses is { Length: > 0 })
+        {
+            filtered = filtered.Where(monitor =>
+                !excludedStatuses.Contains(monitor.StatusStr, StringComparer.OrdinalIgnoreCase));
+        }
+
+        return filtered.ToList();
     }
 
     public async Task<UptimeMonitor> CreateMonitorAsync(Guid tenantId, string name, string url, string? type, double? uptimeSla, CancellationToken ct = default, int? latencyDegradedFloor = null)

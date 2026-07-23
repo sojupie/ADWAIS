@@ -253,6 +253,17 @@ public class MonitorOrchestrationServiceTests
 
         Assert.NotNull(result);
         Assert.Equal(150, result.Kpis.AverageLatency);
+
+        var excludingDev = await _service.GetAnalyticsAsync(
+            period,
+            tenantId,
+            null,
+            ["prod"],
+            null,
+            CancellationToken.None,
+            excludedTags: ["dev"]);
+
+        Assert.Equal(200, excludingDev.Kpis.AverageLatency);
     }
 
     [Fact]

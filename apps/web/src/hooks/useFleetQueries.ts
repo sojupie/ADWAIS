@@ -5,13 +5,19 @@ import type { UptimeMonitorDto, MonitorAnalyticsDto, MonitorAvailabilitySeriesRe
 export const fleetKeys = {
   all: ['fleet'] as const,
   monitors: (timeframe: string, tenantId?: string | null, comparison?: ComparisonPeriod) => [...fleetKeys.all, 'monitors', timeframe, tenantId, comparison] as const,
-  analytics: (timeframe: string, tenantId?: string | null, monitorId?: number | null, comparison?: ComparisonPeriod, tags?: string[], statuses?: string[]) => 
-    [...fleetKeys.all, 'analytics', timeframe, tenantId, monitorId, comparison, tags, statuses] as const,
-  availability: (timeframe: string, tenantId?: string | null, monitorId?: number | null, comparison?: ComparisonPeriod, tags?: string[], statuses?: string[]) =>
-    [...fleetKeys.all, 'availability', timeframe, tenantId, monitorId, comparison, tags, statuses] as const,
+  analytics: (timeframe: string, tenantId?: string | null, monitorId?: number | null, comparison?: ComparisonPeriod, filters?: FleetQueryFilters) =>
+    [...fleetKeys.all, 'analytics', timeframe, tenantId, monitorId, comparison, filters] as const,
+  availability: (timeframe: string, tenantId?: string | null, monitorId?: number | null, comparison?: ComparisonPeriod, filters?: FleetQueryFilters) =>
+    [...fleetKeys.all, 'availability', timeframe, tenantId, monitorId, comparison, filters] as const,
 };
 
 const REFETCH_INTERVAL = 30000;
+
+export interface FleetQueryFilters {
+  tags?: string[];
+  excludedTags?: string[];
+  excludedStatuses?: string[];
+}
 
 export function useFleetMonitors(timeframe: string, tenantId?: string | null, comparison?: ComparisonPeriod) {
   return useGetApiMonitors<UptimeMonitorDto[], Error>(
@@ -30,19 +36,20 @@ export function useFleetMonitors(timeframe: string, tenantId?: string | null, co
   );
 }
 
-export function useFleetAnalytics(timeframe: string, tenantId?: string | null, monitorId?: number | null, comparison?: ComparisonPeriod, tags?: string[], statuses?: string[]) {
+export function useFleetAnalytics(timeframe: string, tenantId?: string | null, monitorId?: number | null, comparison?: ComparisonPeriod, filters?: FleetQueryFilters) {
   return useGetApiMonitorsAnalytics<MonitorAnalyticsDto, Error>(
     {
       timeframe: timeframe as Timeframe,
       tenantId: tenantId || undefined,
       monitorId: monitorId || undefined,
       comparison: comparison as ComparisonType,
-      tags: tags,
-      statuses: statuses
+      tags: filters?.tags,
+      excludedTags: filters?.excludedTags,
+      excludedStatuses: filters?.excludedStatuses,
     },
     {
       query: {
-        queryKey: fleetKeys.analytics(timeframe, tenantId, monitorId, comparison, tags, statuses),
+        queryKey: fleetKeys.analytics(timeframe, tenantId, monitorId, comparison, filters),
         refetchInterval: REFETCH_INTERVAL,
         placeholderData: keepPreviousData,
         select: (res) => res.data as MonitorAnalyticsDto
@@ -51,19 +58,20 @@ export function useFleetAnalytics(timeframe: string, tenantId?: string | null, m
   );
 }
 
-export function useFleetAvailability(timeframe: string, tenantId?: string | null, monitorId?: number | null, comparison?: ComparisonPeriod, tags?: string[], statuses?: string[]) {
+export function useFleetAvailability(timeframe: string, tenantId?: string | null, monitorId?: number | null, comparison?: ComparisonPeriod, filters?: FleetQueryFilters) {
   return useGetApiMonitorsAvailability<MonitorAvailabilitySeriesResponseDto, Error>(
     {
       timeframe: timeframe as Timeframe,
       tenantId: tenantId || undefined,
       monitorId: monitorId ?? undefined,
       comparison: comparison as ComparisonType,
-      tags,
-      statuses,
+      tags: filters?.tags,
+      excludedTags: filters?.excludedTags,
+      excludedStatuses: filters?.excludedStatuses,
     },
     {
       query: {
-        queryKey: fleetKeys.availability(timeframe, tenantId, monitorId, comparison, tags, statuses),
+        queryKey: fleetKeys.availability(timeframe, tenantId, monitorId, comparison, filters),
         refetchInterval: REFETCH_INTERVAL,
         placeholderData: keepPreviousData,
         select: response => response.data,

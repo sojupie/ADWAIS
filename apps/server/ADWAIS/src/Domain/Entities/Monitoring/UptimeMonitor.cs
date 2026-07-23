@@ -7,6 +7,7 @@ public class UptimeMonitor
     public string Type { get; set; } = UptimeMonitorTypes.Http;
     public required string Name { get; set; }
     public required string Url { get; set; }
+    /// <summary>Per-monitor uptime target. Null means no SLA is configured; no global fallback is applied.</summary>
     public double? UptimeSla { get; set; }
     public bool UptimeMonitorEnabled { get; set; }
     public DateTimeOffset? LastUpdate { get; set; }
@@ -26,6 +27,7 @@ public class UptimeMonitor
     public string? LastIncidentReason { get; set; }
     public DateTimeOffset? LastIncidentStartedAt { get; set; }
     public long? LastIncidentDurationSeconds { get; set; }
+    /// <summary>Per-monitor latency degradation threshold in milliseconds. Null means latency is not thresholded.</summary>
     public int? LatencyDegradedFloor { get; set; }
     public double? CurrentUptimePercentage { get; set; }
     public double? CurrentLatency { get; set; }

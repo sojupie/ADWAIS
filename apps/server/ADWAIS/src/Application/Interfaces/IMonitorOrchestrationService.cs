@@ -10,7 +10,15 @@ public interface IMonitorOrchestrationService
     /// <summary>
     /// Retrieves aggregated monitoring KPIs and latency time-series.
     /// </summary>
-    Task<MonitorAnalyticsDto> GetAnalyticsAsync(ResolvedPeriod period, Guid? tenantId = null, int? monitorId = null, string[]? tags = null, string[]? statuses = null, CancellationToken ct = default);
+    Task<MonitorAnalyticsDto> GetAnalyticsAsync(
+        ResolvedPeriod period,
+        Guid? tenantId = null,
+        int? monitorId = null,
+        string[]? tags = null,
+        string[]? statuses = null,
+        CancellationToken ct = default,
+        string[]? excludedTags = null,
+        string[]? excludedStatuses = null);
 
     /// <summary>
     /// Retrieves monitors in one batch and hydrates their period uptime in grouped queries.
@@ -27,7 +35,9 @@ public interface IMonitorOrchestrationService
         int? monitorId = null,
         string[]? tags = null,
         string[]? statuses = null,
-        CancellationToken ct = default);
+        CancellationToken ct = default,
+        string[]? excludedTags = null,
+        string[]? excludedStatuses = null);
 
     /// <summary>
     /// Retrieves all uptime monitors associated with a specific tenant, hydrated with uptime for the given timeframe.

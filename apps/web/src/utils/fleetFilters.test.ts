@@ -24,27 +24,47 @@ describe('fleet filters', () => {
 
   it('keeps tag options independent from the filtered result', () => {
     expect(getFleetTags(monitors)).toEqual(['dev', 'prod', 'status:paused']);
-    expect(getFleetTags(filterFleetMonitors(monitors, { tags: ['dev'], statuses: [] })))
+    expect(getFleetTags(filterFleetMonitors(monitors, {
+      includedTags: ['dev'],
+      excludedTags: [],
+      hiddenStatuses: [],
+    })))
       .toEqual(['dev', 'prod']);
   });
 
   it('matches any selected tag within the tag facet', () => {
-    expect(filterFleetMonitors(monitors, { tags: ['prod', 'dev'], statuses: [] }).map(({ id }) => id))
+    expect(filterFleetMonitors(monitors, {
+      includedTags: ['prod', 'dev'],
+      excludedTags: [],
+      hiddenStatuses: [],
+    }).map(({ id }) => id))
       .toEqual([1, 2]);
   });
 
   it('matches tags case-insensitively without discarding namespaced values', () => {
-    expect(filterFleetMonitors(monitors, { tags: ['STATUS:PAUSED'], statuses: [] }).map(({ id }) => id))
+    expect(filterFleetMonitors(monitors, {
+      includedTags: ['STATUS:PAUSED'],
+      excludedTags: [],
+      hiddenStatuses: [],
+    }).map(({ id }) => id))
       .toEqual([3]);
   });
 
-  it('combines tag and status facets with AND semantics', () => {
-    expect(filterFleetMonitors(monitors, { tags: ['prod'], statuses: ['down'] }).map(({ id }) => id))
+  it('gives excluded tags precedence and hides selected statuses', () => {
+    expect(filterFleetMonitors(monitors, {
+      includedTags: ['prod'],
+      excludedTags: ['dev'],
+      hiddenStatuses: ['PAUSED'],
+    }).map(({ id }) => id))
       .toEqual([2]);
   });
 
   it('reports when a selected tenant or monitor is no longer visible', () => {
-    const visibleMonitors = filterFleetMonitors(monitors, { tags: ['dev'], statuses: [] });
+    const visibleMonitors = filterFleetMonitors(monitors, {
+      includedTags: ['dev'],
+      excludedTags: [],
+      hiddenStatuses: [],
+    });
 
     expect(isFleetSelectionVisible(visibleMonitors, { tenantId: 'tenant-1', monitorId: 1 })).toBe(true);
     expect(isFleetSelectionVisible(visibleMonitors, { tenantId: 'tenant-1', monitorId: null })).toBe(true);

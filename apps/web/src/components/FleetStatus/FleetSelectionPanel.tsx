@@ -191,12 +191,16 @@ export function FleetSelectionPanel({
                 value={formatPercent(availability?.averageUptimePercentage)}
                 detail={(
                   <div className="flex flex-wrap gap-x-2">
-                    {monitorSla != null && <span>SLA {monitorSla.toFixed(3)}%</span>}
+                    <span>{monitorSla != null ? `SLA ${monitorSla.toFixed(3)}%` : 'SLA not configured'}</span>
                     <Trend value={uptimeGrowth} />
                   </div>
                 )}
               />
-              <Fact label="Current latency" value={formatLatency(selectedMonitor.currentLatency)} detail={selectedMonitor.latencyDegradedFloor != null ? `Threshold ${selectedMonitor.latencyDegradedFloor}ms` : undefined} />
+              <Fact
+                label="Current latency"
+                value={formatLatency(selectedMonitor.currentLatency)}
+                detail={selectedMonitor.latencyDegradedFloor != null ? `Threshold ${selectedMonitor.latencyDegradedFloor}ms` : 'Threshold not configured'}
+              />
               <Fact label="Average latency" value={formatLatency(averageLatency)} detail={<Trend value={latencyGrowth} inverse />} />
               <Fact label="P90 latency" value={formatLatency(p90Latency)} detail={<Trend value={p90LatencyGrowth} inverse />} />
               <Fact label="P10 latency" value={formatLatency(p10Latency)} detail={<Trend value={p10LatencyGrowth} inverse />} />

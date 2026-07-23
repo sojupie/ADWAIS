@@ -45,9 +45,21 @@ public record MonitorRequestDto
     public string[]? Tags { get; init; }
 
     /// <summary>
+    /// Optional. Excludes monitors matching any of these tags. Exclusion takes precedence.
+    /// </summary>
+    [FromQuery(Name = "excludedTags")]
+    public string[]? ExcludedTags { get; init; }
+
+    /// <summary>
     /// Optional. Filters the monitors by specific statuses.
     /// </summary>
     [FromQuery(Name = "statuses")]
     public string[]? Statuses { get; init; }
+
+    /// <summary>
+    /// Optional. Excludes monitors with any of these statuses.
+    /// </summary>
+    [FromQuery(Name = "excludedStatuses")]
+    public string[]? ExcludedStatuses { get; init; }
 }
 

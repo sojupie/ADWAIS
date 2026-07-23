@@ -9,18 +9,52 @@ import { SyncStatusWidget } from '../components/common/dashboard/SyncStatusWidge
 import { PeriodSelector } from '../components/common/charts/PeriodSelector';
 import { useFleetStatusViewModel } from "../hooks/useFleetStatusViewModel.ts";
 import { EmptyState } from "../components/common/ui/EmptyState.tsx";
-import { FleetFilterMenu, FleetFilterPanel } from '../components/FleetStatus/FleetFilterMenu.tsx';
+import {
+  FleetFilterMenu,
+  FleetFilterPanel,
+} from '../components/FleetStatus/FleetFilterMenu.tsx';
 import { MobileFooterActions } from '../components/common/ui/MobileFooterActions.tsx';
+import { ArrowLeft } from 'lucide-react';
 import { countActiveFilterGroups } from '../utils/filterCounts.ts';
 
 const EMPTY_LATENCY: never[] = [];
 
 export function FleetStatus() {
   const vm = useFleetStatusViewModel();
+  const summarize = (values: string[]) => values.length <= 2
+    ? values.join(', ')
+    : `${values.slice(0, 2).join(', ')} +${values.length - 2}`;
   const matrixActions = (
-    <span className="text-sm font-bold text-on-surface-variant">
-      {vm.fleetStats.enabled.length} Online
-    </span>
+    <div className="flex flex-wrap items-center justify-end gap-2">
+      <button
+        type="button"
+        disabled={!vm.selection}
+        onClick={vm.goBack}
+        aria-label={vm.selection?.monitorId != null ? 'Back to tenant overview' : 'Back to fleet overview'}
+        className="inline-flex min-h-9 cursor-pointer items-center gap-1.5 rounded-full border border-outline-variant bg-surface px-3 text-sm font-bold text-on-surface transition-colors hover:bg-surface-container-high focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary disabled:cursor-not-allowed disabled:bg-on-surface/[0.10] disabled:text-on-surface/[0.38]"
+      >
+        <ArrowLeft size={16} aria-hidden="true" />
+        <span>{vm.selection?.monitorId != null ? 'Tenant' : 'Fleet'}</span>
+      </button>
+      {vm.appliedFilters.includedTags.length > 0 && (
+        <span className="rounded-full bg-secondary-container px-2.5 py-1 text-sm font-bold text-on-secondary-container">
+          Including: {summarize(vm.appliedFilters.includedTags)}
+        </span>
+      )}
+      {vm.appliedFilters.excludedTags.length > 0 && (
+        <span className="rounded-full bg-error-container px-2.5 py-1 text-sm font-bold text-on-error-container">
+          Excluding: {summarize(vm.appliedFilters.excludedTags)}
+        </span>
+      )}
+      {vm.activeFilters.hiddenStatuses.length > 0 && (
+        <span className="rounded-full bg-surface-container-high px-2.5 py-1 text-sm font-bold text-on-surface-variant">
+          Hiding: {summarize(vm.activeFilters.hiddenStatuses)}
+        </span>
+      )}
+      <span className="text-sm font-bold text-on-surface-variant">
+        {vm.fleetStats.enabled.length} visible
+      </span>
+    </div>
   );
 
   const matrixContent = vm.tenantMonitors.length === 0 ? (
@@ -99,15 +133,21 @@ export function FleetStatus() {
 
         <div className="flex flex-wrap items-center justify-end gap-2">
           <FleetFilterMenu
-            monitors={vm.allMonitors}
             availableTags={vm.availableTags}
-            selection={vm.selection}
-            selectedTags={vm.selectedTags}
-            selectedStatuses={vm.selectedStatuses}
-            onSelectionChange={vm.setSelection}
-            onTagsChange={vm.setSelectedTags}
-            onStatusesChange={vm.setSelectedStatuses}
-            onClearAll={vm.resetFilters}
+            includedTags={vm.activeFilters.includedTags}
+            excludedTags={vm.activeFilters.excludedTags}
+            unavailableIncludedTags={vm.unavailableIncludedTags}
+            unavailableExcludedTags={vm.unavailableExcludedTags}
+            hiddenStatuses={vm.activeFilters.hiddenStatuses}
+            onIncludedTagsChange={vm.setIncludedTags}
+            onExcludedTagsChange={vm.setExcludedTags}
+            onHiddenStatusesChange={vm.setHiddenStatuses}
+            onClearActive={vm.clearActiveFilters}
+            onSaveDefault={vm.saveFilterPreferences}
+            onRestoreSaved={vm.restoreSavedFilters}
+            onForgetSaved={vm.forgetSavedFilters}
+            hasSavedPreferences={vm.hasSavedFilters}
+            hasUnsavedChanges={vm.hasUnsavedFilterChanges}
           />
           <div className="w-px h-6 bg-outline-variant mx-1 shrink-0" aria-hidden="true" />
           <PeriodSelector from="/fleet-status" />
@@ -116,24 +156,29 @@ export function FleetStatus() {
 
       <MobileFooterActions
         activeCount={countActiveFilterGroups(
-          Boolean(vm.selection?.tenantId),
-          vm.selection?.monitorId != null,
-          vm.selectedTags.length > 0,
-          vm.selectedStatuses.length > 0,
+          vm.activeFilters.includedTags.length > 0 || vm.activeFilters.excludedTags.length > 0,
+          vm.activeFilters.hiddenStatuses.length > 0,
         )}
-        clearLabel="Reset all fleet filters"
-        onClearAll={vm.resetFilters}
+        clearLabel="Clear active fleet filters"
+        onClearAll={vm.clearActiveFilters}
       >
         <FleetFilterPanel
           embedded
-          monitors={vm.allMonitors}
           availableTags={vm.availableTags}
-          selection={vm.selection}
-          selectedTags={vm.selectedTags}
-          selectedStatuses={vm.selectedStatuses}
-          onSelectionChange={vm.setSelection}
-          onTagsChange={vm.setSelectedTags}
-          onStatusesChange={vm.setSelectedStatuses}
+          includedTags={vm.activeFilters.includedTags}
+          excludedTags={vm.activeFilters.excludedTags}
+          unavailableIncludedTags={vm.unavailableIncludedTags}
+          unavailableExcludedTags={vm.unavailableExcludedTags}
+          hiddenStatuses={vm.activeFilters.hiddenStatuses}
+          onIncludedTagsChange={vm.setIncludedTags}
+          onExcludedTagsChange={vm.setExcludedTags}
+          onHiddenStatusesChange={vm.setHiddenStatuses}
+          onClearActive={vm.clearActiveFilters}
+          onSaveDefault={vm.saveFilterPreferences}
+          onRestoreSaved={vm.restoreSavedFilters}
+          onForgetSaved={vm.forgetSavedFilters}
+          hasSavedPreferences={vm.hasSavedFilters}
+          hasUnsavedChanges={vm.hasUnsavedFilterChanges}
         />
       </MobileFooterActions>
     </DashboardLayout>

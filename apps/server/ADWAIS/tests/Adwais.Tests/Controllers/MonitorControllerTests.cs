@@ -69,7 +69,10 @@ public class MonitorControllerTests
         {
             TenantId = Guid.NewGuid(),
             Timeframe = Timeframe.T30,
-            Comparison = ComparisonType.Preceding
+            Comparison = ComparisonType.Preceding,
+            Tags = ["PROD"],
+            ExcludedTags = ["DEV"],
+            ExcludedStatuses = ["PAUSED"]
         };
         var mockResult = new MonitorAnalyticsDto(
             GlobalAverageLatency: 120.5,
@@ -87,7 +90,15 @@ public class MonitorControllerTests
             Kpis: new MonitorKpiDto(99.9, 99.8, 0.1, 120.5, 115.0, 4.7, 150.0, 145.0, 3.4, 100.0, 95.0, 5.2)
         );
 
-        _monitorServiceMock.Setup(s => s.GetAnalyticsAsync(It.IsAny<ResolvedPeriod>(), request.TenantId, request.MonitorId, It.IsAny<string[]?>(), It.IsAny<string[]?>(), It.IsAny<CancellationToken>()))
+        _monitorServiceMock.Setup(s => s.GetAnalyticsAsync(
+                It.IsAny<ResolvedPeriod>(),
+                request.TenantId,
+                request.MonitorId,
+                request.Tags,
+                request.Statuses,
+                It.IsAny<CancellationToken>(),
+                request.ExcludedTags,
+                request.ExcludedStatuses))
             .ReturnsAsync(mockResult);
 
         // Act
@@ -106,7 +117,9 @@ public class MonitorControllerTests
         var request = new MonitorRequestDto
         {
             TenantId = Guid.NewGuid(),
-            Timeframe = Timeframe.T30
+            Timeframe = Timeframe.T30,
+            ExcludedTags = ["TEST"],
+            ExcludedStatuses = ["PAUSED"]
         };
         var pointDate = new DateOnly(2026, 7, 22);
         var series = new MonitorAvailabilitySeriesDto(
@@ -127,7 +140,9 @@ public class MonitorControllerTests
                 request.MonitorId,
                 request.Tags,
                 request.Statuses,
-                It.IsAny<CancellationToken>()))
+                It.IsAny<CancellationToken>(),
+                request.ExcludedTags,
+                request.ExcludedStatuses))
             .ReturnsAsync(series);
 
         var result = await _controller.GetAvailability(request, CancellationToken.None);

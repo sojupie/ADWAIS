@@ -20,14 +20,20 @@ function formatUptime(value: number | null | undefined) {
 
 function pointColor(value: number | null | undefined, sla: number | null | undefined) {
   if (value == null) return 'bg-surface-container-high border-outline-variant';
-  if (sla == null) return 'bg-surface-container border-outline-variant';
-  if (value < sla) return 'bg-status-down border-status-down';
+  if (sla != null) {
+    if (value < sla) return 'bg-status-down border-status-down';
+    if (value < 99.95) return 'bg-status-degraded border-status-degraded';
+    return 'bg-teal-500 border-teal-600';
+  }
+  // These are fixed visual availability bands, not a fallback SLA.
+  if (value < 99.9) return 'bg-status-down border-status-down';
   if (value < 99.95) return 'bg-status-degraded border-status-degraded';
   return 'bg-teal-500 border-teal-600';
 }
 
 export function AvailabilityStrip({
   points,
+  sla,
   aggregate = false,
 }: {
   points: MonitorAvailabilityPointResponseDto[];

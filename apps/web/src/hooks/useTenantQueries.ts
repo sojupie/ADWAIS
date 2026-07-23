@@ -38,7 +38,7 @@ export function useCreateTenantMutation(onSuccessCallback?: () => void) {
   return {
     ...mutation,
     mutate: (
-      payload: { name: string; litiumBaseUrl: string; serviceAccountToken: string },
+      payload: { name: string; litiumBaseUrl: string; imageUrl: string; serviceAccountToken: string },
       options?: Parameters<typeof mutation.mutate>[1]
     ) => 
       mutation.mutate({ 

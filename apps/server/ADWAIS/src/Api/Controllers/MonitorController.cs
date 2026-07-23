@@ -37,7 +37,7 @@ public class MonitorController(
 
     /// <summary>
     /// Unified analytics endpoint for monitoring data.
-    /// Provides latency time-series and filtered monitor lists hydrated with uptime for the specified timeframe (defaults to T30).
+    /// Provides latency time-series and monitoring KPIs for the specified timeframe (defaults to T30).
     /// </summary>
     [HttpGet("analytics")]
     [Authorize(Policy = "KioskOrStaffAccess")]
@@ -46,16 +46,20 @@ public class MonitorController(
         var period = await reportingCalendar.ResolvePeriodAsync(request.Timeframe, request.Comparison, ct);
         var result = await _monitorService.GetAnalyticsAsync(period, request.TenantId, request.MonitorId, request.Tags, request.Statuses, ct);
 
-        return Ok(new MonitorAnalyticsResponseDto(
-            result.GlobalAverageLatency,
-            result.LatencyPoints.Select(p => new LatencyPointResponseDto(
-                p.Timestamp,
-                p.Average,
-                p.PreviousAverage,
-                p.Lowest,
-                p.Highest)).ToList(),
-            result.Monitors.Select(ToDto).ToList(),
-            new MonitorKpiResponseDto(
+        return Ok(new MonitorAnalyticsResponseDto
+        {
+            GlobalAverageLatency = result.GlobalAverageLatency,
+            LatencyPoints = result.LatencyPoints.Select(p => new LatencyPointResponseDto
+            {
+                Timestamp = p.Timestamp,
+                Average = p.Average,
+                PreviousAverage = p.PreviousAverage,
+                P10 = p.Lowest,
+                P90 = p.Highest,
+                CurrentState = p.CurrentState,
+                PreviousState = p.PreviousState
+            }).ToList(),
+            Kpis = new MonitorKpiResponseDto(
                 result.Kpis.AverageUptime,
                 result.Kpis.PreviousAverageUptime,
                 result.Kpis.UptimeGrowthPercentage,
@@ -68,7 +72,45 @@ public class MonitorController(
                 result.Kpis.LowestLatency,
                 result.Kpis.PreviousLowestLatency,
                 result.Kpis.LowestLatencyGrowthPercentage)
-        ));
+        });
+    }
+
+    /// <summary>
+    /// Returns daily availability for the selected fleet, tenant, or monitor scope.
+    /// </summary>
+    [HttpGet("availability")]
+    [Authorize(Policy = "KioskOrStaffAccess")]
+    public async Task<ActionResult<MonitorAvailabilitySeriesResponseDto>> GetAvailability(
+        [FromQuery] MonitorRequestDto request,
+        CancellationToken ct = default)
+    {
+        var period = await reportingCalendar.ResolvePeriodAsync(request.Timeframe, request.Comparison, ct);
+        var timeZone = await reportingCalendar.GetTimeZoneAsync(ct);
+        var result = await _monitorService.GetAvailabilitySeriesAsync(
+            period,
+            timeZone,
+            request.TenantId,
+            request.MonitorId,
+            request.Tags,
+            request.Statuses,
+            ct);
+
+        return Ok(new MonitorAvailabilitySeriesResponseDto
+        {
+            PeriodStart = result.PeriodStart,
+            PeriodEnd = result.PeriodEnd,
+            AverageUptimePercentage = result.AverageUptimePercentage,
+            LowestUptimePercentage = result.LowestUptimePercentage,
+            Points = result.Points.Select(point => new MonitorAvailabilityPointResponseDto
+            {
+                Date = point.Date,
+                EndDate = point.EndDate,
+                UptimePercentage = point.UptimePercentage,
+                LowestMonitorUptimePercentage = point.LowestMonitorUptimePercentage,
+                MonitorCount = point.MonitorCount,
+                IsPartial = point.IsPartial
+            }).ToList()
+        });
     }
 
     /// <summary>
@@ -101,20 +143,8 @@ public class MonitorController(
         }
         else 
         {
-            var dbCtx = _dbContext;
-            var allMonitorIds = await dbCtx.Monitors
-                .AsNoTracking()
-                .Where(m => m.TenantId != IApplicationDbContext.SystemTenantGuid)
-                .Select(m => new { m.Id, m.TenantId })
-                .ToListAsync(ct);
-            
-            var dtos = new List<UptimeMonitorDto>();
-            foreach (var m in allMonitorIds)
-            {
-                var hydrated = await _monitorService.GetMonitorAsync(m.TenantId, m.Id, period, ct);
-                dtos.Add(ToDto(hydrated));
-            }
-            resultDtos = dtos;
+            var monitors = await _monitorService.GetMonitorsAsync(period, ct: ct);
+            resultDtos = monitors.Select(ToDto);
         }
 
         if (request.Tags != null && request.Tags.Any())
@@ -156,7 +186,7 @@ public class MonitorController(
         CancellationToken ct = default)
     {
         if (!await IsUptimeRobotConfiguredAsync(ct)) return BadRequest("UptimeRobot API key is not configured.");
-        var m = await _monitorService.CreateMonitorAsync(tenantId, request.Name, request.Url, request.Type, request.UptimeSla, ct);
+        var m = await _monitorService.CreateMonitorAsync(tenantId, request.Name, request.Url, request.Type, request.UptimeSla, ct, request.LatencyDegradedFloor);
         return CreatedAtAction(nameof(GetMonitors), new { id = m.Id }, ToDto(m));
     }
 
@@ -259,7 +289,7 @@ public class MonitorController(
     public async Task<ActionResult<UptimeMonitorDto>> UpdateMonitor(int id, [FromBody] UpdateMonitorRequestDto request, CancellationToken ct = default)
     {
         if (!await IsUptimeRobotConfiguredAsync(ct)) return BadRequest("UptimeRobot API key is not configured.");
-        await _monitorService.UpdateMonitorAsync(id, request.Name, request.Url, request.Type, request.Sla, request.Tags, ct);
+        await _monitorService.UpdateMonitorAsync(id, request.Name, request.Url, request.Type, request.Sla, request.Tags, ct, request.LatencyDegradedFloor);
         
         var db = _dbContext;
         var tenantId = await db.Monitors.Where(m => m.Id == id).Select(m => (Guid?)m.TenantId).SingleOrDefaultAsync(ct);
@@ -291,6 +321,28 @@ public class MonitorController(
             LastLatencyUpdate: m.LastLatencyUpdate,
             CreatedDate: m.CreatedDate,
             LastSyncError: m.LastSyncError,
-            Tags: m.Tags);
+            Tags: m.Tags,
+            TenantBaseUrl: m.Tenant?.LitiumBaseUrl,
+            TenantImageUrl: m.Tenant?.ImageUrl,
+            HttpMethod: m.HttpMethod,
+            TimeoutSeconds: m.TimeoutSeconds,
+            SslExpiresAt: m.SslExpiresAt,
+            DomainExpiresAt: m.DomainExpiresAt,
+            MonitoredRegions: m.MonitoredRegions,
+            CurrentStateDurationSeconds: m.CurrentStateDurationSeconds,
+            LatestIncident: m.LastIncidentId is null
+                && m.LastIncidentStatus is null
+                && m.LastIncidentReason is null
+                && m.LastIncidentStartedAt is null
+                    ? null
+                    : new MonitorIncidentDto
+                    {
+                        Id = m.LastIncidentId,
+                        Status = m.LastIncidentStatus,
+                        Cause = m.LastIncidentCause,
+                        Reason = m.LastIncidentReason,
+                        StartedAt = m.LastIncidentStartedAt,
+                        DurationSeconds = m.LastIncidentDurationSeconds
+                    });
     }
 }

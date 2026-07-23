@@ -53,22 +53,6 @@ export function GlobalConfigurationForm({ config, updateConfig, disabled }: Glob
             onSave={(val) => updateConfig.mutate({ uptimeRobotFetchEnabled: val })}
           />
           <InlineEditField
-            label="Latency Floor (ms)"
-            value={config.latencyDegradedFloor !== null && config.latencyDegradedFloor !== undefined ? config.latencyDegradedFloor : null}
-            type="number"
-            placeholder="e.g. 150"
-            disabled={disabled}
-            onSave={(val) => updateConfig.mutate({ latencyDegradedFloor: val })}
-          />
-          <InlineEditField
-            label="Default Uptime SLA (%)"
-            value={config.defaultUptimeSla !== null && config.defaultUptimeSla !== undefined ? config.defaultUptimeSla : null}
-            type="number"
-            placeholder="e.g. 99.9"
-            disabled={disabled}
-            onSave={(val) => updateConfig.mutate({ defaultUptimeSla: val })}
-          />
-          <InlineEditField
             label="Event Retention (Days)"
             value={config.systemEventRetentionDays ?? 30}
             type="number"
@@ -112,8 +96,6 @@ export function GlobalConfigurationForm({ config, updateConfig, disabled }: Glob
           <FormSkeleton.Input labelWidth="w-28" />
           <FormSkeleton.Checkbox textWidth="w-36" />
           <FormSkeleton.Checkbox textWidth="w-36" />
-          <FormSkeleton.Input labelWidth="w-32" />
-          <FormSkeleton.Input labelWidth="w-40" />
           <FormSkeleton.Input labelWidth="w-36" />
           <FormSkeleton.Input labelWidth="w-32" />
           <FormSkeleton.Input labelWidth="w-36" />

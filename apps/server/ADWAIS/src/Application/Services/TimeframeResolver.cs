@@ -28,8 +28,8 @@ public static class TimeframeResolver
 
         return timeframe switch
         {
-            Timeframe.Today => BuildRollingHourlyPeriod(currentEnd, localNow, 1, comparisonType, timeZone),
-            Timeframe.T7 => BuildRollingHourlyPeriod(currentEnd, localNow, 7, comparisonType, timeZone),
+            Timeframe.Today => BuildRollingHourlyPeriod(currentEnd, 1, comparisonType),
+            Timeframe.T7 => BuildRollingHourlyPeriod(currentEnd, 7, comparisonType),
             Timeframe.T30 => BuildFixedPeriod(today, currentEnd, 30, comparisonType, timeZone),
             Timeframe.T90 => BuildFixedPeriod(today, currentEnd, 90, comparisonType, timeZone),
             Timeframe.Ytd => BuildYtdPeriod(today, currentEnd, comparisonType, timeZone),
@@ -57,18 +57,13 @@ public static class TimeframeResolver
     /// <summary>
     /// Builds a rolling hourly period and its previous comparison period.
     /// </summary>
-    private static ResolvedPeriod BuildRollingHourlyPeriod(DateTimeOffset currentEnd, DateTimeOffset localNow, int days, ComparisonType comparisonType, TimeZoneInfo timeZone)
+    private static ResolvedPeriod BuildRollingHourlyPeriod(DateTimeOffset currentEnd, int days, ComparisonType comparisonType)
     {
-        var currentHourLocal = new DateTime(localNow.Year, localNow.Month, localNow.Day, localNow.Hour, 0, 0, DateTimeKind.Unspecified);
-        var hoursToSubtract = (days * 24) - 1;
-        var currentStartLocal = currentHourLocal.AddHours(-hoursToSubtract);
-        var previousStartLocal = comparisonType == ComparisonType.YearOverYear
-            ? currentStartLocal.AddYears(-1)
-            : currentStartLocal.AddDays(-days);
-        var currentStart = ConvertLocalToUtc(currentStartLocal, timeZone);
-        var previousStart = ConvertLocalToUtc(previousStartLocal, timeZone);
-            
-        var previousEnd = previousStart + (currentEnd - currentStart);
+        var currentStart = currentEnd.AddDays(-days);
+        var previousStart = comparisonType == ComparisonType.YearOverYear
+            ? currentStart.AddYears(-1)
+            : currentStart.AddDays(-days);
+        var previousEnd = previousStart.AddDays(days);
         
         var steps = days == 7 ? 42 : 48;
         return new ResolvedPeriod(currentStart, currentEnd, previousStart, previousEnd, steps, true, days == 1);

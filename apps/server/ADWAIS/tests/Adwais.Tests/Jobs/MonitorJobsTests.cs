@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Configuration;
 using Moq;
 using Xunit;
 using Hangfire;
@@ -25,7 +24,6 @@ public class MonitorJobsTests
     private readonly IMemoryCache _cache;
     private readonly Mock<ISystemEventService> _eventServiceMock;
     private readonly Mock<IRecurringJobManager> _recurringJobManagerMock;
-    private readonly IConfiguration _configuration;
 
     public MonitorJobsTests()
     {
@@ -41,11 +39,6 @@ public class MonitorJobsTests
         _cache = new MemoryCache(new MemoryCacheOptions());
         _eventServiceMock = new Mock<ISystemEventService>();
         _recurringJobManagerMock = new Mock<IRecurringJobManager>();
-
-        _configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
-        {
-            { "FeatureToggles:MockUptimeRobotIntegrations", "false" }
-        }).Build();
 
         // Seed common config
         using var db = new AnalyticsDbContext(_dbOptions);
@@ -84,8 +77,7 @@ public class MonitorJobsTests
             _dbContextFactoryMock.Object,
             _uptimeRobotServiceMock.Object,
             _cache,
-            _eventServiceMock.Object,
-            _configuration
+            _eventServiceMock.Object
         );
 
         // Act
@@ -106,6 +98,38 @@ public class MonitorJobsTests
             Assert.Equal(now, updatedMonitor.LastLatencyUpdate);
             Assert.Null(updatedMonitor.LastSyncError);
         }
+    }
+
+    [Fact]
+    public async Task UpdateMonitorLatencyJob_ShouldNeverCallUpstream_ForNegativeDemoMonitorId()
+    {
+        using (var db = new AnalyticsDbContext(_dbOptions))
+        {
+            db.Monitors.Add(new UptimeMonitor
+            {
+                Id = -1,
+                TenantId = Guid.NewGuid(),
+                Name = "Demo storefront",
+                Url = "https://example.com",
+                UptimeMonitorEnabled = true
+            });
+            db.SaveChanges();
+        }
+
+        var job = new UpdateMonitorLatencyJob(
+            _dbContextFactoryMock.Object,
+            _uptimeRobotServiceMock.Object,
+            _cache,
+            _eventServiceMock.Object);
+
+        var now = DateTimeOffset.UtcNow;
+        await job.ExecuteAsync(-1, now.AddHours(-1), now);
+
+        _uptimeRobotServiceMock.Verify(service => service.GetResponseTimeAsync(
+            It.IsAny<int>(),
+            It.IsAny<DateTimeOffset>(),
+            It.IsAny<DateTimeOffset>(),
+            It.IsAny<string>()), Times.Never);
     }
 
     [Fact]
@@ -132,8 +156,7 @@ public class MonitorJobsTests
             _dbContextFactoryMock.Object,
             _uptimeRobotServiceMock.Object,
             _cache,
-            _eventServiceMock.Object,
-            _configuration
+            _eventServiceMock.Object
         );
 
         // Act & Assert

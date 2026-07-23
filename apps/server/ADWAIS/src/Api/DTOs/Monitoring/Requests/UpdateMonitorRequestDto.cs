@@ -26,6 +26,11 @@ public record UpdateMonitorRequestDto
     public double? Sla { get; init; }
 
     /// <summary>
+    /// Optional per-monitor latency threshold in milliseconds. Omit to leave the current value unchanged.
+    /// </summary>
+    public int? LatencyDegradedFloor { get; init; }
+
+    /// <summary>
     /// Tags associated with the monitor.
     /// </summary>
     public List<string>? Tags { get; init; }

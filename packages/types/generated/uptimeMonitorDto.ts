@@ -4,6 +4,7 @@
  * Adwais.Api
  * OpenAPI spec version: 1.0
  */
+import type { MonitorIncidentDto } from './monitorIncidentDto';
 
 export interface UptimeMonitorDto {
   id?: number;
@@ -39,4 +40,21 @@ export interface UptimeMonitorDto {
   lastSyncError?: string | null;
   /** @nullable */
   tags?: string[] | null;
+  /** @nullable */
+  tenantBaseUrl: string | null;
+  /** @nullable */
+  tenantImageUrl: string | null;
+  /** @nullable */
+  httpMethod: string | null;
+  /** @nullable */
+  timeoutSeconds: number | null;
+  /** @nullable */
+  sslExpiresAt: string | null;
+  /** @nullable */
+  domainExpiresAt: string | null;
+  /** @nullable */
+  monitoredRegions: string[] | null;
+  /** @nullable */
+  currentStateDurationSeconds: number | null;
+  latestIncident: MonitorIncidentDto;
 }

@@ -16,6 +16,8 @@ export interface Tenant {
   /** @nullable */
   litiumBaseUrl?: string | null;
   /** @nullable */
+  imageUrl?: string | null;
+  /** @nullable */
   serviceAccountToken?: string | null;
   /** @nullable */
   fetchedFrom?: string | null;

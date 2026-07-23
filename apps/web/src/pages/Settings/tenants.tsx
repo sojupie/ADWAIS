@@ -96,6 +96,7 @@ export function TenantsMonitorsView() {
                             <div className="p-4 flex flex-col gap-2">
                                 <Input label="Name" placeholder="Tenant Name" value={newTenantDraft.name} onChange={e => setNewTenantDraft({ ...newTenantDraft, name: e.target.value })} />
                                 <Input label="Litium Base URL" placeholder="https://example.com" value={newTenantDraft.litiumBaseUrl} onChange={e => setNewTenantDraft({ ...newTenantDraft, litiumBaseUrl: e.target.value })} />
+                                <Input label="Image URL (optional)" placeholder="https://example.com/logo.png" value={newTenantDraft.imageUrl} onChange={e => setNewTenantDraft({ ...newTenantDraft, imageUrl: e.target.value })} />
                                 <Input label="Service Account Token" type="password" className="font-mono" placeholder="Secret Token" value={newTenantDraft.serviceAccountToken} onChange={e => setNewTenantDraft({ ...newTenantDraft, serviceAccountToken: e.target.value })} />
                                 <SecureButton
                                     className="mt-2 bg-brand-btn-primary hover:bg-brand-btn-quaternary text-white font-bold text-sm px-4 py-2 rounded-lg cursor-pointer flex items-center justify-center gap-4 w-full"

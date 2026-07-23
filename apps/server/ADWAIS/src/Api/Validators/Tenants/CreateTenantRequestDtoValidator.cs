@@ -15,6 +15,8 @@ public class CreateTenantRequestDtoValidator : AbstractValidator<CreateTenantReq
             .When(x => x.OrderFetchingEnabled);
         RuleFor(x => x.LitiumBaseUrl).Must(uri =>
             string.IsNullOrWhiteSpace(uri) || Uri.TryCreate(uri, UriKind.Absolute, out _)).WithMessage("INVALID URL");
+        RuleFor(x => x.ImageUrl).Must(uri =>
+            string.IsNullOrWhiteSpace(uri) || Uri.TryCreate(uri, UriKind.Absolute, out _)).WithMessage("INVALID IMAGE URL");
     }
 
 }

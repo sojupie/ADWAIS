@@ -110,6 +110,7 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
                 .HasMaxLength(50)
                 .HasDefaultValue(TenantType.Mixed);
             entity.Property(t => t.LitiumBaseUrl).HasMaxLength(2048);
+            entity.Property(t => t.ImageUrl).HasMaxLength(2048);
             entity.Property(t => t.ServiceAccountToken).HasMaxLength(2048);
             if (dataProtectionProvider != null)
             {
@@ -242,7 +243,6 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
             entity.Property(x => x.SystemEventRetentionDays).HasDefaultValue(2);
             entity.Property(x => x.LitiumFetchEnabled).HasDefaultValue(true);
             entity.Property(x => x.UptimeRobotFetchEnabled).HasDefaultValue(true);
-            entity.Property(x => x.DefaultUptimeSla);
             entity.Property(x => x.WeatherLocation).HasDefaultValue("Karlstad");
             entity.Property(x => x.WeatherFetchIntervalMinutes).HasDefaultValue(15);
             entity.Property(x => x.ReportingTimeZoneId).HasMaxLength(100).HasDefaultValue("Europe/Stockholm");
@@ -360,6 +360,7 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
             entity.ToTable("monitor_availability");
             entity.HasKey(ma => ma.Id);
             entity.Property(ma => ma.Id).HasDefaultValueSql("uuid_generate_v4()");
+            entity.Property(ma => ma.IsFinalized).HasDefaultValue(false);
             entity.HasOne(ma => ma.UptimeMonitor)
                 .WithMany()
                 .HasForeignKey(ma => ma.MonitorId)
@@ -381,12 +382,18 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
                 .IsRequired();
             entity.Property(m => m.Name).HasMaxLength(255);
             entity.Property(m => m.Url).HasMaxLength(2048);
+            entity.Property(m => m.HttpMethod).HasMaxLength(50);
+            entity.Property(m => m.LastIncidentId).HasMaxLength(100);
+            entity.Property(m => m.LastIncidentStatus).HasMaxLength(100);
+            entity.Property(m => m.LastIncidentCause).HasMaxLength(255);
+            entity.Property(m => m.LastIncidentReason).HasMaxLength(2000);
             entity.HasOne(m => m.Tenant)
                 .WithMany(t => t.Monitors)
                 .HasForeignKey(m => m.TenantId)
                 .OnDelete(DeleteBehavior.Restrict);
             entity.Property(m => m.UpdateInterval).HasDefaultValue(300);
             entity.Property(m => m.Tags).HasDefaultValueSql("'{}'");
+            entity.Property(m => m.MonitoredRegions).HasDefaultValueSql("'{}'");
         });
             
         // intranät

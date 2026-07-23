@@ -28,6 +28,30 @@ export interface UptimeMonitor {
   createdDate?: string;
   updateInterval?: number;
   /** @nullable */
+  httpMethod?: string | null;
+  /** @nullable */
+  timeoutSeconds?: number | null;
+  /** @nullable */
+  sslExpiresAt?: string | null;
+  /** @nullable */
+  domainExpiresAt?: string | null;
+  /** @nullable */
+  monitoredRegions?: string[] | null;
+  /** @nullable */
+  currentStateDurationSeconds?: number | null;
+  /** @nullable */
+  lastIncidentId?: string | null;
+  /** @nullable */
+  lastIncidentStatus?: string | null;
+  /** @nullable */
+  lastIncidentCause?: string | null;
+  /** @nullable */
+  lastIncidentReason?: string | null;
+  /** @nullable */
+  lastIncidentStartedAt?: string | null;
+  /** @nullable */
+  lastIncidentDurationSeconds?: number | null;
+  /** @nullable */
   latencyDegradedFloor?: number | null;
   /** @nullable */
   currentUptimePercentage?: number | null;

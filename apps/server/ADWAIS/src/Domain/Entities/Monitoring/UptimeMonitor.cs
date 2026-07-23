@@ -14,6 +14,18 @@ public class UptimeMonitor
     public DateTimeOffset? LastLatencyUpdate { get; set; }
     public DateTimeOffset CreatedDate { get; set; }
     public int UpdateInterval { get; set; }
+    public string? HttpMethod { get; set; }
+    public int? TimeoutSeconds { get; set; }
+    public DateTimeOffset? SslExpiresAt { get; set; }
+    public DateTimeOffset? DomainExpiresAt { get; set; }
+    public List<string> MonitoredRegions { get; set; } = new();
+    public long? CurrentStateDurationSeconds { get; set; }
+    public string? LastIncidentId { get; set; }
+    public string? LastIncidentStatus { get; set; }
+    public string? LastIncidentCause { get; set; }
+    public string? LastIncidentReason { get; set; }
+    public DateTimeOffset? LastIncidentStartedAt { get; set; }
+    public long? LastIncidentDurationSeconds { get; set; }
     public int? LatencyDegradedFloor { get; set; }
     public double? CurrentUptimePercentage { get; set; }
     public double? CurrentLatency { get; set; }

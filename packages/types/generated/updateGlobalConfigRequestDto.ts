@@ -11,13 +11,9 @@ export interface UpdateGlobalConfigRequestDto {
   /** @nullable */
   uptimeRobotFetchEnabled?: boolean | null;
   /** @nullable */
-  latencyDegradedFloor?: number | null;
-  /** @nullable */
   uptimeRobotApiKey?: string | null;
   /** @nullable */
   systemEventRetentionDays?: number | null;
-  /** @nullable */
-  defaultUptimeSla?: number | null;
   /** @nullable */
   feedFetchIntervalHours?: number | null;
   /** @nullable */

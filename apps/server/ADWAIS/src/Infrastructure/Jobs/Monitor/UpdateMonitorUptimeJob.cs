@@ -2,7 +2,6 @@ using Adwais.Infrastructure.Persistence;
 using Adwais.Domain.Entities.Monitoring;
 using Adwais.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,8 +11,7 @@ namespace Adwais.Infrastructure.Jobs.Monitor;
 public class UpdateMonitorUptimeJob(
     IDbContextFactory<AnalyticsDbContext> dbContextFactory,
     IUptimeRobotService uptimeRobotService,
-    ISystemEventService eventService,
-    IConfiguration configuration)
+    ISystemEventService eventService)
 {
     public async Task ExecuteAsync(int monitorId, DateTimeOffset startDate, DateTimeOffset endDate)
     {
@@ -27,18 +25,21 @@ public class UpdateMonitorUptimeJob(
 
             if (monitor == null || !monitor.UptimeMonitorEnabled) return;
 
-            var isMockEnabled = configuration.GetValue<bool>("FeatureToggles:MockUptimeRobotIntegrations", false);
-            if (isMockEnabled && monitorId <= 0) return;
+            if (monitorId <= 0) return;
             currentStep = "Fetching uptime status from UptimeRobot API";
             var uptime = await uptimeRobotService.GetUptimeAsync(monitorId, startDate, endDate, monitor.Name);
 
             currentStep = "Updating Monitor uptime percentage and timestamps";
             monitor.CurrentUptimePercentage = uptime;
-            monitor.LastUptimeUpdate = endDate;
+            if (!monitor.LastUptimeUpdate.HasValue || endDate > monitor.LastUptimeUpdate.Value)
+            {
+                monitor.LastUptimeUpdate = endDate;
+            }
             monitor.LastSyncError = null;
 
             currentStep = "Configuring Daily Monitor Availability records";
             var date = new DateTimeOffset(startDate.Year, startDate.Month, startDate.Day, 0, 0, 0, TimeSpan.Zero);
+            var isFinalized = startDate == date && endDate >= date.AddDays(1).AddSeconds(-1);
             var availability = await dbContext.MonitorAvailabilities
                 .FirstOrDefaultAsync(ma => ma.MonitorId == monitorId && ma.Date == date);
 
@@ -48,13 +49,15 @@ public class UpdateMonitorUptimeJob(
                 {
                     MonitorId = monitorId,
                     Date = date,
-                    UptimePercentage = uptime
+                    UptimePercentage = uptime,
+                    IsFinalized = isFinalized
                 };
                 dbContext.MonitorAvailabilities.Add(availability);
             }
             else
             {
                 availability.UptimePercentage = uptime;
+                availability.IsFinalized |= isFinalized;
             }
         
             currentStep = "Saving uptime and availability to database";

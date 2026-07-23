@@ -10,6 +10,7 @@ public record TenantResponseDto
     public string Name { get; init; } = string.Empty;
     public TenantType Type { get; init; }
     public string? LitiumBaseUrl { get; init; }
+    public string? ImageUrl { get; init; }
     public bool CurrentlyFetching { get; init; }
     public DateTimeOffset? FetchedFrom { get; init; }
     public DateTimeOffset? FetchedUntil { get; init; }

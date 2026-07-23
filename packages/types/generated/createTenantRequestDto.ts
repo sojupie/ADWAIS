@@ -13,6 +13,8 @@ export interface CreateTenantRequestDto {
   /** @nullable */
   litiumBaseUrl?: string | null;
   /** @nullable */
+  imageUrl?: string | null;
+  /** @nullable */
   serviceAccountToken?: string | null;
   orderFetchingEnabled?: boolean;
 }

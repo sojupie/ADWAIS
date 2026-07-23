@@ -7,6 +7,8 @@ public record LatencyPointDto(
     double? Average,
     double? PreviousAverage,
     double? Lowest,
-    double? Highest);
+    double? Highest,
+    LatencySampleState CurrentState,
+    LatencySampleState PreviousState);
 
 

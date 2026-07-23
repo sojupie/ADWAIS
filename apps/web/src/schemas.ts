@@ -10,4 +10,6 @@ export const financialSearchSchema = z.object({
 
 export const fleetSearchSchema = z.object({
   timeframe: timeframeSchema.optional(),
+  tenantId: z.string().uuid().optional(),
+  monitorId: z.coerce.number().int().optional(),
 });

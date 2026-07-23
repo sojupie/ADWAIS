@@ -4,70 +4,15 @@ using Adwais.Domain.Enums;
 using Adwais.Infrastructure.Persistence;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace Adwais.Infrastructure.DemoDataSeeding;
 
 public class RuntimeDataSeederJob(
     IDbContextFactory<AnalyticsDbContext> dbContextFactory,
-    ILogger<RuntimeDataSeederJob> logger,
-    IConfiguration configuration)
+    ILogger<RuntimeDataSeederJob> logger)
 {
     private const int RunsPerHour = 60;
-    private record TenantProfile(string Name, int MinAov, int MaxAov, int DailyVolume);
-
-    private static readonly List<TenantProfile> Profiles = new()
-    {
-        // Segment 1: High-Volume FMCG & Essentials (Low AOV, High Volume, Low Seasonality)
-        new("Daily Grocery Express", 200, 800, 400),
-        new("Organic Pantry", 300, 1000, 250),
-        new("Pet Paradise Essentials", 150, 1200, 300),
-        new("Healthy Habits Supplements", 250, 900, 350),
-        new("Office Supply Hub", 500, 3000, 200),
-
-        // Segment 2: Enterprise B2B & Industrial (High AOV, Low Volume, High Variance)
-        new("Nordic Heavy Machinery", 15000, 150000, 5),
-        new("Construction Materials Direct", 5000, 40000, 20),
-        new("Commercial Kitchen Supply", 2000, 25000, 15),
-        new("Medical Equipment Pro", 8000, 60000, 8),
-        new("Wholesale Electronics Dist", 10000, 80000, 12),
-
-        // Segment 3: Fashion & Apparel (Medium AOV, Medium/High Volume, High Seasonality)
-        new("Nordic Fashion House", 800, 4500, 150),
-        new("Urban Style Co", 600, 3500, 180),
-        new("Peak Performance Activewear", 1000, 5000, 120),
-        new("Vintage Finds Boutique", 400, 2500, 80),
-        new("The Shoe Box", 700, 3000, 140),
-
-        // Segment 4: Consumer Electronics & Tech (Medium-High AOV, High Seasonality)
-        new("Tech Gadgets Plus", 1500, 8000, 100),
-        new("Smart Home Solutions", 1000, 12000, 80),
-        new("Cosmic PC Gaming", 3000, 25000, 50),
-        new("Camera Gear Supply", 2500, 18000, 40),
-        new("Drone Store Pro", 4000, 20000, 30),
-
-        // Segment 5: Niche Luxury & High-End (Extreme AOV, Very Low Volume)
-        new("Luxe Jewelry", 8000, 80000, 8),
-        new("Elite Timepieces", 15000, 120000, 4),
-        new("Modern Art Prints", 3000, 25000, 12),
-        new("Handcrafted Leather Goods", 2000, 15000, 15),
-
-        // Segment 6: Home, Furniture & Garden (High AOV, Medium Volume, Low/Medium Seasonality)
-        new("Home & Hearth", 1500, 12000, 80),
-        new("Modern Furniture Direct", 3000, 35000, 40),
-        new("Scandi Design Studio", 1000, 8000, 60),
-        new("Gardener's Choice", 400, 3500, 90),
-        new("Outdoor Oasis", 2000, 15000, 50),
-
-        // Segment 7: Hobbies, Sports & Leisure (Mixed AOV, Mixed Volume, High Variance)
-        new("Adventure Gear Outdoors", 1200, 9000, 70),
-        new("Sporting Goods Pro", 800, 6000, 110),
-        new("Music Masters Instruments", 1500, 18000, 40),
-        new("Bookworm Central", 150, 1000, 150),
-        new("Toy Town", 200, 1500, 120),
-        new("Craft Brewery Supplies", 1000, 8000, 60)
-    };
 
     private static readonly double[] HourlyWeights = 
     { 
@@ -91,8 +36,9 @@ public class RuntimeDataSeederJob(
             .SingleAsync();
         var reportingTimeZone = TimeZoneInfo.FindSystemTimeZoneById(reportingTimeZoneId);
         
+        var demoTenantNames = DemoDataCatalog.Tenants.Select(profile => profile.Name).ToArray();
         var tenants = await db.Tenants
-            .Where(t => t.Id != AnalyticsDbContext.SystemTenantGuid && t.Name.EndsWith(" [MOCK]"))
+            .Where(t => demoTenantNames.Contains(t.Name))
             .ToListAsync();
 
         if (!tenants.Any()) return;
@@ -107,8 +53,7 @@ public class RuntimeDataSeederJob(
 
         foreach (var tenant in tenants)
         {
-            var baseName = tenant.Name.Replace(" [MOCK]", "");
-            var profile = Profiles.FirstOrDefault(p => p.Name == baseName);
+            var profile = DemoDataCatalog.FindTenant(tenant.Name);
             if (profile == null) continue;
 
             double weeklyVolume = profile.DailyVolume * 7.0;
@@ -133,15 +78,11 @@ public class RuntimeDataSeederJob(
                 orders.Count, orders.Select(o => o.TenantId).Distinct().Count());
         }
 
-        var isMockEnabled = configuration.GetValue<bool>("FeatureToggles:MockUptimeRobotIntegrations", false);
-        if (isMockEnabled)
-        {
-            await SeedMockMonitorLatencyAsync(db, now, random);
-            await SeedMockMonitorAvailabilityAsync(db, now, random);
-        }
+        await SeedDemoMonitorLatencyAsync(db, now, random);
+        await SeedDemoMonitorAvailabilityAsync(db, now, random);
     }
 
-    private static async Task SeedMockMonitorAvailabilityAsync(AnalyticsDbContext db, DateTimeOffset now, Random random)
+    private static async Task SeedDemoMonitorAvailabilityAsync(AnalyticsDbContext db, DateTimeOffset now, Random random)
     {
         var seededMonitors = await db.Monitors
             .AsNoTracking()
@@ -152,9 +93,9 @@ public class RuntimeDataSeederJob(
 
         var availabilities = seededMonitors.Select(m =>
         {
-            double uptimePercentage = random.NextDouble() < 0.01 
-                ? random.NextDouble() * (99.8 - 98.0) + 98.0 
-                : random.NextDouble() * (100.0 - 99.9) + 99.9;
+            var ordinal = (int)(Math.Abs((long)m.Id) - 1);
+            var reliability = DemoDataCatalog.GetReliability(ordinal);
+            var uptimePercentage = DemoDataCatalog.GenerateUptime(random, reliability);
 
             return new MonitorAvailability
             {
@@ -168,7 +109,7 @@ public class RuntimeDataSeederJob(
         await db.SaveChangesAsync();
     }
 
-    private static async Task SeedMockMonitorLatencyAsync(AnalyticsDbContext db, DateTimeOffset now, Random random)
+    private static async Task SeedDemoMonitorLatencyAsync(AnalyticsDbContext db, DateTimeOffset now, Random random)
     {
         var seededMonitors = await db.Monitors
             .AsNoTracking()

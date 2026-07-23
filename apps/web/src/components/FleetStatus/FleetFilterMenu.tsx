@@ -217,7 +217,7 @@ export function FleetFilterMenu({
     <FloatingFilterMenu
       activeCount={count}
       ariaLabel="Fleet filter controls"
-      clearLabel="Clear all fleet filters"
+      clearLabel="Reset all fleet filters"
       onClearAll={onClearAll}
       width={520}
       placement="top"

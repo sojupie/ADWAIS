@@ -10,6 +10,7 @@ public class Tenant
     public required string Name { get; set; }
     public TenantType Type { get; set; }
     public string? LitiumBaseUrl { get; set; }
+    public string? ImageUrl { get; set; }
     public string? ServiceAccountToken { get; set; }
     public DateTimeOffset? FetchedFrom { get; set; }
     public DateTimeOffset? FetchedUntil { get; set; }

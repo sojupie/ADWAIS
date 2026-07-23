@@ -29,4 +29,9 @@ export interface CreateMonitorRequestDto {
      * @nullable
      */
   uptimeSla?: number | null;
+  /**
+     * Optional per-monitor latency threshold in milliseconds. When omitted, latency is not classified as degraded.
+     * @nullable
+     */
+  latencyDegradedFloor?: number | null;
 }

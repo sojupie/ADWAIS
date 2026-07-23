@@ -55,6 +55,15 @@ export type UptimeMonitorDto = {
   createdDate: string;
   lastSyncError: string | null;
   tags?: string[] | null;
+  tenantBaseUrl: string | null;
+  tenantImageUrl: string | null;
+  httpMethod: string | null;
+  timeoutSeconds: number | null;
+  sslExpiresAt: string | null;
+  domainExpiresAt: string | null;
+  monitoredRegions: string[];
+  currentStateDurationSeconds: number | null;
+  latestIncident: Generated.MonitorIncidentDto | null;
 };
 
 export type TenantResponseDto = {
@@ -62,6 +71,7 @@ export type TenantResponseDto = {
   name: string;
   type: Generated.TenantType;
   litiumBaseUrl: string;
+  imageUrl: string | null;
   currentlyFetching: boolean;
   fetchedFrom: string | null;
   fetchedUntil: string | null;
@@ -104,10 +114,9 @@ export type GlobalConfigDto = Generated.GlobalConfigResponseDto;
 // Added back for compatibility
 export type AccumulatedRevenuePointDto = Required<Generated.AccumulatedRevenuePointResponseDto>;
 export type LatencyPoint = Required<Generated.LatencyPointResponseDto>;
-export type MonitorAnalyticsDto = Required<Omit<Generated.MonitorAnalyticsResponseDto, 'latencyPoints' | 'monitors' | 'globalAverageLatency'>> & {
+export type MonitorAnalyticsDto = Required<Omit<Generated.MonitorAnalyticsResponseDto, 'latencyPoints' | 'globalAverageLatency'>> & {
   globalAverageLatency: number | null;
   latencyPoints: LatencyPoint[];
-  monitors: UptimeMonitorDto[];
 };
 
 // Keeping original because it's returned as an anonymous object from Hangfire endpoints

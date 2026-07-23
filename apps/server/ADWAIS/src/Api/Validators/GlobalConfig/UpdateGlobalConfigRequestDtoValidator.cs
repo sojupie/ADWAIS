@@ -7,11 +7,6 @@ public class UpdateGlobalConfigRequestDtoValidator : AbstractValidator<UpdateGlo
 {
     public UpdateGlobalConfigRequestDtoValidator()
     {
-        RuleFor(x => x.LatencyDegradedFloor)
-            .GreaterThan(0)
-            .When(x => x.LatencyDegradedFloor.HasValue)
-            .WithMessage("Latency degraded floor must be greater than 0 ms.");
-
         RuleFor(x => x.SystemEventRetentionDays)
             .GreaterThan(0)
             .When(x => x.SystemEventRetentionDays.HasValue)

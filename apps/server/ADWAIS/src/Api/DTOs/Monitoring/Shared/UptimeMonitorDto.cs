@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace Adwais.Api.DTOs.Monitoring;
 
@@ -21,6 +22,25 @@ public record UptimeMonitorDto(
     DateTimeOffset? LastLatencyUpdate,
     DateTimeOffset CreatedDate,
     string? LastSyncError,
-    List<string> Tags);
+    List<string> Tags,
+    [property: JsonRequired] string? TenantBaseUrl,
+    [property: JsonRequired] string? TenantImageUrl,
+    [property: JsonRequired] string? HttpMethod,
+    [property: JsonRequired] int? TimeoutSeconds,
+    [property: JsonRequired] DateTimeOffset? SslExpiresAt,
+    [property: JsonRequired] DateTimeOffset? DomainExpiresAt,
+    [property: JsonRequired] List<string> MonitoredRegions,
+    [property: JsonRequired] long? CurrentStateDurationSeconds,
+    [property: JsonRequired] MonitorIncidentDto? LatestIncident);
+
+public sealed record MonitorIncidentDto
+{
+    public required string? Id { get; init; }
+    public required string? Status { get; init; }
+    public required string? Cause { get; init; }
+    public required string? Reason { get; init; }
+    public required DateTimeOffset? StartedAt { get; init; }
+    public required long? DurationSeconds { get; init; }
+}
 
 

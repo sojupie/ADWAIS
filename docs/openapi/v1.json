@@ -1659,7 +1659,7 @@
         "tags": [
           "Monitor"
         ],
-        "summary": "Unified analytics endpoint for monitoring data.\r\nProvides latency time-series and filtered monitor lists hydrated with uptime for the specified timeframe (defaults to T30).",
+        "summary": "Unified analytics endpoint for monitoring data.\r\nProvides latency time-series and monitoring KPIs for the specified timeframe (defaults to T30).",
         "parameters": [
           {
             "name": "tenantId",
@@ -1735,6 +1735,94 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/MonitorAnalyticsResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/monitors/availability": {
+      "get": {
+        "tags": [
+          "Monitor"
+        ],
+        "summary": "Returns daily availability for the selected fleet, tenant, or monitor scope.",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "query",
+            "description": "Optional. Scopes the metrics to a specific tenant. \r\nIf null, metrics represent the global portfolio total.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "monitorId",
+            "in": "query",
+            "description": "Optional. Scopes the metrics to a specific monitor. \r\nIf null, metrics represent the global portfolio total.\r\nOverrides tenantId parameter.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "timeframe",
+            "in": "query",
+            "description": "The primary timeframe for the calculation (e.g., T7, T30). \r\nDefaults to T30.",
+            "schema": {
+              "$ref": "#/components/schemas/Timeframe"
+            }
+          },
+          {
+            "name": "comparison",
+            "in": "query",
+            "description": "The comparison period for the timeframe.\r\nDefaults to Preceding.",
+            "schema": {
+              "$ref": "#/components/schemas/ComparisonType"
+            }
+          },
+          {
+            "name": "tags",
+            "in": "query",
+            "description": "Optional. Filters the monitors by specific tags.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "statuses",
+            "in": "query",
+            "description": "Optional. Filters the monitors by specific statuses.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitorAvailabilitySeriesResponseDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitorAvailabilitySeriesResponseDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitorAvailabilitySeriesResponseDto"
                 }
               }
             }
@@ -3380,6 +3468,12 @@
             "description": "Optional target uptime percentage (0-100).",
             "format": "double",
             "nullable": true
+          },
+          "latencyDegradedFloor": {
+            "type": "integer",
+            "description": "Optional per-monitor latency threshold in milliseconds. When omitted, latency is not classified as degraded.",
+            "format": "int32",
+            "nullable": true
           }
         },
         "additionalProperties": false,
@@ -3478,6 +3572,10 @@
             "$ref": "#/components/schemas/TenantType"
           },
           "litiumBaseUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "imageUrl": {
             "type": "string",
             "nullable": true
           },
@@ -3793,11 +3891,6 @@
             "type": "integer",
             "format": "int32"
           },
-          "latencyDegradedFloor": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
           "uptimeRobotApiKey": {
             "type": "string",
             "nullable": true
@@ -3830,11 +3923,6 @@
           },
           "activeSubscription": {
             "type": "string",
-            "nullable": true
-          },
-          "defaultUptimeSla": {
-            "type": "number",
-            "format": "double",
             "nullable": true
           },
           "feedFetchIntervalHours": {
@@ -3958,6 +4046,15 @@
         "additionalProperties": false
       },
       "LatencyPointResponseDto": {
+        "required": [
+          "average",
+          "currentState",
+          "p10",
+          "p90",
+          "previousAverage",
+          "previousState",
+          "timestamp"
+        ],
         "type": "object",
         "properties": {
           "timestamp": {
@@ -3983,9 +4080,22 @@
             "type": "number",
             "format": "double",
             "nullable": true
+          },
+          "currentState": {
+            "$ref": "#/components/schemas/LatencySampleState"
+          },
+          "previousState": {
+            "$ref": "#/components/schemas/LatencySampleState"
           }
         },
         "additionalProperties": false
+      },
+      "LatencySampleState": {
+        "enum": [
+          "Observed",
+          "NoSamples"
+        ],
+        "type": "string"
       },
       "LitiumOrderDto": {
         "required": [
@@ -4030,6 +4140,11 @@
         "additionalProperties": false
       },
       "MonitorAnalyticsResponseDto": {
+        "required": [
+          "globalAverageLatency",
+          "kpis",
+          "latencyPoints"
+        ],
         "type": "object",
         "properties": {
           "globalAverageLatency": {
@@ -4044,15 +4159,125 @@
             },
             "nullable": true
           },
-          "monitors": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/UptimeMonitorDto"
-            },
-            "nullable": true
-          },
           "kpis": {
             "$ref": "#/components/schemas/MonitorKpiResponseDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "MonitorAvailabilityPointResponseDto": {
+        "required": [
+          "date",
+          "endDate",
+          "isPartial",
+          "lowestMonitorUptimePercentage",
+          "monitorCount",
+          "uptimePercentage"
+        ],
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "uptimePercentage": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "lowestMonitorUptimePercentage": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "monitorCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isPartial": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "MonitorAvailabilitySeriesResponseDto": {
+        "required": [
+          "averageUptimePercentage",
+          "lowestUptimePercentage",
+          "periodEnd",
+          "periodStart",
+          "points"
+        ],
+        "type": "object",
+        "properties": {
+          "periodStart": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "periodEnd": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "averageUptimePercentage": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "lowestUptimePercentage": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MonitorAvailabilityPointResponseDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "MonitorIncidentDto": {
+        "required": [
+          "cause",
+          "durationSeconds",
+          "id",
+          "reason",
+          "startedAt",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "cause": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "durationSeconds": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -4645,6 +4870,10 @@
             "type": "string",
             "nullable": true
           },
+          "imageUrl": {
+            "type": "string",
+            "nullable": true
+          },
           "serviceAccountToken": {
             "type": "string",
             "nullable": true
@@ -4706,6 +4935,10 @@
             "$ref": "#/components/schemas/TenantType"
           },
           "litiumBaseUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "imageUrl": {
             "type": "string",
             "nullable": true
           },
@@ -4931,11 +5164,6 @@
             "type": "boolean",
             "nullable": true
           },
-          "latencyDegradedFloor": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
           "uptimeRobotApiKey": {
             "type": "string",
             "nullable": true
@@ -4943,11 +5171,6 @@
           "systemEventRetentionDays": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "defaultUptimeSla": {
-            "type": "number",
-            "format": "double",
             "nullable": true
           },
           "feedFetchIntervalHours": {
@@ -4993,6 +5216,12 @@
             "type": "number",
             "description": "SLA for the monitor.",
             "format": "double",
+            "nullable": true
+          },
+          "latencyDegradedFloor": {
+            "type": "integer",
+            "description": "Optional per-monitor latency threshold in milliseconds. Omit to leave the current value unchanged.",
+            "format": "int32",
             "nullable": true
           },
           "tags": {
@@ -5081,6 +5310,10 @@
             "type": "string",
             "nullable": true
           },
+          "imageUrl": {
+            "type": "string",
+            "nullable": true
+          },
           "serviceAccountToken": {
             "type": "string",
             "nullable": true
@@ -5163,6 +5396,63 @@
             "type": "integer",
             "format": "int32"
           },
+          "httpMethod": {
+            "type": "string",
+            "nullable": true
+          },
+          "timeoutSeconds": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "sslExpiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "domainExpiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "monitoredRegions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "currentStateDurationSeconds": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "lastIncidentId": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastIncidentStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastIncidentCause": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastIncidentReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastIncidentStartedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastIncidentDurationSeconds": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
           "latencyDegradedFloor": {
             "type": "integer",
             "format": "int32",
@@ -5208,6 +5498,15 @@
       },
       "UptimeMonitorDto": {
         "required": [
+          "currentStateDurationSeconds",
+          "domainExpiresAt",
+          "httpMethod",
+          "latestIncident",
+          "monitoredRegions",
+          "sslExpiresAt",
+          "tenantBaseUrl",
+          "tenantImageUrl",
+          "timeoutSeconds",
           "type"
         ],
         "type": "object",
@@ -5296,6 +5595,48 @@
               "type": "string"
             },
             "nullable": true
+          },
+          "tenantBaseUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "tenantImageUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "httpMethod": {
+            "type": "string",
+            "nullable": true
+          },
+          "timeoutSeconds": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "sslExpiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "domainExpiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "monitoredRegions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "currentStateDurationSeconds": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "latestIncident": {
+            "$ref": "#/components/schemas/MonitorIncidentDto"
           }
         },
         "additionalProperties": false

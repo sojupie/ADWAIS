@@ -7,17 +7,16 @@ using Adwais.Application.Common.Caching;
 using Adwais.Application.Common.Interfaces;
 using Adwais.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 
 namespace Adwais.Application.Services;
 
 public class MonitorOrchestrationService(
     IApplicationDbContext dbContext,
     IUptimeRobotService uptimeRobotService,
-    ICacheService cache,
-    IConfiguration configuration) : IMonitorOrchestrationService
+    ICacheService cache) : IMonitorOrchestrationService
 {
     private record LatencyRow(DateTimeOffset Timestamp, double? Average, double? P10, double? P90);
+    private record AvailabilityRow(int MonitorId, DateTimeOffset Timestamp, double? UptimePercentage);
 
     public async Task<MonitorAnalyticsDto> GetAnalyticsAsync(ResolvedPeriod period, Guid? tenantId = null, int? monitorId = null, string[]? tags = null, string[]? statuses = null, CancellationToken ct = default)
     {
@@ -56,46 +55,30 @@ public class MonitorOrchestrationService(
         var currentRows = await GetMergedLatencyDataAsync(dbContext, currentStart, currentEnd, isHourly, allowedMonitorIds, ct);
         var previousRows = await GetMergedLatencyDataAsync(dbContext, previousStart, period.PreviousEnd, isHourly, allowedMonitorIds, ct);
 
-        var roundedTotalHours = Math.Ceiling((currentEnd - currentStart).TotalHours);
-        var binSizeHours = isHourly 
-            ? roundedTotalHours / steps 
-            : 24;
-
-        var currentByStep = currentRows
-            .GroupBy(r => (int)((r.Timestamp - currentStart.UtcDateTime).TotalHours / binSizeHours))
-            .ToDictionary(
-                g => g.Key, 
-                g => new { 
-                    Avg = g.Average(r => r.Average), 
-                    P10 = g.Average(r => r.P10), 
-                    P90 = g.Average(r => r.P90) 
-                });
-
-        var previousByStep = previousRows
-            .GroupBy(r => (int)((r.Timestamp - previousStart.UtcDateTime).TotalHours / binSizeHours))
-            .ToDictionary(g => g.Key, g => (double?)g.Average(r => r.Average));
+        var binSize = isHourly
+            ? TimeSpan.FromTicks((currentEnd - currentStart).Ticks / steps)
+            : TimeSpan.FromDays(1);
+        var currentByStep = BinLatencyRows(currentRows, currentStart, binSize, steps, isHourly);
+        var previousByStep = BinLatencyRows(previousRows, previousStart, binSize, steps, isHourly);
 
         var latencyPoints = new List<LatencyPointDto>(steps);
         for (var i = 0; i < steps; i++)
         {
-            var timestamp = isHourly 
-                ? currentStart.AddHours((i + 1) * binSizeHours) 
+            var timestamp = isHourly
+                ? currentStart.AddTicks(binSize.Ticks * (i + 1))
                 : currentStart.AddDays(i);
-
-            if (isHourly && i == steps - 1)
-            {
-                timestamp = currentEnd;
-            }
             
             var data = currentByStep.GetValueOrDefault(i);
-            double? prevAvg = previousByStep.TryGetValue(i, out var p) ? p : null;
+            var previousData = previousByStep.GetValueOrDefault(i);
 
             latencyPoints.Add(new LatencyPointDto(
                 timestamp, 
                 data?.Avg, 
-                prevAvg,
+                previousData?.Avg,
                 data?.P10, 
-                data?.P90));
+                data?.P90,
+                data is null ? LatencySampleState.NoSamples : LatencySampleState.Observed,
+                previousData is null ? LatencySampleState.NoSamples : LatencySampleState.Observed));
         }
         
         var periodUptimes = await GetPeriodUptimesAsync(currentStart, currentEnd, allowedMonitorIds, ct);
@@ -157,7 +140,7 @@ public class MonitorOrchestrationService(
             globalAvgLatency = monitors.Where(m => m.CurrentLatency.HasValue).Average(m => m.CurrentLatency!.Value);
         }
 
-        return new MonitorAnalyticsDto(globalAvgLatency, latencyPoints, monitors, kpis);
+        return new MonitorAnalyticsDto(globalAvgLatency, latencyPoints, kpis);
     }
 
     private async Task<Dictionary<int, double?>> GetPeriodUptimesAsync(DateTimeOffset start, DateTimeOffset end, List<int>? allowedMonitorIds, CancellationToken ct = default)
@@ -188,7 +171,7 @@ public class MonitorOrchestrationService(
             })
             .ToDictionaryAsync(x => x.MonitorId, x => (x.Avg, x.Count), ct);
 
-        var todayLive = new Dictionary<int, (double? Avg, int Count)>();
+        var todayLive = new Dictionary<int, double?>();
         if (yesterday < end)
         {
             var liveStart = yesterday > queryStart ? yesterday : queryStart;
@@ -207,10 +190,9 @@ public class MonitorOrchestrationService(
                 .GroupBy(ma => ma.MonitorId)
                 .Select(g => new { 
                     MonitorId = g.Key, 
-                    Avg = (double?)g.Average(ma => ma.UptimePercentage),
-                    Count = g.Count(ma => ma.UptimePercentage != null) 
+                    Avg = (double?)g.Average(ma => ma.UptimePercentage)
                 })
-                .ToDictionaryAsync(x => x.MonitorId, x => (x.Avg, x.Count), ct);
+                .ToDictionaryAsync(x => x.MonitorId, x => x.Avg, ct);
         }
 
         var results = new Dictionary<int, double?>();
@@ -222,7 +204,10 @@ public class MonitorOrchestrationService(
             var hasLive = todayLive.TryGetValue(mid, out var live);
             
             var histCount = hasHist ? hist.Count : 0;
-            var liveCount = hasLive ? live.Count : 0;
+            // Historical rows are daily rollups. Treat today's partial aggregate as
+            // one partial day as well, rather than allowing minute-level polling
+            // frequency to outweigh every completed day in the selected period.
+            var liveCount = hasLive && live.HasValue ? 1 : 0;
             var totalCount = histCount + liveCount;
             
             if (totalCount == 0)
@@ -232,12 +217,121 @@ public class MonitorOrchestrationService(
             else
             {
                 var histSum = (hasHist ? (hist.Avg ?? 0) : 0) * histCount;
-                var liveSum = (hasLive ? (live.Avg ?? 0) : 0) * liveCount;
+                var liveSum = (hasLive ? (live ?? 0) : 0) * liveCount;
                 results[mid] = (histSum + liveSum) / totalCount;
             }
         }
 
         return results;
+    }
+
+    public async Task<MonitorAvailabilitySeriesDto> GetAvailabilitySeriesAsync(
+        ResolvedPeriod period,
+        TimeZoneInfo reportingTimeZone,
+        Guid? tenantId = null,
+        int? monitorId = null,
+        string[]? tags = null,
+        string[]? statuses = null,
+        CancellationToken ct = default)
+    {
+        IQueryable<UptimeMonitor> monitorQuery = dbContext.Monitors.AsNoTracking();
+        if (monitorId.HasValue)
+            monitorQuery = monitorQuery.Where(m => m.Id == monitorId.Value);
+        else if (tenantId.HasValue)
+            monitorQuery = monitorQuery.Where(m => m.TenantId == tenantId.Value);
+        else
+            monitorQuery = monitorQuery.Where(m => m.TenantId != IApplicationDbContext.SystemTenantGuid);
+
+        var monitors = await monitorQuery.ToListAsync(ct);
+        foreach (var monitor in monitors)
+        {
+            HydrateLiveStatus(monitor);
+        }
+
+        if (tags is { Length: > 0 })
+        {
+            monitors = monitors
+                .Where(m => m.Tags != null && m.Tags.Intersect(tags, StringComparer.OrdinalIgnoreCase).Any())
+                .ToList();
+        }
+
+        if (statuses is { Length: > 0 })
+        {
+            monitors = monitors
+                .Where(m => statuses.Contains(m.StatusStr, StringComparer.OrdinalIgnoreCase))
+                .ToList();
+        }
+
+        var monitorIds = monitors.Select(m => m.Id).ToList();
+        var queryStart = period.CurrentStart.AddDays(-1);
+
+        List<AvailabilityRow> rows;
+        if (monitorIds.Count == 0)
+        {
+            rows = [];
+        }
+        else
+        {
+            rows = await dbContext.MonitorAvailabilities
+                .AsNoTracking()
+                .Where(row => monitorIds.Contains(row.MonitorId)
+                    && row.Date >= queryStart
+                    && row.Date < period.CurrentEnd)
+                .Select(row => new AvailabilityRow(row.MonitorId, row.Date, row.UptimePercentage))
+                .ToListAsync(ct);
+        }
+
+        var firstDate = DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(period.CurrentStart, reportingTimeZone).Date);
+        var lastDate = DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(period.CurrentEnd, reportingTimeZone).Date);
+
+        var monitorDayValues = rows
+            .Where(row => row.UptimePercentage.HasValue)
+            .GroupBy(row => new
+            {
+                row.MonitorId,
+                Date = DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(row.Timestamp, reportingTimeZone).Date)
+            })
+            .Where(group => group.Key.Date >= firstDate && group.Key.Date <= lastDate)
+            .Select(group => new
+            {
+                group.Key.MonitorId,
+                group.Key.Date,
+                Uptime = group.Average(row => row.UptimePercentage!.Value)
+            })
+            .ToList();
+
+        var points = new List<MonitorAvailabilityPointDto>();
+        var periodSpanDays = lastDate.DayNumber - firstDate.DayNumber;
+        var bucketSizeDays = periodSpanDays > 90 ? 7 : 1;
+        var periodStartsMidday = TimeZoneInfo.ConvertTime(period.CurrentStart, reportingTimeZone).TimeOfDay != TimeSpan.Zero;
+
+        for (var bucketStart = firstDate; bucketStart <= lastDate;)
+        {
+            var bucketEnd = DateOnly.FromDayNumber(Math.Min(
+                bucketStart.DayNumber + bucketSizeDays - 1,
+                lastDate.DayNumber));
+            var bucketValues = monitorDayValues
+                .Where(value => value.Date >= bucketStart && value.Date <= bucketEnd)
+                .ToList();
+            var isPartial = bucketEnd == lastDate || (bucketStart == firstDate && periodStartsMidday);
+
+            points.Add(new MonitorAvailabilityPointDto(
+                bucketStart,
+                bucketEnd,
+                bucketValues.Count > 0 ? bucketValues.Average(value => value.Uptime) : null,
+                bucketValues.Count > 0 ? bucketValues.Min(value => value.Uptime) : null,
+                bucketValues.Select(value => value.MonitorId).Distinct().Count(),
+                isPartial));
+
+            bucketStart = bucketEnd.AddDays(1);
+        }
+
+        return new MonitorAvailabilitySeriesDto(
+            period.CurrentStart,
+            period.CurrentEnd,
+            monitorDayValues.Count > 0 ? monitorDayValues.Average(value => value.Uptime) : null,
+            monitorDayValues.Count > 0 ? monitorDayValues.Min(value => value.Uptime) : null,
+            points);
     }
 
     private async Task<List<LatencyRow>> GetMergedLatencyDataAsync(
@@ -258,16 +352,7 @@ public class MonitorOrchestrationService(
                 .ToListAsync(ct);
 
             var grouped = raw
-                .GroupBy(rt => new DateTimeOffset(rt.Date.Year, rt.Date.Month, rt.Date.Day, rt.Date.Hour, 0, 0, TimeSpan.Zero))
-                .Select(g => {
-                    var avgList = g.Where(x => x.Average.HasValue).Select(x => x.Average!.Value).ToList();
-                    return new LatencyRow(
-                        g.Key,
-                        avgList.Count > 0 ? avgList.Average() : null,
-                        CalculatePercentile(avgList, 0.10),
-                        CalculatePercentile(avgList, 0.90)
-                    );
-                })
+                .Select(row => new LatencyRow(row.Date, row.Average, row.Average, row.Average))
                 .OrderBy(r => r.Timestamp)
                 .ToList();
             return grouped;
@@ -320,9 +405,52 @@ public class MonitorOrchestrationService(
         return historical;
     }
 
-    public async Task<UptimeMonitor> CreateMonitorAsync(Guid tenantId, string name, string url, string? type, double? uptimeSla, CancellationToken ct = default)
+    private sealed record LatencyBin(double Avg, double? P10, double? P90);
+
+    private static Dictionary<int, LatencyBin> BinLatencyRows(
+        IEnumerable<LatencyRow> rows,
+        DateTimeOffset periodStart,
+        TimeSpan binSize,
+        int steps,
+        bool calculateRawPercentiles)
+    {
+        return rows
+            .Where(row => row.Average.HasValue)
+            .Select(row => new
+            {
+                Row = row,
+                Index = (int)((row.Timestamp - periodStart).Ticks / binSize.Ticks)
+            })
+            .Where(item => item.Index >= 0 && item.Index < steps)
+            .GroupBy(item => item.Index)
+            .ToDictionary(
+                group => group.Key,
+                group =>
+                {
+                    var rowsInBin = group.Select(item => item.Row).ToList();
+                    var averages = rowsInBin.Select(row => row.Average!.Value).ToList();
+                    return new LatencyBin(
+                        averages.Average(),
+                        calculateRawPercentiles
+                            ? CalculatePercentile(averages, 0.10)
+                            : AveragePresent(rowsInBin.Select(row => row.P10)),
+                        calculateRawPercentiles
+                            ? CalculatePercentile(averages, 0.90)
+                            : AveragePresent(rowsInBin.Select(row => row.P90)));
+                });
+    }
+
+    private static double? AveragePresent(IEnumerable<double?> values)
+    {
+        var present = values.Where(value => value.HasValue).Select(value => value!.Value).ToList();
+        return present.Count == 0 ? null : present.Average();
+    }
+
+    public async Task<UptimeMonitor> CreateMonitorAsync(Guid tenantId, string name, string url, string? type, double? uptimeSla, CancellationToken ct = default, int? latencyDegradedFloor = null)
     {
         var normalizedType = UptimeMonitorTypes.Normalize(type);
+        var tenant = await dbContext.Tenants.SingleOrDefaultAsync(t => t.Id == tenantId, ct)
+            ?? throw new KeyNotFoundException($"Tenant {tenantId} not found.");
         var remoteMonitor = await uptimeRobotService.CreateMonitorAsync(name, url, normalizedType);
         
         var monitor = new UptimeMonitor
@@ -333,10 +461,25 @@ public class MonitorOrchestrationService(
             Name = remoteMonitor.FriendlyName,
             Url = remoteMonitor.Url,
             UpdateInterval = remoteMonitor.UpdateInterval,
+            HttpMethod = remoteMonitor.HttpMethod,
+            TimeoutSeconds = remoteMonitor.TimeoutSeconds,
+            SslExpiresAt = remoteMonitor.SslExpiresAt,
+            DomainExpiresAt = remoteMonitor.DomainExpiresAt,
+            MonitoredRegions = remoteMonitor.MonitoredRegions ?? [],
+            CurrentStateDurationSeconds = remoteMonitor.CurrentStateDurationSeconds,
+            LastIncidentId = remoteMonitor.LastIncident?.Id,
+            LastIncidentStatus = remoteMonitor.LastIncident?.Status,
+            LastIncidentCause = remoteMonitor.LastIncident?.Cause,
+            LastIncidentReason = remoteMonitor.LastIncident?.Reason,
+            LastIncidentStartedAt = remoteMonitor.LastIncident?.StartedAt,
+            LastIncidentDurationSeconds = remoteMonitor.LastIncident?.DurationSeconds,
             UptimeSla = uptimeSla,
+            LatencyDegradedFloor = latencyDegradedFloor,
             UptimeMonitorEnabled = true,
             CreatedDate = remoteMonitor.CreatedDate,
-            StatusStr = remoteMonitor.Status
+            StatusStr = remoteMonitor.Status,
+            Tags = remoteMonitor.Tags,
+            Tenant = tenant
         };
 
         dbContext.Monitors.Add(monitor);
@@ -372,17 +515,25 @@ public class MonitorOrchestrationService(
     }
 
     public async Task<IEnumerable<UptimeMonitor>> GetMonitorsByTenantAsync(Guid tenantId, ResolvedPeriod period, CancellationToken ct = default)
+        => await GetMonitorsAsync(period, tenantId, ct);
+
+    public async Task<IReadOnlyList<UptimeMonitor>> GetMonitorsAsync(ResolvedPeriod period, Guid? tenantId = null, CancellationToken ct = default)
     {
         var start = period.CurrentStart;
         var end = period.CurrentEnd;
-        
-        var monitors = await dbContext.Monitors
-            .AsNoTracking()
-            .Include(m => m.Tenant)
-            .Where(m => m.TenantId == tenantId)
-            .ToListAsync(ct);
 
-        var uptimes = await GetPeriodUptimesAsync(start, end, null, ct);
+        IQueryable<UptimeMonitor> query = dbContext.Monitors
+            .AsNoTracking()
+            .Include(m => m.Tenant);
+
+        query = tenantId.HasValue
+            ? query.Where(m => m.TenantId == tenantId.Value)
+            : query.Where(m => m.TenantId != IApplicationDbContext.SystemTenantGuid);
+
+        var monitors = await query.ToListAsync(ct);
+        var monitorIds = monitors.Select(m => m.Id).ToList();
+
+        var uptimes = await GetPeriodUptimesAsync(start, end, monitorIds, ct);
 
         foreach (var m in monitors)
         {
@@ -427,12 +578,10 @@ public class MonitorOrchestrationService(
         }
         else
         {
-            var mockConfig = configuration["FeatureToggles:MockUptimeRobotIntegrations"];
-            var isMockEnabled = bool.TryParse(mockConfig, out var parsed) && parsed;
-            if (isMockEnabled && monitor.Id <= 0)
+            if (monitor.Id <= 0)
             {
                 monitor.StatusStr = "Up";
-                monitor.CurrentLatency = 200 + (monitor.Id % 400); 
+                monitor.CurrentLatency = 140 + Math.Abs((long)monitor.Id % 80);
             }
         }
     }
@@ -450,7 +599,10 @@ public class MonitorOrchestrationService(
         var monitor = await dbContext.Monitors.SingleOrDefaultAsync(m => m.TenantId == tenantId && m.Id == id, ct);
         if (monitor == null) throw new KeyNotFoundException();
 
-        await uptimeRobotService.DeleteMonitorAsync(id);
+        if (id > 0)
+        {
+            await uptimeRobotService.DeleteMonitorAsync(id);
+        }
 
         dbContext.Monitors.Remove(monitor);
         await dbContext.SaveChangesAsync(ct);
@@ -461,7 +613,10 @@ public class MonitorOrchestrationService(
         var monitor = await dbContext.Monitors.SingleOrDefaultAsync(m => m.Id == id, ct);
         if (monitor == null) throw new KeyNotFoundException();
 
-        await uptimeRobotService.PauseMonitorAsync(id);
+        if (id > 0)
+        {
+            await uptimeRobotService.PauseMonitorAsync(id);
+        }
         
         monitor.UptimeMonitorEnabled = false;
         await dbContext.SaveChangesAsync(ct);
@@ -472,7 +627,10 @@ public class MonitorOrchestrationService(
         var monitor = await dbContext.Monitors.SingleOrDefaultAsync(m => m.Id == id, ct);
         if (monitor == null) throw new KeyNotFoundException();
 
-        await uptimeRobotService.StartMonitorAsync(id);
+        if (id > 0)
+        {
+            await uptimeRobotService.StartMonitorAsync(id);
+        }
         
         monitor.UptimeMonitorEnabled = true;
         await dbContext.SaveChangesAsync(ct);
@@ -497,7 +655,7 @@ public class MonitorOrchestrationService(
             .ToListAsync(ct);
     }
 
-    public async Task<UptimeMonitor> UpdateMonitorAsync(int id, string? name, string? url, string? type, double? uptimeSla, List<string>? tags, CancellationToken ct = default)
+    public async Task<UptimeMonitor> UpdateMonitorAsync(int id, string? name, string? url, string? type, double? uptimeSla, List<string>? tags, CancellationToken ct = default, int? latencyDegradedFloor = null)
     {
         var monitor = await dbContext.Monitors.SingleOrDefaultAsync(m => m.Id == id, ct);
         if (monitor == null) throw new KeyNotFoundException($"Monitor {id} not found.");
@@ -517,7 +675,7 @@ public class MonitorOrchestrationService(
         bool typeChanged = normalizedType != null && normalizedType != monitor.Type;
         bool tagsChanged = cleanedTags != null && !cleanedTags.SequenceEqual(monitor.Tags);
 
-        if (nameChanged || urlChanged || typeChanged || tagsChanged)
+        if (id > 0 && (nameChanged || urlChanged || typeChanged || tagsChanged))
         {
             await uptimeRobotService.UpdateMonitorAsync(
                 id,
@@ -525,28 +683,33 @@ public class MonitorOrchestrationService(
                 urlChanged ? url : null,
                 typeChanged ? normalizedType : null,
                 tagsChanged ? cleanedTags : null);
+        }
 
-            if (nameChanged)
-            {
-                monitor.Name = name!;
-            }
-            if (urlChanged)
-            {
-                monitor.Url = url!;
-            }
-            if (typeChanged)
-            {
-                monitor.Type = normalizedType!;
-            }
-            if (tagsChanged && cleanedTags != null)
-            {
-                monitor.Tags = cleanedTags;
-            }
+        if (nameChanged)
+        {
+            monitor.Name = name!;
+        }
+        if (urlChanged)
+        {
+            monitor.Url = url!;
+        }
+        if (typeChanged)
+        {
+            monitor.Type = normalizedType!;
+        }
+        if (tagsChanged && cleanedTags != null)
+        {
+            monitor.Tags = cleanedTags;
         }
 
         if (uptimeSla.HasValue)
         {
             monitor.UptimeSla = uptimeSla;
+        }
+
+        if (latencyDegradedFloor.HasValue)
+        {
+            monitor.LatencyDegradedFloor = latencyDegradedFloor;
         }
 
         await dbContext.SaveChangesAsync(ct);

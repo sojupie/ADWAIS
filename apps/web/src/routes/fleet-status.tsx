@@ -4,6 +4,8 @@ import { getSavedTimeframe } from '../utils/timeframeStorage';
 
 export interface FleetSearch {
   timeframe?: Timeframe;
+  tenantId?: string;
+  monitorId?: number;
 }
 
 export const Route = createFileRoute('/fleet-status')({

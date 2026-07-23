@@ -59,7 +59,9 @@ All config files are tracked in git — no manual setup required after cloning.
 | `apps/server/ADWAIS/src/.env` | Public Azure AD identifiers (tenant ID, client ID) |
 | `apps/server/ADWAIS/src/Api/appsettings.Development.json` | Local DB connection string + feature toggles |
 
-> **Local dev with mock data**: `MockUptimeRobotIntegrations: true` is already set in `appsettings.Development.json` — no external API keys required.
+> **Local development with demo data**: `EnableRuntimeDataSeeding: true` is already set in `appsettings.Development.json`. Demo monitors use negative local IDs and are never sent to UptimeRobot, so no external API key is required.
+>
+> The production Compose setup defaults `ENABLE_RUNTIME_DATA_SEEDING` to `true` for the hosted interactive demo. Override it with `false` for a live-data deployment.
 
 ### 3. Spin up the Database
 If using Docker, run from the root:

@@ -1,5 +1,6 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Globalization;
 using System.Text.Json;
 using Adwais.Application.DTOs.Monitoring.Upstream;
 using Adwais.Application.Interfaces;
@@ -59,7 +60,14 @@ public class UptimeRobotService(
             Status: response.RootElement.GetProperty("status").GetString()!,
             CreatedDate: response.RootElement.GetProperty("createDateTime").GetDateTimeOffset(),
             UpdateInterval: response.RootElement.GetProperty("interval").GetInt32(),
-            Tags: ParseTags(response.RootElement)
+            Tags: ParseTags(response.RootElement),
+            HttpMethod: ParseScalarString(response.RootElement, "httpMethodType"),
+            TimeoutSeconds: ParseNullableInt(response.RootElement, "timeout"),
+            SslExpiresAt: ParseNullableDateTimeOffset(response.RootElement, "sslExpiryDateTime"),
+            DomainExpiresAt: ParseNullableDateTimeOffset(response.RootElement, "domainExpireDate"),
+            MonitoredRegions: ParseRegions(response.RootElement),
+            CurrentStateDurationSeconds: ParseNullableLong(response.RootElement, "currentStateDuration"),
+            LastIncident: ParseIncident(response.RootElement)
         );
         return monitor;
     }
@@ -127,7 +135,14 @@ public class UptimeRobotService(
                         Status: monitor.GetProperty("status").GetString()!,
                         CreatedDate: monitor.GetProperty("createDateTime").GetDateTimeOffset(),
                         UpdateInterval: monitor.GetProperty("interval").GetInt32(),
-                        Tags: ParseTags(monitor)
+                        Tags: ParseTags(monitor),
+                        HttpMethod: ParseScalarString(monitor, "httpMethodType"),
+                        TimeoutSeconds: ParseNullableInt(monitor, "timeout"),
+                        SslExpiresAt: ParseNullableDateTimeOffset(monitor, "sslExpiryDateTime"),
+                        DomainExpiresAt: ParseNullableDateTimeOffset(monitor, "domainExpireDate"),
+                        MonitoredRegions: ParseRegions(monitor),
+                        CurrentStateDurationSeconds: ParseNullableLong(monitor, "currentStateDuration"),
+                        LastIncident: ParseIncident(monitor)
                     ));
                 }
             }
@@ -181,6 +196,112 @@ public class UptimeRobotService(
             JsonValueKind.Number => typeElement.GetRawText(),
             _ => fallback
         };
+    }
+
+    private static string? ParseScalarString(JsonElement element, string propertyName)
+    {
+        if (!element.TryGetProperty(propertyName, out var property)
+            || property.ValueKind is JsonValueKind.Null or JsonValueKind.Undefined)
+        {
+            return null;
+        }
+
+        return property.ValueKind == JsonValueKind.String
+            ? property.GetString()
+            : property.GetRawText();
+    }
+
+    private static int? ParseNullableInt(JsonElement element, string propertyName)
+    {
+        if (!element.TryGetProperty(propertyName, out var property)
+            || property.ValueKind is JsonValueKind.Null or JsonValueKind.Undefined)
+        {
+            return null;
+        }
+
+        if (property.ValueKind == JsonValueKind.Number && property.TryGetInt32(out var number)) return number;
+        return property.ValueKind == JsonValueKind.String
+            && int.TryParse(property.GetString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out number)
+                ? number
+                : null;
+    }
+
+    private static long? ParseNullableLong(JsonElement element, string propertyName)
+    {
+        if (!element.TryGetProperty(propertyName, out var property)
+            || property.ValueKind is JsonValueKind.Null or JsonValueKind.Undefined)
+        {
+            return null;
+        }
+
+        if (property.ValueKind == JsonValueKind.Number && property.TryGetInt64(out var number)) return number;
+        return property.ValueKind == JsonValueKind.String
+            && long.TryParse(property.GetString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out number)
+                ? number
+                : null;
+    }
+
+    private static DateTimeOffset? ParseNullableDateTimeOffset(JsonElement element, string propertyName)
+    {
+        if (!element.TryGetProperty(propertyName, out var property)
+            || property.ValueKind is JsonValueKind.Null or JsonValueKind.Undefined)
+        {
+            return null;
+        }
+
+        if (property.ValueKind == JsonValueKind.String
+            && DateTimeOffset.TryParse(
+                property.GetString(),
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.AssumeUniversal,
+                out var parsed))
+        {
+            return parsed.ToUniversalTime();
+        }
+
+        if (property.ValueKind == JsonValueKind.Number && property.TryGetInt64(out var unixValue))
+        {
+            return unixValue > 10_000_000_000
+                ? DateTimeOffset.FromUnixTimeMilliseconds(unixValue)
+                : DateTimeOffset.FromUnixTimeSeconds(unixValue);
+        }
+
+        return null;
+    }
+
+    private static List<string> ParseRegions(JsonElement monitorElement)
+    {
+        if (!monitorElement.TryGetProperty("regionalData", out var regionalData)
+            || regionalData.ValueKind != JsonValueKind.Object
+            || !regionalData.TryGetProperty("REGION", out var regions)
+            || regions.ValueKind != JsonValueKind.Array)
+        {
+            return [];
+        }
+
+        return regions.EnumerateArray()
+            .Where(region => region.ValueKind == JsonValueKind.String)
+            .Select(region => region.GetString())
+            .Where(region => !string.IsNullOrWhiteSpace(region))
+            .Select(region => region!)
+            .ToList();
+    }
+
+    private static UptimeRobotIncidentDto? ParseIncident(JsonElement monitorElement)
+    {
+        if (!monitorElement.TryGetProperty("lastIncident", out var incident)
+            || incident.ValueKind != JsonValueKind.Object)
+        {
+            return null;
+        }
+
+        return new UptimeRobotIncidentDto(
+            ParseScalarString(incident, "id"),
+            ParseScalarString(incident, "status"),
+            ParseScalarString(incident, "cause"),
+            ParseScalarString(incident, "reason"),
+            ParseNullableDateTimeOffset(incident, "startedAt"),
+            ParseNullableLong(incident, "duration"));
     }
     
     public async Task<double> GetUptimeAsync(int monitorId, DateTimeOffset? startDate = null, DateTimeOffset? endDate = null, string? monitorName = null)

@@ -7,7 +7,6 @@ public class GlobalConfig
     public bool LitiumFetchEnabled { get; set; }
     public bool UptimeRobotFetchEnabled { get; set; }
     public required int LitiumFetchIntervalMinutes { get; set; }
-    public int? LatencyDegradedFloor { get; set; }
     public string? UptimeRobotApiKey { get; set; }
     public int UptimeFetchIntervalMinutes { get; set; }
     public int LatencyFetchIntervalMinutes { get; set; }
@@ -18,7 +17,6 @@ public class GlobalConfig
     public int? MonitorsLimit { get; set; }
     public string? ActiveSubscription { get; set; }
     public string? LastSyncError { get; set; }
-    public double? DefaultUptimeSla { get; set; }
     public int FeedFetchIntervalHours { get; set; } = 2;
     public string? WeatherLocation { get; set; }
     public int WeatherFetchIntervalMinutes { get; set; } = 15;

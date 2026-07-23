@@ -3,7 +3,6 @@ using Adwais.Domain.Entities.Monitoring;
 using Adwais.Application.Common.Caching;
 using Adwais.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Threading;
@@ -15,8 +14,7 @@ public class UpdateMonitorLatencyJob(
     IDbContextFactory<AnalyticsDbContext> dbContextFactory,
     IUptimeRobotService uptimeRobotService,
     IMemoryCache cache,
-    ISystemEventService eventService,
-    IConfiguration configuration)
+    ISystemEventService eventService)
 {
     public async Task ExecuteAsync(int monitorId, DateTimeOffset startDate, DateTimeOffset endDate)
     {
@@ -30,8 +28,7 @@ public class UpdateMonitorLatencyJob(
 
             if (monitor == null || !monitor.UptimeMonitorEnabled) return;
 
-            var isMockEnabled = configuration.GetValue<bool>("FeatureToggles:MockUptimeRobotIntegrations", false);
-            if (isMockEnabled && monitorId <= 0) return;
+            if (monitorId <= 0) return;
             currentStep = "Fetching response latency time-series from UptimeRobot API";
             var responseTime = await uptimeRobotService.GetResponseTimeAsync(monitorId, startDate, endDate, monitor.Name);
 

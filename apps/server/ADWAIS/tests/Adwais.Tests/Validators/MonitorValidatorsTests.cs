@@ -111,7 +111,16 @@ public class MonitorValidatorsTests
             LastLatencyUpdate: null,
             CreatedDate: DateTimeOffset.UtcNow,
             LastSyncError: null,
-            Tags: new List<string>()
+            Tags: new List<string>(),
+            TenantBaseUrl: null,
+            TenantImageUrl: null,
+            HttpMethod: null,
+            TimeoutSeconds: null,
+            SslExpiresAt: null,
+            DomainExpiresAt: null,
+            MonitoredRegions: new List<string>(),
+            CurrentStateDurationSeconds: null,
+            LatestIncident: null
         );
     }
 

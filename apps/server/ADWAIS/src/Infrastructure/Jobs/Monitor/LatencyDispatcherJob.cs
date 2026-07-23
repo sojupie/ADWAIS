@@ -19,7 +19,7 @@ public class LatencyDispatcherJob(IDbContextFactory<AnalyticsDbContext> dbContex
         var globalInterval = globalConfig.LatencyFetchIntervalMinutes;
         
         var monitors = await dbContext.Monitors
-            .Where(m => m.UptimeMonitorEnabled)
+            .Where(m => m.Id > 0 && m.UptimeMonitorEnabled)
             .Select(m => new { m.Id, m.LastLatencyUpdate })
             .ToListAsync();
 

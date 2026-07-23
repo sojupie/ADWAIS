@@ -75,9 +75,15 @@ public class MonitorControllerTests
             GlobalAverageLatency: 120.5,
             LatencyPoints: new List<LatencyPointDto>
             {
-                new(DateTimeOffset.UtcNow, 120.5, 115.0, 100.0, 150.0)
+                new(
+                    DateTimeOffset.UtcNow,
+                    120.5,
+                    115.0,
+                    100.0,
+                    150.0,
+                    LatencySampleState.Observed,
+                    LatencySampleState.Observed)
             },
-            Monitors: new List<UptimeMonitor>(),
             Kpis: new MonitorKpiDto(99.9, 99.8, 0.1, 120.5, 115.0, 4.7, 150.0, 145.0, 3.4, 100.0, 95.0, 5.2)
         );
 
@@ -92,6 +98,79 @@ public class MonitorControllerTests
         var response = Assert.IsType<MonitorAnalyticsResponseDto>(okResult.Value);
         Assert.Equal(120.5, response.GlobalAverageLatency);
         Assert.Single(response.LatencyPoints);
+    }
+
+    [Fact]
+    public async Task GetAvailability_ShouldReturnDailySeries()
+    {
+        var request = new MonitorRequestDto
+        {
+            TenantId = Guid.NewGuid(),
+            Timeframe = Timeframe.T30
+        };
+        var pointDate = new DateOnly(2026, 7, 22);
+        var series = new MonitorAvailabilitySeriesDto(
+            DateTimeOffset.UtcNow.AddDays(-1),
+            DateTimeOffset.UtcNow,
+            99.9,
+            99.5,
+            new List<MonitorAvailabilityPointDto>
+            {
+                new(pointDate, pointDate, 99.9, 99.5, 2, true)
+            });
+
+        _monitorServiceMock
+            .Setup(service => service.GetAvailabilitySeriesAsync(
+                It.IsAny<ResolvedPeriod>(),
+                It.IsAny<TimeZoneInfo>(),
+                request.TenantId,
+                request.MonitorId,
+                request.Tags,
+                request.Statuses,
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(series);
+
+        var result = await _controller.GetAvailability(request, CancellationToken.None);
+
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var response = Assert.IsType<MonitorAvailabilitySeriesResponseDto>(okResult.Value);
+        var point = Assert.Single(response.Points);
+        Assert.Equal(pointDate, point.Date);
+        Assert.Equal(pointDate, point.EndDate);
+        Assert.Equal(99.9, point.UptimePercentage);
+        Assert.True(point.IsPartial);
+    }
+
+    [Fact]
+    public async Task GetMonitors_WithoutScope_ShouldUseBatchedServiceRead()
+    {
+        var request = new MonitorRequestDto { Timeframe = Timeframe.T30 };
+        var monitors = new List<UptimeMonitor>
+        {
+            new() { Id = 41, TenantId = Guid.NewGuid(), Name = "One", Url = "https://one.test" },
+            new() { Id = 42, TenantId = Guid.NewGuid(), Name = "Two", Url = "https://two.test" }
+        };
+        _monitorServiceMock
+            .Setup(service => service.GetMonitorsAsync(
+                It.IsAny<ResolvedPeriod>(),
+                null,
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(monitors);
+
+        var result = await _controller.GetMonitors(request, CancellationToken.None);
+
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var response = Assert.IsAssignableFrom<IEnumerable<UptimeMonitorDto>>(okResult.Value);
+        Assert.Equal(2, response.Count());
+        _monitorServiceMock.Verify(service => service.GetMonitorsAsync(
+            It.IsAny<ResolvedPeriod>(),
+            null,
+            It.IsAny<CancellationToken>()), Times.Once);
+        _monitorServiceMock.Verify(service => service.GetMonitorAsync(
+            It.IsAny<Guid>(),
+            It.IsAny<int>(),
+            It.IsAny<ResolvedPeriod>(),
+            It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]

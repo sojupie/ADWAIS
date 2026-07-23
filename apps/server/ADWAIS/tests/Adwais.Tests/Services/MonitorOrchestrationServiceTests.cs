@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Moq;
 using Xunit;
 using Adwais.Application.Common.Interfaces;
@@ -15,6 +14,7 @@ using Adwais.Domain.Enums;
 using Adwais.Infrastructure.Persistence;
 using Adwais.Application.Services;
 using Adwais.Application.Common.Models;
+using Adwais.Application.DTOs.Monitoring;
 
 namespace Adwais.Tests.Services;
 
@@ -24,7 +24,6 @@ public class MonitorOrchestrationServiceTests
     private readonly AnalyticsDbContext _dbContext;
     private readonly Mock<IUptimeRobotService> _uptimeRobotServiceMock;
     private readonly Mock<ICacheService> _cacheServiceMock;
-    private readonly Mock<IConfiguration> _configurationMock;
     private readonly MonitorOrchestrationService _service;
 
     public MonitorOrchestrationServiceTests()
@@ -36,13 +35,11 @@ public class MonitorOrchestrationServiceTests
 
         _uptimeRobotServiceMock = new Mock<IUptimeRobotService>();
         _cacheServiceMock = new Mock<ICacheService>();
-        _configurationMock = new Mock<IConfiguration>();
 
         _service = new MonitorOrchestrationService(
             _dbContext,
             _uptimeRobotServiceMock.Object,
-            _cacheServiceMock.Object,
-            _configurationMock.Object
+            _cacheServiceMock.Object
         );
     }
 
@@ -98,6 +95,56 @@ public class MonitorOrchestrationServiceTests
         Assert.Equal(20, point.Lowest);
         Assert.Equal(90, point.Highest);
         Assert.Equal(55, point.Average); // Average of 10..100 is 55
+    }
+
+    [Fact]
+    public async Task GetAnalyticsAsync_HalfHourBins_ShouldRetainSamplesFromBothHalvesOfHour()
+    {
+        var tenantId = Guid.NewGuid();
+        var periodStart = new DateTimeOffset(2026, 7, 23, 0, 0, 0, TimeSpan.Zero);
+        _dbContext.Tenants.Add(new Tenant
+        {
+            Id = tenantId,
+            Name = "Binning Tenant",
+            Type = TenantType.B2C,
+            LitiumBaseUrl = "binning.test"
+        });
+        _dbContext.Monitors.Add(new UptimeMonitor
+        {
+            Id = 1,
+            TenantId = tenantId,
+            Name = "Binning Monitor",
+            Url = "https://binning.test",
+            UptimeMonitorEnabled = true
+        });
+        _dbContext.ResponseTimes.AddRange(
+            new ResponseTime { Id = Guid.NewGuid(), MonitorId = 1, Date = periodStart.AddMinutes(15), Average = 100 },
+            new ResponseTime { Id = Guid.NewGuid(), MonitorId = 1, Date = periodStart.AddMinutes(45), Average = 200 });
+        await _dbContext.SaveChangesAsync();
+
+        var period = new ResolvedPeriod(
+            periodStart,
+            periodStart.AddHours(1),
+            periodStart.AddHours(-1),
+            periodStart,
+            2,
+            true,
+            true);
+
+        var result = await _service.GetAnalyticsAsync(period, tenantId, ct: CancellationToken.None);
+
+        Assert.Collection(
+            result.LatencyPoints,
+            point =>
+            {
+                Assert.Equal(100, point.Average);
+                Assert.Equal(LatencySampleState.Observed, point.CurrentState);
+            },
+            point =>
+            {
+                Assert.Equal(200, point.Average);
+                Assert.Equal(LatencySampleState.Observed, point.CurrentState);
+            });
     }
 
     [Fact]
@@ -180,9 +227,13 @@ public class MonitorOrchestrationServiceTests
                 Url = "https://qa.test",
                 Tags = new List<string> { "qa" }
             });
+        var now = DateTimeOffset.UtcNow;
+        _dbContext.ResponseTimes.AddRange(
+            new ResponseTime { Id = Guid.NewGuid(), MonitorId = 1, Date = now.AddHours(-1), Average = 100 },
+            new ResponseTime { Id = Guid.NewGuid(), MonitorId = 2, Date = now.AddHours(-1), Average = 200 },
+            new ResponseTime { Id = Guid.NewGuid(), MonitorId = 3, Date = now.AddHours(-1), Average = 900 });
         await _dbContext.SaveChangesAsync();
 
-        var now = DateTimeOffset.UtcNow;
         var period = new ResolvedPeriod(
             currentStart: now.AddDays(-1),
             currentEnd: now,
@@ -200,7 +251,130 @@ public class MonitorOrchestrationServiceTests
             null,
             CancellationToken.None);
 
-        Assert.Equal(new[] { 1, 2 }, result.Monitors.Select(monitor => monitor.Id).OrderBy(id => id));
+        Assert.NotNull(result);
+        Assert.Equal(150, result.Kpis.AverageLatency);
+    }
+
+    [Fact]
+    public async Task GetMonitorsAsync_ShouldHydrateAllMonitorsInScope()
+    {
+        var tenantId = Guid.NewGuid();
+        var otherTenantId = Guid.NewGuid();
+        _dbContext.Tenants.AddRange(
+            new Tenant { Id = tenantId, Name = "Tenant A", Type = TenantType.B2C, LitiumBaseUrl = "a.test" },
+            new Tenant { Id = otherTenantId, Name = "Tenant B", Type = TenantType.B2C, LitiumBaseUrl = "b.test" });
+        _dbContext.Monitors.AddRange(
+            new UptimeMonitor { Id = 11, TenantId = tenantId, Name = "A", Url = "https://a.test" },
+            new UptimeMonitor { Id = 12, TenantId = otherTenantId, Name = "B", Url = "https://b.test" });
+
+        var now = DateTimeOffset.UtcNow;
+        var utcToday = new DateTimeOffset(now.UtcDateTime.Date, TimeSpan.Zero);
+        _dbContext.MonitorAvailabilities.AddRange(
+            new MonitorAvailability { Id = Guid.NewGuid(), MonitorId = 11, Date = utcToday, UptimePercentage = 99.5 },
+            new MonitorAvailability { Id = Guid.NewGuid(), MonitorId = 12, Date = utcToday, UptimePercentage = 98.5 });
+        await _dbContext.SaveChangesAsync();
+
+        var period = new ResolvedPeriod(
+            now.AddDays(-1), now.AddHours(1), now.AddDays(-2), now.AddDays(-1), 24, true, false);
+
+        var monitors = await _service.GetMonitorsAsync(period, tenantId, CancellationToken.None);
+
+        var monitor = Assert.Single(monitors);
+        Assert.Equal(11, monitor.Id);
+        Assert.Equal(99.5, monitor.CurrentUptimePercentage);
+    }
+
+    [Fact]
+    public async Task GetAvailabilitySeriesAsync_ShouldAggregateMonitorsAndPreserveMissingDays()
+    {
+        var tenantId = Guid.NewGuid();
+        _dbContext.Monitors.AddRange(
+            new UptimeMonitor { Id = 21, TenantId = tenantId, Name = "One", Url = "https://one.test" },
+            new UptimeMonitor { Id = 22, TenantId = tenantId, Name = "Two", Url = "https://two.test" });
+
+        var dayOne = new DateTimeOffset(2026, 7, 20, 0, 0, 0, TimeSpan.Zero);
+        _dbContext.MonitorAvailabilities.AddRange(
+            new MonitorAvailability { Id = Guid.NewGuid(), MonitorId = 21, Date = dayOne, UptimePercentage = 100, IsFinalized = true },
+            new MonitorAvailability { Id = Guid.NewGuid(), MonitorId = 22, Date = dayOne, UptimePercentage = 99, IsFinalized = true },
+            new MonitorAvailability { Id = Guid.NewGuid(), MonitorId = 21, Date = dayOne.AddDays(2), UptimePercentage = 98 });
+        await _dbContext.SaveChangesAsync();
+
+        var period = new ResolvedPeriod(
+            dayOne,
+            dayOne.AddDays(2).AddHours(12),
+            dayOne.AddDays(-3),
+            dayOne,
+            3,
+            false,
+            false);
+
+        var result = await _service.GetAvailabilitySeriesAsync(
+            period,
+            TimeZoneInfo.Utc,
+            tenantId,
+            ct: CancellationToken.None);
+
+        Assert.Equal(3, result.Points.Count);
+        Assert.Equal(result.Points[0].Date, result.Points[0].EndDate);
+        Assert.Equal(99.5, result.Points[0].UptimePercentage);
+        Assert.Equal(99, result.Points[0].LowestMonitorUptimePercentage);
+        Assert.Equal(2, result.Points[0].MonitorCount);
+        Assert.Null(result.Points[1].UptimePercentage);
+        Assert.Equal(0, result.Points[1].MonitorCount);
+        Assert.Equal(98, result.Points[2].UptimePercentage);
+        Assert.True(result.Points[2].IsPartial);
+        Assert.Equal(99, result.AverageUptimePercentage);
+        Assert.Equal(98, result.LowestUptimePercentage);
+    }
+
+    [Fact]
+    public async Task GetAvailabilitySeriesAsync_ShouldUseSevenDayBucketsForPeriodsOverNinetyDays()
+    {
+        var tenantId = Guid.NewGuid();
+        _dbContext.Monitors.Add(new UptimeMonitor
+        {
+            Id = 23,
+            TenantId = tenantId,
+            Name = "Long period",
+            Url = "https://long-period.test"
+        });
+
+        var periodStart = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
+        for (var day = 0; day < 92; day++)
+        {
+            _dbContext.MonitorAvailabilities.Add(new MonitorAvailability
+            {
+                Id = Guid.NewGuid(),
+                MonitorId = 23,
+                Date = periodStart.AddDays(day),
+                UptimePercentage = 99,
+                IsFinalized = true
+            });
+        }
+        await _dbContext.SaveChangesAsync();
+
+        var period = new ResolvedPeriod(
+            periodStart,
+            periodStart.AddDays(91).AddHours(12),
+            periodStart.AddDays(-91),
+            periodStart,
+            92,
+            false,
+            false);
+
+        var result = await _service.GetAvailabilitySeriesAsync(
+            period,
+            TimeZoneInfo.Utc,
+            tenantId,
+            ct: CancellationToken.None);
+
+        Assert.Equal(14, result.Points.Count);
+        Assert.All(result.Points, point => Assert.InRange(
+            point.EndDate.DayNumber - point.Date.DayNumber + 1,
+            1,
+            7));
+        Assert.Equal(periodStart.Date.AddDays(6), result.Points[0].EndDate.ToDateTime(TimeOnly.MinValue));
+        Assert.Equal(99, result.AverageUptimePercentage);
     }
 
     [Fact]
@@ -208,6 +382,8 @@ public class MonitorOrchestrationServiceTests
     {
         // Arrange
         var tenantId = Guid.NewGuid();
+        _dbContext.Tenants.Add(new Tenant { Id = tenantId, Name = "Tenant" });
+        await _dbContext.SaveChangesAsync();
         var remoteMonitor = new Adwais.Application.DTOs.Monitoring.Upstream.UptimeRobotMonitorDto(
             Id: 9876,
             Type: "PING",
@@ -241,6 +417,8 @@ public class MonitorOrchestrationServiceTests
     public async Task CreateMonitorAsync_ShouldDefaultTypeToHttp_WhenOmitted()
     {
         var tenantId = Guid.NewGuid();
+        _dbContext.Tenants.Add(new Tenant { Id = tenantId, Name = "Tenant" });
+        await _dbContext.SaveChangesAsync();
         var remoteMonitor = new Adwais.Application.DTOs.Monitoring.Upstream.UptimeRobotMonitorDto(
             Id: 9877,
             Type: "HTTP",
@@ -365,5 +543,38 @@ public class MonitorOrchestrationServiceTests
         Assert.Equal(99.9, result.UptimeSla);
         Assert.Contains("tag2", result.Tags);
         _uptimeRobotServiceMock.Verify(s => s.UpdateMonitorAsync(80, "New Name", "https://new.com", "PING", It.IsAny<List<string>>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task DemoMonitorMutations_ShouldRemainLocal()
+    {
+        var tenantId = Guid.NewGuid();
+        _dbContext.Monitors.AddRange(
+            new UptimeMonitor { Id = -1, TenantId = tenantId, Name = "Store", Url = "https://store.example", UptimeMonitorEnabled = true },
+            new UptimeMonitor { Id = -2, TenantId = tenantId, Name = "Account", Url = "https://account.example", UptimeMonitorEnabled = true },
+            new UptimeMonitor { Id = -3, TenantId = tenantId, Name = "Checkout", Url = "https://checkout.example", UptimeMonitorEnabled = true });
+        await _dbContext.SaveChangesAsync();
+
+        var updated = await _service.UpdateMonitorAsync(
+            -1,
+            "Updated store",
+            "https://new.example",
+            "http",
+            99.9,
+            ["PROD"],
+            CancellationToken.None);
+        await _service.PauseMonitorAsync(-2, CancellationToken.None);
+        await _service.StartMonitorAsync(-2, CancellationToken.None);
+        await _service.DeleteMonitorAsync(tenantId, -3, CancellationToken.None);
+
+        Assert.Equal("Updated store", updated.Name);
+        Assert.Equal("https://new.example", updated.Url);
+        Assert.True((await _dbContext.Monitors.FindAsync(-2))!.UptimeMonitorEnabled);
+        Assert.Null(await _dbContext.Monitors.FindAsync(-3));
+        _uptimeRobotServiceMock.Verify(service => service.UpdateMonitorAsync(
+            It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<List<string>?>()), Times.Never);
+        _uptimeRobotServiceMock.Verify(service => service.PauseMonitorAsync(It.IsAny<int>()), Times.Never);
+        _uptimeRobotServiceMock.Verify(service => service.StartMonitorAsync(It.IsAny<int>()), Times.Never);
+        _uptimeRobotServiceMock.Verify(service => service.DeleteMonitorAsync(It.IsAny<int>()), Times.Never);
     }
 }

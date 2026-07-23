@@ -8,5 +8,20 @@ public record UptimeRobotMonitorDto(
     string Status,
     DateTimeOffset CreatedDate,
     int UpdateInterval,
-    List<string> Tags);
+    List<string> Tags,
+    string? HttpMethod = null,
+    int? TimeoutSeconds = null,
+    DateTimeOffset? SslExpiresAt = null,
+    DateTimeOffset? DomainExpiresAt = null,
+    List<string>? MonitoredRegions = null,
+    long? CurrentStateDurationSeconds = null,
+    UptimeRobotIncidentDto? LastIncident = null);
+
+public sealed record UptimeRobotIncidentDto(
+    string? Id,
+    string? Status,
+    string? Cause,
+    string? Reason,
+    DateTimeOffset? StartedAt,
+    long? DurationSeconds);
 

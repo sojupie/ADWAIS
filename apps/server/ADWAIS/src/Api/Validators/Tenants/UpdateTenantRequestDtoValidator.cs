@@ -13,6 +13,9 @@ public class UpdateTenantRequestDtoValidator :  AbstractValidator<UpdateTenantRe
         RuleFor(x => x.LitiumBaseUrl)
             .Must(uri => string.IsNullOrWhiteSpace(uri) || Uri.TryCreate(uri, UriKind.Absolute, out _))
             .WithMessage("INVALID URL.");
+        RuleFor(x => x.ImageUrl)
+            .Must(uri => string.IsNullOrWhiteSpace(uri) || Uri.TryCreate(uri, UriKind.Absolute, out _))
+            .WithMessage("INVALID IMAGE URL.");
     }
 
 }

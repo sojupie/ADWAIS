@@ -4,15 +4,18 @@
  * Adwais.Api
  * OpenAPI spec version: 1.0
  */
+import type { LatencySampleState } from './latencySampleState';
 
 export interface LatencyPointResponseDto {
-  timestamp?: string;
+  timestamp: string;
   /** @nullable */
-  average?: number | null;
+  average: number | null;
   /** @nullable */
-  previousAverage?: number | null;
+  previousAverage: number | null;
   /** @nullable */
-  p10?: number | null;
+  p10: number | null;
   /** @nullable */
-  p90?: number | null;
+  p90: number | null;
+  currentState: LatencySampleState;
+  previousState: LatencySampleState;
 }

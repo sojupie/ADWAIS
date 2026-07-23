@@ -47,6 +47,7 @@ public class TenantController(
                     Name = t.Name,
                     Type = t.Type,
                     LitiumBaseUrl = t.LitiumBaseUrl,
+                    ImageUrl = t.ImageUrl,
                     CurrentlyFetching = t.CurrentlyFetching,
                     FetchedFrom = t.FetchedFrom,
                     FetchedUntil = t.FetchedUntil,
@@ -71,6 +72,7 @@ public class TenantController(
                 Name = t.Name,
                 Type = t.Type,
                 LitiumBaseUrl = t.LitiumBaseUrl,
+                ImageUrl = t.ImageUrl,
                 CurrentlyFetching = t.CurrentlyFetching,
                 FetchedFrom = t.FetchedFrom,
                 FetchedUntil = t.FetchedUntil,
@@ -99,6 +101,7 @@ public class TenantController(
             Name = request.Name,
             Type = request.Type,
             LitiumBaseUrl = request.LitiumBaseUrl,
+            ImageUrl = request.ImageUrl,
             ServiceAccountToken = request.ServiceAccountToken,
             OrderFetchingEnabled = request.OrderFetchingEnabled
         };
@@ -112,6 +115,7 @@ public class TenantController(
                 Name = tenant.Name,
                 Type = tenant.Type,
                 LitiumBaseUrl = tenant.LitiumBaseUrl,
+                ImageUrl = tenant.ImageUrl,
                 CurrentlyFetching = tenant.CurrentlyFetching,
                 FetchedFrom = tenant.FetchedFrom,
                 FetchedUntil = tenant.FetchedUntil,
@@ -170,6 +174,10 @@ public class TenantController(
         {
             tenant.LitiumBaseUrl = string.IsNullOrWhiteSpace(request.LitiumBaseUrl) ? null : request.LitiumBaseUrl.Trim();
         }
+        if (request.ImageUrl is not null)
+        {
+            tenant.ImageUrl = string.IsNullOrWhiteSpace(request.ImageUrl) ? null : request.ImageUrl.Trim();
+        }
         if (request.ServiceAccountToken is not null)
         {
             tenant.ServiceAccountToken = string.IsNullOrWhiteSpace(request.ServiceAccountToken) ? null : request.ServiceAccountToken;
@@ -191,6 +199,7 @@ public class TenantController(
             Name = tenant.Name,
             Type = tenant.Type,
             LitiumBaseUrl = tenant.LitiumBaseUrl,
+            ImageUrl = tenant.ImageUrl,
             CurrentlyFetching = tenant.CurrentlyFetching,
             FetchedFrom = tenant.FetchedFrom,
             FetchedUntil = tenant.FetchedUntil,

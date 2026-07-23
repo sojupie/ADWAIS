@@ -20,12 +20,12 @@ function latencyGapPlugin(points: LatencyChartPoint[]): Plugin<'line'> {
       const { ctx, scales } = chart;
       let index = 0;
       while (index < points.length) {
-        if (points[index].average != null) {
+        if (points[index].currentState !== 'NoSamples') {
           index += 1;
           continue;
         }
         const gapStart = index;
-        while (index < points.length && points[index].average == null) index += 1;
+        while (index < points.length && points[index].currentState === 'NoSamples') index += 1;
         const leftIndex = gapStart - 1;
         const rightIndex = index;
         if (leftIndex < 0 || rightIndex >= points.length) continue;
@@ -49,8 +49,8 @@ function latencyGapPlugin(points: LatencyChartPoint[]): Plugin<'line'> {
 
         ctx.save();
         ctx.strokeStyle = chartColor('--color-chart-prev-line', '#94a3b8');
-        ctx.globalAlpha = 0.65;
-        ctx.lineWidth = 3;
+        ctx.globalAlpha = 0.5;
+        ctx.lineWidth = 2;
         ctx.setLineDash([]);
         ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
 
@@ -68,13 +68,6 @@ function latencyGapPlugin(points: LatencyChartPoint[]): Plugin<'line'> {
           ctx.lineWidth = 2;
           ctx.stroke();
         });
-        if (Math.abs(dx) > 30) {
-          ctx.fillStyle = chartColor('--color-chart-label', '#475569');
-          ctx.font = '800 9px Manrope, sans-serif';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'bottom';
-          ctx.fillText('GAP', middleX, middleY - 9);
-        }
         ctx.restore();
       }
     },
@@ -107,6 +100,8 @@ export const NetworkLatencyChart = memo(function NetworkLatencyChart({ isLoading
           previousAverage: avg(chunk.map(p => p.previousAverage)),
           p10: avg(chunk.map(p => p.p10)),
           p90: avg(chunk.map(p => p.p90)),
+          currentState: chunk.some(point => point.currentState === 'Observed') ? 'Observed' : 'NoSamples',
+          previousState: chunk.some(point => point.previousState === 'Observed') ? 'Observed' : 'NoSamples',
         });
       }
       return result;
@@ -128,6 +123,24 @@ export const NetworkLatencyChart = memo(function NetworkLatencyChart({ isLoading
       return { ...point, label, tooltipTitle };
     });
   }, [points]);
+
+  const hasCurrentCollectionGap = useMemo(() => {
+    let index = 0;
+    while (index < chartData.length) {
+      if (chartData[index].currentState !== 'NoSamples') {
+        index += 1;
+        continue;
+      }
+
+      const gapStart = index;
+      while (index < chartData.length && chartData[index].currentState === 'NoSamples') index += 1;
+      if (gapStart > 0 && index < chartData.length) return true;
+    }
+    return false;
+  }, [chartData]);
+
+  const hasAnyLatencyData = chartData.some(point =>
+    point.currentState === 'Observed' || point.previousState === 'Observed');
 
   const yAxisMax = useMemo(() => {
     const maximum = Math.max(0, ...points.map(point => Math.max(point.average || 0, (((point.p90 || 0) + (point.previousAverage || 0) + (point.average || 0)) / 3) * 1.05 || 0)));
@@ -157,8 +170,8 @@ export const NetworkLatencyChart = memo(function NetworkLatencyChart({ isLoading
             title: point.tooltipTitle,
             groups: [
               [
-                { label: 'Current avg', value: point.average == null ? 'N/A (data gap)' : formatLatency(point.average), tone: point.average == null ? 'muted' : 'primary' },
-                { label: 'Previous avg', value: formatLatency(point.previousAverage), tone: 'muted' },
+                { label: 'Current avg', value: point.currentState === 'NoSamples' ? 'No samples in bucket' : formatLatency(point.average), tone: point.currentState === 'NoSamples' ? 'muted' : 'primary' },
+                { label: 'Previous avg', value: point.previousState === 'NoSamples' ? 'No samples in bucket' : formatLatency(point.previousAverage), tone: 'muted' },
               ],
               [
                 { label: '90th percentile', value: formatLatency(point.p90), tone: 'negative' },
@@ -189,16 +202,18 @@ export const NetworkLatencyChart = memo(function NetworkLatencyChart({ isLoading
         <div className="w-4 border-t-2 border-outline border-dashed" />
         <span>Previous</span>
       </div>
-      <div className="flex items-center gap-2">
-        <span className="relative inline-flex w-5 justify-center overflow-hidden text-base leading-none text-outline">//</span>
-        <span>Gap</span>
-      </div>
+      {hasCurrentCollectionGap && (
+        <div className="flex items-center gap-2">
+          <span className="relative inline-flex w-5 justify-center overflow-hidden text-base leading-none text-outline">//</span>
+          <span>Missing samples</span>
+        </div>
+      )}
     </div>
   );
 
   return (
-    <ChartPanel isLoading={isLoading} isStale={isStale} title={title} comparison={comparison} legend={legend} className={className} bodyClassName={!points.length ? 'flex items-center justify-center' : ''}>
-      {!points.length ? <EmptyState message="No latency data available" variant="minimal" /> : <div className="absolute inset-0"><ChartJsCanvas type="line" data={data} options={options} plugins={[latencyGapPlugin(chartData)]} /></div>}
+    <ChartPanel isLoading={isLoading} isStale={isStale} title={title} comparison={comparison} legend={legend} className={className} bodyClassName={!hasAnyLatencyData ? 'flex items-center justify-center' : ''}>
+      {!hasAnyLatencyData ? <EmptyState message="No latency samples in the selected period" variant="minimal" /> : <div className="absolute inset-0"><ChartJsCanvas type="line" data={data} options={options} plugins={[latencyGapPlugin(chartData)]} /></div>}
     </ChartPanel>
   );
 });

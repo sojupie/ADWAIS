@@ -37,10 +37,6 @@ namespace Adwais.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("active_subscription");
 
-                    b.Property<double?>("DefaultUptimeSla")
-                        .HasColumnType("double precision")
-                        .HasColumnName("default_uptime_sla");
-
                     b.Property<int>("FeedFetchIntervalHours")
                         .HasColumnType("integer")
                         .HasColumnName("feed_fetch_interval_hours");
@@ -52,10 +48,6 @@ namespace Adwais.Infrastructure.Migrations
                     b.Property<string>("LastSyncError")
                         .HasColumnType("text")
                         .HasColumnName("last_sync_error");
-
-                    b.Property<int?>("LatencyDegradedFloor")
-                        .HasColumnType("integer")
-                        .HasColumnName("latency_degraded_floor");
 
                     b.Property<int>("LatencyFetchIntervalMinutes")
                         .ValueGeneratedOnAdd()
@@ -651,6 +643,12 @@ namespace Adwais.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("date");
 
+                    b.Property<bool>("IsFinalized")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_finalized");
+
                     b.Property<int>("MonitorId")
                         .HasColumnType("integer")
                         .HasColumnName("monitor_id");
@@ -719,6 +717,47 @@ namespace Adwais.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_date");
 
+                    b.Property<long?>("CurrentStateDurationSeconds")
+                        .HasColumnType("bigint")
+                        .HasColumnName("current_state_duration_seconds");
+
+                    b.Property<DateTimeOffset?>("DomainExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("domain_expires_at");
+
+                    b.Property<string>("HttpMethod")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("http_method");
+
+                    b.Property<string>("LastIncidentCause")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("last_incident_cause");
+
+                    b.Property<long?>("LastIncidentDurationSeconds")
+                        .HasColumnType("bigint")
+                        .HasColumnName("last_incident_duration_seconds");
+
+                    b.Property<string>("LastIncidentId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("last_incident_id");
+
+                    b.Property<string>("LastIncidentReason")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("last_incident_reason");
+
+                    b.Property<DateTimeOffset?>("LastIncidentStartedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_incident_started_at");
+
+                    b.Property<string>("LastIncidentStatus")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("last_incident_status");
+
                     b.Property<DateTimeOffset?>("LastLatencyUpdate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_latency_update");
@@ -739,11 +778,22 @@ namespace Adwais.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("latency_degraded_floor");
 
+                    b.PrimitiveCollection<List<string>>("MonitoredRegions")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text[]")
+                        .HasColumnName("monitored_regions")
+                        .HasDefaultValueSql("'{}'");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)")
                         .HasColumnName("name");
+
+                    b.Property<DateTimeOffset?>("SslExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("ssl_expires_at");
 
                     b.PrimitiveCollection<List<string>>("Tags")
                         .IsRequired()
@@ -755,6 +805,10 @@ namespace Adwais.Infrastructure.Migrations
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uuid")
                         .HasColumnName("tenant_id");
+
+                    b.Property<int?>("TimeoutSeconds")
+                        .HasColumnType("integer")
+                        .HasColumnName("timeout_seconds");
 
                     b.Property<string>("Type")
                         .IsRequired()
@@ -975,6 +1029,11 @@ namespace Adwais.Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("FetchedUntil")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("fetched_until");
+
+                    b.Property<string>("ImageUrl")
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)")
+                        .HasColumnName("image_url");
 
                     b.Property<DateTimeOffset?>("LastPolled")
                         .HasColumnType("timestamp with time zone")

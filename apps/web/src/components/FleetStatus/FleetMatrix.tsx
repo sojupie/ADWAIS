@@ -21,7 +21,8 @@ function FleetMatrixTile({
   const status = getMonitorStatus(monitor.currentStatus, monitor.currentLatency, monitor.latencyDegradedFloor);
   const tenantDisplay = monitor.tenantName || monitor.name.split('-')[0]?.trim() || 'Tenant';
   const theme = STATUS_THEMES[status];
-  const faviconUrl = getTenantFaviconUrl(monitor.url);
+  const faviconUrl = monitor.tenantImageUrl
+    || getTenantFaviconUrl(monitor.tenantBaseUrl || monitor.url);
   const showLetter = !faviconUrl || imgError;
 
   return (
@@ -44,7 +45,7 @@ function FleetMatrixTile({
           <img
             src={faviconUrl!}
             alt=""
-            className="w-12 h-12 object-contain opacity-10 mix-blend-multiply"
+            className="w-12 h-12 object-contain opacity-30 mix-blend-multiply"
             onError={() => setImgError(true)}
           />
         )}

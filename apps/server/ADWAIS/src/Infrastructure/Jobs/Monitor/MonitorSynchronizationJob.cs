@@ -6,7 +6,6 @@ using Hangfire.Storage;
 using Adwais.Application.Common.Caching;
 using Adwais.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace Adwais.Infrastructure.Jobs.Monitor;
@@ -15,8 +14,7 @@ public class MonitorSynchronizationJob(
     IDbContextFactory<AnalyticsDbContext> dbContextFactory,
     IUptimeRobotService uptimeRobotService,
     IMemoryCache cache,
-    IRecurringJobManager recurringJobManager,
-    IConfiguration configuration)
+    IRecurringJobManager recurringJobManager)
 {
     public async Task ExecuteAsync()
     {
@@ -71,6 +69,18 @@ public class MonitorSynchronizationJob(
                 local.Name = remote.FriendlyName;
                 local.Url = remote.Url;
                 local.UpdateInterval = remote.UpdateInterval;
+                local.HttpMethod = remote.HttpMethod;
+                local.TimeoutSeconds = remote.TimeoutSeconds;
+                local.SslExpiresAt = remote.SslExpiresAt;
+                local.DomainExpiresAt = remote.DomainExpiresAt;
+                local.MonitoredRegions = remote.MonitoredRegions ?? [];
+                local.CurrentStateDurationSeconds = remote.CurrentStateDurationSeconds;
+                local.LastIncidentId = remote.LastIncident?.Id;
+                local.LastIncidentStatus = remote.LastIncident?.Status;
+                local.LastIncidentCause = remote.LastIncident?.Cause;
+                local.LastIncidentReason = remote.LastIncident?.Reason;
+                local.LastIncidentStartedAt = remote.LastIncident?.StartedAt;
+                local.LastIncidentDurationSeconds = remote.LastIncident?.DurationSeconds;
                 local.CreatedDate = remote.CreatedDate;
                 local.StatusStr = remote.Status;
                 local.LastUpdate = DateTimeOffset.UtcNow;
@@ -87,6 +97,18 @@ public class MonitorSynchronizationJob(
                     Name = remote.FriendlyName,
                     Url = remote.Url,
                     UpdateInterval = remote.UpdateInterval,
+                    HttpMethod = remote.HttpMethod,
+                    TimeoutSeconds = remote.TimeoutSeconds,
+                    SslExpiresAt = remote.SslExpiresAt,
+                    DomainExpiresAt = remote.DomainExpiresAt,
+                    MonitoredRegions = remote.MonitoredRegions ?? [],
+                    CurrentStateDurationSeconds = remote.CurrentStateDurationSeconds,
+                    LastIncidentId = remote.LastIncident?.Id,
+                    LastIncidentStatus = remote.LastIncident?.Status,
+                    LastIncidentCause = remote.LastIncident?.Cause,
+                    LastIncidentReason = remote.LastIncident?.Reason,
+                    LastIncidentStartedAt = remote.LastIncident?.StartedAt,
+                    LastIncidentDurationSeconds = remote.LastIncident?.DurationSeconds,
                     UptimeMonitorEnabled = monitorState,
                     CreatedDate = remote.CreatedDate,
                     StatusStr = remote.Status,
@@ -97,13 +119,7 @@ public class MonitorSynchronizationJob(
         }
 
         var upStreamIds = upStreamMonitors.Select(m => m.Id).ToHashSet();
-        var isMockEnabled = configuration.GetValue<bool>("FeatureToggles:MockUptimeRobotIntegrations", false);
-        
-        var toDelete = localMonitors.Values.Where(m => !upStreamIds.Contains(m.Id));
-        if (isMockEnabled)
-        {
-            toDelete = toDelete.Where(m => m.Id > 0);
-        }
+        var toDelete = localMonitors.Values.Where(m => m.Id > 0 && !upStreamIds.Contains(m.Id));
         
         dbContext.Monitors.RemoveRange(toDelete);
 

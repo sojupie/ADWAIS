@@ -8,9 +8,26 @@ namespace Adwais.Application.Interfaces;
 public interface IMonitorOrchestrationService
 {
     /// <summary>
-    /// Retrieves aggregated monitoring analytics, including latency time-series and monitor list.
+    /// Retrieves aggregated monitoring KPIs and latency time-series.
     /// </summary>
     Task<MonitorAnalyticsDto> GetAnalyticsAsync(ResolvedPeriod period, Guid? tenantId = null, int? monitorId = null, string[]? tags = null, string[]? statuses = null, CancellationToken ct = default);
+
+    /// <summary>
+    /// Retrieves monitors in one batch and hydrates their period uptime in grouped queries.
+    /// </summary>
+    Task<IReadOnlyList<UptimeMonitor>> GetMonitorsAsync(ResolvedPeriod period, Guid? tenantId = null, CancellationToken ct = default);
+
+    /// <summary>
+    /// Retrieves daily availability for the selected fleet, tenant, or monitor scope.
+    /// </summary>
+    Task<MonitorAvailabilitySeriesDto> GetAvailabilitySeriesAsync(
+        ResolvedPeriod period,
+        TimeZoneInfo reportingTimeZone,
+        Guid? tenantId = null,
+        int? monitorId = null,
+        string[]? tags = null,
+        string[]? statuses = null,
+        CancellationToken ct = default);
 
     /// <summary>
     /// Retrieves all uptime monitors associated with a specific tenant, hydrated with uptime for the given timeframe.
@@ -25,7 +42,7 @@ public interface IMonitorOrchestrationService
     /// <summary>
     /// Creates a new uptime monitor for a tenant.
     /// </summary>
-    Task<UptimeMonitor> CreateMonitorAsync(Guid tenantId, string name, string url, string? type, double? uptimeSla, CancellationToken ct = default);
+    Task<UptimeMonitor> CreateMonitorAsync(Guid tenantId, string name, string url, string? type, double? uptimeSla, CancellationToken ct = default, int? latencyDegradedFloor = null);
 
     /// <summary>
     /// Assigns an existing monitor to a specific tenant.
@@ -60,5 +77,5 @@ public interface IMonitorOrchestrationService
     /// <summary>
     /// Updates a specific monitor.
     /// </summary>
-    Task<UptimeMonitor> UpdateMonitorAsync(int id, string? name, string? url, string? type, double? uptimeSla, List<string>? tags, CancellationToken ct = default);
+    Task<UptimeMonitor> UpdateMonitorAsync(int id, string? name, string? url, string? type, double? uptimeSla, List<string>? tags, CancellationToken ct = default, int? latencyDegradedFloor = null);
 }

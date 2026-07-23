@@ -20,6 +20,7 @@ export function TenantTile({ t, deleteTenant, isAdmin = false }: TenantTileProps
     name: t.name,
     type: t.type ?? 'Mixed',
     litiumBaseUrl: t.litiumBaseUrl || '',
+    imageUrl: t.imageUrl || '',
     serviceAccountToken: '',
     clearToken: false,
     orderFetchingEnabled: t.orderFetchingEnabled ?? false
@@ -29,6 +30,7 @@ export function TenantTile({ t, deleteTenant, isAdmin = false }: TenantTileProps
     draft.name !== t.name ||
     draft.type !== (t.type ?? 'Mixed') ||
     draft.litiumBaseUrl !== (t.litiumBaseUrl || '') ||
+    draft.imageUrl !== (t.imageUrl || '') ||
     draft.serviceAccountToken !== '' ||
     draft.clearToken ||
     draft.orderFetchingEnabled !== (t.orderFetchingEnabled ?? false);
@@ -38,6 +40,7 @@ export function TenantTile({ t, deleteTenant, isAdmin = false }: TenantTileProps
     if (draft.name !== t.name) payload.name = draft.name;
     if (draft.type !== (t.type ?? 'Mixed')) payload.type = draft.type;
     if (draft.litiumBaseUrl !== (t.litiumBaseUrl || '')) payload.litiumBaseUrl = draft.litiumBaseUrl;
+    if (draft.imageUrl !== (t.imageUrl || '')) payload.imageUrl = draft.imageUrl;
 
     if (draft.clearToken) {
       payload.serviceAccountToken = '';
@@ -65,6 +68,7 @@ export function TenantTile({ t, deleteTenant, isAdmin = false }: TenantTileProps
       name: t.name,
       type: t.type ?? 'Mixed',
       litiumBaseUrl: t.litiumBaseUrl || '',
+      imageUrl: t.imageUrl || '',
       serviceAccountToken: '',
       clearToken: false,
       orderFetchingEnabled: t.orderFetchingEnabled ?? false
@@ -130,6 +134,18 @@ export function TenantTile({ t, deleteTenant, isAdmin = false }: TenantTileProps
           className={`text-sm font-semibold text-on-surface bg-transparent border border-transparent rounded px-2 py-1 -ml-2 transition-all outline-none ${isAdmin ? 'hover:bg-surface-container-low focus:bg-surface focus:ring-2 focus:ring-brand-accent/20 hover:border-outline-variant focus:border-brand-accent/30' : 'cursor-not-allowed text-on-surface-variant'
             }`}
           placeholder="https://..."
+        />
+      </div>
+
+      <div className="flex flex-col gap-2 group">
+        <label className="text-sm font-bold text-on-surface-variant uppercase tracking-wider">Image URL</label>
+        <input
+          value={draft.imageUrl}
+          onChange={e => setDraft({ ...draft, imageUrl: e.target.value })}
+          disabled={!isAdmin}
+          className={`text-sm font-semibold text-on-surface bg-transparent border border-transparent rounded px-2 py-1 -ml-2 transition-all outline-none ${isAdmin ? 'hover:bg-surface-container-low focus:bg-surface focus:ring-2 focus:ring-brand-accent/20 hover:border-outline-variant focus:border-brand-accent/30' : 'cursor-not-allowed text-on-surface-variant'
+            }`}
+          placeholder="Google favicon fallback"
         />
       </div>
 

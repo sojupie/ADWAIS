@@ -1,11 +1,10 @@
-import { useFleetAnalytics, useFleetMonitors } from "./useFleetQueries.ts";
+import { useFleetAnalytics, useFleetAvailability, useFleetMonitors } from "./useFleetQueries.ts";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { normalizeStatus } from "../utils/monitorStatusHelper.ts";
 import type { UptimeMonitorDto } from "@types";
-import { useSearch } from "@tanstack/react-router";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import type { Timeframe } from "../schemas";
-import { useGlobalConfigQuery } from "./useJobSettingsQueries.ts";
-import { filterFleetMonitors, getFleetTags, isFleetSelectionVisible } from "../utils/fleetFilters.ts";
+import { filterFleetMonitors, getFleetTags, isFleetSelectionVisible, type FleetSelection } from "../utils/fleetFilters.ts";
 
 function useLocalStorage<T>(key: string, initialValue: T) {
   const [storedValue, setStoredValue] = useState<T>(() => {
@@ -40,23 +39,42 @@ function useLocalStorage<T>(key: string, initialValue: T) {
 export function useFleetStatusViewModel() {
     // Reactively subscribe to the URL state. 
     // The route's beforeLoad guarantees this will be populated.
-    const search = useSearch({ strict: false }) as { timeframe: Timeframe };
+    const search = useSearch({ from: '/fleet-status' }) as {
+        timeframe: Timeframe;
+        tenantId?: string;
+        monitorId?: number;
+    };
+    const navigate = useNavigate({ from: '/fleet-status' });
     const timeframe = search.timeframe;
-
-    const [selectionIntent, setSelection] = useState<{ tenantId: string, monitorId: number | null } | null>(null);
+    const selectionIntent: FleetSelection | null = search.tenantId
+        ? { tenantId: search.tenantId, monitorId: search.monitorId ?? null }
+        : null;
+    const setSelection = useCallback((nextSelection: FleetSelection | null) => {
+        void navigate({
+            search: previous => ({
+                ...previous,
+                tenantId: nextSelection?.tenantId,
+                monitorId: nextSelection?.monitorId ?? undefined,
+            }),
+        });
+    }, [navigate]);
 
     const [selectedTags, setSelectedTags] = useLocalStorage<string[]>('fleet-filter-tags', []);
     const [selectedStatuses, setSelectedStatuses] = useLocalStorage<string[]>('fleet-filter-statuses', []);
+
+    // Drill-down navigation is intentionally separate from filter reset. Going back
+    // to the fleet scope must not discard the user's persisted tag/status choices.
+    const clearSelection = useCallback(() => setSelection(null), [setSelection]);
+    const resetFilters = useCallback(() => {
+        clearSelection();
+        setSelectedTags([]);
+        setSelectedStatuses([]);
+    }, [clearSelection, setSelectedTags, setSelectedStatuses]);
 
     const tagsArg = selectedTags.length > 0 ? selectedTags : undefined;
     const statusesArg = selectedStatuses.length > 0 ? selectedStatuses : undefined;
 
     const globalMonitorsQuery = useFleetMonitors(timeframe);
-    const { data: config } = useGlobalConfigQuery();
-
-    const defaultSla = config?.defaultUptimeSla ?? null;
-    const defaultDegradedFloor = config?.latencyDegradedFloor ?? null;
-
     const allMonitorsInSystem = useMemo(() => {
         const fetchedMonitors = globalMonitorsQuery.data ?? [];
         if (import.meta.env.PROD) return fetchedMonitors;
@@ -80,6 +98,14 @@ export function useFleetStatusViewModel() {
         : null;
 
     const analyticsQuery = useFleetAnalytics(
+        timeframe,
+        selection?.tenantId,
+        selection?.monitorId,
+        undefined,
+        tagsArg,
+        statusesArg,
+    );
+    const availabilityQuery = useFleetAvailability(
         timeframe,
         selection?.tenantId,
         selection?.monitorId,
@@ -122,7 +148,7 @@ export function useFleetStatusViewModel() {
         const degraded = enabled.filter(m => {
             const s = normalizeStatus(m.currentStatus);
             const isUp = s === 'UP' || s === 'PAUSED' || s === 'STARTING' || s === 'UNKNOWN';
-            const floor = m.latencyDegradedFloor ?? defaultDegradedFloor;
+            const floor = m.latencyDegradedFloor;
             return isUp && m.currentLatency !== null && m.currentLatency !== undefined && floor !== null && floor !== undefined && m.currentLatency > floor;
         });
 
@@ -145,11 +171,17 @@ export function useFleetStatusViewModel() {
             highestLatencyGrowth: kpis?.highestLatencyGrowthPercentage ?? null,
             lowestLatencyGrowth: kpis?.lowestLatencyGrowthPercentage ?? null
         };
-    }, [scopedMonitors, defaultDegradedFloor, kpis]);
+    }, [scopedMonitors, kpis]);
 
     const handleMonitorSelect = (monitor: UptimeMonitorDto) => {
         if (!selection) {
-            setSelection({ tenantId: monitor.tenantId, monitorId: null });
+            const isOnlyMonitorForTenant = allMonitorsInSystem
+                .filter(candidate => candidate.tenantId === monitor.tenantId)
+                .length === 1;
+            setSelection({
+                tenantId: monitor.tenantId,
+                monitorId: isOnlyMonitorForTenant ? monitor.id : null,
+            });
         } else {
             if (monitor.id === selection.monitorId) {
                 setSelection({ ...selection, monitorId: null });
@@ -161,6 +193,10 @@ export function useFleetStatusViewModel() {
 
     const selectedMonitorName = selection?.monitorId
         ? tenantMonitors.find(m => m.id === selection.monitorId)?.name
+        : null;
+
+    const selectedMonitor = selection?.monitorId
+        ? tenantMonitors.find(m => m.id === selection.monitorId) ?? null
         : null;
 
     const selectedTenantName = selection?.tenantId
@@ -176,16 +212,18 @@ export function useFleetStatusViewModel() {
     return {
         selection,
         setSelection,
+        clearSelection,
+        resetFilters,
         analyticsQuery,
+        availabilityQuery,
         globalMonitorsQuery,
         tenantMonitors,
         scopedMonitors,
         fleetStats,
         handleMonitorSelect,
         selectedTenantName,
+        selectedMonitor,
         activeScopeName,
-        defaultSla,
-        defaultDegradedFloor,
         allMonitors: allMonitorsInSystem,
         availableTags,
         filteredMonitors,

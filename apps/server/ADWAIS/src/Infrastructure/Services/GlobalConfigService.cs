@@ -38,10 +38,8 @@ public class GlobalConfigService(
 
         if (request.LitiumFetchEnabled.HasValue) config.LitiumFetchEnabled = request.LitiumFetchEnabled.Value;
         if (request.UptimeRobotFetchEnabled.HasValue) config.UptimeRobotFetchEnabled = request.UptimeRobotFetchEnabled.Value;
-        if (request.LatencyDegradedFloor.HasValue) config.LatencyDegradedFloor = request.LatencyDegradedFloor;
         if (request.UptimeRobotApiKey != null) config.UptimeRobotApiKey = string.IsNullOrWhiteSpace(request.UptimeRobotApiKey) ? null : request.UptimeRobotApiKey;
         if (request.SystemEventRetentionDays.HasValue) config.SystemEventRetentionDays = request.SystemEventRetentionDays.Value;
-        if (request.DefaultUptimeSla.HasValue) config.DefaultUptimeSla = request.DefaultUptimeSla;
         if (request.FeedFetchIntervalHours.HasValue)
         {
             config.FeedFetchIntervalHours = request.FeedFetchIntervalHours.Value;
@@ -202,7 +200,6 @@ public class GlobalConfigService(
             config.LitiumFetchEnabled,
             config.UptimeRobotFetchEnabled,
             config.LitiumFetchIntervalMinutes,
-            config.LatencyDegradedFloor,
             MaskApiKey(config.UptimeRobotApiKey),
             config.UptimeFetchIntervalMinutes,
             config.LatencyFetchIntervalMinutes,
@@ -211,7 +208,6 @@ public class GlobalConfigService(
             config.MonitorsCount,
             config.MonitorsLimit,
             config.ActiveSubscription,
-            config.DefaultUptimeSla,
             config.FeedFetchIntervalHours,
             config.WeatherLocation,
             config.WeatherFetchIntervalMinutes,

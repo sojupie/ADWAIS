@@ -30,6 +30,11 @@ export interface UpdateMonitorRequestDto {
      */
   sla?: number | null;
   /**
+     * Optional per-monitor latency threshold in milliseconds. Omit to leave the current value unchanged.
+     * @nullable
+     */
+  latencyDegradedFloor?: number | null;
+  /**
      * Tags associated with the monitor.
      * @nullable
      */

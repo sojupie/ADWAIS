@@ -13,8 +13,6 @@ export interface GlobalConfigResponseDto {
   uptimeRobotFetchEnabled?: boolean;
   litiumFetchIntervalMinutes?: number;
   /** @nullable */
-  latencyDegradedFloor?: number | null;
-  /** @nullable */
   uptimeRobotApiKey?: string | null;
   uptimeFetchIntervalMinutes?: number;
   latencyFetchIntervalMinutes?: number;
@@ -26,8 +24,6 @@ export interface GlobalConfigResponseDto {
   monitorsLimit?: number | null;
   /** @nullable */
   activeSubscription?: string | null;
-  /** @nullable */
-  defaultUptimeSla?: number | null;
   feedFetchIntervalHours?: number;
   /** @nullable */
   weatherLocation?: string | null;

@@ -1,10 +1,8 @@
 import { CollectionPanel } from '../components/common/dashboard/CollectionPanel';
-import { FactPanel } from '../components/common/dashboard/FactPanel';
 import { FleetMatrix } from '../components/FleetStatus/FleetMatrix';
 import { NetworkLatencyChart } from '../components/FleetStatus/NetworkLatencyChart';
-import { SlaBreachWatchlist } from '../components/FleetStatus/SlaBreachWatchlist';
+import { FleetSelectionPanel } from '../components/FleetStatus/FleetSelectionPanel';
 import { DashboardLayout } from "../components/common/layout/DashboardLayout.tsx";
-import { DashboardTopRow } from "../components/common/layout/DashboardTopRow.tsx";
 import { DashboardFlexRow } from "../components/common/layout/DashboardFlexRow.tsx";
 import { DashboardFooter } from "../components/common/layout/DashboardFooter.tsx";
 import { SyncStatusWidget } from '../components/common/dashboard/SyncStatusWidget';
@@ -19,12 +17,6 @@ const EMPTY_LATENCY: never[] = [];
 
 export function FleetStatus() {
   const vm = useFleetStatusViewModel();
-  const clearAllFilters = () => {
-    vm.setSelection(null);
-    vm.setSelectedTags([]);
-    vm.setSelectedStatuses([]);
-  };
-
   const matrixActions = (
     <span className="text-sm font-bold text-on-surface-variant">
       {vm.fleetStats.enabled.length} Online
@@ -48,80 +40,27 @@ export function FleetStatus() {
 
   return (
     <DashboardLayout>
-      {/* Top Row: Macro Stats */}
-      <DashboardTopRow>
-        <FactPanel
-          label={`Uptime: ${vm.activeScopeName}`}
-          value={vm.globalMonitorsQuery.isLoading ? '...' : (vm.fleetStats.avgUptime !== null && vm.fleetStats.avgUptime !== undefined ? `${vm.fleetStats.avgUptime.toFixed(3)}%` : 'N/A')}
-          isLoading={vm.globalMonitorsQuery.isLoading || vm.analyticsQuery.isLoading}
-          extra={vm.fleetStats.uptimeGrowth !== null
-            ? { type: 'PoP', value: vm.fleetStats.uptimeGrowth }
-            : undefined}
-          hasExtra={true}
-        />
-
-        <FactPanel
-          label={`Latency: ${vm.activeScopeName}`}
-          value={vm.analyticsQuery.isLoading ? '...' : `${Math.round(vm.fleetStats.avgLatency)}ms`}
-          isLoading={vm.analyticsQuery.isLoading}
-          extra={vm.fleetStats.latencyGrowth !== null
-            ? { type: 'PoP', value: vm.fleetStats.latencyGrowth }
-            : undefined}
-          hasExtra={true}
-          inverseTrend={true}
-        />
-
-        <FactPanel
-          label={`90th Percentile`}
-          value={vm.analyticsQuery.isLoading ? '...' : `${Math.round(vm.fleetStats.highestLatency)}ms`}
-          isLoading={vm.analyticsQuery.isLoading}
-          valueColor="red"
-          extra={vm.fleetStats.highestLatencyGrowth !== null
-            ? { type: 'PoP', value: vm.fleetStats.highestLatencyGrowth }
-            : undefined}
-          hasExtra={true}
-          inverseTrend={true}
-        />
-
-        <FactPanel
-          label={`10th Percentile`}
-          value={vm.analyticsQuery.isLoading ? '...' : `${Math.round(vm.fleetStats.lowestLatency)}ms`}
-          isLoading={vm.analyticsQuery.isLoading}
-          valueColor="green"
-          extra={vm.fleetStats.lowestLatencyGrowth !== null
-            ? { type: 'PoP', value: vm.fleetStats.lowestLatencyGrowth }
-            : undefined}
-          hasExtra={true}
-          inverseTrend={true}
-        />
-
-        <FactPanel label="Active Incidents">
-          <div className="flex items-baseline gap-12">
-            <div className="flex items-baseline gap-4">
-              <span className="text-2xl lg:text-3xl xl:text-2xl 2xl:text-4xl font-extrabold tracking-tight text-status-down">{vm.fleetStats.down.length}</span>
-              <span className="text-sm font-bold text-on-surface-variant uppercase tracking-widest">DOWN</span>
-            </div>
-            <div className="flex items-baseline gap-4">
-              <span className="text-2xl lg:text-3xl xl:text-2xl 2xl:text-4xl font-extrabold tracking-tight text-status-degraded">{vm.fleetStats.degraded.length}</span>
-              <span className="text-sm font-bold text-on-surface-variant uppercase tracking-widest">DEGRADED</span>
-            </div>
-          </div>
-        </FactPanel>
-
-      </DashboardTopRow>
-
-      {/* Main Content Grid: Matrix on Left, Watchlist & Latency on Right */}
+      {/* Main Content Grid: Matrix on Left, selected scope & latency on Right */}
       <DashboardFlexRow weight="flex-1" gridCols="5" className="landscape-contained:min-h-0">
 
-        {/* Right Column: Watchlist (Top) & Latency Chart (Bottom) (Takes 40% of width) */}
-        <div className="landscape-lg:col-span-2 flex flex-col gap-4 min-h-[500px] contained:min-h-0 contained:h-full">
+        {/* Right Column: Selected scope (Top) & Latency Chart (Bottom) (Takes 40% of width) */}
+        <div className="landscape-lg:col-span-2 flex flex-col gap-4 min-h-[500px] contained:min-h-0 contained:h-full portrait-contained:contents">
 
-          <SlaBreachWatchlist
-            monitors={vm.scopedMonitors}
-            defaultSla={vm.defaultSla}
-            defaultDegradedFloor={vm.defaultDegradedFloor}
-            onMonitorSelect={vm.handleMonitorSelect}
-            selectedMonitorId={vm.selection?.monitorId}
+          <FleetSelectionPanel
+            selection={vm.selection}
+            selectedTenantName={vm.selectedTenantName}
+            selectedMonitor={vm.selectedMonitor}
+            scopedMonitors={vm.scopedMonitors}
+            availability={vm.availabilityQuery.data}
+            isLoading={vm.availabilityQuery.isLoading}
+            isStale={vm.availabilityQuery.isPlaceholderData}
+            averageLatency={vm.fleetStats.avgLatency}
+            p10Latency={vm.fleetStats.lowestLatency}
+            p90Latency={vm.fleetStats.highestLatency}
+            uptimeGrowth={vm.fleetStats.uptimeGrowth}
+            latencyGrowth={vm.fleetStats.latencyGrowth}
+            p10LatencyGrowth={vm.fleetStats.lowestLatencyGrowth}
+            p90LatencyGrowth={vm.fleetStats.highestLatencyGrowth}
             className="flex-1 min-h-[350px] contained:min-h-0 max-h-[600px] xl:max-h-none"
           />
 
@@ -168,7 +107,7 @@ export function FleetStatus() {
             onSelectionChange={vm.setSelection}
             onTagsChange={vm.setSelectedTags}
             onStatusesChange={vm.setSelectedStatuses}
-            onClearAll={clearAllFilters}
+            onClearAll={vm.resetFilters}
           />
           <div className="w-px h-6 bg-outline-variant mx-1 shrink-0" aria-hidden="true" />
           <PeriodSelector from="/fleet-status" />
@@ -182,8 +121,8 @@ export function FleetStatus() {
           vm.selectedTags.length > 0,
           vm.selectedStatuses.length > 0,
         )}
-        clearLabel="Clear all fleet filters"
-        onClearAll={clearAllFilters}
+        clearLabel="Reset all fleet filters"
+        onClearAll={vm.resetFilters}
       >
         <FleetFilterPanel
           embedded

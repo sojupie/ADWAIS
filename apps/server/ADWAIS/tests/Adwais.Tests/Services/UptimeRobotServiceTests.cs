@@ -237,7 +237,21 @@ public class UptimeRobotServiceTests
                     ""url"": ""https://test1.com"",
                     ""status"": ""up"",
                     ""createDateTime"": ""2026-07-06T12:00:00Z"",
-                    ""interval"": 300
+                    ""interval"": 300,
+                    ""httpMethodType"": ""HEAD"",
+                    ""timeout"": 30,
+                    ""sslExpiryDateTime"": ""2027-01-10T10:00:00Z"",
+                    ""domainExpireDate"": ""2027-02-11T00:00:00Z"",
+                    ""currentStateDuration"": 810490,
+                    ""regionalData"": { ""REGION"": [""eu"", ""na""] },
+                    ""lastIncident"": {
+                        ""id"": ""incident-1"",
+                        ""status"": ""Resolved"",
+                        ""cause"": 500,
+                        ""reason"": ""500 Internal Server Error"",
+                        ""startedAt"": ""2026-07-13T06:24:56.690Z"",
+                        ""duration"": 6105
+                    }
                 }
             ]
         }";
@@ -278,6 +292,13 @@ public class UptimeRobotServiceTests
         Assert.Equal(1, result[0].Id);
         Assert.Equal("HTTP", result[0].Type);
         Assert.Equal("Monitor 1", result[0].FriendlyName);
+        Assert.Equal("HEAD", result[0].HttpMethod);
+        Assert.Equal(30, result[0].TimeoutSeconds);
+        Assert.Equal(new[] { "eu", "na" }, result[0].MonitoredRegions);
+        Assert.Equal(810490, result[0].CurrentStateDurationSeconds);
+        Assert.Equal("500", result[0].LastIncident?.Cause);
+        Assert.Equal("500 Internal Server Error", result[0].LastIncident?.Reason);
+        Assert.Equal(6105, result[0].LastIncident?.DurationSeconds);
         Assert.Equal(2, result[1].Id);
         Assert.Equal("PING", result[1].Type);
         Assert.Equal("Monitor 2", result[1].FriendlyName);

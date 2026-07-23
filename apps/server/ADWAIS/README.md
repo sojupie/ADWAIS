@@ -77,14 +77,16 @@ Already present after cloning. Contains non-secret dev defaults:
     "ClientId": "00000000-0000-0000-0000-000000000000"
   },
   "FeatureToggles": {
-    "EnableRuntimeDataSeeding": true,
-    "MockUptimeRobotIntegrations": true
+    "EnableRuntimeDataSeeding": true
   }
 }
 ```
 
-`EnableRuntimeDataSeeding` — registers `RuntimeDataSeederJob` in Hangfire (every minute, seeds mock order + latency data).  
-`MockUptimeRobotIntegrations` — makes mock monitors (negative IDs) show `"Up"` status without a real UptimeRobot API key.
+`EnableRuntimeDataSeeding` — creates the demo portfolio at startup and registers `RuntimeDataSeederJob` in Hangfire. Every minute it adds demo orders, latency, and availability. Demo monitors use negative local IDs and are always isolated from UptimeRobot.
+
+The production Compose file defaults this toggle to `true` for the hosted interactive demo. Set `ENABLE_RUNTIME_DATA_SEEDING=false` when deploying a live-data installation.
+
+Set `RESEED=true` for one startup to replace existing demo orders and negative-ID monitors. Live orders, positive-ID UptimeRobot monitors, and user-created tenants are preserved.
 
 #### `src/.env` — gitignored, must be created
 

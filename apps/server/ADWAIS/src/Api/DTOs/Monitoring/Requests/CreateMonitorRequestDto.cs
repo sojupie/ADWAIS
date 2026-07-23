@@ -28,6 +28,11 @@ public sealed record CreateMonitorRequestDto
     /// Optional target uptime percentage (0-100).
     /// </summary>
     public double? UptimeSla { get; init; }
+
+    /// <summary>
+    /// Optional per-monitor latency threshold in milliseconds. When omitted, latency is not classified as degraded.
+    /// </summary>
+    public int? LatencyDegradedFloor { get; init; }
 }
 
 

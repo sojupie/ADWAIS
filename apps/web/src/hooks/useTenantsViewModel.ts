@@ -13,7 +13,7 @@ export function useTenantsViewModel() {
     const [assignTenantId, setAssignTenantId] = useState('');
 
     const [isCreatingTenant, setIsCreatingTenant] = useState(false);
-    const [newTenantDraft, setNewTenantDraft] = useState({ name: '', litiumBaseUrl: '', serviceAccountToken: '' });
+    const [newTenantDraft, setNewTenantDraft] = useState({ name: '', litiumBaseUrl: '', imageUrl: '', serviceAccountToken: '' });
 
     const [isCreatingMonitor, setIsCreatingMonitor] = useState(false);
     const [newMonitorDraft, setNewMonitorDraft] = useState<{ name: string; url: string; type: string; uptimeSla: number | '' }>({
@@ -38,7 +38,7 @@ export function useTenantsViewModel() {
 
     const createTenant = useCreateTenantMutation(() => {
         setIsCreatingTenant(false);
-        setNewTenantDraft({ name: '', litiumBaseUrl: '', serviceAccountToken: '' });
+        setNewTenantDraft({ name: '', litiumBaseUrl: '', imageUrl: '', serviceAccountToken: '' });
     });
     const deleteTenant = useDeleteTenantMutation();
 

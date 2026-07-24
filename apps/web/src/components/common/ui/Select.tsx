@@ -104,9 +104,11 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
   name,
   required,
   form,
+  autoFocus,
   'aria-label': ariaLabel,
   'aria-labelledby': ariaLabelledBy,
   'aria-describedby': ariaDescribedBy,
+  'aria-invalid': ariaInvalid,
   ...nativeProps
 }, forwardedSelectRef) {
   const generatedId = useId();
@@ -186,6 +188,10 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
     setIsOpen(false);
     if (restoreFocus) triggerRef.current?.focus();
   }, []);
+
+  useEffect(() => {
+    if (autoFocus) triggerRef.current?.focus();
+  }, [autoFocus]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -284,6 +290,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
         name={name}
         required={required}
         form={form}
+        autoFocus={false}
         value={selectedValue}
         onChange={onChange}
         disabled={disabled}
@@ -304,7 +311,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
         aria-haspopup="listbox"
         aria-controls={listboxId}
         aria-activedescendant={isOpen ? `${listboxId}-option-${highlightedIndex}` : undefined}
-        aria-invalid={error ? true : undefined}
+        aria-invalid={error ? true : ariaInvalid}
         aria-label={ariaLabel}
         aria-labelledby={ariaLabelledBy}
         aria-describedby={describedBy}

@@ -10,21 +10,21 @@ interface SubSectionHeaderProps {
 
 export function SubSectionHeader({ title, subtitle, icon, children, className = '' }: SubSectionHeaderProps) {
   return (
-    <div className={`flex items-center justify-between px-3 py-2 sm:p-4 border-b border-outline-variant bg-surface-container-lowest ${className}`}>
-      <div className="flex items-center gap-6">
-        <div className="p-2 bg-brand-link/10 text-brand-link rounded-lg shadow-sm">
+    <header className={`flex flex-wrap items-start justify-between gap-3 p-4 ${className}`}>
+      <div className="flex min-w-0 items-start gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-container text-on-primary-container">
           {icon}
         </div>
-        <div>
-          <h3 className="text-md font-bold text-brand-text leading-tight">{title}</h3>
-          <p className="text-sm font-semibold text-on-surface-variant mt-0.5">{subtitle}</p>
+        <div className="min-w-0 pt-0.5">
+          <h3 className="text-base font-black text-on-surface">{title}</h3>
+          <p className="mt-1 text-sm font-medium leading-5 text-on-surface-variant">{subtitle}</p>
         </div>
       </div>
       {children && (
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center justify-end gap-2">
           {children}
         </div>
       )}
-    </div>
+    </header>
   );
 }

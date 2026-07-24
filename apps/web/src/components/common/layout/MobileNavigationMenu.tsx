@@ -35,7 +35,7 @@ export function MobileNavigationMenu({ isOpen, pathname, financialTimeframe, fle
 
   return (
     <div
-      className={`fixed inset-x-0 bottom-0 top-[60px] z-40 md:hidden ${isOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}
+      className={`fixed inset-x-0 bottom-0 top-[60px] z-40 xl:hidden ${isOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}
       id="mobile-menu"
       role="dialog"
       aria-modal={isOpen ? true : undefined}

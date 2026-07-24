@@ -5,7 +5,7 @@ import type { UserResponseDto } from '@types';
 interface UserRowProps {
   u: UserResponseDto;
   updateUser: {
-    mutate: (variables: { id: string; payload: Partial<UserResponseDto> }) => void;
+    mutateAsync: (variables: { id: string; payload: Partial<UserResponseDto> }) => Promise<void>;
   };
   deleteUser: {
     mutate: (id: string) => void;
@@ -15,10 +15,10 @@ interface UserRowProps {
 
 export function UserRow({ u, updateUser, deleteUser, disabled = false }: UserRowProps) {
   return (
-    <tr className="transition-colors group hover:bg-surface-container-low">
-      <td className="px-6 py-3 align-middle">
-        <div className="flex items-center gap-8">
-          <div className="w-10 h-10 rounded-full bg-brand-accent/10 flex items-center justify-center text-brand-accent font-bold text-lg shrink-0">
+    <tr className="group transition-colors hover:bg-surface-container-high">
+      <td className="px-4 py-3 align-middle sm:px-5">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-container text-lg font-bold text-on-primary-container">
             {u.name?.charAt(0).toUpperCase()}
           </div>
           <div className="flex flex-col w-full max-w-[250px]">
@@ -28,25 +28,25 @@ export function UserRow({ u, updateUser, deleteUser, disabled = false }: UserRow
                value={u.name}
                required
                disabled={disabled}
-               displayValue={
+               renderValue={
                  <div className="flex flex-col">
-                   <span className="font-bold text-on-surface text-sm">{u.name}</span>
+                   <span className="text-base font-bold text-on-surface">{u.name}</span>
                    {u.email && u.email !== u.name && (
-                     <span className="text-xs text-on-surface-variant font-medium mt-0.5">{u.email}</span>
+                     <span className="mt-0.5 text-sm font-medium text-on-surface-variant">{u.email}</span>
                    )}
                    <span className="text-xs text-on-surface-variant font-mono mt-0.5">{u.id}</span>
                  </div>
                }
-               onSave={(val) => updateUser.mutate({ id: u.id, payload: { name: val }})}
+               onCommit={(val) => updateUser.mutateAsync({ id: u.id, payload: { name: val }})}
             />
           </div>
         </div>
       </td>
-      <td className="px-6 py-3 align-middle w-44">
+      <td className="w-44 px-4 py-3 align-middle sm:px-5">
         <InlineEditField
            hideLabel={true}
            label="Role Level"
-           type="select"
+           kind="select"
            value={u.role}
            disabled={disabled}
            options={[
@@ -54,23 +54,23 @@ export function UserRow({ u, updateUser, deleteUser, disabled = false }: UserRow
              { label: 'Viewer', value: 'Viewer' },
              { label: 'Employee', value: 'Employee' },
            ]}
-           displayValue={
-             <span className={`inline-flex items-center gap-3 px-3 py-1 rounded-full text-sm font-bold border ${
-               u.role === 'Admin' ? 'bg-purple-50 text-purple-700 border-purple-200' : 
-               u.role === 'Employee' ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-surface-container text-on-surface-variant border-outline-variant'
+           renderValue={
+             <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-bold ${
+               u.role === 'Admin' ? 'bg-tertiary-container text-on-tertiary-container' :
+               u.role === 'Employee' ? 'bg-secondary-container text-on-secondary-container' : 'bg-surface-container text-on-surface-variant'
              }`}>
                {u.role === 'Admin' ? <Shield size={12} /> : <User size={12} />}
                {u.role}
              </span>
            }
-           onSave={(val) => updateUser.mutate({ id: u.id, payload: { role: val }})}
+           onCommit={(val) => updateUser.mutateAsync({ id: u.id, payload: { role: val }})}
         />
       </td>
-      <td className="px-6 py-3 align-middle text-right w-28">
+      <td className="w-28 px-4 py-3 text-right align-middle sm:px-5">
         {!disabled && (
           <button 
             onClick={() => { if(confirm('Revoke access for this user?')) deleteUser.mutate(u.id); }} 
-            className="inline-flex items-center gap-3 text-red-500 hover:text-red-700 hover:bg-red-50 px-3 py-2 rounded-lg text-sm font-bold transition-colors group-hover:opacity-100 cursor-pointer"
+            className="inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-full px-3 text-sm font-bold text-error transition-colors hover:bg-error-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-error"
           >
             <Trash2 size={16} /> Revoke
           </button>

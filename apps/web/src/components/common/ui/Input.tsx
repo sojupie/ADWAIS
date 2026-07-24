@@ -11,9 +11,9 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ label, error, icon, className = '', disabled, containerClassName = '', ...props }, ref) => {
     const widthClass = containerClassName.includes('w-') ? '' : 'w-full';
     return (
-      <div className={`flex flex-col gap-2 ${widthClass} ${containerClassName}`}>
+      <div className={`flex min-w-0 flex-col gap-2 ${widthClass} ${containerClassName}`}>
         {label && (
-          <label className="text-sm font-bold text-on-surface-variant uppercase tracking-wider">
+          <label className="pl-1 text-sm font-bold text-on-surface-variant">
             {label}
           </label>
         )}
@@ -26,14 +26,14 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           <input
             ref={ref}
             disabled={disabled}
-            className={`w-full border px-3 py-2.5 rounded-xl text-sm font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-brand-link/20 focus:border-brand-link/30 ${
+            className={`min-h-12 w-full rounded-xl px-4 py-3 text-base font-medium text-on-surface outline-none transition-[background-color,color,box-shadow] placeholder:text-on-surface-variant focus:bg-primary-container focus:text-on-primary-container focus:ring-2 focus:ring-secondary/40 ${
               icon ? 'pl-9' : ''
             } ${
               disabled
-                ? 'bg-surface-container border-outline-variant text-on-surface-variant cursor-not-allowed'
-                : 'bg-surface border-outline-variant text-on-surface placeholder:text-on-surface-variant hover:border-slate-400'
+                ? 'cursor-not-allowed bg-on-surface/[0.1] text-on-surface/[0.38]'
+                : ''
             } ${
-              error ? 'border-red-500 focus:ring-red-500/20 focus:border-red-500' : ''
+              error ? 'ring-2 ring-error/40 focus:bg-error-container focus:text-on-error-container focus:ring-error/40' : ''
             } ${className}`}
             {...props}
           />

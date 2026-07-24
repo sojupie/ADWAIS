@@ -33,16 +33,16 @@ export function TileSaveBar({
   };
 
   return (
-    <div className="flex flex-col gap-4 mt-2 pt-3 border-t border-outline-variant animate-in fade-in duration-200">
+    <div className="mt-2 flex flex-col gap-3 border-t border-outline-variant pt-3 animate-in fade-in duration-200">
       {isPending && (
-        <div className="flex items-center gap-4 text-sm font-semibold text-on-surface-variant bg-surface-container-low border border-outline-variant rounded-lg px-2.5 py-1.5 animate-pulse">
+        <div className="flex items-center gap-3 rounded-xl bg-surface px-3 py-2 text-sm font-semibold text-on-surface-variant animate-pulse">
           <Loader2 className="animate-spin text-brand-link h-3.5 w-3.5" />
           <span>Saving updates to remote fleet (may take a long time if being rate limited)...</span>
         </div>
       )}
 
       {isSuccess && !isDirty && (
-        <div className="flex items-center gap-4 text-sm font-bold text-growth bg-surface-container border border-outline-variant rounded-lg px-2.5 py-1.5 animate-in slide-in-from-top-1 duration-200">
+        <div className="flex items-center gap-3 rounded-xl bg-surface px-3 py-2 text-sm font-bold text-growth animate-in slide-in-from-top-1 duration-200">
           <CheckCircle2 className="text-growth h-3.5 w-3.5" />
           <span>Updates saved successfully!</span>
         </div>
@@ -57,18 +57,18 @@ export function TileSaveBar({
       )}
 
       {isDirty && !isPending && (
-        <div className="flex items-center gap-4 w-full">
+        <div className="flex w-full flex-wrap-reverse items-center justify-end gap-2">
           <button
             onClick={handleSave}
             disabled={isPending}
-            className="flex-1 bg-brand-btn-primary text-white font-bold text-sm py-1.5 rounded-lg hover:bg-brand-btn-quaternary transition-colors shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex min-h-10 cursor-pointer items-center justify-center rounded-full bg-on-primary-container px-5 text-sm font-bold text-primary-container transition-colors hover:bg-brand-btn-quaternary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary disabled:cursor-not-allowed disabled:opacity-50"
           >
             Save Changes
           </button>
           <button
             onClick={onCancel}
             disabled={isPending}
-            className="px-3 py-1.5 text-sm font-bold text-on-surface-variant bg-surface-container hover:bg-surface-container-high rounded-lg transition-colors shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex min-h-10 cursor-pointer items-center justify-center rounded-full px-4 text-sm font-bold text-on-surface transition-colors hover:bg-surface-container-high focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary disabled:cursor-not-allowed disabled:opacity-50"
           >
             Cancel
           </button>

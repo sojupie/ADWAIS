@@ -1,4 +1,5 @@
 import { X, Settings, Link, RefreshCw, ShieldAlert } from 'lucide-react';
+import { FormField } from '../common/ui/FormField';
 
 interface CalendarSettingsModalProps {
   isOpen: boolean;
@@ -55,11 +56,13 @@ export function CalendarSettingsModal({
             {isWriter ? (
               token ? (
                 <div className="flex gap-4 animate-in fade-in duration-200">
-                  <input 
-                    type="text" 
-                    readOnly 
+                  <FormField
+                    label="Calendar feed URL"
+                    hideLabel
+                    readOnly
                     value={`${window.location.origin}/api/intranet/calendar/feed.ics?token=${token}`}
-                    className="flex-1 bg-surface-container border-0 text-on-surface-variant text-sm px-4 py-3 rounded-2xl focus:outline-none select-all truncate" 
+                    containerClassName="min-w-0 flex-1"
+                    className="select-all truncate text-sm text-on-surface-variant"
                   />
                   <button 
                     onClick={onCopyFeedLink}

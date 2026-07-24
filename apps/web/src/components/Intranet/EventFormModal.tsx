@@ -1,6 +1,7 @@
 import { Calendar, Edit, X } from 'lucide-react';
 import { EventType, RecurrenceType } from '@types';
 import { DatePickerField, TimePickerField } from '../common/ui/DateTimePickerField';
+import { CheckboxField, FormField } from '../common/ui/FormField';
 
 export type EventForm = {
   title: string;
@@ -23,10 +24,6 @@ interface EventFormModalProps {
   form: EventForm;
   onChange: (form: EventForm) => void;
 }
-
-const inputClass = 'w-full rounded-xl border-0 bg-surface-container px-4 py-3 text-base font-medium text-on-surface transition-all focus:bg-primary-container focus:text-on-primary-container focus:outline-none focus:ring-2 focus:ring-secondary/40';
-const fieldClass = 'flex flex-col gap-2';
-const labelClass = 'pl-1 text-sm font-bold text-on-surface-variant';
 
 export function EventFormModal({ mode, isOpen, onClose, onSubmit, form, onChange }: EventFormModalProps) {
   if (!isOpen) return null;
@@ -58,10 +55,7 @@ export function EventFormModal({ mode, isOpen, onClose, onSubmit, form, onChange
         </div>
 
         <div className="flex max-h-[75vh] flex-col gap-4 overflow-y-auto bg-surface px-6 pb-6 custom-scrollbar">
-          <div className={fieldClass}>
-            <label className={labelClass} htmlFor={`${mode}-event-title`}>Event Title</label>
-            <input id={`${mode}-event-title`} type="text" placeholder="Weekly Sync / Launch / etc." value={form.title} onChange={event => onChange({ ...form, title: event.target.value })} className={inputClass} required />
-          </div>
+          <FormField id={`${mode}-event-title`} label="Event Title" type="text" placeholder="Weekly Sync / Launch / etc." value={form.title} onChange={event => onChange({ ...form, title: event.target.value })} required />
 
           <div className="grid grid-cols-[minmax(0,1fr)_minmax(112px,0.65fr)] gap-3">
             <DatePickerField id={`${mode}-event-start-date`} label="Start date" value={form.startTime.split('T')[0] || ''} onChange={date => onChange({ ...form, startTime: `${date}T${form.startTime.split('T')[1] || '00:00'}` })} />
@@ -71,32 +65,27 @@ export function EventFormModal({ mode, isOpen, onClose, onSubmit, form, onChange
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div className={fieldClass}>
-              <label className={labelClass} htmlFor={`${mode}-event-category`}>Event Category</label>
-              <select id={`${mode}-event-category`} value={form.eventType} onChange={event => onChange({ ...form, eventType: event.target.value as EventType })} className={`${inputClass} cursor-pointer`}>
+            <FormField as="select" id={`${mode}-event-category`} label="Event Category" value={form.eventType} onChange={event => onChange({ ...form, eventType: event.target.value as EventType })}>
                 {Object.keys(EventType).map(key => <option key={key} value={key as EventType}>{key}</option>)}
-              </select>
-            </div>
-            <div className={fieldClass}>
-              <label className={labelClass} htmlFor={`${mode}-event-location`}>Location</label>
-              <input id={`${mode}-event-location`} type="text" placeholder="Kitchen / Zoom / Slack" value={form.location} onChange={event => onChange({ ...form, location: event.target.value })} className={inputClass} />
-            </div>
+            </FormField>
+            <FormField id={`${mode}-event-location`} label="Location" type="text" placeholder="Kitchen / Zoom / Slack" value={form.location} onChange={event => onChange({ ...form, location: event.target.value })} />
           </div>
 
-          <div className={fieldClass}>
-            <label className={labelClass} htmlFor={`${mode}-event-description`}>Description</label>
-            <textarea id={`${mode}-event-description`} rows={3} placeholder="Event scope, notes, etc." value={form.description} onChange={event => onChange({ ...form, description: event.target.value })} className={`${inputClass} resize-none custom-scrollbar`} />
-          </div>
+          <FormField as="textarea" id={`${mode}-event-description`} label="Description" rows={3} placeholder="Event scope, notes, etc." value={form.description} onChange={event => onChange({ ...form, description: event.target.value })} className="resize-none" />
 
-          <div className="flex flex-wrap gap-8 rounded-2xl bg-surface-container-low p-4">
-            <label className="flex cursor-pointer items-center gap-4 text-base font-medium text-on-surface-variant">
-              <input type="checkbox" checked={form.isImportant} onChange={event => onChange({ ...form, isImportant: event.target.checked })} className="h-4 w-4 cursor-pointer rounded text-brand-accent focus:ring-brand-accent/20" />
-              Important Highlight
-            </label>
-            <label className="flex cursor-pointer items-center gap-4 text-base font-medium text-on-surface-variant">
-              <input type="checkbox" checked={form.isSpecial} onChange={event => onChange({ ...form, isSpecial: event.target.checked })} className="h-4 w-4 cursor-pointer rounded text-brand-accent focus:ring-brand-accent/20" />
-              Special Occasion
-            </label>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <CheckboxField
+              id={`${mode}-event-important`}
+              label="Important Highlight"
+              checked={form.isImportant}
+              onChange={event => onChange({ ...form, isImportant: event.target.checked })}
+            />
+            <CheckboxField
+              id={`${mode}-event-special`}
+              label="Special Occasion"
+              checked={form.isSpecial}
+              onChange={event => onChange({ ...form, isSpecial: event.target.checked })}
+            />
           </div>
         </div>
 

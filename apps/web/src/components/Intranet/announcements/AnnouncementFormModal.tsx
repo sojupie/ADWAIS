@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Pencil, Plus, Trash2, X } from 'lucide-react';
 import { ErrorAlert } from '../../common/ui/ErrorAlert';
+import { FormField } from '../../common/ui/FormField';
 
 interface AnnouncementFormModalProps {
   mode: 'create' | 'edit';
@@ -40,14 +41,8 @@ function AnnouncementFormDialog({ mode, isPending, error, initialTitle = '', ini
 
         <div className="flex flex-col gap-4 px-6 pb-6">
           {error && <ErrorAlert title={isEditing ? 'Unable to update announcement' : 'Unable to create announcement'} message={error} />}
-          <label className="flex flex-col gap-3 text-sm font-bold text-on-surface-variant">
-            Title
-            <input autoFocus required maxLength={255} value={title} onChange={event => setTitle(event.target.value)} className="rounded-xl bg-surface-container px-4 py-3 text-base font-medium text-on-surface outline-none focus:bg-primary-container focus:text-on-primary-container focus:outline-none focus:ring-2 focus:ring-secondary/40" />
-          </label>
-          <label className="flex flex-col gap-3 text-sm font-bold text-on-surface-variant">
-            Message
-            <textarea required maxLength={5000} rows={6} value={body} onChange={event => setBody(event.target.value)} className="resize-y rounded-xl bg-surface-container px-4 py-3 text-base font-medium text-on-surface outline-none focus:bg-primary-container focus:text-on-primary-container focus:outline-none focus:ring-2 focus:ring-secondary/40" />
-          </label>
+          <FormField label="Title" autoFocus required maxLength={255} value={title} onChange={event => setTitle(event.target.value)} />
+          <FormField as="textarea" label="Message" required maxLength={5000} rows={6} value={body} onChange={event => setBody(event.target.value)} className="resize-y" />
         </div>
 
         {confirmingDelete ? (

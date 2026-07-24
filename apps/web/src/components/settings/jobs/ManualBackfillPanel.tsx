@@ -27,11 +27,11 @@ export function ManualBackfillPanel({ tenants, triggerBackfill, disabled }: Manu
   return (
     <SettingsCard
       title="Historical Backfill"
-      subtitle="Force massive data ingestion"
+      subtitle="Rebuild historical order data for a selected tenant and period."
       icon={<Database size={20} />}
     >
-      <div className="flex gap-6">
-        <Select
+      <Select
+            label="Tenant"
             value={backfill.tenantId}
             onChange={e => setBackfill({ ...backfill, tenantId: e.target.value })}
             disabled={disabled}
@@ -41,8 +41,7 @@ export function ManualBackfillPanel({ tenants, triggerBackfill, disabled }: Manu
           {(tenants || []).map((t) => (
             <option key={t.id} value={t.id}>{t.name} ({t.type})</option>
           ))}
-        </Select>
-      </div>
+      </Select>
       <div className="flex flex-col sm:flex-row gap-2">
         <Input
           label="Start Date"
@@ -50,6 +49,7 @@ export function ManualBackfillPanel({ tenants, triggerBackfill, disabled }: Manu
           value={backfill.startDate}
           onChange={e => setBackfill({ ...backfill, startDate: e.target.value })}
           disabled={disabled}
+          className={"bg-surface-container-lowest border border-outline"}
         />
         <Input
           label="End Date"
@@ -57,6 +57,7 @@ export function ManualBackfillPanel({ tenants, triggerBackfill, disabled }: Manu
           value={backfill.endDate}
           onChange={e => setBackfill({ ...backfill, endDate: e.target.value })}
           disabled={disabled}
+          className={"bg-surface-container-lowest border border-outline"}
         />
       </div>
       <SecureButton
@@ -66,15 +67,15 @@ export function ManualBackfillPanel({ tenants, triggerBackfill, disabled }: Manu
         loading={triggerBackfill.isPending}
         loadingText="Initiating..."
         icon={<Play size={16} />}
-        className="text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors shadow-sm flex items-center justify-center gap-2 mt-2 w-full bg-brand-btn-primary hover:bg-brand-btn-quaternary cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        className="mt-2 flex min-h-11 w-fit cursor-pointer items-center justify-center gap-2 self-start rounded-full bg-on-primary-container px-5 text-base font-bold text-primary-container transition-colors hover:bg-brand-btn-quaternary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary"
         disabled={!backfill.tenantId}
       >
         Execute Backfill
       </SecureButton>
-      <div className="bg-red-50 border border-red-100 rounded-lg p-3 flex items-start gap-4">
-        <ShieldAlert size={16} className="text-red-500 shrink-0 mt-0.5" />
-        <p className="text-sm text-red-700 font-medium leading-relaxed">
-          Long backfills require multiple GET requests for pagination that are likely to get rate limited (although automatically managed by back-off and retry policies). <br />Triggering a backfill also drops existing materialized views, potentially making queries slower, expect performance degradation (in ADWAIS).
+      <div className="flex items-start gap-3 rounded-xl bg-error-container p-4 text-on-error-container">
+        <ShieldAlert size={18} className="mt-0.5 shrink-0" aria-hidden="true" />
+        <p className="text-sm font-medium leading-5">
+          Large backfills may be rate limited and temporarily slow reporting while monitoring views are rebuilt.
         </p>
       </div>
     </SettingsCard>

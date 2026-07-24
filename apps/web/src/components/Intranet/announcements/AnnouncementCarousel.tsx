@@ -77,12 +77,12 @@ export function AnnouncementCarousel({ children }: AnnouncementCarouselProps) {
       </div>
 
       {canScrollBack && (
-        <button type="button" onClick={() => scroll(-1)} aria-label="Previous announcements" className="absolute left-2 top-1/2 z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-surface text-on-surface m3-elevation-2 hover:bg-surface-container-high md:flex">
+        <button type="button" onClick={() => scroll(-1)} aria-label="Previous announcements" className="absolute left-2 top-1/2 z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-surface text-on-surface m3-elevation-2 hover:bg-surface-container md:flex">
           <ChevronLeft className="h-5 w-5" aria-hidden="true" />
         </button>
       )}
       {canScrollForward && (
-        <button type="button" onClick={() => scroll(1)} aria-label="Next announcements" className="absolute right-2 top-1/2 z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-surface text-on-surface m3-elevation-2 hover:bg-surface-container-high md:flex">
+        <button type="button" onClick={() => scroll(1)} aria-label="Next announcements" className="absolute right-2 top-1/2 z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-surface text-on-surface m3-elevation-2 hover:bg-surface-container md:flex">
           <ChevronRight className="h-5 w-5" aria-hidden="true" />
         </button>
       )}

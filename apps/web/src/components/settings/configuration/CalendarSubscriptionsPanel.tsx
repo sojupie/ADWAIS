@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {Globe, RefreshCw, Trash2, Calendar} from 'lucide-react';
 import { useCalendarSubscriptionsQuery, useCreateCalendarSubscriptionMutation, useDeleteCalendarSubscriptionMutation, useSyncCalendarSubscriptionMutation } from '../../../hooks/useCalendarQueries';
 import {SettingsCard} from "../../common/layout/SettingsCard.tsx";
+import { Input } from '../../common/ui/Input';
 
 export function CalendarSubscriptionsPanel({ disabled }: { disabled?: boolean }) {
   const { data: subscriptions = [], isLoading } = useCalendarSubscriptionsQuery();
@@ -31,35 +32,38 @@ export function CalendarSubscriptionsPanel({ disabled }: { disabled?: boolean })
           icon={<Calendar size={20} />}
       >
         {!disabled && (
-          <form onSubmit={handleCreateSub} className="bg-surface-container-low p-4 rounded-xl border border-outline-variant flex flex-col gap-2">
-            <h4 className="text-sm font-black uppercase tracking-widest text-on-surface-variant flex items-center gap-2">
-              <Globe size={14} className="text-on-surface-variant" /> Connect New Calendar Feed
+          <form onSubmit={handleCreateSub} className="flex flex-col gap-4 rounded-xl bg-surface-container p-4">
+            <h4 className="flex items-center gap-2 text-base font-black text-on-surface">
+              <Globe size={18} className="text-on-surface-variant" aria-hidden="true" />
+              Connect a calendar feed
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <input 
-                type="text" 
-                placeholder="Calendar Name (e.g. Swedish Holidays)" 
-                value={subForm.name} 
+              <Input
+                label="Calendar name"
+                type="text"
+                placeholder="Swedish holidays"
+                value={subForm.name}
                 onChange={e => setSubForm({ ...subForm, name: e.target.value })}
-                className="w-full border border-outline-variant bg-surface rounded px-3 py-2 text-sm focus:outline-none focus:border-slate-500"
                 required
+                className={"bg-surface border border-outline-variant"}
               />
-              <input 
-                type="url" 
-                placeholder="iCal Feed URL (.ics)" 
-                value={subForm.url} 
+              <Input
+                label="iCal feed URL"
+                type="url"
+                placeholder="https://example.com/calendar.ics"
+                value={subForm.url}
                 onChange={e => setSubForm({ ...subForm, url: e.target.value })}
-                className="w-full border border-outline-variant bg-surface rounded px-3 py-2 text-sm focus:outline-none focus:border-slate-500"
                 required
+                className={"bg-surface border border-outline-variant"}
               />
             </div>
             <div className="flex justify-end">
               <button 
                 type="submit" 
                 disabled={createSubMutation.isPending}
-                className="bg-brand-btn-primary text-white text-sm font-black uppercase tracking-widest px-4 py-2 rounded-lg hover:brightness-110 transition shadow-sm cursor-pointer disabled:opacity-50"
+                className="inline-flex min-h-11 cursor-pointer items-center justify-center rounded-full bg-on-primary-container px-5 text-base font-bold text-primary-container transition-colors hover:bg-brand-btn-quaternary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary disabled:cursor-not-allowed disabled:bg-on-surface/[0.1] disabled:text-on-surface/[0.38] disabled:hover:bg-on-surface/[0.1] disabled:hover:text-on-surface/[0.38]"
               >
-                {createSubMutation.isPending ? 'Connecting...' : 'Add Integration'}
+                {createSubMutation.isPending ? 'Connecting…' : 'Add calendar'}
               </button>
             </div>
           </form>
@@ -72,33 +76,35 @@ export function CalendarSubscriptionsPanel({ disabled }: { disabled?: boolean })
             <div className="text-sm text-on-surface-variant italic text-center py-4">No external calendar integrations active.</div>
           ) : (
             subscriptions.map((sub) => (
-              <div key={sub.id} className="flex items-center justify-between p-3 border border-outline-variant rounded-lg hover:border-outline-variant transition bg-surface shadow-sm">
-                <div className="flex flex-col gap-1 max-w-[70%]">
-                  <span className="text-sm, font-bold text-on-surface">{sub.name}</span>
-                  <span className="text-sm text-on-surface-variant truncate" title={sub.url || undefined}>{sub.url}</span>
+              <div key={sub.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-surface-container p-4 transition-colors hover:bg-surface-container-high">
+                <div className="flex min-w-0 flex-1 flex-col gap-1">
+                  <span className="text-base font-bold text-on-surface">{sub.name}</span>
+                  <span className="break-all text-sm text-on-surface-variant" title={sub.url || undefined}>{sub.url}</span>
                   {sub.lastSyncError && (
-                    <span className="text-sm text-red-500 font-bold leading-tight mt-1">{sub.lastSyncError}</span>
+                    <span className="mt-1 text-sm font-bold leading-tight text-error">{sub.lastSyncError}</span>
                   )}
                 </div>
                 
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-1">
                   <button 
                     type="button"
+                    aria-label={`Sync ${sub.name || 'calendar'}`}
                     onClick={() => sub.id && syncSubMutation.mutate(sub.id)}
                     disabled={disabled || syncSubMutation.isPending}
-                    className="p-1.5 text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-md border border-outline-variant transition cursor-pointer disabled:opacity-50"
+                    className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container-highest hover:text-on-surface focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary disabled:cursor-not-allowed disabled:bg-on-surface/[0.1] disabled:text-on-surface/[0.38] disabled:hover:bg-on-surface/[0.1] disabled:hover:text-on-surface/[0.38]"
                     title="Sync Now"
                   >
-                    <RefreshCw size={14} className={syncSubMutation.isPending ? 'animate-spin' : ''} />
+                    <RefreshCw size={18} className={syncSubMutation.isPending ? 'animate-spin' : ''} />
                   </button>
                   <button 
                     type="button"
+                    aria-label={`Remove ${sub.name || 'calendar'}`}
                     onClick={() => sub.id && deleteSubMutation.mutate(sub.id)}
                     disabled={disabled || deleteSubMutation.isPending}
-                    className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md border border-red-100 transition cursor-pointer disabled:opacity-50"
+                    className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-error transition-colors hover:bg-error-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-error disabled:cursor-not-allowed disabled:bg-on-surface/[0.1] disabled:text-on-surface/[0.38] disabled:hover:bg-on-surface/[0.1] disabled:hover:text-on-surface/[0.38]"
                     title="Remove Integration"
                   >
-                    <Trash2 size={14} />
+                    <Trash2 size={18} />
                   </button>
                 </div>
               </div>

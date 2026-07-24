@@ -46,7 +46,7 @@ export function useCreateUserMutation(onSuccessCallback?: () => void) {
           email: user.email,
           role: user.role as UserRole
         }
-      }, options)
+      }, options),
   };
 }
 
@@ -79,7 +79,16 @@ export function useUpdateUserMutation() {
           name: variables.payload.name,
           role: variables.payload.role as UserRole
         }
-      }, options)
+      }, options),
+    mutateAsync: async (variables: { id: string; payload: Partial<UserResponseDto> }) => {
+      await mutation.mutateAsync({
+        id: variables.id,
+        data: {
+          name: variables.payload.name,
+          role: variables.payload.role as UserRole,
+        },
+      });
+    },
   };
 }
 

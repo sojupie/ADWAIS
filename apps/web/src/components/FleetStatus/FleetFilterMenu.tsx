@@ -76,7 +76,7 @@ function PreferenceButton({
       type="button"
       disabled={disabled}
       onClick={onClick}
-      className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-full border border-outline-variant bg-surface px-4 text-sm font-bold text-on-surface transition-colors hover:bg-surface-container-high focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary disabled:cursor-not-allowed disabled:bg-on-surface/[0.10] disabled:text-on-surface/[0.38] md:text-md"
+      className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-full border border-outline-variant bg-surface px-4 text-sm font-bold text-on-surface transition-colors hover:bg-surface-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary disabled:cursor-not-allowed disabled:bg-on-surface/[0.10] disabled:text-on-surface/[0.38] md:text-md"
     >
       {children}
     </button>

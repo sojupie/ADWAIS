@@ -8,8 +8,5 @@
   - weekly calendar cards should show end time. span across multiple days and hours
 - ping litium env for health checks (to see if base url is correct after adding it to a tenant card).
 - revamp settings ui
-- hide or make the FAB useful in intranet/settings
-- uptime graph 
-  - ![img.png](img.png)
-- fleet status, instead of showing monitor name, show monitor type and url
+- fix settings input bugs. cant enter tags
 - create github pipeline

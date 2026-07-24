@@ -12,7 +12,7 @@ export function RecurringJobsTable({ recurring }: RecurringJobsTableProps) {
   return (
     <div className="custom-scrollbar h-full w-full overflow-auto text-left text-sm">
       <table className="w-full min-w-[720px]">
-        <thead className="border-b border-outline text-xs bg-surface-dim font-bold uppercase tracking-wider text-on-surface-variant">
+        <thead className="sticky top-0 z-10 bg-surface shadow-[0_1px_0_0_var(--md-sys-color-outline)] text-xs font-bold uppercase tracking-wider text-on-surface-variant">
           <tr>
             <th className="px-3 py-2">Job ID</th>
             <th className="px-3 py-2">Cron</th>

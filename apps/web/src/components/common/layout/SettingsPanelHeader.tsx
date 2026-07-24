@@ -28,7 +28,7 @@ export function SettingsPanelHeader({
             {title}
           </h2>
           {subtitle && (
-            <p className="m-0 mt-1 text-sm font-medium leading-5 text-on-surface-variant">
+            <p className="m-0 text-sm font-bold leading-5 text-on-surface-variant">
               {subtitle}
             </p>
           )}

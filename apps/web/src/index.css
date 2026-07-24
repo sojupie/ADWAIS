@@ -88,6 +88,21 @@
   --color-decline: #f03e3e;
   --color-decline-warning: #f59f00;
   
+  /* Console Panel Theme (Solarized Light basis) */
+  --color-console-bg: #fdf6e3;
+  --color-console-header: #eee8d5;
+  --color-console-border: #d8cfb5;
+  --color-console-hover: #eee8d5;
+  --color-console-hover-dark: #ddd6c2;
+  --color-console-text: #073642;
+  --color-console-icon: #2aa198;
+  --color-console-blue: #268bd2;
+  --color-console-green: #859900;
+  --color-console-yellow: #b58900;
+  --color-console-red: #dc322f;
+  --color-console-error-bg: #fbe5df;
+  --color-console-error-text: #b52f2c;
+  
   --md-sys-color-primary: #ffffff;
   --md-sys-color-on-primary: #5d5f5f;
   --md-sys-color-primary-container: #e1eeee;
@@ -220,6 +235,20 @@
   --color-growth-rgb: 55, 178, 77;
   --color-decline-rgb: 240, 62, 62;
   --color-decline-warning-rgb: 245, 159, 0;
+
+  --color-console-bg-rgb: 253, 246, 227;
+  --color-console-header-rgb: 238, 232, 213;
+  --color-console-border-rgb: 216, 207, 181;
+  --color-console-hover-rgb: 238, 232, 213;
+  --color-console-hover-dark-rgb: 221, 214, 194;
+  --color-console-text-rgb: 7, 54, 66;
+  --color-console-icon-rgb: 42, 161, 152;
+  --color-console-blue-rgb: 38, 139, 210;
+  --color-console-green-rgb: 133, 153, 0;
+  --color-console-yellow-rgb: 181, 137, 0;
+  --color-console-red-rgb: 220, 50, 47;
+  --color-console-error-bg-rgb: 251, 229, 223;
+  --color-console-error-text-rgb: 181, 47, 44;
 
   --font-sans: "Manrope", system-ui, sans-serif;
   --app-viewport-width: 100vw;

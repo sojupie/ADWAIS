@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { HeartPulse, TerminalSquare, AlertCircle, CheckCircle2, AlertTriangle, Info, Check, Copy } from 'lucide-react';
 import { SettingsPanel } from '../../components/common/layout/SettingsPanel';
 import { SettingsPanelHeader } from '../../components/common/layout/SettingsPanelHeader';
+import { ConsolePanel } from '../../components/common/layout/ConsolePanel';
 import { SecureButton } from '../../components/common/ui/SecureButton';
 import { Skeleton } from '../../components/common/ui/Skeleton';
 import { useSystemEventsViewModel, type SystemEvent } from '../../hooks/useSystemEventsViewModel';
@@ -79,7 +80,7 @@ export function SystemEventsView() {
 
                 <div className="custom-scrollbar flex flex-1 flex-col gap-6 overflow-y-auto p-3 sm:p-4">
                     {health ? (
-                        <div className="flex flex-col gap-4">
+                        <div className="flex shrink-0 flex-col gap-4">
 
                             {/* Database Health Card */}
                             <HealthStatusCard
@@ -144,7 +145,7 @@ export function SystemEventsView() {
                             </SecureButton>
                         </div>
                     ) : (
-                        <div className="flex flex-col gap-8">
+                        <div className="flex flex-col gap-8 shrink-0">
                             <Skeleton.Card className="h-16" />
                             <Skeleton.Card className="h-28" />
                             <Skeleton.Card className="h-28" />
@@ -153,11 +154,11 @@ export function SystemEventsView() {
 
                     {/* Sync Dates Section */}
                     {health && (
-                        <div className="flex flex-col overflow-hidden rounded-xl bg-surface-container">
+                        <div className="flex shrink-0 flex-col overflow-hidden rounded-xl bg-surface-container">
                             <div className="border-b border-outline-variant p-4 text-sm font-black uppercase tracking-widest text-on-surface-variant">
                                 Last Successful Syncs
                             </div>
-                            <div className="flex flex-col divide-y divide-slate-100 text-sm">
+                            <div className="flex flex-col divide-y overflow-y-auto divide-slate-100 text-sm">
                                 <div className="flex justify-between items-center p-3">
                                     <span className="font-semibold text-on-surface-variant">Litium Ingestion</span>
                                     <span className="font-bold text-on-surface">{timeAgo(health.lastLitiumSync)}</span>
@@ -181,22 +182,18 @@ export function SystemEventsView() {
             </SettingsPanel>
 
             {/* System Logs console */}
-            <section className="col-span-1 flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl border border-[#d8cfb5] bg-[#fdf6e3]  landscape-contained:col-span-2">
-                <div className="z-10 flex shrink-0 items-center justify-between border-b border-[#d8cfb5] bg-[#eee8d5] p-4">
-                    <div className="flex items-center gap-3">
-                        <TerminalSquare size={18} className="text-[#2aa198]" />
-                        <div>
-                            <h2 className="text-sm font-black uppercase tracking-widest text-[#073642]">System events</h2>
-                            <p className="mt-0.5 text-sm font-medium text-on-surface-variant">Application and synchronization diagnostics</p>
-                        </div>
-                    </div>
-                </div>
-                <div className="custom-scrollbar flex flex-1 flex-col gap-4 overflow-y-auto bg-[#fdf6e3] p-4 font-mono text-sm">
+            <ConsolePanel
+                title="System events"
+                subtitle="Application and synchronization diagnostics"
+                icon={<TerminalSquare size={18} />}
+                className="col-span-1 landscape-contained:col-span-2 max-h-[500px] landscape-contained:max-h-none"
+            >
+                <div className="flex flex-col gap-4 p-4 min-w-0">
                     {(events || []).map((e: SystemEvent, i: number) => (
                         <LogEventRow key={e.id || i} e={e} />
                     ))}
                 </div>
-            </section>
+            </ConsolePanel>
         </div>
     );
 }
@@ -257,9 +254,9 @@ function LogEventRow({ e }: { e: SystemEvent }) {
     };
 
     return (
-        <div className="group relative flex flex-col gap-2 rounded p-1.5 transition-colors hover:bg-[#eee8d5] select-text">
+        <div className="group relative flex flex-col gap-2 rounded p-1.5 transition-colors hover:bg-console-hover select-text min-w-0">
             {/* First Row: Date, Level icon, Level prefix, Message */}
-            <div className="flex items-center flex-wrap gap-x-4 gap-y-2 pr-8">
+            <div className="flex items-center flex-wrap gap-x-4 gap-y-2 pr-8 min-w-0">
                 <span className="shrink-0 font-mono text-sm">
                     {(() => {
                         const d = new Date(e.timestamp);
@@ -270,10 +267,10 @@ function LogEventRow({ e }: { e: SystemEvent }) {
                         return `${year}-${month}-${day} ${time}`;
                     })()}
                 </span>
-                {isError ? <AlertCircle size={13} className="shrink-0 text-[#dc322f]" /> :
-                    isWarn ? <AlertTriangle size={13} className="shrink-0 text-[#b58900]" /> :
-                        <Info size={13} className="shrink-0 text-[#268bd2]" />}
-                <span className={`shrink-0 text-sm font-bold ${isError ? 'text-[#dc322f]' : isWarn ? 'text-[#b58900]' : 'text-[#268bd2]'}`}>
+                {isError ? <AlertCircle size={13} className="shrink-0 text-console-red" /> :
+                    isWarn ? <AlertTriangle size={13} className="shrink-0 text-console-yellow" /> :
+                        <Info size={13} className="shrink-0 text-console-blue" />}
+                <span className={`shrink-0 text-sm font-bold ${isError ? 'text-console-red' : isWarn ? 'text-console-yellow' : 'text-console-blue'}`}>
                     [{levelStr.toUpperCase()}]
                 </span>
                 <span className="break-words leading-tight">{displayMessage}</span>
@@ -286,22 +283,22 @@ function LogEventRow({ e }: { e: SystemEvent }) {
                         <span>Source: <strong className="">{e.source}</strong></span>
                     )}
                     {e.tenant?.name && (
-                        <span className="text-[#2aa198]">Tenant: <strong className="">{e.tenant.name}</strong></span>
+                        <span className="text-console-icon">Tenant: <strong className="">{e.tenant.name}</strong></span>
                     )}
                 </div>
             )}
 
             {/* Third Row: Details */}
             {e.details && e.details !== e.message && (
-                <div className="whitespace-pre-wrap rounded border border-[#d8cfb5] bg-[#eee8d5] p-2 text-sm text-on-surface-variant">
+                <div className="whitespace-pre-wrap rounded border border-console-border bg-console-hover p-2 text-sm text-on-surface-variant">
                     {e.details}
                 </div>
             )}
 
             {/* Fourth Row: Exception */}
             {e.exception && (
-                <div className="custom-scrollbar overflow-x-auto rounded border border-[#dc322f]/40 bg-[#fbe5df] p-2 text-sm text-[#b52f2c]">
-                    <pre className="whitespace-pre-wrap">{e.exception}</pre>
+                <div className="custom-scrollbar overflow-x-auto rounded border border-console-red/40 bg-console-error-bg p-2 text-sm text-console-error-text min-w-0">
+                    <pre className="whitespace-pre-wrap break-all">{e.exception}</pre>
                 </div>
             )}
 
@@ -309,10 +306,10 @@ function LogEventRow({ e }: { e: SystemEvent }) {
             <button
                 onClick={handleCopy}
                 aria-label="Copy log entry"
-                className="absolute right-2 top-2 cursor-pointer rounded bg-[#eee8d5] p-1 text-on-surface-variant opacity-0 transition-[background-color,color,opacity] duration-150 hover:bg-[#ddd6c2] hover:text-[#073642] group-hover:opacity-100"
+                className="absolute right-2 top-2 cursor-pointer rounded bg-console-hover p-1 text-on-surface-variant opacity-0 transition-[background-color,color,opacity] duration-150 hover:bg-console-hover-dark hover:text-console-text group-hover:opacity-100"
                 title="Copy full log entry"
             >
-                {copied ? <Check size={12} className="text-[#859900]" /> : <Copy size={12} />}
+                {copied ? <Check size={20} className="text-console-green" /> : <Copy size={20} />}
             </button>
         </div>
     );

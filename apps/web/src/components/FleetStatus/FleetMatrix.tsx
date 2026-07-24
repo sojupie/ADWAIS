@@ -20,6 +20,7 @@ function FleetMatrixTile({
 
   const status = getMonitorStatus(monitor.currentStatus, monitor.currentLatency, monitor.latencyDegradedFloor);
   const tenantDisplay = monitor.tenantName || monitor.name.split('-')[0]?.trim() || 'Tenant';
+  const displayUrl = monitor.url.replace(/^(?:[^:]+:\/\/)?(?:www\.)?/, '');
   const theme = STATUS_THEMES[status];
   const faviconUrl = monitor.tenantImageUrl
     || getTenantFaviconUrl(monitor.tenantBaseUrl || monitor.url);
@@ -29,43 +30,29 @@ function FleetMatrixTile({
     <button
       type="button"
       onClick={() => onMonitorSelect?.(monitor)}
-      className={`flex-1 min-w-[200px] max-w-[300px] p-3 rounded-lg transition-all text-left border-2 relative overflow-hidden group min-h-22.5 shrink-0 flex flex-col justify-between min-w-0
+      className={`flex-1 min-w-[225px]  p-3 rounded-lg transition-all text-left border-2 relative overflow-hidden group min-h-22.5 shrink-0 flex flex-col justify-between min-w-0
         ${theme.bg} ${theme.border} ${theme.text}
         ${isActive ? 'z-10 m3-elevation-3' : 'm3-elevation-2 hover:m3-elevation-3'}
         ${selectedMonitorId && !isActive ? 'opacity-30' : 'opacity-100'}
         ${!monitor.uptimeMonitorEnabled ? 'grayscale opacity-50' : ''}
       `}
     >
-      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-12 h-12 pointer-events-none select-none">
-        {showLetter ? (
-          <span className={`text-5xl font-black opacity-10 select-none leading-none ${theme.text}`}>
-            {tenantDisplay.charAt(0).toUpperCase()}
-          </span>
-        ) : (
-          <img
-            src={faviconUrl!}
-            alt=""
-            className="w-12 h-12 object-contain opacity-30 mix-blend-multiply"
-            onError={() => setImgError(true)}
-          />
-        )}
-      </div>
-
       <div className="gap-2 relative z-10 flex flex-col h-full justify-between w-full min-w-0">
         <div className="flex flex-col w-full min-w-0">
-          <span className={`text-sm font-black ${theme.text} break-all tracking-tight leading-tight`}>
-            {monitor.url}
+          <span className={`text-sm font-black ${theme.text} break-all tracking-tight line-clamp-2 h-[calc(2*1.25em)] border-b border-outline-variant pb-1 mb-2 leading-tight`}>
+            {displayUrl}
           </span>
+          
           <div className="flex items-start justify-between gap-2 mt-0.5 min-w-0">
             <span className={`text-xs font-bold ${theme.mutedText} tracking-wider min-w-0 break-words`}>
-              <span className="uppercase">{getMonitorType(monitor.type)}</span> · {tenantDisplay}
+              <span className="uppercase">{getMonitorType(monitor.type)}</span>
             </span>
             <span className={`w-3 h-3 rounded-full shrink-0 mt-0.5 ${theme.dot}`} aria-label={status} />
           </div>
         </div>
 
         {monitor.tags && monitor.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 w-full min-w-0">
+          <div className="flex flex-wrap gap-2 w-full min-w-0 border-b pb-2">
             {monitor.tags.map((tag) => {
               const name = tag.split(':')[0].trim();
               const color = getTagColor(tag);
@@ -81,12 +68,27 @@ function FleetMatrixTile({
           </div>
         )}
 
-        <div className="grid grid-cols-2 items-end mt-auto w-full min-w-0 gap-2">
+        <div className="grid grid-cols-3 items-end mt-auto w-full items-center min-w-0 gap-2">
           <div className="flex flex-col gap-0 min-w-0">
             <span className={`text-xs ${theme.mutedText} uppercase font-bold tracking-wider truncate`}>Uptime</span>
             <span className={`text-sm font-black ${theme.valueText} truncate`}>
               {monitor.currentUptimePercentage != null ? `${monitor.currentUptimePercentage.toFixed(2)}%` : 'N/A'}
             </span>
+          </div>
+          
+          <div className="min-w-0 pointer-events-none flex justify-center items-center select-none">
+            {showLetter ? (
+                <span className={`text-5xl font-black opacity-10 select-none leading-none ${theme.text}`}>
+            {tenantDisplay.charAt(0).toUpperCase()}
+          </span>
+            ) : (
+                <img
+                    src={faviconUrl!}
+                    alt=""
+                    className="w-12 h-12 object-contain opacity-30 mix-blend-multiply"
+                    onError={() => setImgError(true)}
+                />
+            )}
           </div>
           <div className="flex flex-col items-end gap-0 min-w-0 text-right">
             <span className={`text-xs ${theme.mutedText} uppercase font-bold tracking-wider truncate`}>Latency</span>
@@ -121,7 +123,7 @@ export function FleetMatrix({
   });
 
   return (
-    <div className="flex flex-wrap gap-4 content-start w-full min-w-0 pt-1 pb-4">
+    <div className="flex flex-wrap gap-4 justify-center w-full min-w-0 pt-1 pb-4">
       {sortedMonitors.map((monitor) => (
         <FleetMatrixTile
           key={`${monitor.tenantId}-${monitor.id}`}

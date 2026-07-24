@@ -43,6 +43,7 @@ export function MobileNavigationMenu({ isOpen, pathname, financialTimeframe, fle
       aria-label={view === 'settings' ? 'Settings navigation' : 'Main navigation'}
     >
       <button
+          data-md3-ripple="off"
         type="button"
         className={`absolute inset-0 cursor-default bg-black/45 backdrop-blur-[1px] transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0'}`}
         onClick={onClose}

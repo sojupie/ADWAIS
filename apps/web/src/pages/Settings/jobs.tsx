@@ -86,7 +86,7 @@ export function BackgroundJobsView() {
                 <div className="flex min-h-0 flex-1 flex-col gap-4 p-3 sm:p-4">
                     <div className="flex flex-col gap-4 h-full min-h-0">
                         {/* Recurring Table */}
-                        <div className="flex max-h-[260px] shrink-0 flex-col overflow-hidden rounded-xl border border-outline bg-surface-container">
+                        <div className="flex max-h-[260px] shrink-0 flex-col overflow-y-auto rounded-xl border border-outline">
                             <RecurringJobsTable recurring={recurring} />
                         </div>
 

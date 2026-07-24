@@ -12,7 +12,7 @@ export function RecurringJobsTable({ recurring }: RecurringJobsTableProps) {
   return (
     <div className="custom-scrollbar h-full w-full overflow-auto text-left text-sm">
       <table className="w-full min-w-[720px]">
-        <thead className="border-b border-outline bg-surface-container text-xs font-bold uppercase tracking-wider text-on-surface-variant">
+        <thead className="border-b border-outline text-xs bg-surface-dim font-bold uppercase tracking-wider text-on-surface-variant">
           <tr>
             <th className="px-3 py-2">Job ID</th>
             <th className="px-3 py-2">Cron</th>
@@ -34,7 +34,7 @@ export function RecurringJobsTable({ recurring }: RecurringJobsTableProps) {
             ))
           ) : (
             recurring.map((job) => (
-              <tr key={job.id} className="transition-colors hover:bg-surface-container-high">
+              <tr key={job.id} className="transition-colors bg-surface-container-low hover:bg-surface-container">
                 <td className="px-3 py-2 font-bold text-on-surface break-words max-w-[150px]">{job.id}</td>
                 <td className="whitespace-nowrap px-3 py-2">
                   <span className="px-1 py-0.5 bg-brand-accent/10 text-brand-text rounded text-xs font-mono font-bold tracking-widest break-words max-w-[100px] inline-block">

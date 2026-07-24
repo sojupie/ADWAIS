@@ -381,7 +381,7 @@ export function Calendar() {
         />
       }
     >
-      <div className="flex flex-col h-full min-h-[450px] bg-surface-container">
+      <div className="flex flex-col h-full min-h-[350px] bg-surface-container">
         
         {/* Month/Week Navigation */}
         {viewMode !== 'schedule' && (

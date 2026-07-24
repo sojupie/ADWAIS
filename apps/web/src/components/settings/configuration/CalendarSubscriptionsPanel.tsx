@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {Globe, RefreshCw, Trash2, Calendar} from 'lucide-react';
 import { useCalendarSubscriptionsQuery, useCreateCalendarSubscriptionMutation, useDeleteCalendarSubscriptionMutation, useSyncCalendarSubscriptionMutation } from '../../../hooks/useCalendarQueries';
-import {SettingsCard} from "../../common/layout/SettingsCard.tsx";
+import { SettingsPanel } from '../../common/layout/SettingsPanel';
 import { Input } from '../../common/ui/Input';
 
 export function CalendarSubscriptionsPanel({ disabled }: { disabled?: boolean }) {
@@ -26,11 +26,12 @@ export function CalendarSubscriptionsPanel({ disabled }: { disabled?: boolean })
   };
 
   return (
-      <SettingsCard
+      <SettingsPanel
           title="External Calendar Subscriptions"
           subtitle="Manage external .ics calendar integrations. These external calendars will be fetched, aggregated, and converted into intranet schedule blocks automatically."
-          icon={<Calendar size={20} />}
+          icon={<Calendar size={24} />}
       >
+          <div className="flex flex-col gap-4">
         {!disabled && (
           <form onSubmit={handleCreateSub} className="flex flex-col gap-4 rounded-xl bg-surface-container p-4">
             <h4 className="flex items-center gap-2 text-base font-black text-on-surface">
@@ -69,14 +70,14 @@ export function CalendarSubscriptionsPanel({ disabled }: { disabled?: boolean })
           </form>
         )}
 
-        <div className="flex flex-col gap-4 mt-2">
+        <div className="flex flex-col gap-2 mt-2">
           {isLoading ? (
             <div className="text-sm text-on-surface-variant italic text-center py-4">Loading subscriptions...</div>
           ) : subscriptions.length === 0 ? (
             <div className="text-sm text-on-surface-variant italic text-center py-4">No external calendar integrations active.</div>
           ) : (
             subscriptions.map((sub) => (
-              <div key={sub.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-surface-container p-4 transition-colors hover:bg-surface-container-high">
+              <div key={sub.id} className="flex flex-wrap items-center justify-between gap-1 rounded-xl bg-surface-container p-4 transition-colors hover:bg-surface-container-high">
                 <div className="flex min-w-0 flex-1 flex-col gap-1">
                   <span className="text-base font-bold text-on-surface">{sub.name}</span>
                   <span className="break-all text-sm text-on-surface-variant" title={sub.url || undefined}>{sub.url}</span>
@@ -111,6 +112,7 @@ export function CalendarSubscriptionsPanel({ disabled }: { disabled?: boolean })
             ))
           )}
         </div>
-      </SettingsCard>
+      </div>
+    </SettingsPanel>
   );
 }

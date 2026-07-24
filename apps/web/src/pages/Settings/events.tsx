@@ -68,10 +68,10 @@ export function SystemEventsView() {
         clearErrorsMutation
     } = useSystemEventsViewModel();
     return (
-        <div className="grid grid-cols-1 landscape-contained:grid-cols-3 portrait-contained:grid-rows-[1fr_2fr] gap-4 h-full min-h-0">
+        <div className="grid landscape-contained:grid-cols-2 portrait-contained:grid-rows-2 gap-4 h-full min-h-0">
 
             {/* Diagnostics / Health Panel */}
-            <SettingsPanel className="col-span-1">
+            <SettingsPanel className="">
                 <SettingsPanelHeader
                     title="Pipeline Health"
                     subtitle="Live connectivity and ingestion status."
@@ -186,9 +186,9 @@ export function SystemEventsView() {
                 title="System events"
                 subtitle="Application and synchronization diagnostics"
                 icon={<TerminalSquare size={18} />}
-                className="col-span-1 landscape-contained:col-span-2 max-h-[500px] landscape-contained:max-h-none"
+                className="landscape-contained:col-span-1 max-h-[500px] contained:max-h-none"
             >
-                <div className="flex flex-col gap-4 p-4 min-w-0">
+                <div className="flex flex-col min-w-0">
                     {(events || []).map((e: SystemEvent, i: number) => (
                         <LogEventRow key={e.id || i} e={e} />
                     ))}
@@ -254,7 +254,7 @@ function LogEventRow({ e }: { e: SystemEvent }) {
     };
 
     return (
-        <div className="group relative flex flex-col gap-2 rounded p-1.5 transition-colors hover:bg-console-hover select-text min-w-0">
+        <div className="group relative flex flex-col rounded px-3 py-1 transition-colors hover:bg-console-hover select-text min-w-0">
             {/* First Row: Date, Level icon, Level prefix, Message */}
             <div className="flex items-center flex-wrap gap-x-4 gap-y-2 pr-8 min-w-0">
                 <span className="shrink-0 font-mono text-sm">

@@ -39,7 +39,7 @@ function SortToggle({ value, onChange }: {
   onChange: (value: SortOrder) => void;
 }) {
   return (
-    <div className="grid grid-cols-2 gap-1 rounded-full bg-surface-container p-1" role="group" aria-label="Sort order">
+    <div className="grid grid-cols-2 rounded-full bg-surface-container" role="group" aria-label="Sort order">
       {([
         ['asc', 'A–Z'],
         ['desc', 'Z–A'],

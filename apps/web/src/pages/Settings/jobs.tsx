@@ -3,7 +3,6 @@ import { useRecurringJobsQuery, useTriggerJobMutation, useBackfillMutation, useR
 import { useTenantsQuery } from '../../hooks/useTenantQueries';
 import { RecurringJobsTable } from '../../components/settings/jobs/RecurringJobsTable';
 import { ManualBackfillPanel } from '../../components/settings/jobs/ManualBackfillPanel';
-import { SettingsPanelHeader } from '../../components/common/layout/SettingsPanelHeader';
 import { SettingsPanel } from '../../components/common/layout/SettingsPanel';
 import { ConsolePanel } from '../../components/common/layout/ConsolePanel';
 import { useCurrentUser } from '../../hooks/useCurrentUser';
@@ -34,14 +33,12 @@ export function BackgroundJobsView() {
     return (
         <div className="grid grid-cols-1 landscape-contained:grid-cols-2 portrait-contained:grid-rows-2 gap-4 h-full min-h-0">
             {/* Top Action Section / Left Pane */}
-            <SettingsPanel>
-                <SettingsPanelHeader
+            <div className="flex min-h-0 flex-col gap-4 h-full">
+                <SettingsPanel
                     title="Manual Triggers & Configuration"
                     subtitle="Run synchronization and maintenance tasks on demand."
                     icon={<Activity size={24} />}
-                />
-                <div className="custom-scrollbar flex-1 overflow-y-auto p-3 sm:p-4">
-                    <div className="grid grid-cols-1 gap-4">
+                >
                         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                             {manualJobs.map(job => {
                                 const isRestricted = job.isAdminOnly && role !== 'Admin';
@@ -50,44 +47,41 @@ export function BackgroundJobsView() {
                                         key={job.id}
                                         onClick={() => !isRestricted && triggerJob.mutate(job.url)}
                                         disabled={isRestricted}
-                                        className={`group relative flex min-h-28 flex-col overflow-hidden rounded-xl p-4 text-left transition-colors ${isRestricted
+                                        className={`group relative flex min-h-14 flex-col overflow-hidden rounded-xl px-4 py-3 text-left transition-colors ${isRestricted
                                             ? 'cursor-not-allowed bg-on-surface/[0.1] text-on-surface/[0.38] opacity-50'
                                             : 'cursor-pointer bg-primary-container text-on-surface hover:m3-elevation-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary'
                                             }`}
                                     >
-                                        <div className="mb-2 flex items-center gap-3">
+                                        <div className="flex items-center gap-3">
                                             {isRestricted ? (
                                                 <Lock size={14} className="text-on-surface/[0.38]" />
                                             ) : (
                                                 <Play size={18} className="text-on-primary-container transition-transform group-hover:translate-x-0.5" />
                                             )}
-                                            <span className="text-base font-black">{job.name}</span>
+                                            <span className="text-base h-[calc(1.5em*2)] flex items-center font-black">{job.name}</span>
                                             {isRestricted && (
                                                 <span className="ml-auto rounded-full bg-surface px-2.5 py-1 text-sm font-bold text-on-surface-variant">Admin</span>
                                             )}
                                         </div>
-                                        <span className="text-sm font-medium leading-5 text-on-surface-variant">{job.desc}</span>
+                                        <span className="text-sm font-medium line-clamp-2 h-[calc(1.5em*2)] leading-5 text-on-surface-variant">{job.desc}</span>
                                     </button>
                                 );
                             })}
                         </div>
+                </SettingsPanel>
 
-                        <ManualBackfillPanel tenants={tenants} triggerBackfill={triggerBackfill} disabled={role !== 'Admin'} />
-                    </div>
-                </div>
-            </SettingsPanel>
+                <ManualBackfillPanel tenants={tenants} triggerBackfill={triggerBackfill} disabled={role !== 'Admin'} />
+            </div>
 
             {/* Scheduled Jobs Section & Console Panel / Right Pane */}
             <div className="flex min-h-0 flex-col gap-4 h-full">
-                <SettingsPanel className="flex-1 min-h-0 landscape-contained:max-h-none max-h-[500px]">
-                    <SettingsPanelHeader
-                        title="Scheduled Jobs"
-                        subtitle="Recurring system schedules."
-                        icon={<Clock size={24} />}
-                    />
-                    <div className="flex-1 min-h-0 overflow-hidden">
+                <SettingsPanel 
+                    title="Scheduled Jobs"
+                    subtitle="Recurring system schedules."
+                    icon={<Clock size={24} />}
+                    contentClassName="flex-1 min-h-0 overflow-hidden"
+                >
                         <RecurringJobsTable recurring={recurring} />
-                    </div>
                 </SettingsPanel>
 
                 {/* Recent Jobs */}
@@ -104,7 +98,7 @@ export function BackgroundJobsView() {
                                 const isSucceeded = job.state === 'Succeeded';
                                 const isFailed = job.state === 'Failed';
                                 return (
-                                    <div key={job.jobId} className="group relative flex flex-col gap-2 p-2.5 text-on-surface-variant transition-colors hover:bg-console-hover min-w-0">
+                                    <div key={job.jobId} className="group relative flex flex-col px-3 py-1 text-on-surface-variant transition-colors hover:bg-console-hover min-w-0">
                                                 <div className="flex items-center justify-between gap-8 min-w-0">
                                                     <div className="flex items-center gap-6 min-w-0">
                                                         <span className="shrink-0 font-mono text-sm ">

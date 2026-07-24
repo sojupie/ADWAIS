@@ -29,7 +29,7 @@ export function SiteHeader({
   onToggleMobileMenu,
   isProgressBarVisible,
 }: SiteHeaderProps) {
-  const isMobileView = useMediaQuery('(max-width: 1279px)');
+  const isMobileView = useMediaQuery('(max-width: 1023px)');
 
   return (
     <header className="relative z-10 shrink-0 bg-brand-bg-secondary px-6 py-3">

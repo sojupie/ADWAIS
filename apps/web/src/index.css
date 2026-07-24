@@ -259,6 +259,10 @@
 
 /* ── Base Styles ── */
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
   html, body, #root {
     @apply h-full w-full m-0 p-0 overflow-hidden;
   }
@@ -331,6 +335,11 @@
 
 /* ── Utilities ── */
 @layer utilities {
+  .custom-scrollbar {
+    overflow-y: auto;
+    scroll-behavior: smooth;
+  }
+
   /* Hide elements on mobile where the burger menu provides equivalent UI */
   @media (max-width: 767px) {
     .desktop-only {
@@ -371,8 +380,7 @@
   .dashboard-loading {
     @apply flex items-center justify-center min-h-[200px] w-full h-full;
   }
-
-  /*TODO: where's the safe inset?*/
+  
   .app-shell {
     width: var(--app-viewport-width);
     height: var(--app-viewport-height);

@@ -110,7 +110,10 @@ export function TenantTile({ t, deleteTenant, isAdmin = false }: TenantTileProps
           <option value="B2C">B2C</option>
         </Select>
       </span>
-      <span className="truncate font-mono text-xs font-medium text-on-surface-variant select-text">{t.id}</span>
+        <div className={"flex flex-wrap mt-2"}>
+            <span className="font-mono text-xs font-bold text-on-surface-variant select-text">Tenant ID: </span>
+            <span className="break-all font-mono text-xs font-medium text-on-surface-variant select-text">{t.id}</span>
+        </div>
     </>
   );
 

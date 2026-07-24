@@ -209,11 +209,11 @@ export function FloatingFilterMenu({
           onClick={toggleMenu}
           aria-expanded={isOpen}
           aria-label={activeCount > 0 ? `Filters, ${activeCount} active` : 'Filters'}
-          className={`flex h-11 cursor-pointer items-center gap-2 rounded-l-[18px] rounded-r-[4px] px-4 text-sm font-semibold text-on-surface outline-none transition-colors focus-visible:ring-2 focus-visible:ring-secondary ${
+          className={`flex h-11 cursor-pointer items-center gap-2 rounded-l-[18px] rounded-r-[4px] px-4 text-md font-bold text-on-surface outline-none transition-colors focus-visible:ring-2 focus-visible:ring-secondary ${
             triggerClassName || 'bg-surface hover:bg-surface-container'
           }`}
         >
-          <Filter aria-hidden="true" size={16} strokeWidth={2.5} />
+          <Filter aria-hidden="true" size={18} strokeWidth={2.5} />
           Filters
           {activeCount > 0 && (
             <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-secondary-container px-1 text-sm text-on-secondary-container">
@@ -229,7 +229,7 @@ export function FloatingFilterMenu({
           title={clearLabel}
           className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-l-[4px] rounded-r-[18px] bg-error-container text-on-error-container outline-none transition-colors enabled:hover:bg-error/20 focus-visible:ring-2 focus-visible:ring-secondary disabled:cursor-not-allowed disabled:bg-on-surface/[0.1] disabled:text-on-surface/[0.38]"
         >
-          <ListRestart aria-hidden="true" size={16} strokeWidth={2.5} />
+          <ListRestart aria-hidden="true" size={18} strokeWidth={2.5} />
         </button>
         {isOpen && menuPosition && createPortal(
           <div ref={panelRef}>
@@ -260,9 +260,9 @@ export function FloatingFilterMenu({
         onClick={toggleMenu}
         aria-expanded={isOpen}
         aria-label={activeCount > 0 ? `Filters, ${activeCount} active` : 'Filters'}
-        className="flex h-14 cursor-pointer items-center justify-center gap-2 rounded-l-[28px] rounded-r-[8px] bg-surface px-5 py-2 text-sm font-black uppercase tracking-widest outline-none transition-shadow m3-elevation-1 hover:m3-elevation-2 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-secondary md:text-md"
+        className="flex h-14 cursor-pointer items-center justify-center gap-2 rounded-l-[28px] rounded-r-[8px] bg-surface px-5 py-2 text-md font-black uppercase tracking-widest outline-none transition-shadow m3-elevation-1 hover:m3-elevation-2 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-secondary md:text-md"
       >
-        <Filter aria-hidden="true" size={20} strokeWidth={2.5} />
+        <Filter aria-hidden="true" size={18}/>
         Filters
         {activeCount > 0 && (
           <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-secondary-container px-2 text-sm text-on-secondary-container">
@@ -278,7 +278,7 @@ export function FloatingFilterMenu({
         title={clearLabel}
         className="flex h-14 w-14 cursor-pointer items-center justify-center rounded-l-[8px] rounded-r-[28px] bg-error-container text-on-error-container enabled:m3-elevation-1 enabled:hover:bg-error/20 enabled:hover:m3-elevation-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-secondary disabled:cursor-not-allowed disabled:bg-on-surface/[0.1] disabled:text-on-surface/[0.38]"
       >
-        <ListRestart aria-hidden="true" size={20} strokeWidth={2.5} className={"-translate-x-0.5"} />
+        <ListRestart aria-hidden="true" size={18} className={"-translate-x-0.5"} />
       </button>
       {isOpen && menuPosition && createPortal(
         <div ref={panelRef}>

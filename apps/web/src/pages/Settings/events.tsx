@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { HeartPulse, TerminalSquare, AlertCircle, CheckCircle2, AlertTriangle, Info, Check, Copy } from 'lucide-react';
 import { SettingsPanel } from '../../components/common/layout/SettingsPanel';
-import { SectionHeader } from '../../components/common/layout/SectionHeader';
+import { SettingsPanelHeader } from '../../components/common/layout/SettingsPanelHeader';
 import { SecureButton } from '../../components/common/ui/SecureButton';
 import { Skeleton } from '../../components/common/ui/Skeleton';
 import { useSystemEventsViewModel, type SystemEvent } from '../../hooks/useSystemEventsViewModel';
@@ -19,8 +19,6 @@ function timeAgo(date: string | number | null | undefined): string {
     return `${Math.floor(hours / 24)}d ago`;
 }
 
-import { Card } from '../../components/common/ui/Card';
-
 interface HealthStatusCardProps {
     title: string;
     subtitle: string;
@@ -34,30 +32,30 @@ function HealthStatusCard({ title, subtitle, status, children }: HealthStatusCar
     const isFailed = status === 'Failed' || status === 'Error' || status === 'Critical';
 
     return (
-        <Card className="flex flex-col p-3">
-            <div className="flex items-center justify-between">
+        <article className="flex flex-col rounded-xl bg-surface-container p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex flex-col">
                     <span className="text-sm font-bold text-on-surface">{title}</span>
                     <span className="text-sm text-on-surface-variant">{subtitle}</span>
                 </div>
                 {isHealthy && (
-                    <span className="flex items-center gap-3 px-2.5 py-1 bg-green-50 text-green-700 rounded-full text-sm font-bold border border-green-200">
+                    <span className="flex items-center gap-2 rounded-full bg-primary-container px-3 py-1 text-sm font-bold text-on-primary-container">
                         <CheckCircle2 size={13} /> <span>OK</span>
                     </span>
                 )}
                 {isWarning && (
-                    <span className="flex items-center gap-3 px-2.5 py-1 bg-amber-50 text-amber-700 rounded-full text-sm font-bold border border-amber-200">
+                    <span className="flex items-center gap-2 rounded-full bg-tertiary-container px-3 py-1 text-sm font-bold text-on-tertiary-container">
                         <AlertTriangle size={13} /> <span>WARN</span>
                     </span>
                 )}
                 {isFailed && (
-                    <span className="flex items-center gap-3 px-2.5 py-1 bg-red-50 text-red-700 rounded-full text-sm font-bold border border-red-200">
+                    <span className="flex items-center gap-2 rounded-full bg-error-container px-3 py-1 text-sm font-bold text-on-error-container">
                         <AlertCircle size={13} /> <span>ERR</span>
                     </span>
                 )}
             </div>
             {children}
-        </Card>
+        </article>
     );
 }
 
@@ -73,14 +71,13 @@ export function SystemEventsView() {
 
             {/* Diagnostics / Health Panel */}
             <SettingsPanel className="col-span-1">
-                <SectionHeader
+                <SettingsPanelHeader
                     title="Pipeline Health"
-                    subtitle="Live connectivity"
+                    subtitle="Live connectivity and ingestion status."
                     icon={<HeartPulse size={24} />}
-                    dark={true}
                 />
 
-                <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-8 custom-scrollbar bg-surface rounded-xl shadow-sm border border-outline-variant/60">
+                <div className="custom-scrollbar flex flex-1 flex-col gap-6 overflow-y-auto p-3 sm:p-4">
                     {health ? (
                         <div className="flex flex-col gap-4">
 
@@ -97,12 +94,12 @@ export function SystemEventsView() {
                                 subtitle="Monitoring & order ingestion"
                                 status={health.sync?.status}
                             >
-                                <div className="grid grid-cols-2 gap-2 mt-1 text-sm border-t border-outline-variant pt-3 text-on-surface-variant">
+                                <div className="mt-3 grid grid-cols-2 gap-2 border-t border-outline-variant pt-3 text-sm text-on-surface-variant">
                                     <div>Tenants with errors: <span className="font-bold text-on-surface">{health.sync?.tenantsWithErrorsCount}</span></div>
                                     <div>Monitors with errors: <span className="font-bold text-on-surface">{health.sync?.monitorsWithErrorsCount}</span></div>
                                 </div>
                                 {health.sync?.globalSyncError && (
-                                    <div className="mt-1 p-2 bg-red-50 text-red-800 border border-red-100 rounded text-sm leading-tight font-medium">
+                                    <div className="mt-2 rounded-lg bg-error-container p-3 text-sm font-medium leading-5 text-on-error-container">
                                         {health.sync.globalSyncError}
                                     </div>
                                 )}
@@ -115,19 +112,19 @@ export function SystemEventsView() {
                                 status={health.hangfire?.status}
                             >
                                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2 text-center border-t border-outline-variant pt-3 text-sm text-on-surface-variant">
-                                    <div className="flex flex-col p-1.5 bg-surface-container-low rounded">
+                                    <div className="flex flex-col rounded bg-surface-container-high p-1.5">
                                         <span className="font-extrabold text-slate-850">{health.hangfire?.processingCount}</span>
                                         <span>Active</span>
                                     </div>
-                                    <div className="flex flex-col p-1.5 bg-surface-container-low rounded">
+                                    <div className="flex flex-col rounded bg-surface-container-high p-1.5">
                                         <span className="font-extrabold text-slate-850">{health.hangfire?.enqueuedCount}</span>
                                         <span>Queued</span>
                                     </div>
-                                    <div className="flex flex-col p-1.5 bg-surface-container-low rounded">
+                                    <div className="flex flex-col rounded bg-surface-container-high p-1.5">
                                         <span className="font-extrabold text-slate-850">{health.hangfire?.scheduledCount}</span>
                                         <span>Scheduled</span>
                                     </div>
-                                    <div className="flex flex-col p-1.5 bg-surface-container-low rounded">
+                                    <div className="flex flex-col rounded bg-surface-container-high p-1.5">
                                         <span className={`font-extrabold ${health.hangfire?.failedCount > 0 ? 'text-red-650' : 'text-slate-850'}`}>{health.hangfire?.failedCount}</span>
                                         <span>Failed</span>
                                     </div>
@@ -141,7 +138,7 @@ export function SystemEventsView() {
                                 lockTitle="Requires Admin privileges"
                                 loading={clearErrorsMutation.isPending}
                                 loadingText="Clearing Diagnostics..."
-                                className="w-full py-2.5 px-4 bg-slate-150 hover:bg-surface-container-high active:bg-slate-250 text-on-surface-variant font-bold rounded-xl text-sm shadow-sm transition-colors border border-slate-250 cursor-pointer flex items-center justify-center gap-4"
+                                className="flex min-h-11 w-fit cursor-pointer items-center justify-center gap-2 self-start rounded-full border border-outline enabled:hover:bg-surface-container px-5 text-sm font-bold text-on-surface transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary"
                             >
                                 Clear Sync Errors
                             </SecureButton>
@@ -156,8 +153,8 @@ export function SystemEventsView() {
 
                     {/* Sync Dates Section */}
                     {health && (
-                        <div className="flex flex-col border border-outline-variant rounded-xl bg-surface shadow-sm overflow-hidden">
-                            <div className="p-3 bg-surface-container-low border-b border-outline-variant font-bold text-sm text-on-surface-variant uppercase tracking-widest">
+                        <div className="flex flex-col overflow-hidden rounded-xl bg-surface-container">
+                            <div className="border-b border-outline-variant p-4 text-sm font-black uppercase tracking-widest text-on-surface-variant">
                                 Last Successful Syncs
                             </div>
                             <div className="flex flex-col divide-y divide-slate-100 text-sm">
@@ -184,19 +181,17 @@ export function SystemEventsView() {
             </SettingsPanel>
 
             {/* System Logs console */}
-            <section className="flex flex-col col-span-1 landscape-contained:col-span-2 bg-slate-900 rounded-2xl shadow-lg border border-slate-800 overflow-hidden h-full min-h-0 max-h-[500px] sm:max-h-[800px] xl:max-h-[calc(100vh-230px)] min-w-[285px] sm:min-w-[320px] min-w-0">
-                <div className="flex items-center justify-between shrink-0 p-4 border-b border-slate-800 bg-slate-900 z-10">
-                    <div className="flex items-center gap-6">
-                        <TerminalSquare size={18} className="text-brand-accent" />
-                        <h2 className="text-sm font-bold text-white tracking-wider">SYSTEM LOGS</h2>
-                    </div>
-                    <div className="flex gap-3">
-                        <div className="w-3 h-3 rounded-full bg-slate-700"></div>
-                        <div className="w-3 h-3 rounded-full bg-slate-700"></div>
-                        <div className="w-3 h-3 rounded-full bg-slate-700"></div>
+            <section className="col-span-1 flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl border border-[#d8cfb5] bg-[#fdf6e3]  landscape-contained:col-span-2">
+                <div className="z-10 flex shrink-0 items-center justify-between border-b border-[#d8cfb5] bg-[#eee8d5] p-4">
+                    <div className="flex items-center gap-3">
+                        <TerminalSquare size={18} className="text-[#2aa198]" />
+                        <div>
+                            <h2 className="text-sm font-black uppercase tracking-widest text-[#073642]">System events</h2>
+                            <p className="mt-0.5 text-sm font-medium text-on-surface-variant">Application and synchronization diagnostics</p>
+                        </div>
                     </div>
                 </div>
-                <div className="flex-1 overflow-y-auto p-4 custom-scrollbar flex flex-col gap-4 bg-[#0d1117] font-mono text-sm">
+                <div className="custom-scrollbar flex flex-1 flex-col gap-4 overflow-y-auto bg-[#fdf6e3] p-4 font-mono text-sm">
                     {(events || []).map((e: SystemEvent, i: number) => (
                         <LogEventRow key={e.id || i} e={e} />
                     ))}
@@ -262,10 +257,10 @@ function LogEventRow({ e }: { e: SystemEvent }) {
     };
 
     return (
-        <div className="flex flex-col p-1.5 rounded hover:bg-surface/5 transition-colors group text-slate-300 relative gap-2 select-text">
+        <div className="group relative flex flex-col gap-2 rounded p-1.5 transition-colors hover:bg-[#eee8d5] select-text">
             {/* First Row: Date, Level icon, Level prefix, Message */}
             <div className="flex items-center flex-wrap gap-x-4 gap-y-2 pr-8">
-                <span className="text-on-surface-variant text-xs font-mono shrink-0">
+                <span className="shrink-0 font-mono text-sm">
                     {(() => {
                         const d = new Date(e.timestamp);
                         const year = d.getFullYear();
@@ -275,37 +270,37 @@ function LogEventRow({ e }: { e: SystemEvent }) {
                         return `${year}-${month}-${day} ${time}`;
                     })()}
                 </span>
-                {isError ? <AlertCircle size={13} className="text-red-400 shrink-0" /> :
-                    isWarn ? <AlertTriangle size={13} className="text-amber-455 shrink-0" /> :
-                        <Info size={13} className="text-blue-400 shrink-0" />}
-                <span className={`font-bold text-xs shrink-0 ${isError ? 'text-red-400' : isWarn ? 'text-amber-455' : 'text-blue-400'}`}>
+                {isError ? <AlertCircle size={13} className="shrink-0 text-[#dc322f]" /> :
+                    isWarn ? <AlertTriangle size={13} className="shrink-0 text-[#b58900]" /> :
+                        <Info size={13} className="shrink-0 text-[#268bd2]" />}
+                <span className={`shrink-0 text-sm font-bold ${isError ? 'text-[#dc322f]' : isWarn ? 'text-[#b58900]' : 'text-[#268bd2]'}`}>
                     [{levelStr.toUpperCase()}]
                 </span>
-                <span className="break-words leading-tight text-slate-200">{displayMessage}</span>
+                <span className="break-words leading-tight">{displayMessage}</span>
             </div>
 
             {/* Second Row: Badges (Source, Tenant) */}
             {(e.source || e.tenant?.name) && (
-                <div className="flex flex-wrap items-center gap-x-8 gap-y-2 text-xs text-on-surface-variant font-medium">
+                <div className="flex flex-wrap items-center gap-x-8 gap-y-2 text-sm font-medium">
                     {e.source && (
-                        <span>Source: <strong className="text-on-surface-variant">{e.source}</strong></span>
+                        <span>Source: <strong className="">{e.source}</strong></span>
                     )}
                     {e.tenant?.name && (
-                        <span className="text-brand-accent">Tenant: <strong className="text-slate-350">{e.tenant.name}</strong></span>
+                        <span className="text-[#2aa198]">Tenant: <strong className="">{e.tenant.name}</strong></span>
                     )}
                 </div>
             )}
 
             {/* Third Row: Details */}
             {e.details && e.details !== e.message && (
-                <div className="p-2 bg-slate-800/40 border border-slate-700/40 rounded text-slate-300 text-xs whitespace-pre-wrap">
+                <div className="whitespace-pre-wrap rounded border border-[#d8cfb5] bg-[#eee8d5] p-2 text-sm text-on-surface-variant">
                     {e.details}
                 </div>
             )}
 
             {/* Fourth Row: Exception */}
             {e.exception && (
-                <div className="p-2 bg-red-950/30 border border-red-900/50 rounded text-red-200/80 text-xs overflow-x-auto custom-scrollbar">
+                <div className="custom-scrollbar overflow-x-auto rounded border border-[#dc322f]/40 bg-[#fbe5df] p-2 text-sm text-[#b52f2c]">
                     <pre className="whitespace-pre-wrap">{e.exception}</pre>
                 </div>
             )}
@@ -313,10 +308,11 @@ function LogEventRow({ e }: { e: SystemEvent }) {
             {/* Copy Button (visible on hover) */}
             <button
                 onClick={handleCopy}
-                className="absolute right-2 top-2 p-1 rounded bg-slate-800 hover:bg-slate-700 text-on-surface-variant hover:text-white opacity-0 group-hover:opacity-100 transition-opacity duration-150 cursor-pointer"
+                aria-label="Copy log entry"
+                className="absolute right-2 top-2 cursor-pointer rounded bg-[#eee8d5] p-1 text-on-surface-variant opacity-0 transition-[background-color,color,opacity] duration-150 hover:bg-[#ddd6c2] hover:text-[#073642] group-hover:opacity-100"
                 title="Copy full log entry"
             >
-                {copied ? <Check size={12} className="text-green-400" /> : <Copy size={12} />}
+                {copied ? <Check size={12} className="text-[#859900]" /> : <Copy size={12} />}
             </button>
         </div>
     );

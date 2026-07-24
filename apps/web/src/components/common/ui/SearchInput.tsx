@@ -9,14 +9,15 @@ interface SearchInputProps {
 
 export function SearchInput({ value, onChange, placeholder = 'Search...', className = '' }: SearchInputProps) {
   return (
-    <div className={`relative ${className}`}>
-      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant" size={14} />
+    <div className={`relative min-w-0 ${className}`}>
+      <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant" size={18} aria-hidden="true" />
       <input 
         type="text" 
         placeholder={placeholder} 
+        aria-label={placeholder}
         value={value}
         onChange={e => onChange(e.target.value)}
-        className="text-sm font-semibold border border-outline-variant rounded-lg pl-8 pr-2 py-1.5 bg-surface-container-low hover:bg-surface-container transition-colors focus:outline-none focus:ring-2 focus:ring-brand-link/20 w-40 h-9"
+        className="h-11 w-44 rounded-full border border-outline-variant bg-surface-container-low pl-10 pr-4 text-base font-semibold text-on-surface outline-none transition-colors placeholder:text-on-surface-variant hover:bg-surface-container focus:border-tertiary focus:ring-2 focus:ring-tertiary sm:w-52"
       />
     </div>
   );

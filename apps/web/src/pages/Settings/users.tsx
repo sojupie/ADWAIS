@@ -3,7 +3,7 @@ import { useUsersQuery, useCreateUserMutation, useUpdateUserMutation, useDeleteU
 import { useCurrentUser } from '../../hooks/useCurrentUser';
 import { UserRow } from '../../components/settings/users/UserRow';
 import { ProvisionUserPanel } from '../../components/settings/users/ProvisionUserPanel';
-import { SectionHeader } from '../../components/common/layout/SectionHeader';
+import { SettingsPanelHeader } from '../../components/common/layout/SettingsPanelHeader';
 import { SettingsPanel } from '../../components/common/layout/SettingsPanel';
 import { EmptyState } from '../../components/common/ui/EmptyState';
 
@@ -21,22 +21,22 @@ export function UsersView() {
             {isAdmin && <ProvisionUserPanel createUser={createUser} />}
 
             <SettingsPanel className="flex-1">
-                <SectionHeader
+                <SettingsPanelHeader
                     title="Active Users"
-                    subtitle="Manage directory"
+                    subtitle="Review access, roles and registered accounts."
                     icon={<Users size={24} />}
                 />
-                <div className="flex-1 overflow-y-auto custom-scrollbar bg-surface rounded-xl shadow-sm border border-outline-variant/60">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left text-sm whitespace-nowrap">
-                            <thead className="bg-surface text-on-surface-variant border-b border-outline-variant">
+                <div className="custom-scrollbar flex-1 overflow-y-auto">
+                    <div className="custom-scrollbar overflow-x-auto">
+                        <table className="w-full whitespace-nowrap text-left text-sm">
+                            <thead className="border-b border-outline-variant bg-surface-container text-on-surface-variant">
                                 <tr>
-                                    <th className="px-6 py-4 font-bold text-sm uppercase tracking-wider">User</th>
-                                    <th className="px-6 py-4 font-bold text-sm uppercase tracking-wider w-44">Role Level</th>
-                                    <th className="px-6 py-4 font-bold text-sm uppercase tracking-wider text-right w-28">Actions</th>
+                                    <th className="px-4 py-4 text-sm font-black uppercase tracking-widest sm:px-5">User</th>
+                                    <th className="w-44 px-4 py-4 text-sm font-black uppercase tracking-widest sm:px-5">Role</th>
+                                    <th className="w-28 px-4 py-4 text-right text-sm font-black uppercase tracking-widest sm:px-5">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-100">
+                            <tbody className="divide-y divide-outline-variant">
                                 {(users || []).map((u) => (
                                     <UserRow
                                         key={u.id}

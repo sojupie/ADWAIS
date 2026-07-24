@@ -22,13 +22,16 @@ export function SecureButton({
 }: SecureButtonProps) {
   const isButtonDisabled = disabled || loading || locked;
 
-  // Strip conflicting color, state, and pointer classes if locked to ensure a clean, high-contrast style
+  const disabledStateClasses =
+    'disabled:cursor-not-allowed disabled:bg-on-surface/[0.1] disabled:text-on-surface/[0.38] disabled:shadow-none disabled:hover:bg-on-surface/[0.1] disabled:hover:text-on-surface/[0.38]';
+
+  // Strip conflicting color, state, and pointer classes if locked to ensure a clean disabled style.
   const combinedClassName = locked
     ? className
         .replace(/(bg|text|border|hover|active|shadow|cursor|opacity)-\S+/g, '')
         .replace(/(hover|active|focus|disabled):\S+/g, '')
-        .trim() + ' bg-slate-500/10 border border-slate-500/20 text-on-surface-variant font-bold cursor-not-allowed shadow-none opacity-80 flex items-center justify-center gap-2'
-    : className;
+        .trim() + ' bg-on-surface/[0.1] text-on-surface/[0.38] font-bold cursor-not-allowed shadow-none flex items-center justify-center gap-2'
+    : `${className} ${disabledStateClasses}`;
 
   return (
     <button

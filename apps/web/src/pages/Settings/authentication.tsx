@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useMsal } from '@azure/msal-react';
+import { KeyRound, LogOut, MonitorSmartphone } from 'lucide-react';
 import { useActivateKioskMutation } from '../../hooks/useKioskAuth';
 import { useCurrentUser } from '../../hooks/useCurrentUser';
 import { SecureButton } from '../../components/common/ui/SecureButton';
 import { Input } from '../../components/common/ui/Input';
 import { removeKioskToken } from '../../utils/auth';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../../components/common/ui/Card';
 import { ErrorAlert } from '../../components/common/ui/ErrorAlert';
+import { SettingsPanel } from '../../components/common/layout/SettingsPanel';
+import { SettingsPanelHeader } from '../../components/common/layout/SettingsPanelHeader';
+import { SettingsCard } from '../../components/common/layout/SettingsCard';
 
 export function AuthenticationSettings() {
   const [activationCode, setActivationCode] = useState('');
@@ -57,21 +60,24 @@ export function AuthenticationSettings() {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-5xl">
-      {/* Kiosk Activation Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Kiosk Activation</CardTitle>
-          <CardDescription>
-            Enter the 6-character activation code displayed on the kiosk screen to authorize it for use.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleActivate} className="flex flex-col gap-2">
+    <SettingsPanel className="!h-fit max-w-5xl">
+      <SettingsPanelHeader
+        title="Authentication"
+        subtitle="Authorize kiosk displays and manage the session on this device."
+        icon={<KeyRound size={24} />}
+      />
+      <div className="custom-scrollbar grid grid-cols-1 content-start items-start gap-4 overflow-y-auto p-3 sm:p-4 md:grid-cols-2">
+        <SettingsCard
+          title="Kiosk activation"
+          subtitle="Enter the code shown on a kiosk to authorize that display."
+          icon={<MonitorSmartphone size={20} />}
+          className="h-fit"
+        >
+          <form onSubmit={handleActivate} className="flex flex-col gap-4">
             <Input
               label="Activation Code"
               type="text"
-              className="font-mono text-lg uppercase tracking-widest"
+              className="text-center font-mono text-xl uppercase tracking-[0.35em]"
               placeholder={isStaff ? "XXXXXX" : "LOCKED"}
               value={activationCode}
               onChange={(e) => setActivationCode(e.target.value.toUpperCase().slice(0, 6))}
@@ -86,7 +92,7 @@ export function AuthenticationSettings() {
               />
             )}
             {successMsg && (
-              <div className="p-3 bg-green-50 text-green-700 rounded-lg text-sm font-medium border border-green-200">
+              <div className="rounded-xl bg-primary-container p-3 text-sm font-semibold text-on-primary-container">
                 {successMsg}
               </div>
             )}
@@ -96,35 +102,40 @@ export function AuthenticationSettings() {
               locked={!isStaff}
               lockTitle="Requires Staff (Employee or Admin) role"
               loading={activateMutation.isPending}
-              loadingText="Activating..."
-              className="self-start px-6 py-2 disabled:opacity-50 bg-brand-btn-primary hover:bg-brand-btn-quaternary text-white font-bold rounded-lg transition-colors shadow-sm flex items-center justify-center gap-4"
+              loadingText="Activating…"
+              className="inline-flex min-h-11 w-fit cursor-pointer items-center justify-center gap-2 self-start rounded-full bg-on-primary-container px-5 text-base font-bold text-primary-container transition-colors hover:bg-brand-btn-quaternary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary"
               disabled={activationCode.length !== 6}
             >
               Activate Kiosk
             </SecureButton>
           </form>
-        </CardContent>
-      </Card>
+        </SettingsCard>
 
-      {/* Current Session / Sign Out Card */}
-      <Card className="flex flex-col">
-        <CardHeader>
-          <CardTitle>Current Session</CardTitle>
-          <CardDescription>
-            Manage your current session and sign out of the application on this device.
-          </CardDescription>
-        </CardHeader>
-        
-        <CardFooter className="mt-auto border-t border-outline-variant pt-6 justify-between">
-          <span className="text-sm font-medium text-on-surface-variant">Log out of ADWAIS platform</span>
+        <SettingsCard
+          title="Current session"
+          subtitle="Review the signed-in account or remove access from this device."
+          icon={<KeyRound size={20} />}
+          className="h-fit"
+        >
+          <div className="rounded-xl bg-surface-container-high p-4">
+            <span className="text-sm font-bold uppercase tracking-wider text-on-surface-variant">Signed in as</span>
+            <p className="mt-1 break-all text-base font-bold text-on-surface">
+              {accounts[0]?.username || 'Kiosk session'}
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <span className="text-sm font-medium text-on-surface-variant">This only signs out the current device.</span>
           <button
+            type="button"
             onClick={handleSignOut}
-            className="px-6 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold rounded-lg transition-colors shadow-sm cursor-pointer active:scale-[0.98]"
+            className="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-full bg-error px-5 text-base font-bold text-on-error transition-colors hover:bg-error-container hover:text-on-error-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-error"
           >
+            <LogOut size={18} aria-hidden="true" />
             Sign Out
           </button>
-        </CardFooter>
-      </Card>
-    </div>
+          </div>
+        </SettingsCard>
+      </div>
+    </SettingsPanel>
   );
 }

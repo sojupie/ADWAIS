@@ -20,24 +20,24 @@ export function ProvisionUserPanel({ createUser }: ProvisionUserPanelProps) {
   };
 
   return (
-    <section className="bg-surface border border-outline-variant rounded-2xl shadow-sm p-4 flex flex-col sm:flex-row gap-12 items-center justify-between shrink-0">
-      <div className="flex items-center gap-8">
-        <div className="p-3 bg-brand-bg-secondary text-white rounded-xl shadow-sm">
+    <section className="flex shrink-0 flex-col items-start justify-between gap-4 rounded-2xl border border-outline bg-surface p-4 sm:flex-row sm:items-center sm:p-5">
+      <div className="flex min-w-0 items-center gap-3">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary-container text-on-primary-container">
           <UserPlus size={24} />
         </div>
-        <div>
-          <h3 className="font-bold text-brand-text text-lg">Provision New User</h3>
-          <p className="text-sm text-on-surface-variant font-medium mt-0.5">Add a new administrator or user to the system</p>
+        <div className="min-w-0">
+          <h3 className="text-base font-black text-on-surface sm:text-lg">Provision a user</h3>
+          <p className="mt-1 text-sm font-medium text-on-surface-variant">Add an account and choose its initial access level.</p>
         </div>
       </div>
-      <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto items-center">
+      <div className="flex w-full flex-col items-stretch gap-2 sm:w-auto sm:flex-row sm:items-end">
         <Input
           type="email"
           placeholder="Email Address"
           value={newUser.email}
           onChange={e => setNewUser({ ...newUser, email: e.target.value })}
           containerClassName="min-w-[200px] w-full sm:w-auto"
-          className="h-10"
+          aria-label="Email address"
         />
         <Select
             value={newUser.role}
@@ -54,9 +54,9 @@ export function ProvisionUserPanel({ createUser }: ProvisionUserPanelProps) {
           disabled={!newUser.email}
           loading={createUser.isPending}
           loadingText="Creating..."
-          className="h-10 bg-brand-btn-primary text-white px-6 text-sm font-semibold rounded-xl hover:bg-brand-btn-quaternary transition-all cursor-pointer flex items-center justify-center gap-4 w-full sm:w-auto shrink-0"
+          className="inline-flex min-h-11 w-fit shrink-0 cursor-pointer items-center justify-center gap-2 self-start rounded-full bg-on-primary-container px-5 text-base font-bold text-primary-container transition-colors hover:bg-brand-btn-quaternary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary"
         >
-          Create
+          Add user
         </SecureButton>
       </div>
     </section>

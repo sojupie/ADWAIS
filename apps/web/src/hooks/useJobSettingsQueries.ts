@@ -105,7 +105,10 @@ export function useUpdateConfigMutation() {
   return {
     ...mutation,
     mutate: (payload: Partial<GlobalConfigDto>) =>
-      mutation.mutate({ data: payload })
+      mutation.mutate({ data: payload }),
+    mutateAsync: async (payload: Partial<GlobalConfigDto>) => {
+      await mutation.mutateAsync({ data: payload });
+    },
   };
 }
 
@@ -148,6 +151,9 @@ export function useUpdateFetchIntervalsMutation() {
   return {
     ...mutation,
     mutate: (payload: Partial<FetchIntervalsDto>) =>
-      mutation.mutate({ data: payload })
+      mutation.mutate({ data: payload }),
+    mutateAsync: async (payload: Partial<FetchIntervalsDto>) => {
+      await mutation.mutateAsync({ data: payload });
+    },
   };
 }

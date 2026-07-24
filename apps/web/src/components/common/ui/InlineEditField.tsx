@@ -1,245 +1,257 @@
-import { useState, useRef, useEffect } from 'react';
-import { Edit3, Check, X, Loader2, Lock } from 'lucide-react';
-import { Select } from './Select';
+import { useState, type InputHTMLAttributes, type Key, type ReactNode } from 'react';
+import { Check, Edit3, Loader2, Lock, X } from 'lucide-react';
+import { CheckboxField, FormField } from './FormField';
 
-type InlineEditFieldProps<T> = {
+type InlineEditKind = 'text' | 'number' | 'password' | 'select' | 'checkbox';
+
+export interface InlineEditFieldProps<T> {
   label: string;
   value: T;
-  type?: 'text' | 'number' | 'password' | 'checkbox' | 'select';
-  options?: { label: string; value: T }[];
-  onSave: (val: T) => Promise<void> | void;
-  required?: boolean;
-  requiredCondition?: string;
-  displayValue?: React.ReactNode;
+  onCommit: (value: T) => Promise<void> | void;
+  kind?: InlineEditKind;
+  options?: ReadonlyArray<{ label: string; value: T }>;
+  renderValue?: ReactNode;
   placeholder?: string;
-  allowClear?: boolean;
+  required?: boolean;
+  requirement?: string;
+  helperText?: ReactNode;
+  validate?: (value: T) => string | undefined;
+  canClear?: boolean;
   disabled?: boolean;
   hideLabel?: boolean;
-};
+  inputProps?: Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'value' | 'onChange'>;
+}
+
+function isEmpty(value: unknown) {
+  return value === '' || value === null || value === undefined;
+}
 
 export function InlineEditField<T>({
   label,
   value,
-  type = 'text',
+  onCommit,
+  kind = 'text',
   options = [],
-  onSave,
-  required = false,
-  requiredCondition,
-  displayValue,
+  renderValue,
   placeholder,
-  allowClear = false,
+  required = false,
+  requirement,
+  helperText,
+  validate,
+  canClear = false,
   disabled = false,
   hideLabel = false,
+  inputProps,
 }: InlineEditFieldProps<T>) {
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState(value);
   const [isSaving, setIsSaving] = useState(false);
-  const inputRef = useRef<HTMLInputElement | HTMLButtonElement>(null);
+  const [error, setError] = useState<string>();
 
-  const [prevValue, setPrevValue] = useState(value);
-  if (value !== prevValue) {
-    setPrevValue(value);
+  const stopEditing = () => {
     setDraft(value);
-  }
+    setError(undefined);
+    setIsEditing(false);
+  };
 
-  useEffect(() => {
-    if (isEditing && inputRef.current && type !== 'checkbox') {
-      inputRef.current.focus();
-    }
-  }, [isEditing, type]);
-
-  const handleSave = async () => {
-    // If empty and not password
-    if (type !== 'password' && required && (draft === '' || draft === null || draft === undefined)) {
-      console.error(`${label} is required.`);
-      return;
-    }
-    
-    // For password, if it's empty, it means we don't want to save/change it
-    if (type === 'password' && draft === '') {
-      setIsEditing(false);
+  const commit = async (nextValue = draft) => {
+    const validationError = required && isEmpty(nextValue)
+      ? `${label} is required.`
+      : validate?.(nextValue);
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
-    if (draft === value) {
-      setIsEditing(false);
+    if (kind === 'password' && nextValue === '') {
+      stopEditing();
+      return;
+    }
+    if (Object.is(nextValue, value)) {
+      stopEditing();
       return;
     }
 
     setIsSaving(true);
+    setError(undefined);
     try {
-      await onSave(draft);
+      await onCommit(nextValue);
       setIsEditing(false);
-      // Reset draft for password to avoid keeping it in state
-      if (type === 'password') setDraft('' as unknown as T);
-    } catch (e) {
-      console.error(e);
-      console.error('Failed to save.');
+      if (kind === 'password') setDraft('' as T);
+    } catch (commitError) {
+      setError(commitError instanceof Error ? commitError.message : 'Unable to save this value.');
     } finally {
       setIsSaving(false);
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') handleSave();
-    if (e.key === 'Escape') {
-      setDraft(value);
-      setIsEditing(false);
-    }
+  const startEditing = () => {
+    if (disabled) return;
+    setDraft((kind === 'password' ? '' : value) as T);
+    setError(undefined);
+    setIsEditing(true);
   };
 
-  // Special handling for checkbox
-  if (type === 'checkbox') {
+  if (kind === 'select' && options.length === 0) {
+    throw new Error(`InlineEditField "${label}" requires options when kind="select".`);
+  }
+
+  const meta = required
+    ? requirement
+      ? `Required · ${requirement}`
+      : 'Required'
+    : 'Optional';
+
+  if (kind === 'checkbox') {
     return (
-      <div className="flex items-center gap-4 group relative py-1">
-        <input
-          type="checkbox"
-          checked={(isEditing ? draft : value) as unknown as boolean}
-          disabled={disabled || isSaving}
-          onChange={(e) => {
-            if (disabled) return;
-            if (!isEditing) {
-              // Direct save on toggle if not in edit mode
-              setIsSaving(true);
-              Promise.resolve(onSave(e.target.checked as unknown as T))
-                .catch((err) => console.error(err))
-                .finally(() => setIsSaving(false));
-            } else {
-              setDraft(e.target.checked as unknown as T);
-            }
-          }}
-          className={`w-4 h-4 text-brand-link rounded border-outline-variant disabled:opacity-50 ${disabled ? 'cursor-not-allowed text-on-surface-variant' : 'cursor-pointer'}`}
-        />
-        <label className={`text-sm font-semibold select-none ${disabled ? 'text-on-surface-variant cursor-not-allowed' : 'text-on-surface-variant cursor-pointer'}`}>
-          {label}
-        </label>
-        {isSaving && <Loader2 size={12} className="animate-spin text-on-surface-variant" />}
-      </div>
+      <CheckboxField
+        label={label}
+        checked={Boolean(value)}
+        disabled={disabled || isSaving}
+        error={error}
+        helperText={helperText}
+        onChange={event => {
+          setIsSaving(true);
+          setError(undefined);
+          Promise.resolve(onCommit(event.target.checked as T))
+            .catch(commitError => {
+              setError(commitError instanceof Error ? commitError.message : 'Unable to save this value.');
+            })
+            .finally(() => setIsSaving(false));
+        }}
+      />
     );
   }
 
   return (
-    <div 
-      className={`flex flex-col gap-2 w-full transition-colors ${
-        hideLabel
-          ? 'py-0.5'
-          : `py-1 px-2 -mx-2 rounded-lg ${isEditing ? 'bg-surface-container-lowest' : 'hover:bg-surface-container-lowest'}`
-      }`}
-    >
+    <div className={`flex min-w-0 flex-col gap-2 ${hideLabel ? '' : 'w-full'}`}>
       {!hideLabel && (
-        <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider flex justify-between items-center select-none mb-0.5">
-          <span>{label}</span>
-          {required ? (
-            <span className="text-red-500/70 lowercase font-medium text-xs">
-              {requiredCondition ? `(Required ${requiredCondition})` : '(Required)'}
-            </span>
-          ) : (
-            <span className="text-on-surface-variant lowercase font-medium text-xs">(Optional)</span>
-          )}
-        </label>
+        <div className="flex min-h-5 items-start justify-between gap-3 px-1">
+          <span className="text-sm font-bold text-on-surface-variant">{label}</span>
+          <span className={`text-xs font-medium ${error ? 'text-error' : 'text-on-surface-variant'}`}>
+            {error || meta}
+          </span>
+        </div>
       )}
 
       {isEditing ? (
-        <div className="flex items-center gap-4 w-full">
-          {type === 'select' ? (
-            <Select
-              triggerRef={inputRef as React.RefObject<HTMLButtonElement>}
-              value={draft as unknown as string}
-              onChange={(e) => setDraft(e.target.value as unknown as T)}
-                disabled={isSaving}
-                onKeyDown={handleKeyDown}
-                containerClassName="flex-1"
-                size="sm"
-            >
-              {options.map((opt) => (
-                <option key={opt.value as React.Key} value={opt.value as unknown as string}>{opt.label}</option>
-              ))}
-            </Select>
-          ) : (
-            <input
-              ref={inputRef as React.RefObject<HTMLInputElement>}
-              type={type}
-              value={(draft !== null && draft !== undefined) ? (draft as unknown as string) : ''}
-              placeholder={placeholder || (type === 'password' ? '••••••••••••' : '')}
-              onChange={(e) => {
-                const val = e.target.value;
-                setDraft((type === 'number' ? (val === '' ? null : Number(val)) : val) as unknown as T);
-              }}
+        <form
+          className="flex min-w-0 flex-wrap items-start gap-2"
+          onSubmit={event => {
+            event.preventDefault();
+            void commit();
+          }}
+        >
+          {kind === 'select' ? (
+            <FormField
+              as="select"
+              label={label}
+              hideLabel
+              autoFocus
+              value={draft as string}
               disabled={isSaving}
-              onKeyDown={handleKeyDown}
-              className={`flex-1 border border-outline-variant bg-surface rounded-md px-2 py-1.5 text-sm font-semibold focus:ring-2 focus:ring-brand-btn-primary focus:outline-none ${type === 'password' ? 'font-mono' : ''}`}
+              error={hideLabel ? error : undefined}
+              density="default"
+              containerClassName="min-w-[160px] flex-1"
+              onChange={event => setDraft(event.target.value as T)}
+              onKeyDown={event => {
+                if (event.key === 'Escape') stopEditing();
+              }}
+            >
+              {options.map(option => (
+                <option key={option.value as Key} value={option.value as string}>
+                  {option.label}
+                </option>
+              ))}
+            </FormField>
+          ) : (
+            <FormField
+              {...inputProps}
+              label={label}
+              hideLabel
+              autoFocus
+              type={kind}
+              value={isEmpty(draft) ? '' : String(draft)}
+              placeholder={placeholder || (kind === 'password' ? '••••••••••••' : undefined)}
+              disabled={isSaving}
+              error={hideLabel ? error : undefined}
+              density="default"
+              containerClassName="min-w-[160px] flex-1"
+              onChange={event => {
+                const rawValue = event.target.value;
+                setDraft((kind === 'number'
+                  ? rawValue === '' ? null : Number(rawValue)
+                  : rawValue) as T);
+              }}
+              onKeyDown={event => {
+                inputProps?.onKeyDown?.(event);
+                if (event.key === 'Escape') stopEditing();
+              }}
             />
           )}
-          <div className="flex items-center gap-2 shrink-0">
-            {allowClear && (type === 'password' ? value : draft) && (
+          <div className="flex shrink-0 items-center gap-1 pt-0">
+            {canClear && !isEmpty(kind === 'password' ? value : draft) && (
               <button
-                onClick={async () => {
-                  setIsSaving(true);
-                  try {
-                    await onSave((type === 'number' ? null : '') as unknown as T);
-                    setIsEditing(false);
-                    if (type === 'password') setDraft('' as unknown as T);
-                  } catch (e) {
-                    console.error(e);
-                  } finally {
-                    setIsSaving(false);
-                  }
-                }}
+                type="button"
+                onClick={() => void commit((kind === 'number' ? null : '') as T)}
                 disabled={isSaving}
-                className="p-1 text-red-500 hover:bg-red-50 rounded text-sm font-bold cursor-pointer"
-                title="Clear"
+                className="min-h-10 rounded-full px-3 text-sm font-bold text-error transition-colors hover:bg-error-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-error disabled:cursor-not-allowed disabled:bg-on-surface/[0.1] disabled:text-on-surface/[0.38]"
               >
                 Clear
               </button>
             )}
             <button
-              onClick={handleSave}
+              type="submit"
               disabled={isSaving}
-              className="p-1 text-brand-link hover:bg-primary-container rounded cursor-pointer"
-              title="Save"
+              aria-label={`Save ${label}`}
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-container text-on-primary-container transition-colors hover:bg-secondary-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-secondary disabled:cursor-not-allowed disabled:bg-on-surface/[0.1] disabled:text-on-surface/[0.38]"
             >
-              {isSaving ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+              {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Check size={18} />}
             </button>
             <button
-              onClick={() => {
-                setDraft(value);
-                setIsEditing(false);
-              }}
+              type="button"
+              onClick={stopEditing}
               disabled={isSaving}
-              className="p-1 text-on-surface-variant hover:bg-surface-container rounded cursor-pointer"
-              title="Cancel"
+              aria-label={`Cancel editing ${label}`}
+              className="flex h-10 w-10 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-secondary disabled:cursor-not-allowed disabled:bg-on-surface/[0.1] disabled:text-on-surface/[0.38]"
             >
-              <X size={14} />
+              <X size={18} />
             </button>
           </div>
-        </div>
+        </form>
       ) : (
-        <div className="flex items-center justify-between group/val w-full min-h-[28px]">
-          <div className={`text-sm font-semibold text-on-surface ${type === 'password' || displayValue === 'Not set' ? 'italic text-on-surface-variant' : ''}`}>
-            {displayValue ? displayValue : (
-              type === 'password' ? (value ? '••••••••••••' : 'Not set') : (
-                (value !== null && value !== undefined && value !== '') ? String(value) : '—'
-              )
+        <div
+          role={disabled ? undefined : 'button'}
+          tabIndex={disabled ? undefined : 0}
+          aria-label={disabled ? undefined : `Edit ${label}`}
+          onClick={startEditing}
+          onKeyDown={event => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              startEditing();
+            }
+          }}
+          className={`flex min-h-12 min-w-0 items-center justify-between gap-3 rounded-xl px-4 py-3 transition-colors ${
+            disabled
+              ? 'cursor-not-allowed bg-on-surface/[0.1] text-on-surface/[0.38]'
+              : 'cursor-pointer border border-variant focus-visible:outline focus-visible:outline-2 focus-visible:outline-secondary'
+          }`}
+        >
+          <div className={`min-w-0 text-base font-medium ${disabled ? 'text-on-surface/[0.38]' : 'text-on-surface'}`}>
+            {renderValue ?? (
+              kind === 'password'
+                ? value ? '••••••••••••' : 'Not set'
+                : isEmpty(value) ? '—' : String(value)
             )}
           </div>
-          {disabled ? (
-            <span className="p-1 text-on-surface-variant cursor-not-allowed opacity-60 flex items-center gap-2 shrink-0" title="Requires Admin privileges">
-              <Lock size={12} />
-              <span className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">Admin</span>
-            </span>
-          ) : (
-            <button
-              onClick={() => {
-                setDraft((type === 'password' ? '' : value) as unknown as T);
-                setIsEditing(true);
-              }}
-              className="p-1 text-on-surface-variant hover:bg-surface-container rounded cursor-pointer transition-all opacity-100 sm:opacity-0 sm:group-hover/val:opacity-100 shrink-0 ml-2"
-              title="Edit"
-            >
-              <Edit3 size={14} />
-            </button>
-          )}
+          <span className="flex shrink-0 items-center gap-2">
+            {disabled ? <Lock size={16} /> : <Edit3 size={18} />}
+          </span>
         </div>
+      )}
+
+      {!hideLabel && helperText && !error && (
+        <span className="px-1 text-xs font-medium text-on-surface-variant">{helperText}</span>
       )}
     </div>
   );

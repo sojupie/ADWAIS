@@ -7,7 +7,7 @@ import type { GlobalConfigDto } from '@types';
 interface GlobalConfigurationFormProps {
   config: GlobalConfigDto | undefined;
   updateConfig: {
-    mutate: (variables: Partial<GlobalConfigDto>) => void;
+    mutateAsync: (variables: Partial<GlobalConfigDto>) => Promise<void>;
   };
   disabled?: boolean;
 }
@@ -20,9 +20,9 @@ export function GlobalConfigurationForm({ config, updateConfig, disabled }: Glob
       icon={<Settings size={20} />}
     >
       {disabled && config && (
-        <div className="mb-4 p-3 bg-surface-container border border-outline-variant rounded-xl flex items-center gap-4 text-sm text-slate-650 font-bold uppercase tracking-wider animate-in fade-in duration-300">
-          <Lock size={14} className="text-on-surface-variant shrink-0" />
-          <span>Read-only configuration view</span>
+        <div className="flex items-center gap-3 rounded-xl bg-surface-container-high px-4 py-3 text-sm font-semibold text-on-surface-variant animate-in fade-in duration-300">
+          <Lock size={16} className="shrink-0" aria-hidden="true" />
+          <span>You can review these values, but only administrators can change them.</span>
         </div>
       )}
 
@@ -31,64 +31,66 @@ export function GlobalConfigurationForm({ config, updateConfig, disabled }: Glob
           <InlineEditField
             label="Uptime Robot API Key"
             value={config.uptimeRobotApiKey || ''}
-            type="password"
+            kind="password"
             required
-            requiredCondition="if enabled"
-            allowClear
+            requirement="When enabled"
+            canClear
             disabled={disabled}
-            onSave={(val) => updateConfig.mutate({ uptimeRobotApiKey: val })}
+            onCommit={(val) => updateConfig.mutateAsync({ uptimeRobotApiKey: val })}
           />
           <InlineEditField
             label="Litium Fetch Enabled"
             value={config.litiumFetchEnabled ?? false}
-            type="checkbox"
+            kind="checkbox"
             disabled={disabled}
-            onSave={(val) => updateConfig.mutate({ litiumFetchEnabled: val })}
+            onCommit={(val) => updateConfig.mutateAsync({ litiumFetchEnabled: val })}
           />
           <InlineEditField
             label="Uptime Fetch Enabled"
             value={config.uptimeRobotFetchEnabled ?? false}
-            type="checkbox"
+            kind="checkbox"
             disabled={disabled}
-            onSave={(val) => updateConfig.mutate({ uptimeRobotFetchEnabled: val })}
+            onCommit={(val) => updateConfig.mutateAsync({ uptimeRobotFetchEnabled: val })}
           />
           <InlineEditField
             label="Event Retention (Days)"
             value={config.systemEventRetentionDays ?? 30}
-            type="number"
+            kind="number"
             required
-            requiredCondition="> 0"
+            requirement="Greater than 0"
             disabled={disabled}
-            onSave={(val) => updateConfig.mutate({ systemEventRetentionDays: val })}
+            validate={val => val > 0 ? undefined : 'Enter a value greater than 0.'}
+            onCommit={(val) => updateConfig.mutateAsync({ systemEventRetentionDays: val })}
           />
           <InlineEditField
             label="Reporting Timezone"
             value={config.reportingTimeZoneId || 'Europe/Stockholm'}
-            type="text"
+            kind="text"
             required
-            requiredCondition="Valid IANA timezone identifier"
+            requirement="Valid IANA identifier"
             placeholder="e.g. Europe/Stockholm"
             disabled={disabled}
-            onSave={(val) => updateConfig.mutate({ reportingTimeZoneId: val })}
+            onCommit={(val) => updateConfig.mutateAsync({ reportingTimeZoneId: val })}
           />
           <InlineEditField
             label="Weather Location"
             value={config.weatherLocation || ''}
-            type="text"
+            kind="text"
             required
-            requiredCondition="Must not be empty to display weather"
+            requirement="Required for weather"
             placeholder="e.g. Stockholm, SE"
             disabled={disabled}
-            onSave={(val) => updateConfig.mutate({ weatherLocation: val || null })}
+            onCommit={(val) => updateConfig.mutateAsync({ weatherLocation: val || null })}
           />
           <InlineEditField
             label="Weather Fetch Interval (Min)"
             value={config.weatherFetchIntervalMinutes ?? 15}
-            type="number"
+            kind="number"
             required
-            requiredCondition="> 0"
+            requirement="Greater than 0"
             disabled={disabled}
-            onSave={(val) => updateConfig.mutate({ weatherFetchIntervalMinutes: val })}
+            validate={val => val > 0 ? undefined : 'Enter a value greater than 0.'}
+            onCommit={(val) => updateConfig.mutateAsync({ weatherFetchIntervalMinutes: val })}
           />
         </div>
       ) : (

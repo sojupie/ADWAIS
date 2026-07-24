@@ -31,7 +31,7 @@ export function FleetStatus() {
         disabled={!vm.selection}
         onClick={vm.goBack}
         aria-label={vm.selection?.monitorId != null ? 'Back to tenant overview' : 'Back to fleet overview'}
-        className="inline-flex min-h-9 cursor-pointer items-center gap-1.5 rounded-full border border-outline-variant bg-surface px-3 text-sm font-bold text-on-surface transition-colors hover:bg-surface-container-high focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary disabled:cursor-not-allowed disabled:bg-on-surface/[0.10] disabled:text-on-surface/[0.38]"
+        className="inline-flex min-h-9 cursor-pointer items-center gap-1.5 rounded-full border border-outline-variant bg-surface px-3 text-sm font-bold text-on-surface transition-colors hover:bg-surface-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary disabled:cursor-not-allowed disabled:bg-on-surface/[0.10] disabled:text-on-surface/[0.38]"
       >
         <ArrowLeft size={16} aria-hidden="true" />
         <span>{vm.selection?.monitorId != null ? 'Tenant' : 'Fleet'}</span>

@@ -10,9 +10,9 @@ interface RecurringJobsTableProps {
 
 export function RecurringJobsTable({ recurring }: RecurringJobsTableProps) {
   return (
-    <div className="w-full text-left text-sm overflow-x-auto">
-      <table className="w-full">
-        <thead className="bg-surface-container-low border-b border-outline-variant text-on-surface-variant font-semibold uppercase text-xs">
+    <div className="custom-scrollbar h-full w-full overflow-auto text-left text-sm">
+      <table className="w-full min-w-[720px]">
+        <thead className="border-b border-outline bg-surface-container text-xs font-bold uppercase tracking-wider text-on-surface-variant">
           <tr>
             <th className="px-3 py-2">Job ID</th>
             <th className="px-3 py-2">Cron</th>
@@ -21,7 +21,7 @@ export function RecurringJobsTable({ recurring }: RecurringJobsTableProps) {
             <th className="px-3 py-2">Status</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-100">
+        <tbody className="divide-y divide-outline-variant">
           {recurring === undefined ? (
             Array.from({ length: 4 }).map((_, idx) => (
               <tr key={idx}>
@@ -34,9 +34,9 @@ export function RecurringJobsTable({ recurring }: RecurringJobsTableProps) {
             ))
           ) : (
             recurring.map((job) => (
-              <tr key={job.id} className="hover:bg-surface-container-lowest transition-colors">
+              <tr key={job.id} className="transition-colors hover:bg-surface-container-high">
                 <td className="px-3 py-2 font-bold text-on-surface break-words max-w-[150px]">{job.id}</td>
-                <td className="px-3 py-2">
+                <td className="whitespace-nowrap px-3 py-2">
                   <span className="px-1 py-0.5 bg-brand-accent/10 text-brand-text rounded text-xs font-mono font-bold tracking-widest break-words max-w-[100px] inline-block">
                     {job.cron}
                   </span>

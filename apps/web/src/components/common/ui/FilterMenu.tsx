@@ -30,6 +30,7 @@ export interface FloatingFilterMenuProps {
   placement?: FilterMenuPlacement;
   align?: FilterMenuAlign;
   compact?: boolean;
+  triggerClassName?: string;
 }
 
 export function FilterSectionHeader({ label, active, onClear }: {
@@ -117,6 +118,7 @@ export function FloatingFilterMenu({
   placement = 'auto',
   align = 'start',
   compact = false,
+  triggerClassName = '',
 }: FloatingFilterMenuProps) {
   const controlsRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -207,7 +209,9 @@ export function FloatingFilterMenu({
           onClick={toggleMenu}
           aria-expanded={isOpen}
           aria-label={activeCount > 0 ? `Filters, ${activeCount} active` : 'Filters'}
-          className={`flex h-9 cursor-pointer items-center gap-2 rounded-l-[18px] rounded-r-[4px]  px-4 text-sm font-semibold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-secondary bg-surface text-on-surface hover:bg-surface-container`}
+          className={`flex h-11 cursor-pointer items-center gap-2 rounded-l-[18px] rounded-r-[4px] px-4 text-sm font-semibold text-on-surface outline-none transition-colors focus-visible:ring-2 focus-visible:ring-secondary ${
+            triggerClassName || 'bg-surface hover:bg-surface-container'
+          }`}
         >
           <Filter aria-hidden="true" size={16} strokeWidth={2.5} />
           Filters
@@ -223,7 +227,7 @@ export function FloatingFilterMenu({
           disabled={activeCount === 0}
           aria-label={clearLabel}
           title={clearLabel}
-          className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-l-[4px] rounded-r-[18px] bg-error-container text-on-error-container outline-none transition-colors enabled:hover:bg-error/20 focus-visible:ring-2 focus-visible:ring-secondary disabled:cursor-not-allowed disabled:bg-on-surface/[0.1] disabled:text-on-surface/[0.38]"
+          className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-l-[4px] rounded-r-[18px] bg-error-container text-on-error-container outline-none transition-colors enabled:hover:bg-error/20 focus-visible:ring-2 focus-visible:ring-secondary disabled:cursor-not-allowed disabled:bg-on-surface/[0.1] disabled:text-on-surface/[0.38]"
         >
           <ListRestart aria-hidden="true" size={16} strokeWidth={2.5} />
         </button>

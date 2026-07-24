@@ -7,7 +7,7 @@ import type { FetchIntervalsDto } from '../../../hooks/useJobSettingsQueries';
 interface FetchIntervalsFormProps {
   intervals: FetchIntervalsDto | undefined;
   updateIntervals: {
-    mutate: (variables: Partial<FetchIntervalsDto>) => void;
+    mutateAsync: (variables: Partial<FetchIntervalsDto>) => Promise<void>;
   };
   disabled?: boolean;
 }
@@ -20,9 +20,9 @@ export function FetchIntervalsForm({ intervals, updateIntervals, disabled }: Fet
       icon={<Clock size={20} />}
     >
       {disabled && intervals && (
-        <div className="mb-4 p-3 bg-surface-container border border-outline-variant rounded-xl flex items-center gap-4 text-sm text-slate-650 font-bold uppercase tracking-wider animate-in fade-in duration-300">
-          <Lock size={14} className="text-on-surface-variant shrink-0" />
-          <span>Read-only configuration view</span>
+        <div className="flex items-center gap-3 rounded-xl bg-surface-container-high px-4 py-3 text-sm font-semibold text-on-surface-variant animate-in fade-in duration-300">
+          <Lock size={16} className="shrink-0" aria-hidden="true" />
+          <span>You can review these schedules, but only administrators can change them.</span>
         </div>
       )}
 
@@ -31,47 +31,52 @@ export function FetchIntervalsForm({ intervals, updateIntervals, disabled }: Fet
           <InlineEditField
             label="Litium Fetch Interval (mins)"
             value={intervals.litiumFetchIntervalMinutes}
-            type="number"
+            kind="number"
             required
-            requiredCondition="> 0"
+            requirement="Greater than 0"
             disabled={disabled}
-            onSave={(val) => updateIntervals.mutate({ litiumFetchIntervalMinutes: val })}
+            validate={val => val > 0 ? undefined : 'Enter a value greater than 0.'}
+            onCommit={(val) => updateIntervals.mutateAsync({ litiumFetchIntervalMinutes: val })}
           />
           <InlineEditField
             label="Latency Fetch Interval (mins)"
             value={intervals.latencyFetchIntervalMinutes}
-            type="number"
+            kind="number"
             required
-            requiredCondition="> 0"
+            requirement="Greater than 0"
             disabled={disabled}
-            onSave={(val) => updateIntervals.mutate({ latencyFetchIntervalMinutes: val })}
+            validate={val => val > 0 ? undefined : 'Enter a value greater than 0.'}
+            onCommit={(val) => updateIntervals.mutateAsync({ latencyFetchIntervalMinutes: val })}
           />
           <InlineEditField
             label="Uptime Fetch Interval (mins)"
             value={intervals.uptimeFetchIntervalMinutes}
-            type="number"
+            kind="number"
             required
-            requiredCondition="> 0"
+            requirement="Greater than 0"
             disabled={disabled}
-            onSave={(val) => updateIntervals.mutate({ uptimeFetchIntervalMinutes: val })}
+            validate={val => val > 0 ? undefined : 'Enter a value greater than 0.'}
+            onCommit={(val) => updateIntervals.mutateAsync({ uptimeFetchIntervalMinutes: val })}
           />
           <InlineEditField
             label="User Stats Fetch Interval (mins)"
             value={intervals.userStatsFetchIntervalMinutes}
-            type="number"
+            kind="number"
             required
-            requiredCondition="> 0"
+            requirement="Greater than 0"
             disabled={disabled}
-            onSave={(val) => updateIntervals.mutate({ userStatsFetchIntervalMinutes: val })}
+            validate={val => val > 0 ? undefined : 'Enter a value greater than 0.'}
+            onCommit={(val) => updateIntervals.mutateAsync({ userStatsFetchIntervalMinutes: val })}
           />
           <InlineEditField
             label="Feed Fetch Interval (hours)"
             value={intervals.feedFetchIntervalHours}
-            type="number"
+            kind="number"
             required
-            requiredCondition="> 0"
+            requirement="Greater than 0"
             disabled={disabled}
-            onSave={(val) => updateIntervals.mutate({ feedFetchIntervalHours: val })}
+            validate={val => val > 0 ? undefined : 'Enter a value greater than 0.'}
+            onCommit={(val) => updateIntervals.mutateAsync({ feedFetchIntervalHours: val })}
           />
         </div>
       ) : (

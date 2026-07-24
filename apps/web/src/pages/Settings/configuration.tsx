@@ -5,7 +5,7 @@ import { GlobalConfigurationForm } from '../../components/settings/configuration
 import { FetchIntervalsForm } from '../../components/settings/configuration/FetchIntervalsForm';
 import { CalendarSubscriptionsPanel } from '../../components/settings/configuration/CalendarSubscriptionsPanel';
 import { SettingsPanel } from '../../components/common/layout/SettingsPanel';
-import { SectionHeader } from '../../components/common/layout/SectionHeader';
+import { SettingsPanelHeader } from '../../components/common/layout/SettingsPanelHeader';
 
 export function ConfigurationView() {
     const { data: config } = useGlobalConfigQuery();
@@ -18,13 +18,13 @@ export function ConfigurationView() {
     return (
         <div className="h-full min-h-0 w-full">
             <SettingsPanel>
-                <SectionHeader
+                <SettingsPanelHeader
                     title="System Configuration"
-                    subtitle="Global settings and intervals"
+                    subtitle="Control synchronization, feed and calendar behavior."
                     icon={<Activity size={24} />}
                 />
-                <div className="flex-1 overflow-y-auto sm:p-4 custom-scrollbar bg-surface rounded-xl shadow-sm border border-outline-variant/60">
-                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                <div className="custom-scrollbar flex-1 overflow-y-auto p-3 sm:p-4">
+                    <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-2">
                         <div className="flex flex-col gap-4">
                             <FetchIntervalsForm intervals={intervals} updateIntervals={updateIntervals} disabled={disabled} />
                             <CalendarSubscriptionsPanel disabled={disabled} />

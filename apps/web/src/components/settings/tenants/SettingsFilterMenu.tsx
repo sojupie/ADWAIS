@@ -39,7 +39,7 @@ function SortToggle({ value, onChange }: {
   onChange: (value: SortOrder) => void;
 }) {
   return (
-    <div className="grid grid-cols-2 gap-1 p-1" role="group" aria-label="Sort order">
+    <div className="grid grid-cols-2 gap-1 rounded-full bg-surface-container p-1" role="group" aria-label="Sort order">
       {([
         ['asc', 'A–Z'],
         ['desc', 'Z–A'],
@@ -49,9 +49,9 @@ function SortToggle({ value, onChange }: {
           type="button"
           aria-pressed={value === option}
           onClick={() => onChange(option)}
-          className={`h-9 cursor-pointer px-3 text-sm font-bold transition-colors outline-none focus-visible:ring-2 focus-visible:ring-secondary ${value === option
-            ? 'bg-secondary text-on-secondary rounded-md '
-            : 'bg-secondary-container text-on-secondary-container rounded-full'
+          className={`min-h-10 cursor-pointer rounded-full px-4 text-sm font-bold transition-colors outline-none focus-visible:ring-2 focus-visible:ring-secondary ${value === option
+            ? 'bg-secondary text-on-secondary'
+            : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
           }`}
         >
           {label}
@@ -193,6 +193,7 @@ export function TenantSettingsFilterMenu(props: TenantSettingsFilterMenuProps) {
   return (
     <FloatingFilterMenu
       compact
+      triggerClassName="bg-surface-container-high hover:bg-surface-container-highest"
       activeCount={activeCount}
       ariaLabel="Tenant filter controls"
       clearLabel="Clear all tenant filters"
@@ -212,6 +213,7 @@ export function MonitorSettingsFilterMenu(props: MonitorSettingsFilterMenuProps)
   return (
     <FloatingFilterMenu
       compact
+      triggerClassName="bg-surface-container-high hover:bg-surface-container-highest"
       activeCount={activeCount}
       ariaLabel="Monitor filter controls"
       clearLabel="Clear all monitor filters"

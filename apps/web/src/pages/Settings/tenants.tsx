@@ -5,7 +5,7 @@ import {
     MonitorSettingsFilterMenu,
     TenantSettingsFilterMenu,
 } from '../../components/settings/tenants/SettingsFilterMenu';
-import { SectionHeader } from '../../components/common/layout/SectionHeader';
+import { SettingsPanelHeader } from '../../components/common/layout/SettingsPanelHeader';
 import { SearchInput } from '../../components/common/ui/SearchInput';
 import { SettingsPanel } from '../../components/common/layout/SettingsPanel';
 import { EmptyState } from '../../components/common/ui/EmptyState';
@@ -59,9 +59,9 @@ export function TenantsMonitorsView() {
         <div className="grid grid-cols-1 landscape-contained:grid-cols-2 portrait-contained:grid-rows-2 gap-4 h-full min-h-0">
             {/* Tenants Column */}
             <SettingsPanel>
-                <SectionHeader
+                <SettingsPanelHeader
                     title="Tenants"
-                    subtitle="Manage your environments"
+                    subtitle="Connected commerce environments and credentials."
                     icon={<Building2 size={24} />}
                 >
                     <SearchInput
@@ -80,31 +80,34 @@ export function TenantsMonitorsView() {
                         locked={!isAdmin}
                         lockTitle="Requires Admin privileges"
                         icon={<Plus size={16} className="shrink-0" />}
-                        className="flex items-center gap-2 px-3 py-1.5 h-9 rounded-lg text-sm font-bold transition-colors shadow-sm shrink-0 bg-brand-link text-white hover:bg-brand-link/90 cursor-pointer"
+                        className="inline-flex min-h-11 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-full bg-on-primary-container px-5 text-base font-bold text-primary-container transition-colors hover:bg-brand-btn-quaternary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary"
                     >
                         New
                     </SecureButton>
-                </SectionHeader>
+                </SettingsPanelHeader>
 
-                <div className="flex-1 overflow-y-auto px-2 py-3 sm:p-4 flex flex-col gap-4 custom-scrollbar bg-surface rounded-xl shadow-sm border border-outline-variant/60">
+                <div className="custom-scrollbar flex flex-1 flex-col gap-4 overflow-y-auto p-3 sm:p-4">
                     {isCreatingTenant && (
-                        <div className="border-2 border-brand-link/20 rounded-xl overflow-hidden bg-brand-link/5 shadow-sm shrink-0 flex flex-col">
-                            <div className="flex items-center justify-between p-3 border-b border-brand-link/10">
-                                <span className="font-extrabold text-on-surface text-sm">Create New Tenant</span>
-                                <button onClick={() => setIsCreatingTenant(false)} className="text-on-surface-variant hover:text-on-surface-variant cursor-pointer"><X size={16} /></button>
+                        <div className="flex shrink-0 flex-col overflow-hidden rounded-xl bg-primary-container">
+                            <div className="flex items-center justify-between gap-3 p-4">
+                                <div>
+                                    <h3 className="text-base font-black text-on-primary-container">Create tenant</h3>
+                                    <p className="mt-1 text-sm font-medium text-on-primary-container">Connect a commerce environment to the dashboard.</p>
+                                </div>
+                                <button type="button" aria-label="Close tenant form" onClick={() => setIsCreatingTenant(false)} className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full text-on-primary-container transition-colors hover:bg-surface focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary"><X size={18} /></button>
                             </div>
-                            <div className="p-4 flex flex-col gap-2">
+                            <div className="grid grid-cols-1 gap-3 px-4 pb-4 md:grid-cols-2">
                                 <Input label="Name" placeholder="Tenant Name" value={newTenantDraft.name} onChange={e => setNewTenantDraft({ ...newTenantDraft, name: e.target.value })} />
                                 <Input label="Litium Base URL" placeholder="https://example.com" value={newTenantDraft.litiumBaseUrl} onChange={e => setNewTenantDraft({ ...newTenantDraft, litiumBaseUrl: e.target.value })} />
                                 <Input label="Image URL (optional)" placeholder="https://example.com/logo.png" value={newTenantDraft.imageUrl} onChange={e => setNewTenantDraft({ ...newTenantDraft, imageUrl: e.target.value })} />
                                 <Input label="Service Account Token" type="password" className="font-mono" placeholder="Secret Token" value={newTenantDraft.serviceAccountToken} onChange={e => setNewTenantDraft({ ...newTenantDraft, serviceAccountToken: e.target.value })} />
                                 <SecureButton
-                                    className="mt-2 bg-brand-btn-primary hover:bg-brand-btn-quaternary text-white font-bold text-sm px-4 py-2 rounded-lg cursor-pointer flex items-center justify-center gap-4 w-full"
+                                    className="inline-flex min-h-11 w-fit cursor-pointer items-center justify-center gap-2 rounded-full bg-on-primary-container px-5 text-base font-bold text-primary-container transition-colors hover:bg-brand-btn-quaternary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary md:col-span-2 md:ml-auto"
                                     disabled={!newTenantDraft.name || !newTenantDraft.litiumBaseUrl}
                                     loading={createTenant.isPending}
                                     onClick={() => createTenant.mutate(newTenantDraft)}
                                 >
-                                    Save Tenant
+                                    Create tenant
                                 </SecureButton>
                             </div>
                         </div>
@@ -128,9 +131,9 @@ export function TenantsMonitorsView() {
 
             {/* Monitors Column */}
             <SettingsPanel>
-                <SectionHeader
+                <SettingsPanelHeader
                     title="Fleet Monitors"
-                    subtitle="Manage external health checks"
+                    subtitle="External availability and response-time checks."
                     icon={<Activity size={24} />}
                 >
                     <SearchInput
@@ -150,20 +153,23 @@ export function TenantsMonitorsView() {
                         locked={!isAdmin}
                         lockTitle="Requires Admin privileges"
                         icon={<Plus size={16} className="shrink-0" />}
-                        className="flex items-center gap-2 px-3 py-1.5 h-9 rounded-lg text-sm font-bold transition-colors shadow-sm shrink-0 bg-brand-link text-white hover:bg-brand-link/90 cursor-pointer"
+                        className="inline-flex min-h-11 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-full bg-on-primary-container px-5 text-base font-bold text-primary-container transition-colors hover:bg-brand-btn-quaternary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary"
                     >
                         New
                     </SecureButton>
-                </SectionHeader>
+                </SettingsPanelHeader>
 
-                <div className="flex-1 overflow-y-auto px-2 py-3 sm:p-4 flex flex-col gap-4 custom-scrollbar bg-surface rounded-xl shadow-sm border border-outline-variant/60">
+                <div className="custom-scrollbar flex flex-1 flex-col gap-4 overflow-y-auto p-3 sm:p-4">
                     {isCreatingMonitor && (
-                        <div className="border-2 border-brand-link/20 rounded-xl overflow-hidden bg-brand-link/5 shadow-sm shrink-0 flex flex-col">
-                            <div className="flex items-center justify-between p-3 border-b border-brand-link/10">
-                                <span className="font-extrabold text-on-surface-variant text-sm">Create New Monitor</span>
-                                <button onClick={() => setIsCreatingMonitor(false)} className="text-on-surface-variant hover:text-on-surface-variant cursor-pointer"><X size={16} /></button>
+                        <div className="flex shrink-0 flex-col overflow-hidden rounded-xl bg-primary-container">
+                            <div className="flex items-center justify-between gap-3 p-4">
+                                <div>
+                                    <h3 className="text-base font-black text-on-primary-container">Create monitor</h3>
+                                    <p className="mt-1 text-sm font-medium text-on-primary-container">Add a new external availability check.</p>
+                                </div>
+                                <button type="button" aria-label="Close monitor form" onClick={() => setIsCreatingMonitor(false)} className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full text-on-primary-container transition-colors hover:bg-surface focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary"><X size={18} /></button>
                             </div>
-                            <div className="p-4 flex flex-col gap-2">
+                            <div className="grid grid-cols-1 gap-3 px-4 pb-4 md:grid-cols-2">
                                 <Input label="Name" placeholder="Monitor Name" value={newMonitorDraft.name} onChange={e => setNewMonitorDraft({ ...newMonitorDraft, name: e.target.value })} />
                                 <Input label="URL" placeholder="https://example.com" value={newMonitorDraft.url} onChange={e => setNewMonitorDraft({ ...newMonitorDraft, url: e.target.value })} />
                                 <Select label="Monitor Type" value={newMonitorDraft.type} onChange={e => setNewMonitorDraft({ ...newMonitorDraft, type: e.target.value })}>
@@ -171,7 +177,7 @@ export function TenantsMonitorsView() {
                                 </Select>
                                 <Input label="Uptime SLA (%)" type="number" step="0.1" value={newMonitorDraft.uptimeSla} onChange={e => setNewMonitorDraft({ ...newMonitorDraft, uptimeSla: e.target.value === '' ? '' : parseFloat(e.target.value) })} placeholder="e.g. 99.9" />
                                 <SecureButton
-                                    className="mt-2 bg-brand-btn-primary hover:bg-brand-btn-quaternary text-white font-bold text-sm px-4 py-2 rounded-lg cursor-pointer flex items-center justify-center gap-4 w-full"
+                                    className="inline-flex min-h-11 w-fit cursor-pointer items-center justify-center gap-2 rounded-full bg-on-primary-container px-5 text-base font-bold text-primary-container transition-colors hover:bg-brand-btn-quaternary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary md:col-span-2 md:ml-auto"
                                     disabled={!newMonitorDraft.name || !newMonitorDraft.url}
                                     loading={createMonitor.isPending}
                                     onClick={() => createMonitor.mutate({
@@ -181,7 +187,7 @@ export function TenantsMonitorsView() {
                                         uptimeSla: newMonitorDraft.uptimeSla === '' ? null : newMonitorDraft.uptimeSla
                                     })}
                                 >
-                                    Save Monitor
+                                    Create monitor
                                 </SecureButton>
                             </div>
                         </div>

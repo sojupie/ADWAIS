@@ -1,84 +1,78 @@
-import { Link, Outlet, useNavigate, useLocation } from "@tanstack/react-router";
+import { Link, Outlet, useLocation } from "@tanstack/react-router";
 import { useQueryClient } from '@tanstack/react-query';
 import { RefreshCw } from 'lucide-react';
 import { useState } from 'react';
 import { DashboardLayout } from "../components/common/layout/DashboardLayout.tsx";
-import { DashboardFlexRow } from "../components/common/layout/DashboardFlexRow.tsx";
-import { Select } from "../components/common/ui/Select.tsx";
 
 export function Settings() {
     const queryClient = useQueryClient();
     const [isRefreshing, setIsRefreshing] = useState(false);
-    const navigate = useNavigate();
     const location = useLocation();
     const currentPath = location.pathname;
 
     const tabs = [
-        { id: 'jobs', label: 'Background Jobs', path: '/settings/jobs' },
+        { id: 'jobs', label: 'Jobs', path: '/settings/jobs' },
         { id: 'configuration', label: 'Configuration', path: '/settings/configuration' },
-        { id: 'tenants', label: 'Tenants & Monitors', path: '/settings/tenants' },
-        { id: 'events', label: 'Events & Health', path: '/settings/events' },
+        { id: 'tenants', label: 'Tenants & monitors', path: '/settings/tenants' },
+        { id: 'events', label: 'Health & events', path: '/settings/events' },
         { id: 'users', label: 'Users', path: '/settings/users' },
         { id: 'authentication', label: 'Authentication', path: '/settings/authentication' },
     ];
 
     return (
         <DashboardLayout>
-            <header className="flex justify-between items-start shrink-0">
-                <div className="flex flex-col gap-2">
-                    <h1 className="text-2xl font-extrabold text-brand-text tracking-tight m-0">Settings & Administration</h1>
-                    <p className="text-sm text-on-surface-variant m-0 font-medium tracking-wide">Manage system configuration and entities.</p>
-                </div>
-                <button
-                    onClick={async () => {
-                        setIsRefreshing(true);
-                        await queryClient.invalidateQueries();
-                        setTimeout(() => setIsRefreshing(false), 500);
-                    }}
-                    className="flex items-center gap-4 px-3 py-1.5 bg-surface border border-outline-variant text-on-surface-variant rounded-lg hover:bg-surface-container-low hover:text-on-surface hover:border-slate-350 transition-colors shadow-sm text-sm font-bold cursor-pointer"
-                >
-                    <RefreshCw size={16} className={isRefreshing ? 'animate-spin' : ''} />
-                    <span>Refresh</span>
-                </button>
-            </header>
-
-            <DashboardFlexRow weight={"flex-1"}>
-                <div className="flex-1 flex flex-col min-h-0 w-full gap-4">
-                    {/* Mobile Dropdown Navigation */}
-                    <div className="block sm:hidden relative group shrink-0">
-                          <Select
-                              variant="brand"
-                              size="lg"
-                              value={tabs.find(t => currentPath.startsWith(t.path))?.path || tabs[0].path}
-                              onChange={(e) => navigate({ to: e.target.value })}
-                          >
-                            {tabs.map(t => (
-                                <option key={t.id} value={t.path}>{t.label}</option>
-                            ))}
-                        </Select>
+            <section className="flex shrink-0 flex-col gap-3">
+                <div className="flex flex-wrap items-center justify-between gap-4 px-2">
+                    <div className="min-w-0">
+                        <h1 className="m-0 text-xl font-black uppercase tracking-widest text-on-surface sm:text-2xl">
+                            Settings
+                        </h1>
+                        <p className="m-0 mt-1 text-sm font-medium text-on-surface-variant sm:text-base">
+                            Administration, integrations and system configuration
+                        </p>
                     </div>
+                    <button
+                        type="button"
+                        onClick={async () => {
+                            setIsRefreshing(true);
+                            await queryClient.invalidateQueries();
+                            window.setTimeout(() => setIsRefreshing(false), 500);
+                        }}
+                        disabled={isRefreshing}
+                        className="inline-flex min-h-11 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-full bg-surface-container px-5 text-base font-bold text-on-surface transition-colors hover:bg-surface-container-high focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary disabled:cursor-wait disabled:bg-on-surface/[0.1] disabled:text-on-surface/[0.38] disabled:hover:bg-on-surface/[0.1] disabled:hover:text-on-surface/[0.38]"
+                    >
+                        <RefreshCw size={18} className={isRefreshing ? 'animate-spin' : ''} aria-hidden="true" />
+                        <span>{isRefreshing ? 'Refreshing…' : 'Refresh data'}</span>
+                    </button>
+                </div>
+            </section>
 
-                    {/* Desktop Pill Navigation */}
-                    <div className="hidden sm:flex flex-wrap gap-4 shrink-0">
-                        {tabs.map((t) => {
-                            const isActive = currentPath.startsWith(t.path);
+            <div className="flex min-h-0 flex-1 gap-4">
+                <main className="relative flex min-h-0 min-w-0 flex-1 flex-col">
+                    <Outlet />
+                </main>
+                <aside className="hidden w-60 shrink-0 flex-col self-stretch rounded-2xl bg-surface p-3 m3-elevation-3 xl:flex">
+                    <nav aria-label="Settings sections" className="flex flex-col gap-1">
+                        {tabs.map((tab) => {
+                            const isActive = currentPath.startsWith(tab.path);
                             return (
                                 <Link
-                                    key={t.id}
-                                    to={t.path}
-                                    className={`px-5 py-2.5 text-sm font-bold tracking-wide transition-all rounded-xl ${isActive ? 'bg-brand-btn-primary text-white shadow-md' : 'text-on-surface-variant hover:text-on-surface hover:bg-primary-container hover:shadow-sm'}`}
+                                    key={tab.id}
+                                    to={tab.path}
+                                    aria-current={isActive ? 'page' : undefined}
+                                    className={`flex min-h-12 items-center rounded-full px-5 text-sm font-bold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary ${
+                                        isActive
+                                            ? 'bg-primary-container text-on-primary-container'
+                                            : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
+                                    }`}
                                 >
-                                    {t.label}
+                                    {tab.label}
                                 </Link>
                             );
                         })}
-                    </div>
-
-                    <div className="flex-1 min-h-0 relative flex flex-col">
-                        <Outlet />
-                    </div>
-                </div>
-            </DashboardFlexRow>
+                    </nav>
+                </aside>
+            </div>
         </DashboardLayout>
     );
 }

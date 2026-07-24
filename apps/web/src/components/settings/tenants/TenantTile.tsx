@@ -5,6 +5,7 @@ import { TileCard } from '../../common/layout/TileCard';
 import { TileSaveBar } from '../../common/ui/TileSaveBar';
 import { useUpdateTenantMutation } from '../../../hooks/useTenantQueries';
 import { Select } from '../../common/ui/Select';
+import { CheckboxField, FormField } from '../../common/ui/FormField';
 
 interface TenantTileProps {
   t: TenantResponseDto;
@@ -77,27 +78,31 @@ export function TenantTile({ t, deleteTenant, isAdmin = false }: TenantTileProps
 
   const header = (
     <>
-      <span className="font-extrabold text-on-surface text-sm flex items-center gap-4 min-w-0">
-        <input
+      <span className="flex min-w-0 items-center gap-3 text-base font-black text-on-surface">
+        <FormField
+          label="Tenant name"
+          hideLabel
+          variant="outlined"
+          density="compact"
+          containerClassName="min-w-0 flex-1"
           value={draft.name}
           onChange={e => setDraft({ ...draft, name: e.target.value })}
           disabled={!isAdmin}
-          className={`bg-transparent border border-transparent rounded px-1 -ml-1 transition-all outline-none truncate flex-1 min-w-0 ${isAdmin ? 'hover:bg-surface/50 focus:bg-surface focus:ring-2 focus:ring-brand-accent/20 hover:border-outline-variant focus:border-brand-accent/30' : 'cursor-not-allowed text-on-surface-variant'
-            }`}
+          className="truncate text-xl font-black"
         />
         <Select
             value={draft.type}
             onChange={e => setDraft({ ...draft, type: e.target.value as 'Mixed' | 'B2B' | 'B2C' })}
             disabled={!isAdmin}
             indicator={null}
-            variant="plain"
-            size="xs"
+            variant="outlined"
+            size="sm"
             fullWidth={false}
             containerClassName="w-auto shrink-0"
-            className={`uppercase tracking-widest shadow-sm text-white ${isAdmin ? 'hover:opacity-90' : ''
-              } ${draft.type === 'B2B' ? '!bg-[var(--color-brand-btn-primary)]' :
-                draft.type === 'B2C' ? '!bg-[#0ea5e9]' :
-                  '!bg-[#8b5cf6]'
+            className={`!rounded-full text-xs font-black uppercase tracking-widest ${isAdmin ? 'hover:brightness-95' : ''
+              } ${draft.type === 'B2C' ? '!bg-chart-1 !text-white' :
+                draft.type === 'Mixed' ? '!bg-chart-2 !text-white' :
+                  '!bg-chart-3 !text-white'
             }`}
         >
           <option value="Mixed">MIXED</option>
@@ -105,17 +110,18 @@ export function TenantTile({ t, deleteTenant, isAdmin = false }: TenantTileProps
           <option value="B2C">B2C</option>
         </Select>
       </span>
-      <span className="text-sm text-on-surface-variant font-mono font-medium select-text cursor-text truncate">{t.id}</span>
+      <span className="truncate font-mono text-xs font-medium text-on-surface-variant select-text">{t.id}</span>
     </>
   );
 
   const headerActions = isAdmin ? (
     <button
       onClick={() => { if (confirm('Delete tenant?')) deleteTenant.mutate(t.id); }}
-      className="p-1.5 text-on-surface-variant hover:text-red-600 bg-surface rounded-lg cursor-pointer transition-colors shadow-sm ml-2"
+      aria-label={`Delete ${t.name}`}
+      className="ml-2 flex h-10 w-10 cursor-pointer items-baseline justify-center rounded-full text-on-surface-variant transition-colors hover:bg-error-container hover:text-error focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-error"
       title="Delete Tenant"
     >
-      <Trash2 size={14} />
+      <Trash2 size={18} />
     </button>
   ) : (
     <span className="p-1.5 text-on-surface-variant opacity-60 cursor-not-allowed ml-2" title="Requires Admin privileges">
@@ -125,71 +131,63 @@ export function TenantTile({ t, deleteTenant, isAdmin = false }: TenantTileProps
 
   return (
     <TileCard header={header} headerActions={headerActions}>
-      <div className="flex flex-col gap-2 group">
-        <label className="text-sm font-bold text-on-surface-variant uppercase tracking-wider">Litium Base URL</label>
-        <input
-          value={draft.litiumBaseUrl}
-          onChange={e => setDraft({ ...draft, litiumBaseUrl: e.target.value })}
-          disabled={!isAdmin}
-          className={`text-sm font-semibold text-on-surface bg-transparent border border-transparent rounded px-2 py-1 -ml-2 transition-all outline-none ${isAdmin ? 'hover:bg-surface-container-low focus:bg-surface focus:ring-2 focus:ring-brand-accent/20 hover:border-outline-variant focus:border-brand-accent/30' : 'cursor-not-allowed text-on-surface-variant'
-            }`}
-          placeholder="https://..."
-        />
-      </div>
+      <FormField
+        label="Litium Base URL"
+        value={draft.litiumBaseUrl}
+        onChange={e => setDraft({ ...draft, litiumBaseUrl: e.target.value })}
+        disabled={!isAdmin}
+        variant="outlined"
+        className={"border border-outline"}
+        density="compact"
+        placeholder="https://..."
+      />
 
-      <div className="flex flex-col gap-2 group">
-        <label className="text-sm font-bold text-on-surface-variant uppercase tracking-wider">Image URL</label>
-        <input
-          value={draft.imageUrl}
-          onChange={e => setDraft({ ...draft, imageUrl: e.target.value })}
-          disabled={!isAdmin}
-          className={`text-sm font-semibold text-on-surface bg-transparent border border-transparent rounded px-2 py-1 -ml-2 transition-all outline-none ${isAdmin ? 'hover:bg-surface-container-low focus:bg-surface focus:ring-2 focus:ring-brand-accent/20 hover:border-outline-variant focus:border-brand-accent/30' : 'cursor-not-allowed text-on-surface-variant'
-            }`}
-          placeholder="Google favicon fallback"
-        />
-      </div>
+      <FormField
+        label="Image URL"
+        value={draft.imageUrl}
+        onChange={e => setDraft({ ...draft, imageUrl: e.target.value })}
+        disabled={!isAdmin}
+        variant="outlined"
+        className={"border border-outline"}
+        density="compact"
+        placeholder="Google favicon fallback"
+      />
 
-      <div className="flex flex-col gap-2 group">
-        <div className="flex justify-between items-center">
-          <label className="text-sm font-bold text-on-surface-variant uppercase tracking-wider">Service Account Token</label>
-          <div className="flex items-center gap-6">
+      <FormField
+        label="Service Account Token"
+        type="password"
+        value={draft.serviceAccountToken}
+        disabled={!isAdmin || draft.clearToken}
+        onChange={e => setDraft({ ...draft, serviceAccountToken: e.target.value, clearToken: false })}
+        variant="outlined"
+        className={"border border-outline"}
+        density="compact"
+        placeholder={draft.clearToken ? 'Cleared' : (t.hasServiceAccountToken ? '•••••••••••• (Type to change)' : 'Type to set new token')}
+        meta={(
+          <span className="flex items-center gap-3">
             {isAdmin && t.hasServiceAccountToken && !draft.clearToken && (
               <button
+                type="button"
                 onClick={() => setDraft({ ...draft, clearToken: true, serviceAccountToken: '' })}
-                className="text-sm text-red-500 hover:text-red-600 font-bold hover:underline cursor-pointer"
+                className="cursor-pointer rounded-full px-3 py-1 text-sm font-bold text-error transition-colors hover:bg-error-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-error"
               >
                 Clear Token
               </button>
             )}
-            <span className="text-sm text-on-surface-variant italic">
+            <span className="text-xs italic text-on-surface-variant">
               {draft.clearToken ? 'Pending clear' : t.hasServiceAccountToken ? 'Token is set' : 'Not set'}
             </span>
-          </div>
-        </div>
-        <input
-          type="password"
-          value={draft.serviceAccountToken}
-          disabled={!isAdmin || draft.clearToken}
-          onChange={e => setDraft({ ...draft, serviceAccountToken: e.target.value, clearToken: false })}
-          className={`text-sm font-mono font-semibold text-on-surface bg-transparent border border-transparent rounded px-2 py-1 -ml-2 transition-all outline-none ${isAdmin && !draft.clearToken ? 'hover:bg-surface-container-low focus:bg-surface focus:ring-2 focus:ring-brand-accent/20 hover:border-outline-variant focus:border-brand-accent/30' : 'cursor-not-allowed text-on-surface-variant opacity-50'
-            }`}
-          placeholder={draft.clearToken ? 'Cleared' : (t.hasServiceAccountToken ? '•••••••••••• (Type to change)' : 'Type to set new token')}
-        />
-      </div>
+          </span>
+        )}
+      />
 
-      <div className="flex items-center gap-4 group relative py-1">
-        <input
-          type="checkbox"
-          checked={draft.orderFetchingEnabled}
-          disabled={!isAdmin}
-          onChange={(e) => setDraft({ ...draft, orderFetchingEnabled: e.target.checked })}
-          className={`w-4 h-4 text-brand-link rounded border-outline-variant ${isAdmin ? 'cursor-pointer' : 'cursor-not-allowed text-on-surface-variant'}`}
-          id={`chk-${t.id}`}
-        />
-        <label htmlFor={`chk-${t.id}`} className={`text-sm font-semibold select-none ${isAdmin ? 'text-on-surface-variant cursor-pointer' : 'text-slate-450 cursor-not-allowed'}`}>
-          Enable Order Fetching
-        </label>
-      </div>
+      <CheckboxField
+        id={`chk-${t.id}`}
+        label="Enable Order Fetching"
+        checked={draft.orderFetchingEnabled}
+        disabled={!isAdmin}
+        onChange={e => setDraft({ ...draft, orderFetchingEnabled: e.target.checked })}
+      />
 
       {isAdmin && (
         <TileSaveBar

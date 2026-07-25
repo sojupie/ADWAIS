@@ -70,10 +70,10 @@ public class WeatherService(
         var url = $"https://api.open-meteo.com/v1/forecast" +
                   $"?latitude={latitudeValue}&longitude={longitudeValue}" +
                   $"&current=temperature_2m,apparent_temperature,precipitation_probability,precipitation,weather_code" +
-                  $"&timezone=Europe%2FBerlin";
+                  $"&timezone=UTC";
 
         var response = await httpClient.GetFromJsonAsync<ForecastResponse>(url, JsonOptions, ct)
-            ?? throw new InvalidOperationException("Open-Meteo forecast API returned null.");
+                       ?? throw new InvalidOperationException("Open-Meteo forecast API returned null.");
 
         var current = response.Current;
         return new WeatherDto(

@@ -20,7 +20,6 @@ export function useCrossSegmentBeeswarm(
     return map;
   }, [activeCohorts]);
 
-  const radii = useMemo(() => scaleBubbleRadii(tenants.map(t => t.periodRevenue ?? 0), 6, 18, true), [tenants]);
 
   const { minLogVal, maxLogVal } = useMemo(() => {
     if (isEmpty) return { minLogVal: 1, maxLogVal: 4 };
@@ -45,16 +44,16 @@ export function useCrossSegmentBeeswarm(
 
     activeCohorts.forEach(cohortType => {
       const typeTenants = tenants.filter(t => t.type === cohortType);
+      const cohortRadii = scaleBubbleRadii(typeTenants.map(t => t.periodRevenue ?? 0), 13, 20, true);
       const centerX = cohortXMap[cohortType] ?? 1;
 
-      const items = typeTenants.map(t => {
+      const items = typeTenants.map((t, index) => {
         const val = getMetricValue(t, selectedMetric);
-        const originalIndex = tenants.indexOf(t);
         return {
           tenant: t,
           val,
           logVal: Math.log10(val),
-          radius: radii[originalIndex] ?? 12,
+          radius: cohortRadii[index] ?? 12,
         };
       }).sort((a, b) => b.logVal - a.logVal);
 
@@ -111,7 +110,7 @@ export function useCrossSegmentBeeswarm(
     });
 
     return { bubbles: bubbleList, tenantMetaList: metaList };
-  }, [activeCohorts, tenants, selectedMetric, radii, minLogVal, maxLogVal, cohortXMap]);
+  }, [activeCohorts, tenants, selectedMetric, minLogVal, maxLogVal, cohortXMap]);
 
   const dataset = useMemo(() => ({
     label: 'Tenants',

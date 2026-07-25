@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { ArrowLeft } from 'lucide-react';
 
 interface SettingsPanelHeaderProps {
   title: string;
@@ -6,6 +7,7 @@ interface SettingsPanelHeaderProps {
   icon?: ReactNode;
   children?: ReactNode;
   className?: string;
+  onBack?: () => void;
 }
 
 export function SettingsPanelHeader({
@@ -14,10 +16,21 @@ export function SettingsPanelHeader({
   icon,
   children,
   className = '',
+  onBack,
 }: SettingsPanelHeaderProps) {
   return (
     <header className={`flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-outline-variant px-4 py-3 sm:px-5 sm:py-4 ${className}`}>
-      <div className="flex min-w-0 items-center gap-3">
+      <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+        {onBack && (
+          <button
+            type="button"
+            onClick={onBack}
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container-high focus-visible:outline focus-visible:outline-2 focus-visible:outline-secondary"
+            aria-label="Navigate back"
+          >
+            <ArrowLeft size={20} />
+          </button>
+        )}
         {icon && (
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-container text-on-primary-container">
             {icon}

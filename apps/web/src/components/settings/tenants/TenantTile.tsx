@@ -121,7 +121,7 @@ export function TenantTile({ t, deleteTenant, isAdmin = false }: TenantTileProps
     <button
       onClick={() => { if (confirm('Delete tenant?')) deleteTenant.mutate(t.id); }}
       aria-label={`Delete ${t.name}`}
-      className="ml-2 flex h-10 w-10 cursor-pointer items-baseline justify-center rounded-full text-on-surface-variant transition-colors hover:bg-error-container hover:text-error focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-error"
+      className="ml-2 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-error-container hover:text-error focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-error"
       title="Delete Tenant"
     >
       <Trash2 size={18} />

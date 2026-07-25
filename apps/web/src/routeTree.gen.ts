@@ -19,10 +19,14 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as SettingsIndexRouteImport } from './routes/settings/index'
 import { Route as SettingsUsersRouteImport } from './routes/settings/users'
 import { Route as SettingsTenantsRouteImport } from './routes/settings/tenants'
+import { Route as SettingsMonitorsRouteImport } from './routes/settings/monitors'
 import { Route as SettingsJobsRouteImport } from './routes/settings/jobs'
 import { Route as SettingsEventsRouteImport } from './routes/settings/events'
 import { Route as SettingsConfigurationRouteImport } from './routes/settings/configuration'
 import { Route as SettingsAuthenticationRouteImport } from './routes/settings/authentication'
+import { Route as SettingsUsersUserIdRouteImport } from './routes/settings/users_.$userId'
+import { Route as SettingsTenantsTenantIdRouteImport } from './routes/settings/tenants_.$tenantId'
+import { Route as SettingsMonitorsMonitorIdRouteImport } from './routes/settings/monitors_.$monitorId'
 
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
@@ -78,6 +82,13 @@ const SettingsTenantsRoute = SettingsTenantsRouteImport.update({
 } as any).lazy(() =>
   import('./routes/settings/tenants.lazy').then((d) => d.Route),
 )
+const SettingsMonitorsRoute = SettingsMonitorsRouteImport.update({
+  id: '/monitors',
+  path: '/monitors',
+  getParentRoute: () => SettingsRoute,
+} as any).lazy(() =>
+  import('./routes/settings/monitors.lazy').then((d) => d.Route),
+)
 const SettingsJobsRoute = SettingsJobsRouteImport.update({
   id: '/jobs',
   path: '/jobs',
@@ -104,6 +115,28 @@ const SettingsAuthenticationRoute = SettingsAuthenticationRouteImport.update({
 } as any).lazy(() =>
   import('./routes/settings/authentication.lazy').then((d) => d.Route),
 )
+const SettingsUsersUserIdRoute = SettingsUsersUserIdRouteImport.update({
+  id: '/users_/$userId',
+  path: '/users/$userId',
+  getParentRoute: () => SettingsRoute,
+} as any).lazy(() =>
+  import('./routes/settings/users_.$userId.lazy').then((d) => d.Route),
+)
+const SettingsTenantsTenantIdRoute = SettingsTenantsTenantIdRouteImport.update({
+  id: '/tenants_/$tenantId',
+  path: '/tenants/$tenantId',
+  getParentRoute: () => SettingsRoute,
+} as any).lazy(() =>
+  import('./routes/settings/tenants_.$tenantId.lazy').then((d) => d.Route),
+)
+const SettingsMonitorsMonitorIdRoute =
+  SettingsMonitorsMonitorIdRouteImport.update({
+    id: '/monitors_/$monitorId',
+    path: '/monitors/$monitorId',
+    getParentRoute: () => SettingsRoute,
+  } as any).lazy(() =>
+    import('./routes/settings/monitors_.$monitorId.lazy').then((d) => d.Route),
+  )
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -117,9 +150,13 @@ export interface FileRoutesByFullPath {
   '/settings/configuration': typeof SettingsConfigurationRoute
   '/settings/events': typeof SettingsEventsRoute
   '/settings/jobs': typeof SettingsJobsRoute
+  '/settings/monitors': typeof SettingsMonitorsRoute
   '/settings/tenants': typeof SettingsTenantsRoute
   '/settings/users': typeof SettingsUsersRoute
   '/settings/': typeof SettingsIndexRoute
+  '/settings/monitors/$monitorId': typeof SettingsMonitorsMonitorIdRoute
+  '/settings/tenants/$tenantId': typeof SettingsTenantsTenantIdRoute
+  '/settings/users/$userId': typeof SettingsUsersUserIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -132,9 +169,13 @@ export interface FileRoutesByTo {
   '/settings/configuration': typeof SettingsConfigurationRoute
   '/settings/events': typeof SettingsEventsRoute
   '/settings/jobs': typeof SettingsJobsRoute
+  '/settings/monitors': typeof SettingsMonitorsRoute
   '/settings/tenants': typeof SettingsTenantsRoute
   '/settings/users': typeof SettingsUsersRoute
   '/settings': typeof SettingsIndexRoute
+  '/settings/monitors/$monitorId': typeof SettingsMonitorsMonitorIdRoute
+  '/settings/tenants/$tenantId': typeof SettingsTenantsTenantIdRoute
+  '/settings/users/$userId': typeof SettingsUsersUserIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -149,9 +190,13 @@ export interface FileRoutesById {
   '/settings/configuration': typeof SettingsConfigurationRoute
   '/settings/events': typeof SettingsEventsRoute
   '/settings/jobs': typeof SettingsJobsRoute
+  '/settings/monitors': typeof SettingsMonitorsRoute
   '/settings/tenants': typeof SettingsTenantsRoute
   '/settings/users': typeof SettingsUsersRoute
   '/settings/': typeof SettingsIndexRoute
+  '/settings/monitors_/$monitorId': typeof SettingsMonitorsMonitorIdRoute
+  '/settings/tenants_/$tenantId': typeof SettingsTenantsTenantIdRoute
+  '/settings/users_/$userId': typeof SettingsUsersUserIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -167,9 +212,13 @@ export interface FileRouteTypes {
     | '/settings/configuration'
     | '/settings/events'
     | '/settings/jobs'
+    | '/settings/monitors'
     | '/settings/tenants'
     | '/settings/users'
     | '/settings/'
+    | '/settings/monitors/$monitorId'
+    | '/settings/tenants/$tenantId'
+    | '/settings/users/$userId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -182,9 +231,13 @@ export interface FileRouteTypes {
     | '/settings/configuration'
     | '/settings/events'
     | '/settings/jobs'
+    | '/settings/monitors'
     | '/settings/tenants'
     | '/settings/users'
     | '/settings'
+    | '/settings/monitors/$monitorId'
+    | '/settings/tenants/$tenantId'
+    | '/settings/users/$userId'
   id:
     | '__root__'
     | '/'
@@ -198,9 +251,13 @@ export interface FileRouteTypes {
     | '/settings/configuration'
     | '/settings/events'
     | '/settings/jobs'
+    | '/settings/monitors'
     | '/settings/tenants'
     | '/settings/users'
     | '/settings/'
+    | '/settings/monitors_/$monitorId'
+    | '/settings/tenants_/$tenantId'
+    | '/settings/users_/$userId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -285,6 +342,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsTenantsRouteImport
       parentRoute: typeof SettingsRoute
     }
+    '/settings/monitors': {
+      id: '/settings/monitors'
+      path: '/monitors'
+      fullPath: '/settings/monitors'
+      preLoaderRoute: typeof SettingsMonitorsRouteImport
+      parentRoute: typeof SettingsRoute
+    }
     '/settings/jobs': {
       id: '/settings/jobs'
       path: '/jobs'
@@ -313,6 +377,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsAuthenticationRouteImport
       parentRoute: typeof SettingsRoute
     }
+    '/settings/users_/$userId': {
+      id: '/settings/users_/$userId'
+      path: '/users/$userId'
+      fullPath: '/settings/users/$userId'
+      preLoaderRoute: typeof SettingsUsersUserIdRouteImport
+      parentRoute: typeof SettingsRoute
+    }
+    '/settings/tenants_/$tenantId': {
+      id: '/settings/tenants_/$tenantId'
+      path: '/tenants/$tenantId'
+      fullPath: '/settings/tenants/$tenantId'
+      preLoaderRoute: typeof SettingsTenantsTenantIdRouteImport
+      parentRoute: typeof SettingsRoute
+    }
+    '/settings/monitors_/$monitorId': {
+      id: '/settings/monitors_/$monitorId'
+      path: '/monitors/$monitorId'
+      fullPath: '/settings/monitors/$monitorId'
+      preLoaderRoute: typeof SettingsMonitorsMonitorIdRouteImport
+      parentRoute: typeof SettingsRoute
+    }
   }
 }
 
@@ -321,9 +406,13 @@ interface SettingsRouteChildren {
   SettingsConfigurationRoute: typeof SettingsConfigurationRoute
   SettingsEventsRoute: typeof SettingsEventsRoute
   SettingsJobsRoute: typeof SettingsJobsRoute
+  SettingsMonitorsRoute: typeof SettingsMonitorsRoute
   SettingsTenantsRoute: typeof SettingsTenantsRoute
   SettingsUsersRoute: typeof SettingsUsersRoute
   SettingsIndexRoute: typeof SettingsIndexRoute
+  SettingsMonitorsMonitorIdRoute: typeof SettingsMonitorsMonitorIdRoute
+  SettingsTenantsTenantIdRoute: typeof SettingsTenantsTenantIdRoute
+  SettingsUsersUserIdRoute: typeof SettingsUsersUserIdRoute
 }
 
 const SettingsRouteChildren: SettingsRouteChildren = {
@@ -331,9 +420,13 @@ const SettingsRouteChildren: SettingsRouteChildren = {
   SettingsConfigurationRoute: SettingsConfigurationRoute,
   SettingsEventsRoute: SettingsEventsRoute,
   SettingsJobsRoute: SettingsJobsRoute,
+  SettingsMonitorsRoute: SettingsMonitorsRoute,
   SettingsTenantsRoute: SettingsTenantsRoute,
   SettingsUsersRoute: SettingsUsersRoute,
   SettingsIndexRoute: SettingsIndexRoute,
+  SettingsMonitorsMonitorIdRoute: SettingsMonitorsMonitorIdRoute,
+  SettingsTenantsTenantIdRoute: SettingsTenantsTenantIdRoute,
+  SettingsUsersUserIdRoute: SettingsUsersUserIdRoute,
 }
 
 const SettingsRouteWithChildren = SettingsRoute._addFileChildren(

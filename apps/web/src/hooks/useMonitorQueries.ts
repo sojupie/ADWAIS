@@ -7,7 +7,8 @@ import {
   usePostApiMonitorsIdPause, 
   usePatchApiMonitorsId, 
   usePatchApiMonitorsIdAssignTenantId, 
-  usePatchApiMonitorsIdUnassign 
+  usePatchApiMonitorsIdUnassign,
+  useDeleteApiMonitorsId
 } from '../api/generated/endpoints';
 import type { UptimeMonitorDto, ComparisonPeriod, UpdateMonitorRequestDto, Timeframe, ComparisonType } from '@types';
 import { toast } from 'sonner';
@@ -183,6 +184,31 @@ export function useUnassignMonitorMutation() {
       },
       onError: (err: Error) => {
         toast.error('Failed to unassign monitor', {
+          description: err.message || String(err),
+          duration: Infinity
+        });
+      }
+    }
+  });
+
+  return {
+    ...mutation,
+    mutate: (id: number, options?: Parameters<typeof mutation.mutate>[1]) => 
+      mutation.mutate({ id }, options)
+  };
+}
+
+export function useDeleteMonitorMutation() {
+  const queryClient = useQueryClient();
+  const mutation = useDeleteApiMonitorsId<Error>({
+    mutation: {
+      onSuccess: () => {
+        toast.success('Monitor deleted successfully.');
+        queryClient.invalidateQueries({ queryKey: ['monitors'] });
+        queryClient.invalidateQueries({ queryKey: ['unassigned-monitors'] });
+      },
+      onError: (err: Error) => {
+        toast.error('Failed to delete monitor', {
           description: err.message || String(err),
           duration: Infinity
         });

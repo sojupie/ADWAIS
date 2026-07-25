@@ -269,14 +269,17 @@
     user-select: text;
   }
 
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: var(--md-sys-color-surface-container-highest) transparent;
+  /* Firefox specific scrollbar styling */
+  @supports (-moz-appearance: none) {
+    * {
+      scrollbar-color: var(--md-sys-color-surface-container-highest) transparent;
+      scrollbar-width: auto;
+    }
   }
 
   *::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
   }
 
   *::-webkit-scrollbar-track {

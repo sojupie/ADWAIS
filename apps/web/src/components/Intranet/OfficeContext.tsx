@@ -43,6 +43,57 @@ const hasCompleteWeather = (weather?: WeatherDto): weather is CompleteWeather =>
   && typeof weather.weatherCode === 'number',
 );
 
+interface WeatherContentProps {
+  isLoading: boolean;
+  isError: boolean;
+  weather?: WeatherDto;
+}
+
+function WeatherContent({ isLoading, isError, weather }: WeatherContentProps) {
+  if (isLoading) {
+    return (
+      <div className="text-md md:text-lg font-bold text-primary-container" role="status">
+        Loading weather…
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div role="alert">
+        <span className="block text-md md:text-lg font-bold text-error-container">Weather unavailable</span>
+        <span className="block text-md md:text-lg font-medium text-primary-container">API request failed</span>
+      </div>
+    );
+  }
+
+  if (!hasCompleteWeather(weather)) {
+    return (
+      <div role="alert">
+        <span className="block text-md md:text-lg font-bold text-error-container">Weather unavailable</span>
+        <span className="block text-md md:text-lg font-medium text-primary-container">Incomplete API response</span>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <span className="text-2xl md:text-3xl">
+        {getWeatherEmoji(weather.weatherCode)}
+      </span>
+      <span className="text-2xl md:text-3xl font-bold mt-1">
+        {Math.round(weather.temperature)}°C
+      </span>
+      <span className="text-md md:text-lg md:text-base font-bold uppercase tracking-widest">
+        {weather.location}
+      </span>
+      <span className="text-md md:text-lg md:text-base font-medium text-primary-container">
+        Feels {Math.round(weather.apparentTemperature)}° · {weather.precipitationProbability}% rain · {weather.precipitation.toFixed(1)} mm
+      </span>
+    </>
+  );
+}
+
 export function OfficeContext() {
   const time = useClock();
 
@@ -101,20 +152,21 @@ export function OfficeContext() {
   const { data: weatherData, isLoading: isWeatherLoading, isError: isWeatherError } = useGetApiWeather();
   const weather = weatherData?.data;
 
-
-
   const dateString = formatDateTime(time, { weekday: 'long', month: 'long', day: 'numeric' }, 'en-SE');
   const timeString = formatDateTime(time, { hour: '2-digit', minute: '2-digit', hour12: false }, 'en-SE');
 
   const formatEventTime = (startTimeStr?: string) => {
     if (!startTimeStr) {
-      throw new Error("Cannot format empty event start time string.");
+      return "--:--";
     }
-    const formatted = formatDateTime(startTimeStr, { hour: '2-digit', minute: '2-digit', hour12: false });
-    if (!formatted) {
-      throw new Error(`Invalid start time string: "${startTimeStr}"`);
+    
+    try {
+      const formatted = formatDateTime(startTimeStr, { hour: '2-digit', minute: '2-digit', hour12: false });
+      return formatted || "--:--";
+    } catch (error) {
+      console.error(`Failed to format event start time: "${startTimeStr}"`, error);
+      return "--:--";
     }
-    return formatted;
   };
 
   return (
@@ -124,36 +176,14 @@ export function OfficeContext() {
           <span className="text-md md:text-lg font-black text-brand-accent uppercase tracking-widest mb-1">{dateString}</span>
           <span className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter leading-none">{timeString}</span>
         </div>
-        {isWeatherLoading ? (
-          <div className="flex flex-col items-start sm:items-end text-left sm:text-right shrink-0 text-md md:text-lg font-bold text-primary-container" role="status">
-            Loading weather…
-          </div>
-        ) : isWeatherError ? (
-          <div className="flex flex-col items-start sm:items-end text-left sm:text-right shrink-0" role="alert">
-            <span className="block text-md md:text-lg font-bold text-error-container">Weather unavailable</span>
-            <span className="block text-md md:text-lg font-medium text-primary-container">API request failed</span>
-          </div>
-        ) : !hasCompleteWeather(weather) ? (
-          <div className="flex flex-col items-start sm:items-end text-left sm:text-right shrink-0" role="alert">
-            <span className="block text-md md:text-lg font-bold text-error-container">Weather unavailable</span>
-            <span className="block text-md md:text-lg font-medium text-primary-container">Incomplete API response</span>
-          </div>
-        ) : (
-          <div className="flex flex-col items-start sm:items-end text-left sm:text-right shrink-0">
-            <span className="text-2xl md:text-3xl">
-              {getWeatherEmoji(weather.weatherCode)}
-            </span>
-            <span className="text-2xl md:text-3xl font-bold mt-1">
-              {Math.round(weather.temperature)}°C
-            </span>
-            <span className="text-md md:text-lg md:text-base font-bold uppercase tracking-widest">
-              {weather.location}
-            </span>
-            <span className="text-md md:text-lg md:text-base font-medium text-primary-container">
-              Feels {Math.round(weather.apparentTemperature)}° · {weather.precipitationProbability}% rain · {weather.precipitation.toFixed(1)} mm
-            </span>
-          </div>
-        )}
+        
+        <div className="flex flex-1 flex-col sm:items-end text-right shrink-0">
+          <WeatherContent 
+            isLoading={isWeatherLoading}
+            isError={isWeatherError}
+            weather={weather}
+          />
+        </div>
       </div>
 
       {/* Event list */}

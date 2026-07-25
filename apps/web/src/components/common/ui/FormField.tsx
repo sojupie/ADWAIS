@@ -60,7 +60,7 @@ const variantClasses: Record<FieldVariant, string> = {
 };
 
 const densityClasses: Record<FieldDensity, string> = {
-  compact: 'min-h-10 px-3 py-2 text-sm',
+  compact: 'min-h-9 px-3 py-1.5 text-sm',
   default: 'min-h-12 px-4 py-3 text-base',
 };
 
@@ -167,7 +167,7 @@ export function FormField(props: FormFieldProps) {
           aria-invalid={Boolean(props.error) || undefined}
           aria-describedby={describedBy}
           variant={variant === 'plain' ? 'plain' : variant === 'outlined' ? 'outlined' : 'filled'}
-          size={density === 'compact' ? 'md' : 'lg'}
+          size={density === 'compact' ? 'sm' : 'lg'}
           className={controlClassName}
         >
           {props.children}

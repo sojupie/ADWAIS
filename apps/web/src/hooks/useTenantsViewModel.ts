@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useTenantsQuery, useCreateTenantMutation, useDeleteTenantMutation } from './useTenantQueries';
-import { useMonitorsQuery, useUnassignedMonitorsQuery, useCreateMonitorMutation, useControlMonitorMutation, useAssignMonitorMutation, useUnassignMonitorMutation } from './useMonitorQueries';
+import { useMonitorsQuery, useUnassignedMonitorsQuery, useCreateMonitorMutation, useDeleteMonitorMutation, useControlMonitorMutation, useAssignMonitorMutation, useUnassignMonitorMutation } from './useMonitorQueries';
 import { useCurrentUser } from './useCurrentUser';
 import type { UptimeMonitorDto } from '@types';
 import { DEFAULT_UPTIME_MONITOR_TYPE } from '../utils/monitorTypeHelper';
@@ -26,7 +26,7 @@ export function useTenantsViewModel() {
 
     const [monitorSort, setMonitorSort] = useState<'asc' | 'desc'>('asc');
     const [monitorSearch, setMonitorSearch] = useState('');
-    const [monitorFilters, setMonitorFilters] = useState<{ assignment: 'all' | 'assigned' | 'unassigned'; tag: string }>({ assignment: 'all', tag: 'all' });
+    const [monitorFilters, setMonitorFilters] = useState<{ assignment: 'all' | 'assigned' | 'unassigned'; tag: string; status: 'all' | 'enabled' | 'disabled'; type: string }>({ assignment: 'all', tag: 'all', status: 'all', type: 'all' });
 
     // Queries & Mutations from custom hooks
     const { data: tenants } = useTenantsQuery();
@@ -43,6 +43,7 @@ export function useTenantsViewModel() {
         setIsCreatingMonitor(false);
         setNewMonitorDraft({ name: '', url: '', type: DEFAULT_UPTIME_MONITOR_TYPE, uptimeSla: '' });
     });
+    const deleteMonitor = useDeleteMonitorMutation();
     const toggleMonitor = useControlMonitorMutation();
     const assignMonitor = useAssignMonitorMutation();
     const unassignMonitor = useUnassignMonitorMutation();
@@ -71,6 +72,14 @@ export function useTenantsViewModel() {
             }
         });
         return Array.from(tagsSet).sort();
+    }, [allMonitors]);
+
+    const allUniqueTypes = useMemo(() => {
+        const typesSet = new Set<string>();
+        allMonitors.forEach((m) => {
+            if (m.type) typesSet.add(m.type);
+        });
+        return Array.from(typesSet).sort();
     }, [allMonitors]);
 
     const SYSTEM_TENANT_ID = '00000000-0000-0000-0000-000000000001';
@@ -107,8 +116,11 @@ export function useTenantsViewModel() {
                 const matchTenant = m.tenantName?.toLowerCase().includes(q);
                 if (!matchName && !matchUrl && !matchType && !matchTenant) return false;
             }
-            if (monitorFilters.assignment === 'assigned') return m.tenantId != null && m.tenantId !== SYSTEM_TENANT_ID;
-            if (monitorFilters.assignment === 'unassigned') return m.tenantId == null || m.tenantId === SYSTEM_TENANT_ID;
+            if (monitorFilters.assignment === 'assigned' && (m.tenantId == null || m.tenantId === SYSTEM_TENANT_ID)) return false;
+            if (monitorFilters.assignment === 'unassigned' && (m.tenantId != null && m.tenantId !== SYSTEM_TENANT_ID)) return false;
+            if (monitorFilters.status === 'enabled' && !m.uptimeMonitorEnabled) return false;
+            if (monitorFilters.status === 'disabled' && m.uptimeMonitorEnabled) return false;
+            if (monitorFilters.type !== 'all' && m.type !== monitorFilters.type) return false;
             return true;
         }).filter((m) => {
             if (monitorFilters.tag === 'all') return true;
@@ -127,6 +139,7 @@ export function useTenantsViewModel() {
         unassignedMonitors,
         allMonitors,
         allUniqueTags,
+        allUniqueTypes,
         sortedTenants,
         filteredAndSortedMonitors,
         isCreatingTenant,
@@ -152,6 +165,7 @@ export function useTenantsViewModel() {
         createTenant,
         deleteTenant,
         createMonitor,
+        deleteMonitor,
         toggleMonitor,
         assignMonitor,
         unassignMonitor,

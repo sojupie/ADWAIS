@@ -1,0 +1,246 @@
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate, useParams } from '@tanstack/react-router';
+import { Activity, Save, X, Unlink } from 'lucide-react';
+import { useTenantsViewModel } from '../../hooks/useTenantsViewModel';
+import { useUpdateMonitorMutation, useControlMonitorMutation } from '../../hooks/useMonitorQueries';
+import { SettingsPanel } from '../../components/common/layout/SettingsPanel';
+import { SettingsPanelHeader } from '../../components/common/layout/SettingsPanelHeader';
+import { FormField, CheckboxField } from '../../components/common/ui/FormField';
+import { UPTIME_MONITOR_TYPES } from '../../utils/monitorTypeHelper';
+import type { UptimeMonitorDto } from '@types';
+
+function MonitorDetailForm({ monitor, isAdmin, onBack }: { monitor: UptimeMonitorDto, isAdmin: boolean, onBack: () => void }) {
+  const updateMonitor = useUpdateMonitorMutation();
+  const controlMonitor = useControlMonitorMutation();
+  const { tenants, assignMonitor, unassignMonitor } = useTenantsViewModel();
+  
+  const getInitialDraft = (m: UptimeMonitorDto) => ({
+    name: m.name || '',
+    url: m.url || '',
+    type: m.type || UPTIME_MONITOR_TYPES[0],
+    uptimeSla: m.uptimeSla ? m.uptimeSla.toString() : '',
+  });
+
+  const [draft, setDraft] = useState(getInitialDraft(monitor));
+  const lastMonitorRef = useRef(monitor);
+
+  useEffect(() => {
+    setDraft(currentDraft => {
+      const lastKnownDraft = getInitialDraft(lastMonitorRef.current);
+      const isCurrentlyDirty = 
+        currentDraft.name !== lastKnownDraft.name ||
+        currentDraft.url !== lastKnownDraft.url ||
+        currentDraft.type !== lastKnownDraft.type ||
+        currentDraft.uptimeSla !== lastKnownDraft.uptimeSla;
+      
+      lastMonitorRef.current = monitor;
+
+      if (!isCurrentlyDirty) {
+        return getInitialDraft(monitor);
+      }
+      return currentDraft;
+    });
+  }, [monitor]);
+
+  const isDirty =
+    draft.name !== (monitor.name || '') ||
+    draft.url !== (monitor.url || '') ||
+    draft.type !== (monitor.type || UPTIME_MONITOR_TYPES[0]) ||
+    draft.uptimeSla !== (monitor.uptimeSla ? monitor.uptimeSla.toString() : '');
+
+  const handleSave = () => {
+    const payload: Partial<UptimeMonitorDto> = {};
+    if (draft.name !== (monitor.name || '')) payload.name = draft.name;
+    if (draft.url !== (monitor.url || '')) payload.url = draft.url;
+    if (draft.type !== (monitor.type || UPTIME_MONITOR_TYPES[0])) payload.type = draft.type;
+    
+    const sla = draft.uptimeSla === '' ? null : parseFloat(draft.uptimeSla);
+    if (sla !== monitor.uptimeSla) {
+        payload.uptimeSla = sla;
+    }
+
+    updateMonitor.mutate(
+      { id: monitor.id, payload },
+      {
+        onSuccess: () => {
+          setTimeout(() => {
+            updateMonitor.reset();
+          }, 3000);
+        }
+      }
+    );
+  };
+
+  const handleCancel = () => {
+    setDraft(getInitialDraft(monitor));
+  };
+
+  const SYSTEM_TENANT_ID = '00000000-0000-0000-0000-000000000001';
+  const isAssignedToRealTenant = monitor.tenantId != null && monitor.tenantId !== SYSTEM_TENANT_ID;
+  const assignedTenant = isAssignedToRealTenant ? tenants?.find(t => t.id === monitor.tenantId) : null;
+  const availableTenants = tenants?.filter(t => t.id !== SYSTEM_TENANT_ID) || [];
+
+  return (
+    <>
+        <SettingsPanelHeader
+          title="Edit Monitor"
+          subtitle={`Editing details for ${monitor.name}`}
+          icon={<Activity size={24} />}
+          onBack={onBack}
+        >
+          {isAdmin && (
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleCancel}
+                disabled={!isDirty || updateMonitor.isPending}
+                className="inline-flex min-h-11 items-center gap-2 rounded-full px-4 text-sm font-bold text-on-surface-variant transition-colors hover:bg-surface-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-secondary disabled:cursor-not-allowed disabled:text-on-surface/[0.38] disabled:hover:bg-transparent disabled:hover:text-on-surface/[0.38]"
+              >
+                <X size={16} /> Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={!isDirty || updateMonitor.isPending}
+                className="inline-flex min-h-11 items-center gap-2 rounded-full bg-primary-container px-4 text-sm font-bold text-on-primary-container transition-colors hover:bg-primary hover:text-on-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:bg-on-surface/[0.1] disabled:text-on-surface/[0.38] disabled:hover:bg-on-surface/[0.1] disabled:hover:text-on-surface/[0.38]"
+              >
+                <Save size={16} /> Save Changes
+              </button>
+            </div>
+          )}
+        </SettingsPanelHeader>
+
+      <div className="custom-scrollbar flex-1 overflow-y-auto px-6 py-6">
+        <div className="grid grid-cols-1 items-start gap-10 xl:grid-cols-2">
+          
+          <div className="space-y-6">
+            <h3 className="text-lg font-bold text-on-surface">Monitor Details</h3>
+            <FormField
+              id="monitor-name"
+              label="Name"
+              value={draft.name}
+              onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+              disabled={!isAdmin}
+            />
+
+            <FormField
+              id="monitor-url"
+              label="Target URL"
+              type="url"
+              value={draft.url}
+              onChange={(e) => setDraft({ ...draft, url: e.target.value })}
+              disabled={!isAdmin}
+            />
+
+            <FormField
+                as="select"
+                id="monitor-type"
+                label="Monitor Type"
+                value={draft.type}
+                onChange={e => setDraft({ ...draft, type: e.target.value })}
+                disabled={!isAdmin}
+            >
+                {UPTIME_MONITOR_TYPES.map(type => <option key={type} value={type}>{type}</option>)}
+            </FormField>
+
+            <FormField
+              id="monitor-sla"
+              label="Uptime SLA (%)"
+              type="number"
+              step="0.1"
+              value={draft.uptimeSla}
+              onChange={(e) => setDraft({ ...draft, uptimeSla: e.target.value })}
+              disabled={!isAdmin}
+            />
+
+            <CheckboxField
+              id="monitor-enabled"
+              label="Monitor Enabled"
+              checked={monitor.uptimeMonitorEnabled ?? true}
+              disabled={!isAdmin || controlMonitor.isPending}
+              onChange={e => {
+                  if (monitor.id !== undefined) {
+                      controlMonitor.mutate({ id: monitor.id, action: e.target.checked ? 'start' : 'pause' });
+                  }
+              }}
+            />
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="text-lg font-bold text-on-surface">Tenant Assignment</h3>
+            
+            {assignedTenant ? (
+                <div className="flex items-center justify-between p-4 bg-surface border border-outline-variant rounded-xl">
+                    <div>
+                        <div className="text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1">Assigned Owner</div>
+                        <div className="font-bold text-on-surface">{assignedTenant.name}</div>
+                        <div className="text-sm text-on-surface-variant">{assignedTenant.litiumBaseUrl}</div>
+                    </div>
+                    {isAdmin && (
+                        <button
+                            type="button"
+                            onClick={() => monitor.id !== undefined && unassignMonitor.mutate(monitor.id)}
+                            disabled={unassignMonitor.isPending}
+                            className="flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-bold text-error hover:bg-error-container hover:text-on-error-container transition-colors disabled:opacity-50"
+                        >
+                            <Unlink size={16} /> Unassign
+                        </button>
+                    )}
+                </div>
+            ) : (
+                <p className="text-sm text-on-surface-variant italic">This monitor is currently unassigned (system monitor).</p>
+            )}
+
+            {isAdmin && (
+                <div className="pt-2">
+                    <FormField
+                        as="select"
+                        id="assign-tenant"
+                        label={assignedTenant ? "Re-assign to another Tenant" : "Assign to Tenant"}
+                        value=""
+                        onChange={(e) => {
+                            if (e.target.value && monitor.id !== undefined) {
+                                assignMonitor.mutate({ id: monitor.id, tenantId: e.target.value });
+                            }
+                        }}
+                        disabled={assignMonitor.isPending}
+                    >
+                        <option value="" disabled>Select a tenant...</option>
+                        {availableTenants.map(t => (
+                            <option key={t.id} value={t.id}>{t.name}</option>
+                        ))}
+                    </FormField>
+                </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+export function MonitorDetailView() {
+  const navigate = useNavigate();
+  const { monitorId } = useParams({ strict: false }) as { monitorId: string };
+  const { allMonitors, isAdmin } = useTenantsViewModel();
+  
+  const monitorIdNumber = parseInt(monitorId, 10);
+  const monitor = allMonitors.find(m => m.id === monitorIdNumber);
+
+  return (
+    <div className="flex h-full min-h-0 flex-col gap-4">
+      <SettingsPanel className="flex-1">
+        {!monitor ? (
+            <SettingsPanelHeader
+                title="Edit Monitor"
+                subtitle="Loading..."
+                icon={<Activity size={24} />}
+                onBack={() => void navigate({ to: '/settings/monitors' })}
+            />
+        ) : (
+            <MonitorDetailForm key={monitor.id} monitor={monitor} isAdmin={isAdmin} onBack={() => void navigate({ to: '/settings/monitors' })} />
+        )}
+      </SettingsPanel>
+    </div>
+  );
+}

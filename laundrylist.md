@@ -8,5 +8,4 @@
   - weekly calendar cards should show end time. span across multiple days and hours
 - ping litium env for health checks (to see if base url is correct after adding it to a tenant card).
 - revamp settings ui
-- fix settings input bugs. cant enter tags
 - create github pipeline

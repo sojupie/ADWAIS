@@ -36,9 +36,15 @@ describe('SettingsFilterMenu', () => {
 
     render(
       <MonitorSettingsFilterMenu
-        filters={{ assignment: 'all', tag: 'all' }}
+        filters={{
+          assignment: 'all',
+          tag: 'all',
+          status: 'all',
+          type: 'all',
+        }}
         setFilters={setFilters}
         tags={['DEV', 'PROD']}
+        types={['API', 'Ping']}
         sort="asc"
         setSort={vi.fn()}
       />,

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { Play, Pause, X, Lock } from 'lucide-react';
 import type { UptimeMonitorDto, TenantResponseDto, UpdateMonitorRequestDto } from '@types';
 import { TileCard } from '../../common/layout/TileCard';

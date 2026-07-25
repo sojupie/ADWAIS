@@ -42,7 +42,7 @@ export function ManualBackfillPanel({ tenants, triggerBackfill, disabled }: Manu
             <option key={t.id} value={t.id}>{t.name} ({t.type})</option>
           ))}
       </Select>
-      <div className="grid grid-cols-1 gap-1 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <DateTimePickerField
           id="backfill-start-date"
           label="Start Date"

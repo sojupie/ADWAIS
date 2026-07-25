@@ -83,7 +83,8 @@ export function MobileNavigationMenu({ isOpen, pathname, financialTimeframe, fle
             <nav className="flex flex-col gap-2" aria-label="Settings navigation links">
               <Link to="/settings/jobs" onClick={onClose} className={mobileLinkClass(pathname === '/settings/jobs', 'gap-3')} aria-current={pathname === '/settings/jobs' ? 'page' : undefined}>Background Jobs</Link>
               <Link to="/settings/configuration" onClick={onClose} className={mobileLinkClass(pathname === '/settings/configuration')}>Configuration</Link>
-              <Link to="/settings/tenants" onClick={onClose} className={mobileLinkClass(pathname === '/settings/tenants')}>Tenants &amp; Monitors</Link>
+              <Link to="/settings/tenants" onClick={onClose} className={mobileLinkClass(pathname === '/settings/tenants')}>Tenants</Link>
+              <Link to="/settings/monitors" onClick={onClose} className={mobileLinkClass(pathname === '/settings/monitors')}>Monitors</Link>
               <Link to="/settings/events" onClick={onClose} className={mobileLinkClass(pathname === '/settings/events')}>Events &amp; Health</Link>
               <Link to="/settings/users" onClick={onClose} className={mobileLinkClass(pathname === '/settings/users')}>Users</Link>
               <Link to="/settings/authentication" onClick={onClose} className={mobileLinkClass(pathname === '/settings/authentication')}>Authentication</Link>

@@ -24,6 +24,8 @@ interface TenantSettingsFilterMenuProps {
 interface MonitorFilters {
   assignment: 'all' | 'assigned' | 'unassigned';
   tag: string;
+  status: 'all' | 'enabled' | 'disabled';
+  type: string;
 }
 
 interface MonitorSettingsFilterMenuProps {
@@ -32,6 +34,7 @@ interface MonitorSettingsFilterMenuProps {
   sort: SortOrder;
   setSort: (sort: SortOrder) => void;
   tags: string[];
+  types: string[];
 }
 
 function SortToggle({ value, onChange }: {
@@ -126,6 +129,7 @@ function MonitorFilterPanel({
   sort,
   setSort,
   tags,
+  types,
   floatingStyle,
 }: MonitorSettingsFilterMenuProps & { floatingStyle: CSSProperties }) {
   return (
@@ -154,6 +158,52 @@ function MonitorFilterPanel({
             })}
           />
         </div>
+      </div>
+
+      <div>
+        <FilterSectionHeader
+          label="Status"
+          active={filters.status !== 'all'}
+          onClear={() => setFilters({ ...filters, status: 'all' })}
+        />
+        <div className="mt-1 flex flex-wrap gap-2">
+          <FilterChip
+            label="Enabled"
+            checked={filters.status === 'enabled'}
+            onChange={() => setFilters({
+              ...filters,
+              status: filters.status === 'enabled' ? 'all' : 'enabled',
+            })}
+          />
+          <FilterChip
+            label="Disabled"
+            checked={filters.status === 'disabled'}
+            onChange={() => setFilters({
+              ...filters,
+              status: filters.status === 'disabled' ? 'all' : 'disabled',
+            })}
+          />
+        </div>
+      </div>
+
+      <div>
+        <FilterSectionHeader
+          label="Type"
+          active={filters.type !== 'all'}
+          onClear={() => setFilters({ ...filters, type: 'all' })}
+        />
+        <Select
+          aria-label="Type"
+          value={filters.type}
+          onChange={event => setFilters({ ...filters, type: event.target.value })}
+          variant="outlined"
+          size="md"
+          containerClassName="mt-1"
+          className="md:text-md"
+        >
+          <option value="all">All types</option>
+          {types.map(type => <option key={type} value={type}>{type}</option>)}
+        </Select>
       </div>
 
       <div>
@@ -207,8 +257,8 @@ export function TenantSettingsFilterMenu(props: TenantSettingsFilterMenuProps) {
 }
 
 export function MonitorSettingsFilterMenu(props: MonitorSettingsFilterMenuProps) {
-  const activeCount = Number(props.filters.assignment !== 'all') + Number(props.filters.tag !== 'all');
-  const clearAll = () => props.setFilters({ assignment: 'all', tag: 'all' });
+  const activeCount = Number(props.filters.assignment !== 'all') + Number(props.filters.tag !== 'all') + Number(props.filters.status !== 'all') + Number(props.filters.type !== 'all');
+  const clearAll = () => props.setFilters({ assignment: 'all', tag: 'all', status: 'all', type: 'all' });
 
   return (
     <FloatingFilterMenu

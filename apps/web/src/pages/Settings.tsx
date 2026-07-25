@@ -13,7 +13,8 @@ export function Settings() {
     const tabs = [
         { id: 'jobs', label: 'Jobs', path: '/settings/jobs' },
         { id: 'configuration', label: 'Configuration', path: '/settings/configuration' },
-        { id: 'tenants', label: 'Tenants & monitors', path: '/settings/tenants' },
+        { id: 'tenants', label: 'Tenants', path: '/settings/tenants' },
+        { id: 'monitors', label: 'Monitors', path: '/settings/monitors' },
         { id: 'events', label: 'Health & events', path: '/settings/events' },
         { id: 'users', label: 'Users', path: '/settings/users' },
         { id: 'authentication', label: 'Authentication', path: '/settings/authentication' },
@@ -52,7 +53,7 @@ export function Settings() {
                 </main>
             </div>
             
-            <aside className="hidden contained:flex w-60 shrink-0 flex-col self-stretch bg-surface-container p-2 -mt-3 -mr-3 -mb-3 m3-elevation-3 xl:flex">
+            <aside className="hidden lg:flex w-60 shrink-0 flex-col self-stretch bg-surface-container p-2 -mt-3 -mr-3 -mb-3 m3-elevation-3">
                 <nav aria-label="Settings sections" className="flex flex-col gap-1">
                     {tabs.map((tab) => {
                         const isActive = currentPath.startsWith(tab.path);

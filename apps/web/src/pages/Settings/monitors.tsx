@@ -1,36 +1,38 @@
 import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { Building2, Plus, Edit2, Trash2 } from 'lucide-react';
+import { Activity, Plus, Edit2, Trash2 } from 'lucide-react';
 import { SettingsPanelHeader } from '../../components/common/layout/SettingsPanelHeader';
 import { SearchInput } from '../../components/common/ui/SearchInput';
 import { SettingsPanel } from '../../components/common/layout/SettingsPanel';
 import { EmptyState } from '../../components/common/ui/EmptyState';
 import { useTenantsViewModel } from '../../hooks/useTenantsViewModel';
-import { CreateTenantModal } from '../../components/settings/tenants/CreateTenantModal';
-import { TenantRow } from '../../components/settings/tenants/TenantRow';
-import { TenantSettingsFilterMenu } from '../../components/settings/tenants/SettingsFilterMenu';
+import { CreateMonitorModal } from '../../components/settings/tenants/CreateMonitorModal';
+import { MonitorRow } from '../../components/settings/tenants/MonitorRow';
+import { MonitorSettingsFilterMenu } from '../../components/settings/tenants/SettingsFilterMenu';
 
-export function TenantsMonitorsView() {
+export function MonitorsView() {
     const navigate = useNavigate();
     const {
         isAdmin,
-        tenants,
-        sortedTenants,
-        tenantSearch,
-        setTenantSearch,
-        tenantFilters,
-        setTenantFilters,
-        tenantSort,
-        setTenantSort,
-        createTenant,
-        deleteTenant,
+        allMonitors,
+        filteredAndSortedMonitors,
+        monitorSearch,
+        setMonitorSearch,
+        monitorFilters,
+        setMonitorFilters,
+        monitorSort,
+        setMonitorSort,
+        allUniqueTags,
+        allUniqueTypes,
+        createMonitor,
+        deleteMonitor,
     } = useTenantsViewModel();
 
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    const [selectedTenantIds, setSelectedTenantIds] = useState<Set<string>>(new Set());
+    const [selectedMonitorIds, setSelectedMonitorIds] = useState<Set<number>>(new Set());
 
-    const handleSelect = (id: string) => {
-        setSelectedTenantIds((prev) => {
+    const handleSelect = (id: number) => {
+        setSelectedMonitorIds((prev) => {
             const next = new Set(prev);
             if (next.has(id)) {
                 next.delete(id);
@@ -42,18 +44,18 @@ export function TenantsMonitorsView() {
     };
 
     const handleDeleteSelected = () => {
-        if (confirm(`Are you sure you want to delete ${selectedTenantIds.size} tenant(s)?`)) {
-            const ids = Array.from(selectedTenantIds);
-            ids.forEach(id => deleteTenant.mutate(id));
-            setSelectedTenantIds(new Set());
+        if (confirm(`Are you sure you want to delete ${selectedMonitorIds.size} monitor(s)?`)) {
+            const ids = Array.from(selectedMonitorIds);
+            ids.forEach(id => deleteMonitor.mutate(id));
+            setSelectedMonitorIds(new Set());
         }
     };
 
     const handleEditSelected = () => {
-        if (selectedTenantIds.size === 1) {
-            const id = selectedTenantIds.values().next().value;
-            if (id) {
-                void navigate({ to: '/settings/tenants/$tenantId', params: { tenantId: id } });
+        if (selectedMonitorIds.size === 1) {
+            const id = selectedMonitorIds.values().next().value;
+            if (id !== undefined) {
+                void navigate({ to: '/settings/monitors/$monitorId', params: { monitorId: String(id) } });
             }
         }
     };
@@ -62,23 +64,25 @@ export function TenantsMonitorsView() {
         <div className="flex flex-col gap-4 h-full min-h-0">
             <SettingsPanel className="flex-1">
                 <SettingsPanelHeader
-                    title="Tenants"
-                    subtitle="Connected commerce environments and credentials."
-                    icon={<Building2 size={24} />}
+                    title="Fleet Monitors"
+                    subtitle="External availability and response-time checks."
+                    icon={<Activity size={24} />}
                 >
                     <SearchInput
-                        value={tenantSearch}
-                        onChange={setTenantSearch}
-                        placeholder="Search tenants..."
-                    />
-                    
-                    <TenantSettingsFilterMenu
-                        filters={tenantFilters}
-                        setFilters={setTenantFilters}
-                        sort={tenantSort}
-                        setSort={setTenantSort}
+                        value={monitorSearch}
+                        onChange={setMonitorSearch}
+                        placeholder="Search monitors..."
                     />
 
+                    <MonitorSettingsFilterMenu
+                        filters={monitorFilters}
+                        setFilters={setMonitorFilters}
+                        sort={monitorSort}
+                        setSort={setMonitorSort}
+                        tags={allUniqueTags}
+                        types={allUniqueTypes}
+                    />
+                    
                     {isAdmin && (
                         <>
                             <button
@@ -91,7 +95,7 @@ export function TenantsMonitorsView() {
                             <button
                                 type="button"
                                 onClick={handleEditSelected}
-                                disabled={selectedTenantIds.size !== 1}
+                                disabled={selectedMonitorIds.size !== 1}
                                 className="inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-full px-4 text-sm font-bold text-on-surface transition-colors hover:bg-surface-container-high focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary disabled:cursor-not-allowed disabled:text-on-surface/[0.38] disabled:hover:bg-transparent disabled:hover:text-on-surface/[0.38]"
                             >
                                 <Edit2 size={16} /> Edit
@@ -99,7 +103,7 @@ export function TenantsMonitorsView() {
                             <button
                                 type="button"
                                 onClick={handleDeleteSelected}
-                                disabled={selectedTenantIds.size === 0}
+                                disabled={selectedMonitorIds.size === 0}
                                 className="inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-full px-4 text-sm font-bold text-error transition-colors hover:bg-error-container hover:text-on-error-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-error disabled:cursor-not-allowed disabled:text-on-surface/[0.38] disabled:hover:bg-transparent disabled:hover:text-on-surface/[0.38]"
                             >
                                 <Trash2 size={16} /> Delete
@@ -114,24 +118,25 @@ export function TenantsMonitorsView() {
                             <thead className="border-b border-outline-variant bg-surface-container text-on-surface-variant">
                                 <tr>
                                     <th className="w-12 px-4 py-4 sm:px-5"></th>
-                                    <th className="px-4 py-4 text-sm font-black uppercase tracking-widest sm:px-5">Tenant</th>
-                                    <th className="px-4 py-4 text-sm font-black uppercase tracking-widest sm:px-5">Litium URL</th>
+                                    <th className="px-4 py-4 text-sm font-black uppercase tracking-widest sm:px-5">Monitor</th>
+                                    <th className="px-4 py-4 text-sm font-black uppercase tracking-widest sm:px-5">URL</th>
+                                    <th className="w-32 px-4 py-4 text-sm font-black uppercase tracking-widest sm:px-5">Type</th>
+                                    <th className="w-32 px-4 py-4 text-sm font-black uppercase tracking-widest sm:px-5">Assignment</th>
                                     <th className="w-32 px-4 py-4 text-sm font-black uppercase tracking-widest sm:px-5">Status</th>
-                                    <th className="w-32 px-4 py-4 text-sm font-black uppercase tracking-widest sm:px-5">Service Token</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-outline-variant">
-                                {sortedTenants.map((t) => (
-                                    <TenantRow
-                                        key={t.id}
-                                        t={t}
-                                        selected={selectedTenantIds.has(t.id)}
-                                        onSelect={() => isAdmin && handleSelect(t.id)}
-                                        onDoubleClick={() => isAdmin && void navigate({ to: '/settings/tenants/$tenantId', params: { tenantId: t.id } })}
+                                {filteredAndSortedMonitors.map((m) => (
+                                    <MonitorRow
+                                        key={m.id}
+                                        m={m}
+                                        selected={m.id !== undefined ? selectedMonitorIds.has(m.id) : false}
+                                        onSelect={() => isAdmin && m.id !== undefined && handleSelect(m.id)}
+                                        onDoubleClick={() => isAdmin && m.id !== undefined && void navigate({ to: '/settings/monitors/$monitorId', params: { monitorId: String(m.id) } })}
                                     />
                                 ))}
-                                {(!tenants || tenants.length === 0) && (
-                                    <EmptyState message="No tenants found" isTableRow colSpan={5} />
+                                {allMonitors.length === 0 && (
+                                    <EmptyState message="No monitors found" isTableRow colSpan={6} />
                                 )}
                             </tbody>
                         </table>
@@ -140,10 +145,10 @@ export function TenantsMonitorsView() {
             </SettingsPanel>
 
             {isAdmin && (
-                <CreateTenantModal 
+                <CreateMonitorModal 
                     isOpen={isAddModalOpen} 
                     onClose={() => setIsAddModalOpen(false)} 
-                    createTenant={createTenant} 
+                    createMonitor={createMonitor} 
                 />
             )}
         </div>

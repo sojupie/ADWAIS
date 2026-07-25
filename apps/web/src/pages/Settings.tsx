@@ -2,13 +2,16 @@
 import { Link, Outlet, useLocation } from "@tanstack/react-router";
 import { useQueryClient } from '@tanstack/react-query';
 import { RefreshCw } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useContext } from 'react';
+import { createPortal } from 'react-dom';
+import { RightSidebarSlotContext } from '../components/common/ui/RightSidebarSlotContext';
 
 export function Settings() {
     const queryClient = useQueryClient();
     const [isRefreshing, setIsRefreshing] = useState(false);
     const location = useLocation();
     const currentPath = location.pathname;
+    const rightSidebar = useContext(RightSidebarSlotContext);
 
     const tabs = [
         { id: 'jobs', label: 'Jobs', path: '/settings/jobs' },
@@ -19,6 +22,28 @@ export function Settings() {
         { id: 'users', label: 'Users', path: '/settings/users' },
         { id: 'authentication', label: 'Authentication', path: '/settings/authentication' },
     ];
+
+    const sidebarContent = (
+        <nav aria-label="Settings sections" className="flex flex-col gap-1 p-2">
+            {tabs.map((tab) => {
+                const isActive = currentPath.startsWith(tab.path);
+                return (
+                    <Link
+                        key={tab.id}
+                        to={tab.path}
+                        aria-current={isActive ? 'page' : undefined}
+                        className={`flex min-h-12 items-center rounded-full px-5 text-sm font-bold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary ${
+                            isActive
+                                ? 'bg-surface-container-highest text-on-primary-container'
+                                : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
+                        }`}
+                    >
+                        {tab.label}
+                    </Link>
+                );
+            })}
+        </nav>
+    );
 
     return (
         <div className="flex flex-1 min-h-0 w-full flex-row gap-4">
@@ -53,27 +78,7 @@ export function Settings() {
                 </main>
             </div>
             
-            <aside className="hidden lg:flex w-60 shrink-0 flex-col self-stretch bg-surface-container p-2 -mt-3 -mr-3 -mb-3 m3-elevation-3">
-                <nav aria-label="Settings sections" className="flex flex-col gap-1">
-                    {tabs.map((tab) => {
-                        const isActive = currentPath.startsWith(tab.path);
-                        return (
-                            <Link
-                                key={tab.id}
-                                to={tab.path}
-                                aria-current={isActive ? 'page' : undefined}
-                                className={`flex min-h-12 items-center rounded-full px-5 text-sm font-bold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary ${
-                                    isActive
-                                        ? 'bg-surface-container-highest text-on-primary-container'
-                                        : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
-                                }`}
-                            >
-                                {tab.label}
-                            </Link>
-                        );
-                    })}
-                </nav>
-            </aside>
+            {rightSidebar.container ? createPortal(sidebarContent, rightSidebar.container) : null}
         </div>
     );
 }

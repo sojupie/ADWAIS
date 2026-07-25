@@ -13,7 +13,7 @@ export function ConfigurationView() {
     const disabled = role !== 'Admin';
 
     return (
-        <div className="grid grid-cols-1 landscape-contained:grid-cols-2 gap-4 h-full min-h-0">
+        <div className="grid grid-cols-1 landscape-contained:grid-cols-2 gap-4 contained:h-full contained:min-h-0">
             <div className="flex flex-col gap-4 min-h-0 h-full">
                 <FetchIntervalsForm intervals={intervals} updateIntervals={updateIntervals} disabled={disabled} />
                 <CalendarSubscriptionsPanel disabled={disabled} />

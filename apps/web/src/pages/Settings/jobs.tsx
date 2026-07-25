@@ -31,7 +31,7 @@ export function BackgroundJobsView() {
     ];
 
     return (
-        <div className="grid grid-cols-1 landscape-contained:grid-cols-2 portrait-contained:grid-rows-2 gap-4 h-full min-h-0">
+        <div className="grid grid-cols-1 landscape-contained:grid-cols-2 portrait-contained:grid-rows-2 gap-4 contained:h-full contained:min-h-0">
             {/* Top Action Section / Left Pane */}
             <div className="flex min-h-0 flex-col gap-4 h-full">
                 <SettingsPanel

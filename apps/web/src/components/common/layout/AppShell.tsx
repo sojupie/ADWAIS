@@ -10,6 +10,7 @@ import { useMediaQuery } from '../../../hooks/useMediaQuery';
 import { useVisualViewportCssVars } from '../../../hooks/useVisualViewportCssVars';
 import { useOrderNotifier } from '../../../hooks/useOrderNotifier';
 import { MobileFooterActionsSlotContext } from '../ui/MobileFooterActionsContext';
+import { RightSidebarSlotContext } from '../ui/RightSidebarSlotContext';
 
 type AppShellProps = {
   pathname: string;
@@ -52,6 +53,7 @@ export function AppShell({
   const [mobileFooterActionsPanel, setMobileFooterActionsPanel] = useState<HTMLDivElement | null>(null);
   const [mobileFooterActionsIndicator, setMobileFooterActionsIndicator] = useState<HTMLSpanElement | null>(null);
   const [mobileFooterQuickAction, setMobileFooterQuickAction] = useState<HTMLDivElement | null>(null);
+  const [rightSidebarContainer, setRightSidebarContainer] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
@@ -70,6 +72,7 @@ export function AppShell({
   }, [showProgressBar]);
 
   return (
+    <RightSidebarSlotContext.Provider value={{ container: rightSidebarContainer }}>
     <MobileFooterActionsSlotContext.Provider value={{
       panel: mobileFooterActionsPanel,
       indicator: mobileFooterActionsIndicator,
@@ -111,14 +114,19 @@ export function AppShell({
         </>
       )}
 
-      <main className="app-main flex-1 min-h-0 relative flex flex-col">
-        <div className="app-main-scroll bg-surface-dim flex-1 w-full px-3 pt-3 relative flex flex-col min-h-0 overflow-y-auto contained:overflow-hidden custom-scrollbar">
-          <div className="flex flex-col contained:flex-1 contained:min-h-0">
+      <main className="app-main flex-1 min-h-0 relative flex flex-row">
+        <div className="app-main-scroll bg-surface-dim flex-1 min-w-0 w-full px-3 pt-3 relative flex flex-col min-h-0 overflow-y-auto contained:overflow-hidden custom-scrollbar">
+          <div className="flex flex-col flex-1 min-h-0">
             <Outlet />
           </div>
         </div>
+        <aside
+          ref={setRightSidebarContainer}
+          className="hidden lg:flex w-60 shrink-0 flex-col bg-surface-container m3-elevation-3 z-10 empty:hidden"
+        />
       </main>
     </div>
     </MobileFooterActionsSlotContext.Provider>
+    </RightSidebarSlotContext.Provider>
   );
 }

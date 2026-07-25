@@ -30,7 +30,7 @@ function FleetMatrixTile({
     <button
       type="button"
       onClick={() => onMonitorSelect?.(monitor)}
-      className={`flex-1 min-w-[225px]  p-3 rounded-lg transition-all text-left border-2 relative overflow-hidden group min-h-22.5 shrink-0 flex flex-col justify-between min-w-0
+      className={`flex-1 min-w-[225px] max-w-[450px] p-3 rounded-lg transition-all text-left border-2 relative overflow-hidden group min-h-22.5 shrink-0 flex flex-col justify-between min-w-0
         ${theme.bg} ${theme.border} ${theme.text}
         ${isActive ? 'z-10 m3-elevation-3' : 'm3-elevation-2 hover:m3-elevation-3'}
         ${selectedMonitorId && !isActive ? 'opacity-30' : 'opacity-100'}
@@ -39,15 +39,17 @@ function FleetMatrixTile({
     >
       <div className="gap-2 relative z-10 flex flex-col h-full justify-between w-full min-w-0">
         <div className="flex flex-col w-full min-w-0">
-          <span className={`text-sm font-black ${theme.text} break-all tracking-tight line-clamp-2 h-[calc(2*1.25em)] border-b border-outline-variant pb-1 mb-2 leading-tight`}>
+          <div className={"flex flex-1 gap-2 border-b border-outline-variant pb-1 mb-2 items-start"}>
+          <span className={`w-3 h-3 rounded-full shrink-0 mt-0.5 ${theme.dot}`} aria-label={status} />
+          <span className={`text-sm font-black ${theme.text} break-all tracking-tight line-clamp-2 h-[calc(2*1.25em)] leading-tight`}>
             {displayUrl}
           </span>
+          </div>
           
           <div className="flex items-start justify-between gap-2 mt-0.5 min-w-0">
             <span className={`text-xs font-bold ${theme.mutedText} tracking-wider min-w-0 break-words`}>
               <span className="uppercase">{getMonitorType(monitor.type)}</span>
             </span>
-            <span className={`w-3 h-3 rounded-full shrink-0 mt-0.5 ${theme.dot}`} aria-label={status} />
           </div>
         </div>
 
@@ -123,7 +125,7 @@ export function FleetMatrix({
   });
 
   return (
-    <div className="flex flex-wrap gap-4 justify-center w-full min-w-0 pt-1 pb-4">
+    <div className="flex flex-wrap gap-4 justify-center contained:justify-start w-full min-w-0 pt-1 pb-4">
       {sortedMonitors.map((monitor) => (
         <FleetMatrixTile
           key={`${monitor.tenantId}-${monitor.id}`}

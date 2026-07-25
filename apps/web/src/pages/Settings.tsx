@@ -52,7 +52,7 @@ export function Settings() {
                 </main>
             </div>
             
-            <aside className="hidden contained:flex w-60 shrink-0 flex-col self-stretch bg-surface p-2 pr-0 -mt-3 -mr-3 -mb-3 m3-elevation-3 xl:flex">
+            <aside className="hidden contained:flex w-60 shrink-0 flex-col self-stretch bg-surface-container p-2 -mt-3 -mr-3 -mb-3 m3-elevation-3 xl:flex">
                 <nav aria-label="Settings sections" className="flex flex-col gap-1">
                     {tabs.map((tab) => {
                         const isActive = currentPath.startsWith(tab.path);
@@ -61,9 +61,9 @@ export function Settings() {
                                 key={tab.id}
                                 to={tab.path}
                                 aria-current={isActive ? 'page' : undefined}
-                                className={`flex min-h-12 items-center rounded-l-full px-5 text-sm font-bold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary ${
+                                className={`flex min-h-12 items-center rounded-full px-5 text-sm font-bold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary ${
                                     isActive
-                                        ? 'bg-primary-container text-on-primary-container'
+                                        ? 'bg-surface-container-highest text-on-primary-container'
                                         : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
                                 }`}
                             >

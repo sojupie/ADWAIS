@@ -18,6 +18,40 @@ public static class AuthenticationExtensions
         // Configure Authentication Schemes
         var authBuilder = services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme);
         authBuilder.AddMicrosoftIdentityWebApi(configuration, "AzureAd");
+        
+        var kioskIssuer = configuration["Authentication:KioskJwtIssuer"] ?? "ADWAIS";
+        var kioskAudience = configuration["Authentication:KioskJwtAudience"] ?? "ADWAIS-Kiosk";
+        
+        // Prevent the AzureAd handler from logging validation errors when processing Kiosk tokens
+        services.Configure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
+        {
+            var existingOnMessageReceived = options.Events?.OnMessageReceived;
+            options.Events ??= new JwtBearerEvents();
+            options.Events.OnMessageReceived = async context =>
+            {
+                var authHeader = context.Request.Headers.Authorization.ToString();
+                if (authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                {
+                    var token = authHeader.Substring(7).Trim();
+                    var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+                    if (handler.CanReadToken(token))
+                    {
+                        var jwtToken = handler.ReadJwtToken(token);
+                        if (jwtToken.Issuer == kioskIssuer)
+                        {
+                            // Skip the Entra ID scheme for Kiosk tokens
+                            context.NoResult();
+                            return;
+                        }
+                    }
+                }
+
+                if (existingOnMessageReceived != null)
+                {
+                    await existingOnMessageReceived(context);
+                }
+            };
+        });
         authBuilder.AddJwtBearer("KioskJwt", options =>
         {
             options.MapInboundClaims = false;
@@ -33,15 +67,38 @@ public static class AuthenticationExtensions
             options.TokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuer = true,
-                ValidIssuer = "ADWAIS",
+                ValidIssuer = kioskIssuer,
                 ValidateAudience = true,
-                ValidAudience = "ADWAIS-Kiosk",
+                ValidAudience = kioskAudience,
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(key),
                 ValidateLifetime = true,
                 ClockSkew = TimeSpan.Zero,
                 NameClaimType = "name",
                 RoleClaimType = "role"
+            };
+
+            options.Events = new JwtBearerEvents
+            {
+                OnMessageReceived = context =>
+                {
+                    var authHeader = context.Request.Headers.Authorization.ToString();
+                    if (authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var token = authHeader.Substring(7).Trim();
+                        var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+                        if (handler.CanReadToken(token))
+                        {
+                            var jwtToken = handler.ReadJwtToken(token);
+                            if (jwtToken.Issuer != kioskIssuer)
+                            {
+                                // Skip this scheme for non-Kiosk tokens to prevent validation error spam
+                                context.NoResult();
+                            }
+                        }
+                    }
+                    return Task.CompletedTask;
+                }
             };
         });
 

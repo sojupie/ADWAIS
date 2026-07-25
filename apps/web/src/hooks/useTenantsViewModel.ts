@@ -9,9 +9,6 @@ export function useTenantsViewModel() {
     const { role } = useCurrentUser();
     const isAdmin = role === 'Admin';
 
-    const [assigningMonitorId, setAssigningMonitorId] = useState<number | null>(null);
-    const [assignTenantId, setAssignTenantId] = useState('');
-
     const [isCreatingTenant, setIsCreatingTenant] = useState(false);
     const [newTenantDraft, setNewTenantDraft] = useState({ name: '', litiumBaseUrl: '', imageUrl: '', serviceAccountToken: '' });
 
@@ -47,10 +44,7 @@ export function useTenantsViewModel() {
         setNewMonitorDraft({ name: '', url: '', type: DEFAULT_UPTIME_MONITOR_TYPE, uptimeSla: '' });
     });
     const toggleMonitor = useControlMonitorMutation();
-    const assignMonitor = useAssignMonitorMutation(() => {
-        setAssigningMonitorId(null);
-        setAssignTenantId('');
-    });
+    const assignMonitor = useAssignMonitorMutation();
     const unassignMonitor = useUnassignMonitorMutation();
 
     const allMonitors = useMemo(() => {
@@ -135,10 +129,6 @@ export function useTenantsViewModel() {
         allUniqueTags,
         sortedTenants,
         filteredAndSortedMonitors,
-        assigningMonitorId,
-        setAssigningMonitorId,
-        assignTenantId,
-        setAssignTenantId,
         isCreatingTenant,
         setIsCreatingTenant,
         newTenantDraft,

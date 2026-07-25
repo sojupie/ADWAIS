@@ -62,7 +62,7 @@ export function CalendarSettingsModal({
                     readOnly
                     value={`${window.location.origin}/api/intranet/calendar/feed.ics?token=${token}`}
                     containerClassName="min-w-0 flex-1"
-                    className="select-all truncate text-sm text-on-surface-variant"
+                    className="text-sm text-on-surface-variant"
                   />
                   <button 
                     onClick={onCopyFeedLink}

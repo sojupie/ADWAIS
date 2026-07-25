@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Building2, Activity, Plus, X } from 'lucide-react';
 import { TenantTile } from '../../components/settings/tenants/TenantTile';
 import { MonitorTile } from '../../components/settings/tenants/MonitorTile';
@@ -23,10 +24,6 @@ export function TenantsMonitorsView() {
         allUniqueTags,
         sortedTenants,
         filteredAndSortedMonitors,
-        assigningMonitorId,
-        setAssigningMonitorId,
-        assignTenantId,
-        setAssignTenantId,
         isCreatingTenant,
         setIsCreatingTenant,
         newTenantDraft,
@@ -54,6 +51,12 @@ export function TenantsMonitorsView() {
         assignMonitor,
         unassignMonitor
     } = useTenantsViewModel();
+
+    const assignableTenants = useMemo(() => {
+        return (tenants || [])
+            .filter(t => t.id !== '00000000-0000-0000-0000-000000000001')
+            .map(t => <option key={t.id} value={t.id}>{t.name}</option>);
+    }, [tenants]);
 
     return (
         <div className="grid grid-cols-1 landscape-contained:grid-cols-2 portrait-contained:grid-rows-2 gap-4 h-full min-h-0">
@@ -202,10 +205,6 @@ export function TenantsMonitorsView() {
                                 assignMonitor={assignMonitor}
                                 unassignMonitor={unassignMonitor}
                                 tenants={tenants}
-                                isAssigning={assigningMonitorId === m.id}
-                                setAssigningMonitorId={setAssigningMonitorId}
-                                assignTenantId={assignTenantId}
-                                setAssignTenantId={setAssignTenantId}
                                 isAdmin={isAdmin}
                             />
                         ))}
@@ -215,6 +214,10 @@ export function TenantsMonitorsView() {
                     )}
                 </div>
             </SettingsPanel>
+
+            <datalist id="assignable-tenants-list">
+                {assignableTenants}
+            </datalist>
         </div>
     );
 }

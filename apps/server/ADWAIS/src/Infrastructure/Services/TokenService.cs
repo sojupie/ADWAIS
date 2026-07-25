@@ -28,20 +28,23 @@ public class TokenService(IConfiguration configuration) : ITokenService
         tokenHandler.OutboundClaimTypeMap.Clear();
         var key = Encoding.UTF8.GetBytes(secret);
 
-        var tokenDescriptor = new SecurityTokenDescriptor
-        {
-            Subject = new ClaimsIdentity(new[]
+            var issuer = _configuration["Authentication:KioskJwtIssuer"] ?? "ADWAIS";
+            var audience = _configuration["Authentication:KioskJwtAudience"] ?? "ADWAIS-Kiosk";
+
+            var tokenDescriptor = new SecurityTokenDescriptor
             {
-                new Claim("sub", deviceId),
-                new Claim(ClaimTypes.NameIdentifier, deviceId),
-                new Claim("name", $"Kiosk-Device-{deviceId}"),
-                new Claim("role", role)
-            }),
-            Expires = DateTime.UtcNow.AddDays(30),
-            Issuer = "ADWAIS",
-            Audience = "ADWAIS-Kiosk",
-            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-        };
+                Subject = new ClaimsIdentity(new[]
+                {
+                    new Claim("sub", deviceId),
+                    new Claim(ClaimTypes.NameIdentifier, deviceId),
+                    new Claim("name", $"Kiosk-Device-{deviceId}"),
+                    new Claim("role", role)
+                }),
+                Expires = DateTime.UtcNow.AddDays(30),
+                Issuer = issuer,
+                Audience = audience,
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
 
         var token = tokenHandler.CreateToken(tokenDescriptor);
         return tokenHandler.WriteToken(token);

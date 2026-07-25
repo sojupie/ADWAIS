@@ -122,9 +122,13 @@ export function useRegenerateCalendarTokenMutation() {
   const queryClient = useQueryClient();
   return usePostApiIntranetCalendarTokenRegenerate<Error>({
     mutation: {
-      onSuccess: () => {
+      onSuccess: (res: { data: CalendarTokenDto }) => {
         toast.success('Feed token regenerated.');
-        queryClient.invalidateQueries({ queryKey: ['calendar-token'] });
+        if (res?.data) {
+          queryClient.setQueryData(['calendar-token'], res);
+        } else {
+          queryClient.invalidateQueries({ queryKey: ['calendar-token'] });
+        }
       },
       onError: (err: Error) => {
         toast.error('Failed to regenerate token', {

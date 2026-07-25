@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Play, Pause, X, Lock } from 'lucide-react';
 import type { UptimeMonitorDto, TenantResponseDto, UpdateMonitorRequestDto } from '@types';
 import { TileCard } from '../../common/layout/TileCard';
@@ -8,7 +8,7 @@ import { Input } from '../../common/ui/Input';
 import { SecureButton } from '../../common/ui/SecureButton';
 import { FormField } from '../../common/ui/FormField';
 import { getMonitorType, UPTIME_MONITOR_TYPES } from '../../../utils/monitorTypeHelper';
-import {getTagColor, getTagStyle} from "../../../utils/tagHelper.ts";
+import { getTagColor, getTagStyle } from "../../../utils/tagHelper.ts";
 
 const SYSTEM_TENANT_ID = '00000000-0000-0000-0000-000000000001';
 
@@ -35,10 +35,6 @@ interface MonitorTileProps {
     isPending?: boolean;
   };
   tenants: TenantResponseDto[] | undefined;
-  isAssigning: boolean;
-  setAssigningMonitorId: (id: number | null) => void;
-  assignTenantId: string;
-  setAssignTenantId: (id: string) => void;
   isAdmin?: boolean;
 }
 
@@ -48,14 +44,13 @@ export function MonitorTile({
   assignMonitor,
   unassignMonitor,
   tenants,
-  isAssigning,
-  setAssigningMonitorId,
-  assignTenantId,
-  setAssignTenantId,
   isAdmin = false
 }: MonitorTileProps) {
   const updateMonitor = useUpdateMonitorMutation();
   const isUnassigned = !m.tenantId || m.tenantId === SYSTEM_TENANT_ID;
+
+  const [isAssigning, setIsAssigning] = useState(false);
+  const [assignTenantId, setAssignTenantId] = useState('');
 
   const [draft, setDraft] = useState<{
     name: string;
@@ -119,8 +114,6 @@ export function MonitorTile({
     });
     setTagInput('');
   };
-
-  const assignableTenants = (tenants || []).filter(t => t.id !== SYSTEM_TENANT_ID);
 
   const header = (
     <>
@@ -279,27 +272,27 @@ export function MonitorTile({
         ) : isUnassigned || isAssigning ? (
           <div className="flex items-center gap-4 w-full items-end">
             <Input
-              list={`tenants-${m.id}`}
+              list="assignable-tenants-list"
               value={assignTenantId}
               onChange={e => setAssignTenantId(e.target.value)}
               placeholder="Search for tenant..."
               containerClassName="flex-1"
               className="px-2 py-1.5 text-sm h-8 rounded-lg"
             />
-            <datalist id={`tenants-${m.id}`}>
-              {assignableTenants.map((t) => (
-                <option key={t.id} value={t.id}>{t.name}</option>
-              ))}
-            </datalist>
             <SecureButton
-              onClick={() => { if(assignTenantId) assignMonitor.mutate({ id: m.id, tenantId: assignTenantId }); }}
+              onClick={() => { 
+                if(assignTenantId) {
+                  assignMonitor.mutate({ id: m.id, tenantId: assignTenantId });
+                  setIsAssigning(false);
+                }
+              }}
               disabled={!assignTenantId}
               loading={assignMonitor.isPending}
                 className="flex min-h-10 shrink-0 cursor-pointer items-center justify-center rounded-full bg-on-primary-container px-4 text-sm font-bold text-primary-container transition-colors hover:bg-brand-btn-quaternary disabled:cursor-not-allowed disabled:bg-on-surface/[0.1] disabled:text-on-surface/[0.38] disabled:hover:bg-on-surface/[0.1] disabled:hover:text-on-surface/[0.38]"
             >
               Link
             </SecureButton>
-            <button type="button" aria-label="Cancel monitor assignment" onClick={() => { setAssigningMonitorId(null); setAssignTenantId(''); }} className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full text-on-surface-variant hover:bg-surface"><X size={18}/></button>
+            <button type="button" aria-label="Cancel monitor assignment" onClick={() => { setIsAssigning(false); setAssignTenantId(''); }} className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full text-on-surface-variant hover:bg-surface"><X size={18}/></button>
           </div>
         ) : (
           <div className="flex items-center justify-between w-full">
@@ -309,7 +302,7 @@ export function MonitorTile({
             </span>
             <div className="flex gap-4 ml-2">
               <SecureButton
-                onClick={() => setAssigningMonitorId(m.id)}
+                onClick={() => setIsAssigning(true)}
                 locked={!isAdmin}
                 className="flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-full px-4 text-sm font-bold text-on-surface transition-colors hover:bg-surface"
               >

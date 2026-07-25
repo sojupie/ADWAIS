@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Adwais.Domain.Entities;
@@ -99,6 +100,16 @@ public class LocalUserClaimsTransformation(IDbContextFactory<AnalyticsDbContext>
 
         // Append role claim using a cloned principal to ensure thread-safety/immutability
         var clone = principal.Clone();
+        
+        if (clone.Identity is ClaimsIdentity primaryIdentity)
+        {
+            var existingNameIds = primaryIdentity.FindAll(ClaimTypes.NameIdentifier).ToList();
+            foreach (var claim in existingNameIds)
+            {
+                primaryIdentity.RemoveClaim(claim);
+            }
+        }
+
         var localIdentity = new ClaimsIdentity();
         localIdentity.AddClaim(new Claim(ClaimTypes.Role, user.Role.ToString()));
         localIdentity.AddClaim(new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()));

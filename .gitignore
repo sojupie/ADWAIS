@@ -48,6 +48,7 @@ TEST*.xml
 
 # Git worktrees
 /.worktrees/
+.worktrees
 
 # Temporary workspace profiling, patches and screenshots
 /*.png
@@ -62,3 +63,7 @@ TEST*.xml
 
 # Docker override
 docker-compose.override.yml
+
+.agents/
+infrastructure/HOMELAB.md
+/.agents/

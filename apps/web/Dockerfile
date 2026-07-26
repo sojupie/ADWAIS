@@ -1,37 +1,30 @@
-# Build stage
-FROM node:22-alpine AS builder
+FROM node:24.15.0-alpine AS builder
 
 WORKDIR /app
 
-# Enable pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@11.9.0 --activate
 
-# Copy root configurations
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN pnpm fetch
 
-# Copy packages and web app
 COPY packages/ ./packages/
 COPY apps/web/ ./apps/web/
 
-# Install dependencies
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --offline --frozen-lockfile
 
-# Build the web app
-WORKDIR /app/apps/web
-RUN pnpm build
+ARG VITE_AZURE_CLIENT_ID
+ARG VITE_AZURE_TENANT_ID
+ARG VITE_AZURE_API_SCOPE
 
-# Serve stage
+ENV VITE_AZURE_CLIENT_ID=${VITE_AZURE_CLIENT_ID}
+ENV VITE_AZURE_TENANT_ID=${VITE_AZURE_TENANT_ID}
+ENV VITE_AZURE_API_SCOPE=${VITE_AZURE_API_SCOPE}
+
+RUN pnpm --filter web build
+
 FROM nginx:alpine
-COPY --from=builder /app/apps/web/dist /usr/share/nginx/html
 
-RUN echo 'server { \
-    listen 80; \
-    location / { \
-        root /usr/share/nginx/html; \
-        index index.html index.htm; \
-        try_files $uri $uri/ /index.html; \
-    } \
-}' > /etc/nginx/conf.d/default.conf
+COPY --from=builder /app/apps/web/dist /usr/share/nginx/html
+COPY infrastructure/nginx/default.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]

@@ -135,6 +135,17 @@
   --md-sys-color-on-error-rgb: 255, 255, 255;
   --md-sys-color-error-container-rgb: 254, 226, 226;
   --md-sys-color-on-error-container-rgb: 69, 10, 10;
+  
+  --md-sys-color-success-rgb: 16, 185, 129;
+  --md-sys-color-on-success-rgb: 255, 255, 255;
+  --md-sys-color-success-container-rgb: 209, 250, 229;
+  --md-sys-color-on-success-container-rgb: 2, 44, 34;
+
+  --md-sys-color-warning-rgb: 245, 158, 11;
+  --md-sys-color-on-warning-rgb: 255, 255, 255;
+  --md-sys-color-warning-container-rgb: 254, 243, 199;
+  --md-sys-color-on-warning-container-rgb: 120, 53, 15;
+
   --md-sys-color-background-rgb: 248, 250, 252;
   --md-sys-color-on-background-rgb: 2, 45, 46;
   --md-sys-color-surface-rgb: 255, 255, 255;

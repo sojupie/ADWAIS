@@ -1,40 +1,102 @@
 services:
+  web:
+    image: adwais-web:local
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        VITE_AZURE_CLIENT_ID: ${VITE_AZURE_CLIENT_ID:-}
+        VITE_AZURE_TENANT_ID: ${VITE_AZURE_TENANT_ID:-}
+        VITE_AZURE_API_SCOPE: ${VITE_AZURE_API_SCOPE:-}
+    expose:
+      - "80"
+    networks:
+      - edge
+      - app
+    depends_on:
+      - api
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/ || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
   api:
-    image: ghcr.io/sojupie/adwais-api:latest
-    container_name: adwais-api-prod
-    ports:
-      - "127.0.0.1:5002:8080"
+    image: adwais-api:local
+    build:
+      context: .
+      dockerfile: apps/server/ADWAIS/src/Api/Dockerfile
+    expose:
+      - "8080"
     environment:
-      - DashboardAuth__Username=${DASHBOARD_USER}
-      - DashboardAuth__Password=${DASHBOARD_PASS}
-      - ConnectionStrings__AnalyticsDb=Host=db;Database=analyticsdb;Username=postgres;Password=${DB_PASSWORD}
-      - Webhooks__MotasticApiKey=${MOTASTIC_API_KEY}
-      - Webhooks__NewsletterApiKey=${NEWSLETTER_API_KEY}
-      - AzureAd__Instance=https://login.microsoftonline.com/
-      - AzureAd__TenantId=${AZURE_TENANT_ID}
-      - AzureAd__ClientId=${AZURE_CLIENT_ID}
-      - AzureAd__AppIdUri=api://${AZURE_CLIENT_ID}
-      - Authentication__KioskJwtSecret=${KIOSK_JWT_SECRET}
-      - ASPNETCORE_ENVIRONMENT=Production
-      - FeatureToggles__EnableRuntimeDataSeeding=${ENABLE_RUNTIME_DATA_SEEDING:-true}
+      DashboardAuth__Username: ${DASHBOARD_USER}
+      DashboardAuth__Password: ${DASHBOARD_PASS}
+      ConnectionStrings__AnalyticsDb: Host=db;Database=analyticsdb;Username=postgres;Password=${DB_PASSWORD}
+      Webhooks__MotasticApiKey: ${MOTASTIC_API_KEY}
+      Webhooks__NewsletterApiKey: ${NEWSLETTER_API_KEY}
+      AzureAd__Instance: https://login.microsoftonline.com/
+      AzureAd__TenantId: ${AZURE_TENANT_ID}
+      AzureAd__ClientId: ${AZURE_CLIENT_ID}
+      AzureAd__AppIdUri: api://${AZURE_CLIENT_ID}
+      Authentication__KioskJwtSecret: ${KIOSK_JWT_SECRET}
+      ASPNETCORE_ENVIRONMENT: Production
+      FeatureToggles__EnableRuntimeDataSeeding: ${ENABLE_RUNTIME_DATA_SEEDING:-true}
     volumes:
       - dp-keys-prod:/app/dp-keys
+    networks:
+      - app
+      - data
     depends_on:
-      - db
-    restart: always
+      db:
+        condition: service_healthy
+    restart: unless-stopped
 
   db:
     image: postgres:16-alpine
-    ports:
-      - "127.0.0.1:5432:5432"
-    container_name: adwais-db-prod
     environment:
-      - POSTGRES_DB=analyticsdb
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      POSTGRES_DB: analyticsdb
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - pgdata-prod:/var/lib/postgresql/data
-    restart: always
+    networks:
+      - data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d analyticsdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+
+  cloudflared:
+    image: cloudflare/cloudflared:${CLOUDFLARED_IMAGE_TAG:-latest}
+    command:
+      - tunnel
+      - --no-autoupdate
+      - run
+    environment:
+      TUNNEL_TOKEN_FILE: /run/secrets/cloudflared_token
+    secrets:
+      - cloudflared_token
+    networks:
+      - edge
+    depends_on:
+      web:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
   pgdata-prod:
   dp-keys-prod:
+
+networks:
+  edge:
+  app:
+  data:
+    internal: true
+
+secrets:
+  cloudflared_token:
+    file: ${CLOUDFLARED_TOKEN_FILE:-/opt/adwais/secrets/cloudflared-token}

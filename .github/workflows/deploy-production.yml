@@ -40,7 +40,6 @@ jobs:
       COMPOSE_PROJECT_NAME: adwais
       ADWAIS_CONFIG_DIR: /opt/adwais
       ADWAIS_ENV_FILE: /opt/adwais/.env
-      CLOUDFLARED_TOKEN_FILE: /opt/adwais/secrets/cloudflared-token
 
     steps:
       - name: Require main branch
@@ -98,7 +97,6 @@ jobs:
             fi
           done
 
-          install -d -m 700 "$ADWAIS_CONFIG_DIR/secrets"
           umask 077
 
           write_dotenv() {
@@ -127,20 +125,15 @@ jobs:
             write_dotenv KIOSK_JWT_SECRET "$KIOSK_JWT_SECRET"
             write_dotenv ENABLE_RUNTIME_DATA_SEEDING "$ENABLE_RUNTIME_DATA_SEEDING"
             write_dotenv CLOUDFLARED_IMAGE_TAG "$CLOUDFLARED_IMAGE_TAG"
-            write_dotenv CLOUDFLARED_TOKEN_FILE "$CLOUDFLARED_TOKEN_FILE"
+            write_dotenv CLOUDFLARE_TUNNEL_TOKEN "$CLOUDFLARE_TUNNEL_TOKEN"
           } > "$ADWAIS_ENV_FILE"
 
-          printf '%s' "$CLOUDFLARE_TUNNEL_TOKEN" > "$CLOUDFLARED_TOKEN_FILE"
-          chmod 600 "$ADWAIS_ENV_FILE" "$CLOUDFLARED_TOKEN_FILE"
+          chmod 600 "$ADWAIS_ENV_FILE"
 
       - name: Validate production configuration
         run: |
           test -s "$ADWAIS_ENV_FILE" || {
             echo "$ADWAIS_ENV_FILE is missing. Run the all or infrastructure target first." >&2
-            exit 1
-          }
-          test -s "$CLOUDFLARED_TOKEN_FILE" || {
-            echo "$CLOUDFLARED_TOKEN_FILE is missing. Run the all or infrastructure target first." >&2
             exit 1
           }
           docker compose --env-file "$ADWAIS_ENV_FILE" -f docker-compose.prod.yml config --quiet

@@ -60,7 +60,7 @@ export function TenantsMonitorsView() {
 
     return (
         <div className="flex flex-col gap-4 h-full min-h-0">
-            <SettingsPanel className="flex-1">
+            <SettingsPanel className="flex-1 max-h-none">
                 <SettingsPanelHeader
                     title="Tenants"
                     subtitle="Connected commerce environments and credentials."

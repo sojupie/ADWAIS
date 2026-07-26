@@ -34,7 +34,7 @@ export function UserRow({ u, selected = false, onSelect, onDoubleClick }: UserRo
           </div>
         </div>
       </td>
-      <td className="px-4 py-3 align-middle sm:px-5 text-sm font-medium text-on-surface-variant truncate max-w-[250px]">
+      <td className="px-4 py-3 align-middle sm:px-5 text-sm font-bold text-on-surface-variant truncate max-w-[250px]">
         {u.email}
       </td>
       <td className="w-44 px-4 py-3 align-middle sm:px-5">

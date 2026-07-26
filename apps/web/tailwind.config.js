@@ -39,6 +39,14 @@ export default {
         'on-error': withOpacity('--md-sys-color-on-error-rgb'),
         'error-container': withOpacity('--md-sys-color-error-container-rgb'),
         'on-error-container': withOpacity('--md-sys-color-on-error-container-rgb'),
+        success: withOpacity('--md-sys-color-success-rgb'),
+        'on-success': withOpacity('--md-sys-color-on-success-rgb'),
+        'success-container': withOpacity('--md-sys-color-success-container-rgb'),
+        'on-success-container': withOpacity('--md-sys-color-on-success-container-rgb'),
+        warning: withOpacity('--md-sys-color-warning-rgb'),
+        'on-warning': withOpacity('--md-sys-color-on-warning-rgb'),
+        'warning-container': withOpacity('--md-sys-color-warning-container-rgb'),
+        'on-warning-container': withOpacity('--md-sys-color-on-warning-container-rgb'),
         background: withOpacity('--md-sys-color-background-rgb'),
         'on-background': withOpacity('--md-sys-color-on-background-rgb'),
         surface: withOpacity('--md-sys-color-surface-rgb'),
@@ -156,10 +164,10 @@ export default {
         'status-starting-glow': '0 0 6px var(--color-status-starting-glow)',
       },
       screens: {
-        'contained': { 'raw': '(min-width: 1024px) and (min-height: 950px) and (orientation: landscape), (min-width: 1024px) and (min-height: 1350px) and (orientation: portrait)' },
+        'contained': { 'raw': '(min-width: 1024px) and (min-height: 800px) and (orientation: landscape), (min-width: 1024px) and (min-height: 1350px) and (orientation: portrait)' },
         'landscape-lg': { 'raw': '(orientation: landscape) and (min-width: 1024px)' },
         'portrait-lg': { 'raw': '(orientation: portrait) and (min-width: 1024px)' },
-        'landscape-contained': { 'raw': '(orientation: landscape) and (min-width: 1024px) and (min-height: 950px)' },
+        'landscape-contained': { 'raw': '(orientation: landscape) and (min-width: 1024px) and (min-height: 800px)' },
         'portrait-contained': { 'raw': '(orientation: portrait) and (min-width: 1024px) and (min-height: 1350px)' }
       }
     },

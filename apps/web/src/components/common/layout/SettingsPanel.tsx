@@ -21,9 +21,10 @@ export function SettingsPanel({
   contentClassName = 'custom-scrollbar flex-1 flex flex-col gap-3 overflow-y-auto p-3 sm:p-4' 
 }: SettingsPanelProps) {
   const flexClass = className.includes('shrink-0') ? '' : 'flex-1';
+  const maxHClass = className.includes('max-h-') ? '' : 'max-h-[500px]';
   
   return (
-    <section className={`flex ${flexClass} contained:max-h-none max-h-[500px] min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl border border-outline bg-surface ${className}`}>
+    <section className={`flex ${flexClass} contained:max-h-none ${maxHClass} min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl border border-outline bg-surface ${className}`}>
       {title && (
         <SettingsPanelHeader title={title} subtitle={subtitle} icon={icon}>
           {headerActions}

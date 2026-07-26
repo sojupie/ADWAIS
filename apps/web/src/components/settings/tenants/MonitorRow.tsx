@@ -11,7 +11,7 @@ interface MonitorRowProps {
 export function MonitorRow({ m, selected = false, onSelect, onDoubleClick }: MonitorRowProps) {
   return (
     <tr 
-      className={`group transition-colors hover:bg-surface-container-low cursor-pointer select-none ${selected ? 'bg-primary-container/10' : ''}`}
+      className={`group transition-colors bg-surface border-b border-outline-variant hover:bg-surface-container cursor-pointer select-none ${selected ? 'bg-primary-container/10' : ''}`}
       onClick={onSelect}
       onDoubleClick={onDoubleClick}
     >
@@ -34,11 +34,11 @@ export function MonitorRow({ m, selected = false, onSelect, onDoubleClick }: Mon
           </div>
         </div>
       </td>
-      <td className="px-4 py-3 align-middle sm:px-5 text-sm font-medium text-on-surface-variant truncate max-w-[250px]">
+      <td className="px-4 py-3 align-middle sm:px-5 text-sm font-bold text-on-surface-variant truncate max-w-[250px]">
         {m.url || 'N/A'}
       </td>
       <td className="w-32 px-4 py-3 align-middle sm:px-5">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary-container px-3 py-1 text-xs font-bold text-on-secondary-container">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary-container px-3 py-1 text-sm font-bold text-on-secondary-container">
             {m.type === 'Ping' ? <Globe size={12} /> : <Gauge size={12} />}
             {m.type}
         </span>
@@ -49,7 +49,7 @@ export function MonitorRow({ m, selected = false, onSelect, onDoubleClick }: Mon
         </span>
       </td>
       <td className="w-32 px-4 py-3 align-middle sm:px-5">
-        <span className={`inline-flex items-center gap-1.5 rounded-full text-sm font-bold ${
+        <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-bold ${
           m.uptimeMonitorEnabled ? 'bg-success-container text-on-success-container' : 'bg-surface-container text-on-surface-variant'
         }`}>
           {m.uptimeMonitorEnabled ? <CheckCircle2 size={12} /> : <XCircle size={12} />}

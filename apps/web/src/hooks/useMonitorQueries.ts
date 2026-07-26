@@ -1,4 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
+import { useCallback } from 'react';
 import { 
   useGetApiMonitors, 
   useGetApiMonitorsUnassigned, 
@@ -63,16 +64,18 @@ export function useCreateMonitorMutation(onSuccessCallback?: () => void) {
     }
   });
 
-  return {
-    ...mutation,
-    mutate: (
+  const mutate = useCallback((
       payload: { name: string; url: string; type?: string | null; uptimeSla: number | null; latencyDegradedFloor?: number | null },
       options?: Parameters<typeof mutation.mutate>[1]
     ) => 
       mutation.mutate({ 
         params: { tenantId: '00000000-0000-0000-0000-000000000001' }, 
         data: payload 
-      }, options)
+      }, options), [mutation.mutate]);
+
+  return {
+    ...mutation,
+    mutate
   };
 }
 
@@ -84,7 +87,7 @@ export function useControlMonitorMutation() {
 
   const isPending = startMutation.isPending || pauseMutation.isPending;
 
-  const mutate = (
+  const mutate = useCallback((
     { id, action }: { id: number; action: 'start' | 'pause' },
     options?: Parameters<typeof startMutation.mutate>[1]
   ) => {
@@ -112,7 +115,7 @@ export function useControlMonitorMutation() {
         }
       }
     );
-  };
+  }, [startMutation, pauseMutation]);
 
   return {
     isPending,
@@ -132,13 +135,16 @@ export function useUpdateMonitorMutation() {
     }
   });
 
-  return {
-    ...mutation,
-    mutate: (
+  const mutate = useCallback((
       variables: { id: number; payload: UpdateMonitorRequestDto },
       options?: Parameters<typeof mutation.mutate>[1]
     ) =>
-      mutation.mutate({ id: variables.id, data: variables.payload }, options)
+      mutation.mutate({ id: variables.id, data: variables.payload }, options),
+    [mutation.mutate]);
+
+  return {
+    ...mutation,
+    mutate
   };
 }
 
@@ -162,13 +168,16 @@ export function useAssignMonitorMutation(onSuccessCallback?: () => void) {
     }
   });
 
-  return {
-    ...mutation,
-    mutate: (
+  const mutate = useCallback((
       variables: { id: number; tenantId: string },
       options?: Parameters<typeof mutation.mutate>[1]
     ) =>
-      mutation.mutate({ id: variables.id, tenantId: variables.tenantId }, options)
+      mutation.mutate({ id: variables.id, tenantId: variables.tenantId }, options),
+    [mutation.mutate]);
+
+  return {
+    ...mutation,
+    mutate
   };
 }
 
@@ -191,10 +200,13 @@ export function useUnassignMonitorMutation() {
     }
   });
 
+  const mutate = useCallback((id: number, options?: Parameters<typeof mutation.mutate>[1]) => 
+      mutation.mutate({ id }, options),
+    [mutation.mutate]);
+
   return {
     ...mutation,
-    mutate: (id: number, options?: Parameters<typeof mutation.mutate>[1]) => 
-      mutation.mutate({ id }, options)
+    mutate
   };
 }
 
@@ -216,9 +228,12 @@ export function useDeleteMonitorMutation() {
     }
   });
 
+  const mutate = useCallback((id: number, options?: Parameters<typeof mutation.mutate>[1]) => 
+      mutation.mutate({ id }, options),
+    [mutation.mutate]);
+
   return {
     ...mutation,
-    mutate: (id: number, options?: Parameters<typeof mutation.mutate>[1]) => 
-      mutation.mutate({ id }, options)
+    mutate
   };
 }

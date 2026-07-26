@@ -1,33 +1,21 @@
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link as LinkIcon, Unlink } from 'lucide-react';
-import type { UptimeMonitorDto } from '@types';
+import { useTenantsViewModel } from '../../../hooks/useTenantsViewModel';
+
 import { SearchInput } from '../../common/ui/SearchInput';
 import { MonitorSettingsFilterMenu } from './SettingsFilterMenu';
 import { MonitorRow } from './MonitorRow';
 
 interface TenantMonitorsPanelProps {
     tenantId: string;
-    allMonitors: UptimeMonitorDto[];
-    allUniqueTypes: string[];
-    allUniqueTags: string[];
-    assignMonitor: (payload: { id: number; tenantId: string }) => void;
-    unassignMonitor: (id: number) => void;
-    isAssignPending: boolean;
-    isUnassignPending: boolean;
-    isAdmin: boolean;
 }
 
-export function TenantMonitorsPanel({
-    tenantId,
-    allMonitors,
-    allUniqueTypes,
-    allUniqueTags,
-    assignMonitor,
-    unassignMonitor,
-    isAssignPending,
-    isUnassignPending,
-    isAdmin
+export const TenantMonitorsPanel = React.memo(function TenantMonitorsPanel({
+    tenantId
 }: TenantMonitorsPanelProps) {
+    const { allMonitors, allUniqueTypes, allUniqueTags, assignMonitor, unassignMonitor, isAdmin } = useTenantsViewModel();
+    const isAssignPending = assignMonitor.isPending;
+    const isUnassignPending = unassignMonitor.isPending;
     const SYSTEM_TENANT_ID = '00000000-0000-0000-0000-000000000001';
 
     const [assignedSelected, setAssignedSelected] = useState<Set<number>>(new Set());
@@ -85,14 +73,14 @@ export function TenantMonitorsPanel({
     const handleAssignSelected = () => {
         if (!isAdmin) return;
         const ids = Array.from(availableSelected);
-        ids.forEach(id => assignMonitor({ id, tenantId }));
+        ids.forEach(id => assignMonitor.mutate({ id, tenantId }));
         setAvailableSelected(new Set());
     };
 
     const handleUnassignSelected = () => {
         if (!isAdmin) return;
         const ids = Array.from(assignedSelected);
-        ids.forEach(id => unassignMonitor(id));
+        ids.forEach(id => unassignMonitor.mutate(id));
         setAssignedSelected(new Set());
     };
 
@@ -115,7 +103,7 @@ export function TenantMonitorsPanel({
     };
 
     const renderThead = () => (
-        <thead className="sticky top-0 z-10 border-b border-outline-variant bg-surface-container text-on-surface-variant">
+        <thead className="sticky top-0 z-10 border-b border-outline-variant bg-surface-container-high text-on-surface-variant">
             <tr>
                 <th className="w-12 px-4 py-4 sm:px-5"></th>
                 <th className="px-4 py-4 text-sm font-black uppercase tracking-widest sm:px-5">Monitor</th>
@@ -145,11 +133,11 @@ export function TenantMonitorsPanel({
                     )}
                 </div>
 
-                <div className="border border-outline-variant rounded-xl overflow-hidden bg-surface">
-                    <div className="custom-scrollbar overflow-x-auto h-[600px] overflow-y-auto">
+                <div className="border border-outline-variant bg-surface-container-low rounded-xl overflow-hidden bg-surface">
+                    <div className="custom-scrollbar overflow-x-auto h-[500px] overflow-y-auto">
                         <table className="w-full whitespace-nowrap text-left text-sm">
                             {renderThead()}
-                            <tbody className="divide-y divide-outline-variant">
+                            <tbody className="">
                                 {assignedMonitors.map(m => (
                                     <MonitorRow
                                         key={m.id}
@@ -177,7 +165,7 @@ export function TenantMonitorsPanel({
                     <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4">
                         <div className="flex-1 space-y-1">
                             <h3 className="text-lg font-bold text-on-surface">Assignable Monitors</h3>
-                            <p className="text-sm text-on-surface-variant">Select monitors to assign to this tenant. If a monitor is already assigned to another tenant, it will be reassigned.</p>
+                            <p className="text-md text-on-surface-variant">Select monitors to assign to this tenant. If a monitor is already assigned to another tenant, it will be reassigned.</p>
                         </div>
                         
                         {isAdmin && (
@@ -209,7 +197,7 @@ export function TenantMonitorsPanel({
                     </div>
 
                     <div className="border border-outline-variant rounded-xl overflow-hidden bg-surface">
-                        <div className="custom-scrollbar overflow-x-auto h-[600px] overflow-y-auto">
+                        <div className="custom-scrollbar overflow-x-auto h-[500px] overflow-y-auto">
                             <table className="w-full whitespace-nowrap text-left text-sm">
                                 {renderThead()}
                                 <tbody className="divide-y divide-outline-variant">
@@ -236,4 +224,4 @@ export function TenantMonitorsPanel({
             )}
         </>
     );
-}
+});

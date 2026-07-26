@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 
-export function DashboardLayout({ children }: { children: ReactNode }) {
+export function DashboardLayout({ children, className = '' }: { children: ReactNode, className?: string }) {
     return (
-        <div className="flex flex-col gap-4 w-full contained:min-h-full contained:flex-1 pb-3 contained:min-h-0">
+        <div className={`flex flex-col gap-4 w-full pb-3 ${className || 'contained:min-h-full contained:flex-1 contained:min-h-0'}`}>
             {children}
         </div>
     );

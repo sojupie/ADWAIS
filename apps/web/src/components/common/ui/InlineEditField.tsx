@@ -126,7 +126,7 @@ export function InlineEditField<T>({
   return (
     <div className={`flex min-w-0 flex-col gap-1.5 ${hideLabel ? '' : 'w-full'}`}>
       {!hideLabel && (
-        <div className="flex min-h-5 items-start justify-between gap-3 px-1">
+        <div className="flex min-h-5 items-start justify-between gap-3 px-2">
           <span className="text-sm font-bold text-on-surface-variant">{label}</span>
           <span className={`text-xs font-medium ${error ? 'text-error' : 'text-on-surface-variant'}`}>
             {error || meta}
@@ -151,7 +151,6 @@ export function InlineEditField<T>({
               value={draft as string}
               disabled={isSaving}
               error={hideLabel ? error : undefined}
-              density="compact"
               containerClassName="min-w-[120px] flex-1"
               onChange={event => setDraft(event.target.value as T)}
               onKeyDown={event => {
@@ -175,7 +174,6 @@ export function InlineEditField<T>({
               placeholder={placeholder || (kind === 'password' ? '••••••••••••' : undefined)}
               disabled={isSaving}
               error={hideLabel ? error : undefined}
-              density="compact"
               containerClassName="min-w-[120px] flex-1"
               onChange={event => {
                 const rawValue = event.target.value;
@@ -231,7 +229,7 @@ export function InlineEditField<T>({
               startEditing();
             }
           }}
-          className={`group/field flex min-w-0 items-center justify-between gap-3 rounded-xl px-2 py-1.5 -mx-2 transition-colors ${
+          className={`group/field flex min-w-0 items-center justify-between gap-3 rounded-xl px-2 py-1.5 transition-colors ${
             disabled
               ? 'cursor-not-allowed opacity-60'
               : 'cursor-pointer hover:bg-surface-container-low focus-visible:outline focus-visible:outline-2 focus-visible:outline-secondary'

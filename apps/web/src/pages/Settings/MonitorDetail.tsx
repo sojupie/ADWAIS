@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useParams } from '@tanstack/react-router';
 import { Activity, Save, X, Unlink } from 'lucide-react';
 import { useTenantsViewModel } from '../../hooks/useTenantsViewModel';
@@ -12,7 +12,6 @@ import type { UptimeMonitorDto } from '@types';
 function MonitorDetailForm({ monitor, isAdmin, onBack }: { monitor: UptimeMonitorDto, isAdmin: boolean, onBack: () => void }) {
   const updateMonitor = useUpdateMonitorMutation();
   const controlMonitor = useControlMonitorMutation();
-  const { tenants, assignMonitor, unassignMonitor } = useTenantsViewModel();
   
   const getInitialDraft = (m: UptimeMonitorDto) => ({
     name: m.name || '',
@@ -22,25 +21,16 @@ function MonitorDetailForm({ monitor, isAdmin, onBack }: { monitor: UptimeMonito
   });
 
   const [draft, setDraft] = useState(getInitialDraft(monitor));
-  const lastMonitorRef = useRef(monitor);
+  const [isUserEditing, setIsUserEditing] = useState(false);
+  const [prevMonitor, setPrevMonitor] = useState(monitor);
 
-  useEffect(() => {
-    setDraft(currentDraft => {
-      const lastKnownDraft = getInitialDraft(lastMonitorRef.current);
-      const isCurrentlyDirty = 
-        currentDraft.name !== lastKnownDraft.name ||
-        currentDraft.url !== lastKnownDraft.url ||
-        currentDraft.type !== lastKnownDraft.type ||
-        currentDraft.uptimeSla !== lastKnownDraft.uptimeSla;
-      
-      lastMonitorRef.current = monitor;
-
-      if (!isCurrentlyDirty) {
-        return getInitialDraft(monitor);
-      }
-      return currentDraft;
-    });
-  }, [monitor]);
+  // When background data refreshes, only update the draft if the user isn't actively editing
+  if (monitor !== prevMonitor) {
+    setPrevMonitor(monitor);
+    if (!isUserEditing) {
+      setDraft(getInitialDraft(monitor));
+    }
+  }
 
   const isDirty =
     draft.name !== (monitor.name || '') ||
@@ -63,6 +53,7 @@ function MonitorDetailForm({ monitor, isAdmin, onBack }: { monitor: UptimeMonito
       { id: monitor.id, payload },
       {
         onSuccess: () => {
+          setIsUserEditing(false);
           setTimeout(() => {
             updateMonitor.reset();
           }, 3000);
@@ -72,13 +63,14 @@ function MonitorDetailForm({ monitor, isAdmin, onBack }: { monitor: UptimeMonito
   };
 
   const handleCancel = () => {
+    setIsUserEditing(false);
     setDraft(getInitialDraft(monitor));
   };
 
-  const SYSTEM_TENANT_ID = '00000000-0000-0000-0000-000000000001';
-  const isAssignedToRealTenant = monitor.tenantId != null && monitor.tenantId !== SYSTEM_TENANT_ID;
-  const assignedTenant = isAssignedToRealTenant ? tenants?.find(t => t.id === monitor.tenantId) : null;
-  const availableTenants = tenants?.filter(t => t.id !== SYSTEM_TENANT_ID) || [];
+  const updateDraft = (updates: Partial<typeof draft>) => {
+    setIsUserEditing(true);
+    setDraft(prev => ({ ...prev, ...updates }));
+  };
 
   return (
     <>
@@ -119,17 +111,17 @@ function MonitorDetailForm({ monitor, isAdmin, onBack }: { monitor: UptimeMonito
               id="monitor-name"
               label="Name"
               value={draft.name}
-              onChange={(e) => setDraft({ ...draft, name: e.target.value })}
-              disabled={!isAdmin}
+              onChange={(e) => updateDraft({ name: e.target.value })}
+              disabled={!isAdmin || updateMonitor.isPending}
             />
 
             <FormField
               id="monitor-url"
-              label="Target URL"
+              label="URL"
               type="url"
               value={draft.url}
-              onChange={(e) => setDraft({ ...draft, url: e.target.value })}
-              disabled={!isAdmin}
+              onChange={(e) => updateDraft({ url: e.target.value })}
+              disabled={!isAdmin || updateMonitor.isPending}
             />
 
             <FormField
@@ -137,19 +129,19 @@ function MonitorDetailForm({ monitor, isAdmin, onBack }: { monitor: UptimeMonito
                 id="monitor-type"
                 label="Monitor Type"
                 value={draft.type}
-                onChange={e => setDraft({ ...draft, type: e.target.value })}
-                disabled={!isAdmin}
+                onChange={e => updateDraft({ type: e.target.value })}
+                disabled={!isAdmin || updateMonitor.isPending}
             >
                 {UPTIME_MONITOR_TYPES.map(type => <option key={type} value={type}>{type}</option>)}
             </FormField>
 
             <FormField
               id="monitor-sla"
-              label="Uptime SLA (%)"
+              label="Uptime SLA (hours)"
               type="number"
               step="0.1"
               value={draft.uptimeSla}
-              onChange={(e) => setDraft({ ...draft, uptimeSla: e.target.value })}
+              onChange={(e) => updateDraft({ uptimeSla: e.target.value })}
               disabled={!isAdmin}
             />
 
@@ -166,58 +158,70 @@ function MonitorDetailForm({ monitor, isAdmin, onBack }: { monitor: UptimeMonito
             />
           </div>
 
-          <div className="space-y-4">
-            <h3 className="text-lg font-bold text-on-surface">Tenant Assignment</h3>
-            
-            {assignedTenant ? (
-                <div className="flex items-center justify-between p-4 bg-surface border border-outline-variant rounded-xl">
-                    <div>
-                        <div className="text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1">Assigned Owner</div>
-                        <div className="font-bold text-on-surface">{assignedTenant.name}</div>
-                        <div className="text-sm text-on-surface-variant">{assignedTenant.litiumBaseUrl}</div>
-                    </div>
-                    {isAdmin && (
-                        <button
-                            type="button"
-                            onClick={() => monitor.id !== undefined && unassignMonitor.mutate(monitor.id)}
-                            disabled={unassignMonitor.isPending}
-                            className="flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-bold text-error hover:bg-error-container hover:text-on-error-container transition-colors disabled:opacity-50"
-                        >
-                            <Unlink size={16} /> Unassign
-                        </button>
-                    )}
-                </div>
-            ) : (
-                <p className="text-sm text-on-surface-variant italic">This monitor is currently unassigned (system monitor).</p>
-            )}
-
-            {isAdmin && (
-                <div className="pt-2">
-                    <FormField
-                        as="select"
-                        id="assign-tenant"
-                        label={assignedTenant ? "Re-assign to another Tenant" : "Assign to Tenant"}
-                        value=""
-                        onChange={(e) => {
-                            if (e.target.value && monitor.id !== undefined) {
-                                assignMonitor.mutate({ id: monitor.id, tenantId: e.target.value });
-                            }
-                        }}
-                        disabled={assignMonitor.isPending}
-                    >
-                        <option value="" disabled>Select a tenant...</option>
-                        {availableTenants.map(t => (
-                            <option key={t.id} value={t.id}>{t.name}</option>
-                        ))}
-                    </FormField>
-                </div>
-            )}
-          </div>
+          <MonitorAssignmentPanel monitor={monitor} isAdmin={isAdmin} />
         </div>
       </div>
     </>
   );
 }
+
+const MonitorAssignmentPanel = React.memo(function MonitorAssignmentPanel({ monitor, isAdmin }: { monitor: UptimeMonitorDto, isAdmin: boolean }) {
+  const { tenants, assignMonitor, unassignMonitor } = useTenantsViewModel();
+  const SYSTEM_TENANT_ID = '00000000-0000-0000-0000-000000000001';
+  const isAssignedToRealTenant = monitor.tenantId != null && monitor.tenantId !== SYSTEM_TENANT_ID;
+  const assignedTenant = isAssignedToRealTenant ? tenants?.find(t => t.id === monitor.tenantId) : null;
+  const availableTenants = tenants?.filter(t => t.id !== SYSTEM_TENANT_ID) || [];
+
+  return (
+    <div className="space-y-4">
+      <h3 className="text-lg font-bold text-on-surface">Tenant Assignment</h3>
+      
+      {assignedTenant ? (
+          <div className="flex items-center justify-between p-4 bg-surface border border-outline-variant rounded-xl">
+              <div>
+                  <div className="text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1">Assigned Owner</div>
+                  <div className="font-bold text-on-surface">{assignedTenant.name}</div>
+                  <div className="text-sm text-on-surface-variant">{assignedTenant.litiumBaseUrl}</div>
+              </div>
+              {isAdmin && (
+                  <button
+                      type="button"
+                      onClick={() => monitor.id !== undefined && unassignMonitor.mutate(monitor.id)}
+                      disabled={unassignMonitor.isPending}
+                      className="flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-bold text-error hover:bg-error-container hover:text-on-error-container transition-colors disabled:opacity-50"
+                  >
+                      <Unlink size={16} /> Unassign
+                  </button>
+              )}
+          </div>
+      ) : (
+          <p className="text-sm text-on-surface-variant italic">This monitor is currently unassigned (system monitor).</p>
+      )}
+
+      {isAdmin && (
+          <div className="pt-2">
+              <FormField
+                  as="select"
+                  id="assign-tenant"
+                  label={assignedTenant ? "Re-assign to another Tenant" : "Assign to Tenant"}
+                  value=""
+                  onChange={(e) => {
+                      if (e.target.value && monitor.id !== undefined) {
+                          assignMonitor.mutate({ id: monitor.id, tenantId: e.target.value });
+                      }
+                  }}
+                  disabled={assignMonitor.isPending}
+              >
+                  <option value="" disabled>Select a tenant...</option>
+                  {availableTenants.map(t => (
+                      <option key={t.id} value={t.id}>{t.name}</option>
+                  ))}
+              </FormField>
+          </div>
+      )}
+    </div>
+  );
+});
 
 export function MonitorDetailView() {
   const navigate = useNavigate();

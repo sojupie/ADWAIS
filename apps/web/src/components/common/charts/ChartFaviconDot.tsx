@@ -45,7 +45,7 @@ export function ChartFaviconDot(props: ChartFaviconDotProps) {
         r={r}
         fill={resolvedFill}
         fillOpacity={1}
-        stroke="#fff"
+        stroke="white"
         strokeWidth={2}
       />
       {showLetter && tenantName && (
@@ -56,7 +56,7 @@ export function ChartFaviconDot(props: ChartFaviconDotProps) {
           dominantBaseline="central"
           fontSize={r * 1.5}
           fontWeight={800}
-          fill="#fff"
+          fill="white"
           fillOpacity={1}
           style={{ pointerEvents: 'none', userSelect: 'none', fontFamily: 'Manrope, sans-serif', mixBlendMode: 'difference' }}
         >

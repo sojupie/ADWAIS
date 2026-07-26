@@ -59,7 +59,7 @@ function CountdownRing({resetKey, syncError}: { resetKey: number; syncError: boo
           strokeDasharray="100, 100"
           strokeDashoffset="100"
           strokeLinecap="round"
-          className={`${syncError ? 'text-red-500' : 'text-[#51B5B9]'} transition-all duration-1000 ease-linear`}
+          className={`${syncError ? 'text-error' : 'text-primary'} transition-all duration-1000 ease-linear`}
         />
       </svg>
       <div ref={textRef} className="absolute inset-0 flex items-center justify-center text-md font-bold font-mono">

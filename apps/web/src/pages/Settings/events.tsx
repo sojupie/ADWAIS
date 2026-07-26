@@ -40,18 +40,18 @@ function HealthStatusCard({ title, subtitle, status, children }: HealthStatusCar
                     <span className="text-sm text-on-surface-variant">{subtitle}</span>
                 </div>
                 {isHealthy && (
-                    <span className="flex items-center gap-2 rounded-full bg-primary-container px-3 py-1 text-sm font-bold text-on-primary-container">
-                        <CheckCircle2 size={13} /> <span>OK</span>
+                    <span className="flex items-center gap-2 rounded-full bg-success-container px-3 py-1 text-sm font-bold text-on-success-container">
+                        <CheckCircle2 size={16} /> <span>OK</span>
                     </span>
                 )}
                 {isWarning && (
-                    <span className="flex items-center gap-2 rounded-full bg-tertiary-container px-3 py-1 text-sm font-bold text-on-tertiary-container">
-                        <AlertTriangle size={13} /> <span>WARN</span>
+                    <span className="flex items-center gap-2 rounded-full bg-warning-container px-3 py-1 text-sm font-bold text-on-warning-container">
+                        <AlertTriangle size={16} /> <span>WARN</span>
                     </span>
                 )}
                 {isFailed && (
                     <span className="flex items-center gap-2 rounded-full bg-error-container px-3 py-1 text-sm font-bold text-on-error-container">
-                        <AlertCircle size={13} /> <span>ERR</span>
+                        <AlertCircle size={16} /> <span>ERR</span>
                     </span>
                 )}
             </div>

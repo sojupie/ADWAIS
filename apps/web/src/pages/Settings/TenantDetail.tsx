@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { useNavigate, useParams } from '@tanstack/react-router';
 import { Building2, Save, X } from 'lucide-react';
 import { useTenantsViewModel } from '../../hooks/useTenantsViewModel';
@@ -11,7 +11,6 @@ import type { TenantResponseDto } from '@types';
 
 function TenantDetailForm({ tenant, isAdmin, onBack }: { tenant: TenantResponseDto, isAdmin: boolean, onBack: () => void }) {
   const updateTenant = useUpdateTenantMutation();
-  const { allMonitors, allUniqueTypes, allUniqueTags, assignMonitor, unassignMonitor } = useTenantsViewModel();
   
   const getInitialDraft = (t: TenantResponseDto) => ({
     name: t.name || '',
@@ -23,27 +22,16 @@ function TenantDetailForm({ tenant, isAdmin, onBack }: { tenant: TenantResponseD
   });
 
   const [draft, setDraft] = useState(getInitialDraft(tenant));
-  const lastTenantRef = useRef(tenant);
+  const [isUserEditing, setIsUserEditing] = useState(false);
+  const [prevTenant, setPrevTenant] = useState(tenant);
 
-  useEffect(() => {
-    setDraft(currentDraft => {
-      const lastKnownDraft = getInitialDraft(lastTenantRef.current);
-      const isCurrentlyDirty =
-        currentDraft.name !== lastKnownDraft.name ||
-        currentDraft.litiumBaseUrl !== lastKnownDraft.litiumBaseUrl ||
-        currentDraft.imageUrl !== lastKnownDraft.imageUrl ||
-        currentDraft.serviceAccountToken !== lastKnownDraft.serviceAccountToken ||
-        currentDraft.clearToken !== lastKnownDraft.clearToken ||
-        currentDraft.orderFetchingEnabled !== lastKnownDraft.orderFetchingEnabled;
-        
-      lastTenantRef.current = tenant;
-
-      if (!isCurrentlyDirty) {
-        return getInitialDraft(tenant);
-      }
-      return currentDraft;
-    });
-  }, [tenant]);
+  // When background data refreshes, only update the draft if the user isn't actively editing
+  if (tenant !== prevTenant) {
+    setPrevTenant(tenant);
+    if (!isUserEditing) {
+      setDraft(getInitialDraft(tenant));
+    }
+  }
 
   const isDirty =
     draft.name !== (tenant.name || '') ||
@@ -71,6 +59,7 @@ function TenantDetailForm({ tenant, isAdmin, onBack }: { tenant: TenantResponseD
       { id: tenant.id, payload },
       {
         onSuccess: () => {
+          setIsUserEditing(false);
           setDraft(d => ({ ...d, serviceAccountToken: '', clearToken: false }));
           setTimeout(() => {
             updateTenant.reset();
@@ -81,7 +70,14 @@ function TenantDetailForm({ tenant, isAdmin, onBack }: { tenant: TenantResponseD
   };
 
   const handleCancel = () => {
+    setIsUserEditing(false);
     setDraft(getInitialDraft(tenant));
+  };
+
+  // Helper to update draft and mark as user editing
+  const updateDraft = (updates: Partial<typeof draft>) => {
+    setIsUserEditing(true);
+    setDraft(prev => ({ ...prev, ...updates }));
   };
 
   return (
@@ -123,7 +119,7 @@ function TenantDetailForm({ tenant, isAdmin, onBack }: { tenant: TenantResponseD
               id="tenant-name"
               label="Name"
               value={draft.name}
-              onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+              onChange={(e) => updateDraft({ name: e.target.value })}
               disabled={!isAdmin}
             />
 
@@ -132,7 +128,7 @@ function TenantDetailForm({ tenant, isAdmin, onBack }: { tenant: TenantResponseD
               label="Litium Base URL"
               type="url"
               value={draft.litiumBaseUrl}
-              onChange={(e) => setDraft({ ...draft, litiumBaseUrl: e.target.value })}
+              onChange={(e) => updateDraft({ litiumBaseUrl: e.target.value })}
               disabled={!isAdmin}
             />
 
@@ -141,7 +137,7 @@ function TenantDetailForm({ tenant, isAdmin, onBack }: { tenant: TenantResponseD
               label="Image URL"
               type="url"
               value={draft.imageUrl}
-              onChange={(e) => setDraft({ ...draft, imageUrl: e.target.value })}
+              onChange={(e) => updateDraft({ imageUrl: e.target.value })}
               disabled={!isAdmin}
             />
 
@@ -151,14 +147,14 @@ function TenantDetailForm({ tenant, isAdmin, onBack }: { tenant: TenantResponseD
               type="password"
               value={draft.serviceAccountToken}
               disabled={!isAdmin || draft.clearToken}
-              onChange={(e) => setDraft({ ...draft, serviceAccountToken: e.target.value, clearToken: false })}
+              onChange={(e) => updateDraft({ serviceAccountToken: e.target.value, clearToken: false })}
               placeholder={draft.clearToken ? 'Cleared' : (tenant.hasServiceAccountToken ? '•••••••••••• (Type to change)' : 'Type to set new token')}
               meta={(
                 <span className="flex items-center gap-3">
                   {isAdmin && tenant.hasServiceAccountToken && !draft.clearToken && (
                     <button
                       type="button"
-                      onClick={() => setDraft({ ...draft, clearToken: true, serviceAccountToken: '' })}
+                      onClick={() => updateDraft({ clearToken: true, serviceAccountToken: '' })}
                       className="cursor-pointer rounded-full px-3 py-1 text-sm font-bold text-error transition-colors hover:bg-error-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-error"
                     >
                       Clear Token
@@ -176,21 +172,11 @@ function TenantDetailForm({ tenant, isAdmin, onBack }: { tenant: TenantResponseD
               label="Enable Order Fetching"
               checked={draft.orderFetchingEnabled}
               disabled={!isAdmin}
-              onChange={e => setDraft({ ...draft, orderFetchingEnabled: e.target.checked })}
+              onChange={e => updateDraft({ orderFetchingEnabled: e.target.checked })}
             />
           </div>
 
-          <TenantMonitorsPanel
-              tenantId={tenant.id}
-              allMonitors={allMonitors}
-              allUniqueTypes={allUniqueTypes}
-              allUniqueTags={allUniqueTags}
-              assignMonitor={assignMonitor.mutate}
-              unassignMonitor={unassignMonitor.mutate}
-              isAssignPending={assignMonitor.isPending}
-              isUnassignPending={unassignMonitor.isPending}
-              isAdmin={isAdmin}
-          />
+          <TenantMonitorsPanel tenantId={tenant.id} />
         </div>
       </div>
     </>

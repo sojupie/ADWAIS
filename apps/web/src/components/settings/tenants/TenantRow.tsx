@@ -11,7 +11,7 @@ interface TenantRowProps {
 export function TenantRow({ t, selected = false, onSelect, onDoubleClick }: TenantRowProps) {
   return (
     <tr 
-      className={`group transition-colors hover:bg-surface-container-low cursor-pointer select-none ${selected ? 'bg-primary-container/10' : ''}`}
+      className={`group transition-colors bg-surface border-b border-outline-variant hover:bg-surface-container cursor-pointer select-none ${selected ? 'bg-primary-container/10' : ''}`}
       onClick={onSelect}
       onDoubleClick={onDoubleClick}
     >
@@ -38,12 +38,12 @@ export function TenantRow({ t, selected = false, onSelect, onDoubleClick }: Tena
           </div>
         </div>
       </td>
-      <td className="px-4 py-3 align-middle sm:px-5 text-sm font-medium text-on-surface-variant truncate max-w-[250px]">
+      <td className="px-4 py-3 align-middle sm:px-5 text-sm font-bold text-on-surface-variant truncate max-w-[250px]">
         {t.litiumBaseUrl || 'N/A'}
       </td>
       <td className="w-32 px-4 py-3 align-middle sm:px-5">
-        <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-bold ${
-          t.orderFetchingEnabled ? 'bg-success-container text-on-success-container' : 'bg-error-container text-on-error-container'
+        <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-bold ${
+          t.orderFetchingEnabled ? 'bg-success-container text-on-success-container' : 'bg-surface-container text-on-surface-variant'
         }`}>
           {t.orderFetchingEnabled ? <CheckCircle2 size={12} /> : <XCircle size={12} />}
           {t.orderFetchingEnabled ? 'Enabled' : 'Disabled'}

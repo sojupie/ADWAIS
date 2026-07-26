@@ -1,4 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
+import { useCallback } from 'react';
 import { 
   useGetApiTenants, 
   usePostApiTenants, 
@@ -35,15 +36,18 @@ export function useCreateTenantMutation(onSuccessCallback?: () => void) {
     }
   });
 
-  return {
-    ...mutation,
-    mutate: (
+  const mutate = useCallback((
       payload: { name: string; litiumBaseUrl: string; imageUrl: string; serviceAccountToken: string },
       options?: Parameters<typeof mutation.mutate>[1]
     ) => 
       mutation.mutate({ 
         data: { ...payload, type: 'B2B', orderFetchingEnabled: false } 
-      }, options)
+      }, options),
+    [mutation.mutate]);
+
+  return {
+    ...mutation,
+    mutate
   };
 }
 
@@ -66,10 +70,13 @@ export function useDeleteTenantMutation() {
     }
   });
 
+  const mutate = useCallback((id: string, options?: Parameters<typeof mutation.mutate>[1]) => 
+      mutation.mutate({ id }, options),
+    [mutation.mutate]);
+
   return {
     ...mutation,
-    mutate: (id: string, options?: Parameters<typeof mutation.mutate>[1]) => 
-      mutation.mutate({ id }, options)
+    mutate
   };
 }
 
@@ -92,12 +99,15 @@ export function useUpdateTenantMutation() {
     }
   });
 
-  return {
-    ...mutation,
-    mutate: (
+  const mutate = useCallback((
       variables: { id: string; payload: Partial<TenantResponseDto> & { serviceAccountToken?: string } },
       options?: Parameters<typeof mutation.mutate>[1]
     ) => 
-      mutation.mutate({ id: variables.id, data: variables.payload }, options)
+      mutation.mutate({ id: variables.id, data: variables.payload }, options),
+    [mutation.mutate]);
+
+  return {
+    ...mutation,
+    mutate
   };
 }

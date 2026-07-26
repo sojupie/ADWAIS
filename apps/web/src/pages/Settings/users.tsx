@@ -51,7 +51,7 @@ export function UsersView() {
     return (
         <div className="grid grid-cols-1 landscape-contained:grid-cols-1 portrait-contained:grid-rows-1 gap-4 h-full min-h-0">
             <div className="flex min-h-0 flex-col gap-4 h-full">
-            <SettingsPanel>
+            <SettingsPanel className="flex-1 max-h-none">
                 <SettingsPanelHeader
                     title="Active Users"
                     subtitle="Review access, roles and registered accounts."

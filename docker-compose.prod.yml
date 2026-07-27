@@ -63,7 +63,9 @@ services:
     volumes:
       - pgdata-prod:/var/lib/postgresql/data
     networks:
-      - data
+      admin:
+        gw_priority: 1
+      data:
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d analyticsdb"]
       interval: 10s
@@ -92,6 +94,7 @@ volumes:
   dp-keys-prod:
 
 networks:
+  admin:
   edge:
   app:
   data:

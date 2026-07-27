@@ -58,6 +58,11 @@ jobs:
         run: |
           docker version
           docker compose version
+          compose_version="$(docker compose version --short | sed 's/^v//')"
+          if ! dpkg --compare-versions "$compose_version" ge "2.33.1"; then
+            echo "Docker Compose 2.33.1 or newer is required; found $compose_version." >&2
+            exit 1
+          fi
           test -w "$ADWAIS_CONFIG_DIR" || {
             echo "$ADWAIS_CONFIG_DIR does not exist or is not writable by the runner user." >&2
             echo "Create it once using the server setup commands in the deployment documentation." >&2

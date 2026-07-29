@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { Building2, CheckCircle2, XCircle } from 'lucide-react';
+import { getTenantFaviconUrl } from '../../../utils/tenantHelper';
 import type { TenantResponseDto } from '@types';
 
 interface TenantRowProps {
@@ -9,6 +11,10 @@ interface TenantRowProps {
 }
 
 export function TenantRow({ t, selected = false, onSelect, onDoubleClick }: TenantRowProps) {
+  const [imgError, setImgError] = useState(false);
+  const faviconUrl = t.imageUrl || getTenantFaviconUrl(t.litiumBaseUrl);
+  const showIcon = !faviconUrl || imgError;
+
   return (
     <tr 
       className={`group transition-colors bg-surface border-b border-outline-variant hover:bg-surface-container cursor-pointer select-none ${selected ? 'bg-primary-container/10' : ''}`}
@@ -27,10 +33,10 @@ export function TenantRow({ t, selected = false, onSelect, onDoubleClick }: Tena
       <td className="px-4 py-3 align-middle sm:px-5">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-container text-on-primary-container overflow-hidden">
-            {t.imageUrl ? (
-                <img src={t.imageUrl} alt={t.name} className="h-full w-full object-cover" />
-            ) : (
+            {showIcon ? (
                 <Building2 size={20} />
+            ) : (
+                <img src={faviconUrl} alt={t.name || ''} className="h-full w-full object-cover" onError={() => setImgError(true)} />
             )}
           </div>
           <div className="flex flex-col w-full max-w-[250px]">

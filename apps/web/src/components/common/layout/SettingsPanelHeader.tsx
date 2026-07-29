@@ -5,6 +5,7 @@ interface SettingsPanelHeaderProps {
   title: string;
   subtitle?: string;
   icon?: ReactNode;
+  iconContainerClassName?: string;
   children?: ReactNode;
   className?: string;
   onBack?: () => void;
@@ -14,6 +15,7 @@ export function SettingsPanelHeader({
   title,
   subtitle,
   icon,
+  iconContainerClassName,
   children,
   className = '',
   onBack,
@@ -32,7 +34,7 @@ export function SettingsPanelHeader({
           </button>
         )}
         {icon && (
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-container text-on-primary-container">
+          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${iconContainerClassName || 'bg-primary-container text-on-primary-container'}`}>
             {icon}
           </div>
         )}

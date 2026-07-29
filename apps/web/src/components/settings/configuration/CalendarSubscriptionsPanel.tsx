@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import {Globe, RefreshCw, Trash2, Calendar} from 'lucide-react';
+import {Globe, RefreshCw, Trash2, Calendar, Lock} from 'lucide-react';
 import { useCalendarSubscriptionsQuery, useCreateCalendarSubscriptionMutation, useDeleteCalendarSubscriptionMutation, useSyncCalendarSubscriptionMutation } from '../../../hooks/useCalendarQueries';
 import { SettingsPanel } from '../../common/layout/SettingsPanel';
 import { Input } from '../../common/ui/Input';
@@ -32,7 +32,12 @@ export function CalendarSubscriptionsPanel({ disabled }: { disabled?: boolean })
           icon={<Calendar size={24} />}
       >
           <div className="flex flex-col gap-4">
-        {!disabled && (
+        {disabled && (
+          <div className="flex items-center gap-3 rounded-xl bg-surface-container-high px-4 py-3 text-sm font-semibold text-on-surface-variant animate-in fade-in duration-300">
+            <Lock size={16} className="shrink-0" aria-hidden="true" />
+            <span>You can review these subscriptions, but only administrators can add or remove them.</span>
+          </div>
+        )}
           <form onSubmit={handleCreateSub} className="flex flex-col gap-4 rounded-xl bg-surface-container p-4">
             <h4 className="flex items-center gap-2 text-base font-black text-on-surface">
               <Globe size={18} className="text-on-surface-variant" aria-hidden="true" />
@@ -46,6 +51,7 @@ export function CalendarSubscriptionsPanel({ disabled }: { disabled?: boolean })
                 value={subForm.name}
                 onChange={e => setSubForm({ ...subForm, name: e.target.value })}
                 required
+                disabled={disabled}
                 className={"bg-surface border border-outline-variant"}
               />
               <Input
@@ -55,20 +61,20 @@ export function CalendarSubscriptionsPanel({ disabled }: { disabled?: boolean })
                 value={subForm.url}
                 onChange={e => setSubForm({ ...subForm, url: e.target.value })}
                 required
+                disabled={disabled}
                 className={"bg-surface border border-outline-variant"}
               />
             </div>
             <div className="flex justify-end">
               <button 
                 type="submit" 
-                disabled={createSubMutation.isPending}
+                disabled={disabled || createSubMutation.isPending}
                 className="inline-flex min-h-11 cursor-pointer items-center justify-center rounded-full bg-on-primary-container px-5 text-base font-bold text-primary-container transition-colors hover:bg-brand-btn-quaternary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary disabled:cursor-not-allowed disabled:bg-on-surface/[0.1] disabled:text-on-surface/[0.38] disabled:hover:bg-on-surface/[0.1] disabled:hover:text-on-surface/[0.38]"
               >
                 {createSubMutation.isPending ? 'Connecting…' : 'Add calendar'}
               </button>
             </div>
           </form>
-        )}
 
         <div className="flex flex-col gap-2 mt-2">
           {isLoading ? (

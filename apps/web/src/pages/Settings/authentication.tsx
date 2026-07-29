@@ -10,7 +10,6 @@ import { removeKioskToken } from '../../utils/auth';
 import { ErrorAlert } from '../../components/common/ui/ErrorAlert';
 import { SettingsPanel } from '../../components/common/layout/SettingsPanel';
 import { SettingsPanelHeader } from '../../components/common/layout/SettingsPanelHeader';
-import { SettingsCard } from '../../components/common/layout/SettingsCard';
 
 export function AuthenticationSettings() {
   const [activationCode, setActivationCode] = useState('');
@@ -60,82 +59,89 @@ export function AuthenticationSettings() {
   };
 
   return (
-    <SettingsPanel className="!h-fit max-w-5xl">
+    <div className="flex flex-col gap-4 h-full min-h-0">
+      <SettingsPanel className="flex-1 max-h-none">
       <SettingsPanelHeader
         title="Authentication"
         subtitle="Authorize kiosk displays and manage the session on this device."
         icon={<KeyRound size={24} />}
       />
-      <div className="custom-scrollbar grid grid-cols-1 content-start items-start gap-4 overflow-y-auto p-3 sm:p-4 md:grid-cols-2">
-        <SettingsCard
-          title="Kiosk activation"
-          subtitle="Enter the code shown on a kiosk to authorize that display."
-          icon={<MonitorSmartphone size={20} />}
-          className="h-fit"
-        >
-          <form onSubmit={handleActivate} className="flex flex-col gap-4">
-            <Input
-              label="Activation Code"
-              type="text"
-              className="text-center font-mono text-xl uppercase tracking-[0.35em]"
-              placeholder={isStaff ? "XXXXXX" : "LOCKED"}
-              value={activationCode}
-              onChange={(e) => setActivationCode(e.target.value.toUpperCase().slice(0, 6))}
-              disabled={activateMutation.isPending || !isStaff}
-            />
+      <div className="custom-scrollbar flex-1 overflow-y-auto px-6 py-6">
+        <div className="flex flex-col gap-6 max-w-3xl">
+          <div className="space-y-4">
+            <h3 className="flex items-center gap-2 text-lg font-bold text-on-surface">
+              <MonitorSmartphone size={20} /> Kiosk activation
+            </h3>
+            <p className="text-sm text-on-surface-variant">Enter the code shown on a kiosk to authorize that display.</p>
 
-            {errorMsg && (
-              <ErrorAlert
-                title="Unable to activate kiosk"
-                message={errorMsg}
-                onDismiss={() => setErrorMsg('')}
+            <form onSubmit={handleActivate} className="flex flex-col gap-4">
+              <Input
+                label="Activation Code"
+                type="text"
+                className="text-center font-mono text-xl uppercase tracking-[0.35em]"
+                placeholder={isStaff ? "XXXXXX" : "LOCKED"}
+                value={activationCode}
+                onChange={(e) => setActivationCode(e.target.value.toUpperCase().slice(0, 6))}
+                disabled={activateMutation.isPending || !isStaff}
               />
-            )}
-            {successMsg && (
-              <div className="rounded-xl bg-primary-container p-3 text-sm font-semibold text-on-primary-container">
-                {successMsg}
-              </div>
-            )}
 
-            <SecureButton
-              type="submit"
-              locked={!isStaff}
-              lockTitle="Requires Staff (Employee or Admin) role"
-              loading={activateMutation.isPending}
-              loadingText="Activating…"
-              className="inline-flex min-h-11 w-fit cursor-pointer items-center justify-center gap-2 self-start rounded-full bg-on-primary-container px-5 text-base font-bold text-primary-container transition-colors hover:bg-brand-btn-quaternary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary"
-              disabled={activationCode.length !== 6}
-            >
-              Activate Kiosk
-            </SecureButton>
-          </form>
-        </SettingsCard>
+              {errorMsg && (
+                <ErrorAlert
+                  title="Unable to activate kiosk"
+                  message={errorMsg}
+                  onDismiss={() => setErrorMsg('')}
+                />
+              )}
+              {successMsg && (
+                <div className="rounded-xl bg-primary-container p-3 text-sm font-semibold text-on-primary-container">
+                  {successMsg}
+                </div>
+              )}
 
-        <SettingsCard
-          title="Current session"
-          subtitle="Review the signed-in account or remove access from this device."
-          icon={<KeyRound size={20} />}
-          className="h-fit"
-        >
-          <div className="rounded-xl bg-surface-container-high p-4">
-            <span className="text-sm font-bold uppercase tracking-wider text-on-surface-variant">Signed in as</span>
-            <p className="mt-1 break-all text-base font-bold text-on-surface">
-              {accounts[0]?.username || 'Kiosk session'}
-            </p>
+              <SecureButton
+                type="submit"
+                locked={!isStaff}
+                lockTitle="Requires Staff (Employee or Admin) role"
+                loading={activateMutation.isPending}
+                loadingText="Activating…"
+                className="inline-flex min-h-11 w-fit cursor-pointer items-center justify-center gap-2 self-start rounded-full bg-on-primary-container px-5 text-base font-bold text-primary-container transition-colors hover:bg-brand-btn-quaternary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary"
+                disabled={activationCode.length !== 6}
+              >
+                Activate Kiosk
+              </SecureButton>
+            </form>
           </div>
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <span className="text-sm font-medium text-on-surface-variant">This only signs out the current device.</span>
-          <button
-            type="button"
-            onClick={handleSignOut}
-            className="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-full bg-error px-5 text-base font-bold text-on-error transition-colors hover:bg-error-container hover:text-on-error-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-error"
-          >
-            <LogOut size={18} aria-hidden="true" />
-            Sign Out
-          </button>
+
+          <hr className="border-outline-variant" />
+
+          <div className="space-y-4">
+            <h3 className="flex items-center gap-2 text-lg font-bold text-on-surface">
+              <KeyRound size={20} /> Current session
+            </h3>
+            <p className="text-sm text-on-surface-variant">Review the signed-in account or remove access from this device.</p>
+
+            <div className="rounded-xl bg-surface-container-high p-4">
+              <span className="text-sm font-bold uppercase tracking-wider text-on-surface-variant">Signed in as</span>
+              <p className="mt-1 break-all text-base font-bold text-on-surface">
+                {accounts[0]?.username || 'Kiosk session'}
+              </p>
+            </div>
+            
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <span className="text-sm font-medium text-on-surface-variant">This only signs out the current device.</span>
+              <button
+                type="button"
+                onClick={handleSignOut}
+                className="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-full hover:bg-error px-5 text-base font-bold hover:text-on-error transition-colors bg-error-container text-on-error-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-error"
+              >
+                <LogOut size={18} aria-hidden="true" />
+                Sign Out
+              </button>
+            </div>
           </div>
-        </SettingsCard>
+        </div>
       </div>
     </SettingsPanel>
+    </div>
   );
 }

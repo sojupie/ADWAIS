@@ -1,4 +1,5 @@
 import { Shield, User } from 'lucide-react';
+import { getTagColor, getTagStyle } from '../../../utils/tagHelper';
 import type { UserResponseDto } from '@types';
 
 interface UserRowProps {
@@ -9,6 +10,9 @@ interface UserRowProps {
 }
 
 export function UserRow({ u, selected = false, onSelect, onDoubleClick }: UserRowProps) {
+  const avatarColor = getTagColor(u.name || u.email || 'Unknown');
+  const avatarStyle = getTagStyle(avatarColor);
+
   return (
     <tr 
       className={`group transition-colors hover:bg-surface-container-low cursor-pointer select-none ${selected ? 'bg-primary-container/10' : ''}`}
@@ -26,7 +30,7 @@ export function UserRow({ u, selected = false, onSelect, onDoubleClick }: UserRo
       </td>
       <td className="px-4 py-3 align-middle sm:px-5">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-container text-lg font-bold text-on-primary-container">
+          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-lg font-bold overflow-hidden border ${avatarStyle}`}>
             {u.name?.charAt(0).toUpperCase() || '?'}
           </div>
           <div className="flex flex-col w-full max-w-[250px]">

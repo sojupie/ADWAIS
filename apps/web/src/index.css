@@ -334,9 +334,9 @@
 /* ── Components ── */
 @layer components {
   :where(
-    button:not(:disabled):not([data-md3-ripple='off']),
-    [role='button']:not([aria-disabled='true']):not([data-md3-ripple='off']),
-    [data-md3-ripple]:not([data-md3-ripple='off']):not([aria-disabled='true'])
+    button:not([data-md3-ripple='off']),
+    [role='button']:not([data-md3-ripple='off']),
+    [data-md3-ripple]:not([data-md3-ripple='off'])
   ) {
     position: relative;
     isolation: isolate;
@@ -477,3 +477,4 @@
 .delay-400 { animation-delay: 400ms; }
 .delay-500 { animation-delay: 500ms; }
 .delay-600 { animation-delay: 600ms; }
+

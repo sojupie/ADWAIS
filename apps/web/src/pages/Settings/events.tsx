@@ -186,7 +186,7 @@ export function SystemEventsView() {
                 title="System events"
                 subtitle="Application and synchronization diagnostics"
                 icon={<TerminalSquare size={18} />}
-                className="landscape-contained:col-span-1 max-h-[500px] contained:max-h-none"
+                className="landscape-contained:col-span-1 min-h-[400px] max-h-[500px] contained:max-h-none"
             >
                 <div className="flex flex-col min-w-0">
                     {(events || []).map((e: SystemEvent, i: number) => (

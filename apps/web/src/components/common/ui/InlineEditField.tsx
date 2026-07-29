@@ -1,8 +1,13 @@
 import { useState, type InputHTMLAttributes, type Key, type ReactNode } from 'react';
 import { Check, Edit3, Loader2, Lock, X } from 'lucide-react';
-import { CheckboxField, FormField } from './FormField';
+import { CheckboxField, FormField, type FieldDensity, type FieldVariant } from './FormField';
 
 type InlineEditKind = 'text' | 'number' | 'password' | 'select' | 'checkbox';
+
+const densityClasses: Record<FieldDensity, string> = {
+  compact: 'min-h-9 px-3 py-1.5 text-sm',
+  default: 'min-h-12 px-4 py-3 text-base',
+};
 
 export interface InlineEditFieldProps<T> {
   label: string;
@@ -19,6 +24,8 @@ export interface InlineEditFieldProps<T> {
   canClear?: boolean;
   disabled?: boolean;
   hideLabel?: boolean;
+  variant?: FieldVariant;
+  density?: FieldDensity;
   inputProps?: Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'value' | 'onChange'>;
 }
 
@@ -41,6 +48,8 @@ export function InlineEditField<T>({
   canClear = false,
   disabled = false,
   hideLabel = false,
+  variant = 'filled',
+  density = 'default',
   inputProps,
 }: InlineEditFieldProps<T>) {
   const [isEditing, setIsEditing] = useState(false);
@@ -148,6 +157,8 @@ export function InlineEditField<T>({
               label={label}
               hideLabel
               autoFocus
+              variant={variant}
+              density={density}
               value={draft as string}
               disabled={isSaving}
               error={hideLabel ? error : undefined}
@@ -170,6 +181,8 @@ export function InlineEditField<T>({
               hideLabel
               autoFocus
               type={kind}
+              variant={variant}
+              density={density}
               value={isEmpty(draft) ? '' : String(draft)}
               placeholder={placeholder || (kind === 'password' ? '••••••••••••' : undefined)}
               disabled={isSaving}
@@ -229,13 +242,13 @@ export function InlineEditField<T>({
               startEditing();
             }
           }}
-          className={`group/field flex min-w-0 items-center justify-between gap-3 rounded-xl px-2 py-1.5 transition-colors ${
+          className={`group/field relative overflow-hidden flex min-w-0 items-center justify-between gap-3 rounded-xl border border-transparent transition-colors ${densityClasses[density]} ${
             disabled
               ? 'cursor-not-allowed opacity-60'
               : 'cursor-pointer hover:bg-surface-container-low focus-visible:outline focus-visible:outline-2 focus-visible:outline-secondary'
           }`}
         >
-          <div className="min-w-0 text-base font-medium text-on-surface">
+          <div className="min-w-0 font-medium text-on-surface">
             {renderValue ?? (
               kind === 'password'
                 ? value ? '••••••••••••' : 'Not set'

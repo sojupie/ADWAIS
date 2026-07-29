@@ -31,7 +31,7 @@ export function BackgroundJobsView() {
     ];
 
     return (
-        <div className="grid grid-cols-1 landscape-contained:grid-cols-2 portrait-contained:grid-rows-2 gap-4 contained:h-full contained:min-h-0">
+        <div className="grid grid-cols-1 landscape-contained:grid-cols-2 portrait-contained:grid-rows-2 gap-4 contained:h-full contained:min-h-0 pb-3">
             {/* Top Action Section / Left Pane */}
             <div className="flex min-h-0 flex-col gap-4 h-full">
                 <SettingsPanel
@@ -89,7 +89,7 @@ export function BackgroundJobsView() {
                     title="Recent executions"
                     subtitle="Newest dispatches first"
                     icon={<Activity size={18} />}
-                    className="flex-1 min-h-0 landscape-contained:max-h-none max-h-[500px]"
+                    className="flex-1 min-h-[400px] landscape-contained:max-h-none max-h-[500px]"
                 >
                     {recentJobs && recentJobs.length > 0 ? (
                         <div className="flex flex-col divide-y divide-console-border min-w-0">

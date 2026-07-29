@@ -6,6 +6,8 @@ import { useCurrentUser } from '../../hooks/useCurrentUser';
 import { SettingsPanel } from '../../components/common/layout/SettingsPanel';
 import { SettingsPanelHeader } from '../../components/common/layout/SettingsPanelHeader';
 import { FormField } from '../../components/common/ui/FormField';
+import { Button } from '../../components/common/ui/Button';
+import { getTagColor, getTagStyle } from '../../utils/tagHelper';
 import type { UserRole, UserResponseDto } from '@types';
 
 function UserDetailForm({ user, isAdmin }: { user: UserResponseDto, isAdmin: boolean }) {
@@ -57,37 +59,39 @@ function UserDetailForm({ user, isAdmin }: { user: UserResponseDto, isAdmin: boo
       <SettingsPanelHeader
         title="Edit User"
         subtitle={`Editing details for ${user.email}`}
-        icon={<UserIcon size={24} />}
+        icon={<span className="text-lg font-bold">{user.name?.charAt(0).toUpperCase() || '?'}</span>}
+        iconContainerClassName={`border ${getTagStyle(getTagColor(user.name || user.email || 'Unknown'))}`}
         onBack={() => void navigate({ to: '/settings/users' })}
       >
-          {isAdmin && (
             <div className="flex items-center gap-2">
-              <button
-                type="button"
+              <Button
                 onClick={handleDelete}
-                disabled={deleteUser.isPending}
-                className="inline-flex min-h-11 items-center gap-2 rounded-full px-4 text-sm font-bold text-error transition-colors hover:bg-error-container hover:text-on-error-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-error disabled:cursor-not-allowed disabled:text-on-surface/[0.38] disabled:hover:bg-transparent disabled:hover:text-on-surface/[0.38]"
+                disabled={!isAdmin || deleteUser.isPending}
+                variant="tonal"
+                color="error"
+                icon={<Trash2 size={16} />}
               >
-                <Trash2 size={16} /> Revoke Access
-              </button>
-              <button
-                type="button"
+                Revoke Access
+              </Button>
+              <Button
                 onClick={handleCancel}
-                disabled={!isDirty || updateUser.isPending}
-                className="inline-flex min-h-11 items-center gap-2 rounded-full px-4 text-sm font-bold text-on-surface-variant transition-colors hover:bg-surface-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-secondary disabled:cursor-not-allowed disabled:text-on-surface/[0.38] disabled:hover:bg-transparent disabled:hover:text-on-surface/[0.38]"
+                disabled={!isAdmin || !isDirty || updateUser.isPending}
+                variant="text"
+                color="surface"
+                icon={<X size={16} />}
               >
-                <X size={16} /> Cancel
-              </button>
-              <button
-                type="button"
+                Cancel
+              </Button>
+              <Button
                 onClick={handleSave}
-                disabled={!isDirty || updateUser.isPending}
-                className="inline-flex min-h-11 items-center gap-2 rounded-full bg-primary-container px-4 text-sm font-bold text-on-primary-container transition-colors hover:bg-primary hover:text-on-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:bg-on-surface/[0.1] disabled:text-on-surface/[0.38] disabled:hover:bg-on-surface/[0.1] disabled:hover:text-on-surface/[0.38]"
+                disabled={!isAdmin || !isDirty || updateUser.isPending}
+                variant="tonal"
+                color="primary"
+                icon={<Save size={16} />}
               >
-                <Save size={16} /> Save Changes
-              </button>
+                Save Changes
+              </Button>
             </div>
-          )}
         </SettingsPanelHeader>
 
       <div className="custom-scrollbar flex-1 overflow-y-auto px-6 py-6">
@@ -137,7 +141,7 @@ export function UserDetailView() {
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-4">
-      <SettingsPanel className="flex-1">
+      <SettingsPanel className="flex-1 max-h-none">
         {isLoading && (
           <SettingsPanelHeader
             title="Edit User"

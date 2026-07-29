@@ -1,8 +1,8 @@
 import { useId, type ChangeEventHandler, type InputHTMLAttributes, type ReactNode, type TextareaHTMLAttributes } from 'react';
 import { Select, type SelectProps } from './Select';
 
-type FieldVariant = 'filled' | 'raised' | 'outlined' | 'plain';
-type FieldDensity = 'compact' | 'default';
+export type FieldVariant = 'filled' | 'raised' | 'outlined' | 'plain';
+export type FieldDensity = 'compact' | 'default';
 
 interface FieldFrameProps {
   id: string;
@@ -140,18 +140,42 @@ export function FormField(props: FormFieldProps) {
     containerClassName: props.containerClassName,
   };
 
+  const getWrapperClasses = (isTextarea: boolean) => {
+    const base = `relative overflow-hidden flex ${
+      isTextarea ? '' : 'items-center'
+    } w-full rounded-xl font-medium text-on-surface transition-[background-color,border-color,color,box-shadow] focus-within:border-secondary focus-within:bg-primary-container focus-within:text-on-primary-container focus-within:ring-2 focus-within:ring-secondary/40 ${variantClasses[variant]} ${densityClasses[density]} ${props.className || ''}`;
+    
+    if (props.disabled) {
+      return `${base} cursor-not-allowed border-transparent bg-on-surface/[0.1] text-on-surface/[0.38]`;
+    }
+    return `${base} cursor-text`;
+  };
+
+  const handleWrapperClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const el = e.currentTarget.querySelector<HTMLInputElement | HTMLTextAreaElement>('input, textarea');
+    if (el && document.activeElement !== el) {
+      el.focus();
+    }
+  };
+
   if (props.as === 'textarea') {
     const textareaProps = getControlProps<TextareaHTMLAttributes<HTMLTextAreaElement>>(props);
     return (
       <FieldFrame {...frameProps}>
-        <textarea
-          {...textareaProps}
-          id={id}
-          aria-label={props.hideLabel ? props.label : props['aria-label']}
-          aria-invalid={Boolean(props.error) || undefined}
-          aria-describedby={describedBy}
-          className={`custom-scrollbar ${controlClassName}`}
-        />
+        <div 
+          className={getWrapperClasses(true)}
+          data-md3-ripple={!props.disabled ? 'true' : undefined}
+          onClick={handleWrapperClick}
+        >
+          <textarea
+            {...textareaProps}
+            id={id}
+            aria-label={props.hideLabel ? props.label : props['aria-label']}
+            aria-invalid={Boolean(props.error) || undefined}
+            aria-describedby={describedBy}
+            className="w-full h-full bg-transparent outline-none disabled:bg-transparent custom-scrollbar resize-y text-inherit placeholder:text-on-surface-variant"
+          />
+        </div>
       </FieldFrame>
     );
   }
@@ -179,14 +203,20 @@ export function FormField(props: FormFieldProps) {
   const inputProps = getControlProps<InputHTMLAttributes<HTMLInputElement>>(props);
   return (
     <FieldFrame {...frameProps}>
-      <input
-        {...inputProps}
-        id={id}
-        aria-label={props.hideLabel ? props.label : props['aria-label']}
-        aria-invalid={Boolean(props.error) || undefined}
-        aria-describedby={describedBy}
-        className={controlClassName}
-      />
+      <div 
+        className={getWrapperClasses(false)}
+        data-md3-ripple={!props.disabled ? 'true' : undefined}
+        onClick={handleWrapperClick}
+      >
+        <input
+          {...inputProps}
+          id={id}
+          aria-label={props.hideLabel ? props.label : props['aria-label']}
+          aria-invalid={Boolean(props.error) || undefined}
+          aria-describedby={describedBy}
+          className="w-full h-full bg-transparent outline-none disabled:bg-transparent text-inherit placeholder:text-on-surface-variant"
+        />
+      </div>
     </FieldFrame>
   );
 }

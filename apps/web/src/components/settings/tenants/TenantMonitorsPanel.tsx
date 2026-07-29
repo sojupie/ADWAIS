@@ -5,6 +5,7 @@ import { useTenantsViewModel } from '../../../hooks/useTenantsViewModel';
 import { SearchInput } from '../../common/ui/SearchInput';
 import { MonitorSettingsFilterMenu } from './SettingsFilterMenu';
 import { MonitorRow } from './MonitorRow';
+import { Button } from '../../common/ui/Button';
 
 interface TenantMonitorsPanelProps {
     tenantId: string;
@@ -121,16 +122,16 @@ export const TenantMonitorsPanel = React.memo(function TenantMonitorsPanel({
             <div className="space-y-4">
                 <div className="flex items-center justify-between pb-2">
                     <h3 className="text-lg font-bold text-on-surface">Assigned Monitors</h3>
-                    {isAdmin && (
-                        <button
-                            type="button"
-                            onClick={handleUnassignSelected}
-                            disabled={isUnassignPending || assignedSelected.size === 0}
-                            className="inline-flex min-h-9 items-center gap-2 rounded-full px-4 text-sm font-bold text-error transition-colors hover:bg-error-container hover:text-on-error-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-error disabled:cursor-not-allowed disabled:text-on-surface/[0.38] disabled:hover:bg-transparent disabled:hover:text-on-surface/[0.38]"
-                        >
-                            <Unlink size={16} /> Unassign Selected ({assignedSelected.size})
-                        </button>
-                    )}
+                    <Button
+                        onClick={handleUnassignSelected}
+                        disabled={!isAdmin || isUnassignPending || assignedSelected.size === 0}
+                        variant="text"
+                        color="error"
+                        icon={<Unlink size={16} />}
+                        className="!min-h-9 px-4 text-sm"
+                    >
+                        Unassign Selected ({assignedSelected.size})
+                    </Button>
                 </div>
 
                 <div className="border border-outline-variant bg-surface-container-low rounded-xl overflow-hidden bg-surface">
@@ -143,7 +144,7 @@ export const TenantMonitorsPanel = React.memo(function TenantMonitorsPanel({
                                         key={m.id}
                                         m={m}
                                         selected={m.id !== undefined ? assignedSelected.has(m.id) : false}
-                                        onSelect={() => isAdmin && m.id !== undefined && handleAssignedSelect(m.id)}
+                                        onSelect={() => m.id !== undefined && handleAssignedSelect(m.id)}
                                     />
                                 ))}
                                 {assignedMonitors.length === 0 && (
@@ -160,41 +161,40 @@ export const TenantMonitorsPanel = React.memo(function TenantMonitorsPanel({
             </div>
 
             {/* Available Monitors */}
-            {isAdmin && (
-                <div className="space-y-4 xl:col-span-2">
-                    <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4">
-                        <div className="flex-1 space-y-1">
-                            <h3 className="text-lg font-bold text-on-surface">Assignable Monitors</h3>
-                            <p className="text-md text-on-surface-variant">Select monitors to assign to this tenant. If a monitor is already assigned to another tenant, it will be reassigned.</p>
-                        </div>
-                        
-                        {isAdmin && (
-                            <button
-                                type="button"
-                                onClick={handleAssignSelected}
-                                disabled={isAssignPending || availableSelected.size === 0}
-                                className="inline-flex shrink-0 min-h-10 items-center gap-2 rounded-full bg-primary-container px-5 text-sm font-bold text-on-primary-container transition-colors hover:bg-primary hover:text-on-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:bg-on-surface/[0.1] disabled:text-on-surface/[0.38] disabled:hover:bg-on-surface/[0.1] disabled:hover:text-on-surface/[0.38]"
-                            >
-                                <LinkIcon size={16} /> Assign Selected ({availableSelected.size})
-                            </button>
-                        )}
+            <div className="space-y-4 xl:col-span-2">
+                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4">
+                    <div className="flex-1 space-y-1">
+                        <h3 className="text-lg font-bold text-on-surface">Assignable Monitors</h3>
+                        <p className="text-md text-on-surface-variant">Select monitors to assign to this tenant. If a monitor is already assigned to another tenant, it will be reassigned.</p>
                     </div>
+                    
+                    <Button
+                        onClick={handleAssignSelected}
+                        disabled={!isAdmin || isAssignPending || availableSelected.size === 0}
+                        variant="tonal"
+                        color="primary"
+                        icon={<LinkIcon size={16} />}
+                        className="shrink-0"
+                    >
+                        Assign Selected ({availableSelected.size})
+                    </Button>
+                </div>
 
-                    <div className="flex flex-wrap items-center gap-3 pb-2">
-                        <SearchInput
-                            value={availableSearch}
-                            onChange={setAvailableSearch}
-                            placeholder="Search monitors..."
-                        />
-                        <MonitorSettingsFilterMenu
-                            filters={monitorFilters}
-                            setFilters={setMonitorFilters}
-                            sort={monitorSort}
-                            setSort={setMonitorSort}
-                            tags={allUniqueTags}
-                            types={allUniqueTypes}
-                        />
-                    </div>
+                <div className="flex flex-wrap items-center gap-3 pb-2">
+                    <SearchInput
+                        value={availableSearch}
+                        onChange={setAvailableSearch}
+                        placeholder="Search monitors..."
+                    />
+                    <MonitorSettingsFilterMenu
+                        filters={monitorFilters}
+                        setFilters={setMonitorFilters}
+                        sort={monitorSort}
+                        setSort={setMonitorSort}
+                        tags={allUniqueTags}
+                        types={allUniqueTypes}
+                    />
+                </div>
 
                     <div className="border border-outline-variant rounded-xl overflow-hidden bg-surface">
                         <div className="custom-scrollbar overflow-x-auto h-[500px] overflow-y-auto">
@@ -206,7 +206,7 @@ export const TenantMonitorsPanel = React.memo(function TenantMonitorsPanel({
                                             key={m.id}
                                             m={m}
                                             selected={m.id !== undefined ? availableSelected.has(m.id) : false}
-                                            onSelect={() => isAdmin && m.id !== undefined && handleAvailableSelect(m.id)}
+                                            onSelect={() => m.id !== undefined && handleAvailableSelect(m.id)}
                                         />
                                     ))}
                                     {availableMonitors.length === 0 && (
@@ -221,7 +221,6 @@ export const TenantMonitorsPanel = React.memo(function TenantMonitorsPanel({
                         </div>
                     </div>
                 </div>
-            )}
         </>
     );
 });

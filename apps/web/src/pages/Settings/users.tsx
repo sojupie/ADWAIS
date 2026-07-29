@@ -8,6 +8,7 @@ import { ProvisionUserModal } from '../../components/settings/users/ProvisionUse
 import { SettingsPanelHeader } from '../../components/common/layout/SettingsPanelHeader';
 import { SettingsPanel } from '../../components/common/layout/SettingsPanel';
 import { EmptyState } from '../../components/common/ui/EmptyState';
+import { Button } from '../../components/common/ui/Button';
 
 export function UsersView() {
     const navigate = useNavigate();
@@ -57,38 +58,37 @@ export function UsersView() {
                     subtitle="Review access, roles and registered accounts."
                     icon={<Users size={24} />}
                 >
-                    {isAdmin && (
-                        <>
-                            <button
-                                type="button"
+                            <Button
                                 onClick={() => setIsAddModalOpen(true)}
-                                className="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-full bg-secondary-container px-5 text-sm font-bold text-on-secondary-container transition-colors hover:m3-elevation-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary"
+                                disabled={!isAdmin}
+                                variant="tonal"
+                                color="secondary"
+                                icon={<UserPlus size={16} />}
                             >
-                                <UserPlus size={16} /> Add user
-                            </button>
-                            <button
-                                type="button"
+                                Add user
+                            </Button>
+                            <Button
                                 onClick={handleEditSelected}
-                                disabled={selectedUserIds.size !== 1}
-                                className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full px-4 text-sm font-bold text-on-surface transition-colors hover:bg-surface-container-high focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary disabled:cursor-not-allowed disabled:text-on-surface/[0.38] disabled:hover:bg-transparent disabled:hover:text-on-surface/[0.38]"
+                                disabled={!isAdmin || selectedUserIds.size !== 1}
+                                variant="text"
+                                color="surface"
+                                icon={<Edit2 size={16} />}
                             >
-                                <Edit2 size={16} /> Edit
-                            </button>
-                            <button
-                                type="button"
+                                Edit
+                            </Button>
+                            <Button
                                 onClick={handleDeleteSelected}
-                                disabled={selectedUserIds.size === 0}
-                                className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full px-4 text-sm font-bold text-error transition-colors hover:bg-error-container hover:text-on-error-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-error disabled:cursor-not-allowed disabled:text-on-surface/[0.38] disabled:hover:bg-transparent disabled:hover:text-on-surface/[0.38]"
+                                disabled={!isAdmin || selectedUserIds.size === 0}
+                                variant="tonal"
+                                color="error"
+                                icon={<Trash2 size={16} />}
                             >
-                                <Trash2 size={16} /> Delete
-                            </button>
-                        </>
-                    )}
+                                Delete
+                            </Button>
                 </SettingsPanelHeader>
-                <div className="custom-scrollbar flex-1 overflow-y-auto">
-                    <div className="custom-scrollbar overflow-x-auto">
+                <div className="border border-outline-variant bg-surface custom-scrollbar flex-1 overflow-auto">
                         <table className="w-full whitespace-nowrap text-left text-sm">
-                            <thead className="border-b border-outline-variant bg-surface-container text-on-surface-variant">
+                            <thead className="sticky top-0 z-10 border-b border-outline-variant bg-surface-container-high text-on-surface-variant">
                                 <tr>
                                     <th className="w-12 px-4 py-4 sm:px-5"></th>
                                     <th className="px-4 py-4 text-sm font-black uppercase tracking-widest sm:px-5">User</th>
@@ -102,8 +102,8 @@ export function UsersView() {
                                         key={u.id}
                                         u={u}
                                         selected={selectedUserIds.has(u.id)}
-                                        onSelect={() => isAdmin && handleSelect(u.id)}
-                                        onDoubleClick={() => isAdmin && void navigate({ to: '/settings/users/$userId', params: { userId: u.id } })}
+                                        onSelect={() => handleSelect(u.id)}
+                                        onDoubleClick={() => void navigate({ to: '/settings/users/$userId', params: { userId: u.id } })}
                                     />
                                 ))}
                                 {(!users || users.length === 0) && (
@@ -111,7 +111,6 @@ export function UsersView() {
                                 )}
                             </tbody>
                         </table>
-                    </div>
                 </div>
             </SettingsPanel>
             </div>

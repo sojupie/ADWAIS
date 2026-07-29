@@ -1,16 +1,20 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from '@tanstack/react-router';
-import { Building2, Save, X } from 'lucide-react';
+import { Building2, Save, X, Trash2 } from 'lucide-react';
 import { useTenantsViewModel } from '../../hooks/useTenantsViewModel';
-import { useUpdateTenantMutation } from '../../hooks/useTenantQueries';
+import { useUpdateTenantMutation, useDeleteTenantMutation } from '../../hooks/useTenantQueries';
 import { SettingsPanel } from '../../components/common/layout/SettingsPanel';
 import { SettingsPanelHeader } from '../../components/common/layout/SettingsPanelHeader';
 import { FormField, CheckboxField } from '../../components/common/ui/FormField';
+import { Button } from '../../components/common/ui/Button';
 import { TenantMonitorsPanel } from '../../components/settings/tenants/TenantMonitorsPanel';
+import { getTenantFaviconUrl } from '../../utils/tenantHelper';
 import type { TenantResponseDto } from '@types';
 
 function TenantDetailForm({ tenant, isAdmin, onBack }: { tenant: TenantResponseDto, isAdmin: boolean, onBack: () => void }) {
+  const navigate = useNavigate();
   const updateTenant = useUpdateTenantMutation();
+  const deleteTenant = useDeleteTenantMutation();
   
   const getInitialDraft = (t: TenantResponseDto) => ({
     name: t.name || '',
@@ -24,6 +28,10 @@ function TenantDetailForm({ tenant, isAdmin, onBack }: { tenant: TenantResponseD
   const [draft, setDraft] = useState(getInitialDraft(tenant));
   const [isUserEditing, setIsUserEditing] = useState(false);
   const [prevTenant, setPrevTenant] = useState(tenant);
+  const [imgError, setImgError] = useState(false);
+
+  const faviconUrl = draft.imageUrl || getTenantFaviconUrl(draft.litiumBaseUrl);
+  const showIcon = !faviconUrl || imgError;
 
   // When background data refreshes, only update the draft if the user isn't actively editing
   if (tenant !== prevTenant) {
@@ -74,6 +82,16 @@ function TenantDetailForm({ tenant, isAdmin, onBack }: { tenant: TenantResponseD
     setDraft(getInitialDraft(tenant));
   };
 
+  const handleDelete = () => {
+    if (confirm('Are you sure you want to delete this tenant?')) {
+      deleteTenant.mutate(tenant.id, {
+        onSuccess: () => {
+          void navigate({ to: '/settings/tenants' });
+        }
+      });
+    }
+  };
+
   // Helper to update draft and mark as user editing
   const updateDraft = (updates: Partial<typeof draft>) => {
     setIsUserEditing(true);
@@ -85,29 +103,39 @@ function TenantDetailForm({ tenant, isAdmin, onBack }: { tenant: TenantResponseD
         <SettingsPanelHeader
           title="Edit Tenant"
           subtitle={`Editing details for ${tenant.name}`}
-          icon={<Building2 size={24} />}
+          iconContainerClassName={!showIcon ? 'overflow-hidden bg-transparent' : undefined}
+          icon={showIcon ? <Building2 size={24} /> : <img src={faviconUrl!} alt={tenant.name || ''} className="h-full w-full object-cover" onError={() => setImgError(true)} />}
           onBack={onBack}
         >
-          {isAdmin && (
             <div className="flex items-center gap-2">
-              <button
-                type="button"
+              <Button
+                onClick={handleDelete}
+                disabled={!isAdmin || deleteTenant.isPending}
+                variant="text"
+                color="error"
+                icon={<Trash2 size={16} />}
+              >
+                Delete Tenant
+              </Button>
+              <Button
                 onClick={handleCancel}
-                disabled={!isDirty || updateTenant.isPending}
-                className="inline-flex min-h-11 items-center gap-2 rounded-full px-4 text-sm font-bold text-on-surface-variant transition-colors hover:bg-surface-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-secondary disabled:cursor-not-allowed disabled:text-on-surface/[0.38] disabled:hover:bg-transparent disabled:hover:text-on-surface/[0.38]"
+                disabled={!isAdmin || !isDirty || updateTenant.isPending}
+                variant="text"
+                color="surface"
+                icon={<X size={16} />}
               >
-                <X size={16} /> Cancel
-              </button>
-              <button
-                type="button"
+                Cancel
+              </Button>
+              <Button
                 onClick={handleSave}
-                disabled={!isDirty || updateTenant.isPending}
-                className="inline-flex min-h-11 items-center gap-2 rounded-full bg-primary-container px-4 text-sm font-bold text-on-primary-container transition-colors hover:bg-primary hover:text-on-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:bg-on-surface/[0.1] disabled:text-on-surface/[0.38] disabled:hover:bg-on-surface/[0.1] disabled:hover:text-on-surface/[0.38]"
+                disabled={!isAdmin || !isDirty || updateTenant.isPending}
+                variant="tonal"
+                color="primary"
+                icon={<Save size={16} />}
               >
-                <Save size={16} /> Save Changes
-              </button>
+                Save Changes
+              </Button>
             </div>
-          )}
         </SettingsPanelHeader>
 
       <div className="custom-scrollbar flex-1 overflow-y-auto px-6 py-6">
@@ -151,11 +179,12 @@ function TenantDetailForm({ tenant, isAdmin, onBack }: { tenant: TenantResponseD
               placeholder={draft.clearToken ? 'Cleared' : (tenant.hasServiceAccountToken ? '•••••••••••• (Type to change)' : 'Type to set new token')}
               meta={(
                 <span className="flex items-center gap-3">
-                  {isAdmin && tenant.hasServiceAccountToken && !draft.clearToken && (
+                  {tenant.hasServiceAccountToken && !draft.clearToken && (
                     <button
                       type="button"
                       onClick={() => updateDraft({ clearToken: true, serviceAccountToken: '' })}
-                      className="cursor-pointer rounded-full px-3 py-1 text-sm font-bold text-error transition-colors hover:bg-error-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-error"
+                      disabled={!isAdmin}
+                      className="cursor-pointer rounded-full px-3 py-1 text-sm font-bold text-error transition-colors hover:bg-error-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-error disabled:cursor-not-allowed disabled:text-on-surface/[0.38] disabled:hover:bg-transparent disabled:hover:text-on-surface/[0.38]"
                     >
                       Clear Token
                     </button>
@@ -192,7 +221,7 @@ export function TenantDetailView() {
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-4">
-      <SettingsPanel className="flex-1">
+      <SettingsPanel className="flex-1 max-h-none">
         {!tenant ? (
             <SettingsPanelHeader
                 title="Edit Tenant"

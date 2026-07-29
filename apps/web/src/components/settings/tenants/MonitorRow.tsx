@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { Activity, CheckCircle2, XCircle, Globe, Gauge } from 'lucide-react';
+import { getTenantFaviconUrl } from '../../../utils/tenantHelper';
 import type { UptimeMonitorDto } from '@types';
 
 interface MonitorRowProps {
@@ -9,6 +11,10 @@ interface MonitorRowProps {
 }
 
 export function MonitorRow({ m, selected = false, onSelect, onDoubleClick }: MonitorRowProps) {
+  const [imgError, setImgError] = useState(false);
+  const faviconUrl = m.tenantImageUrl || getTenantFaviconUrl(m.tenantBaseUrl || m.url);
+  const showIcon = !faviconUrl || imgError;
+
   return (
     <tr 
       className={`group transition-colors bg-surface border-b border-outline-variant hover:bg-surface-container cursor-pointer select-none ${selected ? 'bg-primary-container/10' : ''}`}
@@ -26,8 +32,12 @@ export function MonitorRow({ m, selected = false, onSelect, onDoubleClick }: Mon
       </td>
       <td className="px-4 py-3 align-middle sm:px-5">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-container text-on-primary-container">
-             <Activity size={20} />
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-container text-on-primary-container overflow-hidden">
+             {showIcon ? (
+                 <Activity size={20} />
+             ) : (
+                 <img src={faviconUrl} alt="" className="h-full w-full object-cover" onError={() => setImgError(true)} />
+             )}
           </div>
           <div className="flex flex-col w-full max-w-[250px]">
             <span className="text-base font-bold text-on-surface truncate">{m.name || 'Unnamed Monitor'}</span>

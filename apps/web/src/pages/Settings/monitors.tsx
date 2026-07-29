@@ -5,6 +5,7 @@ import { SettingsPanelHeader } from '../../components/common/layout/SettingsPane
 import { SearchInput } from '../../components/common/ui/SearchInput';
 import { SettingsPanel } from '../../components/common/layout/SettingsPanel';
 import { EmptyState } from '../../components/common/ui/EmptyState';
+import { Button } from '../../components/common/ui/Button';
 import { useTenantsViewModel } from '../../hooks/useTenantsViewModel';
 import { CreateMonitorModal } from '../../components/settings/tenants/CreateMonitorModal';
 import { MonitorRow } from '../../components/settings/tenants/MonitorRow';
@@ -83,39 +84,38 @@ export function MonitorsView() {
                         types={allUniqueTypes}
                     />
                     
-                    {isAdmin && (
-                        <>
-                            <button
-                                type="button"
+                            <Button
                                 onClick={() => setIsAddModalOpen(true)}
-                                className="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-full bg-secondary-container px-5 text-sm font-bold text-on-secondary-container transition-colors hover:m3-elevation-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary"
+                                disabled={!isAdmin}
+                                variant="tonal"
+                                color="secondary"
+                                icon={<Plus size={16} />}
                             >
-                                <Plus size={16} /> New
-                            </button>
-                            <button
-                                type="button"
+                                New
+                            </Button>
+                            <Button
                                 onClick={handleEditSelected}
-                                disabled={selectedMonitorIds.size !== 1}
-                                className="inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-full px-4 text-sm font-bold text-on-surface transition-colors hover:bg-surface-container-high focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary disabled:cursor-not-allowed disabled:text-on-surface/[0.38] disabled:hover:bg-transparent disabled:hover:text-on-surface/[0.38]"
+                                disabled={!isAdmin || selectedMonitorIds.size !== 1}
+                                variant="text"
+                                color="surface"
+                                icon={<Edit2 size={16} />}
                             >
-                                <Edit2 size={16} /> Edit
-                            </button>
-                            <button
-                                type="button"
+                                Edit
+                            </Button>
+                            <Button
                                 onClick={handleDeleteSelected}
-                                disabled={selectedMonitorIds.size === 0}
-                                className="inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-full px-4 text-sm font-bold text-error transition-colors hover:bg-error-container hover:text-on-error-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-error disabled:cursor-not-allowed disabled:text-on-surface/[0.38] disabled:hover:bg-transparent disabled:hover:text-on-surface/[0.38]"
+                                disabled={!isAdmin || selectedMonitorIds.size === 0}
+                                variant="text"
+                                color="error"
+                                icon={<Trash2 size={16} />}
                             >
-                                <Trash2 size={16} /> Delete
-                            </button>
-                        </>
-                    )}
+                                Delete
+                            </Button>
                 </SettingsPanelHeader>
 
-                <div className="custom-scrollbar flex-1 overflow-y-auto">
-                    <div className="custom-scrollbar overflow-x-auto">
+                <div className="border border-outline-variant bg-surface custom-scrollbar flex-1 overflow-auto">
                         <table className="w-full whitespace-nowrap text-left text-sm">
-                            <thead className="border-b border-outline-variant bg-surface-container text-on-surface-variant">
+                            <thead className="sticky top-0 z-10 border-b border-outline-variant bg-surface-container-high text-on-surface-variant">
                                 <tr>
                                     <th className="w-12 px-4 py-4 sm:px-5"></th>
                                     <th className="px-4 py-4 text-sm font-black uppercase tracking-widest sm:px-5">Monitor</th>
@@ -131,8 +131,8 @@ export function MonitorsView() {
                                         key={m.id}
                                         m={m}
                                         selected={m.id !== undefined ? selectedMonitorIds.has(m.id) : false}
-                                        onSelect={() => isAdmin && m.id !== undefined && handleSelect(m.id)}
-                                        onDoubleClick={() => isAdmin && m.id !== undefined && void navigate({ to: '/settings/monitors/$monitorId', params: { monitorId: String(m.id) } })}
+                                        onSelect={() => m.id !== undefined && handleSelect(m.id)}
+                                        onDoubleClick={() => m.id !== undefined && void navigate({ to: '/settings/monitors/$monitorId', params: { monitorId: String(m.id) } })}
                                     />
                                 ))}
                                 {allMonitors.length === 0 && (
@@ -140,7 +140,6 @@ export function MonitorsView() {
                                 )}
                             </tbody>
                         </table>
-                    </div>
                 </div>
             </SettingsPanel>
 

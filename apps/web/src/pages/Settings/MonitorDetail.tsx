@@ -1,16 +1,20 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from '@tanstack/react-router';
-import { Activity, Save, X, Unlink } from 'lucide-react';
+import { Activity, Save, X, Unlink, Trash2 } from 'lucide-react';
 import { useTenantsViewModel } from '../../hooks/useTenantsViewModel';
-import { useUpdateMonitorMutation, useControlMonitorMutation } from '../../hooks/useMonitorQueries';
+import { useUpdateMonitorMutation, useControlMonitorMutation, useDeleteMonitorMutation } from '../../hooks/useMonitorQueries';
 import { SettingsPanel } from '../../components/common/layout/SettingsPanel';
 import { SettingsPanelHeader } from '../../components/common/layout/SettingsPanelHeader';
 import { FormField, CheckboxField } from '../../components/common/ui/FormField';
+import { Button } from '../../components/common/ui/Button';
 import { UPTIME_MONITOR_TYPES } from '../../utils/monitorTypeHelper';
+import { getTenantFaviconUrl } from '../../utils/tenantHelper';
 import type { UptimeMonitorDto } from '@types';
 
 function MonitorDetailForm({ monitor, isAdmin, onBack }: { monitor: UptimeMonitorDto, isAdmin: boolean, onBack: () => void }) {
+  const navigate = useNavigate();
   const updateMonitor = useUpdateMonitorMutation();
+  const deleteMonitor = useDeleteMonitorMutation();
   const controlMonitor = useControlMonitorMutation();
   
   const getInitialDraft = (m: UptimeMonitorDto) => ({
@@ -23,6 +27,10 @@ function MonitorDetailForm({ monitor, isAdmin, onBack }: { monitor: UptimeMonito
   const [draft, setDraft] = useState(getInitialDraft(monitor));
   const [isUserEditing, setIsUserEditing] = useState(false);
   const [prevMonitor, setPrevMonitor] = useState(monitor);
+  const [imgError, setImgError] = useState(false);
+
+  const faviconUrl = monitor.tenantImageUrl || getTenantFaviconUrl(monitor.tenantBaseUrl || draft.url);
+  const showIcon = !faviconUrl || imgError;
 
   // When background data refreshes, only update the draft if the user isn't actively editing
   if (monitor !== prevMonitor) {
@@ -67,6 +75,18 @@ function MonitorDetailForm({ monitor, isAdmin, onBack }: { monitor: UptimeMonito
     setDraft(getInitialDraft(monitor));
   };
 
+  const handleDelete = () => {
+    if (confirm('Are you sure you want to delete this monitor?')) {
+      if (monitor.id !== undefined) {
+        deleteMonitor.mutate(monitor.id, {
+          onSuccess: () => {
+            void navigate({ to: '/settings/monitors' });
+          }
+        });
+      }
+    }
+  };
+
   const updateDraft = (updates: Partial<typeof draft>) => {
     setIsUserEditing(true);
     setDraft(prev => ({ ...prev, ...updates }));
@@ -77,29 +97,39 @@ function MonitorDetailForm({ monitor, isAdmin, onBack }: { monitor: UptimeMonito
         <SettingsPanelHeader
           title="Edit Monitor"
           subtitle={`Editing details for ${monitor.name}`}
-          icon={<Activity size={24} />}
+          iconContainerClassName={!showIcon ? 'overflow-hidden bg-transparent' : undefined}
+          icon={showIcon ? <Activity size={24} /> : <img src={faviconUrl!} alt={monitor.name || ''} className="h-full w-full object-cover" onError={() => setImgError(true)} />}
           onBack={onBack}
         >
-          {isAdmin && (
             <div className="flex items-center gap-2">
-              <button
-                type="button"
+              <Button
+                onClick={handleDelete}
+                disabled={!isAdmin || deleteMonitor.isPending}
+                variant="text"
+                color="error"
+                icon={<Trash2 size={16} />}
+              >
+                Delete Monitor
+              </Button>
+              <Button
                 onClick={handleCancel}
-                disabled={!isDirty || updateMonitor.isPending}
-                className="inline-flex min-h-11 items-center gap-2 rounded-full px-4 text-sm font-bold text-on-surface-variant transition-colors hover:bg-surface-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-secondary disabled:cursor-not-allowed disabled:text-on-surface/[0.38] disabled:hover:bg-transparent disabled:hover:text-on-surface/[0.38]"
+                disabled={!isAdmin || !isDirty || updateMonitor.isPending}
+                variant="text"
+                color="surface"
+                icon={<X size={16} />}
               >
-                <X size={16} /> Cancel
-              </button>
-              <button
-                type="button"
+                Cancel
+              </Button>
+              <Button
                 onClick={handleSave}
-                disabled={!isDirty || updateMonitor.isPending}
-                className="inline-flex min-h-11 items-center gap-2 rounded-full bg-primary-container px-4 text-sm font-bold text-on-primary-container transition-colors hover:bg-primary hover:text-on-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:bg-on-surface/[0.1] disabled:text-on-surface/[0.38] disabled:hover:bg-on-surface/[0.1] disabled:hover:text-on-surface/[0.38]"
+                disabled={!isAdmin || !isDirty || updateMonitor.isPending}
+                variant="tonal"
+                color="primary"
+                icon={<Save size={16} />}
               >
-                <Save size={16} /> Save Changes
-              </button>
+                Save Changes
+              </Button>
             </div>
-          )}
         </SettingsPanelHeader>
 
       <div className="custom-scrollbar flex-1 overflow-y-auto px-6 py-6">
@@ -183,22 +213,19 @@ const MonitorAssignmentPanel = React.memo(function MonitorAssignmentPanel({ moni
                   <div className="font-bold text-on-surface">{assignedTenant.name}</div>
                   <div className="text-sm text-on-surface-variant">{assignedTenant.litiumBaseUrl}</div>
               </div>
-              {isAdmin && (
                   <button
                       type="button"
                       onClick={() => monitor.id !== undefined && unassignMonitor.mutate(monitor.id)}
-                      disabled={unassignMonitor.isPending}
-                      className="flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-bold text-error hover:bg-error-container hover:text-on-error-container transition-colors disabled:opacity-50"
+                      disabled={!isAdmin || unassignMonitor.isPending}
+                      className="flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-bold text-error hover:bg-error-container hover:text-on-error-container transition-colors disabled:cursor-not-allowed disabled:text-on-surface/[0.38] disabled:hover:bg-transparent disabled:hover:text-on-surface/[0.38]"
                   >
                       <Unlink size={16} /> Unassign
                   </button>
-              )}
           </div>
       ) : (
           <p className="text-sm text-on-surface-variant italic">This monitor is currently unassigned (system monitor).</p>
       )}
 
-      {isAdmin && (
           <div className="pt-2">
               <FormField
                   as="select"
@@ -210,7 +237,7 @@ const MonitorAssignmentPanel = React.memo(function MonitorAssignmentPanel({ moni
                           assignMonitor.mutate({ id: monitor.id, tenantId: e.target.value });
                       }
                   }}
-                  disabled={assignMonitor.isPending}
+                  disabled={!isAdmin || assignMonitor.isPending}
               >
                   <option value="" disabled>Select a tenant...</option>
                   {availableTenants.map(t => (
@@ -218,7 +245,6 @@ const MonitorAssignmentPanel = React.memo(function MonitorAssignmentPanel({ moni
                   ))}
               </FormField>
           </div>
-      )}
     </div>
   );
 });
@@ -233,7 +259,7 @@ export function MonitorDetailView() {
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-4">
-      <SettingsPanel className="flex-1">
+      <SettingsPanel className="flex-1 max-h-none">
         {!monitor ? (
             <SettingsPanelHeader
                 title="Edit Monitor"

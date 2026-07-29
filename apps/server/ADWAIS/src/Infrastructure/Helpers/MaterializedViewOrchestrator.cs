@@ -7,25 +7,25 @@ public static class MaterializedViewOrchestrator
 {
     public static async Task SyncViewsAsync(AnalyticsDbContext context)
     {
-        // 1. Check existing views to avoid destructive drops
-        // We use a raw SQL query to check pg_matviews
+        // Read the catalog before rebuilding the rollups from the completed raw dataset.
         var existingViews = await context.Database
             .SqlQueryRaw<string>("SELECT matviewname FROM pg_matviews")
             .ToListAsync();
 
-        // 2. Create Views only if they are missing
-        
-        // --- Financial Domain ---
-        // Temporary drop to recreate with new WHERE clause
+        // Rebuild all dependent rollups once, after raw data seeding has completed.
         await context.Database.ExecuteSqlRawAsync("DROP MATERIALIZED VIEW IF EXISTS v_mat_financial_daily_global_rollup CASCADE; DROP MATERIALIZED VIEW IF EXISTS v_mat_financial_daily_tenant_rollup CASCADE;");
         existingViews.Remove("v_mat_financial_daily_global_rollup");
         existingViews.Remove("v_mat_financial_daily_tenant_rollup");
 
-        // --- Latency Domain Drop ---
         await context.Database.ExecuteSqlRawAsync("DROP MATERIALIZED VIEW IF EXISTS v_mat_daily_latency_global_rollup CASCADE; DROP MATERIALIZED VIEW IF EXISTS v_mat_daily_latency_tenant_rollup CASCADE; DROP MATERIALIZED VIEW IF EXISTS v_mat_daily_latency_monitor_rollup CASCADE;");
         existingViews.Remove("v_mat_daily_latency_global_rollup");
         existingViews.Remove("v_mat_daily_latency_tenant_rollup");
         existingViews.Remove("v_mat_daily_latency_monitor_rollup");
+
+        await context.Database.ExecuteSqlRawAsync("DROP MATERIALIZED VIEW IF EXISTS v_mat_daily_availability_global_rollup CASCADE; DROP MATERIALIZED VIEW IF EXISTS v_mat_daily_availability_tenant_rollup CASCADE; DROP MATERIALIZED VIEW IF EXISTS v_mat_daily_availability_monitor_rollup CASCADE;");
+        existingViews.Remove("v_mat_daily_availability_global_rollup");
+        existingViews.Remove("v_mat_daily_availability_tenant_rollup");
+        existingViews.Remove("v_mat_daily_availability_monitor_rollup");
 
         if (!existingViews.Contains("v_mat_financial_daily_tenant_rollup"))
         {

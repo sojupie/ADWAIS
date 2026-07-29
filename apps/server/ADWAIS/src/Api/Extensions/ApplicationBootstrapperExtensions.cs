@@ -25,13 +25,57 @@ public static class ApplicationBootstrapperExtensions
         {
             var contextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<AnalyticsDbContext>>();
             await using var context = await contextFactory.CreateDbContextAsync();
-            
-            await context.Database.MigrateAsync();
-            await MaterializedViewOrchestrator.SyncViewsAsync(context);
 
             if (enableSeeding)
             {
-                await DatabaseSeeder.SeedSampleDataAsync(context);
+                var progress = new DemoSeedProgress(7);
+                progress.StartStep(1, "Database migrations");
+                try
+                {
+                    await context.Database.MigrateAsync();
+                    progress.CompleteStep();
+                }
+                catch (Exception exception)
+                {
+                    progress.FailStep(exception);
+                    throw;
+                }
+
+                await DatabaseSeeder.SeedSampleDataAsync(context, progress);
+
+                progress.StartStep(7, "Materialized views");
+                var previousCommandTimeout = context.Database.GetCommandTimeout();
+                context.Database.SetCommandTimeout(TimeSpan.FromMinutes(10));
+                try
+                {
+                    await MaterializedViewOrchestrator.SyncViewsAsync(context);
+                    progress.CompleteStep();
+                }
+                catch (Exception exception)
+                {
+                    progress.FailStep(exception);
+                    throw;
+                }
+                finally
+                {
+                    context.Database.SetCommandTimeout(previousCommandTimeout);
+                }
+
+                progress.Finish();
+            }
+            else
+            {
+                await context.Database.MigrateAsync();
+                var previousCommandTimeout = context.Database.GetCommandTimeout();
+                context.Database.SetCommandTimeout(TimeSpan.FromMinutes(10));
+                try
+                {
+                    await MaterializedViewOrchestrator.SyncViewsAsync(context);
+                }
+                finally
+                {
+                    context.Database.SetCommandTimeout(previousCommandTimeout);
+                }
             }
         }
 
@@ -108,7 +152,7 @@ public static class ApplicationBootstrapperExtensions
                     recurringJobManager.AddOrUpdate<RuntimeDataSeederJob>(
                         "dev-runtime-data-seeder",
                         newJob => newJob.ExecuteAsync(),
-                        Cron.MinuteInterval(1));
+                        Cron.MinuteInterval(RuntimeDataSeederJob.FinancialSimulationIntervalMinutes));
                 }
                 else
                 {

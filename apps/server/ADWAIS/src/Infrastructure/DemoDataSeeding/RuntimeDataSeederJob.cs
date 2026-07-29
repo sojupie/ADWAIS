@@ -12,19 +12,9 @@ public class RuntimeDataSeederJob(
     IDbContextFactory<AnalyticsDbContext> dbContextFactory,
     ILogger<RuntimeDataSeederJob> logger)
 {
-    private const int RunsPerHour = 60;
-
-    private static readonly double[] HourlyWeights = 
-    { 
-        0.020, 0.010, 0.005, 0.005, 0.007, 0.010, 0.020, 0.035, 
-        0.050, 0.058, 0.065, 0.068, 0.075, 0.075, 0.068, 0.060, 
-        0.050, 0.045, 0.048, 0.055, 0.070, 0.075, 0.065, 0.042 
-    };
-
-    private static readonly double[] DailyWeights = 
-    { 
-        0.12, 0.16, 0.16, 0.15, 0.16, 0.14, 0.11 
-    };
+    public const int FinancialSimulationIntervalMinutes = 1;
+    public const int LatencySimulationIntervalMinutes = 30;
+    public const int AvailabilitySimulationIntervalMinutes = 24 * 60;
 
     [DisableConcurrentExecution(timeoutInSeconds: 300)]
     [AutomaticRetry(Attempts = 0)]
@@ -45,27 +35,22 @@ public class RuntimeDataSeederJob(
 
         var random = new Random();
         var now = DateTimeOffset.UtcNow;
-        var reportingNow = TimeZoneInfo.ConvertTime(now, reportingTimeZone);
         var orders = new List<Order>();
-
-        double currentHourWeight = HourlyWeights[reportingNow.Hour] / HourlyWeights.Sum();
-        double currentDayWeight = DailyWeights[(int)reportingNow.DayOfWeek];
 
         foreach (var tenant in tenants)
         {
             var profile = DemoDataCatalog.FindTenant(tenant.Name);
             if (profile == null) continue;
 
-            double weeklyVolume = profile.DailyVolume * 7.0;
-            double expectedOrdersToday = weeklyVolume * currentDayWeight;
-            double expectedOrdersThisHour = expectedOrdersToday * currentHourWeight;
-            
-            double expectedOrdersPerRun = expectedOrdersThisHour / RunsPerHour;
-            int count = (int)expectedOrdersPerRun + (random.NextDouble() < (expectedOrdersPerRun % 1.0) ? 1 : 0);
+            var count = DemoDataSimulation.GenerateOrderCount(
+                profile,
+                now,
+                reportingTimeZone,
+                random);
 
             if (count > 0)
             {
-                AddOrders(orders, tenant.Id, count, profile.MinAov, profile.MaxAov, now, random);
+                AddOrders(orders, tenant.Id, profile, count, now, random);
             }
         }
 
@@ -78,8 +63,10 @@ public class RuntimeDataSeederJob(
                 orders.Count, orders.Select(o => o.TenantId).Distinct().Count());
         }
 
-        await SeedDemoMonitorLatencyAsync(db, now, random);
-        await SeedDemoMonitorAvailabilityAsync(db, now, random);
+        var latencyTimestamp = DemoDataSimulation.FloorToLatencyInterval(now);
+        var availabilityTimestamp = DemoDataSimulation.FloorToAvailabilityInterval(now);
+        await SeedDemoMonitorLatencyAsync(db, latencyTimestamp, random);
+        await SeedDemoMonitorAvailabilityAsync(db, availabilityTimestamp, random);
     }
 
     private static async Task SeedDemoMonitorAvailabilityAsync(AnalyticsDbContext db, DateTimeOffset now, Random random)
@@ -91,17 +78,23 @@ public class RuntimeDataSeederJob(
 
         if (!seededMonitors.Any()) return;
 
-        var availabilities = seededMonitors.Select(m =>
-        {
-            var ordinal = (int)(Math.Abs((long)m.Id) - 1);
-            var reliability = DemoDataCatalog.GetReliability(ordinal);
-            var uptimePercentage = DemoDataCatalog.GenerateUptime(random, reliability);
+        var monitorIds = seededMonitors.Select(m => m.Id).ToArray();
+        var monitorIdsAlreadySeeded = (await db.MonitorAvailabilities
+                .AsNoTracking()
+                .Where(sample => monitorIds.Contains(sample.MonitorId) && sample.Date == now)
+                .Select(sample => sample.MonitorId)
+                .ToListAsync())
+            .ToHashSet();
 
+        var availabilities = seededMonitors
+            .Where(m => !monitorIdsAlreadySeeded.Contains(m.Id))
+            .Select(m =>
+        {
             return new MonitorAvailability
             {
                 MonitorId = m.Id,
                 Date = now,
-                UptimePercentage = uptimePercentage
+                UptimePercentage = DemoDataSimulation.GenerateAvailability(m.Id, random)
             };
         }).ToList();
 
@@ -118,31 +111,27 @@ public class RuntimeDataSeederJob(
 
         if (!seededMonitors.Any()) return;
 
-        var responseTimes = seededMonitors.Select(m =>
-        {
-            int stableBaseLatency = 80 + (Math.Abs(m.Id.GetHashCode()) % 200);
-            int avg = stableBaseLatency + random.Next(-10, 20);
-            int highest = avg + random.Next(10, 60);
+        var monitorIds = seededMonitors.Select(m => m.Id).ToArray();
+        var monitorIdsAlreadySeeded = (await db.ResponseTimes
+                .AsNoTracking()
+                .Where(sample => monitorIds.Contains(sample.MonitorId) && sample.Date == now)
+                .Select(sample => sample.MonitorId)
+                .ToListAsync())
+            .ToHashSet();
 
-            double spikeChance = random.NextDouble();
-            if (spikeChance < 0.005)
-            {
-                highest += random.Next(800, 2500);
-                avg += random.Next(150, 400);
-            }
-            else if (spikeChance < 0.03)
-            {
-                highest += random.Next(150, 300);
-                avg += random.Next(30, 80);
-            }
+        var responseTimes = seededMonitors
+            .Where(m => !monitorIdsAlreadySeeded.Contains(m.Id))
+            .Select(m =>
+        {
+            var sample = DemoDataSimulation.GenerateLatency(m.Id, random);
 
             return new ResponseTime
             {
                 MonitorId = m.Id,
                 Date = now,
-                Average = Math.Max(10, avg),
-                Lowest = Math.Max(10, avg - random.Next(5, 20)),
-                Highest = highest
+                Average = sample.Average,
+                Lowest = sample.Lowest,
+                Highest = sample.Highest
             };
         }).ToList();
 
@@ -150,12 +139,17 @@ public class RuntimeDataSeederJob(
         await db.SaveChangesAsync();
     }
 
-    private static void AddOrders(List<Order> orders, Guid tenantId, int count, int minAov, int maxAov, DateTimeOffset now, Random random)
+    private static void AddOrders(
+        List<Order> orders,
+        Guid tenantId,
+        DemoTenantProfile profile,
+        int count,
+        DateTimeOffset now,
+        Random random)
     {
         for (int i = 0; i < count; i++)
         {
-            double weight = random.NextDouble();
-            decimal valueIncVat = Math.Round(minAov + (decimal)(Math.Pow(weight, 2.5) * (maxAov - minAov)), 2);
+            var valueIncVat = DemoDataSimulation.GenerateOrderValue(profile, random);
             decimal valueExcVat = Math.Round(valueIncVat / 1.25m, 2);
 
             orders.Add(new Order

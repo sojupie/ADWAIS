@@ -9,20 +9,11 @@ namespace Adwais.Infrastructure.DemoDataSeeding;
 
 public static class DatabaseSeeder
 {
-    private static readonly double[] HourlyWeights = 
-    { 
-        0.020, 0.010, 0.005, 0.005, 0.007, 0.010, 0.020, 0.035, 
-        0.050, 0.058, 0.065, 0.068, 0.075, 0.075, 0.068, 0.060, 
-        0.050, 0.045, 0.048, 0.055, 0.070, 0.075, 0.065, 0.042 
-    };
-
-    private static readonly double[] DailyWeights = 
-    { 
-        0.12, 0.16, 0.16, 0.15, 0.16, 0.14, 0.11 
-    };
-
-    public static async Task SeedSampleDataAsync(AnalyticsDbContext context)
+    public static async Task SeedSampleDataAsync(
+        AnalyticsDbContext context,
+        DemoSeedProgress progress)
     {
+        progress.StartStep(2, "Demo metadata and monitor definitions");
         var random = new Random(42);
         var forceReSeed = Environment.GetEnvironmentVariable("RESEED") == "true";
         var reportingTimeZoneId = await context.GlobalConfigs
@@ -75,71 +66,37 @@ public static class DatabaseSeeder
         if (!forceReSeed && await context.Tenants.AnyAsync(tenant => tenant.Name.EndsWith(" [MOCK]")))
         {
             Console.WriteLine("Legacy demo data detected. Set RESEED=true to replace it with the current demo portfolio.");
+            progress.CompleteStep("Legacy demo data requires RESEED=true.");
+            progress.SkipStep(3, "Availability history", "legacy demo data");
+            progress.SkipStep(4, "Latency history", "legacy demo data");
+            progress.SkipStep(5, "Financial order history", "legacy demo data");
+            progress.SkipStep(6, "Order indexes", "legacy demo data");
             return;
         }
 
         var tenants = await SeedTenantsAsync(context);
-
-        var monitoringStopwatch = System.Diagnostics.Stopwatch.StartNew();
-        await SeedMonitorsAndMetricsAsync(context, tenants, random);
-        Console.WriteLine($"Monitoring seed completed in {monitoringStopwatch.Elapsed.TotalSeconds:F1} seconds.");
+        await SeedMonitorsAndMetricsAsync(context, tenants, random, progress);
 
         var seededTenantIds = tenants.Select(tenant => tenant.Id).ToArray();
         if (!forceReSeed && await context.Orders.AnyAsync(order => seededTenantIds.Contains(order.TenantId)))
         {
-            Console.WriteLine("Demo orders already exist, skipping order seed.");
+            progress.SkipStep(5, "Financial order history", "demo orders already exist");
+            progress.SkipStep(6, "Order indexes", "financial order history was not rebuilt");
             return;
         }
 
-        var endDate = DateTimeOffset.UtcNow;
+        var endDate = DemoDataSimulation.FloorToFinancialInterval(DateTimeOffset.UtcNow);
         var startDate = endDate.AddMonths(-24);
 
-        Console.WriteLine($"Seeding 2 years of historical data for {tenants.Count} tenants...");
-        var sw = System.Diagnostics.Stopwatch.StartNew();
-        var orderStopwatch = System.Diagnostics.Stopwatch.StartNew();
-        var orderCount = await BulkInsertOrdersAsync(
+        progress.StartStep(5, "Financial order history");
+        await BulkInsertOrdersAsync(
             context,
             tenants,
             startDate,
             endDate,
             random,
-            reportingTimeZone);
-        Console.WriteLine($"Inserted {orderCount:N0} orders in {orderStopwatch.Elapsed.TotalSeconds:F1} seconds.");
-
-        var views = new[]
-        {
-            "v_mat_financial_daily_tenant_rollup",
-            "v_mat_financial_daily_global_rollup",
-            "v_mat_daily_latency_monitor_rollup",
-            "v_mat_daily_latency_tenant_rollup",
-            "v_mat_daily_latency_global_rollup",
-            "v_mat_daily_availability_monitor_rollup",
-            "v_mat_daily_availability_tenant_rollup",
-            "v_mat_daily_availability_global_rollup"
-        };
-
-        foreach (var view in views)
-        {
-            var viewStopwatch = System.Diagnostics.Stopwatch.StartNew();
-#pragma warning disable EF1003
-            await context.Database.ExecuteSqlRawAsync("REFRESH MATERIALIZED VIEW " + view + ";");
-#pragma warning restore EF1003
-            Console.WriteLine($"Refreshed {view} in {viewStopwatch.Elapsed.TotalSeconds:F1} seconds.");
-        }
-
-        Console.WriteLine($"Seeding completed in {sw.Elapsed.TotalMinutes:F2} minutes.");
-    }
-
-    private static int GetWeightedHour(Random random)
-    {
-        double r = random.NextDouble() * HourlyWeights.Sum();
-        double sum = 0;
-        for (int i = 0; i < HourlyWeights.Length; i++)
-        {
-            sum += HourlyWeights[i];
-            if (r <= sum) return i;
-        }
-        return 23; 
+            reportingTimeZone,
+            progress);
     }
 
     private static async Task<long> BulkInsertOrdersAsync(
@@ -148,31 +105,86 @@ public static class DatabaseSeeder
         DateTimeOffset startDate,
         DateTimeOffset endDate,
         Random random,
-        TimeZoneInfo reportingTimeZone)
+        TimeZoneInfo reportingTimeZone,
+        DemoSeedProgress progress)
     {
         var connection = (NpgsqlConnection)context.Database.GetDbConnection();
         if (connection.State != System.Data.ConnectionState.Open) await connection.OpenAsync();
 
-        using var writer = connection.BeginBinaryImport(
-            "COPY orders (id, tenant_id, order_state, litium_order_id, created_date, total_value_inc_vat, total_value_exc_vat, currency) FROM STDIN (FORMAT BINARY)");
+        var previousCommandTimeout = context.Database.GetCommandTimeout();
+        context.Database.SetCommandTimeout(TimeSpan.FromMinutes(10));
+        var indexesDropped = false;
 
-        long count = 0;
-        foreach (var tenant in tenants)
+        try
         {
-            var profile = DemoDataCatalog.FindTenant(tenant.Name)
-                ?? throw new InvalidOperationException($"No demo profile exists for tenant '{tenant.Name}'.");
-            count += WriteOrdersForTenant(
-                writer,
-                tenant,
-                profile,
-                startDate,
-                endDate,
-                random,
-                reportingTimeZone);
-        }
+            var dropStopwatch = System.Diagnostics.Stopwatch.StartNew();
+            await DropOrderSeedIndexesAsync(context);
+            indexesDropped = true;
+            Console.WriteLine($"Dropped order seed indexes in {dropStopwatch.Elapsed.TotalSeconds:F1} seconds.");
 
-        writer.Complete();
-        return count;
+            long count = 0;
+            using (var writer = connection.BeginBinaryImport(
+                       "COPY orders (id, tenant_id, order_state, litium_order_id, created_date, total_value_inc_vat, total_value_exc_vat, currency) FROM STDIN (FORMAT BINARY)"))
+            {
+                writer.Timeout = TimeSpan.FromMinutes(10);
+                var streamingStopwatch = System.Diagnostics.Stopwatch.StartNew();
+
+                foreach (var tenant in tenants)
+                {
+                    var profile = DemoDataCatalog.FindTenant(tenant.Name)
+                        ?? throw new InvalidOperationException($"No demo profile exists for tenant '{tenant.Name}'.");
+                    count += WriteOrdersForTenant(
+                        writer,
+                        tenant,
+                        profile,
+                        startDate,
+                        endDate,
+                        random,
+                        reportingTimeZone);
+                }
+
+                Console.WriteLine(
+                    $"Generated and streamed {count:N0} orders in {streamingStopwatch.Elapsed.TotalSeconds:F1} seconds.");
+
+                var completionStopwatch = System.Diagnostics.Stopwatch.StartNew();
+                writer.Complete();
+                Console.WriteLine(
+                    $"PostgreSQL completed the order COPY in {completionStopwatch.Elapsed.TotalSeconds:F1} seconds.");
+            }
+
+            progress.CompleteStep($"{count:N0} orders copied.");
+            return count;
+        }
+        catch (Exception exception)
+        {
+            progress.FailStep(exception);
+            throw;
+        }
+        finally
+        {
+            if (indexesDropped)
+            {
+                progress.StartStep(6, "Order indexes");
+                if (connection.State != System.Data.ConnectionState.Open)
+                {
+                    await connection.CloseAsync();
+                    await connection.OpenAsync();
+                }
+
+                try
+                {
+                    await CreateOrderSeedIndexesAsync(context);
+                    progress.CompleteStep();
+                }
+                catch (Exception exception)
+                {
+                    progress.FailStep(exception);
+                    throw;
+                }
+            }
+
+            context.Database.SetCommandTimeout(previousCommandTimeout);
+        }
     }
 
     private static int WriteOrdersForTenant(
@@ -185,66 +197,122 @@ public static class DatabaseSeeder
         TimeZoneInfo reportingTimeZone)
     {
         var count = 0;
-        double weeklyVolume = profile.DailyVolume * 7.0;
+        var intervalMinutes = RuntimeDataSeederJob.FinancialSimulationIntervalMinutes;
+        if (60 % intervalMinutes != 0)
+            throw new InvalidOperationException("The financial simulation interval must divide evenly into one hour.");
 
-        for (var date = startDate; date <= endDate; date = date.AddDays(1))
+        var slotsPerHour = 60 / intervalMinutes;
+        var firstHour = new DateTimeOffset(
+            startDate.Year,
+            startDate.Month,
+            startDate.Day,
+            startDate.Hour,
+            0,
+            0,
+            TimeSpan.Zero);
+
+        for (var hourStart = firstHour; hourStart <= endDate; hourStart = hourStart.AddHours(1))
         {
-            var localDate = TimeZoneInfo.ConvertTime(date, reportingTimeZone);
-            double dayWeight = DailyWeights[(int)localDate.DayOfWeek];
-            double expectedBaseDailyVolume = weeklyVolume * dayWeight;
-            
-            var dailyVolume = (int)expectedBaseDailyVolume + random.Next(-profile.VolumeVariance, profile.VolumeVariance + 1);
-            if (dailyVolume < 0) dailyVolume = 0;
-            
-            var isHolidaySeason = localDate.Month == 11 || localDate.Month == 12;
-            if (isHolidaySeason) dailyVolume = (int)(dailyVolume * (double)profile.SeasonalMultiplier);
+            var firstSlot = hourStart < startDate
+                ? (int)Math.Ceiling((startDate - hourStart).TotalMinutes / intervalMinutes)
+                : 0;
+            var lastSlotExclusive = hourStart.AddHours(1) > endDate
+                ? (int)Math.Floor((endDate - hourStart).TotalMinutes / intervalMinutes) + 1
+                : slotsPerHour;
+            var slotCount = lastSlotExclusive - firstSlot;
+            if (slotCount <= 0) continue;
 
-            for (int i = 0; i < dailyVolume; i++)
+            var expectedOrdersPerRun = DemoDataSimulation.GetExpectedOrderCountPerRun(
+                profile,
+                hourStart.AddMinutes(firstSlot * intervalMinutes),
+                reportingTimeZone);
+            var guaranteedOrdersPerRun = (int)expectedOrdersPerRun;
+            var fractionalProbability = expectedOrdersPerRun - guaranteedOrdersPerRun;
+
+            if (guaranteedOrdersPerRun > 0)
             {
-                int hour = GetWeightedHour(random);
-                var localOrderDate = new DateTime(
-                    localDate.Year,
-                    localDate.Month,
-                    localDate.Day,
-                    hour,
-                    random.Next(0, 60),
-                    random.Next(0, 60),
-                    DateTimeKind.Unspecified);
-                if (reportingTimeZone.IsInvalidTime(localOrderDate)) localOrderDate = localOrderDate.AddHours(1);
-                var orderDate = new DateTimeOffset(
-                    TimeZoneInfo.ConvertTimeToUtc(localOrderDate, reportingTimeZone),
-                    TimeSpan.Zero);
+                for (var slot = 0; slot < slotCount; slot++)
+                {
+                    var timestamp = hourStart.AddMinutes((firstSlot + slot) * intervalMinutes);
+                    for (var orderIndex = 0; orderIndex < guaranteedOrdersPerRun; orderIndex++)
+                        WriteOrder(writer, tenant.Id, profile, timestamp, orderIndex, random);
+                    count += guaranteedOrdersPerRun;
+                }
+            }
 
-                double u1 = 1.0 - random.NextDouble();
-                double u2 = 1.0 - random.NextDouble();
-                double randStdNormal = Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Sin(2.0 * Math.PI * u2);
+            if (fractionalProbability <= 0) continue;
 
-                double meanLog = Math.Log((double)profile.MinAov * 2.5); 
-                double stdDevLog = 0.6; 
+            var successfulSlot = -1;
+            while (true)
+            {
+                successfulSlot += SampleFailuresBeforeSuccess(random, fractionalProbability) + 1;
+                if (successfulSlot >= slotCount) break;
 
-                double logNormalValue = Math.Exp(meanLog + stdDevLog * randStdNormal);
-
-                decimal valueIncVat = Math.Round(
-                    Math.Clamp((decimal)logNormalValue, profile.MinAov, profile.MaxAov),
-                    2);
-
-                decimal valueExcVat = Math.Round(valueIncVat / 1.25m, 2);
-
-                writer.StartRow();
-                writer.Write(Guid.NewGuid());
-                writer.Write(tenant.Id);
-                writer.Write("Completed");
-                writer.Write($"SEED-{tenant.Id.ToString()[..4]}-{orderDate.Ticks}-{i}");
-                writer.Write(orderDate);
-                writer.Write(valueIncVat);
-                writer.Write(valueExcVat);
-                writer.Write("SEK");
+                var timestamp = hourStart.AddMinutes((firstSlot + successfulSlot) * intervalMinutes);
+                WriteOrder(
+                    writer,
+                    tenant.Id,
+                    profile,
+                    timestamp,
+                    guaranteedOrdersPerRun,
+                    random);
                 count++;
             }
         }
 
         return count;
     }
+
+    private static int SampleFailuresBeforeSuccess(Random random, double successProbability)
+    {
+        if (successProbability >= 1) return 0;
+
+        return (int)Math.Floor(
+            Math.Log(1.0 - random.NextDouble()) /
+            Math.Log(1.0 - successProbability));
+    }
+
+    private static void WriteOrder(
+        NpgsqlBinaryImporter writer,
+        Guid tenantId,
+        DemoTenantProfile profile,
+        DateTimeOffset timestamp,
+        int orderIndex,
+        Random random)
+    {
+        var valueIncVat = DemoDataSimulation.GenerateOrderValue(profile, random);
+        var valueExcVat = Math.Round(valueIncVat / 1.25m, 2);
+
+        writer.StartRow();
+        writer.Write(Guid.NewGuid());
+        writer.Write(tenantId);
+        writer.Write("Completed");
+        writer.Write($"SEED-{tenantId.ToString()[..4]}-{timestamp.Ticks}-{orderIndex}");
+        writer.Write(timestamp);
+        writer.Write(valueIncVat);
+        writer.Write(valueExcVat);
+        writer.Write("SEK");
+    }
+
+    private static Task DropOrderSeedIndexesAsync(AnalyticsDbContext context)
+        => context.Database.ExecuteSqlRawAsync("""
+            DROP INDEX IF EXISTS ix_orders_tenant_id_created_date_order_state;
+            DROP INDEX IF EXISTS idx_orders_composite_dash;
+            DROP INDEX IF EXISTS idx_orders_value_dist;
+            DROP INDEX IF EXISTS idx_orders_tenant_isolated;
+            """);
+
+    private static Task CreateOrderSeedIndexesAsync(AnalyticsDbContext context)
+        => context.Database.ExecuteSqlRawAsync("""
+            CREATE INDEX IF NOT EXISTS ix_orders_tenant_id_created_date_order_state
+                ON orders (tenant_id, created_date, order_state);
+            CREATE INDEX IF NOT EXISTS idx_orders_composite_dash
+                ON orders (created_date, tenant_id) INCLUDE (total_value_inc_vat);
+            CREATE INDEX IF NOT EXISTS idx_orders_value_dist
+                ON orders (tenant_id, total_value_inc_vat);
+            CREATE INDEX IF NOT EXISTS idx_orders_tenant_isolated
+                ON orders (tenant_id, created_date) INCLUDE (total_value_inc_vat);
+            """);
 
     private static async Task<List<Tenant>> SeedTenantsAsync(AnalyticsDbContext context)
     {
@@ -283,7 +351,8 @@ public static class DatabaseSeeder
     private static async Task SeedMonitorsAndMetricsAsync(
         AnalyticsDbContext context,
         IReadOnlyCollection<Tenant> tenants,
-        Random random)
+        Random random,
+        DemoSeedProgress progress)
     {
         var tenantIds = tenants.Select(tenant => tenant.Id).ToArray();
         var existingMonitorRows = await context.Monitors
@@ -377,44 +446,70 @@ public static class DatabaseSeeder
                 .Distinct()
                 .ToListAsync())
             .ToHashSet();
-        var seedNow = DateTimeOffset.UtcNow;
-        var historyStartDate = seedNow.Date.AddDays(-729);
-        var monitorsWithOrdinals = allMonitors
-            .Select((monitor, ordinal) => (Monitor: monitor, Ordinal: ordinal))
-            .ToArray();
+        var latencySeedNow = DemoDataSimulation.FloorToLatencyInterval(DateTimeOffset.UtcNow);
+        var latencyHistoryStartDate = latencySeedNow.AddMonths(-24);
+        var availabilitySeedNow = DemoDataSimulation.FloorToAvailabilityInterval(DateTimeOffset.UtcNow);
+        var availabilityHistoryStartDate = availabilitySeedNow.AddMonths(-24);
+        progress.CompleteStep($"{allMonitors.Count:N0} demo monitors ready.");
 
-        var availabilityTargets = monitorsWithOrdinals
-            .Where(item => !monitorIdsWithAvailability.Contains(item.Monitor.Id))
+        var availabilityTargets = allMonitors
+            .Where(monitor => !monitorIdsWithAvailability.Contains(monitor.Id))
             .ToArray();
-        if (availabilityTargets.Length > 0)
+        progress.StartStep(3, "Availability history");
+        try
         {
-            var count = await CopyMonitorAvailabilityHistoryAsync(
-                context,
-                availabilityTargets,
-                historyStartDate,
-                seedNow,
-                random);
-            Console.WriteLine($"Inserted {count:N0} availability rows with binary COPY.");
+            if (availabilityTargets.Length > 0)
+            {
+                var count = await CopyMonitorAvailabilityHistoryAsync(
+                    context,
+                    availabilityTargets,
+                    availabilityHistoryStartDate,
+                    availabilitySeedNow,
+                    random);
+                progress.CompleteStep($"{count:N0} rows copied.");
+            }
+            else
+            {
+                progress.CompleteStep("Already present; no rows copied.");
+            }
+        }
+        catch (Exception exception)
+        {
+            progress.FailStep(exception);
+            throw;
         }
 
-        var latencyTargets = monitorsWithOrdinals
-            .Where(item => !monitorIdsWithLatency.Contains(item.Monitor.Id))
+        var latencyTargets = allMonitors
+            .Where(monitor => !monitorIdsWithLatency.Contains(monitor.Id))
             .ToArray();
-        if (latencyTargets.Length > 0)
+        progress.StartStep(4, "Latency history");
+        try
         {
-            var count = await CopyResponseTimeHistoryAsync(
-                context,
-                latencyTargets,
-                historyStartDate,
-                seedNow,
-                random);
-            Console.WriteLine($"Inserted {count:N0} response-time rows with binary COPY.");
+            if (latencyTargets.Length > 0)
+            {
+                var count = await CopyResponseTimeHistoryAsync(
+                    context,
+                    latencyTargets,
+                    latencyHistoryStartDate,
+                    latencySeedNow,
+                    random);
+                progress.CompleteStep($"{count:N0} rows copied.");
+            }
+            else
+            {
+                progress.CompleteStep("Already present; no rows copied.");
+            }
+        }
+        catch (Exception exception)
+        {
+            progress.FailStep(exception);
+            throw;
         }
     }
 
     private static async Task<long> CopyMonitorAvailabilityHistoryAsync(
         AnalyticsDbContext context,
-        IReadOnlyCollection<(UptimeMonitor Monitor, int Ordinal)> monitors,
+        IReadOnlyCollection<UptimeMonitor> monitors,
         DateTimeOffset historyStartDate,
         DateTimeOffset historyEnd,
         Random random)
@@ -424,45 +519,34 @@ public static class DatabaseSeeder
 
         using var writer = connection.BeginBinaryImport(
             "COPY monitor_availability (monitor_id, date, uptime_percentage, is_finalized) FROM STDIN (FORMAT BINARY)");
+        writer.Timeout = TimeSpan.FromMinutes(10);
         long count = 0;
         var currentUtcDayStart = new DateTimeOffset(historyEnd.UtcDateTime.Date, TimeSpan.Zero);
+        var simulationInterval = TimeSpan.FromMinutes(RuntimeDataSeederJob.AvailabilitySimulationIntervalMinutes);
 
-        foreach (var (monitor, ordinal) in monitors)
+        foreach (var monitor in monitors)
         {
-            var reliability = DemoDataCatalog.GetReliability(ordinal);
-            for (var date = historyStartDate.Date; date <= historyEnd.Date; date = date.AddDays(1))
+            for (var timestamp = historyStartDate; timestamp <= historyEnd; timestamp = timestamp.Add(simulationInterval))
             {
-                var utcMidnight = new DateTimeOffset(date.Year, date.Month, date.Day, 0, 0, 0, TimeSpan.Zero);
-                var dailyUptime = DemoDataCatalog.GenerateUptime(random, reliability);
-                var sampleIntervalMinutes = date >= historyEnd.Date.AddDays(-13) ? 30 : 360;
-
-                for (var minute = 0; minute < 24 * 60; minute += sampleIntervalMinutes)
-                {
-                    var timestamp = utcMidnight.AddMinutes(minute);
-                    if (timestamp > historyEnd) break;
-
-                    var uptimePercentage = Math.Clamp(
-                        dailyUptime + (random.NextDouble() - 0.5) * reliability.DailyJitter,
-                        0,
-                        100);
-
-                    writer.StartRow();
-                    writer.Write(monitor.Id);
-                    writer.Write(timestamp);
-                    writer.Write(uptimePercentage);
-                    writer.Write(timestamp < currentUtcDayStart);
-                    count++;
-                }
+                writer.StartRow();
+                writer.Write(monitor.Id);
+                writer.Write(timestamp);
+                writer.Write(DemoDataSimulation.GenerateAvailability(monitor.Id, random));
+                writer.Write(timestamp < currentUtcDayStart);
+                count++;
             }
         }
 
+        var completionStopwatch = System.Diagnostics.Stopwatch.StartNew();
         writer.Complete();
+        Console.WriteLine(
+            $"PostgreSQL completed the availability COPY in {completionStopwatch.Elapsed.TotalSeconds:F1} seconds.");
         return count;
     }
 
     private static async Task<long> CopyResponseTimeHistoryAsync(
         AnalyticsDbContext context,
-        IReadOnlyCollection<(UptimeMonitor Monitor, int Ordinal)> monitors,
+        IReadOnlyCollection<UptimeMonitor> monitors,
         DateTimeOffset historyStartDate,
         DateTimeOffset historyEnd,
         Random random)
@@ -472,48 +556,29 @@ public static class DatabaseSeeder
 
         using var writer = connection.BeginBinaryImport(
             "COPY response_time (monitor_id, date, average, lowest, highest) FROM STDIN (FORMAT BINARY)");
+        writer.Timeout = TimeSpan.FromMinutes(10);
         long count = 0;
+        var simulationInterval = TimeSpan.FromMinutes(RuntimeDataSeederJob.LatencySimulationIntervalMinutes);
 
-        foreach (var (monitor, _) in monitors)
+        foreach (var monitor in monitors)
         {
-            var stableBaseLatency = 80 + (int)(Math.Abs((long)monitor.Id) % 200);
-            for (var date = historyStartDate.Date; date <= historyEnd.Date; date = date.AddDays(1))
+            for (var timestamp = historyStartDate; timestamp <= historyEnd; timestamp = timestamp.Add(simulationInterval))
             {
-                var utcMidnight = new DateTimeOffset(date.Year, date.Month, date.Day, 0, 0, 0, TimeSpan.Zero);
-                var sampleIntervalMinutes = date >= historyEnd.Date.AddDays(-13) ? 30 : 360;
-
-                for (var minute = 0; minute < 24 * 60; minute += sampleIntervalMinutes)
-                {
-                    var timestamp = utcMidnight.AddMinutes(minute);
-                    if (timestamp > historyEnd) break;
-
-                    var avg = stableBaseLatency + random.Next(-10, 20);
-                    var highest = avg + random.Next(10, 60);
-
-                    double spikeChance = random.NextDouble();
-                    if (spikeChance < 0.005)
-                    {
-                        highest += random.Next(800, 2500);
-                        avg += random.Next(150, 400);
-                    }
-                    else if (spikeChance < 0.03)
-                    {
-                        highest += random.Next(150, 300);
-                        avg += random.Next(30, 80);
-                    }
-
-                    writer.StartRow();
-                    writer.Write(monitor.Id);
-                    writer.Write(timestamp);
-                    writer.Write((double)Math.Max(10, avg));
-                    writer.Write((double)Math.Max(10, avg - random.Next(5, 20)));
-                    writer.Write((double)highest);
-                    count++;
-                }
+                var sample = DemoDataSimulation.GenerateLatency(monitor.Id, random);
+                writer.StartRow();
+                writer.Write(monitor.Id);
+                writer.Write(timestamp);
+                writer.Write(sample.Average);
+                writer.Write(sample.Lowest);
+                writer.Write(sample.Highest);
+                count++;
             }
         }
 
+        var completionStopwatch = System.Diagnostics.Stopwatch.StartNew();
         writer.Complete();
+        Console.WriteLine(
+            $"PostgreSQL completed the response-time COPY in {completionStopwatch.Elapsed.TotalSeconds:F1} seconds.");
         return count;
     }
 }

@@ -5,6 +5,7 @@ import {
   useGetApiFinancialPortfolioImpact,
   useGetApiFinancialRevenueEfficiency,
   useGetApiFinancialCrossSegmentDistribution,
+  useGetApiFinancialDailyRevenueDelta,
   useGetApiFinancialCumulativeGrowthDelta,
   useGetApiFinancialOrderDistribution,
   useGetApiFinancialTransactionDensity
@@ -15,6 +16,7 @@ import type {
   PortfolioImpactResponse,
   RevenueEfficiencyResponse,
   CrossSegmentDistributionResponse,
+  NetGrowthAdditionPoint,
   CumulativeGrowthDeltaPoint,
   OrderBin,
   AccumulatedRevenuePointDto,
@@ -35,6 +37,7 @@ export const financialKeys = {
   crossSegmentDistribution: (timeframe: string, comparison?: ComparisonPeriod, tenantTypes?: TenantType[]) => [...financialKeys.all, 'crossSegmentDistribution', timeframe, comparison, tenantTypes] as const,
   volumeAnomaly: (timeframe: string, comparison?: ComparisonPeriod, tenantTypes?: TenantType[]) => [...financialKeys.all, 'volumeAnomaly', timeframe, comparison, tenantTypes] as const,
   delta: (timeframe: string, tenantId?: string | null, comparison?: ComparisonPeriod, tenantTypes?: TenantType[]) => [...financialKeys.all, 'delta', timeframe, tenantId, comparison, tenantTypes] as const,
+  netGrowthAddition: (timeframe: string, tenantId?: string | null, tenantTypes?: TenantType[]) => [...financialKeys.all, 'netGrowthAddition', timeframe, tenantId, tenantTypes] as const,
   orders: (timeframe: string, tenantId?: string | null, comparison?: ComparisonPeriod) => [...financialKeys.all, 'orders', timeframe, tenantId, comparison] as const,
   accumulatedRevenue: (timeframe: string, tenantId?: string | null, comparison?: ComparisonPeriod, tenantTypes?: TenantType[]) => [...financialKeys.all, 'accumulatedRevenue', timeframe, tenantId, comparison, tenantTypes] as const,
   transactionDensity: (period: TransactionDensityPeriod, tenantId?: string | null, tenantTypes?: TenantType[]) => [...financialKeys.all, 'transactionDensity', period, tenantId, tenantTypes] as const,
@@ -122,6 +125,20 @@ export function useCumulativeGrowthDelta(timeframe: string, tenantId: string, co
         refetchInterval: REFETCH_INTERVAL,
         placeholderData: keepPreviousData,
         select: (res) => res.data as CumulativeGrowthDeltaPoint[]
+      }
+    }
+  );
+}
+
+export function useNetGrowthAddition(timeframe: string, tenantId?: string | null, tenantTypes?: TenantType[]) {
+  return useGetApiFinancialDailyRevenueDelta<NetGrowthAdditionPoint[], Error>(
+    { timeframe: timeframe as Timeframe, tenantId: tenantId || undefined, tenantTypes: tenantTypes?.length ? tenantTypes : undefined },
+    {
+      query: {
+        queryKey: financialKeys.netGrowthAddition(timeframe, tenantId, tenantTypes),
+        refetchInterval: REFETCH_INTERVAL,
+        placeholderData: keepPreviousData,
+        select: (res) => res.data as NetGrowthAdditionPoint[]
       }
     }
   );

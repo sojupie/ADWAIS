@@ -13,9 +13,22 @@ export const CumulativeGrowthDeltaChart = memo(function CumulativeGrowthDeltaCha
     const binSize = inferBinSize(points.map(point => point.timestamp), points.length > 0 && points.length <= 24);
     return points.map((point, index) => ({ ...point, label: formatChartLabel(point.timestamp, binSize, index) }));
   }, [points]);
+  const deltaColor = chartColor('--color-brand-btn-primary', '#2563eb');
   const data: ChartData<'line', number[], string> = {
     labels: chartData.map(point => point.label),
-    datasets: [{ label: 'Cumulative Growth Delta', data: chartData.map(point => point.cumulativeGrowthDelta), borderColor: chartColor('--color-brand-btn-primary', '#2563eb'), borderWidth: 2.4, pointRadius: 0, pointHoverRadius: 7, pointHoverBackgroundColor: chartColor('--color-brand-btn-primary', '#2563eb'), pointHoverBorderColor: '#fff', pointHoverBorderWidth: 3, stepped: 'after' }],
+    datasets: [{
+      label: 'Cumulative Growth Delta',
+      data: chartData.map(point => point.cumulativeGrowthDelta),
+      borderColor: deltaColor,
+      borderWidth: 2.4,
+      pointRadius: 0,
+      pointHoverRadius: 7,
+      pointHoverBackgroundColor: deltaColor,
+      pointHoverBorderColor: '#fff',
+      pointHoverBorderWidth: 3,
+      stepped: 'after',
+      tension: 0,
+    }],
   };
   const options: ChartOptions<'line'> = {
     responsive: true, maintainAspectRatio: false, animation: false, interaction: { mode: 'index', intersect: false },
@@ -45,7 +58,17 @@ export const CumulativeGrowthDeltaChart = memo(function CumulativeGrowthDeltaCha
     },
     scales: {
       x: { border: { display: false }, grid: { display: false }, ticks: { ...chartTick(14, 700), autoSkip: true, maxRotation: 0 } },
-      y: { border: { display: false }, grid: horizontalGrid, ticks: { ...chartTick(14), callback: value => `${Number(value) > 0 ? '+' : ''}${formatCompact(Math.abs(Number(value)))}` } },
+      y: {
+        border: { display: false },
+        grid: horizontalGrid,
+        ticks: {
+          ...chartTick(14),
+          callback: value => {
+            const numericValue = Number(value);
+            return `${numericValue > 0 ? '+' : ''}${formatCompact(numericValue)}`;
+          },
+        },
+      },
     },
   };
   return (

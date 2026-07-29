@@ -1,13 +1,15 @@
 import { formatCurrency, formatNumber } from '@utils';
 import { FactPanel } from '../components/common/dashboard/FactPanel';
 import { CumulativeGrowthDeltaChart } from '../components/TenantSpecific/CumulativeGrowthDeltaChart';
+// import { NetGrowthAdditionChart } from '../components/TenantSpecific/NetGrowthAdditionChart';
 import { OrderValueDistributionChart } from '../components/TenantSpecific/OrderValueDistributionChart';
 import { AccumulatedRevenueChart } from '../components/financial/AccumulatedRevenueChart';
 import { TransactionDensityChart } from '../components/financial/TransactionDensityChart';
 import {
   useGlobalKpis, 
   useAccumulatedRevenue,
-  useCumulativeGrowthDelta, 
+  useCumulativeGrowthDelta,
+  // useNetGrowthAddition,
   useOrderDistribution,
   useTransactionDensity
 } from '../hooks/useFinancialQueries';
@@ -42,6 +44,7 @@ const EMPTY_DENSITY: TransactionDensityResponseDto = {
   periodEnd: '',
 };
 const EMPTY_DELTA: never[] = [];
+// const EMPTY_NET_GROWTH: never[] = [];
 const EMPTY_BINS: never[] = [];
 
 interface Props {
@@ -75,6 +78,7 @@ export function TenantDiagnostics({
   const accumulatedQuery = useAccumulatedRevenue(timeframe, tenantId, 'YearOverYear');
   const densityQuery = useTransactionDensity(densityPeriod, tenantId);
   const deltaQuery = useCumulativeGrowthDelta(timeframe, tenantId, 'YearOverYear');
+  // const netGrowthQuery = useNetGrowthAddition(timeframe, tenantId);
   const orderQuery = useOrderDistribution(timeframe, tenantId);
 
   const kpis = kpiQuery.data;
@@ -164,9 +168,9 @@ export function TenantDiagnostics({
           className="h-full min-h-[350px] contained:min-h-0"
         />
 
-        <CumulativeGrowthDeltaChart 
-          points={deltaQuery.data || EMPTY_DELTA} 
-          isLoading={deltaQuery.isLoading} 
+        <CumulativeGrowthDeltaChart
+          points={deltaQuery.data || EMPTY_DELTA}
+          isLoading={deltaQuery.isLoading}
           isStale={deltaQuery.isPlaceholderData}
           comparison="YearOverYear"
           className="h-full min-h-[350px] contained:min-h-0"

@@ -2,7 +2,7 @@ import { memo, useMemo } from 'react';
 import type { ChartData, ChartOptions } from 'chart.js';
 import type { AccumulatedRevenuePointDto, ComparisonPeriod } from '@types';
 import { ChartPanel } from '../common/charts/ChartPanel';
-import { formatCurrency, formatCompact } from '@utils';
+import { foldDailySeries, formatCurrency, formatCompact } from '@utils';
 import { formatDateTime } from '../../utils/dateTime';
 import { EmptyState } from '../common/ui/EmptyState';
 import { chartColor, chartLegendLabels, chartTick, createHtmlTooltip, horizontalGrid } from '../common/charts/chartJs';
@@ -28,32 +28,22 @@ export const AccumulatedRevenueChart = memo(function AccumulatedRevenueChart({ i
       formatDateTime(ts, { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Stockholm' }, 'en-SE');
 
     // Weekly fold for 365D / large YTD — reduces visual noise at small widths.
-    const gapMs = points.length > 1
-      ? new Date(points[1].timestamp).getTime() - new Date(points[0].timestamp).getTime()
-      : 0;
-    const isDaily = gapMs >= 20 * 60 * 60 * 1000 && gapMs < 2 * 24 * 60 * 60 * 1000;
-    const needsFold = isDaily && points.length > 90;
+    const { points: workingPoints } = foldDailySeries(points, chunk => {
+      const last = chunk[chunk.length - 1];
+      const sum = (key: keyof typeof chunk[0]) =>
+        chunk.reduce((acc, point) => acc + (point[key] as number ?? 0), 0);
 
-    const workingPoints = needsFold ? (() => {
-      const result: typeof points = [];
-      for (let i = 0; i < points.length; i += 7) {
-        const chunk = points.slice(i, i + 7);
-        const last = chunk[chunk.length - 1];
-        const sum = (key: keyof typeof chunk[0]) =>
-          chunk.reduce((acc, p) => acc + (p[key] as number ?? 0), 0);
-        result.push({
-          timestamp: chunk[0].timestamp,
-          currentRevenue: sum('currentRevenue'),
-          currentRevenueB2C: sum('currentRevenueB2C'),
-          currentRevenueB2B: sum('currentRevenueB2B'),
-          currentRevenueMixed: sum('currentRevenueMixed'),
-          previousRevenue: sum('previousRevenue'),
-          currentAccumulated: last.currentAccumulated,
-          previousAccumulated: last.previousAccumulated,
-        });
-      }
-      return result;
-    })() : points;
+      return {
+        timestamp: chunk[0].timestamp,
+        currentRevenue: sum('currentRevenue'),
+        currentRevenueB2C: sum('currentRevenueB2C'),
+        currentRevenueB2B: sum('currentRevenueB2B'),
+        currentRevenueMixed: sum('currentRevenueMixed'),
+        previousRevenue: sum('previousRevenue'),
+        currentAccumulated: last.currentAccumulated,
+        previousAccumulated: last.previousAccumulated,
+      };
+    });
 
     // Re-derive gap from working points so isWeekly fires for folded data.
     const workingGapMs = workingPoints.length > 1

@@ -49,7 +49,7 @@ function CountdownRing({resetKey, syncError}: { resetKey: number; syncError: boo
  return (
     <div className="relative w-8 h-8 shrink-0">
       <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-        <circle cx="18" cy="18" r="16" fill="none" stroke="var(--md-sys-color-on-surface-variant)" strokeWidth="4" className="" />
+        <circle cx="18" cy="18" r="16" fill="none" stroke="var(--md-sys-color-secondary)" strokeWidth="4" className="" />
         <circle
           ref={circleRef}
           cx="18" cy="18" r="16"

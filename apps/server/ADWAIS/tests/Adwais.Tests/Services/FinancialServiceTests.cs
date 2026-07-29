@@ -102,6 +102,55 @@ public class FinancialServiceTests : IDisposable
         Assert.Equal(100m, distribution.Tenants[0].PeriodRevenue);
     }
 
+    [Fact]
+    public async Task GetNetGrowthAdditionAsync_WithoutTenant_ReturnsPortfolioSeries()
+    {
+        AddOrder(_b2bTenantId, _period.CurrentStart.AddHours(-0.5), 40m, "b2b-lookback");
+        AddOrder(_b2cTenantId, _period.CurrentStart.AddHours(-0.25), 10m, "b2c-lookback");
+        AddOrder(_b2bTenantId, _period.CurrentStart.AddHours(1.5), 160m, "b2b-current-2");
+        _dbContext.SaveChanges();
+
+        var result = await _service.GetNetGrowthAdditionAsync(_period);
+        var b2bResult = await _service.GetNetGrowthAdditionAsync(
+            _period,
+            tenantTypes: [TenantType.B2B]);
+
+        Assert.Collection(
+            result,
+            point => Assert.Equal(350m, point.NetGrowthAddition),
+            point => Assert.Equal(-240m, point.NetGrowthAddition));
+        Assert.Collection(
+            b2bResult,
+            point => Assert.Equal(60m, point.NetGrowthAddition),
+            point => Assert.Equal(60m, point.NetGrowthAddition));
+    }
+
+    [Fact]
+    public async Task GetNetGrowthAdditionAsync_UsesResolvedHourlyBinWidth()
+    {
+        var start = DateTimeOffset.UtcNow.AddDays(-7);
+        var period = new ResolvedPeriod(
+            start,
+            start.AddDays(7),
+            start.AddDays(-7),
+            start,
+            42,
+            isHourly: true,
+            includeActualTime: false);
+
+        AddOrder(_b2bTenantId, start.AddHours(-2), 25m, "lookback-bin");
+        AddOrder(_b2bTenantId, start.AddHours(1), 100m, "first-bin");
+        AddOrder(_b2bTenantId, start.AddHours(5), 140m, "second-bin");
+        _dbContext.SaveChanges();
+
+        var result = await _service.GetNetGrowthAdditionAsync(period, _b2bTenantId);
+
+        Assert.Equal(42, result.Count);
+        Assert.Equal(75m, result[0].NetGrowthAddition);
+        Assert.Equal(40m, result[1].NetGrowthAddition);
+        Assert.Equal(start.AddHours(4), result[1].Timestamp);
+    }
+
     private void AddOrder(Guid tenantId, DateTimeOffset createdDate, decimal value, string litiumOrderId)
     {
         _dbContext.Orders.Add(new Order

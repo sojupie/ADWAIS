@@ -46,6 +46,7 @@ import type {
   GetApiFinancialAccumulatedRevenueParams,
   GetApiFinancialCrossSegmentDistributionParams,
   GetApiFinancialCumulativeGrowthDeltaParams,
+  GetApiFinancialDailyRevenueDeltaParams,
   GetApiFinancialKpisParams,
   GetApiFinancialOrderDistributionParams,
   GetApiFinancialOrdersParams,
@@ -69,6 +70,7 @@ import type {
   LitiumOrderDto,
   MonitorAnalyticsResponseDto,
   MonitorAvailabilitySeriesResponseDto,
+  NetGrowthAdditionPointResponseDto,
   OfficeEventDto,
   OrderBinResponseDto,
   OrderDto,
@@ -3072,6 +3074,146 @@ export function useGetApiFinancialPortfolioImpact<TData = Awaited<ReturnType<typ
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetApiFinancialPortfolioImpactQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export type getApiFinancialDailyRevenueDeltaResponse200TextPlain = {
+  data: NetGrowthAdditionPointResponseDto[]
+  status: 200
+}
+
+export type getApiFinancialDailyRevenueDeltaResponse200ApplicationJson = {
+  data: NetGrowthAdditionPointResponseDto[]
+  status: 200
+}
+
+export type getApiFinancialDailyRevenueDeltaResponse200TextJson = {
+  data: NetGrowthAdditionPointResponseDto[]
+  status: 200
+}
+
+export type getApiFinancialDailyRevenueDeltaResponseSuccess = (getApiFinancialDailyRevenueDeltaResponse200TextPlain | getApiFinancialDailyRevenueDeltaResponse200ApplicationJson | getApiFinancialDailyRevenueDeltaResponse200TextJson) & {
+  headers: Headers;
+};
+;
+
+export type getApiFinancialDailyRevenueDeltaResponse = (getApiFinancialDailyRevenueDeltaResponseSuccess)
+
+export const getGetApiFinancialDailyRevenueDeltaUrl = (params?: GetApiFinancialDailyRevenueDeltaParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    const explodeParameters = ["tenantTypes"];
+
+    if (Array.isArray(value) && explodeParameters.includes(key)) {
+      value.forEach((v) => {
+        normalizedParams.append(key, v === null ? 'null' : String(v));
+      });
+      return;
+    }
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/financial/daily-revenue-delta?${stringifiedParams}` : `/api/financial/daily-revenue-delta`
+}
+
+/**
+ * @summary Revenue change from one daily/hourly bucket to the next.
+Scopes to a single tenant if tenantId is provided, otherwise portfolio-wide.
+ */
+export const getApiFinancialDailyRevenueDelta = async (params?: GetApiFinancialDailyRevenueDeltaParams, options?: RequestInit): Promise<getApiFinancialDailyRevenueDeltaResponse> => {
+
+  return customClient<getApiFinancialDailyRevenueDeltaResponse>(getGetApiFinancialDailyRevenueDeltaUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiFinancialDailyRevenueDeltaQueryKey = (params?: GetApiFinancialDailyRevenueDeltaParams,) => {
+    return [
+    `/api/financial/daily-revenue-delta`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetApiFinancialDailyRevenueDeltaQueryOptions = <TData = Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>, TError = unknown>(params?: GetApiFinancialDailyRevenueDeltaParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiFinancialDailyRevenueDeltaQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>> = ({ signal }) => getApiFinancialDailyRevenueDelta(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiFinancialDailyRevenueDeltaQueryResult = NonNullable<Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>>
+export type GetApiFinancialDailyRevenueDeltaQueryError = unknown
+
+
+export function useGetApiFinancialDailyRevenueDelta<TData = Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>, TError = unknown>(
+ params: undefined |  GetApiFinancialDailyRevenueDeltaParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>,
+          TError,
+          Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiFinancialDailyRevenueDelta<TData = Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>, TError = unknown>(
+ params?: GetApiFinancialDailyRevenueDeltaParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>,
+          TError,
+          Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiFinancialDailyRevenueDelta<TData = Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>, TError = unknown>(
+ params?: GetApiFinancialDailyRevenueDeltaParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Revenue change from one daily/hourly bucket to the next.
+Scopes to a single tenant if tenantId is provided, otherwise portfolio-wide.
+ */
+
+export function useGetApiFinancialDailyRevenueDelta<TData = Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>, TError = unknown>(
+ params?: GetApiFinancialDailyRevenueDeltaParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinancialDailyRevenueDelta>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiFinancialDailyRevenueDeltaQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

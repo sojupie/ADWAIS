@@ -4,6 +4,7 @@ export type ComparisonPeriod = Generated.ComparisonType;
 export type GlobalKpi = Required<Generated.KpiResponseDto>;
 export type FinancialKpi = GlobalKpi; // Deprecated but maps to KpiResponseDto
 export type CumulativeGrowthDeltaPoint = Required<Generated.CumulativeGrowthDeltaPointResponseDto>;
+export type NetGrowthAdditionPoint = Required<Generated.NetGrowthAdditionPointResponseDto>;
 export type OrderBin = Required<Omit<Generated.OrderBinResponseDto, 'binLabel'>> & {
   binLabel: string;
 };

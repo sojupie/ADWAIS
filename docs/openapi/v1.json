@@ -1032,6 +1032,83 @@
         }
       }
     },
+    "/api/financial/daily-revenue-delta": {
+      "get": {
+        "tags": [
+          "Financial"
+        ],
+        "summary": "Revenue change from one daily/hourly bucket to the next.\r\nScopes to a single tenant if tenantId is provided, otherwise portfolio-wide.",
+        "parameters": [
+          {
+            "name": "timeframe",
+            "in": "query",
+            "description": "The primary timeframe for the calculation (e.g., T7, T30). \r\nDefaults to T30.",
+            "schema": {
+              "$ref": "#/components/schemas/Timeframe"
+            }
+          },
+          {
+            "name": "tenantId",
+            "in": "query",
+            "description": "Optional. Scopes the metrics to a specific tenant. \r\nIf null, metrics represent the global portfolio total.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "tenantTypes",
+            "in": "query",
+            "description": "Optional. Restricts portfolio metrics to tenants with one of these business models.\r\nIgnored when tenantId is provided.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/TenantType"
+              }
+            }
+          },
+          {
+            "name": "comparison",
+            "in": "query",
+            "description": "The comparison period for the timeframe.\r\nDefaults to Preceding.",
+            "schema": {
+              "$ref": "#/components/schemas/ComparisonType"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NetGrowthAdditionPointResponseDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NetGrowthAdditionPointResponseDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NetGrowthAdditionPointResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/financial/order-distribution": {
       "get": {
         "tags": [
@@ -4410,6 +4487,20 @@
             "type": "number",
             "format": "double",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "NetGrowthAdditionPointResponseDto": {
+        "type": "object",
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "netGrowthAddition": {
+            "type": "number",
+            "format": "double"
           }
         },
         "additionalProperties": false

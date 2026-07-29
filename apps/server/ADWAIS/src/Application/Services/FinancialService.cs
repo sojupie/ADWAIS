@@ -577,30 +577,46 @@ public class FinancialService(
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<NetGrowthAdditionPointDto>> GetNetGrowthAdditionAsync(ResolvedPeriod period, Guid tenantId, CancellationToken ct = default)
+    public async Task<IReadOnlyList<NetGrowthAdditionPointDto>> GetNetGrowthAdditionAsync(
+        ResolvedPeriod period,
+        Guid? tenantId = null,
+        IReadOnlyCollection<TenantType>? tenantTypes = null,
+        CancellationToken ct = default)
     {
         var currentStart = period.CurrentStart;
         var currentEnd = period.CurrentEnd;
         var steps = period.StepsInPeriod;
         var isHourly = period.IsHourly;
-        var includeActualTime = period.IncludeActualTime;
         var context = _dbContext;
 
-        var currentRows = await GetMergedTenantDataAsync(context, currentStart, currentEnd, isHourly, tenantId, ct: ct);
+        var roundedTotalHours = Math.Ceiling((currentEnd - currentStart).TotalHours);
+        var binSizeHours = isHourly ? roundedTotalHours / steps : 24d;
+        var lookbackStart = currentStart.AddHours(-binSizeHours);
 
-        var lookbackStart = isHourly ? currentStart.AddHours(-1) : currentStart.AddDays(-1);
-        var beforeStartRows = await GetMergedTenantDataAsync(context, lookbackStart, currentStart, isHourly, tenantId, ct: ct);
+        List<DataRow> currentRows, beforeStartRows;
+        if (tenantId.HasValue || tenantTypes is { Count: > 0 })
+        {
+            currentRows = await GetMergedTenantDataAsync(context, currentStart, currentEnd, isHourly, tenantId, tenantTypes, ct);
+            beforeStartRows = await GetMergedTenantDataAsync(context, lookbackStart, currentStart, isHourly, tenantId, tenantTypes, ct);
+        }
+        else
+        {
+            currentRows = await GetMergedGlobalDataAsync(context, currentStart, currentEnd, isHourly, ct);
+            beforeStartRows = await GetMergedGlobalDataAsync(context, lookbackStart, currentStart, isHourly, ct);
+        }
+
         var previousValue = beforeStartRows.Sum(r => r.Revenue);
 
         var currentByStep = currentRows
-            .GroupBy(r => isHourly ? (int)(r.Timestamp - currentStart).TotalHours : (int)(r.Timestamp - currentStart).TotalDays)
+            .GroupBy(r => (int)((r.Timestamp - currentStart).TotalHours / binSizeHours))
+            .Where(g => g.Key >= 0 && g.Key < steps)
             .ToDictionary(g => g.Key, g => g.Sum(r => r.Revenue));
 
         var points = new List<NetGrowthAdditionPointDto>(steps);
 
         for (var i = 0; i < steps; i++)
         {
-            var timestamp = isHourly ? currentStart.AddHours(i) : currentStart.AddDays(i);
+            var timestamp = currentStart.AddHours(i * binSizeHours);
             var cur = currentByStep.GetValueOrDefault(i, 0m);
             var delta = cur - previousValue;
             points.Add(new NetGrowthAdditionPointDto(timestamp, delta));

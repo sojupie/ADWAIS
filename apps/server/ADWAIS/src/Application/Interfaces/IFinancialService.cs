@@ -32,6 +32,12 @@ public interface IFinancialService
     Task<PortfolioImpactDto> GetPortfolioImpactAsync(ResolvedPeriod period, IReadOnlyCollection<TenantType>? tenantTypes = null, CancellationToken ct = default);
     
     /// <summary>
+    /// Calculates the change in revenue from one time bucket to the next.
+    /// Scopes to a tenant when provided, otherwise returns portfolio-wide values.
+    /// </summary>
+    Task<IReadOnlyList<NetGrowthAdditionPointDto>> GetNetGrowthAdditionAsync(ResolvedPeriod period, Guid? tenantId = null, IReadOnlyCollection<TenantType>? tenantTypes = null, CancellationToken ct = default);
+
+    /// <summary>
     /// Generates a distribution histogram of order values for a specific tenant.
     /// </summary>
     Task<IReadOnlyList<OrderBinDto>> GetOrderDistributionAsync(ResolvedPeriod period, Guid tenantId, int? binCount = null, CancellationToken ct = default);

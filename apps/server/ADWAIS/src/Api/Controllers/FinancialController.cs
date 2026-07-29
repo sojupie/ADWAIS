@@ -146,6 +146,20 @@ public class FinancialController(
     }
 
     /// <summary>
+    /// Revenue change from one daily/hourly bucket to the next.
+    /// Scopes to a single tenant if tenantId is provided, otherwise portfolio-wide.
+    /// </summary>
+    [HttpGet("daily-revenue-delta")]
+    public async Task<ActionResult<IEnumerable<NetGrowthAdditionPointResponseDto>>> GetNetGrowthAddition([FromQuery] FinancialRequestDto request, CancellationToken ct = default)
+    {
+        var period = await reportingCalendar.ResolvePeriodAsync(request.Timeframe, request.Comparison, ct);
+        var result = await financialService.GetNetGrowthAdditionAsync(period, request.TenantId, request.TenantTypes, ct);
+        return Ok(result.Select(n => new NetGrowthAdditionPointResponseDto(
+                n.Timestamp,
+                n.NetGrowthAddition)).ToList());
+    }
+
+    /// <summary>
     /// Histogram of order values with adaptive binning. Drilldown view only.
     /// </summary>
     [HttpGet("order-distribution")]

@@ -14,7 +14,7 @@ dist-ssr
 *.local
 
 # Environment variables
-# .env is tracked — contains only non-secret VITE_AZURE_* dev defaults
+# OIDC client settings are public, but local overrides and secrets stay untracked.
 # Local overrides and secrets must NOT be committed
 .env.local
 .env.*.local

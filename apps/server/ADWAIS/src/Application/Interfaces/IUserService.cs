@@ -28,12 +28,12 @@ public interface IUserService
     Task<User?> GetUserByIdAsync(Guid id, CancellationToken ct);
 
     /// <summary>
-    /// Retrieves a single user by their Entra ID Object Identifier.
+    /// Retrieves a single user by their external OIDC subject identifier.
     /// </summary>
-    /// <param name="entraObjectId">The unique Entra ID object identifier of the user.</param>
+    /// <param name="externalSubjectId">The subject identifier issued by the external identity provider.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns>The user record, or null if not found.</returns>
-    Task<User?> GetUserByEntraObjectIdAsync(Guid entraObjectId, CancellationToken ct);
+    Task<User?> GetUserByExternalSubjectIdAsync(string externalSubjectId, CancellationToken ct);
 
     /// <summary>
     /// Creates a new user record.

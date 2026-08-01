@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { useMsal } from '@azure/msal-react';
+import { useContext } from 'react';
+import { AuthContext } from 'react-oidc-context';
 import { getKioskToken } from '../utils/auth';
 import { parseJwt } from '../utils/jwt';
 import { apiFetch } from '../apiClient';
@@ -12,17 +13,16 @@ export interface UserProfile {
 
 export function useCurrentUser() {
   const kioskToken = getKioskToken();
-  const { accounts } = useMsal();
-  const hasMsalAccount = accounts.length > 0;
+  const auth = useContext(AuthContext);
+  const hasOidcUser = auth?.isAuthenticated === true;
 
   const kioskUser = kioskToken ? parseJwt(kioskToken) : null;
   const kioskRole = kioskUser?.role as 'Admin' | 'Employee' | 'Viewer' | undefined;
 
-  // Query Entra ID user profile only when authenticated via MSAL and not in Kiosk mode
-  const msalQuery = useQuery<UserProfile>({
+  const oidcQuery = useQuery<UserProfile>({
     queryKey: ['current-user'],
     queryFn: () => apiFetch<UserProfile>('/api/users/me'),
-    enabled: hasMsalAccount && !kioskToken,
+    enabled: hasOidcUser && !kioskToken,
     retry: false,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
@@ -40,11 +40,11 @@ export function useCurrentUser() {
     };
   }
 
-  if (hasMsalAccount) {
+  if (hasOidcUser) {
     return {
-      isLoading: msalQuery.isLoading,
-      user: msalQuery.data || null,
-      role: msalQuery.data?.role || null,
+      isLoading: oidcQuery.isLoading,
+      user: oidcQuery.data || null,
+      role: oidcQuery.data?.role || null,
     };
   }
 

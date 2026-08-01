@@ -1,18 +1,22 @@
 import { test, expect, vi, beforeEach, afterEach } from 'vitest';
 import { apiFetch } from './apiClient';
-import { msalInstance } from './utils/msalConfig';
-import type { AccountInfo, AuthenticationResult } from '@azure/msal-browser';
+import { userManager } from './utils/oidcConfig';
+import type { User } from 'oidc-client-ts';
 
-vi.mock('./utils/msalConfig', () => ({
-  msalInstance: {
-    getActiveAccount: vi.fn(),
-    getAllAccounts: vi.fn(),
-    acquireTokenSilent: vi.fn(),
+const oidcMock = vi.hoisted(() => ({ isDemoMode: false }));
+
+vi.mock('./utils/oidcConfig', () => ({
+  get isDemoMode() {
+    return oidcMock.isDemoMode;
   },
-  AZURE_API_SCOPE: 'api://mock-scope/.default',
+  userManager: {
+    getUser: vi.fn(),
+    removeUser: vi.fn(),
+  },
 }));
 
 beforeEach(() => {
+  oidcMock.isDemoMode = false;
   const mockLocalStorage: Storage = {
     getItem: vi.fn().mockReturnValue(null),
     setItem: vi.fn(),
@@ -28,8 +32,8 @@ beforeEach(() => {
   };
   vi.stubGlobal('sessionStorage', mockSessionStorage);
 
-  vi.mocked(msalInstance.getAllAccounts).mockReturnValue([]);
-  vi.mocked(msalInstance.getActiveAccount).mockReturnValue(null);
+  vi.mocked(userManager!.getUser).mockResolvedValue(null);
+  vi.mocked(userManager!.removeUser).mockResolvedValue();
 
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
     ok: true,
@@ -43,41 +47,19 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-test('apiFetch attaches MSAL token when no kiosk token exists', async () => {
-  const mockAccount: AccountInfo = {
-    homeAccountId: '1',
-    localAccountId: '1',
-    environment: 'login',
-    tenantId: '1',
-    username: 'test@example.com',
-    name: 'Test',
-  };
-
-  vi.mocked(msalInstance.getAllAccounts).mockReturnValue([mockAccount]);
-  
-  const mockAuthResult: AuthenticationResult = {
-    authority: 'https://login',
-    uniqueId: '1',
-    tenantId: '1',
-    scopes: [],
-    account: mockAccount,
-    idToken: 'id',
-    idTokenClaims: {},
-    accessToken: 'entra-token-123',
-    fromCache: true,
-    expiresOn: null,
-    tokenType: 'Bearer',
-    correlationId: '1',
-  };
-
-  vi.mocked(msalInstance.acquireTokenSilent).mockResolvedValue(mockAuthResult);
+test('apiFetch attaches OIDC token when no kiosk token exists', async () => {
+  const user = {
+    access_token: 'oidc-token-123',
+    expired: false,
+  } as User;
+  vi.mocked(userManager!.getUser).mockResolvedValue(user);
 
   await apiFetch('http://test.local');
 
-  expect(msalInstance.acquireTokenSilent).toHaveBeenCalled();
+  expect(userManager!.getUser).toHaveBeenCalled();
   const fetchCall = vi.mocked(fetch).mock.calls[0];
   const headers = fetchCall[1]?.headers as Headers;
-  expect(headers.get('Authorization')).toBe('Bearer entra-token-123');
+  expect(headers.get('Authorization')).toBe('Bearer oidc-token-123');
 });
 
 test('apiFetch does not redirect to /kiosk on 401 when on /login', async () => {
@@ -116,7 +98,7 @@ test('apiFetch redirects to /kiosk on 401 when on non-bypass route', async () =>
   expect(mockLocation.href).toBe('/kiosk');
 });
 
-test('apiFetch redirects to /kiosk on 403 for /api/users/me when no MSAL accounts exist', async () => {
+test('apiFetch redirects to /kiosk on 403 for /api/users/me when no OIDC user exists', async () => {
   const mockLocation = {
     pathname: '/financial',
     href: 'http://localhost/financial',
@@ -134,22 +116,39 @@ test('apiFetch redirects to /kiosk on 403 for /api/users/me when no MSAL account
   expect(mockLocation.href).toBe('/kiosk');
 });
 
-test('apiFetch redirects to /login on 403 for /api/users/me when MSAL accounts exist', async () => {
+test('apiFetch reloads demo mode when its token is invalid', async () => {
+  oidcMock.isDemoMode = true;
+  const reload = vi.fn();
+  vi.stubGlobal('window', {
+    location: {
+      pathname: '/financial',
+      href: 'http://localhost/financial',
+      reload,
+    },
+  });
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+    ok: false,
+    status: 401,
+    text: async () => 'Unauthorized',
+  }));
+
+  await expect(apiFetch('http://test.local/api/users/me')).rejects.toThrow();
+
+  expect(localStorage.removeItem).toHaveBeenCalledWith('kiosk_token');
+  expect(reload).toHaveBeenCalledOnce();
+});
+
+test('apiFetch redirects to /login on 403 for /api/users/me when an OIDC user exists', async () => {
   const mockLocation = {
     pathname: '/financial',
     href: 'http://localhost/financial',
   };
   vi.stubGlobal('window', { location: mockLocation });
   
-  const mockAccount = {
-    homeAccountId: '1',
-    localAccountId: '1',
-    environment: 'login',
-    tenantId: '1',
-    username: 'test@example.com',
-    name: 'Test',
-  };
-  vi.mocked(msalInstance.getAllAccounts).mockReturnValue([mockAccount]);
+  vi.mocked(userManager!.getUser).mockResolvedValue({
+    access_token: 'stale-token',
+    expired: false,
+  } as User);
 
   const mockSessionStorage = {
     clear: vi.fn(),
@@ -165,6 +164,7 @@ test('apiFetch redirects to /login on 403 for /api/users/me when MSAL accounts e
   await expect(apiFetch('http://test.local/api/users/me')).rejects.toThrow();
 
   expect(mockSessionStorage.clear).toHaveBeenCalled();
+  expect(userManager!.removeUser).toHaveBeenCalled();
   expect(mockLocation.href).toBe('/login');
 });
 

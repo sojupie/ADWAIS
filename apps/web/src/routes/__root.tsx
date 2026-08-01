@@ -1,6 +1,7 @@
 import {createRootRoute, redirect, useRouterState, useSearch} from '@tanstack/react-router';
-import {useMsal} from '@azure/msal-react';
-import {msalInstance} from '../utils/msalConfig';
+import {useContext} from 'react';
+import {AuthContext, hasAuthParams} from 'react-oidc-context';
+import {isDemoMode, userManager} from '../utils/oidcConfig';
 import {getKioskToken} from '../utils/auth';
 import {getSavedTimeframe, type PersistentDomain} from '../utils/timeframeStorage';
 import {useCurrentUser} from '../hooks/useCurrentUser';
@@ -11,15 +12,18 @@ import {AuthRouteShell} from '../components/common/layout/AuthRouteShell';
 import {AppShell} from '../components/common/layout/AppShell';
 
 export const Route = createRootRoute({
-  beforeLoad: ({location}) => {
+  beforeLoad: async ({location}) => {
     const isLoginRoute = location.pathname === '/login';
     const isKioskRoute = location.pathname.startsWith('/kiosk');
 
     if (isLoginRoute || isKioskRoute) return;
     if (getKioskToken()) return;
+    if (hasAuthParams()) return;
 
-    const accounts = msalInstance.getAllAccounts();
-    if (accounts.length === 0) {
+    if (isDemoMode) return;
+
+    const user = await userManager?.getUser();
+    if (!user || user.expired) {
       throw redirect({
         to: '/login',
       });
@@ -31,7 +35,7 @@ export const Route = createRootRoute({
 function RootComponent() {
   useSearch({strict: false});
 
-  const {accounts} = useMsal();
+  const auth = useContext(AuthContext);
   const {user} = useCurrentUser();
   const {isOnline, isBackendOnline} = useConnectivityStatus();
   const location = useRouterState({select: (state) => state.location});
@@ -44,7 +48,7 @@ function RootComponent() {
   const timeframeDomain: PersistentDomain | null = isFinancialPage ? '/financial' : isFleetPage ? '/fleet-status' : null;
 
   const kioskToken = getKioskToken();
-  const userLabel = kioskToken ? 'Kiosk' : (user?.name || accounts[0]?.name || accounts[0]?.username || null);
+  const userLabel = kioskToken ? 'Kiosk' : (user?.name || auth?.user?.profile?.name || null);
   const isAuthRoute = location.pathname === '/login' || location.pathname.startsWith('/kiosk');
 
   return (

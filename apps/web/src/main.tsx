@@ -6,10 +6,12 @@ import { queryClient } from './queryClient';
 import { routeTree } from './routeTree.gen';
 import './index.css';
 
-import { MsalProvider } from '@azure/msal-react';
-import { msalInstance } from './utils/msalConfig';
+import { AuthProvider } from 'react-oidc-context';
+import { isDemoMode, isOidcConfigured, userManager } from './utils/oidcConfig';
+import { getKioskToken, setKioskToken } from './utils/auth';
 import { applyFlexGapFallbackClass } from './utils/flexGapSupport';
 import { Md3RippleProvider } from './components/common/ui/Md3RippleProvider';
+import { getApiDemoToken } from './api/generated/endpoints';
 
 applyFlexGapFallbackClass();
 
@@ -26,18 +28,35 @@ declare module '@tanstack/react-router' {
   }
 }
 
-msalInstance.initialize().then(() => {
-  return msalInstance.handleRedirectPromise();
-}).then(() => {
+async function bootstrap() {
+  if (isDemoMode && !getKioskToken()) {
+    const { data } = await getApiDemoToken();
+    if (!data.token) throw new Error('Demo token response did not contain a token.');
+    setKioskToken(data.token);
+  }
+
+  const app = (
+    <QueryClientProvider client={queryClient}>
+      <Md3RippleProvider>
+        <RouterProvider router={router} />
+      </Md3RippleProvider>
+    </QueryClientProvider>
+  );
+
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
-      <MsalProvider instance={msalInstance}>
-        <QueryClientProvider client={queryClient}>
-          <Md3RippleProvider>
-            <RouterProvider router={router} />
-          </Md3RippleProvider>
-        </QueryClientProvider>
-      </MsalProvider>
+      {isOidcConfigured
+        ? (
+          <AuthProvider
+            userManager={userManager!}
+            onSigninCallback={() => window.history.replaceState({}, document.title, window.location.pathname)}
+          >
+            {app}
+          </AuthProvider>
+        )
+        : app}
     </StrictMode>,
   );
-});
+}
+
+bootstrap();

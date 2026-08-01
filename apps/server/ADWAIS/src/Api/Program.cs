@@ -94,26 +94,22 @@ if (!isBuildTime)
 
 var app = builder.Build();
 
-if (!app.Environment.IsDevelopment())
-{
-    app.UseMiddleware<Adwais.Api.Middleware.DashboardBasicAuthMiddleware>();
-}
-
+app.UseExceptionHandler();
 app.MapOpenApi();
 app.UseSwagger();
 app.UseSwaggerUI();
-app.UseExceptionHandler();
-if (!isBuildTime)
-{
-    app.UseHangfireDashboard("/hangfire", new Hangfire.DashboardOptions
-    {
-        Authorization = new[] { new Adwais.Api.Filters.AllowAllDashboardAuthorizationFilter() }
-    });
-}
 
 app.UseMiddleware<Adwais.Api.Middleware.DevMockAuthMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
+
+if (!isBuildTime)
+{
+    app.UseHangfireDashboard("/hangfire", new Hangfire.DashboardOptions
+    {
+        Authorization = new[] { new Adwais.Api.Filters.AdminDashboardAuthorizationFilter() }
+    });
+}
 
 app.MapControllers();
 

@@ -24,11 +24,12 @@ public class UserController(IUserService userService) : ControllerBase
     [Authorize(Policy = "KioskOrStaffAccess")]
     public async Task<ActionResult<UserResponseDto>> GetMe(CancellationToken ct)
     {
-        var oidClaim = User.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier")?.Value ?? User.FindFirst("oid")?.Value;
+        Console.WriteLine("");
+        var subjectId = User.FindFirst("sub")?.Value;
 
-        if (!string.IsNullOrEmpty(oidClaim) && Guid.TryParse(oidClaim, out var entraOid))
+        if (!string.IsNullOrEmpty(subjectId))
         {
-            var user = await _userService.GetUserByEntraObjectIdAsync(entraOid, ct);
+            var user = await _userService.GetUserByExternalSubjectIdAsync(subjectId, ct);
             if (user != null)
             {
                 return Ok(new UserResponseDto(user.Id, user.Name, user.Email, user.Role));
@@ -75,7 +76,7 @@ public class UserController(IUserService userService) : ControllerBase
 
     /// <summary>
     /// Manually creates a new user record.
-    /// Used for pre-provisioning users before EntraID sign-in.
+    /// Used for pre-provisioning users before OIDC sign-in.
     /// </summary>
     [HttpPost]
     [Authorize(Policy = "AdminOnly")]

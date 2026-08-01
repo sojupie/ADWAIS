@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { useMsal } from '@azure/msal-react';
+import { useContext } from 'react';
+import { AuthContext } from 'react-oidc-context';
 import { KeyRound, LogOut, MonitorSmartphone } from 'lucide-react';
 import { useActivateKioskMutation } from '../../hooks/useKioskAuth';
 import { useCurrentUser } from '../../hooks/useCurrentUser';
@@ -46,13 +47,14 @@ export function AuthenticationSettings() {
     );
   };
 
-  const { instance, accounts } = useMsal();
+  const auth = useContext(AuthContext);
   const navigate = useNavigate();
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
+    await fetch('/api/dashboard-session', { method: 'DELETE' }).catch(() => undefined);
     removeKioskToken();
-    if (accounts.length > 0) {
-      instance.logoutRedirect();
+    if (auth?.isAuthenticated) {
+      await auth.signoutRedirect();
     } else {
       navigate({ to: '/login' });
     }
@@ -123,7 +125,7 @@ export function AuthenticationSettings() {
             <div className="rounded-xl bg-surface-container-high p-4">
               <span className="text-sm font-bold uppercase tracking-wider text-on-surface-variant">Signed in as</span>
               <p className="mt-1 break-all text-base font-bold text-on-surface">
-                {accounts[0]?.username || 'Kiosk session'}
+                {auth?.user?.profile?.preferred_username || auth?.user?.profile?.email || 'Kiosk session'}
               </p>
             </div>
             

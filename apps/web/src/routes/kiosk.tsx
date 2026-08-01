@@ -3,15 +3,15 @@ import { type QueryClient } from '@tanstack/react-query';
 import { getOrCreateDeviceId, getKioskToken } from '../utils/auth';
 import { type RegisterKioskResponse } from '../hooks/useKioskAuth';
 import { customClient } from '../apiClient';
-import { msalInstance } from '../utils/msalConfig';
+import { userManager } from '../utils/oidcConfig';
 
 export const Route = createFileRoute('/kiosk')({
-  beforeLoad: () => {
+  beforeLoad: async () => {
     if (getKioskToken()) {
       throw redirect({ to: '/fleet-status' });
     }
-    const accounts = msalInstance.getAllAccounts();
-    if (accounts.length > 0) {
+    const user = await userManager?.getUser();
+    if (user && !user.expired) {
       throw redirect({ to: '/financial' });
     }
   },

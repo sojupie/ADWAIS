@@ -34,11 +34,11 @@ public class UserService(IApplicationDbContext dbContext) : IUserService
     }
 
     /// <inheritdoc />
-    public async Task<User?> GetUserByEntraObjectIdAsync(Guid entraObjectId, CancellationToken ct)
+    public async Task<User?> GetUserByExternalSubjectIdAsync(string externalSubjectId, CancellationToken ct)
     {
         return await _dbContext.Users
             .AsNoTracking()
-            .SingleOrDefaultAsync(u => u.EntraObjectId == entraObjectId, ct);
+            .SingleOrDefaultAsync(u => u.ExternalSubjectId == externalSubjectId, ct);
     }
 
     /// <inheritdoc />

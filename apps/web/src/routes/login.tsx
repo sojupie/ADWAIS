@@ -1,14 +1,14 @@
 import { createFileRoute, redirect } from '@tanstack/react-router';
 import { getKioskToken } from '../utils/auth';
-import { msalInstance } from '../utils/msalConfig';
+import { userManager } from '../utils/oidcConfig';
 
 export const Route = createFileRoute('/login')({
-  beforeLoad: () => {
+  beforeLoad: async () => {
     if (getKioskToken()) {
       throw redirect({ to: '/fleet-status' });
     }
-    const accounts = msalInstance.getAllAccounts();
-    if (accounts.length > 0) {
+    const user = await userManager?.getUser();
+    if (user && !user.expired) {
       throw redirect({ to: '/financial' });
     }
   },

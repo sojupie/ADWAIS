@@ -285,10 +285,11 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
                 .HasMaxLength(255)
                 .IsRequired(false);
 
-            entity.Property(u => u.EntraObjectId)
+            entity.Property(u => u.ExternalSubjectId)
+                .HasMaxLength(255)
                 .IsRequired(false);
 
-            entity.HasIndex(u => u.EntraObjectId)
+            entity.HasIndex(u => u.ExternalSubjectId)
                 .IsUnique();
 
             entity.HasIndex(u => u.Email)

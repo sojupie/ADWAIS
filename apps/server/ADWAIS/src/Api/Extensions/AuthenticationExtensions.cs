@@ -1,11 +1,11 @@
 using System;
 using System.Text;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Identity.Web;
 using Microsoft.IdentityModel.Tokens;
 using Adwais.Infrastructure.Security;
 
@@ -13,45 +13,65 @@ namespace Adwais.Api.Extensions;
 
 public static class AuthenticationExtensions
 {
+    public const string DashboardCookieScheme = "DashboardCookie";
+    public const string DashboardCookieName = "adwais_dashboard";
+    private const string AppAuthenticationScheme = "AppAuthentication";
+
     public static IServiceCollection AddAppAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
         // Configure Authentication Schemes
-        var authBuilder = services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme);
-        authBuilder.AddMicrosoftIdentityWebApi(configuration, "AzureAd");
-        
+        var authBuilder = services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = AppAuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        });
         var kioskIssuer = configuration["Authentication:KioskJwtIssuer"] ?? "ADWAIS";
         var kioskAudience = configuration["Authentication:KioskJwtAudience"] ?? "ADWAIS-Kiosk";
-        
-        // Prevent the AzureAd handler from logging validation errors when processing Kiosk tokens
-        services.Configure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
+
+        authBuilder.AddPolicyScheme(AppAuthenticationScheme, AppAuthenticationScheme, options =>
         {
-            var existingOnMessageReceived = options.Events?.OnMessageReceived;
-            options.Events ??= new JwtBearerEvents();
-            options.Events.OnMessageReceived = async context =>
+            options.ForwardDefaultSelector = context =>
+                context.Request.Path.StartsWithSegments("/hangfire")
+                && context.Request.Cookies.ContainsKey(DashboardCookieName)
+                    ? DashboardCookieScheme
+                    : JwtBearerDefaults.AuthenticationScheme;
+        });
+
+        authBuilder.AddJwtBearer(options =>
+        {
+            options.Authority = configuration["Authentication:OidcAuthority"];
+            options.Audience = configuration["Authentication:OidcAudience"];
+            options.RequireHttpsMetadata = !string.Equals(
+                configuration["ASPNETCORE_ENVIRONMENT"],
+                "Development",
+                StringComparison.OrdinalIgnoreCase);
+            options.MapInboundClaims = false;
+            options.TokenValidationParameters = new TokenValidationParameters
             {
-                var authHeader = context.Request.Headers.Authorization.ToString();
-                if (authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                NameClaimType = "name",
+                RoleClaimType = "role",
+                ValidateIssuer = true,
+                ValidateAudience = true
+            };
+            options.Events = new JwtBearerEvents
+            {
+                OnMessageReceived = context =>
                 {
-                    var token = authHeader.Substring(7).Trim();
-                    var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
-                    if (handler.CanReadToken(token))
+                    var authHeader = context.Request.Headers.Authorization.ToString();
+                    if (authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
                     {
-                        var jwtToken = handler.ReadJwtToken(token);
-                        if (jwtToken.Issuer == kioskIssuer)
+                        var token = authHeader.Substring(7).Trim();
+                        var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+                        if (handler.CanReadToken(token) && handler.ReadJwtToken(token).Issuer == kioskIssuer)
                         {
-                            // Skip the Entra ID scheme for Kiosk tokens
                             context.NoResult();
-                            return;
                         }
                     }
-                }
-
-                if (existingOnMessageReceived != null)
-                {
-                    await existingOnMessageReceived(context);
+                    return Task.CompletedTask;
                 }
             };
         });
+
         authBuilder.AddJwtBearer("KioskJwt", options =>
         {
             options.MapInboundClaims = false;
@@ -101,8 +121,18 @@ public static class AuthenticationExtensions
                 }
             };
         });
+        authBuilder.AddCookie(DashboardCookieScheme, options =>
+        {
+            options.Cookie.Name = DashboardCookieName;
+            options.Cookie.HttpOnly = true;
+            options.Cookie.Path = "/hangfire";
+            options.Cookie.SameSite = SameSiteMode.Strict;
+            options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+            options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
+            options.SlidingExpiration = false;
+        });
 
-        // Register Claims Transformation for Entra ID users mapping
+        // Register claims transformation for external OIDC users.
         services.AddTransient<IClaimsTransformation, LocalUserClaimsTransformation>();
 
         // Configure Authorization Policies

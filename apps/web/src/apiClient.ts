@@ -1,4 +1,4 @@
-import { msalInstance, AZURE_API_SCOPE } from './utils/msalConfig';
+import { isDemoMode, userManager } from './utils/oidcConfig';
 
 export async function getAuthHeaders(customHeaders?: HeadersInit): Promise<Headers> {
   const headers = new Headers(customHeaders);
@@ -6,33 +6,30 @@ export async function getAuthHeaders(customHeaders?: HeadersInit): Promise<Heade
   if (kioskToken && !headers.has('Authorization')) {
     headers.set('Authorization', `Bearer ${kioskToken}`);
   } else if (!headers.has('Authorization')) {
-    const account = msalInstance.getActiveAccount() || msalInstance.getAllAccounts()[0];
-    if (account) {
-      try {
-        const response = await msalInstance.acquireTokenSilent({
-          scopes: [AZURE_API_SCOPE],
-          account: account
-        });
-        headers.set('Authorization', `Bearer ${response.accessToken}`);
-      } catch (e) {
-        console.warn('Failed to acquire silent token', e);
-      }
+    const user = await userManager?.getUser();
+    if (user && !user.expired) {
+      headers.set('Authorization', `Bearer ${user.access_token}`);
     }
   }
   return headers;
 }
 
-export function handleSessionInvalidation() {
+export async function handleSessionInvalidation() {
   if (window.location.pathname === '/kiosk' || window.location.pathname === '/login') {
     return;
   }
-  const hasMsal = msalInstance.getAllAccounts().length > 0;
-  if (hasMsal) {
+  const user = await userManager?.getUser();
+  if (user) {
+    await userManager?.removeUser();
     sessionStorage.clear();
     window.location.href = '/login';
   } else {
     localStorage.removeItem('kiosk_token');
-    window.location.href = '/kiosk';
+    if (isDemoMode) {
+      window.location.reload();
+    } else {
+      window.location.href = '/kiosk';
+    }
   }
 }
 
@@ -45,7 +42,7 @@ export async function checkSessionValidity() {
     const headers = await getAuthHeaders();
     const response = await fetch('/api/users/me', { headers });
     if (response.status === 401 || response.status === 403) {
-      handleSessionInvalidation();
+      await handleSessionInvalidation();
     }
   } catch (e) {
     console.error('Failed to verify session validity:', e);
@@ -73,7 +70,7 @@ export async function apiFetch<T>(url: string, options?: RequestInit): Promise<T
       if (isProfileUrl) {
         const bypass = headers.get('X-Bypass-Global-401');
         if (bypass !== 'true') {
-          handleSessionInvalidation();
+          await handleSessionInvalidation();
         }
       } else {
         checkSessionValidity().catch((err) => {
@@ -138,7 +135,7 @@ export async function customClient<T>(
         if (isProfileUrl) {
           const bypass = headers.get('X-Bypass-Global-401');
           if (bypass !== 'true') {
-            handleSessionInvalidation();
+            await handleSessionInvalidation();
           }
         } else {
           checkSessionValidity().catch((err) => {

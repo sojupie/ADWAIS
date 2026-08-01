@@ -7,6 +7,7 @@ import { SecureButton } from '../../components/common/ui/SecureButton';
 import { Skeleton } from '../../components/common/ui/Skeleton';
 import { useSystemEventsViewModel, type SystemEvent } from '../../hooks/useSystemEventsViewModel';
 import { formatDateTime } from '../../utils/dateTime';
+import { usePostApiDashboardSession } from '../../api/generated/endpoints';
 
 function timeAgo(date: string | number | null | undefined): string {
     if (!date) return 'Never';
@@ -67,6 +68,25 @@ export function SystemEventsView() {
         events,
         clearErrorsMutation
     } = useSystemEventsViewModel();
+    const dashboardSessionMutation = usePostApiDashboardSession();
+
+    const openDashboard = async () => {
+        const dashboardTab = window.open('about:blank', '_blank');
+        if (dashboardTab) dashboardTab.opener = null;
+
+        try {
+            await dashboardSessionMutation.mutateAsync();
+            if (dashboardTab) {
+                dashboardTab.location.replace('/hangfire');
+            } else {
+                window.location.assign('/hangfire');
+            }
+        } catch (error) {
+            dashboardTab?.close();
+            window.alert(error instanceof Error ? error.message : 'Unable to open the Hangfire dashboard.');
+        }
+    };
+
     return (
         <div className="grid landscape-contained:grid-cols-2 portrait-contained:grid-rows-2 gap-4 contained:h-full contained:min-h-0">
 
@@ -132,17 +152,28 @@ export function SystemEventsView() {
                                 </div>
                             </HealthStatusCard>
 
-                            {/* Clear Errors Action */}
-                            <SecureButton
-                                onClick={() => clearErrorsMutation.mutate()}
-                                locked={!isAdmin}
-                                lockTitle="Requires Admin privileges"
-                                loading={clearErrorsMutation.isPending}
-                                loadingText="Clearing Diagnostics..."
-                                className="flex min-h-11 w-fit cursor-pointer items-center justify-center gap-2 self-start rounded-full border border-outline enabled:hover:bg-surface-container px-5 text-sm font-bold text-on-surface transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary"
-                            >
-                                Clear Sync Errors
-                            </SecureButton>
+                            <div className="flex flex-wrap gap-3">
+                                <SecureButton
+                                    onClick={openDashboard}
+                                    locked={!isAdmin}
+                                    lockTitle="Requires Admin privileges"
+                                    loading={dashboardSessionMutation.isPending}
+                                    loadingText="Opening Dashboard..."
+                                    className="flex min-h-11 w-fit cursor-pointer items-center justify-center gap-2 rounded-full border border-outline enabled:hover:bg-surface-container px-5 text-sm font-bold text-on-surface transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary"
+                                >
+                                    Open Hangfire Dashboard
+                                </SecureButton>
+                                <SecureButton
+                                    onClick={() => clearErrorsMutation.mutate()}
+                                    locked={!isAdmin}
+                                    lockTitle="Requires Admin privileges"
+                                    loading={clearErrorsMutation.isPending}
+                                    loadingText="Clearing Diagnostics..."
+                                    className="flex min-h-11 w-fit cursor-pointer items-center justify-center gap-2 rounded-full border border-outline enabled:hover:bg-surface-container px-5 text-sm font-bold text-on-surface transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary"
+                                >
+                                    Clear Sync Errors
+                                </SecureButton>
+                            </div>
                         </div>
                     ) : (
                         <div className="flex flex-col gap-8 shrink-0">

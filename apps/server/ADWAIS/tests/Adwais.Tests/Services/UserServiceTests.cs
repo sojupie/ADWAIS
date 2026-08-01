@@ -187,11 +187,11 @@ public class UserServiceTests
     }
 
     [Fact]
-    public async Task GetUserByEntraObjectIdAsync_ShouldReturnCorrectUser_WhenExists()
+    public async Task GetUserByExternalSubjectIdAsync_ShouldReturnCorrectUser_WhenExists()
     {
         // Arrange
-        var entraId = Guid.NewGuid();
-        var user = new User { Id = Guid.NewGuid(), EntraObjectId = entraId, Name = "Entra User", Role = UserRole.Employee };
+        var subjectId = "auth0|user-123";
+        var user = new User { Id = Guid.NewGuid(), ExternalSubjectId = subjectId, Name = "OIDC User", Role = UserRole.Employee };
         await using (var db = new AnalyticsDbContext(_dbOptions))
         {
             db.Users.Add(user);
@@ -199,19 +199,19 @@ public class UserServiceTests
         }
 
         // Act
-        var result = await _userService.GetUserByEntraObjectIdAsync(entraId, CancellationToken.None);
+        var result = await _userService.GetUserByExternalSubjectIdAsync(subjectId, CancellationToken.None);
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(entraId, result.EntraObjectId);
-        Assert.Equal("Entra User", result.Name);
+        Assert.Equal(subjectId, result.ExternalSubjectId);
+        Assert.Equal("OIDC User", result.Name);
     }
 
     [Fact]
-    public async Task GetUserByEntraObjectIdAsync_ShouldReturnNull_WhenNotExists()
+    public async Task GetUserByExternalSubjectIdAsync_ShouldReturnNull_WhenNotExists()
     {
         // Act
-        var result = await _userService.GetUserByEntraObjectIdAsync(Guid.NewGuid(), CancellationToken.None);
+        var result = await _userService.GetUserByExternalSubjectIdAsync("missing-subject", CancellationToken.None);
 
         // Assert
         Assert.Null(result);

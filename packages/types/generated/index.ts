@@ -53,6 +53,7 @@ export * from './getApiSystemEventParams';
 export * from './getApiTenantsParams';
 export * from './globalConfigResponseDto';
 export * from './hangfireHealthDto';
+export * from './kioskTokenResponseDto';
 export * from './kpiResponseDto';
 export * from './latencyMetricsDto';
 export * from './latencyPointResponseDto';

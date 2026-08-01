@@ -180,18 +180,18 @@ public class UserControllerTests
     }
 
     [Fact]
-    public async Task GetMe_ShouldReturnOkWithUser_WhenEntraUserExists()
+    public async Task GetMe_ShouldReturnOkWithUser_WhenOidcUserExists()
     {
         // Arrange
-        var entraId = Guid.NewGuid();
-        var user = new User { Id = Guid.NewGuid(), EntraObjectId = entraId, Name = "Entra User", Role = UserRole.Employee };
+        var subjectId = "auth0|user-123";
+        var user = new User { Id = Guid.NewGuid(), ExternalSubjectId = subjectId, Name = "OIDC User", Role = UserRole.Employee };
         
-        _userServiceMock.Setup(s => s.GetUserByEntraObjectIdAsync(entraId, It.IsAny<CancellationToken>()))
+        _userServiceMock.Setup(s => s.GetUserByExternalSubjectIdAsync(subjectId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
 
         var claims = new List<System.Security.Claims.Claim>
         {
-            new("oid", entraId.ToString())
+            new("sub", subjectId)
         };
         var identity = new System.Security.Claims.ClaimsIdentity(claims, "Test");
         var principal = new System.Security.Claims.ClaimsPrincipal(identity);
@@ -208,7 +208,7 @@ public class UserControllerTests
         var okResult = Assert.IsType<OkObjectResult>(result.Result);
         var returnedUser = Assert.IsType<UserResponseDto>(okResult.Value);
         Assert.Equal(user.Id, returnedUser.Id);
-        Assert.Equal("Entra User", returnedUser.Name);
+        Assert.Equal("OIDC User", returnedUser.Name);
         Assert.Equal(UserRole.Employee, returnedUser.Role);
     }
 

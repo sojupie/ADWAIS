@@ -65,6 +65,7 @@ import type {
   GetApiSystemEventParams,
   GetApiTenantsParams,
   GlobalConfigResponseDto,
+  KioskTokenResponseDto,
   KpiResponseDto,
   LatencyMetricsDto,
   LitiumOrderDto,
@@ -2261,6 +2262,275 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getPostApiIntranetPostsMutationOptions(options), queryClient);
     }
+
+export type postApiDashboardSessionResponse200 = {
+  data: void
+  status: 200
+}
+
+export type postApiDashboardSessionResponseSuccess = (postApiDashboardSessionResponse200) & {
+  headers: Headers;
+};
+;
+
+export type postApiDashboardSessionResponse = (postApiDashboardSessionResponseSuccess)
+
+export const getPostApiDashboardSessionUrl = () => {
+
+
+
+
+  return `/api/dashboard-session`
+}
+
+export const postApiDashboardSession = async ( options?: RequestInit): Promise<postApiDashboardSessionResponse> => {
+
+  return customClient<postApiDashboardSessionResponse>(getPostApiDashboardSessionUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getPostApiDashboardSessionMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiDashboardSession>>, TError,void, TContext>, request?: SecondParameter<typeof customClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiDashboardSession>>, TError,void, TContext> => {
+
+const mutationKey = ['postApiDashboardSession'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiDashboardSession>>, void> = () => {
+
+
+          return  postApiDashboardSession(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiDashboardSessionMutationResult = NonNullable<Awaited<ReturnType<typeof postApiDashboardSession>>>
+
+    export type PostApiDashboardSessionMutationError = unknown
+
+    export const usePostApiDashboardSession = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiDashboardSession>>, TError,void, TContext>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiDashboardSession>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getPostApiDashboardSessionMutationOptions(options), queryClient);
+    }
+
+export type deleteApiDashboardSessionResponse200 = {
+  data: void
+  status: 200
+}
+
+export type deleteApiDashboardSessionResponseSuccess = (deleteApiDashboardSessionResponse200) & {
+  headers: Headers;
+};
+;
+
+export type deleteApiDashboardSessionResponse = (deleteApiDashboardSessionResponseSuccess)
+
+export const getDeleteApiDashboardSessionUrl = () => {
+
+
+
+
+  return `/api/dashboard-session`
+}
+
+export const deleteApiDashboardSession = async ( options?: RequestInit): Promise<deleteApiDashboardSessionResponse> => {
+
+  return customClient<deleteApiDashboardSessionResponse>(getDeleteApiDashboardSessionUrl(),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteApiDashboardSessionMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiDashboardSession>>, TError,void, TContext>, request?: SecondParameter<typeof customClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteApiDashboardSession>>, TError,void, TContext> => {
+
+const mutationKey = ['deleteApiDashboardSession'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteApiDashboardSession>>, void> = () => {
+
+
+          return  deleteApiDashboardSession(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteApiDashboardSessionMutationResult = NonNullable<Awaited<ReturnType<typeof deleteApiDashboardSession>>>
+
+    export type DeleteApiDashboardSessionMutationError = unknown
+
+    export const useDeleteApiDashboardSession = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiDashboardSession>>, TError,void, TContext>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteApiDashboardSession>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getDeleteApiDashboardSessionMutationOptions(options), queryClient);
+    }
+
+export type getApiDemoTokenResponse200TextPlain = {
+  data: KioskTokenResponseDto
+  status: 200
+}
+
+export type getApiDemoTokenResponse200ApplicationJson = {
+  data: KioskTokenResponseDto
+  status: 200
+}
+
+export type getApiDemoTokenResponse200TextJson = {
+  data: KioskTokenResponseDto
+  status: 200
+}
+
+export type getApiDemoTokenResponseSuccess = (getApiDemoTokenResponse200TextPlain | getApiDemoTokenResponse200ApplicationJson | getApiDemoTokenResponse200TextJson) & {
+  headers: Headers;
+};
+;
+
+export type getApiDemoTokenResponse = (getApiDemoTokenResponseSuccess)
+
+export const getGetApiDemoTokenUrl = () => {
+
+
+
+
+  return `/api/demo/token`
+}
+
+export const getApiDemoToken = async ( options?: RequestInit): Promise<getApiDemoTokenResponse> => {
+
+  return customClient<getApiDemoTokenResponse>(getGetApiDemoTokenUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiDemoTokenQueryKey = () => {
+    return [
+    `/api/demo/token`
+    ] as const;
+    }
+
+
+export const getGetApiDemoTokenQueryOptions = <TData = Awaited<ReturnType<typeof getApiDemoToken>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiDemoToken>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiDemoTokenQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiDemoToken>>> = ({ signal }) => getApiDemoToken({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiDemoToken>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiDemoTokenQueryResult = NonNullable<Awaited<ReturnType<typeof getApiDemoToken>>>
+export type GetApiDemoTokenQueryError = unknown
+
+
+export function useGetApiDemoToken<TData = Awaited<ReturnType<typeof getApiDemoToken>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiDemoToken>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiDemoToken>>,
+          TError,
+          Awaited<ReturnType<typeof getApiDemoToken>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiDemoToken<TData = Awaited<ReturnType<typeof getApiDemoToken>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiDemoToken>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiDemoToken>>,
+          TError,
+          Awaited<ReturnType<typeof getApiDemoToken>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiDemoToken<TData = Awaited<ReturnType<typeof getApiDemoToken>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiDemoToken>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiDemoToken<TData = Awaited<ReturnType<typeof getApiDemoToken>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiDemoToken>>, TError, TData>>, request?: SecondParameter<typeof customClient>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiDemoTokenQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
 
 export type getApiIntranetFeedsResponse200TextPlain = {
   data: FeedItem[]
@@ -7862,7 +8132,7 @@ export const getPostApiUsersUrl = () => {
 
 /**
  * @summary Manually creates a new user record.
-Used for pre-provisioning users before EntraID sign-in.
+Used for pre-provisioning users before OIDC sign-in.
  */
 export const postApiUsers = async (createUserRequestDto?: CreateUserRequestDto, options?: RequestInit): Promise<postApiUsersResponse> => {
 
@@ -7911,7 +8181,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     /**
  * @summary Manually creates a new user record.
-Used for pre-provisioning users before EntraID sign-in.
+Used for pre-provisioning users before OIDC sign-in.
  */
 export const usePostApiUsers = <TError = unknown,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiUsers>>, TError,{data?: CreateUserRequestDto}, TContext>, request?: SecondParameter<typeof customClient>}

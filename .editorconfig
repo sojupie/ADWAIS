@@ -1,0 +1,12 @@
+root = true
+
+# Environment files must be UTF-8 without BOM so Vite reads the first key correctly.
+[.env*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+
+[**/.env*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true

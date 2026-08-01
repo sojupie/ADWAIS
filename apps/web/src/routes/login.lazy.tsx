@@ -1,19 +1,17 @@
 import { createLazyFileRoute, Link } from '@tanstack/react-router';
-import { useMsal } from '@azure/msal-react';
-import { AZURE_API_SCOPE } from '../utils/msalConfig';
+import { useAuth } from 'react-oidc-context';
+import { ssoButtonLabel, ssoButtonLogoUrl } from '../utils/oidcConfig';
 
 export const Route = createLazyFileRoute('/login')({
   component: LoginComponent,
 });
 
 function LoginComponent() {
-  const { instance } = useMsal();
+  const auth = useAuth();
 
   const handleLogin = () => {
-    instance.loginRedirect({
-      scopes: [AZURE_API_SCOPE],
-    }).catch((err) => {
-      console.error('MSAL Login error:', err);
+    auth.signinRedirect().catch((err) => {
+      console.error('OIDC Login error:', err);
     });
   };
 
@@ -32,13 +30,15 @@ function LoginComponent() {
           onClick={handleLogin}
           className="self-center py-4 px-6 bg-surface-container-highest hover:bg-brand-btn-primary-hover font-extrabold rounded-full transition-all duration-300 m3-elevation-1 hover:m3-elevation-2 cursor-pointer inline-flex items-center justify-center gap-3 group text-md tracking-widest uppercase whitespace-nowrap"
         >
-          <img
-            src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg"
-            className="w-5 h-5 shrink-0"
-            alt=""
-            aria-hidden="true"
-          />
-          <span>Sign in with Microsoft</span>
+          {ssoButtonLogoUrl && (
+            <img
+              src={ssoButtonLogoUrl}
+              className="w-5 h-5 shrink-0"
+              alt=""
+              aria-hidden="true"
+            />
+          )}
+          <span>{ssoButtonLabel}</span>
         </button>
 
         <div className="flex w-full justify-center pt-6">

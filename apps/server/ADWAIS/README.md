@@ -70,11 +70,10 @@ Already present after cloning. Contains non-secret dev defaults:
   "ConnectionStrings": {
     "AnalyticsDb": "Host=localhost;Database=analyticsdb;Username=postgres;Password=development_password"
   },
-  "AzureAd": {
-    "Instance": "https://login.microsoftonline.com/",
-    "Domain": "localhost",
-    "TenantId": "common",
-    "ClientId": "00000000-0000-0000-0000-000000000000"
+  "Authentication": {
+    "OidcAuthority": "https://your-idp.example.com",
+    "OidcAudience": "adwais-api",
+    "EnableDemoAccess": false
   },
   "FeatureToggles": {
     "EnableRuntimeDataSeeding": true
@@ -98,11 +97,11 @@ cp src/.env.example src/.env
 
 | Variable | Where to find it |
 |---|---|
-| `AZURE_TENANT_ID` | Azure Portal → Azure Active Directory → Overview |
-| `AZURE_CLIENT_ID` | Azure Portal → App Registrations → your app → Application (client) ID |
-| `APP_ID_URI` | Azure Portal → App Registrations → your app → Expose an API |
+| `Authentication__OidcAuthority` | Your provider's OIDC authority URL |
+| `Authentication__OidcAudience` | The API audience expected in access tokens |
+| `Authentication__EnableDemoAccess` | Set `true` to expose the read-only demo token endpoint |
 
-> For local dev with mock data, `AzureAd` values are the only ones strictly required for auth.
+> Development uses the Admin mock token. Production requires OIDC settings unless demo mode is enabled.
 
 
 ---

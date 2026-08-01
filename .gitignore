@@ -6,7 +6,7 @@ node_modules/
 **/obj/
 
 # Environment and Logs
-# Server src/.env contains only public Azure AD identifiers — tracked
+# Server src/.env can contain local OIDC settings and stays untracked.
 # Use .env.local files for machine-specific overrides (gitignored)
 *.log
 # .NET config — ignore production secrets, track Development defaults

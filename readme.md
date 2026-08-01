@@ -51,12 +51,12 @@ pnpm install
 
 ### 2. Configure Environment
 
-All config files are tracked in git — no manual setup required after cloning.
+Copy the environment examples and configure OIDC or demo mode before starting the frontend.
 
 | File | Contains |
 |---|---|
-| `apps/web/.env` | Public Azure client/tenant IDs for MSAL |
-| `apps/server/ADWAIS/src/.env` | Public Azure AD identifiers (tenant ID, client ID) |
+| `apps/web/.env.local` | Public OIDC client settings or demo-mode flag |
+| `apps/server/ADWAIS/src/.env` | Backend OIDC authority/audience or demo-mode flag |
 | `apps/server/ADWAIS/src/Api/appsettings.Development.json` | Local DB connection string + feature toggles |
 
 > **Local development with demo data**: `EnableRuntimeDataSeeding: true` is already set in `appsettings.Development.json`. Demo monitors use negative local IDs and are never sent to UptimeRobot, so no external API key is required.
@@ -125,7 +125,7 @@ Production deployment is manual and component-selective. In GitHub, open **Actio
 - `restart-api`, `restart-stack`, or `reload-nginx`
 - `all`
 
-The `production` GitHub environment must define `SERVER_IP`, `SSH_PRIVATE_KEY`, `SSH_KNOWN_HOSTS`, `GHCR_PULL_USERNAME`, `GHCR_PULL_TOKEN`, `DASHBOARD_USER`, `DASHBOARD_PASS`, `DB_PASSWORD`, `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`, `MOTASTIC_API_KEY`, `NEWSLETTER_API_KEY`, and `KIOSK_JWT_SECRET`. The GHCR pull token only needs `read:packages`.
+The `production` GitHub environment must define `SERVER_IP`, `SSH_PRIVATE_KEY`, `SSH_KNOWN_HOSTS`, `GHCR_PULL_USERNAME`, `GHCR_PULL_TOKEN`, `DB_PASSWORD`, `OIDC_AUTHORITY`, `OIDC_AUDIENCE`, `OIDC_CLIENT_ID`, `MOTASTIC_API_KEY`, `NEWSLETTER_API_KEY`, and `KIOSK_JWT_SECRET`. The GHCR pull token only needs `read:packages`.
 
 For a zero-runner-credit local deployment, set `ADWAIS_SERVER_IP` and ensure `ssh` and `scp` are available. On Windows, install MSYS2 and run `pacman -S rsync`; the deployment script automatically detects the standard `C:\msys64\usr\bin\rsync.exe` installation without adding the full MSYS2 toolchain to `PATH`.
 

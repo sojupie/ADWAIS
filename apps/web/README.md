@@ -26,17 +26,20 @@ The user-facing dashboard displaying daily order rollups, financial stats, site 
 
 ## Configuration
 
-`apps/web/.env` is **tracked in git** — it contains only public Azure app registration IDs (non-secret):
+Create `.env.local` and configure either OIDC or demo mode. The repository
+`.editorconfig` requires environment files to use UTF-8 without BOM.
 
 ```env
-VITE_AZURE_CLIENT_ID=<your-client-id>
-VITE_AZURE_TENANT_ID=<your-tenant-id>
-VITE_AZURE_API_SCOPE=api://<your-client-id>/.default
+VITE_OIDC_AUTHORITY=https://your-idp.example.com
+VITE_OIDC_CLIENT_ID=adwais-frontend
+VITE_OIDC_SCOPE=openid profile email
+VITE_DEMO_MODE=false
+VITE_SSO_BUTTON_LABEL=Sign in with SSO
+VITE_SSO_BUTTON_LOGO_URL=
 ```
 
-These values come from the same Azure App Registration used by the backend. After cloning, the file is already present. If the app registration changes, update these values to match `AZURE_CLIENT_ID` / `AZURE_TENANT_ID` in the backend `src/.env`.
-
-If you need a local override (e.g., a different tenant), create `apps/web/.env.local` — it is gitignored and takes precedence.
+`VITE_OIDC_AUTHORITY` and `VITE_OIDC_CLIENT_ID` are required unless `VITE_DEMO_MODE=true`.
+Demo mode automatically requests a read-only Viewer token from `/api/demo/token`.
 
 ---
 

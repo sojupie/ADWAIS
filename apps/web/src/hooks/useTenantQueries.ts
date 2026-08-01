@@ -35,15 +35,16 @@ export function useCreateTenantMutation(onSuccessCallback?: () => void) {
       }
     }
   });
+  const { mutate: mutateRequest } = mutation;
 
   const mutate = useCallback((
       payload: { name: string; litiumBaseUrl: string; imageUrl: string; serviceAccountToken: string },
-      options?: Parameters<typeof mutation.mutate>[1]
+      options?: Parameters<typeof mutateRequest>[1]
     ) => 
-      mutation.mutate({ 
+      mutateRequest({ 
         data: { ...payload, type: 'B2B', orderFetchingEnabled: false } 
       }, options),
-    [mutation.mutate]);
+    [mutateRequest]);
 
   return {
     ...mutation,
@@ -69,10 +70,11 @@ export function useDeleteTenantMutation() {
       }
     }
   });
+  const { mutate: mutateRequest } = mutation;
 
-  const mutate = useCallback((id: string, options?: Parameters<typeof mutation.mutate>[1]) => 
-      mutation.mutate({ id }, options),
-    [mutation.mutate]);
+  const mutate = useCallback((id: string, options?: Parameters<typeof mutateRequest>[1]) => 
+      mutateRequest({ id }, options),
+    [mutateRequest]);
 
   return {
     ...mutation,
@@ -98,13 +100,14 @@ export function useUpdateTenantMutation() {
       }
     }
   });
+  const { mutate: mutateRequest } = mutation;
 
   const mutate = useCallback((
       variables: { id: string; payload: Partial<TenantResponseDto> & { serviceAccountToken?: string } },
-      options?: Parameters<typeof mutation.mutate>[1]
+      options?: Parameters<typeof mutateRequest>[1]
     ) => 
-      mutation.mutate({ id: variables.id, data: variables.payload }, options),
-    [mutation.mutate]);
+      mutateRequest({ id: variables.id, data: variables.payload }, options),
+    [mutateRequest]);
 
   return {
     ...mutation,

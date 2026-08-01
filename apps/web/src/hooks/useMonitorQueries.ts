@@ -63,15 +63,16 @@ export function useCreateMonitorMutation(onSuccessCallback?: () => void) {
       }
     }
   });
+  const { mutate: mutateRequest } = mutation;
 
   const mutate = useCallback((
       payload: { name: string; url: string; type?: string | null; uptimeSla: number | null; latencyDegradedFloor?: number | null },
-      options?: Parameters<typeof mutation.mutate>[1]
+      options?: Parameters<typeof mutateRequest>[1]
     ) => 
-      mutation.mutate({ 
+      mutateRequest({ 
         params: { tenantId: '00000000-0000-0000-0000-000000000001' }, 
         data: payload 
-      }, options), [mutation.mutate]);
+      }, options), [mutateRequest]);
 
   return {
     ...mutation,
@@ -87,7 +88,7 @@ export function useControlMonitorMutation() {
 
   const isPending = startMutation.isPending || pauseMutation.isPending;
 
-  const mutate = useCallback((
+  const mutate = (
     { id, action }: { id: number; action: 'start' | 'pause' },
     options?: Parameters<typeof startMutation.mutate>[1]
   ) => {
@@ -115,7 +116,7 @@ export function useControlMonitorMutation() {
         }
       }
     );
-  }, [startMutation, pauseMutation]);
+  };
 
   return {
     isPending,
@@ -134,13 +135,14 @@ export function useUpdateMonitorMutation() {
       }
     }
   });
+  const { mutate: mutateRequest } = mutation;
 
   const mutate = useCallback((
       variables: { id: number; payload: UpdateMonitorRequestDto },
-      options?: Parameters<typeof mutation.mutate>[1]
+      options?: Parameters<typeof mutateRequest>[1]
     ) =>
-      mutation.mutate({ id: variables.id, data: variables.payload }, options),
-    [mutation.mutate]);
+      mutateRequest({ id: variables.id, data: variables.payload }, options),
+    [mutateRequest]);
 
   return {
     ...mutation,
@@ -167,13 +169,14 @@ export function useAssignMonitorMutation(onSuccessCallback?: () => void) {
       }
     }
   });
+  const { mutate: mutateRequest } = mutation;
 
   const mutate = useCallback((
       variables: { id: number; tenantId: string },
-      options?: Parameters<typeof mutation.mutate>[1]
+      options?: Parameters<typeof mutateRequest>[1]
     ) =>
-      mutation.mutate({ id: variables.id, tenantId: variables.tenantId }, options),
-    [mutation.mutate]);
+      mutateRequest({ id: variables.id, tenantId: variables.tenantId }, options),
+    [mutateRequest]);
 
   return {
     ...mutation,
@@ -199,10 +202,11 @@ export function useUnassignMonitorMutation() {
       }
     }
   });
+  const { mutate: mutateRequest } = mutation;
 
-  const mutate = useCallback((id: number, options?: Parameters<typeof mutation.mutate>[1]) => 
-      mutation.mutate({ id }, options),
-    [mutation.mutate]);
+  const mutate = useCallback((id: number, options?: Parameters<typeof mutateRequest>[1]) => 
+      mutateRequest({ id }, options),
+    [mutateRequest]);
 
   return {
     ...mutation,
@@ -227,10 +231,11 @@ export function useDeleteMonitorMutation() {
       }
     }
   });
+  const { mutate: mutateRequest } = mutation;
 
-  const mutate = useCallback((id: number, options?: Parameters<typeof mutation.mutate>[1]) => 
-      mutation.mutate({ id }, options),
-    [mutation.mutate]);
+  const mutate = useCallback((id: number, options?: Parameters<typeof mutateRequest>[1]) => 
+      mutateRequest({ id }, options),
+    [mutateRequest]);
 
   return {
     ...mutation,

@@ -9,3 +9,5 @@
 - ping litium env for health checks (to see if base url is correct after adding it to a tenant card).
 - revamp settings/auth ui
 - separate repos
+- settings button in /financial and /fleet-status
+- test app without valid role

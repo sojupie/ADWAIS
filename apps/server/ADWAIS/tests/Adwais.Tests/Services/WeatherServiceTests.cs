@@ -86,7 +86,7 @@ public class WeatherServiceTests
                 ItExpr.Is<HttpRequestMessage>(req =>
                     req.RequestUri!.ToString().Contains("latitude=59.4&longitude=13.5") &&
                     req.RequestUri.ToString().Contains("temperature_2m,apparent_temperature,precipitation_probability,precipitation,weather_code") &&
-                    req.RequestUri.ToString().Contains("timezone=Europe%2FBerlin")),
+                    req.RequestUri.ToString().Contains("timezone=UTC")),
                 ItExpr.IsAny<CancellationToken>())
             .ReturnsAsync(new HttpResponseMessage
             {

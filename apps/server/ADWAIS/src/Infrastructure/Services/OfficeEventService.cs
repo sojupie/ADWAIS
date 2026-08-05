@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Adwais.Application.Common.Interfaces;
@@ -75,16 +74,14 @@ public class OfficeEventService(IApplicationDbContext dbContext) : IOfficeEventS
                 if (occurrenceEnd >= startUtc && occurrenceStart <= endUtc)
                 {
                     results.Add(new OfficeEventDto(
-                        GenerateDeterministicGuid(oe.Id, occurrenceStart),
+                        oe.Id,
                         oe.Title,
                         oe.Description,
                         oe.Location,
                         occurrenceStart,
                         occurrenceEnd,
                         oe.EventType,
-                        oe.IsImportant,
                         oe.IsRecurring,
-                        oe.IsSpecial,
                         oe.Recurrence,
                         oe.UserId,
                         oe.User?.Name,
@@ -109,9 +106,7 @@ public class OfficeEventService(IApplicationDbContext dbContext) : IOfficeEventS
             StartTime = dto.StartTime.ToUniversalTime(),
             EndTime = dto.EndTime.ToUniversalTime(),
             EventType = dto.EventType,
-            IsImportant = dto.IsImportant,
             IsRecurring = dto.IsRecurring,
-            IsSpecial = dto.IsSpecial,
             Recurrence = dto.Recurrence,
             UserId = userId
         };
@@ -142,9 +137,7 @@ public class OfficeEventService(IApplicationDbContext dbContext) : IOfficeEventS
         if (dto.StartTime.HasValue) officeEvent.StartTime = dto.StartTime.Value.ToUniversalTime();
         if (dto.EndTime.HasValue) officeEvent.EndTime = dto.EndTime.Value.ToUniversalTime();
         if (dto.EventType.HasValue) officeEvent.EventType = dto.EventType.Value;
-        if (dto.IsImportant.HasValue) officeEvent.IsImportant = dto.IsImportant.Value;
         if (dto.IsRecurring.HasValue) officeEvent.IsRecurring = dto.IsRecurring.Value;
-        if (dto.IsSpecial.HasValue) officeEvent.IsSpecial = dto.IsSpecial.Value;
         if (dto.Recurrence.HasValue) officeEvent.Recurrence = dto.Recurrence.Value;
 
         if (officeEvent.EndTime < officeEvent.StartTime)
@@ -183,27 +176,12 @@ public class OfficeEventService(IApplicationDbContext dbContext) : IOfficeEventS
             oe.StartTime,
             oe.EndTime,
             oe.EventType,
-            oe.IsImportant,
             oe.IsRecurring,
-            oe.IsSpecial,
             oe.Recurrence,
             oe.UserId,
             oe.User?.Name,
             oe.ExternalUid,
             oe.CalendarSubscriptionId
         );
-    }
-
-    /// <summary>
-    /// Generates a stable, deterministic Guid for a recurring event occurrence.
-    /// This ensures React list keys remain consistent across re-renders.
-    /// </summary>
-    private static Guid GenerateDeterministicGuid(Guid sourceId, DateTimeOffset occurrenceStart)
-    {
-        Span<byte> buffer = stackalloc byte[24];
-        sourceId.TryWriteBytes(buffer[..16]);
-        BitConverter.TryWriteBytes(buffer[16..], occurrenceStart.UtcTicks);
-        var hash = MD5.HashData(buffer);
-        return new Guid(hash);
     }
 }

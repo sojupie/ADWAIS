@@ -10,8 +10,6 @@ public record CreateOfficeEventDto(
     DateTimeOffset StartTime,
     DateTimeOffset EndTime,
     EventType EventType,
-    bool IsImportant,
     bool IsRecurring,
-    bool IsSpecial,
     RecurrenceType Recurrence
 );

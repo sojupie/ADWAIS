@@ -11,9 +11,7 @@ public class OfficeEvent
     public DateTimeOffset StartTime { get; set; }
     public DateTimeOffset EndTime { get; set; }
     public EventType EventType { get; set; }
-    public bool IsImportant { get; set; }
     public bool IsRecurring { get; set; }
-    public bool IsSpecial { get; set; }
     public RecurrenceType Recurrence { get; set; }
     public Guid? UserId { get; set; }
     public User? User { get; set; }

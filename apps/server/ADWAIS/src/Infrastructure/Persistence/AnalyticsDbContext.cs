@@ -418,14 +418,30 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
         // OfficeEvent
         modelBuilder.Entity<OfficeEvent>(entity =>
         {
-            entity.ToTable("office_event");
+            entity.ToTable("office_event", table =>
+            {
+                table.HasCheckConstraint(
+                    "ck_office_event_event_type",
+                    "\"event_type\" IN ('General', 'Meeting', 'Fika', 'Social', 'Birthday', 'GoLive', 'ExternalSync')");
+                table.HasCheckConstraint(
+                    "ck_office_event_recurrence",
+                    "\"recurrence\" IN ('None', 'Daily', 'Weekly', 'Monthly', 'Yearly')");
+            });
             entity.HasKey(oe => oe.Id);
             entity.Property(oe => oe.Id).HasDefaultValueSql("uuid_generate_v4()");
             entity.Property(oe => oe.Title).HasMaxLength(255).IsRequired();
             entity.Property(oe => oe.Description).IsRequired(false);
             entity.Property(oe => oe.Location).HasMaxLength(255).IsRequired(false);
-            entity.Property(oe => oe.EventType).IsRequired();
-            entity.Property(oe => oe.Recurrence).IsRequired().HasDefaultValue(RecurrenceType.None);
+            entity.Property(oe => oe.EventType)
+                .HasConversion<string>()
+                .HasMaxLength(20)
+                .IsRequired()
+                .HasDefaultValue(EventType.General);
+            entity.Property(oe => oe.Recurrence)
+                .HasConversion<string>()
+                .HasMaxLength(20)
+                .IsRequired()
+                .HasDefaultValue(RecurrenceType.None);
             entity.Property(oe => oe.ExternalUid).HasMaxLength(255).IsRequired(false);
             entity.HasOne(oe => oe.User)
                 .WithMany()

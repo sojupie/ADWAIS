@@ -20,10 +20,6 @@ export interface UpdateOfficeEventDto {
   endTime?: string | null;
   eventType?: EventType;
   /** @nullable */
-  isImportant?: boolean | null;
-  /** @nullable */
   isRecurring?: boolean | null;
-  /** @nullable */
-  isSpecial?: boolean | null;
   recurrence?: RecurrenceType;
 }

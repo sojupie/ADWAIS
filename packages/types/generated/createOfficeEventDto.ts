@@ -17,8 +17,6 @@ export interface CreateOfficeEventDto {
   startTime?: string;
   endTime?: string;
   eventType?: EventType;
-  isImportant?: boolean;
   isRecurring?: boolean;
-  isSpecial?: boolean;
   recurrence?: RecurrenceType;
 }

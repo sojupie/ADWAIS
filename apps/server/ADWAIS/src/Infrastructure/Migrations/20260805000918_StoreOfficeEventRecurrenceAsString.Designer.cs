@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Adwais.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Adwais.Infrastructure.Migrations
 {
     [DbContext(typeof(AnalyticsDbContext))]
-    partial class AnalyticsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260805000918_StoreOfficeEventRecurrenceAsString")]
+    partial class StoreOfficeEventRecurrenceAsString
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -361,12 +364,8 @@ namespace Adwais.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("end_time");
 
-                    b.Property<string>("EventType")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
-                        .HasDefaultValue("General")
+                    b.Property<int>("EventType")
+                        .HasColumnType("integer")
                         .HasColumnName("event_type");
 
                     b.Property<string>("ExternalUid")
@@ -374,9 +373,17 @@ namespace Adwais.Infrastructure.Migrations
                         .HasColumnType("character varying(255)")
                         .HasColumnName("external_uid");
 
+                    b.Property<bool>("IsImportant")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_important");
+
                     b.Property<bool>("IsRecurring")
                         .HasColumnType("boolean")
                         .HasColumnName("is_recurring");
+
+                    b.Property<bool>("IsSpecial")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_special");
 
                     b.Property<string>("Location")
                         .HasMaxLength(255)
@@ -425,8 +432,6 @@ namespace Adwais.Infrastructure.Migrations
 
                     b.ToTable("office_event", null, t =>
                         {
-                            t.HasCheckConstraint("ck_office_event_event_type", "\"event_type\" IN ('General', 'Meeting', 'Fika', 'Social', 'Birthday', 'GoLive', 'ExternalSync')");
-
                             t.HasCheckConstraint("ck_office_event_recurrence", "\"recurrence\" IN ('None', 'Daily', 'Weekly', 'Monthly', 'Yearly')");
                         });
                 });

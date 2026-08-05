@@ -18,9 +18,7 @@ export interface OfficeEventDto {
   startTime?: string;
   endTime?: string;
   eventType?: EventType;
-  isImportant?: boolean;
   isRecurring?: boolean;
-  isSpecial?: boolean;
   recurrence?: RecurrenceType;
   /** @nullable */
   userId?: string | null;

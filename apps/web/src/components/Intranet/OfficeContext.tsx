@@ -1,9 +1,11 @@
 import { useMemo } from 'react';
+import { Repeat2 } from 'lucide-react';
 import { useGetApiWeather } from '../../api/generated/endpoints';
 import { useCalendarEventsQuery } from '../../hooks/useCalendarQueries';
 import type { OfficeEventDto, WeatherDto } from '@types';
 import { useClock } from '../../hooks/useClock';
 import { formatDateTime } from '../../utils/dateTime';
+import { getEventDayTimingLabel, getEventEmoji } from './calendar/calendarPresentation';
 
 const getWeatherEmoji = (code?: number | null) => {
   if (code === undefined || code === null) return '🌤️';
@@ -16,18 +18,6 @@ const getWeatherEmoji = (code?: number | null) => {
   if (code >= 80 && code <= 82) return '🌧️';
   if (code >= 95) return '⛈️';
   return '🌤️';
-};
-
-const getEventEmoji = (type?: string) => {
-  switch (type) {
-    case 'Meeting': return '🤝';
-    case 'Fika': return '☕';
-    case 'Social': return '🎉';
-    case 'Birthday': return '🎂';
-    case 'GoLive': return '🚀';
-    case 'ExternalSync': return '🔄';
-    default: return '📅';
-  }
 };
 
 type CompleteWeather = WeatherDto & Required<Pick<WeatherDto,
@@ -121,9 +111,7 @@ export function OfficeContext() {
       startTime: new Date(new Date(today).setHours(10, 0, 0, 0)).toISOString(),
       endTime: new Date(new Date(today).setHours(11, 0, 0, 0)).toISOString(),
       eventType: 'Meeting',
-      isImportant: false,
       isRecurring: false,
-      isSpecial: false,
       recurrence: 'None'
     };
 
@@ -135,9 +123,7 @@ export function OfficeContext() {
       startTime: new Date(new Date(today).setHours(14, 30, 0, 0)).toISOString(),
       endTime: new Date(new Date(today).setHours(15, 0, 0, 0)).toISOString(),
       eventType: 'Fika',
-      isImportant: false,
       isRecurring: false,
-      isSpecial: false,
       recurrence: 'None'
     };
 
@@ -146,7 +132,10 @@ export function OfficeContext() {
 
   // Fetch today's events from the backend
   const { data: rawEvents = [], isLoading } = useCalendarEventsQuery(todayRange.start, todayRange.end);
-  const events = useMemo(() => [...rawEvents, ...mockEvents], [rawEvents, mockEvents]);
+  const events = useMemo(
+    () => [...rawEvents, ...mockEvents].sort((a, b) => new Date(a.startTime ?? 0).getTime() - new Date(b.startTime ?? 0).getTime()),
+    [rawEvents, mockEvents],
+  );
 
   // Fetch current weather
   const { data: weatherData, isLoading: isWeatherLoading, isError: isWeatherError } = useGetApiWeather();
@@ -154,20 +143,6 @@ export function OfficeContext() {
 
   const dateString = formatDateTime(time, { weekday: 'long', month: 'long', day: 'numeric' }, 'en-SE');
   const timeString = formatDateTime(time, { hour: '2-digit', minute: '2-digit', hour12: false }, 'en-SE');
-
-  const formatEventTime = (startTimeStr?: string) => {
-    if (!startTimeStr) {
-      return "--:--";
-    }
-    
-    try {
-      const formatted = formatDateTime(startTimeStr, { hour: '2-digit', minute: '2-digit', hour12: false });
-      return formatted || "--:--";
-    } catch (error) {
-      console.error(`Failed to format event start time: "${startTimeStr}"`, error);
-      return "--:--";
-    }
-  };
 
   return (
     <section className="gap-6 md:gap-8 rounded-2xl border-0 overflow-hidden bg-brand-bg-secondary text-primary-container h-[400px] max-h-[400px] md:max-h-none md:h-full relative flex flex-col w-full min-w-0 p-6">
@@ -203,17 +178,23 @@ export function OfficeContext() {
           ) : (
             events.map(e => (
               <div 
-                key={e.id} 
+                key={`${e.id}-${e.startTime}`}
                 className="flex flex-col transition-colors py-4 justify-center w-full min-w-0 shrink-0 gap-1"
               >
                 {/* Row 1: icon, time, title */}
                 <div className="flex items-center gap-1 min-w-0 flex-shrink-0">
                   <span className="text-sm md:text-md shrink-0 leading-none pr-1">{getEventEmoji(e.eventType)}</span>
                   <span className="text-sm md:text-md font-black text-brand-accent whitespace-nowrap leading-none shrink-0">
-                    {formatEventTime(e.startTime)}
+                    {getEventDayTimingLabel(e, time)}
                   </span>
                   <div className="flex items-center gap-4 min-w-0 flex-1">
                     <span className="text-md md:text-lg font-bold text-primary-container truncate leading-none flex-1 min-w-0">{e.title}</span>
+                    {e.isRecurring && (
+                      <span className="inline-flex shrink-0 items-center gap-1 text-sm font-bold text-primary-container">
+                        <Repeat2 size={13} aria-hidden="true" />
+                        {e.recurrence && e.recurrence !== 'None' ? e.recurrence : 'Recurring'}
+                      </span>
+                    )}
                     {e.location && (
                       <span className="text-sm md:text-md text-primary-container font-bold uppercase tracking-wider truncate leading-none max-w-[50%] min-w-0">
                         📍 {e.location}

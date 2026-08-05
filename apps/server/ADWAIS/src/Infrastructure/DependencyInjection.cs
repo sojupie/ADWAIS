@@ -18,9 +18,6 @@ public static class DependencyInjection
     {
         var connectionString = configuration.GetConnectionString("AnalyticsDb");
 
-        services.AddDbContext<AnalyticsDbContext>(options =>
-            options.UseNpgsql(connectionString).UseSnakeCaseNamingConvention());
-
         services.AddDbContextFactory<AnalyticsDbContext>(options =>
             options.UseNpgsql(connectionString).UseSnakeCaseNamingConvention(), ServiceLifetime.Scoped);
 

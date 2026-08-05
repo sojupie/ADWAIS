@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Adwais.Application.DTOs.Intranet;
@@ -18,6 +19,32 @@ public class OfficeEventServiceTests
         return new DbContextOptionsBuilder<AnalyticsDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
+    }
+
+    [Fact]
+    public async Task GetEventsAsync_MonthlyRecurrence_ClampsWithoutDriftingAndKeepsSeriesId()
+    {
+        var options = CreateNewContextOptions();
+        using var dbContext = new AnalyticsDbContext(options);
+        var officeEvent = new OfficeEvent
+        {
+            Id = Guid.NewGuid(),
+            Title = "Month end",
+            StartTime = new DateTimeOffset(2025, 1, 31, 10, 0, 0, TimeSpan.Zero),
+            EndTime = new DateTimeOffset(2025, 1, 31, 11, 0, 0, TimeSpan.Zero),
+            EventType = EventType.Meeting,
+            IsRecurring = true,
+            Recurrence = RecurrenceType.Monthly
+        };
+        dbContext.OfficeEvents.Add(officeEvent);
+        await dbContext.SaveChangesAsync();
+
+        var result = (await new OfficeEventService(dbContext).GetEventsAsync(
+            new DateTimeOffset(2025, 1, 1, 0, 0, 0, TimeSpan.Zero),
+            new DateTimeOffset(2025, 3, 31, 23, 59, 59, TimeSpan.Zero))).ToArray();
+
+        Assert.Equal(new[] { 31, 28, 31 }, result.Select(e => e.StartTime.Day));
+        Assert.All(result, occurrence => Assert.Equal(officeEvent.Id, occurrence.Id));
     }
 
     [Fact]
@@ -48,9 +75,7 @@ public class OfficeEventServiceTests
                 StartTime: updatedStartTime,
                 EndTime: updatedEndTime,
                 EventType: null,
-                IsImportant: null,
                 IsRecurring: null,
-                IsSpecial: null,
                 Recurrence: null
             );
 
@@ -93,9 +118,7 @@ public class OfficeEventServiceTests
                 StartTime: updatedStartTime,
                 EndTime: updatedEndTime,
                 EventType: null,
-                IsImportant: null,
                 IsRecurring: null,
-                IsSpecial: null,
                 Recurrence: null
             );
 

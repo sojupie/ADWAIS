@@ -9,7 +9,7 @@ namespace Adwais.Infrastructure.DemoDataSeeding;
 
 public static class DatabaseSeeder
 {
-    public static async Task SeedSampleDataAsync(
+    public static async Task<bool> SeedSampleDataAsync(
         AnalyticsDbContext context,
         DemoSeedProgress progress)
     {
@@ -71,32 +71,34 @@ public static class DatabaseSeeder
             progress.SkipStep(4, "Latency history", "legacy demo data");
             progress.SkipStep(5, "Financial order history", "legacy demo data");
             progress.SkipStep(6, "Order indexes", "legacy demo data");
-            return;
+            return false;
         }
 
         var tenants = await SeedTenantsAsync(context);
-        await SeedMonitorsAndMetricsAsync(context, tenants, random, progress);
+        var monitoringHistorySeeded = await SeedMonitorsAndMetricsAsync(context, tenants, random, progress);
 
         var seededTenantIds = tenants.Select(tenant => tenant.Id).ToArray();
         if (!forceReSeed && await context.Orders.AnyAsync(order => seededTenantIds.Contains(order.TenantId)))
         {
             progress.SkipStep(5, "Financial order history", "demo orders already exist");
             progress.SkipStep(6, "Order indexes", "financial order history was not rebuilt");
-            return;
+            return monitoringHistorySeeded;
         }
 
         var endDate = DemoDataSimulation.FloorToFinancialInterval(DateTimeOffset.UtcNow);
         var startDate = endDate.AddMonths(-24);
 
         progress.StartStep(5, "Financial order history");
-        await BulkInsertOrdersAsync(
+        var orderRowsSeeded = await BulkInsertOrdersAsync(
             context,
             tenants,
             startDate,
             endDate,
             random,
             reportingTimeZone,
-            progress);
+            progress) > 0;
+
+        return monitoringHistorySeeded || orderRowsSeeded;
     }
 
     private static async Task<long> BulkInsertOrdersAsync(
@@ -348,7 +350,7 @@ public static class DatabaseSeeder
         return tenants;
     }
 
-    private static async Task SeedMonitorsAndMetricsAsync(
+    private static async Task<bool> SeedMonitorsAndMetricsAsync(
         AnalyticsDbContext context,
         IReadOnlyCollection<Tenant> tenants,
         Random random,
@@ -455,6 +457,7 @@ public static class DatabaseSeeder
         var availabilityTargets = allMonitors
             .Where(monitor => !monitorIdsWithAvailability.Contains(monitor.Id))
             .ToArray();
+        var historyRowsSeeded = false;
         progress.StartStep(3, "Availability history");
         try
         {
@@ -466,6 +469,7 @@ public static class DatabaseSeeder
                     availabilityHistoryStartDate,
                     availabilitySeedNow,
                     random);
+                historyRowsSeeded = count > 0;
                 progress.CompleteStep($"{count:N0} rows copied.");
             }
             else
@@ -493,6 +497,7 @@ public static class DatabaseSeeder
                     latencyHistoryStartDate,
                     latencySeedNow,
                     random);
+                historyRowsSeeded |= count > 0;
                 progress.CompleteStep($"{count:N0} rows copied.");
             }
             else
@@ -505,6 +510,8 @@ public static class DatabaseSeeder
             progress.FailStep(exception);
             throw;
         }
+
+        return historyRowsSeeded;
     }
 
     private static async Task<long> CopyMonitorAvailabilityHistoryAsync(

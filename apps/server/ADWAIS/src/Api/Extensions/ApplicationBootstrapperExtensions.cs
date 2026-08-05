@@ -41,24 +41,31 @@ public static class ApplicationBootstrapperExtensions
                     throw;
                 }
 
-                await DatabaseSeeder.SeedSampleDataAsync(context, progress);
+                var seededRows = await DatabaseSeeder.SeedSampleDataAsync(context, progress);
 
-                progress.StartStep(7, "Materialized views");
-                var previousCommandTimeout = context.Database.GetCommandTimeout();
-                context.Database.SetCommandTimeout(TimeSpan.FromMinutes(10));
-                try
+                if (seededRows)
                 {
-                    await MaterializedViewOrchestrator.SyncViewsAsync(context);
-                    progress.CompleteStep();
+                    progress.StartStep(7, "Materialized views");
+                    var previousCommandTimeout = context.Database.GetCommandTimeout();
+                    context.Database.SetCommandTimeout(TimeSpan.FromMinutes(10));
+                    try
+                    {
+                        await MaterializedViewOrchestrator.SyncViewsAsync(context);
+                        progress.CompleteStep();
+                    }
+                    catch (Exception exception)
+                    {
+                        progress.FailStep(exception);
+                        throw;
+                    }
+                    finally
+                    {
+                        context.Database.SetCommandTimeout(previousCommandTimeout);
+                    }
                 }
-                catch (Exception exception)
+                else
                 {
-                    progress.FailStep(exception);
-                    throw;
-                }
-                finally
-                {
-                    context.Database.SetCommandTimeout(previousCommandTimeout);
+                    progress.SkipStep(7, "Materialized views", "no history or order rows were seeded");
                 }
 
                 progress.Finish();

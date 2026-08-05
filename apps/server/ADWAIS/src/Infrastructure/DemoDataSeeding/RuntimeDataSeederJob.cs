@@ -1,3 +1,4 @@
+using Adwais.Domain;
 using Adwais.Domain.Entities.Monitoring;
 using Adwais.Domain.Entities.OrderData;
 using Adwais.Domain.Enums;
@@ -152,11 +153,14 @@ public class RuntimeDataSeederJob(
             var valueIncVat = DemoDataSimulation.GenerateOrderValue(profile, random);
             decimal valueExcVat = Math.Round(valueIncVat / 1.25m, 2);
 
+            var externalId = $"RUNTIME-{tenantId.ToString()[..4]}-{now.Ticks}-{i}";
             orders.Add(new Order
             {
                 Id = Guid.NewGuid(),
                 TenantId = tenantId,
-                LitiumOrderId = $"RUNTIME-{tenantId.ToString()[..4]}-{now.Ticks}-{i}",
+                Provider = IntegrationProviders.Demo,
+                ExternalId = externalId,
+                OrderNumber = externalId,
                 OrderState = OrderState.Completed,
                 CreatedDate = now,
                 TotalValueIncVat = valueIncVat,

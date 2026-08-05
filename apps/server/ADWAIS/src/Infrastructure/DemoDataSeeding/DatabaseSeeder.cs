@@ -1,3 +1,4 @@
+using Adwais.Domain;
 using Adwais.Domain.Entities;
 using Adwais.Domain.Entities.Intranet;
 using Adwais.Domain.Entities.Monitoring;
@@ -126,7 +127,7 @@ public static class DatabaseSeeder
 
             long count = 0;
             using (var writer = connection.BeginBinaryImport(
-                       "COPY orders (id, tenant_id, order_state, litium_order_id, created_date, total_value_inc_vat, total_value_exc_vat, currency) FROM STDIN (FORMAT BINARY)"))
+                       "COPY orders (id, tenant_id, provider, external_id, order_state, order_number, created_date, total_value_inc_vat, total_value_exc_vat, currency) FROM STDIN (FORMAT BINARY)"))
             {
                 writer.Timeout = TimeSpan.FromMinutes(10);
                 var streamingStopwatch = System.Diagnostics.Stopwatch.StartNew();
@@ -285,11 +286,16 @@ public static class DatabaseSeeder
         var valueIncVat = DemoDataSimulation.GenerateOrderValue(profile, random);
         var valueExcVat = Math.Round(valueIncVat / 1.25m, 2);
 
+        var orderId = Guid.NewGuid();
+        var externalId = $"SEED-{tenantId.ToString()[..4]}-{timestamp.Ticks}-{orderIndex}";
+
         writer.StartRow();
-        writer.Write(Guid.NewGuid());
+        writer.Write(orderId);
         writer.Write(tenantId);
+        writer.Write(IntegrationProviders.Demo);
+        writer.Write(externalId);
         writer.Write("Completed");
-        writer.Write($"SEED-{tenantId.ToString()[..4]}-{timestamp.Ticks}-{orderIndex}");
+        writer.Write(externalId);
         writer.Write(timestamp);
         writer.Write(valueIncVat);
         writer.Write(valueExcVat);
@@ -299,6 +305,7 @@ public static class DatabaseSeeder
     private static Task DropOrderSeedIndexesAsync(AnalyticsDbContext context)
         => context.Database.ExecuteSqlRawAsync("""
             DROP INDEX IF EXISTS ix_orders_tenant_id_created_date_order_state;
+            DROP INDEX IF EXISTS ix_orders_tenant_id_provider_external_id;
             DROP INDEX IF EXISTS idx_orders_composite_dash;
             DROP INDEX IF EXISTS idx_orders_value_dist;
             DROP INDEX IF EXISTS idx_orders_tenant_isolated;
@@ -308,6 +315,8 @@ public static class DatabaseSeeder
         => context.Database.ExecuteSqlRawAsync("""
             CREATE INDEX IF NOT EXISTS ix_orders_tenant_id_created_date_order_state
                 ON orders (tenant_id, created_date, order_state);
+            CREATE UNIQUE INDEX IF NOT EXISTS ix_orders_tenant_id_provider_external_id
+                ON orders (tenant_id, provider, external_id);
             CREATE INDEX IF NOT EXISTS idx_orders_composite_dash
                 ON orders (created_date, tenant_id) INCLUDE (total_value_inc_vat);
             CREATE INDEX IF NOT EXISTS idx_orders_value_dist
@@ -401,6 +410,8 @@ public static class DatabaseSeeder
                 {
                     Id = monitorId,
                     TenantId = tenant.Id,
+                    Provider = IntegrationProviders.Demo,
+                    ExternalId = monitorId.ToString(System.Globalization.CultureInfo.InvariantCulture),
                     Name = spec.Name,
                     Url = spec.Url,
                     Type = UptimeMonitorTypes.Http,

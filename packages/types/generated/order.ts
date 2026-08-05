@@ -11,10 +11,14 @@ export interface Order {
   id?: string;
   tenantId?: string;
   /** @nullable */
+  provider?: string | null;
+  /** @nullable */
+  externalId?: string | null;
+  /** @nullable */
   organizationSystemId?: string | null;
   orderState?: OrderState;
   /** @nullable */
-  litiumOrderId: string | null;
+  orderNumber: string | null;
   createdDate?: string;
   totalValueIncVat?: number;
   totalValueExcVat?: number;

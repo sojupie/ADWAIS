@@ -9,7 +9,7 @@ import type { OrderState } from './orderState';
 export interface OrderDto {
   adwaisOrderId?: string;
   /** @nullable */
-  litiumOrderId?: string | null;
+  orderNumber?: string | null;
   adwaisTenantId?: string;
   orderState?: OrderState;
   createdDate?: string;
@@ -19,4 +19,8 @@ export interface OrderDto {
   currency?: string | null;
   /** @nullable */
   tenantName?: string | null;
+  /** @nullable */
+  provider?: string | null;
+  /** @nullable */
+  externalId?: string | null;
 }

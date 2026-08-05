@@ -13,6 +13,8 @@ export interface UpdateTenantRequestDto {
   /** @nullable */
   litiumBaseUrl?: string | null;
   /** @nullable */
+  orderProvider?: string | null;
+  /** @nullable */
   imageUrl?: string | null;
   /** @nullable */
   serviceAccountToken?: string | null;

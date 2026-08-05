@@ -57,4 +57,8 @@ export interface UptimeMonitorDto {
   /** @nullable */
   currentStateDurationSeconds: number | null;
   latestIncident: MonitorIncidentDto;
+  /** @nullable */
+  provider: string | null;
+  /** @nullable */
+  externalId: string | null;
 }

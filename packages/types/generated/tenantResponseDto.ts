@@ -14,6 +14,8 @@ export interface TenantResponseDto {
   /** @nullable */
   litiumBaseUrl?: string | null;
   /** @nullable */
+  orderProvider?: string | null;
+  /** @nullable */
   imageUrl?: string | null;
   currentlyFetching?: boolean;
   /** @nullable */

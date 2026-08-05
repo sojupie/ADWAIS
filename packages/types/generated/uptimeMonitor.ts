@@ -11,6 +11,10 @@ export interface UptimeMonitor {
   id?: number;
   tenantId?: string;
   /** @nullable */
+  provider?: string | null;
+  /** @nullable */
+  externalId?: string | null;
+  /** @nullable */
   type?: string | null;
   /** @nullable */
   name: string | null;

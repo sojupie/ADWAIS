@@ -22,4 +22,6 @@ export interface UpdateGlobalConfigRequestDto {
   weatherFetchIntervalMinutes?: number | null;
   /** @nullable */
   reportingTimeZoneId?: string | null;
+  /** @nullable */
+  monitoringProvider?: string | null;
 }

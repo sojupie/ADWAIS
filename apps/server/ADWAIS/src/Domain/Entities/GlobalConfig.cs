@@ -1,3 +1,5 @@
+using Adwais.Domain;
+
 namespace Adwais.Domain.Entities;
 
 public class GlobalConfig
@@ -8,6 +10,7 @@ public class GlobalConfig
     public bool UptimeRobotFetchEnabled { get; set; }
     public required int LitiumFetchIntervalMinutes { get; set; }
     public string? UptimeRobotApiKey { get; set; }
+    public string MonitoringProvider { get; set; } = IntegrationProviders.UptimeRobot;
     public int UptimeFetchIntervalMinutes { get; set; }
     public int LatencyFetchIntervalMinutes { get; set; }
     public int UserStatsFetchIntervalMinutes { get; set; }

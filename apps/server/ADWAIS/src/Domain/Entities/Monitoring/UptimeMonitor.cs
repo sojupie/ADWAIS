@@ -1,9 +1,13 @@
+using Adwais.Domain;
+
 namespace Adwais.Domain.Entities.Monitoring;
 
 public class UptimeMonitor
 {
-    public int Id { get; set; } // External ID from UptimeRobot
+    public int Id { get; set; }
     public Guid TenantId { get; set; }
+    public string Provider { get; set; } = IntegrationProviders.UptimeRobot;
+    public string ExternalId { get; set; } = string.Empty;
     public string Type { get; set; } = UptimeMonitorTypes.Http;
     public required string Name { get; set; }
     public required string Url { get; set; }

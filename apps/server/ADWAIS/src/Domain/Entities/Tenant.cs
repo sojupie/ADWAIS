@@ -2,6 +2,8 @@ using Adwais.Domain.Entities.Monitoring;
 using Adwais.Domain.Entities.OrderData;
 using Adwais.Domain.Enums;
 
+using Adwais.Domain;
+
 namespace Adwais.Domain.Entities;
 
 public class Tenant
@@ -10,6 +12,7 @@ public class Tenant
     public required string Name { get; set; }
     public TenantType Type { get; set; }
     public string? LitiumBaseUrl { get; set; }
+    public string OrderProvider { get; set; } = IntegrationProviders.Litium;
     public string? ImageUrl { get; set; }
     public string? ServiceAccountToken { get; set; }
     public DateTimeOffset? FetchedFrom { get; set; }

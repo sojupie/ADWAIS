@@ -26,8 +26,9 @@ The user-facing dashboard displaying daily order rollups, financial stats, site 
 
 ## Configuration
 
-Create `.env.local` and configure either OIDC or demo mode. The repository
-`.editorconfig` requires environment files to use UTF-8 without BOM.
+Create `apps/web/.env.local` manually or copy `apps/web/.env-example` and edit it.
+Vite only reads environment files from this directory. The Vite config checks
+the file encoding and fails early with a clear error if it contains a UTF-8 BOM.
 
 ```env
 VITE_OIDC_AUTHORITY=https://your-idp.example.com
@@ -39,7 +40,8 @@ VITE_SSO_BUTTON_LOGO_URL=
 ```
 
 `VITE_OIDC_AUTHORITY` and `VITE_OIDC_CLIENT_ID` are required unless `VITE_DEMO_MODE=true`.
-Demo mode automatically requests a read-only Viewer token from `/api/demo/token`.
+Demo mode adds an explicit “Continue as demo user” option on `/login`; selecting it
+requests a read-only Viewer token from `/api/demo/token`.
 
 ---
 

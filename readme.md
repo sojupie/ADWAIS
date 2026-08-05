@@ -51,13 +51,37 @@ pnpm install
 
 ### 2. Configure Environment
 
-Copy the environment examples and configure OIDC or demo mode before starting the frontend.
+Local development has separate frontend and backend configuration. Vite reads files
+from `apps/web` and embeds `VITE_*` values into the browser bundle; the API reads
+ASP.NET configuration at runtime.
 
-| File | Contains |
-|---|---|
-| `apps/web/.env.local` | Public OIDC client settings or demo-mode flag |
-| `apps/server/ADWAIS/src/.env` | Backend OIDC authority/audience or demo-mode flag |
-| `apps/server/ADWAIS/src/Api/appsettings.Development.json` | Local DB connection string + feature toggles |
+| File | Required? | Contains |
+|---|---|---|
+| `apps/web/.env.local` | Yes | Public OIDC client settings, SSO branding, or the frontend demo-mode flag |
+| `apps/server/ADWAIS/src/Api/appsettings.Development.json` | Already tracked | Local database, backend authentication, and feature-toggle defaults |
+| `apps/server/ADWAIS/src/.env` | Optional | Local backend overrides; use this only when overriding the tracked development settings |
+
+Create `apps/web/.env.local` manually or copy `apps/web/.env-example` and edit it.
+Do not put frontend `VITE_*` values in a root `.env.local`; the Vite project is
+scoped to `apps/web`. Vite fails early if an environment file contains a UTF-8 BOM.
+
+To run the local public demo, enable both sides:
+
+```env
+# apps/web/.env.local
+VITE_DEMO_MODE=true
+```
+
+```json
+// apps/server/ADWAIS/src/Api/appsettings.Development.json
+"EnableDemoAccess": true
+```
+
+The frontend offers a demo-login button on `/login`; selecting it requests a
+Viewer token from `/api/demo/token`. OIDC variables are not needed in demo mode.
+Outside demo mode, set
+`VITE_OIDC_AUTHORITY` and `VITE_OIDC_CLIENT_ID` for the frontend and the matching
+`Authentication:OidcAuthority` and `Authentication:OidcAudience` for the API.
 
 > **Local development with demo data**: `EnableRuntimeDataSeeding: true` is already set in `appsettings.Development.json`. Demo monitors use negative local IDs and are never sent to UptimeRobot, so no external API key is required.
 >
@@ -125,17 +149,29 @@ Production deployment is manual and component-selective. In GitHub, open **Actio
 - `restart-api`, `restart-stack`, or `reload-nginx`
 - `all`
 
-The `production` GitHub environment must define `SERVER_IP`, `SSH_PRIVATE_KEY`, `SSH_KNOWN_HOSTS`, `GHCR_PULL_USERNAME`, `GHCR_PULL_TOKEN`, `DB_PASSWORD`, `OIDC_AUTHORITY`, `OIDC_AUDIENCE`, `OIDC_CLIENT_ID`, `MOTASTIC_API_KEY`, `NEWSLETTER_API_KEY`, and `KIOSK_JWT_SECRET`. The GHCR pull token only needs `read:packages`.
+The `production` GitHub environment must define the deployment credentials
+(`SERVER_IP`, `SSH_PRIVATE_KEY`, `SSH_KNOWN_HOSTS`, `GHCR_PULL_USERNAME`, and
+`GHCR_PULL_TOKEN`) plus the runtime secrets (`DB_PASSWORD`, `MOTASTIC_API_KEY`,
+`NEWSLETTER_API_KEY`, `KIOSK_JWT_SECRET`, and `CLOUDFLARE_TUNNEL_TOKEN`). The
+GHCR pull token only needs `read:packages`.
 
-For a zero-runner-credit local deployment, set `ADWAIS_SERVER_IP` and ensure `ssh` and `scp` are available. On Windows, install MSYS2 and run `pacman -S rsync`; the deployment script automatically detects the standard `C:\msys64\usr\bin\rsync.exe` installation without adding the full MSYS2 toolchain to `PATH`.
+The workflow reads these GitHub Actions variables for OIDC and frontend
+configuration: `OIDC_AUTHORITY`, `OIDC_AUDIENCE`, `OIDC_CLIENT_ID`, optional
+`OIDC_SCOPE`, optional `SSO_BUTTON_LABEL`, optional `SSO_BUTTON_LOGO_URL`, and
+`DEMO_MODE` (default `false`). OIDC authority, audience, and client ID are
+required unless `DEMO_MODE=true`.
 
-Then run, for example:
+The workflow writes the resulting Compose environment to
+`/opt/adwais/.env`. That file is the production source of truth; no
+`.env.production` file is used by the GitHub deployment. Compose maps the
+unprefixed values into frontend `VITE_*` build arguments and API
+`Authentication__*` runtime variables.
 
-```powershell
-.\deploy.ps1 -Target Frontend
-.\deploy.ps1 -Target Backend
-.\deploy.ps1 -Target RestartApi
-```
-
-`Infrastructure` and `All` additionally require an ignored `.env.production` file based on `.env.example`. Local backend publishing requires an existing `docker login ghcr.io`; remote pulls use `GHCR_PULL_USERNAME` and `GHCR_PULL_TOKEN` when those environment variables are set.
+`Frontend` and `Backend` targets reuse the existing `/opt/adwais/.env`; run
+`Infrastructure` or `All` first when that file has not been created yet or when
+GitHub configuration variables have changed. Use `All` when changing
+`DEMO_MODE`, because the API must restart and the frontend must be rebuilt with
+the new `VITE_DEMO_MODE` value. Local backend publishing requires an existing
+`docker login ghcr.io`; remote pulls use `GHCR_PULL_USERNAME` and
+`GHCR_PULL_TOKEN` when those environment variables are set.
 

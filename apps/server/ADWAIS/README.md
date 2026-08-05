@@ -59,7 +59,8 @@ The analytics and monitoring server that aggregates data from external resources
 
 ### Configuration files
 
-Two config files are needed. One is tracked in git; one must be created from the example.
+The tracked development settings are enough for normal local API development.
+An ignored `.env` file is optional and only needed for local overrides.
 
 #### `src/Api/appsettings.Development.json` — tracked in git
 
@@ -73,7 +74,7 @@ Already present after cloning. Contains non-secret dev defaults:
   "Authentication": {
     "OidcAuthority": "https://your-idp.example.com",
     "OidcAudience": "adwais-api",
-    "EnableDemoAccess": false
+    "EnableDemoAccess": true
   },
   "FeatureToggles": {
     "EnableRuntimeDataSeeding": true
@@ -87,9 +88,9 @@ The production Compose file defaults this toggle to `true` for the hosted intera
 
 Set `RESEED=true` for one startup to replace existing demo orders and negative-ID monitors. Live orders, positive-ID UptimeRobot monitors, and user-created tenants are preserved.
 
-#### `src/.env` — gitignored, must be created
+#### `src/.env` — gitignored, optional overrides
 
-Copy from the example and fill in real values:
+Create this file only when you need to override the tracked development settings:
 
 ```bash
 cp src/.env.example src/.env
@@ -101,7 +102,10 @@ cp src/.env.example src/.env
 | `Authentication__OidcAudience` | The API audience expected in access tokens |
 | `Authentication__EnableDemoAccess` | Set `true` to expose the read-only demo token endpoint |
 
-> Development uses the Admin mock token. Production requires OIDC settings unless demo mode is enabled.
+> Development uses the Admin mock token. Production configuration is supplied by
+> Docker Compose from `/opt/adwais/.env`; it requires OIDC settings unless demo
+> mode is enabled. The frontend has its own Vite configuration in
+> `apps/web/.env.local`.
 
 
 ---

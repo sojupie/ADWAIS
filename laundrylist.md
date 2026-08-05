@@ -1,12 +1,6 @@
-- add demo mode with customized auth
 - add an about/info page with good to know info and links
-- intranet api
-  - reccurence controls
-  - get rid of vertical scrollbars
-  - weather sync button/trigger
-  - weekly calendar cards should show end time. span across multiple days and hours
 - ping litium env for health checks (to see if base url is correct after adding it to a tenant card).
 - revamp settings/auth ui
-- separate repos
 - settings button in /financial and /fleet-status
-- test app without valid role
+- separate unathorized view from loading/loading error. make sure all settings views and components live up to the standard. users view currently does not, it doesnt even have a loading view it seems? remove the red border from the youre not authorized style.
+- make refresh mat views endpoint only allowed for staff and admins, not for restricted viewers/kiosk/role-less users.

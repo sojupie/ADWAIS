@@ -143,9 +143,7 @@ public class CalendarSubscriptionService(
                         StartTime = startTime,
                         EndTime = endTime,
                         EventType = EventType.ExternalSync,
-                        IsImportant = false,
                         IsRecurring = calendarEvent.RecurrenceRule is not null,
-                        IsSpecial = false,
                         Recurrence = RecurrenceType.None,
                         ExternalUid = externalUid,
                         CalendarSubscriptionId = sub.Id

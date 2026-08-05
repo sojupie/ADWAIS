@@ -1,6 +1,6 @@
-import { X, Clock, MapPin, User as UserIcon, Globe } from 'lucide-react';
+import { X, Clock, MapPin, User as UserIcon, Globe, Repeat2 } from 'lucide-react';
 import type { OfficeEventDto } from '@types';
-import { formatDateTime } from '../../utils/dateTime';
+import { getEventRangeLabel } from './calendar/calendarPresentation';
 
 interface EventDetailModalProps {
   event: OfficeEventDto;
@@ -65,20 +65,22 @@ export function EventDetailModal({
           <div className="flex flex-col gap-4 text-on-surface-variant text-sm border-t border-outline-variant pt-4">
             <div className="flex items-center gap-4">
               <Clock size={16} className="text-on-surface-variant shrink-0" />
-              <span>
-                {formatDateTime(event.startTime, { weekday: 'long', month: 'short', day: 'numeric' })}
-                <span className="font-bold text-on-surface ml-1.5">
-                  {formatDateTime(event.startTime, { hour: '2-digit', minute: '2-digit' })}
-                  {' - '}
-                  {formatDateTime(event.endTime, { hour: '2-digit', minute: '2-digit' })}
-                </span>
-              </span>
+              <span className="font-bold text-on-surface">{getEventRangeLabel(event)}</span>
             </div>
 
             {event.location && (
               <div className="flex items-center gap-4">
                 <MapPin size={16} className="text-on-surface-variant shrink-0" />
                 <span className="font-medium text-on-surface-variant">{event.location}</span>
+              </div>
+            )}
+
+            {event.isRecurring && (
+              <div className="flex items-center gap-4">
+                <Repeat2 size={16} className="shrink-0 text-on-surface-variant" />
+                <span className="font-medium text-on-surface-variant">
+                  {event.recurrence && event.recurrence !== 'None' ? `Repeats ${event.recurrence.toLowerCase()}` : 'Recurring event'}
+                </span>
               </div>
             )}
 

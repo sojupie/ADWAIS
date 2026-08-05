@@ -1,7 +1,8 @@
 import type { RefObject } from 'react';
+import { Repeat2 } from 'lucide-react';
 import type { OfficeEventDto } from '@types';
 import { formatDateTime } from '../../../utils/dateTime';
-import { getEventBadgeClass, getEventEmoji } from './calendarPresentation';
+import { getEventBadgeClass, getEventDayTimingLabel, getEventEmoji } from './calendarPresentation';
 
 interface WeekCalendarViewProps {
   days: Date[];
@@ -29,9 +30,9 @@ export function WeekCalendarView({ days, isWriter, todayRef, getEventsForDay, on
             </div>
             <div className="flex flex-1 flex-col gap-2 overflow-y-auto p-1 custom-scrollbar">
               {dayEvents.map(event => (
-                <div data-md3-ripple key={event.id} onClick={e => { e.stopPropagation(); onEventClick(event); }} className={`m3-elevation-1 flex cursor-pointer flex-col gap-2 rounded-xl p-3 text-sm font-bold leading-tight transition-all hover:m3-elevation-2 ${getEventBadgeClass(event.eventType)}`}>
-                  <div className="flex items-center gap-2"><span>{getEventEmoji(event.eventType)}</span><span className="opacity-70">{formatDateTime(event.startTime, { hour: '2-digit', minute: '2-digit' })}</span></div>
-                  <span className="truncate">{event.title}</span>
+                <div data-md3-ripple key={`${event.id}-${event.startTime}`} onClick={e => { e.stopPropagation(); onEventClick(event); }} className={`m3-elevation-1 flex min-h-16 shrink-0 cursor-pointer flex-col gap-2 rounded-xl p-3 text-sm font-bold leading-tight transition-all hover:m3-elevation-2 ${getEventBadgeClass(event.eventType)}`}>
+                  <div className="flex items-center gap-2"><span>{getEventEmoji(event.eventType)}</span><span className="opacity-70">{getEventDayTimingLabel(event, day)}</span></div>
+                  <span className="flex items-center gap-1.5"><span className="truncate">{event.title}</span>{event.isRecurring && <Repeat2 size={13} className="shrink-0" aria-label="Recurring event" />}</span>
                 </div>
               ))}
             </div>

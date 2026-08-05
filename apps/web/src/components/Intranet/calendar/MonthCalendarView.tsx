@@ -1,4 +1,4 @@
-import { Plus } from 'lucide-react';
+import { Plus, Repeat2 } from 'lucide-react';
 import type { OfficeEventDto } from '@types';
 import { formatDateTime } from '../../../utils/dateTime';
 import { getEventCircleColor } from './calendarPresentation';
@@ -39,11 +39,14 @@ export function MonthCalendarView({ cells, isWriter, getEventsForDay, onDayClick
               <div className="flex flex-1 flex-wrap items-center justify-center gap-2 py-1">
                 {dayEvents.map(event => (
                   <span
-                    key={event.id}
+                    key={`${event.id}-${event.startTime}`}
                     onClick={e => { e.stopPropagation(); onEventClick(event); }}
-                    className={`h-2.5 w-2.5 cursor-pointer rounded-full border border-white shadow-sm transition-all hover:scale-125 ${getEventCircleColor(event.eventType)}`}
-                    title={`${event.title || 'Event'} (${formatDateTime(event.startTime, { hour: '2-digit', minute: '2-digit' })})`}
-                  />
+                    className="flex cursor-pointer items-center gap-0.5 transition-all hover:scale-125"
+                    title={`${event.title || 'Event'} (${formatDateTime(event.startTime, { hour: '2-digit', minute: '2-digit' })})${event.isRecurring ? ` · Repeats ${(event.recurrence || 'recurring').toLowerCase()}` : ''}`}
+                  >
+                    <span className={`h-2.5 w-2.5 rounded-full border border-white shadow-sm ${getEventCircleColor(event.eventType)}`} />
+                    {event.isRecurring && <Repeat2 size={10} aria-label="Recurring event" />}
+                  </span>
                 ))}
               </div>
             </div>

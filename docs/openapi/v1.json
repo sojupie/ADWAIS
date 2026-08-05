@@ -3722,13 +3722,7 @@
           "eventType": {
             "$ref": "#/components/schemas/EventType"
           },
-          "isImportant": {
-            "type": "boolean"
-          },
           "isRecurring": {
-            "type": "boolean"
-          },
-          "isSpecial": {
             "type": "boolean"
           },
           "recurrence": {
@@ -4603,13 +4597,7 @@
           "eventType": {
             "$ref": "#/components/schemas/EventType"
           },
-          "isImportant": {
-            "type": "boolean"
-          },
           "isRecurring": {
-            "type": "boolean"
-          },
-          "isSpecial": {
             "type": "boolean"
           },
           "recurrence": {
@@ -5489,15 +5477,7 @@
           "eventType": {
             "$ref": "#/components/schemas/EventType"
           },
-          "isImportant": {
-            "type": "boolean",
-            "nullable": true
-          },
           "isRecurring": {
-            "type": "boolean",
-            "nullable": true
-          },
-          "isSpecial": {
             "type": "boolean",
             "nullable": true
           },

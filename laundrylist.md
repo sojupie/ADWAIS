@@ -1,4 +1,3 @@
-- rework auth to be provider agnostic
 - add demo mode with customized auth
 - add an about/info page with good to know info and links
 - intranet api

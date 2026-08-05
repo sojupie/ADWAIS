@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { CollectionPanel } from '../common/dashboard/CollectionPanel';
-import { useGetApiUsersMe } from '../../api/generated/endpoints';
+import { getApiIntranetEventsId, useGetApiUsersMe } from '../../api/generated/endpoints';
 import { getKioskToken } from '../../utils/auth';
 import { formatDateTime } from '../../utils/dateTime';
 import { 
@@ -58,9 +58,6 @@ export function Calendar() {
     startTime: string;
     endTime: string;
     eventType: EventType;
-    isImportant: boolean;
-    isRecurring: boolean;
-    isSpecial: boolean;
     recurrence: RecurrenceType;
   }>({
     title: '',
@@ -69,9 +66,6 @@ export function Calendar() {
     startTime: '',
     endTime: '',
     eventType: 'General',
-    isImportant: false,
-    isRecurring: false,
-    isSpecial: false,
     recurrence: 'None'
   });
 
@@ -83,9 +77,6 @@ export function Calendar() {
       startTime: '',
       endTime: '',
       eventType: 'General' as EventType,
-      isImportant: false,
-      isRecurring: false,
-      isSpecial: false,
       recurrence: 'None' as RecurrenceType
     });
   };
@@ -107,40 +98,9 @@ export function Calendar() {
     };
   }, [currentDate]);
 
-  // Generate mock events for design verification
-  const mockEvents = useMemo(() => {
-    const today = new Date();
-    const currentDayOfWeek = (today.getDay() + 6) % 7; // Mon=0
-    const startOfWeek = new Date(today);
-    startOfWeek.setDate(today.getDate() - currentDayOfWeek);
-
-    const types: (keyof typeof EventType)[] = ['Meeting', 'Fika', 'Social', 'Birthday', 'GoLive', 'ExternalSync', 'General'];
-    return types.map((type, idx) => {
-      const date = new Date(startOfWeek);
-      date.setDate(startOfWeek.getDate() + (idx % 7)); // Distribute Mon-Sun
-      date.setHours(10 + (idx % 3) * 2, 0, 0, 0); // e.g. 10:00, 12:00, 14:00
-      const end = new Date(date);
-      end.setHours(date.getHours() + 1);
-
-      return {
-        id: `mock-${type.toLowerCase()}`,
-        title: `${type} Verification`,
-        description: `This is a mock event of type ${type} for verifying calendar styles.`,
-        location: `Meeting Room ${idx + 1}`,
-        startTime: date.toISOString(),
-        endTime: end.toISOString(),
-        eventType: type,
-        isImportant: type === 'GoLive',
-        isRecurring: false,
-        isSpecial: false,
-        recurrence: 'None'
-      } as OfficeEventDto;
-    });
-  }, []);
-
   // Load events
   const { data: rawEvents = [], isLoading } = useCalendarEventsQuery(rangeBoundaries.start, rangeBoundaries.end);
-  const events = useMemo(() => [...rawEvents, ...mockEvents], [rawEvents, mockEvents]);
+  const events = useMemo(() => [...rawEvents], [rawEvents]);
   const { data: tokenData } = useCalendarTokenQuery(isWriter && isTokenRequested);
 
   // Mutations
@@ -251,9 +211,6 @@ export function Calendar() {
       startTime: localDateTimeStr,
       endTime: new Date(date.getTime() + 60 * 60 * 1000 - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16),
       eventType: 'General' as EventType,
-      isImportant: false,
-      isRecurring: false,
-      isSpecial: false,
       recurrence: 'None' as RecurrenceType
     });
     setIsCreateModalOpen(true);
@@ -268,9 +225,7 @@ export function Calendar() {
       startTime: new Date(eventForm.startTime).toISOString(),
       endTime: new Date(eventForm.endTime).toISOString(),
       eventType: eventForm.eventType,
-      isImportant: eventForm.isImportant,
-      isRecurring: eventForm.isRecurring,
-      isSpecial: eventForm.isSpecial,
+      isRecurring: eventForm.recurrence !== RecurrenceType.None,
       recurrence: eventForm.recurrence
     });
   };
@@ -294,29 +249,34 @@ export function Calendar() {
         startTime: new Date(eventForm.startTime).toISOString(),
         endTime: new Date(eventForm.endTime).toISOString(),
         eventType: eventForm.eventType,
-        isImportant: eventForm.isImportant,
-        isRecurring: eventForm.isRecurring,
-        isSpecial: eventForm.isSpecial,
+        isRecurring: eventForm.recurrence !== RecurrenceType.None,
         recurrence: eventForm.recurrence
       }
     });
   };
 
-  const openEditModal = (event: OfficeEventDto) => {
+  const openEditModal = async (event: OfficeEventDto) => {
     setSelectedEvent(null);
+    let editableEvent = event;
+    if (event.isRecurring && event.id) {
+      try {
+        editableEvent = (await getApiIntranetEventsId(event.id)).data;
+      } catch {
+        toast.error('Failed to load the recurring series.');
+        return;
+      }
+    }
+
     setEventForm({
-      title: event.title || '',
-      description: event.description || '',
-      location: event.location || '',
-      startTime: event.startTime ? new Date(new Date(event.startTime).getTime() - new Date(event.startTime).getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '',
-      endTime: event.endTime ? new Date(new Date(event.endTime).getTime() - new Date(event.endTime).getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '',
-      eventType: (event.eventType || 'General') as EventType,
-      isImportant: event.isImportant || false,
-      isRecurring: event.isRecurring || false,
-      isSpecial: event.isSpecial || false,
-      recurrence: (event.recurrence || 'None') as RecurrenceType
+      title: editableEvent.title || '',
+      description: editableEvent.description || '',
+      location: editableEvent.location || '',
+      startTime: editableEvent.startTime ? new Date(new Date(editableEvent.startTime).getTime() - new Date(editableEvent.startTime).getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '',
+      endTime: editableEvent.endTime ? new Date(new Date(editableEvent.endTime).getTime() - new Date(editableEvent.endTime).getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '',
+      eventType: (editableEvent.eventType || 'General') as EventType,
+      recurrence: (editableEvent.recurrence || 'None') as RecurrenceType
     });
-    setSelectedEvent(event);
+    setSelectedEvent(editableEvent);
     setIsEditModalOpen(true);
   };
 
@@ -362,7 +322,8 @@ export function Calendar() {
     const now = new Date(currentDate);
     now.setHours(0,0,0,0);
     return events
-      .filter(e => e.startTime && new Date(e.startTime) >= now)
+      .filter(e => e.endTime && new Date(e.endTime) >= now)
+      .sort((a, b) => new Date(a.startTime ?? 0).getTime() - new Date(b.startTime ?? 0).getTime())
       .slice(0, 20);
   }, [events, currentDate]);
 

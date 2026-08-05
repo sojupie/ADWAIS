@@ -1,7 +1,7 @@
 import { Calendar, Edit, X } from 'lucide-react';
 import { EventType, RecurrenceType } from '@types';
 import { DatePickerField, TimePickerField } from '../common/ui/DateTimePickerField';
-import { CheckboxField, FormField } from '../common/ui/FormField';
+import { FormField } from '../common/ui/FormField';
 
 export type EventForm = {
   title: string;
@@ -10,9 +10,6 @@ export type EventForm = {
   startTime: string;
   endTime: string;
   eventType: EventType;
-  isImportant: boolean;
-  isRecurring: boolean;
-  isSpecial: boolean;
   recurrence: RecurrenceType;
 };
 
@@ -73,20 +70,14 @@ export function EventFormModal({ mode, isOpen, onClose, onSubmit, form, onChange
 
           <FormField as="textarea" id={`${mode}-event-description`} label="Description" rows={3} placeholder="Event scope, notes, etc." value={form.description} onChange={event => onChange({ ...form, description: event.target.value })} className="resize-none" />
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <CheckboxField
-              id={`${mode}-event-important`}
-              label="Important Highlight"
-              checked={form.isImportant}
-              onChange={event => onChange({ ...form, isImportant: event.target.checked })}
-            />
-            <CheckboxField
-              id={`${mode}-event-special`}
-              label="Special Occasion"
-              checked={form.isSpecial}
-              onChange={event => onChange({ ...form, isSpecial: event.target.checked })}
-            />
-          </div>
+          <FormField as="select" id={`${mode}-event-recurrence`} label="Repeat" value={form.recurrence} onChange={event => onChange({ ...form, recurrence: event.target.value as RecurrenceType })}>
+            <option value={RecurrenceType.None}>Does not repeat</option>
+            <option value={RecurrenceType.Daily}>Daily</option>
+            <option value={RecurrenceType.Weekly}>Weekly</option>
+            <option value={RecurrenceType.Monthly}>Monthly</option>
+            <option value={RecurrenceType.Yearly}>Yearly</option>
+          </FormField>
+
         </div>
 
         <div className="flex justify-end gap-3 bg-surface px-6 py-4">

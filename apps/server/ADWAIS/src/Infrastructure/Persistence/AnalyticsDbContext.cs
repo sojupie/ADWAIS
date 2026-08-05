@@ -1,3 +1,4 @@
+using Adwais.Domain;
 using Adwais.Domain.Entities;
 using Adwais.Domain.Entities.Monitoring;
 using Adwais.Domain.Entities.OrderData;
@@ -110,6 +111,10 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
                 .HasMaxLength(50)
                 .HasDefaultValue(TenantType.Mixed);
             entity.Property(t => t.LitiumBaseUrl).HasMaxLength(2048);
+            entity.Property(t => t.OrderProvider)
+                .HasMaxLength(100)
+                .HasDefaultValue(IntegrationProviders.Litium)
+                .IsRequired();
             entity.Property(t => t.ImageUrl).HasMaxLength(2048);
             entity.Property(t => t.ServiceAccountToken).HasMaxLength(2048);
             if (dataProtectionProvider != null)
@@ -141,8 +146,12 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
             entity.Property(o => o.OrderState)
                 .HasConversion<string>()
                 .HasMaxLength(255);
-            entity.Property(o => o.LitiumOrderId).HasMaxLength(255);
+            entity.Property(o => o.OrderNumber).HasMaxLength(255);
+            entity.Property(o => o.Provider).HasMaxLength(100).IsRequired();
+            entity.Property(o => o.ExternalId).HasMaxLength(255).IsRequired();
             entity.Property(o => o.Currency).HasMaxLength(10);
+
+            entity.HasIndex(o => new { o.TenantId, o.Provider, o.ExternalId }).IsUnique();
             
             entity.HasIndex(o => new { o.TenantId, o.CreatedDate, o.OrderState });
                 
@@ -232,6 +241,10 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
                     "\"id\" = 1"));
             entity.HasKey(x => x.Id);
             entity.Property(x => x.UptimeRobotApiKey).HasMaxLength(1024);
+            entity.Property(x => x.MonitoringProvider)
+                .HasMaxLength(100)
+                .HasDefaultValue(IntegrationProviders.UptimeRobot)
+                .IsRequired();
             if (dataProtectionProvider != null)
             {
                 entity.Property(x => x.UptimeRobotApiKey)
@@ -381,6 +394,8 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
                 .HasMaxLength(50)
                 .HasDefaultValue(UptimeMonitorTypes.Http)
                 .IsRequired();
+            entity.Property(m => m.Provider).HasMaxLength(100).IsRequired();
+            entity.Property(m => m.ExternalId).HasMaxLength(255).IsRequired();
             entity.Property(m => m.Name).HasMaxLength(255);
             entity.Property(m => m.Url).HasMaxLength(2048);
             entity.Property(m => m.HttpMethod).HasMaxLength(50);
@@ -395,6 +410,7 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
             entity.Property(m => m.UpdateInterval).HasDefaultValue(300);
             entity.Property(m => m.Tags).HasDefaultValueSql("'{}'");
             entity.Property(m => m.MonitoredRegions).HasDefaultValueSql("'{}'");
+            entity.HasIndex(m => new { m.TenantId, m.Provider, m.ExternalId }).IsUnique();
         });
             
         // intranät

@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Moq;
 using Xunit;
 using Adwais.Api.Controllers;
@@ -24,6 +25,20 @@ public class UserControllerTests
     {
         _userServiceMock = new Mock<IUserService>();
         _controller = new UserController(_userServiceMock.Object);
+    }
+
+    [Theory]
+    [InlineData(nameof(UserController.GetUsers))]
+    [InlineData(nameof(UserController.GetUser))]
+    public void ReadEndpointsAllowViewers(string actionName)
+    {
+        var action = typeof(UserController).GetMethod(actionName);
+        var authorization = action?.GetCustomAttributes(typeof(AuthorizeAttribute), false)
+            .Cast<AuthorizeAttribute>()
+            .SingleOrDefault();
+
+        Assert.NotNull(authorization);
+        Assert.Equal("KioskOrStaffAccess", authorization.Policy);
     }
 
     [Fact]

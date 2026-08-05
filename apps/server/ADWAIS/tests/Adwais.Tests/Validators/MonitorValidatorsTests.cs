@@ -120,7 +120,9 @@ public class MonitorValidatorsTests
             DomainExpiresAt: null,
             MonitoredRegions: new List<string>(),
             CurrentStateDurationSeconds: null,
-            LatestIncident: null
+            LatestIncident: null,
+            Provider: "uptimerobot",
+            ExternalId: id.ToString()
         );
     }
 

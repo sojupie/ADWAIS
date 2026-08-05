@@ -1,8 +1,10 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Net.Http;
 using Xunit;
 using Moq;
+using Moq.Protected;
 using Microsoft.EntityFrameworkCore;
 using Adwais.Infrastructure.Services;
 using Adwais.Application.Interfaces;
@@ -14,30 +16,64 @@ namespace Adwais.Tests.Services;
 
 public class LitiumIngestionServiceTests
 {
+    private (LitiumIngestionService Service, Mock<HttpMessageHandler> HttpMock, AnalyticsDbContext DbContext) SetupTestEnvironment(string dbName)
+    {
+        var options = new DbContextOptionsBuilder<AnalyticsDbContext>()
+            .UseInMemoryDatabase(dbName)
+            .Options;
+
+        var dbContext = new AnalyticsDbContext(options);
+        var dbContextFactoryMock = new Mock<IDbContextFactory<AnalyticsDbContext>>();
+        dbContextFactoryMock.Setup(f => f.CreateDbContextAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(() => new AnalyticsDbContext(options));
+
+        var httpHandlerMock = new Mock<HttpMessageHandler>(MockBehavior.Strict);
+        var httpClient = new HttpClient(httpHandlerMock.Object);
+        var orderSource = new LitiumOrderSource(httpClient);
+        var loggerMock = new Mock<ILogger<LitiumIngestionService>>();
+        var eventServiceMock = new Mock<ISystemEventService>();
+
+        var service = new LitiumIngestionService(
+            dbContextFactoryMock.Object,
+            new[] { orderSource },
+            loggerMock.Object,
+            eventServiceMock.Object);
+
+        return (service, httpHandlerMock, dbContext);
+    }
+
     [Fact]
     public async Task IngestSingleOrderAsync_ExecutesWithoutThrowing()
     {
         // Arrange
         var options = new DbContextOptionsBuilder<AnalyticsDbContext>()
-            .UseInMemoryDatabase("TestDb")
+            .UseInMemoryDatabase("TestDb_IngestSingle")
             .Options;
 
         var dbContextFactoryMock = new Mock<IDbContextFactory<AnalyticsDbContext>>();
         dbContextFactoryMock.Setup(f => f.CreateDbContextAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(() => new AnalyticsDbContext(options));
 
-        var httpClient = new System.Net.Http.HttpClient();
+        var orderSource = new Mock<IOrderSource>();
+        orderSource.SetupGet(source => source.Provider).Returns("litium");
         var loggerMock = new Mock<ILogger<LitiumIngestionService>>();
         var eventServiceMock = new Mock<ISystemEventService>();
 
         ILitiumIngestionService service = new LitiumIngestionService(
-            dbContextFactoryMock.Object, 
-            httpClient, 
-            loggerMock.Object, 
+            dbContextFactoryMock.Object,
+            new[] { orderSource.Object },
+            loggerMock.Object,
             eventServiceMock.Object);
 
-        var orderDto = new LitiumSyncResponse.LitiumOrderDto 
-        { 
+        var tenantId = Guid.NewGuid();
+        await using (var dbContext = new AnalyticsDbContext(options))
+        {
+            dbContext.Tenants.Add(new Adwais.Domain.Entities.Tenant { Id = tenantId, Name = "Test Tenant" });
+            await dbContext.SaveChangesAsync();
+        }
+
+        var orderDto = new LitiumSyncResponse.LitiumOrderDto
+        {
             Id = Guid.NewGuid(),
             OrderNumber = "123",
             CreatedDate = DateTimeOffset.UtcNow,
@@ -45,9 +81,140 @@ public class LitiumIngestionServiceTests
         };
 
         // Act
-        var exception = await Record.ExceptionAsync(() => service.IngestSingleOrderAsync(Guid.NewGuid(), orderDto));
+        var exception = await Record.ExceptionAsync(() => service.IngestSingleOrderAsync(tenantId, orderDto));
 
         // Assert
         Assert.Null(exception);
+    }
+
+    [Fact]
+    public void Normalize_ShouldMapLitiumOrderToProviderNeutralOrder()
+    {
+        var id = Guid.NewGuid();
+        var createdDate = new DateTimeOffset(2026, 1, 1, 12, 0, 0, TimeSpan.FromHours(2));
+
+        var result = LitiumOrderSource.Normalize(new LitiumSyncResponse.LitiumOrderDto
+        {
+            Id = id,
+            OrderNumber = "ORDER-1",
+            CreatedDate = createdDate,
+            OrderStatus = "Confirmed",
+            TotalValueIncludingVat = 125,
+            TotalValueExcludingVat = 100,
+            Currency = null
+        });
+
+        Assert.Equal(id.ToString("D"), result.ExternalId);
+        Assert.Equal("ORDER-1", result.OrderNumber);
+        Assert.Equal(createdDate.ToUniversalTime(), result.CreatedDate);
+        Assert.Equal(Adwais.Domain.Enums.OrderState.Confirmed, result.State);
+        Assert.Equal(125m, result.TotalValueIncludingVat);
+        Assert.Equal(100m, result.TotalValueExcludingVat);
+        Assert.Equal("UNK", result.Currency);
+    }
+
+    [Fact]
+    public async Task ExecuteIngestionAsync_EmptyResponse_UpdatesTenantLifecycleAndSendsCorrectRequest()
+    {
+        // Arrange
+        var dbName = Guid.NewGuid().ToString();
+        var (service, httpMock, dbContext) = SetupTestEnvironment(dbName);
+
+        var tenantId = Guid.NewGuid();
+        var tenant = new Adwais.Domain.Entities.Tenant
+        {
+            Id = tenantId,
+            Name = "Test Tenant",
+            LitiumBaseUrl = "https://example.com/litium/",
+            ServiceAccountToken = "ServiceAccount TW90YXN0aWNBZGFwdGVyOk1vdGFzdGljQWRhcHRlcg==",
+            CurrentlyFetching = true,
+            LastSyncError = "Old Error"
+        };
+        dbContext.Tenants.Add(tenant);
+        await dbContext.SaveChangesAsync();
+
+        HttpRequestMessage? capturedRequest = null;
+        var responseJson = @"{ ""TotalOrders"": 0, ""Orders"": [] }";
+
+        httpMock.Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>())
+            .Callback<HttpRequestMessage, CancellationToken>((req, _) => capturedRequest = req)
+            .ReturnsAsync(new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+            {
+                Content = new StringContent(responseJson)
+            });
+
+        var startDate = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
+        var endDate = new DateTimeOffset(2026, 1, 31, 0, 0, 0, TimeSpan.Zero);
+
+        // Act
+        var count = await service.ExecuteIngestionAsync(tenantId, startDate, endDate);
+
+        // Assert
+        Assert.Equal(0, count);
+
+        // Assert Request
+        Assert.NotNull(capturedRequest);
+        Assert.Equal(HttpMethod.Get, capturedRequest.Method);
+
+        var sinceParam = Uri.EscapeDataString(startDate.ToString("O"));
+        var untilParam = Uri.EscapeDataString(endDate.ToString("O"));
+        var expectedUrl = $"https://example.com/litium/api/motasticadapter/sync?since={sinceParam}&until={untilParam}&skip=0&take=500";
+        Assert.Equal(expectedUrl, capturedRequest.RequestUri!.ToString());
+
+        Assert.True(capturedRequest.Headers.Contains("Authorization"));
+        Assert.Equal("ServiceAccount TW90YXN0aWNBZGFwdGVyOk1vdGFzdGljQWRhcHRlcg==", string.Join(",", capturedRequest.Headers.GetValues("Authorization")));
+
+        // Assert Lifecycle
+        var updatedTenant = await dbContext.Tenants.AsNoTracking().FirstAsync(t => t.Id == tenantId);
+        Assert.False(updatedTenant.CurrentlyFetching);
+        Assert.Null(updatedTenant.LastSyncError);
+        Assert.NotNull(updatedTenant.LastPolled);
+        Assert.Equal(startDate, updatedTenant.FetchedFrom);
+        Assert.Equal(endDate, updatedTenant.FetchedUntil);
+    }
+
+    [Fact]
+    public async Task ExecuteIngestionAsync_NonSuccessResponse_PropagatesExceptionAndRecordsError()
+    {
+        // Arrange
+        var dbName = Guid.NewGuid().ToString();
+        var (service, httpMock, dbContext) = SetupTestEnvironment(dbName);
+
+        var tenantId = Guid.NewGuid();
+        var tenant = new Adwais.Domain.Entities.Tenant
+        {
+            Id = tenantId,
+            Name = "Test Tenant",
+            LitiumBaseUrl = "https://example.com/litium/",
+            ServiceAccountToken = "ServiceAccount TW90YXN0aWNBZGFwdGVyOk1vdGFzdGljQWRhcHRlcg==",
+            CurrentlyFetching = true
+        };
+        dbContext.Tenants.Add(tenant);
+        await dbContext.SaveChangesAsync();
+
+        httpMock.Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>())
+            .ReturnsAsync(new HttpResponseMessage(System.Net.HttpStatusCode.InternalServerError));
+
+        var startDate = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
+        var endDate = new DateTimeOffset(2026, 1, 31, 0, 0, 0, TimeSpan.Zero);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<HttpRequestException>(() =>
+            service.ExecuteIngestionAsync(tenantId, startDate, endDate));
+
+        Assert.Contains("InternalServerError", exception.Message);
+
+        var updatedTenant = await dbContext.Tenants.AsNoTracking().FirstAsync(t => t.Id == tenantId);
+        Assert.False(updatedTenant.CurrentlyFetching);
+        Assert.NotNull(updatedTenant.LastSyncError);
+        Assert.Contains("Failed to fetch chunk. Status: InternalServerError", updatedTenant.LastSyncError);
     }
 }

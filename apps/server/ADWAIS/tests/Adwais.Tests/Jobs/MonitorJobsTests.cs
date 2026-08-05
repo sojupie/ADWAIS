@@ -20,7 +20,7 @@ public class MonitorJobsTests
 {
     private readonly DbContextOptions<AnalyticsDbContext> _dbOptions;
     private readonly Mock<IDbContextFactory<AnalyticsDbContext>> _dbContextFactoryMock;
-    private readonly Mock<IUptimeRobotService> _uptimeRobotServiceMock;
+    private readonly Mock<IMonitoringProvider> _uptimeRobotServiceMock;
     private readonly IMemoryCache _cache;
     private readonly Mock<ISystemEventService> _eventServiceMock;
     private readonly Mock<IRecurringJobManager> _recurringJobManagerMock;
@@ -35,7 +35,8 @@ public class MonitorJobsTests
         _dbContextFactoryMock.Setup(f => f.CreateDbContextAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(() => new AnalyticsDbContext(_dbOptions));
 
-        _uptimeRobotServiceMock = new Mock<IUptimeRobotService>();
+        _uptimeRobotServiceMock = new Mock<IMonitoringProvider>();
+        _uptimeRobotServiceMock.SetupGet(provider => provider.Provider).Returns("uptimerobot");
         _cache = new MemoryCache(new MemoryCacheOptions());
         _eventServiceMock = new Mock<ISystemEventService>();
         _recurringJobManagerMock = new Mock<IRecurringJobManager>();
@@ -62,6 +63,7 @@ public class MonitorJobsTests
             db.Monitors.Add(new UptimeMonitor
             {
                 Id = 100,
+                ExternalId = "100",
                 TenantId = Guid.NewGuid(),
                 Name = "Test Monitor",
                 Url = "https://test.com",
@@ -70,12 +72,12 @@ public class MonitorJobsTests
             db.SaveChanges();
         }
 
-        _uptimeRobotServiceMock.Setup(s => s.GetResponseTimeAsync(100, It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), "Test Monitor"))
+        _uptimeRobotServiceMock.Setup(s => s.GetResponseTimeAsync("100", It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), "Test Monitor"))
             .ReturnsAsync((150, 100, 200));
 
         var job = new UpdateMonitorLatencyJob(
             _dbContextFactoryMock.Object,
-            _uptimeRobotServiceMock.Object,
+            new[] { _uptimeRobotServiceMock.Object },
             _cache,
             _eventServiceMock.Object
         );
@@ -118,7 +120,7 @@ public class MonitorJobsTests
 
         var job = new UpdateMonitorLatencyJob(
             _dbContextFactoryMock.Object,
-            _uptimeRobotServiceMock.Object,
+            new[] { _uptimeRobotServiceMock.Object },
             _cache,
             _eventServiceMock.Object);
 
@@ -126,7 +128,7 @@ public class MonitorJobsTests
         await job.ExecuteAsync(-1, now.AddHours(-1), now);
 
         _uptimeRobotServiceMock.Verify(service => service.GetResponseTimeAsync(
-            It.IsAny<int>(),
+            It.IsAny<string>(),
             It.IsAny<DateTimeOffset>(),
             It.IsAny<DateTimeOffset>(),
             It.IsAny<string>()), Times.Never);
@@ -141,6 +143,7 @@ public class MonitorJobsTests
             db.Monitors.Add(new UptimeMonitor
             {
                 Id = 101,
+                ExternalId = "101",
                 TenantId = Guid.NewGuid(),
                 Name = "Test Monitor",
                 Url = "https://test.com",
@@ -149,12 +152,12 @@ public class MonitorJobsTests
             db.SaveChanges();
         }
 
-        _uptimeRobotServiceMock.Setup(s => s.GetResponseTimeAsync(101, It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), "Test Monitor"))
+        _uptimeRobotServiceMock.Setup(s => s.GetResponseTimeAsync("101", It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), "Test Monitor"))
             .ThrowsAsync(new HttpRequestException("API is down"));
 
         var job = new UpdateMonitorLatencyJob(
             _dbContextFactoryMock.Object,
-            _uptimeRobotServiceMock.Object,
+            new[] { _uptimeRobotServiceMock.Object },
             _cache,
             _eventServiceMock.Object
         );

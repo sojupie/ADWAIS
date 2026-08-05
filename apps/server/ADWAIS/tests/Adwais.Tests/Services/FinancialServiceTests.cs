@@ -157,7 +157,7 @@ public class FinancialServiceTests : IDisposable
         {
             Id = Guid.NewGuid(),
             TenantId = tenantId,
-            LitiumOrderId = litiumOrderId,
+            OrderNumber = litiumOrderId,
             CreatedDate = createdDate,
             TotalValueIncVat = value,
             TotalValueExcVat = value,

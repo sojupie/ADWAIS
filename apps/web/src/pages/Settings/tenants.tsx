@@ -6,6 +6,7 @@ import { SearchInput } from '../../components/common/ui/SearchInput';
 import { SettingsPanel } from '../../components/common/layout/SettingsPanel';
 import { EmptyState } from '../../components/common/ui/EmptyState';
 import { Button } from '../../components/common/ui/Button';
+import { TableSkeletonRows } from '../../components/common/ui/TableSkeletonRows';
 import { useTenantsViewModel } from '../../hooks/useTenantsViewModel';
 import { CreateTenantModal } from '../../components/settings/tenants/CreateTenantModal';
 import { TenantRow } from '../../components/settings/tenants/TenantRow';
@@ -17,6 +18,8 @@ export function TenantsMonitorsView() {
         isAdmin,
         tenants,
         sortedTenants,
+        isTenantsLoading,
+        isTenantsError,
         tenantSearch,
         setTenantSearch,
         tenantFilters,
@@ -120,8 +123,9 @@ export function TenantsMonitorsView() {
                                     <th className="w-32 px-4 py-4 text-sm font-black uppercase tracking-widest sm:px-5">Service Token</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-outline-variant">
-                                {sortedTenants.map((t) => (
+                            <tbody className="divide-y divide-outline-variant" aria-busy={isTenantsLoading} aria-label={isTenantsLoading ? 'Loading tenants' : undefined}>
+                                {isTenantsLoading && <TableSkeletonRows columnCount={5} />}
+                                {!isTenantsLoading && !isTenantsError && sortedTenants.map((t) => (
                                     <TenantRow
                                         key={t.id}
                                         t={t}
@@ -130,7 +134,16 @@ export function TenantsMonitorsView() {
                                         onDoubleClick={() => void navigate({ to: '/settings/tenants/$tenantId', params: { tenantId: t.id } })}
                                     />
                                 ))}
-                                {(!tenants || tenants.length === 0) && (
+                                {!isTenantsLoading && isTenantsError && (
+                                    <tr>
+                                        <td colSpan={5} className="p-0">
+                                            <div role="alert" className="p-8 text-center text-on-surface-variant">
+                                                Unable to load tenants.
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )}
+                                {!isTenantsLoading && !isTenantsError && tenants?.length === 0 && (
                                     <EmptyState message="No tenants found" isTableRow colSpan={5} />
                                 )}
                             </tbody>

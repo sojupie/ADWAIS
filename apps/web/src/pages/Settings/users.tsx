@@ -9,10 +9,11 @@ import { SettingsPanelHeader } from '../../components/common/layout/SettingsPane
 import { SettingsPanel } from '../../components/common/layout/SettingsPanel';
 import { EmptyState } from '../../components/common/ui/EmptyState';
 import { Button } from '../../components/common/ui/Button';
+import { TableSkeletonRows } from '../../components/common/ui/TableSkeletonRows';
 
 export function UsersView() {
     const navigate = useNavigate();
-    const { data: users } = useUsersQuery();
+    const { data: users, isLoading, isError } = useUsersQuery();
     const createUser = useCreateUserMutation();
     const deleteUser = useDeleteUserMutation();
     const { role } = useCurrentUser();
@@ -96,8 +97,9 @@ export function UsersView() {
                                     <th className="w-44 px-4 py-4 text-sm font-black uppercase tracking-widest sm:px-5">Role</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-outline-variant">
-                                {(users || []).map((u) => (
+                            <tbody className="divide-y divide-outline-variant" aria-busy={isLoading} aria-label={isLoading ? 'Loading users' : undefined}>
+                                {isLoading && <TableSkeletonRows columnCount={4} />}
+                                {!isLoading && !isError && (users || []).map((u) => (
                                     <UserRow
                                         key={u.id}
                                         u={u}
@@ -106,8 +108,17 @@ export function UsersView() {
                                         onDoubleClick={() => void navigate({ to: '/settings/users/$userId', params: { userId: u.id } })}
                                     />
                                 ))}
-                                {(!users || users.length === 0) && (
-                                    <EmptyState message="No active users registered." isTableRow colSpan={3} />
+                                {!isLoading && isError && (
+                                    <tr>
+                                        <td colSpan={4} className="p-0">
+                                            <div role="alert" className="p-8 text-center text-on-surface-variant">
+                                                Unable to load users.
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )}
+                                {!isLoading && !isError && users?.length === 0 && (
+                                    <EmptyState message="No active users registered." isTableRow colSpan={4} />
                                 )}
                             </tbody>
                         </table>

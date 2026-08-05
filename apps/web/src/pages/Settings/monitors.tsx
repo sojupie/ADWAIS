@@ -6,6 +6,7 @@ import { SearchInput } from '../../components/common/ui/SearchInput';
 import { SettingsPanel } from '../../components/common/layout/SettingsPanel';
 import { EmptyState } from '../../components/common/ui/EmptyState';
 import { Button } from '../../components/common/ui/Button';
+import { TableSkeletonRows } from '../../components/common/ui/TableSkeletonRows';
 import { useTenantsViewModel } from '../../hooks/useTenantsViewModel';
 import { CreateMonitorModal } from '../../components/settings/tenants/CreateMonitorModal';
 import { MonitorRow } from '../../components/settings/tenants/MonitorRow';
@@ -17,6 +18,8 @@ export function MonitorsView() {
         isAdmin,
         allMonitors,
         filteredAndSortedMonitors,
+        isMonitorsLoading,
+        isMonitorsError,
         monitorSearch,
         setMonitorSearch,
         monitorFilters,
@@ -125,8 +128,9 @@ export function MonitorsView() {
                                     <th className="w-32 px-4 py-4 text-sm font-black uppercase tracking-widest sm:px-5">Status</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-outline-variant">
-                                {filteredAndSortedMonitors.map((m) => (
+                            <tbody className="divide-y divide-outline-variant" aria-busy={isMonitorsLoading} aria-label={isMonitorsLoading ? 'Loading monitors' : undefined}>
+                                {isMonitorsLoading && <TableSkeletonRows columnCount={6} />}
+                                {!isMonitorsLoading && !isMonitorsError && filteredAndSortedMonitors.map((m) => (
                                     <MonitorRow
                                         key={m.id}
                                         m={m}
@@ -135,7 +139,16 @@ export function MonitorsView() {
                                         onDoubleClick={() => m.id !== undefined && void navigate({ to: '/settings/monitors/$monitorId', params: { monitorId: String(m.id) } })}
                                     />
                                 ))}
-                                {allMonitors.length === 0 && (
+                                {!isMonitorsLoading && isMonitorsError && (
+                                    <tr>
+                                        <td colSpan={6} className="p-0">
+                                            <div role="alert" className="p-8 text-center text-on-surface-variant">
+                                                Unable to load monitors.
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )}
+                                {!isMonitorsLoading && !isMonitorsError && allMonitors.length === 0 && (
                                     <EmptyState message="No monitors found" isTableRow colSpan={6} />
                                 )}
                             </tbody>

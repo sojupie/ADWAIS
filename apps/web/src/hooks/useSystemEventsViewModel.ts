@@ -46,8 +46,10 @@ export function useSystemEventsViewModel() {
         isAdmin,
         health: healthQuery.data,
         isLoadingHealth: healthQuery.isLoading,
+        isHealthError: healthQuery.isError,
         events: eventsQuery.data,
         isLoadingEvents: eventsQuery.isLoading,
+        isEventsError: eventsQuery.isError,
         clearErrorsMutation
     };
 }

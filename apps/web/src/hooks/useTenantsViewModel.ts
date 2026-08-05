@@ -29,9 +29,12 @@ export function useTenantsViewModel() {
     const [monitorFilters, setMonitorFilters] = useState<{ assignment: 'all' | 'assigned' | 'unassigned'; tag: string; status: 'all' | 'enabled' | 'disabled'; type: string }>({ assignment: 'all', tag: 'all', status: 'all', type: 'all' });
 
     // Queries & Mutations from custom hooks
-    const { data: tenants } = useTenantsQuery();
-    const { data: monitors } = useMonitorsQuery();
-    const { data: unassignedMonitors } = useUnassignedMonitorsQuery();
+    const tenantsQuery = useTenantsQuery();
+    const monitorsQuery = useMonitorsQuery();
+    const unassignedMonitorsQuery = useUnassignedMonitorsQuery();
+    const { data: tenants } = tenantsQuery;
+    const { data: monitors } = monitorsQuery;
+    const { data: unassignedMonitors } = unassignedMonitorsQuery;
 
     const createTenant = useCreateTenantMutation(() => {
         setIsCreatingTenant(false);
@@ -137,6 +140,10 @@ export function useTenantsViewModel() {
         tenants,
         monitors,
         unassignedMonitors,
+        isTenantsLoading: tenantsQuery.isLoading,
+        isTenantsError: tenantsQuery.isError,
+        isMonitorsLoading: monitorsQuery.isLoading || unassignedMonitorsQuery.isLoading,
+        isMonitorsError: monitorsQuery.isError || unassignedMonitorsQuery.isError,
         allMonitors,
         allUniqueTags,
         allUniqueTypes,

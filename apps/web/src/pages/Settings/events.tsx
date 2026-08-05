@@ -5,6 +5,7 @@ import { SettingsPanelHeader } from '../../components/common/layout/SettingsPane
 import { ConsolePanel } from '../../components/common/layout/ConsolePanel';
 import { SecureButton } from '../../components/common/ui/SecureButton';
 import { Skeleton } from '../../components/common/ui/Skeleton';
+import { ConsoleLoadingRows } from '../../components/common/ui/ConsoleLoadingRows';
 import { useSystemEventsViewModel, type SystemEvent } from '../../hooks/useSystemEventsViewModel';
 import { formatDateTime } from '../../utils/dateTime';
 import { usePostApiDashboardSession } from '../../api/generated/endpoints';
@@ -66,6 +67,10 @@ export function SystemEventsView() {
         isAdmin,
         health,
         events,
+        isLoadingHealth,
+        isHealthError,
+        isLoadingEvents,
+        isEventsError,
         clearErrorsMutation
     } = useSystemEventsViewModel();
     const dashboardSessionMutation = usePostApiDashboardSession();
@@ -175,13 +180,17 @@ export function SystemEventsView() {
                                 </SecureButton>
                             </div>
                         </div>
-                    ) : (
+                    ) : isLoadingHealth ? (
                         <div className="flex flex-col gap-8 shrink-0">
                             <Skeleton.Card className="h-16" />
                             <Skeleton.Card className="h-28" />
                             <Skeleton.Card className="h-28" />
                         </div>
-                    )}
+                    ) : isHealthError ? (
+                        <div role="alert" className="flex min-h-48 items-center justify-center p-4 text-center text-on-surface-variant">
+                            Unable to load pipeline health.
+                        </div>
+                    ) : null}
 
                     {/* Sync Dates Section */}
                     {health && (
@@ -219,11 +228,23 @@ export function SystemEventsView() {
                 icon={<TerminalSquare size={18} />}
                 className="landscape-contained:col-span-1 min-h-[400px] max-h-[500px] contained:max-h-none"
             >
-                <div className="flex flex-col min-w-0">
-                    {(events || []).map((e: SystemEvent, i: number) => (
+                {isLoadingEvents ? (
+                    <ConsoleLoadingRows label="Loading system events" />
+                ) : isEventsError ? (
+                    <div role="alert" className="flex h-full items-center justify-center p-4 text-center text-console-text">
+                        Unable to load system events.
+                    </div>
+                ) : events?.length ? (
+                    <div className="flex flex-col min-w-0">
+                        {events.map((e: SystemEvent, i: number) => (
                         <LogEventRow key={e.id || i} e={e} />
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="flex h-full items-center justify-center p-4 text-center text-console-text">
+                        No system events found.
+                    </div>
+                )}
             </ConsolePanel>
         </div>
     );

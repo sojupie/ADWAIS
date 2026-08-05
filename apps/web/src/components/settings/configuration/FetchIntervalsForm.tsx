@@ -1,7 +1,8 @@
-import { Clock, Lock } from 'lucide-react';
+import { Clock } from 'lucide-react';
 import { SettingsPanel } from '../../common/layout/SettingsPanel';
 import { InlineEditField } from '../../common/ui/InlineEditField';
 import { FormSkeleton } from '../../common/ui/FormSkeleton';
+import { ReadOnlyBanner } from '../../common/ui/ReadOnlyBanner';
 import type { FetchIntervalsDto } from '../../../hooks/useJobSettingsQueries';
 
 interface FetchIntervalsFormProps {
@@ -21,10 +22,7 @@ export function FetchIntervalsForm({ intervals, updateIntervals, disabled }: Fet
     >
       <div className="flex flex-col gap-4">
         {disabled && intervals && (
-          <div className="flex items-center gap-3 rounded-xl bg-surface-container-high px-4 py-3 text-sm font-semibold text-on-surface-variant animate-in fade-in duration-300">
-            <Lock size={16} className="shrink-0" aria-hidden="true" />
-            <span>You can review these schedules, but only administrators can change them.</span>
-          </div>
+          <ReadOnlyBanner message="You can review these schedules, but only administrators can change them." />
         )}
 
         {intervals ? (

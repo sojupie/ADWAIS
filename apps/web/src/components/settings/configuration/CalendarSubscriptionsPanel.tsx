@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import {Globe, RefreshCw, Trash2, Calendar, Lock} from 'lucide-react';
+import {Globe, RefreshCw, Trash2, Calendar} from 'lucide-react';
 import { useCalendarSubscriptionsQuery, useCreateCalendarSubscriptionMutation, useDeleteCalendarSubscriptionMutation, useSyncCalendarSubscriptionMutation } from '../../../hooks/useCalendarQueries';
 import { SettingsPanel } from '../../common/layout/SettingsPanel';
 import { Input } from '../../common/ui/Input';
+import { ReadOnlyBanner } from '../../common/ui/ReadOnlyBanner';
 
 export function CalendarSubscriptionsPanel({ disabled }: { disabled?: boolean }) {
   const { data: subscriptions = [], isLoading } = useCalendarSubscriptionsQuery();
@@ -33,10 +34,7 @@ export function CalendarSubscriptionsPanel({ disabled }: { disabled?: boolean })
       >
           <div className="flex flex-col gap-4">
         {disabled && (
-          <div className="flex items-center gap-3 rounded-xl bg-surface-container-high px-4 py-3 text-sm font-semibold text-on-surface-variant animate-in fade-in duration-300">
-            <Lock size={16} className="shrink-0" aria-hidden="true" />
-            <span>You can review these subscriptions, but only administrators can add or remove them.</span>
-          </div>
+          <ReadOnlyBanner message="You can review these subscriptions, but only administrators can add or remove them." />
         )}
           <form onSubmit={handleCreateSub} className="flex flex-col gap-4 rounded-xl bg-surface-container p-4">
             <h4 className="flex items-center gap-2 text-base font-black text-on-surface">

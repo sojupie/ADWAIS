@@ -351,19 +351,20 @@ const fieldSizeClasses: Record<FieldSize, string> = {
   standard: 'min-h-14 px-4 text-base',
 };
 
-export function DatePickerField({ id, value, label, onChange, size = 'compact' }: {
+export function DatePickerField({ id, value, label, onChange, size = 'compact', disabled = false }: {
   id: string;
   value: string;
   label: string;
   onChange: (value: string) => void;
   size?: FieldSize;
+  disabled?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const display = value ? parseDate(value).toLocaleDateString('en-SE', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Choose date';
   return (
     <div className="flex min-w-0 flex-col gap-2">
       <span id={`${id}-label`} className="pl-1 text-sm font-bold text-on-surface-variant">{label}</span>
-      <button type="button" onClick={() => setOpen(true)} className={`flex w-full min-w-0 items-center gap-3 rounded-xl border border-outline bg-surface text-left font-medium text-on-surface transition-colors hover:border-secondary hover:bg-secondary-container ${fieldSizeClasses[size]}`} aria-labelledby={`${id}-label`}>
+      <button type="button" onClick={() => setOpen(true)} disabled={disabled} className={`flex w-full min-w-0 items-center gap-3 rounded-xl border border-outline bg-surface text-left font-medium text-on-surface transition-colors hover:border-secondary hover:bg-secondary-container disabled:cursor-not-allowed disabled:opacity-50 ${fieldSizeClasses[size]}`} aria-labelledby={`${id}-label`}>
         <CalendarDays size={18} className="shrink-0 text-on-surface-variant" aria-hidden="true" />
         <span className="truncate">{display}</span>
       </button>
@@ -372,18 +373,19 @@ export function DatePickerField({ id, value, label, onChange, size = 'compact' }
   );
 }
 
-export function TimePickerField({ id, value, label, onChange, size = 'compact' }: {
+export function TimePickerField({ id, value, label, onChange, size = 'compact', disabled = false }: {
   id: string;
   value: string;
   label: string;
   onChange: (value: string) => void;
   size?: FieldSize;
+  disabled?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="flex min-w-0 flex-col gap-2">
       <span id={`${id}-label`} className="pl-1 text-sm font-bold text-on-surface-variant">{label}</span>
-      <button type="button" onClick={() => setOpen(true)} className={`flex w-full min-w-0 items-center gap-3 rounded-xl border border-outline bg-surface text-left font-bold tabular-nums text-on-surface transition-colors hover:border-secondary hover:bg-secondary-container ${fieldSizeClasses[size]}`} aria-labelledby={`${id}-label`}>
+      <button type="button" onClick={() => setOpen(true)} disabled={disabled} className={`flex w-full min-w-0 items-center gap-3 rounded-xl border border-outline bg-surface text-left font-bold tabular-nums text-on-surface transition-colors hover:border-secondary hover:bg-secondary-container disabled:cursor-not-allowed disabled:opacity-50 ${fieldSizeClasses[size]}`} aria-labelledby={`${id}-label`}>
         <Clock size={18} className="shrink-0 text-on-surface-variant" aria-hidden="true" />
         <span>{value || '--:--'}</span>
       </button>
@@ -392,19 +394,20 @@ export function TimePickerField({ id, value, label, onChange, size = 'compact' }
   );
 }
 
-export function DateTimePickerField({ id, value, label, onChange, size = 'compact' }: {
+export function DateTimePickerField({ id, value, label, onChange, size = 'compact', disabled = false }: {
   id: string;
   value: string;
   label: string;
   onChange: (value: string) => void;
   size?: FieldSize;
+  disabled?: boolean;
 }) {
   const [date = '', time = ''] = value.split('T');
   return (
     <fieldset className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-2">
       <legend className="sr-only">{label}</legend>
-      <DatePickerField id={`${id}-date`} value={date} label={`${label} date`} size={size} onChange={nextDate => onChange(`${nextDate}T${time || '00:00'}`)} />
-      <TimePickerField id={`${id}-time`} value={time} label={`${label} time`} size={size} onChange={nextTime => onChange(`${date || formatIsoDate(new Date())}T${nextTime}`)} />
+      <DatePickerField id={`${id}-date`} value={date} label={`${label} date`} size={size} disabled={disabled} onChange={nextDate => onChange(`${nextDate}T${time || '00:00'}`)} />
+      <TimePickerField id={`${id}-time`} value={time} label={`${label} time`} size={size} disabled={disabled} onChange={nextTime => onChange(`${date || formatIsoDate(new Date())}T${nextTime}`)} />
     </fieldset>
   );
 }

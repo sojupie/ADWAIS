@@ -1,7 +1,8 @@
-import { Settings, Lock } from 'lucide-react';
+import { Settings } from 'lucide-react';
 import { SettingsPanel } from '../../common/layout/SettingsPanel';
 import { InlineEditField } from '../../common/ui/InlineEditField';
 import { FormSkeleton } from '../../common/ui/FormSkeleton';
+import { ReadOnlyBanner } from '../../common/ui/ReadOnlyBanner';
 import type { GlobalConfigDto } from '@types';
 
 interface GlobalConfigurationFormProps {
@@ -21,10 +22,7 @@ export function GlobalConfigurationForm({ config, updateConfig, disabled }: Glob
     >
       <div className="flex flex-col gap-4">
         {disabled && config && (
-          <div className="flex items-center gap-3 rounded-xl bg-surface-container-high px-4 py-3 text-sm font-semibold text-on-surface-variant animate-in fade-in duration-300">
-            <Lock size={16} className="shrink-0" aria-hidden="true" />
-            <span>You can review these values, but only administrators can change them.</span>
-          </div>
+          <ReadOnlyBanner message="You can review these values, but only administrators can change them." />
         )}
 
         {config ? (

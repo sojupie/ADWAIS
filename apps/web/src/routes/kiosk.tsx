@@ -7,12 +7,12 @@ import { userManager } from '../utils/oidcConfig';
 
 export const Route = createFileRoute('/kiosk')({
   beforeLoad: async () => {
-    if (getKioskToken()) {
-      throw redirect({ to: '/fleet-status' });
-    }
     const user = await userManager?.getUser();
     if (user && !user.expired) {
       throw redirect({ to: '/financial' });
+    }
+    if (getKioskToken()) {
+      throw redirect({ to: '/fleet-status' });
     }
   },
   loader: ({ context }) => {

@@ -22,12 +22,20 @@ export function useCurrentUser() {
   const oidcQuery = useQuery<UserProfile>({
     queryKey: ['current-user'],
     queryFn: () => apiFetch<UserProfile>('/api/users/me'),
-    enabled: hasOidcUser && !kioskToken,
+    enabled: hasOidcUser,
     retry: false,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
 
   // Calculate profile and role dynamically on render
+  if (hasOidcUser) {
+    return {
+      isLoading: oidcQuery.isLoading,
+      user: oidcQuery.data || null,
+      role: oidcQuery.data?.role || null,
+    };
+  }
+
   if (kioskToken) {
     return {
       isLoading: false,
@@ -37,14 +45,6 @@ export function useCurrentUser() {
         role: kioskRole || 'Viewer',
       } as UserProfile,
       role: kioskRole || 'Viewer',
-    };
-  }
-
-  if (hasOidcUser) {
-    return {
-      isLoading: oidcQuery.isLoading,
-      user: oidcQuery.data || null,
-      role: oidcQuery.data?.role || null,
     };
   }
 

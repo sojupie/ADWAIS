@@ -7,11 +7,9 @@ import { routeTree } from './routeTree.gen';
 import './index.css';
 
 import { AuthProvider } from 'react-oidc-context';
-import { isDemoMode, isOidcConfigured, userManager } from './utils/oidcConfig';
-import { getKioskToken, setKioskToken } from './utils/auth';
+import { isOidcConfigured, userManager } from './utils/oidcConfig';
 import { applyFlexGapFallbackClass } from './utils/flexGapSupport';
 import { Md3RippleProvider } from './components/common/ui/Md3RippleProvider';
-import { getApiDemoToken } from './api/generated/endpoints';
 
 applyFlexGapFallbackClass();
 
@@ -29,12 +27,6 @@ declare module '@tanstack/react-router' {
 }
 
 async function bootstrap() {
-  if (isDemoMode && !getKioskToken()) {
-    const { data } = await getApiDemoToken();
-    if (!data.token) throw new Error('Demo token response did not contain a token.');
-    setKioskToken(data.token);
-  }
-
   const app = (
     <QueryClientProvider client={queryClient}>
       <Md3RippleProvider>

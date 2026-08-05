@@ -1,7 +1,7 @@
 import {createRootRoute, redirect, useRouterState, useSearch} from '@tanstack/react-router';
 import {useContext} from 'react';
 import {AuthContext, hasAuthParams} from 'react-oidc-context';
-import {isDemoMode, userManager} from '../utils/oidcConfig';
+import {userManager} from '../utils/oidcConfig';
 import {getKioskToken} from '../utils/auth';
 import {getSavedTimeframe, type PersistentDomain} from '../utils/timeframeStorage';
 import {useCurrentUser} from '../hooks/useCurrentUser';
@@ -17,17 +17,15 @@ export const Route = createRootRoute({
     const isKioskRoute = location.pathname.startsWith('/kiosk');
 
     if (isLoginRoute || isKioskRoute) return;
-    if (getKioskToken()) return;
     if (hasAuthParams()) return;
 
-    if (isDemoMode) return;
-
     const user = await userManager?.getUser();
-    if (!user || user.expired) {
-      throw redirect({
-        to: '/login',
-      });
-    }
+    if (user && !user.expired) return;
+    if (getKioskToken()) return;
+
+    throw redirect({
+      to: '/login',
+    });
   },
   component: RootComponent,
 });
@@ -48,7 +46,7 @@ function RootComponent() {
   const timeframeDomain: PersistentDomain | null = isFinancialPage ? '/financial' : isFleetPage ? '/fleet-status' : null;
 
   const kioskToken = getKioskToken();
-  const userLabel = kioskToken ? 'Kiosk' : (user?.name || auth?.user?.profile?.name || null);
+  const userLabel = user?.name || auth?.user?.profile?.name || (kioskToken ? 'Kiosk' : null);
   const isAuthRoute = location.pathname === '/login' || location.pathname.startsWith('/kiosk');
 
   return (

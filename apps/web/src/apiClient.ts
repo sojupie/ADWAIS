@@ -1,15 +1,19 @@
 import { isDemoMode, userManager } from './utils/oidcConfig';
+import { removeKioskToken } from './utils/auth';
 
 export async function getAuthHeaders(customHeaders?: HeadersInit): Promise<Headers> {
   const headers = new Headers(customHeaders);
+  if (headers.has('Authorization')) return headers;
+
+  const user = await userManager?.getUser();
+  if (user && !user.expired) {
+    headers.set('Authorization', `Bearer ${user.access_token}`);
+    return headers;
+  }
+
   const kioskToken = localStorage.getItem('kiosk_token');
-  if (kioskToken && !headers.has('Authorization')) {
+  if (kioskToken) {
     headers.set('Authorization', `Bearer ${kioskToken}`);
-  } else if (!headers.has('Authorization')) {
-    const user = await userManager?.getUser();
-    if (user && !user.expired) {
-      headers.set('Authorization', `Bearer ${user.access_token}`);
-    }
   }
   return headers;
 }
@@ -21,6 +25,7 @@ export async function handleSessionInvalidation() {
   const user = await userManager?.getUser();
   if (user) {
     await userManager?.removeUser();
+    removeKioskToken();
     sessionStorage.clear();
     window.location.href = '/login';
   } else {

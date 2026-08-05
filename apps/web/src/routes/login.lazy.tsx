@@ -1,18 +1,41 @@
-import { createLazyFileRoute, Link } from '@tanstack/react-router';
-import { useAuth } from 'react-oidc-context';
-import { ssoButtonLabel, ssoButtonLogoUrl } from '../utils/oidcConfig';
+import { createLazyFileRoute, Link, useNavigate } from '@tanstack/react-router';
+import { useContext, useState } from 'react';
+import { AuthContext } from 'react-oidc-context';
+import { getApiDemoToken } from '../api/generated/endpoints';
+import { removeKioskToken, setKioskToken } from '../utils/auth';
+import { isDemoMode, isOidcConfigured, ssoButtonLabel, ssoButtonLogoUrl } from '../utils/oidcConfig';
 
 export const Route = createLazyFileRoute('/login')({
   component: LoginComponent,
 });
 
 function LoginComponent() {
-  const auth = useAuth();
+  const auth = useContext(AuthContext);
+  const navigate = useNavigate();
+  const [isDemoSigningIn, setIsDemoSigningIn] = useState(false);
+  const [demoError, setDemoError] = useState<string | null>(null);
 
   const handleLogin = () => {
-    auth.signinRedirect().catch((err) => {
+    removeKioskToken();
+    auth?.signinRedirect().catch((err) => {
       console.error('OIDC Login error:', err);
     });
+  };
+
+  const handleDemoLogin = async () => {
+    setIsDemoSigningIn(true);
+    setDemoError(null);
+    try {
+      const { data } = await getApiDemoToken();
+      if (!data.token) throw new Error('Demo token response did not contain a token.');
+      setKioskToken(data.token);
+      await navigate({ to: '/fleet-status' });
+    } catch (error) {
+      console.error('Demo login error:', error);
+      setDemoError('Demo access is currently unavailable.');
+    } finally {
+      setIsDemoSigningIn(false);
+    }
   };
 
   return (
@@ -25,26 +48,43 @@ function LoginComponent() {
         </p>
       </div>
 
-      <div className="w-full relative z-10 flex divide-y divide-outline flex-col items-center gap-6 animate-stagger delay-200">
-        <button
-          onClick={handleLogin}
-          className="self-center py-4 px-6 bg-surface-container-highest hover:bg-brand-btn-primary-hover font-extrabold rounded-full transition-all duration-300 m3-elevation-1 hover:m3-elevation-2 cursor-pointer inline-flex items-center justify-center gap-3 group text-md tracking-widest uppercase whitespace-nowrap"
-        >
-          {ssoButtonLogoUrl && (
-            <img
-              src={ssoButtonLogoUrl}
-              className="w-5 h-5 shrink-0"
-              alt=""
-              aria-hidden="true"
-            />
-          )}
-          <span>{ssoButtonLabel}</span>
-        </button>
+      <div className="w-full relative z-10 flex flex-col items-center divide-y divide-outline animate-stagger delay-200">
+        <div className="flex w-full flex-col items-center gap-3 pt-12 pb-6">
+          <div className="flex w-full flex-wrap items-center justify-center gap-3">
+            {isOidcConfigured && (
+              <button
+                onClick={handleLogin}
+                className="py-4 px-6 bg-surface-container-highest hover:bg-brand-btn-primary-hover font-extrabold rounded-full transition-all duration-300 m3-elevation-1 hover:m3-elevation-2 cursor-pointer inline-flex items-center justify-center gap-3 group text-base tracking-widest uppercase whitespace-nowrap"
+              >
+                {ssoButtonLogoUrl && (
+                  <img
+                    src={ssoButtonLogoUrl}
+                    className="w-5 h-5 shrink-0"
+                    alt=""
+                    aria-hidden="true"
+                  />
+                )}
+                <span>{ssoButtonLabel}</span>
+              </button>
+            )}
+
+            {isDemoMode && (
+              <button
+                onClick={handleDemoLogin}
+                disabled={isDemoSigningIn}
+                className="py-4 px-6 bg-primary-container hover:bg-primary-container/80 font-extrabold rounded-full transition-all duration-300 m3-elevation-1 hover:m3-elevation-2 cursor-pointer disabled:cursor-wait disabled:opacity-60 inline-flex items-center justify-center gap-3 text-base tracking-widest uppercase whitespace-nowrap"
+              >
+                {isDemoSigningIn ? 'Starting demo…' : 'Continue as demo user'}
+              </button>
+            )}
+          </div>
+          {demoError && <p className="text-sm font-semibold text-error" role="alert">{demoError}</p>}
+        </div>
 
         <div className="flex w-full justify-center pt-6">
           <Link
             to="/kiosk"
-            className="inline-flex min-h-12 items-center justify-center rounded-full border border-on-surface-variant px-6 py-3 text-md font-bold uppercase tracking-widest transition-colors hover:bg-white/50"
+            className="inline-flex min-h-12 items-center justify-center rounded-full border border-on-surface-variant px-6 py-3 text-base font-bold uppercase tracking-widest transition-colors hover:bg-white/50"
           >
             Activate kiosk
           </Link>

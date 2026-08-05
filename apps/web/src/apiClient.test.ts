@@ -1,5 +1,5 @@
 import { test, expect, vi, beforeEach, afterEach } from 'vitest';
-import { apiFetch } from './apiClient';
+import { apiFetch, getAuthHeaders } from './apiClient';
 import { userManager } from './utils/oidcConfig';
 import type { User } from 'oidc-client-ts';
 
@@ -114,6 +114,19 @@ test('apiFetch redirects to /kiosk on 403 for /api/users/me when no OIDC user ex
   await expect(apiFetch('http://test.local/api/users/me')).rejects.toThrow();
 
   expect(mockLocation.href).toBe('/kiosk');
+});
+
+test('OIDC token takes precedence over a stale kiosk token', async () => {
+  const user = {
+    access_token: 'oidc-admin-token',
+    expired: false,
+  } as User;
+  vi.mocked(userManager!.getUser).mockResolvedValue(user);
+  vi.mocked(localStorage.getItem).mockReturnValue('stale-demo-token');
+
+  const headers = await getAuthHeaders();
+
+  expect(headers.get('Authorization')).toBe('Bearer oidc-admin-token');
 });
 
 test('apiFetch reloads demo mode when its token is invalid', async () => {

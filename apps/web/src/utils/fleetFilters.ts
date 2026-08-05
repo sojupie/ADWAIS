@@ -12,6 +12,31 @@ export interface FleetSelection {
   monitorId: number | null;
 }
 
+export type FleetSettingsTarget =
+  | { label: 'Monitor settings'; to: '/settings/monitors' }
+  | { label: 'Edit tenant'; to: '/settings/tenants/$tenantId'; params: { tenantId: string } }
+  | { label: 'Edit monitor'; to: '/settings/monitors/$monitorId'; params: { monitorId: string } };
+
+export function getFleetSettingsTarget(selection: FleetSelection | null): FleetSettingsTarget {
+  if (selection?.monitorId != null) {
+    return {
+      label: 'Edit monitor',
+      to: '/settings/monitors/$monitorId',
+      params: { monitorId: String(selection.monitorId) },
+    };
+  }
+
+  if (selection) {
+    return {
+      label: 'Edit tenant',
+      to: '/settings/tenants/$tenantId',
+      params: { tenantId: selection.tenantId },
+    };
+  }
+
+  return { label: 'Monitor settings', to: '/settings/monitors' };
+}
+
 const normalizeFilterValue = (value: string) => value.trim().toLocaleLowerCase();
 
 export function getFleetTags(monitors: UptimeMonitorDto[]): string[] {

@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useNavigate } from '@tanstack/react-router';
 import { Link as LinkIcon, Unlink } from 'lucide-react';
 import { useTenantsViewModel } from '../../../hooks/useTenantsViewModel';
 
@@ -14,6 +15,7 @@ interface TenantMonitorsPanelProps {
 export const TenantMonitorsPanel = React.memo(function TenantMonitorsPanel({
     tenantId
 }: TenantMonitorsPanelProps) {
+    const navigate = useNavigate();
     const { allMonitors, allUniqueTypes, allUniqueTags, assignMonitor, unassignMonitor, isAdmin } = useTenantsViewModel();
     const isAssignPending = assignMonitor.isPending;
     const isUnassignPending = unassignMonitor.isPending;
@@ -145,6 +147,7 @@ export const TenantMonitorsPanel = React.memo(function TenantMonitorsPanel({
                                         m={m}
                                         selected={m.id !== undefined ? assignedSelected.has(m.id) : false}
                                         onSelect={() => m.id !== undefined && handleAssignedSelect(m.id)}
+                                        onDoubleClick={() => m.id !== undefined && void navigate({ to: '/settings/monitors/$monitorId', params: { monitorId: String(m.id) } })}
                                     />
                                 ))}
                                 {assignedMonitors.length === 0 && (
@@ -165,7 +168,7 @@ export const TenantMonitorsPanel = React.memo(function TenantMonitorsPanel({
                 <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4">
                     <div className="flex-1 space-y-1">
                         <h3 className="text-lg font-bold text-on-surface">Assignable Monitors</h3>
-                        <p className="text-md text-on-surface-variant">Select monitors to assign to this tenant. If a monitor is already assigned to another tenant, it will be reassigned.</p>
+                        <p className="text-base text-on-surface-variant">Select monitors to assign to this tenant. If a monitor is already assigned to another tenant, it will be reassigned.</p>
                     </div>
                     
                     <Button
@@ -207,6 +210,7 @@ export const TenantMonitorsPanel = React.memo(function TenantMonitorsPanel({
                                             m={m}
                                             selected={m.id !== undefined ? availableSelected.has(m.id) : false}
                                             onSelect={() => m.id !== undefined && handleAvailableSelect(m.id)}
+                                            onDoubleClick={() => m.id !== undefined && void navigate({ to: '/settings/monitors/$monitorId', params: { monitorId: String(m.id) } })}
                                         />
                                     ))}
                                     {availableMonitors.length === 0 && (

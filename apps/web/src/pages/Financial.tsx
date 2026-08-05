@@ -16,6 +16,9 @@ import type { PortfolioImpactResponse, TransactionDensityResponseDto, CrossSegme
 import { FinancialFilterMenu, FinancialFilterPanel } from '../components/financial/FinancialFilterMenu.tsx';
 import { MobileFooterActions } from '../components/common/ui/MobileFooterActions.tsx';
 import { countActiveFilterGroups } from '../utils/filterCounts.ts';
+import { useNavigate } from '@tanstack/react-router';
+import { Settings } from 'lucide-react';
+import { Button } from '../components/common/ui/Button';
 
 const EMPTY_VELOCITY: never[] = [];
 const EMPTY_DENSITY: TransactionDensityResponseDto = {
@@ -36,6 +39,7 @@ const EMPTY_CROSS_SEGMENT_DISTRIBUTION: CrossSegmentDistributionResponse = { coh
 
 export function Financial() {
   const vm = useFinancialViewModel();
+  const navigate = useNavigate({ from: '/financial' });
 
   if (vm.tenantId && vm.selectedTenantDetails) {
     return (
@@ -150,6 +154,17 @@ export function Financial() {
       <DashboardFooter>
         <SyncStatusWidget />
         <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+          <Button
+            variant="filled"
+            color="secondary"
+            icon={<Settings size={18} />}
+            aria-label="Open tenant settings"
+            title="Open tenant settings"
+            onClick={() => void navigate({ to: '/settings/tenants' })}
+            className="!min-h-14 !text-base"
+          >
+            Tenant settings
+          </Button>
           <FinancialFilterMenu
             tenants={vm.tenantOptions}
             selectedTenantId={vm.tenantId ?? null}
@@ -167,6 +182,10 @@ export function Financial() {
         activeCount={countActiveFilterGroups(Boolean(vm.tenantId), vm.selectedTenantTypes.length > 0)}
         clearLabel="Clear all financial filters"
         onClearAll={vm.clearFinancialFilters}
+        settingsAction={{
+          label: 'Tenant settings',
+          onClick: () => void navigate({ to: '/settings/tenants' }),
+        }}
       >
         <FinancialFilterPanel
           embedded

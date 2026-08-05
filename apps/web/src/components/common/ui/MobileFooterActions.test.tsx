@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { MobileFooterActions } from './MobileFooterActions';
 import { MobileFooterActionsSlotContext } from './MobileFooterActionsContext';
 
-function renderActions(activeCount: number, onClearAll = vi.fn()) {
+function renderActions(activeCount: number, onClearAll = vi.fn(), onOpenSettings?: () => void) {
   const panel = document.createElement('div');
   const indicator = document.createElement('span');
   const quickAction = document.createElement('div');
@@ -15,6 +15,7 @@ function renderActions(activeCount: number, onClearAll = vi.fn()) {
         activeCount={activeCount}
         clearLabel="Clear all fleet filters"
         onClearAll={onClearAll}
+        settingsAction={onOpenSettings ? { label: 'Monitor settings', onClick: onOpenSettings } : undefined}
       >
         <div>Fleet filters</div>
       </MobileFooterActions>
@@ -49,6 +50,19 @@ describe('MobileFooterActions', () => {
 
     expect(screen.queryByText(/active filters/)).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Clear all fleet filters' })).toBeDisabled();
+
+    unmount();
+    cleanupSlots();
+  });
+
+  it('renders a full-size settings action in the mobile FAB', () => {
+    const onOpenSettings = vi.fn();
+    const { cleanupSlots, unmount } = renderActions(0, vi.fn(), onOpenSettings);
+
+    const settings = screen.getByRole('button', { name: 'Monitor settings' });
+    expect(settings).toHaveClass('h-14', 'w-14');
+    fireEvent.click(settings);
+    expect(onOpenSettings).toHaveBeenCalledOnce();
 
     unmount();
     cleanupSlots();

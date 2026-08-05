@@ -195,7 +195,8 @@ function MonitorDetailForm({ monitor, isAdmin, onBack }: { monitor: UptimeMonito
   );
 }
 
-const MonitorAssignmentPanel = React.memo(function MonitorAssignmentPanel({ monitor, isAdmin }: { monitor: UptimeMonitorDto, isAdmin: boolean }) {
+export const MonitorAssignmentPanel = React.memo(function MonitorAssignmentPanel({ monitor, isAdmin }: { monitor: UptimeMonitorDto, isAdmin: boolean }) {
+  const navigate = useNavigate();
   const { tenants, assignMonitor, unassignMonitor } = useTenantsViewModel();
   const SYSTEM_TENANT_ID = '00000000-0000-0000-0000-000000000001';
   const isAssignedToRealTenant = monitor.tenantId != null && monitor.tenantId !== SYSTEM_TENANT_ID;
@@ -207,15 +208,22 @@ const MonitorAssignmentPanel = React.memo(function MonitorAssignmentPanel({ moni
       <h3 className="text-lg font-bold text-on-surface">Tenant Assignment</h3>
       
       {assignedTenant ? (
-          <div className="flex items-center justify-between p-4 bg-surface border border-outline-variant rounded-xl">
-              <div>
+          <div className="flex items-center justify-between rounded-xl border border-outline-variant bg-surface p-4">
+              <button
+                  type="button"
+                  className="min-w-0 cursor-pointer text-left transition-colors hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+                  onClick={() => void navigate({ to: '/settings/tenants/$tenantId', params: { tenantId: assignedTenant.id } })}
+              >
                   <div className="text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1">Assigned Owner</div>
                   <div className="font-bold text-on-surface">{assignedTenant.name}</div>
                   <div className="text-sm text-on-surface-variant">{assignedTenant.litiumBaseUrl}</div>
-              </div>
+              </button>
                   <button
                       type="button"
-                      onClick={() => monitor.id !== undefined && unassignMonitor.mutate(monitor.id)}
+                      onClick={(event) => {
+                          event.stopPropagation();
+                          if (monitor.id !== undefined) unassignMonitor.mutate(monitor.id);
+                      }}
                       disabled={!isAdmin || unassignMonitor.isPending}
                       className="flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-bold text-error hover:bg-error-container hover:text-on-error-container transition-colors disabled:cursor-not-allowed disabled:text-on-surface/[0.38] disabled:hover:bg-transparent disabled:hover:text-on-surface/[0.38]"
                   >

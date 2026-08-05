@@ -16,11 +16,14 @@ import {
 import { MobileFooterActions } from '../components/common/ui/MobileFooterActions.tsx';
 import { ArrowLeft } from 'lucide-react';
 import { countActiveFilterGroups } from '../utils/filterCounts.ts';
+import { useNavigate } from '@tanstack/react-router';
+import { getFleetSettingsTarget } from '../utils/fleetFilters.ts';
 
 const EMPTY_LATENCY: never[] = [];
 
 export function FleetStatus() {
   const vm = useFleetStatusViewModel();
+  const navigate = useNavigate({ from: '/fleet-status' });
   const summarize = (values: string[]) => values.length <= 2
     ? values.join(', ')
     : `${values.slice(0, 2).join(', ')} +${values.length - 2}`;
@@ -72,6 +75,9 @@ export function FleetStatus() {
     />
   );
 
+  const settingsTarget = getFleetSettingsTarget(vm.selection);
+  const openSettings = () => void navigate(settingsTarget);
+
   return (
     <DashboardLayout>
       {/* Main Content Grid: Matrix on Left, selected scope & latency on Right */}
@@ -95,6 +101,8 @@ export function FleetStatus() {
             latencyGrowth={vm.fleetStats.latencyGrowth}
             p10LatencyGrowth={vm.fleetStats.lowestLatencyGrowth}
             p90LatencyGrowth={vm.fleetStats.highestLatencyGrowth}
+            onOpenSettings={openSettings}
+            settingsLabel={settingsTarget.label}
             className="flex-1 min-h-[350px] contained:min-h-0 max-h-[600px] xl:max-h-none"
           />
 
@@ -116,7 +124,7 @@ export function FleetStatus() {
               className="flex-grow min-h-[59px]"
               isLoading={vm.globalMonitorsQuery.isLoading}
               actions={matrixActions}
-              titleClassName={"!text-sm !md:text-md"}
+              titleClassName="!text-sm md:!text-base"
           >
             <div className="px-4 pb-4 h-full flex flex-col min-h-0">
               {matrixContent}

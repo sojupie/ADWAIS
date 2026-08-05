@@ -1,9 +1,11 @@
 import type { MonitorAvailabilitySeriesResponseDto, UptimeMonitorDto } from '@types';
 import type { ReactNode } from 'react';
 import type { FleetSelection } from '../../utils/fleetFilters';
+import { Settings } from 'lucide-react';
 import { getMonitorStatus, normalizeStatus } from '../../utils/monitorStatusHelper';
 import { getMonitorType } from '../../utils/monitorTypeHelper';
 import { CollectionPanel } from '../common/dashboard/CollectionPanel';
+import { Button } from '../common/ui/Button';
 import { AvailabilityStrip } from './AvailabilityStrip';
 import { formatDateTime } from '../../utils/dateTime';
 
@@ -49,7 +51,7 @@ function Fact({ label, value, detail }: { label: string; value: ReactNode; detai
     <div className="flex flex-col gap-0.5 rounded-xl bg-surface-container p-3 min-w-0">
       <span className="text-sm font-bold uppercase tracking-widest text-on-surface-variant">{label}</span>
       <span className="text-xl font-black text-on-surface break-words">{value}</span>
-      {detail && <div className="text-md font-bold text-on-surface-variant break-words">{detail}</div>}
+      {detail && <div className="text-base font-bold text-on-surface-variant break-words">{detail}</div>}
     </div>
   );
 }
@@ -83,6 +85,8 @@ export function FleetSelectionPanel({
   latencyGrowth,
   p10LatencyGrowth,
   p90LatencyGrowth,
+  onOpenSettings,
+  settingsLabel,
   className,
 }: {
   selection: FleetSelection | null;
@@ -99,6 +103,8 @@ export function FleetSelectionPanel({
   latencyGrowth?: number | null;
   p10LatencyGrowth?: number | null;
   p90LatencyGrowth?: number | null;
+  onOpenSettings: () => void;
+  settingsLabel: string;
   className?: string;
 }) {
   const enabledMonitors = scopedMonitors.filter(monitor => monitor.uptimeMonitorEnabled);
@@ -139,33 +145,47 @@ export function FleetSelectionPanel({
       title={title}
       className={className}
       isLoading={isLoading && !availability}
-      titleClassName="!text-sm !md:text-md"
-      actions={statusLabel ? (
-        <span className={`rounded-md px-2 py-1 text-sm font-black tracking-widest ${statusClass}`}>
-          {statusLabel}
-        </span>
-      ) : undefined}
+      titleClassName="!text-sm md:!text-base"
+      actions={(
+        <div className="flex items-center gap-2">
+          {statusLabel && (
+            <span className={`rounded-md px-2 py-1 text-sm font-black tracking-widest ${statusClass}`}>
+              {statusLabel}
+            </span>
+          )}
+          <Button
+            variant="filled"
+            color="secondary"
+            icon={<Settings size={18} />}
+            aria-label={settingsLabel}
+            title={settingsLabel}
+            onClick={onOpenSettings}
+          >
+            {settingsLabel}
+          </Button>
+        </div>
+      )}
     >
       <div className={`flex flex-col gap-4 px-4 pb-4 ${isStale ? 'opacity-70' : ''}`}>
         <div className="min-w-0">
           {selectedMonitor ? (
             <>
               <p className="text-base font-black text-on-surface break-all leading-tight">{selectedMonitor.url}</p>
-              <p className="mt-1 text-md font-bold text-on-surface-variant break-words">
+              <p className="mt-1 text-base font-bold text-on-surface-variant break-words">
                 {getMonitorType(selectedMonitor.type)} · {selectedTenantName}
               </p>
             </>
           ) : selection ? (
             <>
               <p className="text-xl font-black text-on-surface break-words">{selectedTenantName}</p>
-              <p className="mt-1 text-md font-medium text-on-surface-variant">
+              <p className="mt-1 text-base font-medium text-on-surface-variant">
                 Aggregated facts for the currently visible tenant monitors.
               </p>
             </>
           ) : (
             <>
               <p className="text-xl font-black text-on-surface">Current fleet</p>
-              <p className="mt-1 text-md font-medium text-on-surface-variant">
+              <p className="mt-1 text-base font-medium text-on-surface-variant">
                 Select a tenant or endpoint for more specific facts.
               </p>
             </>
@@ -174,7 +194,7 @@ export function FleetSelectionPanel({
 
         <div className="flex flex-col gap-2 min-w-0">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h3 className="text-md font-bold uppercase tracking-widest text-on-surface-variant">Availability over time</h3>
+            <h3 className="text-base font-bold uppercase tracking-widest text-on-surface-variant">Availability over time</h3>
             <span className="text-sm font-bold text-on-surface-variant">Selected period</span>
           </div>
           <AvailabilityStrip

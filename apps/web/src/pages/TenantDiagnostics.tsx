@@ -28,6 +28,9 @@ import {
 } from '../components/financial/FinancialFilterMenu.tsx';
 import { MobileFooterActions } from '../components/common/ui/MobileFooterActions.tsx';
 import { countActiveFilterGroups } from '../utils/filterCounts.ts';
+import { useNavigate } from '@tanstack/react-router';
+import { Settings } from 'lucide-react';
+import { Button } from '../components/common/ui/Button';
 
 const EMPTY_ACCUMULATED: never[] = [];
 const EMPTY_DENSITY: TransactionDensityResponseDto = {
@@ -72,6 +75,7 @@ export function TenantDiagnostics({
   onTypesChange,
   onClearFilters,
 }: Props) {
+  const navigate = useNavigate({ from: '/financial' });
   const [densityPeriod, setDensityPeriod] = useState<TransactionDensityPeriod>('Auto');
   const kpiQuery = useGlobalKpis(timeframe, tenantId);
   const globalKpiQuery = useGlobalKpis(timeframe, undefined, undefined, selectedTenantTypes);
@@ -99,7 +103,7 @@ export function TenantDiagnostics({
           <div className="flex items-center gap-6 mb-1">
             <h1 className="text-2xl font-extrabold text-brand-text tracking-tight m-0">{tenantName} Diagnostics</h1>
             <span 
-              className={`inline-flex items-center px-4 py-1 rounded-2xl text-md font-black uppercase tracking-widest shadow-sm shrink-0 ${
+              className={`inline-flex items-center px-4 py-1 rounded-2xl text-base font-black uppercase tracking-widest shadow-sm shrink-0 ${
                 tenantType === 'B2C' ? 'bg-chart-1 text-white' : 
                 tenantType === 'Mixed' ? 'bg-chart-2 text-white' :
                 tenantType === 'B2B' ? 'bg-chart-3 text-white' :    
@@ -188,6 +192,17 @@ export function TenantDiagnostics({
       <DashboardFooter>
         <SyncStatusWidget />
         <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+          <Button
+            variant="filled"
+            color="secondary"
+            icon={<Settings size={18} />}
+            aria-label={`Open settings for ${tenantName}`}
+            title={`Open settings for ${tenantName}`}
+            onClick={() => void navigate({ to: '/settings/tenants/$tenantId', params: { tenantId } })}
+            className="!min-h-14"
+          >
+            Edit tenant
+          </Button>
           <FinancialFilterMenu
             tenants={tenantOptions}
             selectedTenantId={tenantId}
@@ -206,6 +221,10 @@ export function TenantDiagnostics({
         activeCount={countActiveFilterGroups(Boolean(tenantId), selectedTenantTypes.length > 0)}
         clearLabel="Clear all financial filters"
         onClearAll={onClearFilters}
+        settingsAction={{
+          label: `Edit ${tenantName}`,
+          onClick: () => void navigate({ to: '/settings/tenants/$tenantId', params: { tenantId } }),
+        }}
       >
         <FinancialFilterPanel
           embedded

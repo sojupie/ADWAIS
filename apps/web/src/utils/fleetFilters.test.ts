@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { UptimeMonitorDto } from '@types';
-import { filterFleetMonitors, getFleetTags, isFleetSelectionVisible } from './fleetFilters';
+import { filterFleetMonitors, getFleetSettingsTarget, getFleetTags, isFleetSelectionVisible } from './fleetFilters';
 
 const monitor = (
   id: number,
@@ -69,5 +69,22 @@ describe('fleet filters', () => {
     expect(isFleetSelectionVisible(visibleMonitors, { tenantId: 'tenant-1', monitorId: 1 })).toBe(true);
     expect(isFleetSelectionVisible(visibleMonitors, { tenantId: 'tenant-1', monitorId: null })).toBe(true);
     expect(isFleetSelectionVisible(visibleMonitors, { tenantId: 'tenant-2', monitorId: 2 })).toBe(false);
+  });
+
+  it('maps every fleet scope to its matching settings route and label', () => {
+    expect(getFleetSettingsTarget(null)).toEqual({
+      label: 'Monitor settings',
+      to: '/settings/monitors',
+    });
+    expect(getFleetSettingsTarget({ tenantId: 'tenant-1', monitorId: null })).toEqual({
+      label: 'Edit tenant',
+      to: '/settings/tenants/$tenantId',
+      params: { tenantId: 'tenant-1' },
+    });
+    expect(getFleetSettingsTarget({ tenantId: 'tenant-1', monitorId: 42 })).toEqual({
+      label: 'Edit monitor',
+      to: '/settings/monitors/$monitorId',
+      params: { monitorId: '42' },
+    });
   });
 });

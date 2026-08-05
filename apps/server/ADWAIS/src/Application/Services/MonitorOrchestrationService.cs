@@ -12,7 +12,7 @@ namespace Adwais.Application.Services;
 
 public class MonitorOrchestrationService(
     IApplicationDbContext dbContext,
-    IUptimeRobotService uptimeRobotService,
+    IEnumerable<IMonitoringProvider> monitoringProviders,
     ICacheService cache) : IMonitorOrchestrationService
 {
     private record LatencyRow(DateTimeOffset Timestamp, double? Average, double? P10, double? P90);
@@ -480,14 +480,17 @@ public class MonitorOrchestrationService(
         var normalizedType = UptimeMonitorTypes.Normalize(type);
         var tenant = await dbContext.Tenants.SingleOrDefaultAsync(t => t.Id == tenantId, ct)
             ?? throw new KeyNotFoundException($"Tenant {tenantId} not found.");
-        var remoteMonitor = await uptimeRobotService.CreateMonitorAsync(name, url, normalizedType);
+        var config = await dbContext.GlobalConfigs.SingleAsync(ct);
+        var monitoringProvider = monitoringProviders.ForProvider(config.MonitoringProvider);
+        var remoteMonitor = await monitoringProvider.CreateMonitorAsync(name, url, normalizedType);
         
         var monitor = new UptimeMonitor
         {
-            Id = remoteMonitor.Id,
+            Provider = monitoringProvider.Provider,
+            ExternalId = remoteMonitor.ExternalId,
             Type = remoteMonitor.Type,
             TenantId = tenantId,
-            Name = remoteMonitor.FriendlyName,
+            Name = remoteMonitor.Name,
             Url = remoteMonitor.Url,
             UpdateInterval = remoteMonitor.UpdateInterval,
             HttpMethod = remoteMonitor.HttpMethod,
@@ -496,7 +499,7 @@ public class MonitorOrchestrationService(
             DomainExpiresAt = remoteMonitor.DomainExpiresAt,
             MonitoredRegions = remoteMonitor.MonitoredRegions ?? [],
             CurrentStateDurationSeconds = remoteMonitor.CurrentStateDurationSeconds,
-            LastIncidentId = remoteMonitor.LastIncident?.Id,
+            LastIncidentId = remoteMonitor.LastIncident?.ExternalId,
             LastIncidentStatus = remoteMonitor.LastIncident?.Status,
             LastIncidentCause = remoteMonitor.LastIncident?.Cause,
             LastIncidentReason = remoteMonitor.LastIncident?.Reason,
@@ -630,7 +633,7 @@ public class MonitorOrchestrationService(
 
         if (id > 0)
         {
-            await uptimeRobotService.DeleteMonitorAsync(id);
+            await monitoringProviders.ForProvider(monitor.Provider).DeleteMonitorAsync(monitor.ExternalId);
         }
 
         dbContext.Monitors.Remove(monitor);
@@ -644,7 +647,7 @@ public class MonitorOrchestrationService(
 
         if (id > 0)
         {
-            await uptimeRobotService.PauseMonitorAsync(id);
+            await monitoringProviders.ForProvider(monitor.Provider).PauseMonitorAsync(monitor.ExternalId);
         }
         
         monitor.UptimeMonitorEnabled = false;
@@ -658,7 +661,7 @@ public class MonitorOrchestrationService(
 
         if (id > 0)
         {
-            await uptimeRobotService.StartMonitorAsync(id);
+            await monitoringProviders.ForProvider(monitor.Provider).StartMonitorAsync(monitor.ExternalId);
         }
         
         monitor.UptimeMonitorEnabled = true;
@@ -706,8 +709,8 @@ public class MonitorOrchestrationService(
 
         if (id > 0 && (nameChanged || urlChanged || typeChanged || tagsChanged))
         {
-            await uptimeRobotService.UpdateMonitorAsync(
-                id,
+            await monitoringProviders.ForProvider(monitor.Provider).UpdateMonitorAsync(
+                monitor.ExternalId,
                 nameChanged ? name : null,
                 urlChanged ? url : null,
                 typeChanged ? normalizedType : null,

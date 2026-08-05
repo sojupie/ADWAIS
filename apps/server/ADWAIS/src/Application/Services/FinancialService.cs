@@ -938,14 +938,16 @@ public class FinancialService(
             .Take(ceilingCount)
             .Select(p => new OrderDto(
                 AdwaisOrderId: p.Id,
-                LitiumOrderId: p.LitiumOrderId,
+                OrderNumber: p.OrderNumber,
                 AdwaisTenantId: p.TenantId,
                 OrderState: p.OrderState,
                 CreatedDate: p.CreatedDate,
                 TotalValueIncVat: p.TotalValueIncVat,
                 TotalValueExcVat: p.TotalValueExcVat,
                 Currency: p.Currency,
-                TenantName: p.Tenant != null ? p.Tenant.Name : null
+                TenantName: p.Tenant != null ? p.Tenant.Name : null,
+                Provider: p.Provider,
+                ExternalId: p.ExternalId
                 ))
             .ToListAsync(ct);
     }

@@ -4,11 +4,13 @@ namespace Adwais.Application.DTOs.Financial;
 
 public record OrderDto(
     Guid AdwaisOrderId,
-    string LitiumOrderId,
+    string OrderNumber,
     Guid AdwaisTenantId,
     OrderState OrderState,
     DateTimeOffset CreatedDate,
     decimal TotalValueIncVat,
     decimal TotalValueExcVat,
     string? Currency,
-    string? TenantName);
+    string? TenantName,
+    string Provider,
+    string ExternalId);

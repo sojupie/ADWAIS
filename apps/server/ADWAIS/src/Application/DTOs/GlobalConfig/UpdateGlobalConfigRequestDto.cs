@@ -8,5 +8,6 @@ public record UpdateGlobalConfigRequestDto(
     int? FeedFetchIntervalHours = null,
     string? WeatherLocation = null,
     int? WeatherFetchIntervalMinutes = null,
-    string? ReportingTimeZoneId = null
+    string? ReportingTimeZoneId = null,
+    string? MonitoringProvider = null
 );

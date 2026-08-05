@@ -1,9 +1,9 @@
 namespace Adwais.Application.DTOs.Monitoring.Upstream;
 
-public record UptimeRobotMonitorDto(
-    int Id,
+public sealed record MonitoringProviderMonitor(
+    string ExternalId,
     string Type,
-    string FriendlyName,
+    string Name,
     string Url,
     string Status,
     DateTimeOffset CreatedDate,
@@ -15,13 +15,19 @@ public record UptimeRobotMonitorDto(
     DateTimeOffset? DomainExpiresAt = null,
     List<string>? MonitoredRegions = null,
     long? CurrentStateDurationSeconds = null,
-    UptimeRobotIncidentDto? LastIncident = null);
+    MonitoringProviderIncident? LastIncident = null);
 
-public sealed record UptimeRobotIncidentDto(
-    string? Id,
+public sealed record MonitoringProviderIncident(
+    string? ExternalId,
     string? Status,
     string? Cause,
     string? Reason,
     DateTimeOffset? StartedAt,
     long? DurationSeconds);
 
+public sealed record MonitoringProviderAccount(
+    string Email,
+    string FullName,
+    int MonitorsCount,
+    int MonitorLimit,
+    string ActiveSubscriptionPlan);

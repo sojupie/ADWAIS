@@ -1,4 +1,4 @@
-using System;
+using Adwais.Domain;
 
 namespace Adwais.Application.DTOs.GlobalConfig;
 
@@ -19,5 +19,6 @@ public record GlobalConfigResponseDto(
     int FeedFetchIntervalHours,
     string? WeatherLocation,
     int WeatherFetchIntervalMinutes,
-    string ReportingTimeZoneId
+    string ReportingTimeZoneId,
+    string MonitoringProvider = IntegrationProviders.UptimeRobot
 );

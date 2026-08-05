@@ -5,30 +5,46 @@ import { RecurringJobsTable } from '../../components/settings/jobs/RecurringJobs
 import { ManualBackfillPanel } from '../../components/settings/jobs/ManualBackfillPanel';
 import { SettingsPanel } from '../../components/common/layout/SettingsPanel';
 import { ConsolePanel } from '../../components/common/layout/ConsolePanel';
-import { useCurrentUser } from '../../hooks/useCurrentUser';
+import { ConsoleLoadingRows } from '../../components/common/ui/ConsoleLoadingRows';
+import { useCurrentUser, type UserProfile } from '../../hooks/useCurrentUser';
 import { formatDateTime } from '../../utils/dateTime';
 
+type ManualJobAccess = 'admin' | 'staff';
 
+interface ManualJob {
+    id: string;
+    name: string;
+    desc: string;
+    access: ManualJobAccess;
+    url: string;
+}
+
+const manualJobs = [
+    { id: 'monitor-sync', name: 'Monitor Sync', desc: 'Syncs monitor states from external providers.', access: 'admin', url: '/api/job/trigger/monitor-sync' },
+    { id: 'uptime-sync', name: 'Uptime Sync', desc: 'Fetches latest uptime ping data.', access: 'admin', url: '/api/job/trigger/uptime-sync' },
+    { id: 'latency-sync', name: 'Latency Sync', desc: 'Fetches latency metrics for all monitors.', access: 'admin', url: '/api/job/trigger/latency-sync' },
+    { id: 'user-stats-sync', name: 'UptimeRobot User Stats', desc: 'Calculates active UptimeRobot user statistics.', access: 'admin', url: '/api/job/trigger/user-stats-sync' },
+    { id: 'litium-sync', name: 'Litium Sync', desc: 'Synchronizes order data from Litium.', access: 'admin', url: '/api/job/trigger/litium-sync' },
+    { id: 'feed-fetch', name: 'Feed Fetch', desc: 'Triggers aggregation of RSS, blogs, and newsrooms immediately.', access: 'admin', url: '/api/global-config/feeds/fetch' },
+    { id: 'refresh-historic-order-data', name: 'Refresh Historic Orders', desc: 'Rebuilds materialized views for old orders.', access: 'staff', url: '/api/job/trigger/refresh-historic-order-data' },
+    { id: 'refresh-monitoring-data', name: 'Refresh Monitoring', desc: 'Rebuilds monitoring materialized views.', access: 'staff', url: '/api/job/trigger/refresh-monitoring-data' },
+] satisfies readonly ManualJob[];
+
+function canTriggerManualJob(role: UserProfile['role'] | null, access: ManualJobAccess) {
+    return role === 'Admin' || (role === 'Employee' && access === 'staff');
+}
 
 export function BackgroundJobsView() {
-    const { data: recurring } = useRecurringJobsQuery();
-    const { data: tenants } = useTenantsQuery();
-    const { data: recentJobs } = useRecentJobsQuery();
+    const recurringQuery = useRecurringJobsQuery();
+    const tenantsQuery = useTenantsQuery();
+    const recentJobsQuery = useRecentJobsQuery();
+    const { data: recurring } = recurringQuery;
+    const { data: tenants } = tenantsQuery;
+    const { data: recentJobs } = recentJobsQuery;
     const { role } = useCurrentUser();
 
     const triggerJob = useTriggerJobMutation();
     const triggerBackfill = useBackfillMutation();
-
-    const manualJobs = [
-        { id: 'monitor-sync', name: 'Monitor Sync', desc: 'Syncs monitor states from external providers.', isAdminOnly: true, url: '/api/job/trigger/monitor-sync' },
-        { id: 'uptime-sync', name: 'Uptime Sync', desc: 'Fetches latest uptime ping data.', isAdminOnly: true, url: '/api/job/trigger/uptime-sync' },
-        { id: 'latency-sync', name: 'Latency Sync', desc: 'Fetches latency metrics for all monitors.', isAdminOnly: true, url: '/api/job/trigger/latency-sync' },
-        { id: 'user-stats-sync', name: 'UptimeRobot User Stats', desc: 'Calculates active UptimeRobot user statistics.', isAdminOnly: true, url: '/api/job/trigger/user-stats-sync' },
-        { id: 'litium-sync', name: 'Litium Sync', desc: 'Synchronizes order data from Litium.', isAdminOnly: true, url: '/api/job/trigger/litium-sync' },
-        { id: 'feed-fetch', name: 'Feed Fetch', desc: 'Triggers aggregation of RSS, blogs, and newsrooms immediately.', isAdminOnly: true, url: '/api/global-config/feeds/fetch' },
-        { id: 'refresh-historic-order-data', name: 'Refresh Historic Orders', desc: 'Rebuilds materialized views for old orders.', isAdminOnly: false, url: '/api/job/trigger/refresh-historic-order-data' },
-        { id: 'refresh-monitoring-data', name: 'Refresh Monitoring', desc: 'Rebuilds monitoring materialized views.', isAdminOnly: false, url: '/api/job/trigger/refresh-monitoring-data' },
-    ];
 
     return (
         <div className="grid grid-cols-1 landscape-contained:grid-cols-2 portrait-contained:grid-rows-2 gap-4 contained:h-full contained:min-h-0 pb-3">
@@ -41,7 +57,7 @@ export function BackgroundJobsView() {
                 >
                         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                             {manualJobs.map(job => {
-                                const isRestricted = job.isAdminOnly && role !== 'Admin';
+                                const isRestricted = !canTriggerManualJob(role, job.access);
                                 return (
                                     <button
                                         key={job.id}
@@ -60,7 +76,9 @@ export function BackgroundJobsView() {
                                             )}
                                             <span className="text-base h-[calc(1.5em*2)] flex items-center font-black">{job.name}</span>
                                             {isRestricted && (
-                                                <span className="ml-auto rounded-full bg-surface px-2.5 py-1 text-sm font-bold text-on-surface-variant">Admin</span>
+                                                <span className="ml-auto rounded-full bg-surface px-2.5 py-1 text-sm font-bold text-on-surface-variant">
+                                                    {job.access === 'admin' ? 'Admin' : 'Staff'}
+                                                </span>
                                             )}
                                         </div>
                                         <span className="text-sm font-medium line-clamp-2 h-[calc(1.5em*2)] leading-5 text-on-surface-variant">{job.desc}</span>
@@ -70,7 +88,13 @@ export function BackgroundJobsView() {
                         </div>
                 </SettingsPanel>
 
-                <ManualBackfillPanel tenants={tenants} triggerBackfill={triggerBackfill} disabled={role !== 'Admin'} />
+                <ManualBackfillPanel
+                    tenants={tenants}
+                    isLoading={tenantsQuery.isLoading}
+                    isError={tenantsQuery.isError}
+                    triggerBackfill={triggerBackfill}
+                    disabled={role !== 'Admin'}
+                />
             </div>
 
             {/* Scheduled Jobs Section & Console Panel / Right Pane */}
@@ -81,7 +105,11 @@ export function BackgroundJobsView() {
                     icon={<Clock size={24} />}
                     contentClassName="flex-1 min-h-0 overflow-hidden"
                 >
-                        <RecurringJobsTable recurring={recurring} />
+                        <RecurringJobsTable
+                            recurring={recurring}
+                            isLoading={recurringQuery.isLoading}
+                            isError={recurringQuery.isError}
+                        />
                 </SettingsPanel>
 
                 {/* Recent Jobs */}
@@ -91,7 +119,13 @@ export function BackgroundJobsView() {
                     icon={<Activity size={18} />}
                     className="flex-1 min-h-[400px] landscape-contained:max-h-none max-h-[500px]"
                 >
-                    {recentJobs && recentJobs.length > 0 ? (
+                    {recentJobsQuery.isLoading ? (
+                        <ConsoleLoadingRows label="Loading recent executions" />
+                    ) : recentJobsQuery.isError ? (
+                        <div role="alert" className="flex h-full items-center justify-center p-4 text-center text-console-text">
+                            Unable to load recent executions.
+                        </div>
+                    ) : recentJobs && recentJobs.length > 0 ? (
                         <div className="flex flex-col divide-y divide-console-border min-w-0">
                             {recentJobs.map((job) => {
                                 const isProcessing = job.state === 'Processing';

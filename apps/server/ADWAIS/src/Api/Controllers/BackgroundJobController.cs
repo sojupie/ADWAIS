@@ -78,7 +78,7 @@ public class BackgroundJobController : ControllerBase
     /// Triggers a refresh of the financial materialized views.
     /// </summary>
     [HttpPost("trigger/refresh-historic-order-data")]
-    [Authorize(Policy = "KioskOrStaffAccess")]
+    [Authorize(Policy = "StaffAccess")]
     public ActionResult TriggerMaterialViewRefresh()
     {
         RecurringJob.TriggerJob("refresh-financial-materialized-views");
@@ -89,7 +89,7 @@ public class BackgroundJobController : ControllerBase
     /// Triggers a refresh of all monitoring materialized views (latency and availability).
     /// </summary>
     [HttpPost("trigger/refresh-monitoring-data")]
-    [Authorize(Policy = "KioskOrStaffAccess")]
+    [Authorize(Policy = "StaffAccess")]
     public ActionResult TriggerMonitoringMaterialViewRefresh()
     {
         RecurringJob.TriggerJob("refresh-monitoring-materialized-views");

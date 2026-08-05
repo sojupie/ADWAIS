@@ -1,14 +1,16 @@
 import { CheckCircle2, Activity } from 'lucide-react';
 import { EmptyState } from '../../common/ui/EmptyState';
-import { Skeleton } from '../../common/ui/Skeleton';
+import { TableSkeletonRows } from '../../common/ui/TableSkeletonRows';
 import type { RecurringJobDto } from '@types';
 import { formatDateTime } from '../../../utils/dateTime';
 
 interface RecurringJobsTableProps {
   recurring: RecurringJobDto[] | undefined;
+  isLoading?: boolean;
+  isError?: boolean;
 }
 
-export function RecurringJobsTable({ recurring }: RecurringJobsTableProps) {
+export function RecurringJobsTable({ recurring, isLoading = recurring === undefined, isError = false }: RecurringJobsTableProps) {
   return (
     <div className="custom-scrollbar h-full w-full overflow-auto text-left text-sm">
       <table className="w-full min-w-[720px]">
@@ -21,19 +23,19 @@ export function RecurringJobsTable({ recurring }: RecurringJobsTableProps) {
             <th className="px-3 py-2">Status</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-outline-variant">
-          {recurring === undefined ? (
-            Array.from({ length: 4 }).map((_, idx) => (
-              <tr key={idx}>
-                <td className="px-3 py-2"><Skeleton className="h-4 w-28" /></td>
-                <td className="px-3 py-2"><Skeleton className="h-4 w-16" /></td>
-                <td className="px-3 py-2"><Skeleton className="h-4 w-32" /></td>
-                <td className="px-3 py-2"><Skeleton className="h-4 w-32" /></td>
-                <td className="px-3 py-2"><Skeleton className="h-4 w-20" /></td>
-              </tr>
-            ))
+        <tbody className="divide-y divide-outline-variant" aria-busy={isLoading} aria-label={isLoading ? 'Loading scheduled jobs' : undefined}>
+          {isLoading ? (
+            <TableSkeletonRows columnCount={5} />
+          ) : isError ? (
+            <tr>
+              <td colSpan={5} className="p-0">
+                <div role="alert" className="p-8 text-center text-on-surface-variant">
+                  Unable to load scheduled jobs.
+                </div>
+              </td>
+            </tr>
           ) : (
-            recurring.map((job) => (
+            recurring?.map((job) => (
               <tr key={job.id} className="transition-colors bg-surface-container-low hover:bg-surface-container">
                 <td className="px-3 py-2 font-bold text-on-surface break-words max-w-[150px]">{job.id}</td>
                 <td className="whitespace-nowrap px-3 py-2">
@@ -63,7 +65,7 @@ export function RecurringJobsTable({ recurring }: RecurringJobsTableProps) {
               </tr>
             ))
           )}
-          {recurring !== undefined && recurring.length === 0 && (
+          {!isLoading && !isError && recurring?.length === 0 && (
             <EmptyState message="No recurring jobs configured." isTableRow colSpan={5} />
           )}
         </tbody>

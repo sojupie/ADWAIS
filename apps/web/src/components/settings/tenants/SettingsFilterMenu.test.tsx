@@ -57,7 +57,12 @@ describe('SettingsFilterMenu', () => {
     fireEvent.pointerDown(prod);
     fireEvent.click(prod);
 
-    expect(setFilters).toHaveBeenCalledWith({ assignment: 'all', tag: 'PROD' });
+    expect(setFilters).toHaveBeenCalledWith({
+      assignment: 'all',
+      tag: 'PROD',
+      status: 'all',
+      type: 'all',
+    });
     expect(trigger).toHaveAttribute('aria-expanded', 'true');
   });
 });

@@ -12,7 +12,7 @@ namespace Adwais.Infrastructure.Jobs.Monitor;
 
 public class UpdateMonitorLatencyJob(
     IDbContextFactory<AnalyticsDbContext> dbContextFactory,
-    IUptimeRobotService uptimeRobotService,
+    IEnumerable<IMonitoringProvider> monitoringProviders,
     IMemoryCache cache,
     ISystemEventService eventService)
 {
@@ -29,8 +29,10 @@ public class UpdateMonitorLatencyJob(
             if (monitor == null || !monitor.UptimeMonitorEnabled) return;
 
             if (monitorId <= 0) return;
-            currentStep = "Fetching response latency time-series from UptimeRobot API";
-            var responseTime = await uptimeRobotService.GetResponseTimeAsync(monitorId, startDate, endDate, monitor.Name);
+            var monitoringProvider = monitoringProviders.ForProvider(monitor.Provider);
+            currentStep = "Fetching response latency time-series from monitoring provider";
+            var responseTime = await monitoringProvider.GetResponseTimeAsync(
+                monitor.ExternalId, startDate, endDate, monitor.Name);
 
             if (responseTime.Average.HasValue)
             {

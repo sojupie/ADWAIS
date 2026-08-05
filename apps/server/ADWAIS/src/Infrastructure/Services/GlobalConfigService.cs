@@ -39,6 +39,7 @@ public class GlobalConfigService(
         if (request.LitiumFetchEnabled.HasValue) config.LitiumFetchEnabled = request.LitiumFetchEnabled.Value;
         if (request.UptimeRobotFetchEnabled.HasValue) config.UptimeRobotFetchEnabled = request.UptimeRobotFetchEnabled.Value;
         if (request.UptimeRobotApiKey != null) config.UptimeRobotApiKey = string.IsNullOrWhiteSpace(request.UptimeRobotApiKey) ? null : request.UptimeRobotApiKey;
+        if (!string.IsNullOrWhiteSpace(request.MonitoringProvider)) config.MonitoringProvider = request.MonitoringProvider.Trim().ToLowerInvariant();
         if (request.SystemEventRetentionDays.HasValue) config.SystemEventRetentionDays = request.SystemEventRetentionDays.Value;
         if (request.FeedFetchIntervalHours.HasValue)
         {
@@ -211,7 +212,8 @@ public class GlobalConfigService(
             config.FeedFetchIntervalHours,
             config.WeatherLocation,
             config.WeatherFetchIntervalMinutes,
-            config.ReportingTimeZoneId
+            config.ReportingTimeZoneId,
+            config.MonitoringProvider
         );
     }
 

@@ -40,15 +40,16 @@ public static class DependencyInjection
 
         // Register Typed HTTP Clients with resilience policies
         services.AddTransient<UptimeRobotRateLimitHandler>();
-        services.AddHttpClient<IUptimeRobotService, UptimeRobotService>()
+        services.AddHttpClient<IMonitoringProvider, UptimeRobotService>()
             .AddHttpMessageHandler<UptimeRobotRateLimitHandler>()
             .AddStandardResilienceHandler();
 
-        services.AddHttpClient<ILitiumIngestionService, LitiumIngestionService>()
+        services.AddHttpClient<IOrderSource, LitiumOrderSource>()
             .AddStandardResilienceHandler(options =>
             {
                 options.Retry.MaxRetryAttempts = 5;
             });
+        services.AddScoped<ILitiumIngestionService, LitiumIngestionService>();
 
         services.AddHttpClient<IFeedAggregationService, FeedAggregationService>()
             .AddStandardResilienceHandler();

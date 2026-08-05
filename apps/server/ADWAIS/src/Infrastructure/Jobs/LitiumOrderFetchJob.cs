@@ -1,3 +1,4 @@
+using Adwais.Domain;
 using Adwais.Infrastructure.Persistence;
 using Hangfire;
 using Adwais.Application.Interfaces;
@@ -32,6 +33,7 @@ public class LitiumOrderFetchJob(
 
         var tenants = await db.Tenants
             .Where(t => t.OrderFetchingEnabled && t.Id != AnalyticsDbContext.SystemTenantGuid
+                        && t.OrderProvider == IntegrationProviders.Litium
                         && t.LitiumBaseUrl != null && t.ServiceAccountToken != null)
             .ToListAsync();
 

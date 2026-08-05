@@ -10,7 +10,7 @@ namespace Adwais.Infrastructure.Jobs.Monitor;
 
 public class UpdateMonitorUptimeJob(
     IDbContextFactory<AnalyticsDbContext> dbContextFactory,
-    IUptimeRobotService uptimeRobotService,
+    IEnumerable<IMonitoringProvider> monitoringProviders,
     ISystemEventService eventService)
 {
     public async Task ExecuteAsync(int monitorId, DateTimeOffset startDate, DateTimeOffset endDate)
@@ -26,8 +26,10 @@ public class UpdateMonitorUptimeJob(
             if (monitor == null || !monitor.UptimeMonitorEnabled) return;
 
             if (monitorId <= 0) return;
-            currentStep = "Fetching uptime status from UptimeRobot API";
-            var uptime = await uptimeRobotService.GetUptimeAsync(monitorId, startDate, endDate, monitor.Name);
+            var monitoringProvider = monitoringProviders.ForProvider(monitor.Provider);
+            currentStep = "Fetching uptime status from monitoring provider";
+            var uptime = await monitoringProvider.GetUptimeAsync(
+                monitor.ExternalId, startDate, endDate, monitor.Name);
 
             currentStep = "Updating Monitor uptime percentage and timestamps";
             monitor.CurrentUptimePercentage = uptime;

@@ -7,7 +7,7 @@ namespace Adwais.Infrastructure.Jobs.Monitor;
 
 public class UpdateGlobalUptimeRobotUserStatsJob(
     IDbContextFactory<AnalyticsDbContext> dbContextFactory,
-    IUptimeRobotService uptimeRobotService,
+    IEnumerable<IMonitoringProvider> monitoringProviders,
     ILogger<UpdateGlobalUptimeRobotUserStatsJob> logger,
     ISystemEventService eventService)
 {
@@ -23,7 +23,7 @@ public class UpdateGlobalUptimeRobotUserStatsJob(
 
         try
         {
-            var user = await uptimeRobotService.GetAccountDetailsAsync();
+            var user = await monitoringProviders.ForProvider(config.MonitoringProvider).GetAccountDetailsAsync();
             config.MonitorsCount = user.MonitorsCount;
             config.MonitorsLimit = user.MonitorLimit;
             config.ActiveSubscription = user.ActiveSubscriptionPlan;

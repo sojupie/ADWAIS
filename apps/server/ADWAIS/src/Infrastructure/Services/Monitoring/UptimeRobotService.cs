@@ -13,8 +13,10 @@ namespace Adwais.Infrastructure.Services.Monitoring;
 public class UptimeRobotService(
     HttpClient httpClient, 
     IDbContextFactory<AnalyticsDbContext> contextFactory,
-    ISystemEventService eventService) : IUptimeRobotService
+    ISystemEventService eventService) : IMonitoringProvider
 {
+    public string Provider => "uptimerobot";
+
     private async Task<string> GetApiKeyAsync()
     {
         using var context = await contextFactory.CreateDbContextAsync();
@@ -45,17 +47,17 @@ public class UptimeRobotService(
         return JsonDocument.Parse(responseContent);
     }
 
-    public async Task<UptimeRobotMonitorDto> CreateMonitorAsync(string name, string url, string? type)
+    public async Task<MonitoringProviderMonitor> CreateMonitorAsync(string name, string url, string? type)
     {
         var normalizedType = UptimeMonitorTypes.Normalize(type);
         var request = new HttpRequestMessage(HttpMethod.Post, "https://api.uptimerobot.com/v3/monitors");
         request.Content = JsonContent.Create(new { friendlyName = name, url, type = normalizedType, interval = 300, timeout = 60 });
         using var response = await GetResponseAsync(request, $"Create: {name}");
         
-        var monitor = new UptimeRobotMonitorDto(
-            Id: response.RootElement.GetProperty("id").GetInt32(),
+        var monitor = new MonitoringProviderMonitor(
+            ExternalId: response.RootElement.GetProperty("id").GetInt32().ToString(CultureInfo.InvariantCulture),
             Type: ParseType(response.RootElement, normalizedType),
-            FriendlyName: response.RootElement.GetProperty("friendlyName").GetString()!,
+            Name: response.RootElement.GetProperty("friendlyName").GetString()!,
             Url: response.RootElement.GetProperty("url").GetString()!,
             Status: response.RootElement.GetProperty("status").GetString()!,
             CreatedDate: response.RootElement.GetProperty("createDateTime").GetDateTimeOffset(),
@@ -72,7 +74,7 @@ public class UptimeRobotService(
         return monitor;
     }
 
-    public async Task UpdateMonitorAsync(int monitorId, string? name, string? url, string? type, List<string>? tags)
+    public async Task UpdateMonitorAsync(string externalId, string? name, string? url, string? type, List<string>? tags)
     {
         var payload = new Dictionary<string, object>();
         if (name != null)
@@ -97,6 +99,7 @@ public class UptimeRobotService(
             return;
         }
 
+        var monitorId = ParseExternalId(externalId);
         var request = new HttpRequestMessage(HttpMethod.Patch, $"https://api.uptimerobot.com/v3/monitors/{monitorId}")
         {
             Content = JsonContent.Create(payload)
@@ -104,15 +107,15 @@ public class UptimeRobotService(
         using var response = await GetResponseAsync(request, $"Update: {name ?? "Unspecified"} ({monitorId})");
     }
 
-    public async Task<List<UptimeRobotMonitorDto>> GetMonitorsAsync(int[]? monitorIds = null)
+    public async Task<List<MonitoringProviderMonitor>> GetMonitorsAsync(IReadOnlyCollection<string>? externalIds = null)
     {
-        var monitors = new List<UptimeRobotMonitorDto>();
+        var monitors = new List<MonitoringProviderMonitor>();
         var baseUrl = "https://api.uptimerobot.com/v3/monitors";
         var queryParams = new List<string> { "limit=200" };
 
-        if (monitorIds is { Length: > 0 })
+        if (externalIds is { Count: > 0 })
         {
-            queryParams.Add($"monitors={string.Join("-", monitorIds)}");
+            queryParams.Add($"monitors={string.Join("-", externalIds.Select(ParseExternalId))}");
         }
 
         var nextUrl = $"{baseUrl}?{string.Join("&", queryParams)}";
@@ -127,10 +130,10 @@ public class UptimeRobotService(
             {
                 foreach (var monitor in dataProp.EnumerateArray())
                 {
-                    monitors.Add(new UptimeRobotMonitorDto(
-                        Id: monitor.GetProperty("id").GetInt32(),
+                    monitors.Add(new MonitoringProviderMonitor(
+                        ExternalId: monitor.GetProperty("id").GetInt32().ToString(CultureInfo.InvariantCulture),
                         Type: ParseType(monitor),
-                        FriendlyName: monitor.GetProperty("friendlyName").GetString()!,
+                        Name: monitor.GetProperty("friendlyName").GetString()!,
                         Url: monitor.GetProperty("url").GetString()!,
                         Status: monitor.GetProperty("status").GetString()!,
                         CreatedDate: monitor.GetProperty("createDateTime").GetDateTimeOffset(),
@@ -287,7 +290,7 @@ public class UptimeRobotService(
             .ToList();
     }
 
-    private static UptimeRobotIncidentDto? ParseIncident(JsonElement monitorElement)
+    private static MonitoringProviderIncident? ParseIncident(JsonElement monitorElement)
     {
         if (!monitorElement.TryGetProperty("lastIncident", out var incident)
             || incident.ValueKind != JsonValueKind.Object)
@@ -295,7 +298,7 @@ public class UptimeRobotService(
             return null;
         }
 
-        return new UptimeRobotIncidentDto(
+        return new MonitoringProviderIncident(
             ParseScalarString(incident, "id"),
             ParseScalarString(incident, "status"),
             ParseScalarString(incident, "cause"),
@@ -304,8 +307,9 @@ public class UptimeRobotService(
             ParseNullableLong(incident, "duration"));
     }
     
-    public async Task<double> GetUptimeAsync(int monitorId, DateTimeOffset? startDate = null, DateTimeOffset? endDate = null, string? monitorName = null)
+    public async Task<double> GetUptimeAsync(string externalId, DateTimeOffset? startDate = null, DateTimeOffset? endDate = null, string? monitorName = null)
     {
+        var monitorId = ParseExternalId(externalId);
         var url = $"https://api.uptimerobot.com/v3/monitors/{monitorId}/stats/uptime";
         if (startDate.HasValue && endDate.HasValue)
         {
@@ -318,8 +322,9 @@ public class UptimeRobotService(
         return response.RootElement.GetProperty("uptime").GetDouble();
     }
         
-    public async Task<(int? Average, int? Lowest, int? Highest)> GetResponseTimeAsync(int monitorId, DateTimeOffset? startDate = null, DateTimeOffset? endDate = null, string? monitorName = null)
+    public async Task<(int? Average, int? Lowest, int? Highest)> GetResponseTimeAsync(string externalId, DateTimeOffset? startDate = null, DateTimeOffset? endDate = null, string? monitorName = null)
     {
+        var monitorId = ParseExternalId(externalId);
         var url = $"https://api.uptimerobot.com/v3/monitors/{monitorId}/stats/response-time";
         if (startDate.HasValue && endDate.HasValue)
         {
@@ -338,27 +343,30 @@ public class UptimeRobotService(
         return (avg, lowest, highest);
     }
 
-    public async Task DeleteMonitorAsync(int monitorId)
+    public async Task DeleteMonitorAsync(string externalId)
     {
+        var monitorId = ParseExternalId(externalId);
         var request = new HttpRequestMessage(HttpMethod.Delete, $"https://api.uptimerobot.com/v3/monitors/{monitorId}");
         await GetResponseAsync(request, $"Delete MonitorId: {monitorId}");
     }
 
-    public async Task PauseMonitorAsync(int monitorId)
+    public async Task PauseMonitorAsync(string externalId)
     {
+        var monitorId = ParseExternalId(externalId);
         var request = new HttpRequestMessage(HttpMethod.Post, $"https://api.uptimerobot.com/v3/monitors/{monitorId}/pause");
         request.Content = new StringContent(string.Empty, System.Text.Encoding.UTF8, "application/json");
         await GetResponseAsync(request, $"Pause MonitorId: {monitorId}");
     }
 
-    public async Task StartMonitorAsync(int monitorId)
+    public async Task StartMonitorAsync(string externalId)
     {
+        var monitorId = ParseExternalId(externalId);
         var request = new HttpRequestMessage(HttpMethod.Post, $"https://api.uptimerobot.com/v3/monitors/{monitorId}/start");
         request.Content = new StringContent(string.Empty, System.Text.Encoding.UTF8, "application/json");
         await GetResponseAsync(request, $"Start MonitorId: {monitorId}");
     }
 
-    public async Task<UptimeRobotUserDto> GetAccountDetailsAsync()
+    public async Task<MonitoringProviderAccount> GetAccountDetailsAsync()
     {
         var request = new HttpRequestMessage(HttpMethod.Get, "https://api.uptimerobot.com/v3/user/me");
         using var response = await GetResponseAsync(request, "GetAccountDetails");
@@ -366,7 +374,7 @@ public class UptimeRobotService(
         var root = response.RootElement;
         var sub = root.GetProperty("activeSubscription");
 
-        return new UptimeRobotUserDto(
+        return new MonitoringProviderAccount(
             Email: root.GetProperty("email").GetString()!,
             FullName: root.GetProperty("fullName").GetString()!,
             MonitorsCount: root.GetProperty("monitorsCount").GetInt32(),
@@ -374,6 +382,11 @@ public class UptimeRobotService(
             ActiveSubscriptionPlan: sub.GetProperty("plan").GetString()!
         );
     }
+
+    private static int ParseExternalId(string externalId)
+        => int.TryParse(externalId, NumberStyles.None, CultureInfo.InvariantCulture, out var monitorId) && monitorId > 0
+            ? monitorId
+            : throw new ArgumentException("UptimeRobot monitor IDs must be positive integers.", nameof(externalId));
 }
 
 

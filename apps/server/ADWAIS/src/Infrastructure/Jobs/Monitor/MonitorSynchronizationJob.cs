@@ -12,7 +12,7 @@ namespace Adwais.Infrastructure.Jobs.Monitor;
 
 public class MonitorSynchronizationJob(
     IDbContextFactory<AnalyticsDbContext> dbContextFactory,
-    IUptimeRobotService uptimeRobotService,
+    IEnumerable<IMonitoringProvider> monitoringProviders,
     IMemoryCache cache,
     IRecurringJobManager recurringJobManager)
 {
@@ -20,21 +20,27 @@ public class MonitorSynchronizationJob(
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var globalConfig = await dbContext.GlobalConfigs.SingleOrDefaultAsync();
-        if (globalConfig == null || string.IsNullOrWhiteSpace(globalConfig.UptimeRobotApiKey) || !globalConfig.UptimeRobotFetchEnabled)
+        if (globalConfig == null
+            || string.IsNullOrWhiteSpace(globalConfig.UptimeRobotApiKey)
+            || !globalConfig.UptimeRobotFetchEnabled)
         {
             return;
         }
+        var monitoringProvider = monitoringProviders.ForProvider(globalConfig.MonitoringProvider);
         
-        var upStreamMonitors = await uptimeRobotService.GetMonitorsAsync();
+        var upStreamMonitors = await monitoringProvider.GetMonitorsAsync();
         
         var lowestIntervalMins = upStreamMonitors.Any() 
             ? Math.Max(1, upStreamMonitors.Min(m => m.UpdateInterval) / 60)
             : 5;
-        recurringJobManager.AddOrUpdate<MonitorSynchronizationJob>("sync-uptimerobot-fleet", job => job.ExecuteAsync(), Cron.MinuteInterval(lowestIntervalMins));
+        recurringJobManager.AddOrUpdate<MonitorSynchronizationJob>("sync-monitoring-fleet", job => job.ExecuteAsync(), Cron.MinuteInterval(lowestIntervalMins));
 
-        var localMonitors = await dbContext.Monitors.ToDictionaryAsync(m => m.Id);
+        var localMonitors = await dbContext.Monitors
+            .Where(monitor => monitor.Provider == monitoringProvider.Provider)
+            .ToListAsync();
+        var localByExternalId = localMonitors.ToDictionary(monitor => monitor.ExternalId, StringComparer.Ordinal);
         var cronExpression = JobStorage.Current.GetConnection().GetRecurringJobs()
-            .SingleOrDefault(j => j.Id == "sync-uptimerobot-fleet")?.Cron;
+            .SingleOrDefault(j => j.Id == "sync-monitoring-fleet")?.Cron;
         
         TimeSpan cacheDuration = TimeSpan.FromMinutes(6);
         
@@ -54,19 +60,13 @@ public class MonitorSynchronizationJob(
             catch (CronFormatException) { }
         }
         
+        var liveStates = new List<(UptimeMonitor Monitor, string Status)>();
         foreach (var remote in upStreamMonitors)
         {
-            var existing = cache.TryGetValue(GlobalCacheKeys.MonitorState(remote.Id), out LiveMonitorState? state) ? state : null;
-
-            cache.Set(
-                GlobalCacheKeys.MonitorState(remote.Id),
-                new LiveMonitorState(remote.Status, existing?.CurrentLatency),
-                cacheDuration
-            );
-            if (localMonitors.TryGetValue(remote.Id, out var local))
+            if (localByExternalId.TryGetValue(remote.ExternalId, out var local))
             {
                 local.Type = remote.Type;
-                local.Name = remote.FriendlyName;
+                local.Name = remote.Name;
                 local.Url = remote.Url;
                 local.UpdateInterval = remote.UpdateInterval;
                 local.HttpMethod = remote.HttpMethod;
@@ -75,7 +75,7 @@ public class MonitorSynchronizationJob(
                 local.DomainExpiresAt = remote.DomainExpiresAt;
                 local.MonitoredRegions = remote.MonitoredRegions ?? [];
                 local.CurrentStateDurationSeconds = remote.CurrentStateDurationSeconds;
-                local.LastIncidentId = remote.LastIncident?.Id;
+                local.LastIncidentId = remote.LastIncident?.ExternalId;
                 local.LastIncidentStatus = remote.LastIncident?.Status;
                 local.LastIncidentCause = remote.LastIncident?.Cause;
                 local.LastIncidentReason = remote.LastIncident?.Reason;
@@ -89,12 +89,13 @@ public class MonitorSynchronizationJob(
             else
             {
                 var monitorState = !remote.Status.Equals("PAUSED");
-                dbContext.Monitors.Add(new UptimeMonitor
+                local = new UptimeMonitor
                 {
-                    Id = remote.Id,
                     TenantId = AnalyticsDbContext.SystemTenantGuid,
+                    Provider = monitoringProvider.Provider,
+                    ExternalId = remote.ExternalId,
                     Type = remote.Type,
-                    Name = remote.FriendlyName,
+                    Name = remote.Name,
                     Url = remote.Url,
                     UpdateInterval = remote.UpdateInterval,
                     HttpMethod = remote.HttpMethod,
@@ -103,7 +104,7 @@ public class MonitorSynchronizationJob(
                     DomainExpiresAt = remote.DomainExpiresAt,
                     MonitoredRegions = remote.MonitoredRegions ?? [],
                     CurrentStateDurationSeconds = remote.CurrentStateDurationSeconds,
-                    LastIncidentId = remote.LastIncident?.Id,
+                    LastIncidentId = remote.LastIncident?.ExternalId,
                     LastIncidentStatus = remote.LastIncident?.Status,
                     LastIncidentCause = remote.LastIncident?.Cause,
                     LastIncidentReason = remote.LastIncident?.Reason,
@@ -114,16 +115,28 @@ public class MonitorSynchronizationJob(
                     StatusStr = remote.Status,
                     LastUpdate = DateTimeOffset.UtcNow,
                     Tags = remote.Tags
-                });
+                };
+                dbContext.Monitors.Add(local);
             }
+
+            liveStates.Add((local, remote.Status));
         }
 
-        var upStreamIds = upStreamMonitors.Select(m => m.Id).ToHashSet();
-        var toDelete = localMonitors.Values.Where(m => m.Id > 0 && !upStreamIds.Contains(m.Id));
+        var upStreamIds = upStreamMonitors.Select(monitor => monitor.ExternalId).ToHashSet(StringComparer.Ordinal);
+        var toDelete = localMonitors.Where(monitor => !upStreamIds.Contains(monitor.ExternalId));
         
         dbContext.Monitors.RemoveRange(toDelete);
 
         await dbContext.SaveChangesAsync();
+
+        foreach (var (monitor, status) in liveStates)
+        {
+            var existing = cache.TryGetValue(GlobalCacheKeys.MonitorState(monitor.Id), out LiveMonitorState? state) ? state : null;
+            cache.Set(
+                GlobalCacheKeys.MonitorState(monitor.Id),
+                new LiveMonitorState(status, existing?.CurrentLatency),
+                cacheDuration);
+        }
     }
 }
 

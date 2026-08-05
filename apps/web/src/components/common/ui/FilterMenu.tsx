@@ -40,13 +40,13 @@ export function FilterSectionHeader({ label, active, onClear }: {
 }) {
   return (
     <div className="flex min-h-9 items-center justify-between gap-3">
-      <span className="text-sm font-black uppercase tracking-widest text-on-surface-variant md:text-md">{label}</span>
+      <span className="text-sm font-black uppercase tracking-widest text-on-surface-variant md:text-base">{label}</span>
       <button
         type="button"
         disabled={!active}
         onClick={onClear}
         aria-label={`Clear ${label.toLowerCase()}`}
-        className="min-h-9 cursor-pointer rounded-full bg-surface-container-low px-3 py-1 text-sm font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high disabled:pointer-events-none disabled:opacity-0 md:text-md"
+        className="min-h-9 cursor-pointer rounded-full bg-surface-container-low px-3 py-1 text-sm font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high disabled:pointer-events-none disabled:opacity-0 md:text-base"
       >
         Clear
       </button>
@@ -66,7 +66,7 @@ export function FilterChip({ label, checked, disabled = false, onChange }: {
       aria-pressed={checked}
       disabled={disabled}
       onClick={onChange}
-      className={`inline-flex h-8 cursor-pointer items-center rounded-lg border text-sm font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-secondary/40 disabled:cursor-not-allowed disabled:border-transparent disabled:bg-on-surface/[0.10] disabled:text-on-surface/[0.38] md:text-md ${checked
+      className={`inline-flex h-8 cursor-pointer items-center rounded-lg border text-sm font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-secondary/40 disabled:cursor-not-allowed disabled:border-transparent disabled:bg-on-surface/[0.10] disabled:text-on-surface/[0.38] md:text-base ${checked
         ? 'gap-2 border-transparent bg-secondary-container px-2 text-on-secondary-container hover:bg-secondary-container/80'
         : 'border-outline-variant bg-surface px-4 text-on-surface-variant hover:bg-surface-container-low'
       }`}
@@ -91,7 +91,7 @@ export function FilterPanelFrame({ title, children, embedded = false, floatingSt
         : 'custom-scrollbar fixed z-[200] flex flex-col gap-4 overflow-y-auto rounded-3xl border border-outline-variant bg-surface p-4 m3-elevation-4'}
     >
       <div className="flex items-center gap-4 border-b border-outline-variant pb-3">
-        <h2 className="m-0 text-md font-black text-on-surface">{title}</h2>
+        <h2 className="m-0 text-base font-black text-on-surface">{title}</h2>
       </div>
       {children}
     </div>
@@ -209,7 +209,7 @@ export function FloatingFilterMenu({
           onClick={toggleMenu}
           aria-expanded={isOpen}
           aria-label={activeCount > 0 ? `Filters, ${activeCount} active` : 'Filters'}
-          className={`flex h-11 cursor-pointer items-center gap-2 rounded-l-[18px] rounded-r-[4px] px-4 text-md font-bold text-on-surface outline-none transition-colors focus-visible:ring-2 focus-visible:ring-secondary ${
+          className={`flex h-11 cursor-pointer items-center gap-2 rounded-l-[18px] rounded-r-[4px] px-4 text-base font-bold text-on-surface outline-none transition-colors focus-visible:ring-2 focus-visible:ring-secondary ${
             triggerClassName || 'bg-surface hover:bg-surface-container'
           }`}
         >
@@ -260,7 +260,7 @@ export function FloatingFilterMenu({
         onClick={toggleMenu}
         aria-expanded={isOpen}
         aria-label={activeCount > 0 ? `Filters, ${activeCount} active` : 'Filters'}
-        className="flex h-14 cursor-pointer items-center justify-center gap-2 rounded-l-[28px] rounded-r-[8px] bg-surface px-5 py-2 text-md font-black uppercase tracking-widest outline-none transition-shadow m3-elevation-1 hover:m3-elevation-2 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-secondary md:text-md"
+        className="flex h-14 cursor-pointer items-center justify-center gap-2 rounded-l-[28px] rounded-r-[8px] bg-surface px-5 py-2 text-base font-bold outline-none transition-shadow m3-elevation-1 hover:m3-elevation-2 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-secondary"
       >
         <Filter aria-hidden="true" size={18}/>
         Filters

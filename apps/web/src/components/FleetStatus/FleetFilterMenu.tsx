@@ -40,7 +40,7 @@ function UnavailableTag({ tag, onRemove }: { tag: string; onRemove: () => void }
       onClick={onRemove}
       aria-label={`Remove unavailable tag ${tag}`}
       title="This tag is not present on any currently available monitor"
-      className="inline-flex min-h-8 cursor-pointer items-center gap-1.5 rounded-lg border border-dashed border-error bg-error-container px-2 text-sm font-bold text-on-error-container transition-colors hover:bg-error/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary md:text-md"
+      className="inline-flex min-h-8 cursor-pointer items-center gap-1.5 rounded-lg border border-dashed border-error bg-error-container px-2 text-sm font-bold text-on-error-container transition-colors hover:bg-error/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary md:text-base"
     >
       <span>{tag}</span>
       <span className="font-medium">(unavailable)</span>
@@ -76,7 +76,7 @@ function PreferenceButton({
       type="button"
       disabled={disabled}
       onClick={onClick}
-      className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-full border border-outline-variant bg-surface px-4 text-sm font-bold text-on-surface transition-colors hover:bg-surface-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary disabled:cursor-not-allowed disabled:bg-on-surface/[0.10] disabled:text-on-surface/[0.38] md:text-md"
+      className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-full border border-outline-variant bg-surface px-4 text-sm font-bold text-on-surface transition-colors hover:bg-surface-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary disabled:cursor-not-allowed disabled:bg-on-surface/[0.10] disabled:text-on-surface/[0.38] md:text-base"
     >
       {children}
     </button>
@@ -124,7 +124,7 @@ export function FleetFilterPanel({
           active={hiddenStatuses.length > 0}
           onClear={() => onHiddenStatusesChange([])}
         />
-        <p className="mb-2 text-sm text-on-surface-variant md:text-md">
+        <p className="mb-2 text-sm text-on-surface-variant md:text-base">
           Uncheck a status to hide it from the matrix and aggregate facts.
         </p>
         <div className="flex flex-wrap gap-2">
@@ -145,7 +145,7 @@ export function FleetFilterPanel({
           active={includedTags.length > 0}
           onClear={() => onIncludedTagsChange([])}
         />
-        <p className="mb-2 text-sm text-on-surface-variant md:text-md">
+        <p className="mb-2 text-sm text-on-surface-variant md:text-base">
           When selected, monitors matching any included tag are shown.
         </p>
         <div className="custom-scrollbar flex max-h-28 flex-wrap gap-2 overflow-y-auto pr-1">
@@ -165,7 +165,7 @@ export function FleetFilterPanel({
             />
           ))}
           {availableTags.length === 0 && unavailableIncludedTags.length === 0 && (
-            <span className="text-sm italic text-on-surface-variant md:text-md">No tags available</span>
+            <span className="text-sm italic text-on-surface-variant md:text-base">No tags available</span>
           )}
         </div>
       </div>
@@ -176,7 +176,7 @@ export function FleetFilterPanel({
           active={excludedTags.length > 0}
           onClear={() => onExcludedTagsChange([])}
         />
-        <p className="mb-2 text-sm text-on-surface-variant md:text-md">
+        <p className="mb-2 text-sm text-on-surface-variant md:text-base">
           Excluded tags take precedence over included tags.
         </p>
         <div className="custom-scrollbar flex max-h-28 flex-wrap gap-2 overflow-y-auto pr-1">
@@ -196,16 +196,16 @@ export function FleetFilterPanel({
             />
           ))}
           {availableTags.length === 0 && unavailableExcludedTags.length === 0 && (
-            <span className="text-sm italic text-on-surface-variant md:text-md">No tags available</span>
+            <span className="text-sm italic text-on-surface-variant md:text-base">No tags available</span>
           )}
         </div>
       </div>
 
       <div className="border-t border-outline-variant pt-4">
-        <h3 className="text-sm font-black uppercase tracking-widest text-on-surface-variant md:text-md">
+        <h3 className="text-sm font-black uppercase tracking-widest text-on-surface-variant md:text-base">
           Saved defaults
         </h3>
-        <p className="mt-1 text-sm text-on-surface-variant md:text-md">
+        <p className="mt-1 text-sm text-on-surface-variant md:text-base">
           Saved defaults are restored the next time you open Fleet Status.
         </p>
         <div className="mt-3 flex flex-wrap gap-2">

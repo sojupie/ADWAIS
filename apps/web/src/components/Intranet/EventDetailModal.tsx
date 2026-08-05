@@ -62,7 +62,7 @@ export function EventDetailModal({
             )}
           </div>
           
-          <div className="flex flex-col gap-4 text-on-surface-variant text-sm border-t border-outline-variant pt-4">
+          <div className="flex flex-col gap-4 text-on-surface-variant text-base border-t border-outline-variant pt-4">
             <div className="flex items-center gap-4">
               <Clock size={16} className="text-on-surface-variant shrink-0" />
               <span className="font-bold text-on-surface">{getEventRangeLabel(event)}</span>

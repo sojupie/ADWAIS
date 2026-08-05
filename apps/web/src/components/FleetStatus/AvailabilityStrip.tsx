@@ -65,7 +65,7 @@ export function AvailabilityStrip({
   const radiusClass = points.length > 45 ? 'rounded-sm' : 'rounded-md';
 
   if (points.length === 0) {
-    return <p className="text-md font-medium text-on-surface-variant">No availability data for this period.</p>;
+    return <p className="text-base font-medium text-on-surface-variant">No availability data for this period.</p>;
   }
 
   return (
@@ -107,12 +107,12 @@ export function AvailabilityStrip({
       <div className="flex flex-wrap items-baseline justify-between gap-2 min-h-10 rounded-xl bg-surface-container px-3 py-2">
         {activePoint ? (
           <>
-            <span className="font-bold text-md text-on-surface">
+            <span className="font-bold text-base text-on-surface">
               {formatRange(activePoint)}{activePoint.isPartial ? ' · Partial period' : ''}
             </span>
             <span className="font-black text-xl text-on-surface">{formatUptime(activePoint.uptimePercentage)}</span>
             {aggregate && activePoint.monitorCount > 0 && (
-              <span className="w-full text-md font-bold text-on-surface-variant">
+              <span className="w-full text-base font-bold text-on-surface-variant">
                 {activePoint.monitorCount} monitor{activePoint.monitorCount === 1 ? '' : 's'} · Worst {formatUptime(activePoint.lowestMonitorUptimePercentage)}
               </span>
             )}

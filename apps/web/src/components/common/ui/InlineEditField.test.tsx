@@ -11,7 +11,7 @@ describe('FormField', () => {
 
     const input = screen.getByRole('textbox', { name: 'Title' });
     expect(input).toHaveAccessibleDescription('Keep it short');
-    expect(input).toHaveClass('bg-surface-container', 'focus:bg-primary-container');
+    expect(input.parentElement).toHaveClass('bg-surface-container', 'focus-within:bg-primary-container');
 
     rerender(
       <FormField label="Title" error="A title is required" value="" onChange={() => undefined} />,
@@ -26,8 +26,8 @@ describe('FormField', () => {
       <FormField label="Endpoint" variant="outlined" value="" onChange={() => undefined} />,
     );
 
-    expect(screen.getByRole('textbox', { name: 'Endpoint' }))
-      .toHaveClass('border-outline-variant', 'bg-surface');
+    expect(screen.getByRole('textbox', { name: 'Endpoint' }).parentElement)
+      .toHaveClass('border-outline', 'bg-surface');
   });
 
   it('uses the custom Select while preserving native change events', () => {

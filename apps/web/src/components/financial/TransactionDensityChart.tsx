@@ -177,7 +177,7 @@ export const TransactionDensityChart = memo(function TransactionDensityChart({
           <span className="mt-1 block text-xs font-bold uppercase tracking-wider text-on-surface-variant">transactions</span>
         </div>
         <div className="w-36 min-w-28" aria-label={`Density ranges from ${minCount} to ${maxCount} transactions per bucket`}>
-          <div className="mb-1 flex justify-between text-md font-bold tabular-nums text-on-surface-variant">
+          <div className="mb-1 flex justify-between text-base font-bold tabular-nums text-on-surface-variant">
             <span>{formatNumber(minCount)}</span>
             <span>{formatNumber(maxCount)}</span>
           </div>

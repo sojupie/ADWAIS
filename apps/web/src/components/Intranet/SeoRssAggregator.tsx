@@ -19,7 +19,7 @@ export function SeoRssAggregator() {
           ))}
         </div>
       ) : feedItems.length === 0 ? (
-        <div className="p-4 text-center text-on-surface-variant text-md font-semibold py-8">
+        <div className="p-4 text-center text-on-surface-variant text-base font-semibold py-8">
           No feeds available.
         </div>
       ) : (

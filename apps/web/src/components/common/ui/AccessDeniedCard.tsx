@@ -2,7 +2,7 @@ import { ShieldAlert } from 'lucide-react';
 
 export function AccessDeniedCard({ message = "You don't have permission to view this component." }: { message?: string }) {
   return (
-    <div className="flex flex-col items-center justify-center p-8 bg-brand-bg-primary border border-red-200 rounded-xl text-center h-full min-h-[200px]">
+    <div className="flex flex-col items-center justify-center p-8 bg-brand-bg-primary border border-outline rounded-xl text-center h-full min-h-[200px]">
       <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-4 text-red-500">
         <ShieldAlert size={24} />
       </div>

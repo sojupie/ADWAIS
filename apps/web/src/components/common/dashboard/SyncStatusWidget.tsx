@@ -62,7 +62,7 @@ function CountdownRing({resetKey, syncError}: { resetKey: number; syncError: boo
           className={`${syncError ? 'text-error' : 'text-primary'} transition-all duration-1000 ease-linear`}
         />
       </svg>
-      <div ref={textRef} className="absolute inset-0 flex items-center justify-center text-md font-bold font-mono">
+      <div ref={textRef} className="absolute inset-0 flex items-center justify-center text-base font-bold font-mono">
         60
       </div>
     </div>

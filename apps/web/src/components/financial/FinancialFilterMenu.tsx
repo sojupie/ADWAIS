@@ -79,7 +79,7 @@ export function FinancialFilterPanel({
           variant="outlined"
           size="md"
           containerClassName="mt-1"
-          className="md:text-md"
+          className="md:text-base"
         >
           <option value="">Global portfolio</option>
           {tenantOptions.map(tenant => (

@@ -17,6 +17,12 @@ public class UpdateGlobalConfigRequestDtoValidator : AbstractValidator<UpdateGlo
             .When(x => x.FeedFetchIntervalHours.HasValue)
             .WithMessage("Feed fetch interval must be at least 1 hour.");
 
+        RuleFor(x => x.MonitoringProvider)
+            .NotEmpty()
+            .MaximumLength(100)
+            .Matches("^[a-z0-9-]+$")
+            .When(x => x.MonitoringProvider is not null);
+
         RuleFor(x => x.ReportingTimeZoneId)
             .NotEmpty()
             .MaximumLength(100)

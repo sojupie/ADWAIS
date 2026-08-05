@@ -229,14 +229,16 @@ public class FinancialController(
         var result = await financialService.GetOrdersAsync(request.DateSince, request.DateUntil, request.CeilingCount, ct);
         return Ok(result.Select(p => new OrderDto(
             AdwaisOrderId: p.AdwaisOrderId,
-            LitiumOrderId: p.LitiumOrderId,
+            OrderNumber: p.OrderNumber,
             AdwaisTenantId: p.AdwaisTenantId,
             OrderState: p.OrderState,
             CreatedDate: p.CreatedDate,
             TotalValueIncVat: p.TotalValueIncVat,
             TotalValueExcVat: p.TotalValueExcVat,
             Currency: p.Currency,
-            TenantName: p.TenantName)).ToList());
+            TenantName: p.TenantName,
+            Provider: p.Provider,
+            ExternalId: p.ExternalId)).ToList());
     }
 }
 

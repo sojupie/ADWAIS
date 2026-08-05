@@ -9,6 +9,10 @@ public class CreateTenantRequestDtoValidator : AbstractValidator<CreateTenantReq
     {
         RuleFor(x => x.Name).NotEmpty().
             WithMessage("Name is required.");
+        RuleFor(x => x.OrderProvider)
+            .NotEmpty()
+            .MaximumLength(100)
+            .Matches("^[a-z0-9-]+$");
         
         RuleFor(x => x.LitiumBaseUrl).NotEmpty().
             WithMessage("LitiumBaseUrl is required when order fetching is enabled.")

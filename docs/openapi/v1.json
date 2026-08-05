@@ -3763,6 +3763,10 @@
             "type": "string",
             "nullable": true
           },
+          "orderProvider": {
+            "type": "string",
+            "nullable": true
+          },
           "imageUrl": {
             "type": "string",
             "nullable": true
@@ -4126,6 +4130,10 @@
             "format": "int32"
           },
           "reportingTimeZoneId": {
+            "type": "string",
+            "nullable": true
+          },
+          "monitoringProvider": {
             "type": "string",
             "nullable": true
           }
@@ -4626,7 +4634,7 @@
       },
       "Order": {
         "required": [
-          "litiumOrderId"
+          "orderNumber"
         ],
         "type": "object",
         "properties": {
@@ -4638,6 +4646,14 @@
             "type": "string",
             "format": "uuid"
           },
+          "provider": {
+            "type": "string",
+            "nullable": true
+          },
+          "externalId": {
+            "type": "string",
+            "nullable": true
+          },
           "organizationSystemId": {
             "type": "string",
             "format": "uuid",
@@ -4646,7 +4662,7 @@
           "orderState": {
             "$ref": "#/components/schemas/OrderState"
           },
-          "litiumOrderId": {
+          "orderNumber": {
             "type": "string",
             "nullable": true
           },
@@ -4709,7 +4725,7 @@
             "type": "string",
             "format": "uuid"
           },
-          "litiumOrderId": {
+          "orderNumber": {
             "type": "string",
             "nullable": true
           },
@@ -4737,6 +4753,14 @@
             "nullable": true
           },
           "tenantName": {
+            "type": "string",
+            "nullable": true
+          },
+          "provider": {
+            "type": "string",
+            "nullable": true
+          },
+          "externalId": {
             "type": "string",
             "nullable": true
           }
@@ -5083,6 +5107,10 @@
             "type": "string",
             "nullable": true
           },
+          "orderProvider": {
+            "type": "string",
+            "nullable": true
+          },
           "imageUrl": {
             "type": "string",
             "nullable": true
@@ -5148,6 +5176,10 @@
             "$ref": "#/components/schemas/TenantType"
           },
           "litiumBaseUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "orderProvider": {
             "type": "string",
             "nullable": true
           },
@@ -5403,6 +5435,10 @@
           "reportingTimeZoneId": {
             "type": "string",
             "nullable": true
+          },
+          "monitoringProvider": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -5515,6 +5551,10 @@
             "type": "string",
             "nullable": true
           },
+          "orderProvider": {
+            "type": "string",
+            "nullable": true
+          },
           "imageUrl": {
             "type": "string",
             "nullable": true
@@ -5557,6 +5597,14 @@
           "tenantId": {
             "type": "string",
             "format": "uuid"
+          },
+          "provider": {
+            "type": "string",
+            "nullable": true
+          },
+          "externalId": {
+            "type": "string",
+            "nullable": true
           },
           "type": {
             "type": "string",
@@ -5705,9 +5753,11 @@
         "required": [
           "currentStateDurationSeconds",
           "domainExpiresAt",
+          "externalId",
           "httpMethod",
           "latestIncident",
           "monitoredRegions",
+          "provider",
           "sslExpiresAt",
           "tenantBaseUrl",
           "tenantImageUrl",
@@ -5842,6 +5892,14 @@
           },
           "latestIncident": {
             "$ref": "#/components/schemas/MonitorIncidentDto"
+          },
+          "provider": {
+            "type": "string",
+            "nullable": true
+          },
+          "externalId": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false

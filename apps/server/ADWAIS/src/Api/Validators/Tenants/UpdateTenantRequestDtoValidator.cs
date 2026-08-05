@@ -9,6 +9,11 @@ public class UpdateTenantRequestDtoValidator :  AbstractValidator<UpdateTenantRe
     {
         RuleFor(x => x.Name).NotEmpty().WithMessage("Name cannot be empty.")
             .When(x => x.Name is not null);
+        RuleFor(x => x.OrderProvider)
+            .NotEmpty()
+            .MaximumLength(100)
+            .Matches("^[a-z0-9-]+$")
+            .When(x => x.OrderProvider is not null);
 
         RuleFor(x => x.LitiumBaseUrl)
             .Must(uri => string.IsNullOrWhiteSpace(uri) || Uri.TryCreate(uri, UriKind.Absolute, out _))

@@ -31,7 +31,9 @@ public record UptimeMonitorDto(
     [property: JsonRequired] DateTimeOffset? DomainExpiresAt,
     [property: JsonRequired] List<string> MonitoredRegions,
     [property: JsonRequired] long? CurrentStateDurationSeconds,
-    [property: JsonRequired] MonitorIncidentDto? LatestIncident);
+    [property: JsonRequired] MonitorIncidentDto? LatestIncident,
+    [property: JsonRequired] string Provider,
+    [property: JsonRequired] string ExternalId);
 
 public sealed record MonitorIncidentDto
 {

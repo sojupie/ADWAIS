@@ -1,5 +1,6 @@
 using Adwais.Api.DTOs.Tenants;
 using Adwais.Api.DTOs.Monitoring;
+using Adwais.Domain;
 using Adwais.Domain.Entities;
 using FluentValidation;
 using Adwais.Application.Common.Interfaces;
@@ -47,6 +48,7 @@ public class TenantController(
                     Name = t.Name,
                     Type = t.Type,
                     LitiumBaseUrl = t.LitiumBaseUrl,
+                    OrderProvider = t.OrderProvider,
                     ImageUrl = t.ImageUrl,
                     CurrentlyFetching = t.CurrentlyFetching,
                     FetchedFrom = t.FetchedFrom,
@@ -72,6 +74,7 @@ public class TenantController(
                 Name = t.Name,
                 Type = t.Type,
                 LitiumBaseUrl = t.LitiumBaseUrl,
+                OrderProvider = t.OrderProvider,
                 ImageUrl = t.ImageUrl,
                 CurrentlyFetching = t.CurrentlyFetching,
                 FetchedFrom = t.FetchedFrom,
@@ -101,6 +104,9 @@ public class TenantController(
             Name = request.Name,
             Type = request.Type,
             LitiumBaseUrl = request.LitiumBaseUrl,
+            OrderProvider = string.IsNullOrWhiteSpace(request.OrderProvider)
+                ? IntegrationProviders.Litium
+                : request.OrderProvider.Trim().ToLowerInvariant(),
             ImageUrl = request.ImageUrl,
             ServiceAccountToken = request.ServiceAccountToken,
             OrderFetchingEnabled = request.OrderFetchingEnabled
@@ -115,6 +121,7 @@ public class TenantController(
                 Name = tenant.Name,
                 Type = tenant.Type,
                 LitiumBaseUrl = tenant.LitiumBaseUrl,
+                OrderProvider = tenant.OrderProvider,
                 ImageUrl = tenant.ImageUrl,
                 CurrentlyFetching = tenant.CurrentlyFetching,
                 FetchedFrom = tenant.FetchedFrom,
@@ -174,6 +181,11 @@ public class TenantController(
         {
             tenant.LitiumBaseUrl = string.IsNullOrWhiteSpace(request.LitiumBaseUrl) ? null : request.LitiumBaseUrl.Trim();
         }
+
+        if (request.OrderProvider is not null)
+        {
+            tenant.OrderProvider = request.OrderProvider.Trim().ToLowerInvariant();
+        }
         if (request.ImageUrl is not null)
         {
             tenant.ImageUrl = string.IsNullOrWhiteSpace(request.ImageUrl) ? null : request.ImageUrl.Trim();
@@ -199,6 +211,7 @@ public class TenantController(
             Name = tenant.Name,
             Type = tenant.Type,
             LitiumBaseUrl = tenant.LitiumBaseUrl,
+            OrderProvider = tenant.OrderProvider,
             ImageUrl = tenant.ImageUrl,
             CurrentlyFetching = tenant.CurrentlyFetching,
             FetchedFrom = tenant.FetchedFrom,

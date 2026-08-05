@@ -366,6 +366,8 @@ public class MonitorController(
                         Reason = m.LastIncidentReason,
                         StartedAt = m.LastIncidentStartedAt,
                         DurationSeconds = m.LastIncidentDurationSeconds
-                    });
+                    },
+            Provider: m.Provider,
+            ExternalId: m.ExternalId);
     }
 }

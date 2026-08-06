@@ -9,12 +9,12 @@ using Adwais.Application.Interfaces;
 
 namespace Adwais.Infrastructure.Services;
 
-public class LitiumIngestionService(
+public class OrderIngestionService(
     IDbContextFactory<AnalyticsDbContext> contextFactory,
     IEnumerable<IOrderSource> orderSources,
-    ILogger<LitiumIngestionService> logger,
+    ILogger<OrderIngestionService> logger,
     ISystemEventService eventService)
-    : ILitiumIngestionService
+    : IOrderIngestionService
 {
     public async Task<int> ExecuteIngestionAsync(Guid tenantId, DateTimeOffset startDate, DateTimeOffset endDate, CancellationToken ct = default)
     {
@@ -37,7 +37,7 @@ public class LitiumIngestionService(
 
             if (result > 0)
             {
-                await eventService.LogAsync(nameof(LitiumIngestionService), $"Successfully ingested {result} orders.", SystemEventLevel.Information, $"Period: {startDate:O} to {endDate:O}", tenantId);
+                await eventService.LogAsync(nameof(OrderIngestionService), $"Successfully ingested {result} orders.", SystemEventLevel.Information, $"Period: {startDate:O} to {endDate:O}", tenantId);
             }
             
             return result;
@@ -47,7 +47,7 @@ public class LitiumIngestionService(
             var step = ex.Data.Contains("Step") ? ex.Data["Step"]?.ToString() : "Executing Ingestion Core";
             var detailedErrorMessage = $"Failed during step '{step}': {ex.Message}";
             
-            await eventService.LogErrorAsync(nameof(LitiumIngestionService), $"Ingestion failed: {detailedErrorMessage}", ex, tenantId);
+            await eventService.LogErrorAsync(nameof(OrderIngestionService), $"Ingestion failed: {detailedErrorMessage}", ex, tenantId);
             
             try
             {
@@ -82,9 +82,8 @@ public class LitiumIngestionService(
 
     private async Task<int> ExecuteIngestionCoreAsync(Tenant tenant, IOrderSource orderSource, DateTimeOffset startDate, DateTimeOffset endDate, CancellationToken ct)
     {
-        if (tenant.LitiumBaseUrl == null || tenant.ServiceAccountToken == null)
-            throw new InvalidOperationException("Litium credentials are missing.");
-        var sourceSettings = new OrderSourceSettings(tenant.LitiumBaseUrl, tenant.ServiceAccountToken);
+        if (!orderSource.IsConfigured(tenant.OrderProviderSettings))
+            throw new InvalidOperationException("Order provider settings are missing or invalid.");
         var totalIngested = 0;
         var currentStart = startDate;
 
@@ -104,7 +103,7 @@ public class LitiumIngestionService(
                 IReadOnlyList<OrderSourceOrder> orders;
                 try
                 {
-                    orders = await orderSource.FetchOrdersAsync(sourceSettings, currentStart, currentEnd, take, ct);
+                    orders = await orderSource.FetchOrdersAsync(tenant.OrderProviderSettings!, currentStart, currentEnd, take, ct);
                 }
                 catch (HttpRequestException ex)
                 {
@@ -163,29 +162,27 @@ public class LitiumIngestionService(
         return totalIngested;
     }
 
-    public async Task IngestSingleOrderAsync(Guid tenantId, LitiumSyncResponse.LitiumOrderDto order, CancellationToken ct = default)
+    public async Task IngestSingleOrderAsync(Guid tenantId, string provider, OrderSourceOrder order, CancellationToken ct = default)
     {
         await using var dbContext = await contextFactory.CreateDbContextAsync(ct);
-        var provider = await dbContext.Tenants
+        var tenantProvider = await dbContext.Tenants
             .Where(tenant => tenant.Id == tenantId)
             .Select(tenant => tenant.OrderProvider)
             .SingleAsync(ct);
-        if (!provider.Equals(IntegrationProviders.Litium, StringComparison.OrdinalIgnoreCase))
-            throw new InvalidOperationException($"Tenant is configured for order provider '{provider}', not '{IntegrationProviders.Litium}'.");
         var orderSource = orderSources.ForProvider(provider);
-
-        var normalized = LitiumOrderSource.Normalize(order);
+        if (!tenantProvider.Equals(orderSource.Provider, StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException($"Tenant is configured for order provider '{tenantProvider}', not '{orderSource.Provider}'.");
 
         var pIds = new[] { Guid.NewGuid() };
         var pTenantIds = new[] { tenantId };
         var pProviders = new[] { orderSource.Provider };
-        var pExternalIds = new[] { normalized.ExternalId };
-        var pOrderStatus = new[] { normalized.State.ToString() };
-        var pOrderIds = new[] { normalized.OrderNumber };
-        var pDatesCreated = new[] { normalized.CreatedDate };
-        var pIncVat = new[] { normalized.TotalValueIncludingVat };
-        var pExcVat = new[] { normalized.TotalValueExcludingVat };
-        var pCurrencies = new[] { normalized.Currency };
+        var pExternalIds = new[] { order.ExternalId };
+        var pOrderStatus = new[] { order.State.ToString() };
+        var pOrderIds = new[] { order.OrderNumber };
+        var pDatesCreated = new[] { order.CreatedDate };
+        var pIncVat = new[] { order.TotalValueIncludingVat };
+        var pExcVat = new[] { order.TotalValueExcludingVat };
+        var pCurrencies = new[] { order.Currency };
 
         await UpsertOrdersAsync(dbContext, pIds, pTenantIds, pProviders, pExternalIds, pOrderStatus, pOrderIds, pDatesCreated, pIncVat, pExcVat, pCurrencies);
     }

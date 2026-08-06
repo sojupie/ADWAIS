@@ -49,7 +49,7 @@ public static class DependencyInjection
             {
                 options.Retry.MaxRetryAttempts = 5;
             });
-        services.AddScoped<ILitiumIngestionService, LitiumIngestionService>();
+        services.AddScoped<IOrderIngestionService, OrderIngestionService>();
 
         services.AddHttpClient<IFeedAggregationService, FeedAggregationService>()
             .AddStandardResilienceHandler();

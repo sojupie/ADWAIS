@@ -110,16 +110,15 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
                 .HasConversion<string>()
                 .HasMaxLength(50)
                 .HasDefaultValue(TenantType.Mixed);
-            entity.Property(t => t.LitiumBaseUrl).HasMaxLength(2048);
             entity.Property(t => t.OrderProvider)
                 .HasMaxLength(100)
                 .HasDefaultValue(IntegrationProviders.Litium)
                 .IsRequired();
             entity.Property(t => t.ImageUrl).HasMaxLength(2048);
-            entity.Property(t => t.ServiceAccountToken).HasMaxLength(2048);
+            entity.Property(t => t.OrderProviderSettings).HasMaxLength(4096);
             if (dataProtectionProvider != null)
             {
-                entity.Property(t => t.ServiceAccountToken)
+                entity.Property(t => t.OrderProviderSettings)
                     .HasConversion(new EncryptedStringConverter(dataProtectionProvider));
             }
             entity.Property(t => t.CurrentlyFetching).HasDefaultValue(false);
@@ -131,8 +130,7 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
                     Id = SystemTenantGuid,
                     Name = "System (unassigned monitors)",
                     Type = TenantType.Mixed,
-                    LitiumBaseUrl = null,
-                    ServiceAccountToken = null,
+                    OrderProviderSettings = null,
                     OrderFetchingEnabled = false
                 }
             );
@@ -240,22 +238,22 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
                 t.HasCheckConstraint("CK_GlobalConfig_SingleRow", 
                     "\"id\" = 1"));
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.UptimeRobotApiKey).HasMaxLength(1024);
             entity.Property(x => x.MonitoringProvider)
                 .HasMaxLength(100)
                 .HasDefaultValue(IntegrationProviders.UptimeRobot)
                 .IsRequired();
+            entity.Property(x => x.MonitoringProviderSettings).HasMaxLength(4096);
             if (dataProtectionProvider != null)
             {
-                entity.Property(x => x.UptimeRobotApiKey)
+                entity.Property(x => x.MonitoringProviderSettings)
                     .HasConversion(new EncryptedStringConverter(dataProtectionProvider));
             }
             entity.Property(x => x.UptimeFetchIntervalMinutes).HasDefaultValue(60);
             entity.Property(x => x.LatencyFetchIntervalMinutes).HasDefaultValue(10);
             entity.Property(x => x.UserStatsFetchIntervalMinutes).HasDefaultValue(60);
             entity.Property(x => x.SystemEventRetentionDays).HasDefaultValue(2);
-            entity.Property(x => x.LitiumFetchEnabled).HasDefaultValue(true);
-            entity.Property(x => x.UptimeRobotFetchEnabled).HasDefaultValue(true);
+            entity.Property(x => x.OrderFetchEnabled).HasDefaultValue(true);
+            entity.Property(x => x.MonitoringFetchEnabled).HasDefaultValue(true);
             entity.Property(x => x.WeatherLocation).HasDefaultValue("Karlstad");
             entity.Property(x => x.WeatherFetchIntervalMinutes).HasDefaultValue(15);
             entity.Property(x => x.ReportingTimeZoneId).HasMaxLength(100).HasDefaultValue("Europe/Stockholm");
@@ -263,9 +261,9 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
             entity.HasData(new GlobalConfig
             {
                 Id = 1,
-                LitiumFetchEnabled = true,
-                UptimeRobotFetchEnabled = true,
-                LitiumFetchIntervalMinutes = 60,
+                OrderFetchEnabled = true,
+                MonitoringFetchEnabled = true,
+                OrderFetchIntervalMinutes = 60,
                 UptimeFetchIntervalMinutes = 60,
                 LatencyFetchIntervalMinutes = 10,
                 UserStatsFetchIntervalMinutes = 60,

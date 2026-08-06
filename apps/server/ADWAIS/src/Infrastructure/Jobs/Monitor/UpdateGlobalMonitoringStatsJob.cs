@@ -5,10 +5,10 @@ using Microsoft.Extensions.Logging;
 
 namespace Adwais.Infrastructure.Jobs.Monitor;
 
-public class UpdateGlobalUptimeRobotUserStatsJob(
+public class UpdateGlobalMonitoringStatsJob(
     IDbContextFactory<AnalyticsDbContext> dbContextFactory,
     IEnumerable<IMonitoringProvider> monitoringProviders,
-    ILogger<UpdateGlobalUptimeRobotUserStatsJob> logger,
+    ILogger<UpdateGlobalMonitoringStatsJob> logger,
     ISystemEventService eventService)
 {
     public async Task ExecuteAsync()
@@ -16,7 +16,7 @@ public class UpdateGlobalUptimeRobotUserStatsJob(
         await using var db = await dbContextFactory.CreateDbContextAsync();
         var config = await db.GlobalConfigs.SingleOrDefaultAsync();
 
-        if (config == null || string.IsNullOrWhiteSpace(config.UptimeRobotApiKey) || !config.UptimeRobotFetchEnabled)
+        if (config == null || string.IsNullOrWhiteSpace(config.MonitoringProviderSettings) || !config.MonitoringFetchEnabled)
         {
             return;
         }
@@ -30,14 +30,14 @@ public class UpdateGlobalUptimeRobotUserStatsJob(
             config.LastSyncError = null;
             
             await db.SaveChangesAsync();
-            logger.LogInformation("Updated UptimeRobot global user stats: {Count}/{Limit} ({Sub})", user.MonitorsCount, user.MonitorLimit, user.ActiveSubscriptionPlan);
+            logger.LogInformation("Updated global monitoring account stats: {Count}/{Limit} ({Sub})", user.MonitorsCount, user.MonitorLimit, user.ActiveSubscriptionPlan);
         }
         catch (Exception ex)
         {
-            var detailedErrorMessage = $"Failed to update UptimeRobot global user stats: {ex.Message}";
+            var detailedErrorMessage = $"Failed to update global monitoring account stats: {ex.Message}";
             try
             {
-                await eventService.LogErrorAsync(nameof(UpdateGlobalUptimeRobotUserStatsJob), detailedErrorMessage, ex);
+                await eventService.LogErrorAsync(nameof(UpdateGlobalMonitoringStatsJob), detailedErrorMessage, ex);
             }
             catch
             {

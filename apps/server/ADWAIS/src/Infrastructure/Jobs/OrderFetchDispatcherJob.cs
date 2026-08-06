@@ -7,10 +7,10 @@ using Microsoft.Extensions.Logging;
 
 namespace Adwais.Infrastructure.Jobs;
 
-public class LitiumOrderFetchJob(
+public class OrderFetchDispatcherJob(
     IDbContextFactory<AnalyticsDbContext> dbContextFactory,
     IBackgroundJobClient backgroundJobClient,
-    ILogger<LitiumOrderFetchJob> logger,
+    ILogger<OrderFetchDispatcherJob> logger,
     ISystemEventService eventService)
 {
     private static readonly TimeSpan StaleThreshold = TimeSpan.FromMinutes(60);
@@ -22,19 +22,17 @@ public class LitiumOrderFetchJob(
         await using var db = await dbContextFactory.CreateDbContextAsync();
         var config = await db.GlobalConfigs.SingleOrDefaultAsync();
 
-        if (config is null || !config.LitiumFetchEnabled)
+        if (config is null || !config.OrderFetchEnabled)
         {
-            logger.LogInformation("Litium fetching disabled globally. Skipping.");
+            logger.LogInformation("Order fetching disabled globally. Skipping.");
             return;
         }
 
-        var fetchInterval = config.LitiumFetchIntervalMinutes;
         var now = DateTimeOffset.UtcNow;
 
         var tenants = await db.Tenants
             .Where(t => t.OrderFetchingEnabled && t.Id != AnalyticsDbContext.SystemTenantGuid
-                        && t.OrderProvider == IntegrationProviders.Litium
-                        && t.LitiumBaseUrl != null && t.ServiceAccountToken != null)
+                        && t.OrderProviderSettings != null)
             .ToListAsync();
 
         var dispatched = 0;
@@ -45,7 +43,7 @@ public class LitiumOrderFetchJob(
                 && now - tenant.LastPolled.Value > StaleThreshold)
             {
                 var msg = $"Tenant {tenant.Id} has stale CurrentlyFetching flag. Resetting.";
-                await eventService.LogWarningAsync(nameof(LitiumOrderFetchJob), msg, $"Last polled: {tenant.LastPolled}", tenant.Id);
+                await eventService.LogWarningAsync(nameof(OrderFetchDispatcherJob), msg, $"Last polled: {tenant.LastPolled}", tenant.Id);
                 tenant.CurrentlyFetching = false;
             }
 
@@ -61,12 +59,12 @@ public class LitiumOrderFetchJob(
             if (end - start > TimeSpan.FromDays(31))
             {
                 var msg = $"Fetch gap too large ({Math.Floor((end - start).TotalDays)} days). Skipping automated sync.";
-                await eventService.LogWarningAsync(nameof(LitiumOrderFetchJob), msg, "Automated sync only handles gaps up to 31 days. Use the manual backfill endpoint to recover this tenant.", tenant.Id);
+                await eventService.LogWarningAsync(nameof(OrderFetchDispatcherJob), msg, "Automated sync only handles gaps up to 31 days. Use the manual backfill endpoint to recover this tenant.", tenant.Id);
                 continue;
             }
 
-            backgroundJobClient.Enqueue<ILitiumIngestionService>(
-                litiumIngestionService => litiumIngestionService.ExecuteIngestionAsync(tenant.Id, start, end, CancellationToken.None));
+            backgroundJobClient.Enqueue<IOrderIngestionService>(
+                ingestionService => ingestionService.ExecuteIngestionAsync(tenant.Id, start, end, CancellationToken.None));
 
             tenant.CurrentlyFetching = true;
             tenant.LastPolled = now;
@@ -76,7 +74,7 @@ public class LitiumOrderFetchJob(
         config.LastPolled = now;
         await db.SaveChangesAsync();
 
-        logger.LogInformation("Litium dispatch complete. Enqueued {Dispatched}/{Total} tenants.",
+        logger.LogInformation("Order fetch dispatch complete. Enqueued {Dispatched}/{Total} tenants.",
             dispatched, tenants.Count);
     }
 }

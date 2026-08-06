@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Adwais.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Adwais.Infrastructure.Migrations
 {
     [DbContext(typeof(AnalyticsDbContext))]
-    partial class AnalyticsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260805222416_ReplaceVendorConfiguration")]
+    partial class ReplaceVendorConfiguration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -55,11 +58,15 @@ namespace Adwais.Infrastructure.Migrations
                         .HasDefaultValue(10)
                         .HasColumnName("latency_fetch_interval_minutes");
 
-                    b.Property<bool>("MonitoringFetchEnabled")
+                    b.Property<bool>("LitiumFetchEnabled")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
                         .HasDefaultValue(true)
-                        .HasColumnName("monitoring_fetch_enabled");
+                        .HasColumnName("litium_fetch_enabled");
+
+                    b.Property<int>("LitiumFetchIntervalMinutes")
+                        .HasColumnType("integer")
+                        .HasColumnName("litium_fetch_interval_minutes");
 
                     b.Property<string>("MonitoringProvider")
                         .IsRequired()
@@ -82,16 +89,6 @@ namespace Adwais.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("monitors_limit");
 
-                    b.Property<bool>("OrderFetchEnabled")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(true)
-                        .HasColumnName("order_fetch_enabled");
-
-                    b.Property<int>("OrderFetchIntervalMinutes")
-                        .HasColumnType("integer")
-                        .HasColumnName("order_fetch_interval_minutes");
-
                     b.Property<string>("ReportingTimeZoneId")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -111,6 +108,12 @@ namespace Adwais.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasDefaultValue(60)
                         .HasColumnName("uptime_fetch_interval_minutes");
+
+                    b.Property<bool>("UptimeRobotFetchEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("uptime_robot_fetch_enabled");
 
                     b.Property<int>("UserStatsFetchIntervalMinutes")
                         .ValueGeneratedOnAdd()
@@ -144,13 +147,13 @@ namespace Adwais.Infrastructure.Migrations
                             Id = 1,
                             FeedFetchIntervalHours = 2,
                             LatencyFetchIntervalMinutes = 10,
-                            MonitoringFetchEnabled = true,
+                            LitiumFetchEnabled = true,
+                            LitiumFetchIntervalMinutes = 60,
                             MonitoringProvider = "uptimerobot",
-                            OrderFetchEnabled = true,
-                            OrderFetchIntervalMinutes = 60,
                             ReportingTimeZoneId = "Europe/Stockholm",
                             SystemEventRetentionDays = 2,
                             UptimeFetchIntervalMinutes = 60,
+                            UptimeRobotFetchEnabled = true,
                             UserStatsFetchIntervalMinutes = 60,
                             WeatherFetchIntervalMinutes = 15,
                             WeatherLocation = "Karlstad"

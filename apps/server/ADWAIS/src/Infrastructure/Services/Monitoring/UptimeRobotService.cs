@@ -17,15 +17,61 @@ public class UptimeRobotService(
 {
     public string Provider => "uptimerobot";
 
+    public bool IsConfigured(string? settings)
+    {
+        try { return !string.IsNullOrWhiteSpace(ParseSettings(settings).ApiKey); }
+        catch (JsonException) { return false; }
+    }
+
+    public IReadOnlyDictionary<string, string?> GetPublicSettings(string? settings)
+    {
+        try
+        {
+            return new Dictionary<string, string?>
+            {};
+        }
+        catch (JsonException)
+        {
+            return new Dictionary<string, string?>();
+        }
+    }
+
+    public IReadOnlyCollection<string> GetConfiguredSecretKeys(string? settings)
+    {
+        try
+        {
+            return string.IsNullOrWhiteSpace(ParseSettings(settings).ApiKey) ? [] : ["apiKey"];
+        }
+        catch (JsonException)
+        {
+            return [];
+        }
+    }
+
+    public string MergeSettings(string? currentSettings, IReadOnlyDictionary<string, string?> updates)
+    {
+        foreach (var key in updates.Keys)
+        {
+            if (key != "apiKey") throw new ArgumentException($"'{key}' is not a valid UptimeRobot setting.", nameof(updates));
+        }
+
+        if (updates.TryGetValue("apiKey", out var apiKey) && apiKey == "configured")
+            throw new ArgumentException("'configured' is a display value, not a valid API key update.", nameof(updates));
+
+        var current = ParseSettings(currentSettings);
+        var updatedApiKey = updates.TryGetValue("apiKey", out var updated) ? Normalize(updated) : current.ApiKey;
+        return JsonSerializer.Serialize(new UptimeRobotSettings(updatedApiKey));
+    }
+
     private async Task<string> GetApiKeyAsync()
     {
         using var context = await contextFactory.CreateDbContextAsync();
         var config = await context.GlobalConfigs.SingleOrDefaultAsync();
-        if (config == null || string.IsNullOrWhiteSpace(config.UptimeRobotApiKey))
+        if (config == null || !IsConfigured(config.MonitoringProviderSettings))
         {
-            throw new InvalidOperationException("UptimeRobotApiKey is not configured in GlobalConfig.");
+            throw new InvalidOperationException("UptimeRobot provider settings require apiKey.");
         }
-        return config.UptimeRobotApiKey;
+        return ParseSettings(config.MonitoringProviderSettings).ApiKey!;
     }
 
     private async Task<JsonDocument> GetResponseAsync(HttpRequestMessage request, string? context = null)
@@ -382,6 +428,17 @@ public class UptimeRobotService(
             ActiveSubscriptionPlan: sub.GetProperty("plan").GetString()!
         );
     }
+
+    private static UptimeRobotSettings ParseSettings(string? settings)
+        => string.IsNullOrWhiteSpace(settings)
+            ? new UptimeRobotSettings(null)
+            : JsonSerializer.Deserialize<UptimeRobotSettings>(settings, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+              ?? new UptimeRobotSettings(null);
+
+    private static string? Normalize(string? value)
+        => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+
+    private sealed record UptimeRobotSettings(string? ApiKey);
 
     private static int ParseExternalId(string externalId)
         => int.TryParse(externalId, NumberStyles.None, CultureInfo.InvariantCulture, out var monitorId) && monitorId > 0

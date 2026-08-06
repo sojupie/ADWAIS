@@ -341,8 +341,11 @@ public static class DatabaseSeeder
                     Id = Guid.NewGuid(),
                     Name = profile.Name,
                     Type = profile.Type,
-                    LitiumBaseUrl = profile.BaseUrl,
-                    ServiceAccountToken = $"seed-token-{profile.Name.GetHashCode()}",
+                    OrderProviderSettings = System.Text.Json.JsonSerializer.Serialize(new
+                    {
+                        endpointUrl = profile.BaseUrl,
+                        authorization = $"seed-token-{profile.Name.GetHashCode()}"
+                    }),
                     OrderFetchingEnabled = false
                 };
                 context.Tenants.Add(tenant);
@@ -350,7 +353,11 @@ public static class DatabaseSeeder
             else
             {
                 tenant.Type = profile.Type;
-                tenant.LitiumBaseUrl = profile.BaseUrl;
+                tenant.OrderProviderSettings = System.Text.Json.JsonSerializer.Serialize(new
+                {
+                    endpointUrl = profile.BaseUrl,
+                    authorization = $"seed-token-{profile.Name.GetHashCode()}"
+                });
                 tenant.OrderFetchingEnabled = false;
             }
             tenants.Add(tenant);

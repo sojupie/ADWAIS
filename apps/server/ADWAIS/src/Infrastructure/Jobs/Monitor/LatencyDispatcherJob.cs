@@ -11,7 +11,7 @@ public class LatencyDispatcherJob(IDbContextFactory<AnalyticsDbContext> dbContex
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var globalConfig = await dbContext.GlobalConfigs.SingleOrDefaultAsync();
         
-        if (globalConfig == null || string.IsNullOrWhiteSpace(globalConfig.UptimeRobotApiKey) || !globalConfig.UptimeRobotFetchEnabled)
+        if (globalConfig == null || string.IsNullOrWhiteSpace(globalConfig.MonitoringProviderSettings) || !globalConfig.MonitoringFetchEnabled)
         {
             return;
         }

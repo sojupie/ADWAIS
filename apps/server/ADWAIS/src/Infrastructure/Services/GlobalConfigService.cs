@@ -17,11 +17,13 @@ namespace Adwais.Infrastructure.Services;
 public class GlobalConfigService(
     IApplicationDbContext dbContext,
     ISystemEventService eventService,
-    IReportingRollupRefresher reportingRollupRefresher) : IGlobalConfigService
+    IReportingRollupRefresher reportingRollupRefresher,
+    IEnumerable<IMonitoringProvider> monitoringProviders) : IGlobalConfigService
 {
     private readonly IApplicationDbContext _dbContext = dbContext;
     private readonly ISystemEventService _eventService = eventService;
     private readonly IReportingRollupRefresher _reportingRollupRefresher = reportingRollupRefresher;
+    private readonly IEnumerable<IMonitoringProvider> _monitoringProviders = monitoringProviders;
 
     public async Task<GlobalConfigResponseDto> GetConfigAsync(CancellationToken ct = default)
     {
@@ -36,10 +38,21 @@ public class GlobalConfigService(
         var config = await _dbContext.GlobalConfigs.SingleOrDefaultAsync(ct);
         if (config == null) throw new InvalidOperationException("Global configuration not found.");
 
-        if (request.LitiumFetchEnabled.HasValue) config.LitiumFetchEnabled = request.LitiumFetchEnabled.Value;
-        if (request.UptimeRobotFetchEnabled.HasValue) config.UptimeRobotFetchEnabled = request.UptimeRobotFetchEnabled.Value;
-        if (request.UptimeRobotApiKey != null) config.UptimeRobotApiKey = string.IsNullOrWhiteSpace(request.UptimeRobotApiKey) ? null : request.UptimeRobotApiKey;
-        if (!string.IsNullOrWhiteSpace(request.MonitoringProvider)) config.MonitoringProvider = request.MonitoringProvider.Trim().ToLowerInvariant();
+        if (request.OrderFetchEnabled.HasValue) config.OrderFetchEnabled = request.OrderFetchEnabled.Value;
+        if (request.MonitoringFetchEnabled.HasValue) config.MonitoringFetchEnabled = request.MonitoringFetchEnabled.Value;
+        if (!string.IsNullOrWhiteSpace(request.MonitoringProvider))
+        {
+            var provider = request.MonitoringProvider.Trim().ToLowerInvariant();
+            _monitoringProviders.ForProvider(provider);
+            config.MonitoringProvider = provider;
+            config.MonitoringProviderSettings = null;
+        }
+        if (request.MonitoringProviderSettings != null)
+        {
+            config.MonitoringProviderSettings = _monitoringProviders
+                .ForProvider(config.MonitoringProvider)
+                .MergeSettings(config.MonitoringProviderSettings, request.MonitoringProviderSettings);
+        }
         if (request.SystemEventRetentionDays.HasValue) config.SystemEventRetentionDays = request.SystemEventRetentionDays.Value;
         if (request.FeedFetchIntervalHours.HasValue)
         {
@@ -94,7 +107,7 @@ public class GlobalConfigService(
             {
                 g.LatencyFetchIntervalMinutes,
                 g.UptimeFetchIntervalMinutes,
-                g.LitiumFetchIntervalMinutes,
+                g.OrderFetchIntervalMinutes,
                 g.UserStatsFetchIntervalMinutes,
                 g.FeedFetchIntervalHours
             })
@@ -113,7 +126,7 @@ public class GlobalConfigService(
             LatencyFetchIntervalMinutes = config.LatencyFetchIntervalMinutes,
             UptimeFetchIntervalMinutes = config.UptimeFetchIntervalMinutes,
             StatusFetchIntervalMinutes = lowestIntervalMins,
-            LitiumFetchIntervalMinutes = config.LitiumFetchIntervalMinutes,
+            OrderFetchIntervalMinutes = config.OrderFetchIntervalMinutes,
             UserStatsFetchIntervalMinutes = config.UserStatsFetchIntervalMinutes,
             FeedFetchIntervalHours = config.FeedFetchIntervalHours
         };
@@ -128,7 +141,7 @@ public class GlobalConfigService(
         {
             config.UptimeFetchIntervalMinutes = request.UptimeFetchIntervalMinutes.Value;
             RecurringJob.AddOrUpdate<UptimeDispatcherJob>(
-                "dispatch-uptimerobot-uptime", 
+                "dispatch-monitoring-uptime",
                 job => job.ExecuteAsync(), 
                 CronHelper.FromMinutes(request.UptimeFetchIntervalMinutes.Value));
             await _eventService.LogAsync(nameof(GlobalConfigService), $"Updated Uptime Fetch Interval to {request.UptimeFetchIntervalMinutes.Value} minutes");
@@ -138,7 +151,7 @@ public class GlobalConfigService(
         {
             config.LatencyFetchIntervalMinutes = request.LatencyFetchIntervalMinutes.Value;
             RecurringJob.AddOrUpdate<LatencyDispatcherJob>(
-                "dispatch-uptimerobot-latency", 
+                "dispatch-monitoring-latency",
                 job => job.ExecuteAsync(), 
                 CronHelper.FromMinutes(request.LatencyFetchIntervalMinutes.Value));
             await _eventService.LogAsync(nameof(GlobalConfigService), $"Updated Latency Fetch Interval to {request.LatencyFetchIntervalMinutes.Value} minutes");
@@ -147,21 +160,21 @@ public class GlobalConfigService(
         if (request.UserStatsFetchIntervalMinutes.HasValue)
         {
             config.UserStatsFetchIntervalMinutes = request.UserStatsFetchIntervalMinutes.Value;
-            RecurringJob.AddOrUpdate<UpdateGlobalUptimeRobotUserStatsJob>(
-                "sync-uptimerobot-account-stats", 
+            RecurringJob.AddOrUpdate<UpdateGlobalMonitoringStatsJob>(
+                "sync-monitoring-account-stats",
                 job => job.ExecuteAsync(), 
                 CronHelper.FromMinutes(request.UserStatsFetchIntervalMinutes.Value));
             await _eventService.LogAsync(nameof(GlobalConfigService), $"Updated User Stats Fetch Interval to {request.UserStatsFetchIntervalMinutes.Value} minutes");
         }
             
-        if (request.LitiumFetchIntervalMinutes.HasValue)
+        if (request.OrderFetchIntervalMinutes.HasValue)
         {
-            config.LitiumFetchIntervalMinutes = request.LitiumFetchIntervalMinutes.Value;
-            RecurringJob.AddOrUpdate<LitiumOrderFetchJob>(
-                "dispatch-litium-orders", 
+            config.OrderFetchIntervalMinutes = request.OrderFetchIntervalMinutes.Value;
+            RecurringJob.AddOrUpdate<OrderFetchDispatcherJob>(
+                "dispatch-order-fetch",
                 job => job.ExecuteAsync(), 
-                CronHelper.FromMinutes(request.LitiumFetchIntervalMinutes.Value));
-            await _eventService.LogAsync(nameof(GlobalConfigService), $"Updated Litium Fetch Interval to {request.LitiumFetchIntervalMinutes.Value} minutes");
+                CronHelper.FromMinutes(request.OrderFetchIntervalMinutes.Value));
+            await _eventService.LogAsync(nameof(GlobalConfigService), $"Updated order fetch interval to {request.OrderFetchIntervalMinutes.Value} minutes");
         }
 
         if (request.FeedFetchIntervalHours.HasValue)
@@ -187,21 +200,22 @@ public class GlobalConfigService(
             LatencyFetchIntervalMinutes = config.LatencyFetchIntervalMinutes,
             UptimeFetchIntervalMinutes = config.UptimeFetchIntervalMinutes,
             StatusFetchIntervalMinutes = lowestIntervalMins,
-            LitiumFetchIntervalMinutes = config.LitiumFetchIntervalMinutes,
+            OrderFetchIntervalMinutes = config.OrderFetchIntervalMinutes,
             UserStatsFetchIntervalMinutes = config.UserStatsFetchIntervalMinutes,
             FeedFetchIntervalHours = config.FeedFetchIntervalHours
         };
     }
 
-    private static GlobalConfigResponseDto MapToDto(GlobalConfig config)
+    private GlobalConfigResponseDto MapToDto(GlobalConfig config)
     {
         return new GlobalConfigResponseDto(
             config.Id,
             config.LastPolled,
-            config.LitiumFetchEnabled,
-            config.UptimeRobotFetchEnabled,
-            config.LitiumFetchIntervalMinutes,
-            MaskApiKey(config.UptimeRobotApiKey),
+            config.OrderFetchEnabled,
+            config.MonitoringFetchEnabled,
+            config.OrderFetchIntervalMinutes,
+            _monitoringProviders.ForProvider(config.MonitoringProvider).GetPublicSettings(config.MonitoringProviderSettings),
+            _monitoringProviders.ForProvider(config.MonitoringProvider).GetConfiguredSecretKeys(config.MonitoringProviderSettings),
             config.UptimeFetchIntervalMinutes,
             config.LatencyFetchIntervalMinutes,
             config.UserStatsFetchIntervalMinutes,
@@ -217,10 +231,4 @@ public class GlobalConfigService(
         );
     }
 
-    private static string? MaskApiKey(string? apiKey)
-    {
-        if (string.IsNullOrEmpty(apiKey)) return null;
-        if (apiKey.Length <= 8) return "****";
-        return apiKey[..4] + "****" + apiKey[^4..];
-    }
 }

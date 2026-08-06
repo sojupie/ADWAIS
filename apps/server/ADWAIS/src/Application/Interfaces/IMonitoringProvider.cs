@@ -5,6 +5,10 @@ namespace Adwais.Application.Interfaces;
 public interface IMonitoringProvider
 {
     string Provider { get; }
+    bool IsConfigured(string? settings);
+    IReadOnlyDictionary<string, string?> GetPublicSettings(string? settings);
+    IReadOnlyCollection<string> GetConfiguredSecretKeys(string? settings);
+    string MergeSettings(string? currentSettings, IReadOnlyDictionary<string, string?> updates);
 
     Task<MonitoringProviderMonitor> CreateMonitorAsync(string name, string url, string? type);
     Task UpdateMonitorAsync(string externalId, string? name, string? url, string? type, List<string>? tags);

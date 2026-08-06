@@ -10,5 +10,3 @@ public sealed record OrderSourceOrder(
     decimal? TotalValueIncludingVat,
     decimal? TotalValueExcludingVat,
     string Currency);
-
-public sealed record OrderSourceSettings(string BaseUrl, string Authorization);

@@ -1,9 +1,9 @@
 namespace Adwais.Application.DTOs.GlobalConfig;
 
 public record UpdateGlobalConfigRequestDto(
-    bool? LitiumFetchEnabled = null,
-    bool? UptimeRobotFetchEnabled = null,
-    string? UptimeRobotApiKey = null,
+    bool? OrderFetchEnabled = null,
+    bool? MonitoringFetchEnabled = null,
+    Dictionary<string, string?>? MonitoringProviderSettings = null,
     int? SystemEventRetentionDays = null,
     int? FeedFetchIntervalHours = null,
     string? WeatherLocation = null,

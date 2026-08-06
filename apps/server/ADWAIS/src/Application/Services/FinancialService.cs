@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Text.Json;
 using Adwais.Application.Common.Models;
 using Adwais.Application.DTOs.Financial;
 using Adwais.Application.Interfaces;
@@ -326,7 +327,7 @@ public class FinancialService(
         var tenantDetails = await context.Tenants
             .AsNoTracking()
             .Where(t => t.Id != IApplicationDbContext.SystemTenantGuid)
-            .Select(t => new { t.Id, t.Name, t.Type, t.LitiumBaseUrl })
+            .Select(t => new { t.Id, t.Name, t.Type, t.OrderProviderSettings })
             .ToDictionaryAsync(t => t.Id, ct);
 
         var currentByTenant = currentRows
@@ -357,7 +358,7 @@ public class FinancialService(
                 var growth = CalculateGrowthPercentage(curRev, prevRev);
                 var details = tenantDetails[tid];
 
-                return new RevenueEfficiencyTenantDto(tid, details.Name, details.Type, aov, curVol, share, growth, details.LitiumBaseUrl);
+                return new RevenueEfficiencyTenantDto(tid, details.Name, details.Type, aov, curVol, share, growth, GetEndpoint(details.OrderProviderSettings));
             })
             .ToList();
 
@@ -388,7 +389,7 @@ public class FinancialService(
         var tenantDetails = await context.Tenants
             .AsNoTracking()
             .Where(t => t.Id != IApplicationDbContext.SystemTenantGuid)
-            .Select(t => new { t.Id, t.Name, t.Type, t.LitiumBaseUrl })
+            .Select(t => new { t.Id, t.Name, t.Type, t.OrderProviderSettings })
             .ToDictionaryAsync(t => t.Id, ct);
 
         var currentByTenant = currentRows
@@ -418,7 +419,7 @@ public class FinancialService(
                     Volume = curVol,
                     Revenue = curRev,
                     Share = share,
-                    LitiumBaseUrl = details.LitiumBaseUrl
+                    OrderProviderEndpoint = GetEndpoint(details.OrderProviderSettings)
                 };
             })
             .ToList();
@@ -450,7 +451,7 @@ public class FinancialService(
                 aovRank,
                 volRank,
                 revRank,
-                t.LitiumBaseUrl);
+                t.OrderProviderEndpoint);
         }).ToList();
 
         var cohortGroups = tenants
@@ -530,7 +531,7 @@ public class FinancialService(
         var tenantDetails = await context.Tenants
             .AsNoTracking()
             .Where(t => t.Id != IApplicationDbContext.SystemTenantGuid)
-            .Select(t => new { t.Id, t.Name, t.Type, t.LitiumBaseUrl })
+            .Select(t => new { t.Id, t.Name, t.Type, t.OrderProviderSettings })
             .ToDictionaryAsync(t => t.Id, ct);
 
         var currentByTenant = currentRows
@@ -561,7 +562,7 @@ public class FinancialService(
                 var share = totalCurrentRevenue > 0 ? Math.Round((cur / totalCurrentRevenue) * 100, 2) : 0m;
                 var details = tenantDetails[tid];
 
-                return new PortfolioImpactTenantDto(tid, details.Name, details.Type, prev, growth, cur, volume, volumeGrowth, share, details.LitiumBaseUrl);
+                return new PortfolioImpactTenantDto(tid, details.Name, details.Type, prev, growth, cur, volume, volumeGrowth, share, GetEndpoint(details.OrderProviderSettings));
             })
             .ToList();
 
@@ -1008,6 +1009,22 @@ public class FinancialService(
     private static string FormatBinLabel(decimal min, decimal max)
     {
         return $"{min:N0}–{max:N0} SEK";
+    }
+
+    private static string? GetEndpoint(string? settings)
+    {
+        if (string.IsNullOrWhiteSpace(settings)) return null;
+        try
+        {
+            using var document = JsonDocument.Parse(settings);
+            return document.RootElement.TryGetProperty("endpointUrl", out var endpoint)
+                ? endpoint.GetString()
+                : null;
+        }
+        catch (JsonException)
+        {
+            return null;
+        }
     }
 
     #endregion

@@ -12,7 +12,7 @@ public record PortfolioImpactTenantDto(
     decimal OrderVolume,
     decimal VolumeGrowthPercentage,
     decimal PortfolioSharePercentage,
-    string? LitiumBaseUrl);
+    string? OrderProviderEndpoint);
 
 public record PortfolioImpactDto(
     decimal MedianBaselineRevenue,

@@ -1,6 +1,6 @@
+using System.Globalization;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Globalization;
 using System.Text.Json;
 using Adwais.Application.DTOs.Monitoring.Upstream;
 using Adwais.Application.Interfaces;
@@ -8,7 +8,7 @@ using Adwais.Domain.Entities.Monitoring;
 using Adwais.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-namespace Adwais.Infrastructure.Services.Monitoring;
+namespace Adwais.Infrastructure.Services;
 
 public class UptimeRobotService(
     HttpClient httpClient, 

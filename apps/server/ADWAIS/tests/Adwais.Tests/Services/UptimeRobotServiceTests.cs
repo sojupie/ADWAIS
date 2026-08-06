@@ -12,7 +12,7 @@ using Xunit;
 using Adwais.Application.Interfaces;
 using Adwais.Domain.Entities;
 using Adwais.Infrastructure.Persistence;
-using Adwais.Infrastructure.Services.Monitoring;
+using Adwais.Infrastructure.Services;
 
 namespace Adwais.Tests.Services;
 
@@ -483,5 +483,16 @@ public class UptimeRobotServiceTests
         Assert.Throws<ArgumentException>(() => _service.MergeSettings(
             settings,
             new Dictionary<string, string?> { ["apiKey"] = "configured" }));
+    }
+
+    [Fact]
+    public void MergeSettings_NullApiKeyExplicitlyClearsIt()
+    {
+        const string settings = "{\"apiKey\":\"actual-key\"}";
+
+        var cleared = _service.MergeSettings(settings, new Dictionary<string, string?> { ["apiKey"] = null });
+
+        Assert.Empty(_service.GetConfiguredSecretKeys(cleared));
+        Assert.False(_service.IsConfigured(cleared));
     }
 }

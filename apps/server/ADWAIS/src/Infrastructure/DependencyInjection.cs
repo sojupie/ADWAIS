@@ -4,7 +4,6 @@ using Adwais.Application.Services;
 using Adwais.Infrastructure.Caching;
 using Adwais.Infrastructure.Persistence;
 using Adwais.Infrastructure.Services;
-using Adwais.Infrastructure.Services.Monitoring;
 using Adwais.Infrastructure.Jobs.MaterializedViews;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;

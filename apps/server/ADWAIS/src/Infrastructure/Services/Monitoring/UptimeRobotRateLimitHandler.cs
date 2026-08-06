@@ -1,9 +1,8 @@
 using System.Net;
-using System.Net.Http;
 using Adwais.Application.Common.Caching;
 using Microsoft.Extensions.Caching.Memory;
 
-namespace Adwais.Infrastructure.Services.Monitoring;
+namespace Adwais.Infrastructure.Services;
 
 /// <summary>
 /// A delegating handler that implements client-side rate limiting for the UptimeRobot API.

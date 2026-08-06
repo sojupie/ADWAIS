@@ -232,4 +232,17 @@ public class OrderIngestionServiceTests
         Assert.Contains("ServiceAccount secret", merged);
         Assert.Throws<ArgumentException>(() => source.MergeSettings(settings, new Dictionary<string, string?> { ["authorization"] = "configured" }));
     }
+
+    [Fact]
+    public void ProviderSettings_NullAuthorizationExplicitlyClearsIt()
+    {
+        var source = new LitiumOrderSource(new HttpClient());
+        const string settings = "{\"endpointUrl\":\"https://example.com\",\"authorization\":\"ServiceAccount secret\"}";
+
+        var cleared = source.MergeSettings(settings, new Dictionary<string, string?> { ["authorization"] = null });
+
+        Assert.Equal("https://example.com", source.GetPublicSettings(cleared)["endpointUrl"]);
+        Assert.DoesNotContain("authorization", source.GetConfiguredSecretKeys(cleared));
+        Assert.False(source.IsConfigured(cleared));
+    }
 }

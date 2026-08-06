@@ -4,11 +4,11 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Adwais.Infrastructure.Services;
 using Microsoft.Extensions.Caching.Memory;
 using Moq;
 using Moq.Protected;
 using Xunit;
-using Adwais.Infrastructure.Services.Monitoring;
 
 namespace Adwais.Tests.Services;
 

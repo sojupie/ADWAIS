@@ -134,6 +134,8 @@ The project leverages `Microsoft.Extensions.ApiDescription.Server` in the ASP.NE
 
 The React frontend uses `orval` to consume this specification and generate TypeScript types (`packages/types/generated/*`) and custom API client hooks (`apps/web/src/api/generated/endpoints.ts`).
 
+The authentication route and policy reference is documented in [`docs/authentication.md`](docs/authentication.md). Controller XML documentation is included in Swagger; the Markdown reference explains the flows that span multiple requests, such as OIDC-to-Hangfire session exchange and demo-mode access.
+
 To update both after modifying endpoints or backend DTOs, run:
 ```bash
 pnpm codegen

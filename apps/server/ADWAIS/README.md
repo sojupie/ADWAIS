@@ -134,6 +134,8 @@ pnpm --filter web codegen
 
 This reads `docs/openapi/v1.json` (updated on each `dotnet build`) and regenerates the React Query hooks and TypeScript interfaces in `packages/types/generated/` and `apps/web/src/api/generated/`. See [`apps/web/README.md`](../../../web/README.md) for details.
 
+For the authentication route contract, role policies, demo mode, kiosk JWT flow, and Hangfire session bridge, see [`docs/authentication.md`](../../../docs/authentication.md).
+
 If you need to run raw `dotnet` commands directly (e.g. from `apps/server/ADWAIS`):
 
 ```bash

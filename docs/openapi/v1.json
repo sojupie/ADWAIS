@@ -644,9 +644,51 @@
         "tags": [
           "DashboardSession"
         ],
+        "summary": "Creates the HttpOnly dashboard cookie used by the server-rendered Hangfire UI.",
+        "description": "The SPA sends its OIDC or kiosk bearer token to this endpoint. Browser navigation to\r\n`/hangfire` then uses the five-minute cookie because normal navigations do not carry\r\nthe SPA's Authorization header.",
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
           }
         }
       },
@@ -654,9 +696,10 @@
         "tags": [
           "DashboardSession"
         ],
+        "summary": "Clears the current browser's Hangfire dashboard session, if one exists.",
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         }
       }
@@ -666,6 +709,8 @@
         "tags": [
           "Demo"
         ],
+        "summary": "Returns a Viewer kiosk token when public demo access is enabled.",
+        "description": "Demo access is controlled by `Authentication:EnableDemoAccess`. The endpoint is\r\nintentionally anonymous; the returned token is read-only and cannot perform mutations.",
         "responses": {
           "200": {
             "description": "OK",
@@ -683,6 +728,26 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/KioskTokenResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             }
@@ -3087,6 +3152,8 @@
         "tags": [
           "User"
         ],
+        "summary": "Resolves the authenticated OIDC subject or kiosk claims to the current application user.",
+        "description": "OIDC users are matched by the standard `sub` claim. Kiosk tokens use their embedded\r\nrole claims and do not create a database user record.",
         "responses": {
           "200": {
             "description": "OK",
@@ -3104,6 +3171,26 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/UserResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             }
@@ -4861,6 +4948,33 @@
           }
         },
         "additionalProperties": false
+      },
+      "ProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "detail": {
+            "type": "string",
+            "nullable": true
+          },
+          "instance": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": { }
       },
       "RecurrenceType": {
         "enum": [

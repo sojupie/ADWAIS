@@ -127,7 +127,15 @@ public static class AuthenticationExtensions
             options.Cookie.HttpOnly = true;
             options.Cookie.Path = "/hangfire";
             options.Cookie.SameSite = SameSiteMode.Strict;
-            options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+            var environmentName = configuration["ASPNETCORE_ENVIRONMENT"]
+                ?? configuration["DOTNET_ENVIRONMENT"];
+            var isDevelopment = string.Equals(
+                environmentName,
+                "Development",
+                StringComparison.OrdinalIgnoreCase);
+            options.Cookie.SecurePolicy = isDevelopment
+                ? CookieSecurePolicy.SameAsRequest
+                : CookieSecurePolicy.Always;
             options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
             options.SlidingExpiration = false;
         });

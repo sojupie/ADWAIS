@@ -1,13 +1,10 @@
-using Adwais.Domain.Entities;
 using Adwais.Application.Common.Interfaces;
-using Microsoft.AspNetCore.Mvc;
+using Adwais.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace Adwais.Api.Controllers;
+namespace Adwais.Api.Controllers.System;
 
 /// <summary>
 /// Provides access to system-wide audit events and logs.

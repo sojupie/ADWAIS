@@ -1,10 +1,9 @@
 using Adwais.Application.DTOs.GlobalConfig;
 using Adwais.Application.Interfaces;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 
-namespace Adwais.Api.Controllers;
+namespace Adwais.Api.Controllers.Administration;
 
 /// <summary>
 /// Provides access to system-wide global settings and configurations.

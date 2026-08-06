@@ -1,11 +1,9 @@
-using System;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 using Adwais.Api.DTOs.Kiosk;
 using Adwais.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
-namespace Adwais.Api.Controllers;
+namespace Adwais.Api.Controllers.Authentication;
 
 /// <summary>
 /// Handles authentication lifecycle for kiosk display devices, including registration,

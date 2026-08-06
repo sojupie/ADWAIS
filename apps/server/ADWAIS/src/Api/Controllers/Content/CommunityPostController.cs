@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.Security.Claims;
-using System.Threading;
-using System.Threading.Tasks;
 using Adwais.Api.DTOs.Intranet;
 using Adwais.Application.DTOs.Intranet;
 using Adwais.Application.Interfaces;
@@ -10,7 +6,7 @@ using Adwais.Domain.Entities.Intranet;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Adwais.Api.Controllers;
+namespace Adwais.Api.Controllers.Content;
 
 [ApiController]
 [Route("api/intranet/posts")]

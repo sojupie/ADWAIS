@@ -1,14 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using Adwais.Application.DTOs.Intranet;
 using Adwais.Application.Interfaces;
 using Adwais.Domain.Entities.Intranet;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Adwais.Api.Controllers;
+namespace Adwais.Api.Controllers.Content;
 
 [ApiController]
 [Route("api/intranet/feeds")]

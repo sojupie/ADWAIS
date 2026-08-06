@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace Adwais.Api.Controllers;
+namespace Adwais.Api.Controllers.Integrations;
 
 [ApiController]
 [Route("api/webhooks")]

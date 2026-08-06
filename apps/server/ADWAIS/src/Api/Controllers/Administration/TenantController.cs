@@ -1,19 +1,12 @@
 using Adwais.Api.DTOs.Tenants;
-using Adwais.Api.DTOs.Monitoring;
-using Adwais.Domain;
-using Adwais.Domain.Entities;
-using FluentValidation;
 using Adwais.Application.Common.Interfaces;
 using Adwais.Application.Interfaces;
-using Microsoft.AspNetCore.Mvc;
+using Adwais.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace Adwais.Api.Controllers;
+namespace Adwais.Api.Controllers.Administration;
 
 /// <summary>
 /// Manages tenant lifecycle and configuration.

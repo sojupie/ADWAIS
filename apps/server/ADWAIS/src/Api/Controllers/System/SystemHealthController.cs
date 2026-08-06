@@ -1,11 +1,9 @@
 using Adwais.Application.DTOs.System;
 using Adwais.Application.Interfaces;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 
-namespace Adwais.Api.Controllers;
+namespace Adwais.Api.Controllers.System;
 
 /// <summary>
 /// Provides a high-level overview of system health and background job status.

@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Xunit;
-using Adwais.Api.Controllers;
+using Adwais.Api.Controllers.Authentication;
 using Adwais.Api.DTOs.Kiosk;
 using Adwais.Application.Interfaces;
 

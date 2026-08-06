@@ -1,5 +1,5 @@
 using System.Security.Claims;
-using Adwais.Api.Controllers;
+using Adwais.Api.Controllers.Authentication;
 using Adwais.Api.Extensions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;

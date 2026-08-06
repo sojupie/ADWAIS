@@ -1,11 +1,9 @@
-using System.Threading;
-using System.Threading.Tasks;
 using Adwais.Application.DTOs.Weather;
 using Adwais.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Adwais.Api.Controllers;
+namespace Adwais.Api.Controllers.Office;
 
 [ApiController]
 [Route("api/weather")]

@@ -1,15 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Adwais.Api.DTOs.Users;
 using Adwais.Application.Interfaces;
 using Adwais.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Adwais.Api.Controllers;
+namespace Adwais.Api.Controllers.Authentication;
 
 /// <summary>
 /// Manages system users and their database-assigned roles.
@@ -20,8 +15,17 @@ public class UserController(IUserService userService) : ControllerBase
 {
     private readonly IUserService _userService = userService;
 
+    /// <summary>
+    /// Resolves the authenticated OIDC subject or kiosk claims to the current application user.
+    /// </summary>
+    /// <remarks>
+    /// OIDC users are matched by the standard <c>sub</c> claim. Kiosk tokens use their embedded
+    /// role claims and do not create a database user record.
+    /// </remarks>
     [HttpGet("me")]
     [Authorize(Policy = "KioskOrStaffAccess")]
+    [ProducesResponseType(typeof(UserResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<UserResponseDto>> GetMe(CancellationToken ct)
     {
         Console.WriteLine("");
@@ -36,7 +40,7 @@ public class UserController(IUserService userService) : ControllerBase
             }
         }
         
-        var role = User.FindFirst("role")?.Value ?? User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+        var role = User.FindFirst("role")?.Value ?? User.FindFirst(global::System.Security.Claims.ClaimTypes.Role)?.Value;
         var kioskRole = role switch
         {
             "Admin"    => (UserRole?)UserRole.Admin,

@@ -1,4 +1,4 @@
-using Adwais.Api.Controllers;
+using Adwais.Api.Controllers.Authentication;
 using Adwais.Api.DTOs.Kiosk;
 using Adwais.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;

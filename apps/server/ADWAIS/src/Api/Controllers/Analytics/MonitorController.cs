@@ -1,19 +1,13 @@
 using Adwais.Api.DTOs.Monitoring;
-using Adwais.Domain.Entities.Monitoring;
-using Adwais.Domain.Enums;
 using Adwais.Application.Common.Interfaces;
 using Adwais.Application.Interfaces;
-using Adwais.Application.Services;
-using Microsoft.AspNetCore.Mvc;
+using Adwais.Domain.Entities.Monitoring;
+using Adwais.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace Adwais.Api.Controllers;
+namespace Adwais.Api.Controllers.Analytics;
 
 /// <summary>
 /// Manages uptime monitors and retrieves monitoring metrics.

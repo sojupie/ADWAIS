@@ -1,14 +1,10 @@
-using Adwais.Application.Common.Models;
 using Adwais.Api.DTOs.Financial;
 using Adwais.Application.DTOs.Financial;
-using Adwais.Domain.Enums;
 using Adwais.Application.Interfaces;
-using Adwais.Application.Services;
-using Adwais.Domain.Entities.OrderData;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
-namespace Adwais.Api.Controllers;
+namespace Adwais.Api.Controllers.Analytics;
 
 [ApiController]
 [Route("api/financial")]

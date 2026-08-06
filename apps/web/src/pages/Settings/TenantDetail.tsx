@@ -15,13 +15,14 @@ function TenantDetailForm({ tenant, isAdmin, onBack }: { tenant: TenantResponseD
   const navigate = useNavigate();
   const updateTenant = useUpdateTenantMutation();
   const deleteTenant = useDeleteTenantMutation();
+  const hasAuthorization = tenant.orderProviderConfiguredSecretKeys.includes('authorization');
   
   const getInitialDraft = (t: TenantResponseDto) => ({
     name: t.name || '',
-    litiumBaseUrl: t.litiumBaseUrl || '',
+    endpointUrl: t.orderProviderSettings?.endpointUrl || '',
     imageUrl: t.imageUrl || '',
-    serviceAccountToken: '',
-    clearToken: false,
+    authorization: '',
+    clearAuthorization: false,
     orderFetchingEnabled: t.orderFetchingEnabled ?? false,
   });
 
@@ -30,7 +31,7 @@ function TenantDetailForm({ tenant, isAdmin, onBack }: { tenant: TenantResponseD
   const [prevTenant, setPrevTenant] = useState(tenant);
   const [imgError, setImgError] = useState(false);
 
-  const faviconUrl = draft.imageUrl || getTenantFaviconUrl(draft.litiumBaseUrl);
+  const faviconUrl = draft.imageUrl || getTenantFaviconUrl(draft.endpointUrl);
   const showIcon = !faviconUrl || imgError;
 
   // When background data refreshes, only update the draft if the user isn't actively editing
@@ -43,22 +44,22 @@ function TenantDetailForm({ tenant, isAdmin, onBack }: { tenant: TenantResponseD
 
   const isDirty =
     draft.name !== (tenant.name || '') ||
-    draft.litiumBaseUrl !== (tenant.litiumBaseUrl || '') ||
+    draft.endpointUrl !== (tenant.orderProviderSettings?.endpointUrl || '') ||
     draft.imageUrl !== (tenant.imageUrl || '') ||
-    draft.serviceAccountToken !== '' ||
-    draft.clearToken ||
+    draft.authorization !== '' ||
+    draft.clearAuthorization ||
     draft.orderFetchingEnabled !== (tenant.orderFetchingEnabled ?? false);
 
   const handleSave = () => {
-    const payload: Partial<TenantResponseDto> & { serviceAccountToken?: string } = {};
+    const payload: Partial<TenantResponseDto> = {};
     if (draft.name !== tenant.name) payload.name = draft.name;
-    if (draft.litiumBaseUrl !== (tenant.litiumBaseUrl || '')) payload.litiumBaseUrl = draft.litiumBaseUrl;
+    if (draft.endpointUrl !== (tenant.orderProviderSettings?.endpointUrl || '')) payload.orderProviderSettings = { endpointUrl: draft.endpointUrl };
     if (draft.imageUrl !== (tenant.imageUrl || '')) payload.imageUrl = draft.imageUrl;
     
-    if (draft.clearToken) {
-      payload.serviceAccountToken = '';
-    } else if (draft.serviceAccountToken !== '') {
-      payload.serviceAccountToken = draft.serviceAccountToken;
+    if (draft.clearAuthorization) {
+      payload.orderProviderSettings = { ...payload.orderProviderSettings, authorization: null };
+    } else if (draft.authorization !== '') {
+      payload.orderProviderSettings = { ...payload.orderProviderSettings, authorization: draft.authorization };
     }
 
     if (draft.orderFetchingEnabled !== (tenant.orderFetchingEnabled ?? false)) payload.orderFetchingEnabled = draft.orderFetchingEnabled;
@@ -68,7 +69,7 @@ function TenantDetailForm({ tenant, isAdmin, onBack }: { tenant: TenantResponseD
       {
         onSuccess: () => {
           setIsUserEditing(false);
-          setDraft(d => ({ ...d, serviceAccountToken: '', clearToken: false }));
+          setDraft(d => ({ ...d, authorization: '', clearAuthorization: false }));
           setTimeout(() => {
             updateTenant.reset();
           }, 3000);
@@ -152,11 +153,11 @@ function TenantDetailForm({ tenant, isAdmin, onBack }: { tenant: TenantResponseD
             />
 
             <FormField
-              id="tenant-litium-url"
-              label="Litium Base URL"
+              id="tenant-provider-endpoint"
+              label="Order Provider Endpoint"
               type="url"
-              value={draft.litiumBaseUrl}
-              onChange={(e) => updateDraft({ litiumBaseUrl: e.target.value })}
+              value={draft.endpointUrl}
+              onChange={(e) => updateDraft({ endpointUrl: e.target.value })}
               disabled={!isAdmin}
             />
 
@@ -171,26 +172,26 @@ function TenantDetailForm({ tenant, isAdmin, onBack }: { tenant: TenantResponseD
 
             <FormField
               id="tenant-token"
-              label="Service Account Token"
+              label="Order Provider Authorization"
               type="password"
-              value={draft.serviceAccountToken}
-              disabled={!isAdmin || draft.clearToken}
-              onChange={(e) => updateDraft({ serviceAccountToken: e.target.value, clearToken: false })}
-              placeholder={draft.clearToken ? 'Cleared' : (tenant.hasServiceAccountToken ? '•••••••••••• (Type to change)' : 'Type to set new token')}
+              value={draft.authorization}
+              disabled={!isAdmin || draft.clearAuthorization}
+              onChange={(e) => updateDraft({ authorization: e.target.value, clearAuthorization: false })}
+              placeholder={draft.clearAuthorization ? 'Cleared' : (hasAuthorization ? '•••••••••••• (Type to change)' : 'Type to set')}
               meta={(
                 <span className="flex items-center gap-3">
-                  {tenant.hasServiceAccountToken && !draft.clearToken && (
+                  {hasAuthorization && !draft.clearAuthorization && (
                     <button
                       type="button"
-                      onClick={() => updateDraft({ clearToken: true, serviceAccountToken: '' })}
+                      onClick={() => updateDraft({ clearAuthorization: true, authorization: '' })}
                       disabled={!isAdmin}
                       className="cursor-pointer rounded-full px-3 py-1 text-sm font-bold text-error transition-colors hover:bg-error-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-error disabled:cursor-not-allowed disabled:text-on-surface/[0.38] disabled:hover:bg-transparent disabled:hover:text-on-surface/[0.38]"
                     >
-                      Clear Token
+                      Clear Authorization
                     </button>
                   )}
                   <span className="text-xs italic text-on-surface-variant">
-                    {draft.clearToken ? 'Pending clear' : tenant.hasServiceAccountToken ? 'Token is set' : 'Not set'}
+                    {draft.clearAuthorization ? 'Pending clear' : hasAuthorization ? 'Configured' : 'Not configured'}
                   </span>
                 </span>
               )}

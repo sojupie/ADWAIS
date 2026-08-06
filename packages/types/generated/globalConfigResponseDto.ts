@@ -4,16 +4,19 @@
  * Adwais.Api
  * OpenAPI spec version: 1.0
  */
+import type { GlobalConfigResponseDtoMonitoringProviderSettings } from './globalConfigResponseDtoMonitoringProviderSettings';
 
 export interface GlobalConfigResponseDto {
   id?: number;
   /** @nullable */
   lastPolled?: string | null;
-  litiumFetchEnabled?: boolean;
-  uptimeRobotFetchEnabled?: boolean;
-  litiumFetchIntervalMinutes?: number;
+  orderFetchEnabled?: boolean;
+  monitoringFetchEnabled?: boolean;
+  orderFetchIntervalMinutes?: number;
   /** @nullable */
-  uptimeRobotApiKey?: string | null;
+  monitoringProviderSettings?: GlobalConfigResponseDtoMonitoringProviderSettings;
+  /** @nullable */
+  monitoringProviderConfiguredSecretKeys?: string[] | null;
   uptimeFetchIntervalMinutes?: number;
   latencyFetchIntervalMinutes?: number;
   userStatsFetchIntervalMinutes?: number;

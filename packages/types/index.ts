@@ -71,7 +71,9 @@ export type TenantResponseDto = {
   id: string;
   name: string;
   type: Generated.TenantType;
-  litiumBaseUrl: string;
+  orderProvider: string;
+  orderProviderSettings: Record<string, string | null> | null;
+  orderProviderConfiguredSecretKeys: string[];
   imageUrl: string | null;
   currentlyFetching: boolean;
   fetchedFrom: string | null;
@@ -80,7 +82,7 @@ export type TenantResponseDto = {
   orderFetchingEnabled: boolean;
   monitorCount: number;
   lastSyncError: string | null;
-  hasServiceAccountToken: boolean;
+  hasOrderProviderSettings: boolean;
 };
 
 export type SystemHealthDto = {

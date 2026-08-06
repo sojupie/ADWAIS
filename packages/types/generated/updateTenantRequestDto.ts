@@ -5,19 +5,18 @@
  * OpenAPI spec version: 1.0
  */
 import type { TenantType } from './tenantType';
+import type { UpdateTenantRequestDtoOrderProviderSettings } from './updateTenantRequestDtoOrderProviderSettings';
 
 export interface UpdateTenantRequestDto {
   /** @nullable */
   name?: string | null;
   type?: TenantType;
   /** @nullable */
-  litiumBaseUrl?: string | null;
-  /** @nullable */
   orderProvider?: string | null;
   /** @nullable */
-  imageUrl?: string | null;
+  orderProviderSettings?: UpdateTenantRequestDtoOrderProviderSettings;
   /** @nullable */
-  serviceAccountToken?: string | null;
+  imageUrl?: string | null;
   /** @nullable */
   orderFetchingEnabled?: boolean | null;
 }

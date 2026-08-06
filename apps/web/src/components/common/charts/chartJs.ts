@@ -267,7 +267,7 @@ export function scaleBubbleRadii(values: number[], minRadius = 5, maxRadius = 20
 
 type TenantPointMeta = {
   tenantName?: string | null;
-  litiumBaseUrl?: string | null;
+  orderProviderEndpoint?: string | null;
   url?: string | null;
 };
 
@@ -338,7 +338,7 @@ export const tenantMarkerPlugin: Plugin<'bubble'> = {
         const name = tenant?.tenantName;
         const radius = (dataset.data[index] as { r?: number } | undefined)?.r ?? 0;
         if (radius < 5) return;
-        const faviconUrl = getTenantFaviconUrl(tenant?.litiumBaseUrl || tenant?.url);
+        const faviconUrl = getTenantFaviconUrl(tenant?.orderProviderEndpoint || tenant?.url);
         const favicon = faviconUrl ? getChartFavicon(faviconUrl, chart) : null;
 
         context.save();

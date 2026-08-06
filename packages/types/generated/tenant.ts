@@ -14,13 +14,11 @@ export interface Tenant {
   name: string | null;
   type?: TenantType;
   /** @nullable */
-  litiumBaseUrl?: string | null;
-  /** @nullable */
   orderProvider?: string | null;
   /** @nullable */
-  imageUrl?: string | null;
+  orderProviderSettings?: string | null;
   /** @nullable */
-  serviceAccountToken?: string | null;
+  imageUrl?: string | null;
   /** @nullable */
   fetchedFrom?: string | null;
   /** @nullable */

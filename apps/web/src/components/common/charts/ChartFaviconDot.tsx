@@ -13,7 +13,7 @@ export interface ChartFaviconDotProps extends SVGProps<SVGGElement> {
     type?: string;
     /** Tenant's base URL used for favicon resolution. */
     url?: string | null;
-    litiumBaseUrl?: string | null;
+    orderProviderEndpoint?: string | null;
   };
 }
 
@@ -26,7 +26,7 @@ export function ChartFaviconDot(props: ChartFaviconDotProps) {
 
   const r = Math.sqrt(size / Math.PI);
   const tenantName = payload?.tenantName ?? '';
-  const faviconUrl = getTenantFaviconUrl(payload?.litiumBaseUrl || payload?.url);
+  const faviconUrl = getTenantFaviconUrl(payload?.orderProviderEndpoint || payload?.url);
   const clipId = `fav-clip-${elementId.replace(/:/g, '')}-${payload?.tenantId ?? ''}`;
   const imgSize = r * 1.5;
   const resolvedFill = fill || 'var(--color-chart-1)';

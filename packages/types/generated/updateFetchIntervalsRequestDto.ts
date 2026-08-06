@@ -7,7 +7,7 @@
 
 export interface UpdateFetchIntervalsRequestDto {
   /** @nullable */
-  litiumFetchIntervalMinutes?: number | null;
+  orderFetchIntervalMinutes?: number | null;
   /** @nullable */
   uptimeFetchIntervalMinutes?: number | null;
   /** @nullable */

@@ -4,6 +4,7 @@
  * Adwais.Api
  * OpenAPI spec version: 1.0
  */
+import type { TenantResponseDtoOrderProviderSettings } from './tenantResponseDtoOrderProviderSettings';
 import type { TenantType } from './tenantType';
 
 export interface TenantResponseDto {
@@ -12,9 +13,11 @@ export interface TenantResponseDto {
   name?: string | null;
   type?: TenantType;
   /** @nullable */
-  litiumBaseUrl?: string | null;
-  /** @nullable */
   orderProvider?: string | null;
+  /** @nullable */
+  orderProviderSettings?: TenantResponseDtoOrderProviderSettings;
+  /** @nullable */
+  orderProviderConfiguredSecretKeys?: string[] | null;
   /** @nullable */
   imageUrl?: string | null;
   currentlyFetching?: boolean;
@@ -28,5 +31,5 @@ export interface TenantResponseDto {
   monitorCount?: number;
   /** @nullable */
   lastSyncError?: string | null;
-  hasServiceAccountToken?: boolean;
+  hasOrderProviderSettings?: boolean;
 }

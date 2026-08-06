@@ -18,5 +18,5 @@ export interface PortfolioImpactTenantResponseDto {
   volumeGrowthPercentage?: number;
   portfolioSharePercentage?: number;
   /** @nullable */
-  litiumBaseUrl?: string | null;
+  orderProviderEndpoint?: string | null;
 }

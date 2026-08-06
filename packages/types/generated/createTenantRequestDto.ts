@@ -4,6 +4,7 @@
  * Adwais.Api
  * OpenAPI spec version: 1.0
  */
+import type { CreateTenantRequestDtoOrderProviderSettings } from './createTenantRequestDtoOrderProviderSettings';
 import type { TenantType } from './tenantType';
 
 export interface CreateTenantRequestDto {
@@ -11,12 +12,10 @@ export interface CreateTenantRequestDto {
   name?: string | null;
   type?: TenantType;
   /** @nullable */
-  litiumBaseUrl?: string | null;
+  orderProvider: string | null;
   /** @nullable */
-  orderProvider?: string | null;
+  orderProviderSettings?: CreateTenantRequestDtoOrderProviderSettings;
   /** @nullable */
   imageUrl?: string | null;
-  /** @nullable */
-  serviceAccountToken?: string | null;
   orderFetchingEnabled?: boolean;
 }

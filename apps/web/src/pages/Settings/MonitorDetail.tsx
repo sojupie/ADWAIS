@@ -216,7 +216,7 @@ export const MonitorAssignmentPanel = React.memo(function MonitorAssignmentPanel
               >
                   <div className="text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1">Assigned Owner</div>
                   <div className="font-bold text-on-surface">{assignedTenant.name}</div>
-                  <div className="text-sm text-on-surface-variant">{assignedTenant.litiumBaseUrl}</div>
+                  <div className="text-sm text-on-surface-variant">{assignedTenant.orderProviderSettings?.endpointUrl}</div>
               </button>
                   <button
                       type="button"

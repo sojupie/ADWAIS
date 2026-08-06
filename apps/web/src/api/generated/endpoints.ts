@@ -125,7 +125,7 @@ export const getPostApiJobTriggerMonitorSyncUrl = () => {
 }
 
 /**
- * @summary Triggers the UptimeRobot monitor synchronization job immediately.
+ * @summary Triggers the monitoring-provider synchronization job immediately.
  */
 export const postApiJobTriggerMonitorSync = async ( options?: RequestInit): Promise<postApiJobTriggerMonitorSyncResponse> => {
 
@@ -173,7 +173,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type PostApiJobTriggerMonitorSyncMutationError = unknown
 
     /**
- * @summary Triggers the UptimeRobot monitor synchronization job immediately.
+ * @summary Triggers the monitoring-provider synchronization job immediately.
  */
 export const usePostApiJobTriggerMonitorSync = <TError = unknown,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerMonitorSync>>, TError,void, TContext>, request?: SecondParameter<typeof customClient>}
@@ -207,7 +207,7 @@ export const getPostApiJobTriggerUptimeSyncUrl = () => {
 }
 
 /**
- * @summary Triggers the UptimeRobot uptime metrics collection job immediately.
+ * @summary Triggers the monitoring uptime metrics collection job immediately.
  */
 export const postApiJobTriggerUptimeSync = async ( options?: RequestInit): Promise<postApiJobTriggerUptimeSyncResponse> => {
 
@@ -255,7 +255,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type PostApiJobTriggerUptimeSyncMutationError = unknown
 
     /**
- * @summary Triggers the UptimeRobot uptime metrics collection job immediately.
+ * @summary Triggers the monitoring uptime metrics collection job immediately.
  */
 export const usePostApiJobTriggerUptimeSync = <TError = unknown,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerUptimeSync>>, TError,void, TContext>, request?: SecondParameter<typeof customClient>}
@@ -289,7 +289,7 @@ export const getPostApiJobTriggerLatencySyncUrl = () => {
 }
 
 /**
- * @summary Triggers the UptimeRobot latency metrics collection job immediately.
+ * @summary Triggers the monitoring latency metrics collection job immediately.
  */
 export const postApiJobTriggerLatencySync = async ( options?: RequestInit): Promise<postApiJobTriggerLatencySyncResponse> => {
 
@@ -337,7 +337,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type PostApiJobTriggerLatencySyncMutationError = unknown
 
     /**
- * @summary Triggers the UptimeRobot latency metrics collection job immediately.
+ * @summary Triggers the monitoring latency metrics collection job immediately.
  */
 export const usePostApiJobTriggerLatencySync = <TError = unknown,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerLatencySync>>, TError,void, TContext>, request?: SecondParameter<typeof customClient>}
@@ -371,7 +371,7 @@ export const getPostApiJobTriggerUserStatsSyncUrl = () => {
 }
 
 /**
- * @summary Triggers the UptimeRobot account statistics synchronization job immediately.
+ * @summary Triggers the monitoring account statistics synchronization job immediately.
  */
 export const postApiJobTriggerUserStatsSync = async ( options?: RequestInit): Promise<postApiJobTriggerUserStatsSyncResponse> => {
 
@@ -419,7 +419,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type PostApiJobTriggerUserStatsSyncMutationError = unknown
 
     /**
- * @summary Triggers the UptimeRobot account statistics synchronization job immediately.
+ * @summary Triggers the monitoring account statistics synchronization job immediately.
  */
 export const usePostApiJobTriggerUserStatsSync = <TError = unknown,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerUserStatsSync>>, TError,void, TContext>, request?: SecondParameter<typeof customClient>}
@@ -432,32 +432,32 @@ export const usePostApiJobTriggerUserStatsSync = <TError = unknown,
       return useMutation(getPostApiJobTriggerUserStatsSyncMutationOptions(options), queryClient);
     }
 
-export type postApiJobTriggerLitiumSyncResponse200 = {
+export type postApiJobTriggerOrderSyncResponse200 = {
   data: void
   status: 200
 }
 
-export type postApiJobTriggerLitiumSyncResponseSuccess = (postApiJobTriggerLitiumSyncResponse200) & {
+export type postApiJobTriggerOrderSyncResponseSuccess = (postApiJobTriggerOrderSyncResponse200) & {
   headers: Headers;
 };
 ;
 
-export type postApiJobTriggerLitiumSyncResponse = (postApiJobTriggerLitiumSyncResponseSuccess)
+export type postApiJobTriggerOrderSyncResponse = (postApiJobTriggerOrderSyncResponseSuccess)
 
-export const getPostApiJobTriggerLitiumSyncUrl = () => {
-
-
+export const getPostApiJobTriggerOrderSyncUrl = () => {
 
 
-  return `/api/job/trigger/litium-sync`
+
+
+  return `/api/job/trigger/order-sync`
 }
 
 /**
- * @summary Triggers the Litium order data ingestion job immediately.
+ * @summary Triggers the order ingestion job immediately.
  */
-export const postApiJobTriggerLitiumSync = async ( options?: RequestInit): Promise<postApiJobTriggerLitiumSyncResponse> => {
+export const postApiJobTriggerOrderSync = async ( options?: RequestInit): Promise<postApiJobTriggerOrderSyncResponse> => {
 
-  return customClient<postApiJobTriggerLitiumSyncResponse>(getPostApiJobTriggerLitiumSyncUrl(),
+  return customClient<postApiJobTriggerOrderSyncResponse>(getPostApiJobTriggerOrderSyncUrl(),
   {
     ...options,
     method: 'POST'
@@ -469,11 +469,11 @@ export const postApiJobTriggerLitiumSync = async ( options?: RequestInit): Promi
 
 
 
-export const getPostApiJobTriggerLitiumSyncMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerLitiumSync>>, TError,void, TContext>, request?: SecondParameter<typeof customClient>}
-): UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerLitiumSync>>, TError,void, TContext> => {
+export const getPostApiJobTriggerOrderSyncMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerOrderSync>>, TError,void, TContext>, request?: SecondParameter<typeof customClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerOrderSync>>, TError,void, TContext> => {
 
-const mutationKey = ['postApiJobTriggerLitiumSync'];
+const mutationKey = ['postApiJobTriggerOrderSync'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -483,10 +483,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiJobTriggerLitiumSync>>, void> = () => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiJobTriggerOrderSync>>, void> = () => {
 
 
-          return  postApiJobTriggerLitiumSync(requestOptions)
+          return  postApiJobTriggerOrderSync(requestOptions)
         }
 
 
@@ -496,22 +496,22 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type PostApiJobTriggerLitiumSyncMutationResult = NonNullable<Awaited<ReturnType<typeof postApiJobTriggerLitiumSync>>>
+    export type PostApiJobTriggerOrderSyncMutationResult = NonNullable<Awaited<ReturnType<typeof postApiJobTriggerOrderSync>>>
 
-    export type PostApiJobTriggerLitiumSyncMutationError = unknown
+    export type PostApiJobTriggerOrderSyncMutationError = unknown
 
     /**
- * @summary Triggers the Litium order data ingestion job immediately.
+ * @summary Triggers the order ingestion job immediately.
  */
-export const usePostApiJobTriggerLitiumSync = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerLitiumSync>>, TError,void, TContext>, request?: SecondParameter<typeof customClient>}
+export const usePostApiJobTriggerOrderSync = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiJobTriggerOrderSync>>, TError,void, TContext>, request?: SecondParameter<typeof customClient>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postApiJobTriggerLitiumSync>>,
+        Awaited<ReturnType<typeof postApiJobTriggerOrderSync>>,
         TError,
         void,
         TContext
       > => {
-      return useMutation(getPostApiJobTriggerLitiumSyncMutationOptions(options), queryClient);
+      return useMutation(getPostApiJobTriggerOrderSyncMutationOptions(options), queryClient);
     }
 
 export type postApiJobTriggerRefreshHistoricOrderDataResponse200 = {

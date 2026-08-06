@@ -19,5 +19,5 @@ export interface CrossSegmentCohortTenantResponseDto {
   volumePercentileRank?: number;
   revenuePercentileRank?: number;
   /** @nullable */
-  litiumBaseUrl?: string | null;
+  orderProviderEndpoint?: string | null;
 }

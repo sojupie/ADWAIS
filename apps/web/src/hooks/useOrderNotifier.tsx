@@ -44,7 +44,7 @@ export function useOrderNotifier() {
                   const tenantsRes = queryClient.getQueryData<{ data: TenantResponseDto[] }>(['tenants']);
                   const tenantsList = tenantsRes?.data || [];
                   const tenant = tenantsList.find((t) => t.id === order.adwaisTenantId);
-                  const faviconUrl = tenant ? getTenantFaviconUrl(tenant.litiumBaseUrl) : null;
+                  const faviconUrl = tenant ? getTenantFaviconUrl(tenant.orderProviderSettings?.endpointUrl) : null;
 
                   if (notificationsEnabled) {
                     toast.custom(

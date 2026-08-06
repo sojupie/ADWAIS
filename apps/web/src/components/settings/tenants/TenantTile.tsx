@@ -17,36 +17,37 @@ interface TenantTileProps {
 
 export function TenantTile({ t, deleteTenant, isAdmin = false }: TenantTileProps) {
   const updateTenant = useUpdateTenantMutation();
+  const hasAuthorization = t.orderProviderConfiguredSecretKeys.includes('authorization');
   const [draft, setDraft] = useState({
     name: t.name,
     type: t.type ?? 'Mixed',
-    litiumBaseUrl: t.litiumBaseUrl || '',
+    endpointUrl: t.orderProviderSettings?.endpointUrl || '',
     imageUrl: t.imageUrl || '',
-    serviceAccountToken: '',
-    clearToken: false,
+    authorization: '',
+    clearAuthorization: false,
     orderFetchingEnabled: t.orderFetchingEnabled ?? false
   });
 
   const isDirty =
     draft.name !== t.name ||
     draft.type !== (t.type ?? 'Mixed') ||
-    draft.litiumBaseUrl !== (t.litiumBaseUrl || '') ||
+    draft.endpointUrl !== (t.orderProviderSettings?.endpointUrl || '') ||
     draft.imageUrl !== (t.imageUrl || '') ||
-    draft.serviceAccountToken !== '' ||
-    draft.clearToken ||
+    draft.authorization !== '' ||
+    draft.clearAuthorization ||
     draft.orderFetchingEnabled !== (t.orderFetchingEnabled ?? false);
 
   const handleSave = () => {
-    const payload: Partial<TenantResponseDto> & { serviceAccountToken?: string } = {};
+    const payload: Partial<TenantResponseDto> = {};
     if (draft.name !== t.name) payload.name = draft.name;
     if (draft.type !== (t.type ?? 'Mixed')) payload.type = draft.type;
-    if (draft.litiumBaseUrl !== (t.litiumBaseUrl || '')) payload.litiumBaseUrl = draft.litiumBaseUrl;
+    if (draft.endpointUrl !== (t.orderProviderSettings?.endpointUrl || '')) payload.orderProviderSettings = { endpointUrl: draft.endpointUrl };
     if (draft.imageUrl !== (t.imageUrl || '')) payload.imageUrl = draft.imageUrl;
 
-    if (draft.clearToken) {
-      payload.serviceAccountToken = '';
-    } else if (draft.serviceAccountToken !== '') {
-      payload.serviceAccountToken = draft.serviceAccountToken;
+    if (draft.clearAuthorization) {
+      payload.orderProviderSettings = { ...payload.orderProviderSettings, authorization: null };
+    } else if (draft.authorization !== '') {
+      payload.orderProviderSettings = { ...payload.orderProviderSettings, authorization: draft.authorization };
     }
 
     if (draft.orderFetchingEnabled !== (t.orderFetchingEnabled ?? false)) payload.orderFetchingEnabled = draft.orderFetchingEnabled;
@@ -55,7 +56,7 @@ export function TenantTile({ t, deleteTenant, isAdmin = false }: TenantTileProps
       { id: t.id, payload },
       {
         onSuccess: () => {
-          setDraft(d => ({ ...d, serviceAccountToken: '', clearToken: false }));
+          setDraft(d => ({ ...d, authorization: '', clearAuthorization: false }));
           setTimeout(() => {
             updateTenant.reset();
           }, 3000);
@@ -68,10 +69,10 @@ export function TenantTile({ t, deleteTenant, isAdmin = false }: TenantTileProps
     setDraft({
       name: t.name,
       type: t.type ?? 'Mixed',
-      litiumBaseUrl: t.litiumBaseUrl || '',
+      endpointUrl: t.orderProviderSettings?.endpointUrl || '',
       imageUrl: t.imageUrl || '',
-      serviceAccountToken: '',
-      clearToken: false,
+      authorization: '',
+      clearAuthorization: false,
       orderFetchingEnabled: t.orderFetchingEnabled ?? false
     });
   };
@@ -135,9 +136,9 @@ export function TenantTile({ t, deleteTenant, isAdmin = false }: TenantTileProps
   return (
     <TileCard header={header} headerActions={headerActions}>
       <FormField
-        label="Litium Base URL"
-        value={draft.litiumBaseUrl}
-        onChange={e => setDraft({ ...draft, litiumBaseUrl: e.target.value })}
+        label="Order Provider Endpoint"
+        value={draft.endpointUrl}
+        onChange={e => setDraft({ ...draft, endpointUrl: e.target.value })}
         disabled={!isAdmin}
         variant="outlined"
         className={"border border-outline"}
@@ -157,28 +158,28 @@ export function TenantTile({ t, deleteTenant, isAdmin = false }: TenantTileProps
       />
 
       <FormField
-        label="Service Account Token"
+        label="Order Provider Authorization"
         type="password"
-        value={draft.serviceAccountToken}
-        disabled={!isAdmin || draft.clearToken}
-        onChange={e => setDraft({ ...draft, serviceAccountToken: e.target.value, clearToken: false })}
+        value={draft.authorization}
+        disabled={!isAdmin || draft.clearAuthorization}
+        onChange={e => setDraft({ ...draft, authorization: e.target.value, clearAuthorization: false })}
         variant="outlined"
         className={"border border-outline"}
         density="compact"
-        placeholder={draft.clearToken ? 'Cleared' : (t.hasServiceAccountToken ? '•••••••••••• (Type to change)' : 'Type to set new token')}
+        placeholder={draft.clearAuthorization ? 'Cleared' : (hasAuthorization ? '•••••••••••• (Type to change)' : 'Type to set')}
         meta={(
           <span className="flex items-center gap-3">
-            {isAdmin && t.hasServiceAccountToken && !draft.clearToken && (
+            {isAdmin && hasAuthorization && !draft.clearAuthorization && (
               <button
                 type="button"
-                onClick={() => setDraft({ ...draft, clearToken: true, serviceAccountToken: '' })}
+                onClick={() => setDraft({ ...draft, clearAuthorization: true, authorization: '' })}
                 className="cursor-pointer rounded-full px-3 py-1 text-sm font-bold text-error transition-colors hover:bg-error-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-error"
               >
-                Clear Token
+                Clear Authorization
               </button>
             )}
             <span className="text-xs italic text-on-surface-variant">
-              {draft.clearToken ? 'Pending clear' : t.hasServiceAccountToken ? 'Token is set' : 'Not set'}
+              {draft.clearAuthorization ? 'Pending clear' : hasAuthorization ? 'Configured' : 'Not configured'}
             </span>
           </span>
         )}

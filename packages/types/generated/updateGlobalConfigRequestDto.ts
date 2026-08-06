@@ -4,14 +4,15 @@
  * Adwais.Api
  * OpenAPI spec version: 1.0
  */
+import type { UpdateGlobalConfigRequestDtoMonitoringProviderSettings } from './updateGlobalConfigRequestDtoMonitoringProviderSettings';
 
 export interface UpdateGlobalConfigRequestDto {
   /** @nullable */
-  litiumFetchEnabled?: boolean | null;
+  orderFetchEnabled?: boolean | null;
   /** @nullable */
-  uptimeRobotFetchEnabled?: boolean | null;
+  monitoringFetchEnabled?: boolean | null;
   /** @nullable */
-  uptimeRobotApiKey?: string | null;
+  monitoringProviderSettings?: UpdateGlobalConfigRequestDtoMonitoringProviderSettings;
   /** @nullable */
   systemEventRetentionDays?: number | null;
   /** @nullable */

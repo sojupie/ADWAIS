@@ -38,11 +38,18 @@ export function useCreateTenantMutation(onSuccessCallback?: () => void) {
   const { mutate: mutateRequest } = mutation;
 
   const mutate = useCallback((
-      payload: { name: string; litiumBaseUrl: string; imageUrl: string; serviceAccountToken: string },
+      payload: { name: string; endpointUrl: string; imageUrl: string; authorization: string },
       options?: Parameters<typeof mutateRequest>[1]
     ) => 
       mutateRequest({ 
-        data: { ...payload, type: 'B2B', orderFetchingEnabled: false } 
+        data: {
+          name: payload.name,
+          imageUrl: payload.imageUrl,
+          orderProvider: 'litium',
+          orderProviderSettings: { endpointUrl: payload.endpointUrl, authorization: payload.authorization },
+          type: 'B2B',
+          orderFetchingEnabled: false
+        }
       }, options),
     [mutateRequest]);
 
@@ -103,7 +110,7 @@ export function useUpdateTenantMutation() {
   const { mutate: mutateRequest } = mutation;
 
   const mutate = useCallback((
-      variables: { id: string; payload: Partial<TenantResponseDto> & { serviceAccountToken?: string } },
+      variables: { id: string; payload: Partial<TenantResponseDto> },
       options?: Parameters<typeof mutateRequest>[1]
     ) => 
       mutateRequest({ id: variables.id, data: variables.payload }, options),

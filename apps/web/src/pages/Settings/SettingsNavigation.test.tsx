@@ -53,7 +53,9 @@ const tenant: TenantResponseDto = {
   id: 'tenant-1',
   name: 'Acme',
   type: 'B2B',
-  litiumBaseUrl: 'https://example.com',
+  orderProvider: 'litium',
+  orderProviderSettings: { endpointUrl: 'https://example.com' },
+  orderProviderConfiguredSecretKeys: ['authorization'],
   imageUrl: null,
   currentlyFetching: false,
   fetchedFrom: null,
@@ -62,7 +64,7 @@ const tenant: TenantResponseDto = {
   orderFetchingEnabled: true,
   monitorCount: 1,
   lastSyncError: null,
-  hasServiceAccountToken: true,
+  hasOrderProviderSettings: true,
 };
 
 const mutation = () => ({ isPending: false, mutate: vi.fn() });

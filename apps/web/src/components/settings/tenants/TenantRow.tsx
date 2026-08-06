@@ -12,7 +12,7 @@ interface TenantRowProps {
 
 export function TenantRow({ t, selected = false, onSelect, onDoubleClick }: TenantRowProps) {
   const [imgError, setImgError] = useState(false);
-  const faviconUrl = t.imageUrl || getTenantFaviconUrl(t.litiumBaseUrl);
+  const faviconUrl = t.imageUrl || getTenantFaviconUrl(t.orderProviderSettings?.endpointUrl);
   const showIcon = !faviconUrl || imgError;
 
   return (
@@ -45,7 +45,7 @@ export function TenantRow({ t, selected = false, onSelect, onDoubleClick }: Tena
         </div>
       </td>
       <td className="px-4 py-3 align-middle sm:px-5 text-sm font-bold text-on-surface-variant truncate max-w-[250px]">
-        {t.litiumBaseUrl || 'N/A'}
+        {t.orderProviderSettings?.endpointUrl || 'N/A'}
       </td>
       <td className="w-32 px-4 py-3 align-middle sm:px-5">
         <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-bold ${
@@ -57,10 +57,10 @@ export function TenantRow({ t, selected = false, onSelect, onDoubleClick }: Tena
       </td>
       <td className="w-32 px-4 py-3 align-middle sm:px-5">
         <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-bold ${
-          t.hasServiceAccountToken ? 'bg-success-container text-on-success-container' : 'bg-surface-container text-on-surface-variant'
+          t.hasOrderProviderSettings ? 'bg-success-container text-on-success-container' : 'bg-surface-container text-on-surface-variant'
         }`}>
-          {t.hasServiceAccountToken ? <CheckCircle2 size={12} /> : <XCircle size={12} />}
-          {t.hasServiceAccountToken ? 'Token Set' : 'Missing Token'}
+          {t.hasOrderProviderSettings ? <CheckCircle2 size={12} /> : <XCircle size={12} />}
+          {t.hasOrderProviderSettings ? 'Settings Set' : 'Missing Settings'}
         </span>
       </td>
     </tr>

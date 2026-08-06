@@ -28,28 +28,29 @@ export function GlobalConfigurationForm({ config, updateConfig, disabled }: Glob
         {config ? (
           <div className="flex flex-col gap-2">
             <InlineEditField
-              label="Uptime Robot API Key"
-              value={config.uptimeRobotApiKey || ''}
+              label="Monitoring Provider API Key"
+              value={config.monitoringProviderConfiguredSecretKeys?.includes('apiKey') ? 'configured' : ''}
               kind="password"
               required
               requirement="When enabled"
               canClear
               disabled={disabled}
-              onCommit={(val) => updateConfig.mutateAsync({ uptimeRobotApiKey: val })}
+              onCommit={(val) => updateConfig.mutateAsync({ monitoringProviderSettings: { apiKey: val } })}
+              onClear={() => updateConfig.mutateAsync({ monitoringProviderSettings: { apiKey: null } })}
             />
             <InlineEditField
-              label="Litium Fetch Enabled"
-              value={config.litiumFetchEnabled ?? false}
+              label="Order Fetch Enabled"
+              value={config.orderFetchEnabled ?? false}
               kind="checkbox"
               disabled={disabled}
-              onCommit={(val) => updateConfig.mutateAsync({ litiumFetchEnabled: val })}
+              onCommit={(val) => updateConfig.mutateAsync({ orderFetchEnabled: val })}
             />
             <InlineEditField
-              label="Uptime Fetch Enabled"
-              value={config.uptimeRobotFetchEnabled ?? false}
+              label="Monitoring Fetch Enabled"
+              value={config.monitoringFetchEnabled ?? false}
               kind="checkbox"
               disabled={disabled}
-              onCommit={(val) => updateConfig.mutateAsync({ uptimeRobotFetchEnabled: val })}
+              onCommit={(val) => updateConfig.mutateAsync({ monitoringFetchEnabled: val })}
             />
             <InlineEditField
               label="Event Retention (Days)"

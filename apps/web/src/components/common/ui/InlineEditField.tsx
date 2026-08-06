@@ -22,6 +22,7 @@ export interface InlineEditFieldProps<T> {
   helperText?: ReactNode;
   validate?: (value: T) => string | undefined;
   canClear?: boolean;
+  onClear?: () => Promise<void> | void;
   disabled?: boolean;
   hideLabel?: boolean;
   variant?: FieldVariant;
@@ -46,6 +47,7 @@ export function InlineEditField<T>({
   helperText,
   validate,
   canClear = false,
+  onClear,
   disabled = false,
   hideLabel = false,
   variant = 'filled',
@@ -99,6 +101,20 @@ export function InlineEditField<T>({
     setDraft((kind === 'password' ? '' : value) as T);
     setError(undefined);
     setIsEditing(true);
+  };
+
+  const clear = async () => {
+    setIsSaving(true);
+    setError(undefined);
+    try {
+      await onClear?.();
+      setDraft('' as T);
+      setIsEditing(false);
+    } catch (clearError) {
+      setError(clearError instanceof Error ? clearError.message : 'Unable to clear this value.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   if (kind === 'select' && options.length === 0) {
@@ -204,7 +220,7 @@ export function InlineEditField<T>({
             {canClear && !isEmpty(kind === 'password' ? value : draft) && (
               <button
                 type="button"
-                onClick={() => void commit((kind === 'number' ? null : '') as T)}
+                onClick={() => void (onClear ? clear() : commit((kind === 'number' ? null : '') as T))}
                 disabled={isSaving}
                 className="min-h-9 rounded-full px-3 text-xs font-bold text-error transition-colors hover:bg-error-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-error disabled:cursor-not-allowed disabled:bg-on-surface/[0.1] disabled:text-on-surface/[0.38]"
               >

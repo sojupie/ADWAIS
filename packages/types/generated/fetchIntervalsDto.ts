@@ -9,7 +9,7 @@ export interface FetchIntervalsDto {
   latencyFetchIntervalMinutes?: number;
   uptimeFetchIntervalMinutes?: number;
   statusFetchIntervalMinutes?: number;
-  litiumFetchIntervalMinutes?: number;
+  orderFetchIntervalMinutes?: number;
   userStatsFetchIntervalMinutes?: number;
   feedFetchIntervalHours?: number;
 }

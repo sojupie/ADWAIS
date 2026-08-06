@@ -6,13 +6,13 @@ interface CreateTenantModalProps {
   isOpen: boolean;
   onClose: () => void;
   createTenant: {
-    mutate: (tenant: { name: string; litiumBaseUrl: string; imageUrl: string; serviceAccountToken: string; }, options?: { onSuccess?: () => void }) => void;
+    mutate: (tenant: { name: string; endpointUrl: string; imageUrl: string; authorization: string; }, options?: { onSuccess?: () => void }) => void;
     isPending: boolean;
   };
 }
 
 export function CreateTenantModal({ isOpen, onClose, createTenant }: CreateTenantModalProps) {
-  const [draft, setDraft] = useState({ name: '', litiumBaseUrl: '', imageUrl: '', serviceAccountToken: '' });
+  const [draft, setDraft] = useState({ name: '', endpointUrl: '', imageUrl: '', authorization: '' });
 
   if (!isOpen) return null;
 
@@ -20,7 +20,7 @@ export function CreateTenantModal({ isOpen, onClose, createTenant }: CreateTenan
     e.preventDefault();
     createTenant.mutate(draft, {
       onSuccess: () => {
-        setDraft({ name: '', litiumBaseUrl: '', imageUrl: '', serviceAccountToken: '' });
+        setDraft({ name: '', endpointUrl: '', imageUrl: '', authorization: '' });
         onClose();
       }
     });
@@ -66,11 +66,11 @@ export function CreateTenantModal({ isOpen, onClose, createTenant }: CreateTenan
 
           <FormField
             id="tenant-url"
-            label="Litium Base URL"
+            label="Order Provider Endpoint"
             type="url"
             placeholder="https://example.com"
-            value={draft.litiumBaseUrl}
-            onChange={e => setDraft({ ...draft, litiumBaseUrl: e.target.value })}
+            value={draft.endpointUrl}
+            onChange={e => setDraft({ ...draft, endpointUrl: e.target.value })}
             required
           />
 
@@ -85,11 +85,11 @@ export function CreateTenantModal({ isOpen, onClose, createTenant }: CreateTenan
 
           <FormField
             id="tenant-token"
-            label="Service Account Token"
+            label="Order Provider Authorization"
             type="password"
             placeholder="Secret Token"
-            value={draft.serviceAccountToken}
-            onChange={e => setDraft({ ...draft, serviceAccountToken: e.target.value })}
+            value={draft.authorization}
+            onChange={e => setDraft({ ...draft, authorization: e.target.value })}
             className="font-mono"
           />
         </div>
@@ -98,7 +98,7 @@ export function CreateTenantModal({ isOpen, onClose, createTenant }: CreateTenan
           <button type="button" onClick={onClose} disabled={createTenant.isPending} className="inline-flex min-h-11 items-center justify-center rounded-full px-4 text-base font-bold transition-colors hover:bg-surface-container-high focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary disabled:cursor-not-allowed disabled:text-on-surface/[0.38] disabled:hover:bg-transparent">
             Cancel
           </button>
-          <button type="submit" disabled={!draft.name || !draft.litiumBaseUrl || createTenant.isPending} className="inline-flex min-h-11 items-center justify-center rounded-full bg-on-primary-container px-5 text-base font-bold text-primary-container transition-colors hover:bg-brand-btn-quaternary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary disabled:cursor-not-allowed disabled:bg-on-surface/[0.1] disabled:text-on-surface/[0.38] disabled:hover:bg-on-surface/[0.1] disabled:hover:text-on-surface/[0.38]">
+          <button type="submit" disabled={!draft.name || !draft.endpointUrl || createTenant.isPending} className="inline-flex min-h-11 items-center justify-center rounded-full bg-on-primary-container px-5 text-base font-bold text-primary-container transition-colors hover:bg-brand-btn-quaternary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary disabled:cursor-not-allowed disabled:bg-on-surface/[0.1] disabled:text-on-surface/[0.38] disabled:hover:bg-on-surface/[0.1] disabled:hover:text-on-surface/[0.38]">
             {createTenant.isPending ? 'Creating...' : 'Create tenant'}
           </button>
         </div>

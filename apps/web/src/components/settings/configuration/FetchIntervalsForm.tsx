@@ -28,14 +28,14 @@ export function FetchIntervalsForm({ intervals, updateIntervals, disabled }: Fet
         {intervals ? (
           <div className="flex flex-col gap-2">
             <InlineEditField
-              label="Litium Fetch Interval (mins)"
-              value={intervals.litiumFetchIntervalMinutes}
+              label="Order Fetch Interval (mins)"
+              value={intervals.orderFetchIntervalMinutes}
               kind="number"
               required
               requirement="Greater than 0"
               disabled={disabled}
               validate={val => val > 0 ? undefined : 'Enter a value greater than 0.'}
-              onCommit={(val) => updateIntervals.mutateAsync({ litiumFetchIntervalMinutes: val })}
+              onCommit={(val) => updateIntervals.mutateAsync({ orderFetchIntervalMinutes: val })}
             />
             <InlineEditField
               label="Latency Fetch Interval (mins)"

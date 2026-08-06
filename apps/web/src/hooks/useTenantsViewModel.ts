@@ -10,7 +10,7 @@ export function useTenantsViewModel() {
     const isAdmin = role === 'Admin';
 
     const [isCreatingTenant, setIsCreatingTenant] = useState(false);
-    const [newTenantDraft, setNewTenantDraft] = useState({ name: '', litiumBaseUrl: '', imageUrl: '', serviceAccountToken: '' });
+    const [newTenantDraft, setNewTenantDraft] = useState({ name: '', endpointUrl: '', imageUrl: '', authorization: '' });
 
     const [isCreatingMonitor, setIsCreatingMonitor] = useState(false);
     const [newMonitorDraft, setNewMonitorDraft] = useState<{ name: string; url: string; type: string; uptimeSla: number | '' }>({
@@ -38,7 +38,7 @@ export function useTenantsViewModel() {
 
     const createTenant = useCreateTenantMutation(() => {
         setIsCreatingTenant(false);
-        setNewTenantDraft({ name: '', litiumBaseUrl: '', imageUrl: '', serviceAccountToken: '' });
+        setNewTenantDraft({ name: '', endpointUrl: '', imageUrl: '', authorization: '' });
     });
     const deleteTenant = useDeleteTenantMutation();
 
@@ -94,10 +94,10 @@ export function useTenantsViewModel() {
             if (tenantSearch) {
                 const q = tenantSearch.toLowerCase();
                 const matchName = t.name?.toLowerCase().includes(q);
-                const matchUrl = t.litiumBaseUrl?.toLowerCase().includes(q);
+                const matchUrl = t.orderProviderSettings?.endpointUrl?.toLowerCase().includes(q);
                 if (!matchName && !matchUrl) return false;
             }
-            const hasToken = t.hasServiceAccountToken;
+            const hasToken = t.hasOrderProviderSettings;
             if (tenantFilters.token === 'set') if (!hasToken) return false;
             if (tenantFilters.token === 'missing') if (hasToken) return false;
             if (tenantFilters.fetch === 'on') if (!t.orderFetchingEnabled) return false;

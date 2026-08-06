@@ -35,7 +35,7 @@ export const MOCK_PORTFOLIO_IMPACT: PortfolioImpactResponse = {
     type: i % 3 === 0 ? 'B2B' : i % 3 === 1 ? 'B2C' : 'Mixed',
     vertical: 'Retail',
     status: 'Active',
-    litiumBaseUrl: null
+    orderProviderEndpoint: null
   }))
 };
 
@@ -56,7 +56,7 @@ export const MOCK_EFFICIENCY: RevenueEfficiencyResponse = {
     type: i % 3 === 0 ? 'B2B' : i % 3 === 1 ? 'B2C' : 'Mixed',
     vertical: 'Retail',
     status: 'Active',
-    litiumBaseUrl: null
+    orderProviderEndpoint: null
   }))
 };
 
@@ -82,7 +82,7 @@ export const MOCK_CROSS_SEGMENT_DISTRIBUTION: CrossSegmentDistributionResponse =
       aovPercentileRank: 50,
       volumePercentileRank: 50,
       revenuePercentileRank: 50,
-      litiumBaseUrl: null
+      orderProviderEndpoint: null
     };
   })
 };

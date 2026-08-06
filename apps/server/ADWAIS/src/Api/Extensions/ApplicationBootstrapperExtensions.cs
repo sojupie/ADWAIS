@@ -25,6 +25,7 @@ public static class ApplicationBootstrapperExtensions
         {
             var contextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<AnalyticsDbContext>>();
             await using var context = await contextFactory.CreateDbContextAsync();
+            context.Database.SetCommandTimeout(TimeSpan.FromMinutes(10));
 
             if (enableSeeding)
             {

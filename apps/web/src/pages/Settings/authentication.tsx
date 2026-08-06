@@ -11,6 +11,7 @@ import { removeKioskToken } from '../../utils/auth';
 import { ErrorAlert } from '../../components/common/ui/ErrorAlert';
 import { SettingsPanel } from '../../components/common/layout/SettingsPanel';
 import { SettingsPanelHeader } from '../../components/common/layout/SettingsPanelHeader';
+import { useDeleteApiDashboardSession } from '../../api/generated/endpoints';
 
 export function AuthenticationSettings() {
   const [activationCode, setActivationCode] = useState('');
@@ -49,9 +50,10 @@ export function AuthenticationSettings() {
 
   const auth = useContext(AuthContext);
   const navigate = useNavigate();
+  const dashboardSessionMutation = useDeleteApiDashboardSession();
 
   const handleSignOut = async () => {
-    await fetch('/api/dashboard-session', { method: 'DELETE' }).catch(() => undefined);
+    await dashboardSessionMutation.mutateAsync().catch(() => undefined);
     removeKioskToken();
     if (auth?.isAuthenticated) {
       await auth.signoutRedirect();

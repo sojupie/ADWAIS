@@ -94,4 +94,25 @@ describe('InlineEditField', () => {
 
     await waitFor(() => expect(onCommit).toHaveBeenCalledWith(true));
   });
+
+  it('uses the explicit clear callback for configured credentials', async () => {
+    const onCommit = vi.fn();
+    const onClear = vi.fn().mockResolvedValue(undefined);
+    render(
+      <InlineEditField
+        label="API Key"
+        value="configured"
+        kind="password"
+        canClear
+        onCommit={onCommit}
+        onClear={onClear}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Edit API Key' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Clear' }));
+
+    await waitFor(() => expect(onClear).toHaveBeenCalledOnce());
+    expect(onCommit).not.toHaveBeenCalled();
+  });
 });

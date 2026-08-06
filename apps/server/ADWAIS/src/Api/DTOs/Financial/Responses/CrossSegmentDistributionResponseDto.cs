@@ -13,7 +13,7 @@ public record CrossSegmentCohortTenantResponseDto(
     int AovPercentileRank,
     int VolumePercentileRank,
     int RevenuePercentileRank,
-    string? LitiumBaseUrl);
+    string? OrderProviderEndpoint);
 
 public record CrossSegmentCohortGroupResponseDto(
     TenantType Type,

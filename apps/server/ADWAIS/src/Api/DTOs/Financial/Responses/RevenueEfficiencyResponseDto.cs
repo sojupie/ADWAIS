@@ -10,7 +10,7 @@ public record RevenueEfficiencyTenantResponseDto(
     decimal OrderVolume,
     decimal PortfolioSharePercentage,
     decimal GrowthVelocity,
-    string? LitiumBaseUrl
+    string? OrderProviderEndpoint
 );
 
 public record RevenueEfficiencyResponseDto(

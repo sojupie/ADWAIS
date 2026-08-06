@@ -22,10 +22,12 @@ namespace Adwais.Api.Controllers;
 [Route("api/tenants")]
 public class TenantController(
     IApplicationDbContext dbContext,
-    IMonitorOrchestrationService monitorService) : ControllerBase
+    IMonitorOrchestrationService monitorService,
+    IEnumerable<IOrderSource> orderSources) : ControllerBase
 {
     private readonly IApplicationDbContext _dbContext = dbContext;
     private readonly IMonitorOrchestrationService _monitorService = monitorService;
+    private readonly IEnumerable<IOrderSource> _orderSources = orderSources;
 
     /// <summary>
     /// Retrieves tenants, optionally filtered by ID.
@@ -41,53 +43,21 @@ public class TenantController(
         {
             var tenant = await context.Tenants
                 .AsNoTracking()
+                .Include(t => t.Monitors)
                 .Where(t => t.Id == id.Value)
-                .Select(t => new TenantResponseDto()
-                {
-                    Id = t.Id,
-                    Name = t.Name,
-                    Type = t.Type,
-                    LitiumBaseUrl = t.LitiumBaseUrl,
-                    OrderProvider = t.OrderProvider,
-                    ImageUrl = t.ImageUrl,
-                    CurrentlyFetching = t.CurrentlyFetching,
-                    FetchedFrom = t.FetchedFrom,
-                    FetchedUntil = t.FetchedUntil,
-                    LastPolled = t.LastPolled,
-                    OrderFetchingEnabled = t.OrderFetchingEnabled,
-                    MonitorCount = t.Monitors.Count,
-                    LastSyncError = t.LastSyncError,
-                    HasServiceAccountToken = !string.IsNullOrWhiteSpace(t.ServiceAccountToken) && t.ServiceAccountToken != "N/A" && !t.ServiceAccountToken.StartsWith("mock-token-")
-                })
                 .SingleOrDefaultAsync();
 
             if (tenant == null) return Ok(Enumerable.Empty<TenantResponseDto>());
 
-            return Ok(new[] { tenant });
+            return Ok(new[] { Map(tenant) });
         }
 
         var tenants = await context.Tenants
             .AsNoTracking()
-            .Select(t => new TenantResponseDto()
-            {
-                Id = t.Id,
-                Name = t.Name,
-                Type = t.Type,
-                LitiumBaseUrl = t.LitiumBaseUrl,
-                OrderProvider = t.OrderProvider,
-                ImageUrl = t.ImageUrl,
-                CurrentlyFetching = t.CurrentlyFetching,
-                FetchedFrom = t.FetchedFrom,
-                FetchedUntil = t.FetchedUntil,
-                LastPolled = t.LastPolled,
-                OrderFetchingEnabled = t.OrderFetchingEnabled,
-                MonitorCount = t.Monitors.Count,
-                LastSyncError = t.LastSyncError,
-                HasServiceAccountToken = !string.IsNullOrWhiteSpace(t.ServiceAccountToken) && t.ServiceAccountToken != "N/A" && !t.ServiceAccountToken.StartsWith("mock-token-")
-            })
+            .Include(t => t.Monitors)
             .ToListAsync();
 
-        return Ok(tenants);
+        return Ok(tenants.Select(Map));
     }
 
     /// <summary>
@@ -99,38 +69,34 @@ public class TenantController(
     {
         var context = _dbContext;
 
+        var provider = request.OrderProvider.Trim().ToLowerInvariant();
+        var source = _orderSources.ForProvider(provider);
+        string? settings;
+        try
+        {
+            settings = request.OrderProviderSettings is null ? null : source.MergeSettings(null, request.OrderProviderSettings);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        if (request.OrderFetchingEnabled && !source.IsConfigured(settings))
+            return BadRequest("Configured order provider settings are required when order fetching is enabled.");
+
         var tenant = new Tenant
         {
             Name = request.Name,
             Type = request.Type,
-            LitiumBaseUrl = request.LitiumBaseUrl,
-            OrderProvider = string.IsNullOrWhiteSpace(request.OrderProvider)
-                ? IntegrationProviders.Litium
-                : request.OrderProvider.Trim().ToLowerInvariant(),
+            OrderProvider = provider,
+            OrderProviderSettings = settings,
             ImageUrl = request.ImageUrl,
-            ServiceAccountToken = request.ServiceAccountToken,
             OrderFetchingEnabled = request.OrderFetchingEnabled
         };
 
         context.Tenants.Add(tenant);
         await context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetTenants), new { id = tenant.Id }, new TenantResponseDto()
-            {
-                Id = tenant.Id,
-                Name = tenant.Name,
-                Type = tenant.Type,
-                LitiumBaseUrl = tenant.LitiumBaseUrl,
-                OrderProvider = tenant.OrderProvider,
-                ImageUrl = tenant.ImageUrl,
-                CurrentlyFetching = tenant.CurrentlyFetching,
-                FetchedFrom = tenant.FetchedFrom,
-                FetchedUntil = tenant.FetchedUntil,
-                LastPolled = tenant.LastPolled,
-                OrderFetchingEnabled = tenant.OrderFetchingEnabled,
-                LastSyncError = tenant.LastSyncError,
-                HasServiceAccountToken = !string.IsNullOrWhiteSpace(tenant.ServiceAccountToken) && tenant.ServiceAccountToken != "N/A" && !tenant.ServiceAccountToken.StartsWith("mock-token-")
-            });
+        return CreatedAtAction(nameof(GetTenants), new { id = tenant.Id }, Map(tenant));
     }
 
     /// <summary>
@@ -177,22 +143,28 @@ public class TenantController(
         {
             tenant.Name = request.Name.Trim();
         }
-        if (request.LitiumBaseUrl is not null)
-        {
-            tenant.LitiumBaseUrl = string.IsNullOrWhiteSpace(request.LitiumBaseUrl) ? null : request.LitiumBaseUrl.Trim();
-        }
-
+        var providerChanged = false;
         if (request.OrderProvider is not null)
         {
             tenant.OrderProvider = request.OrderProvider.Trim().ToLowerInvariant();
+            providerChanged = true;
+        }
+        var source = _orderSources.ForProvider(tenant.OrderProvider);
+        if (providerChanged) tenant.OrderProviderSettings = null;
+        if (request.OrderProviderSettings is not null)
+        {
+            try
+            {
+                tenant.OrderProviderSettings = source.MergeSettings(tenant.OrderProviderSettings, request.OrderProviderSettings);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
         if (request.ImageUrl is not null)
         {
             tenant.ImageUrl = string.IsNullOrWhiteSpace(request.ImageUrl) ? null : request.ImageUrl.Trim();
-        }
-        if (request.ServiceAccountToken is not null)
-        {
-            tenant.ServiceAccountToken = string.IsNullOrWhiteSpace(request.ServiceAccountToken) ? null : request.ServiceAccountToken;
         }
         if (request.OrderFetchingEnabled.HasValue)
         {
@@ -203,23 +175,34 @@ public class TenantController(
             tenant.Type = request.Type.Value;
         }
 
+        if (tenant.OrderFetchingEnabled && !source.IsConfigured(tenant.OrderProviderSettings))
+            return BadRequest("Configured order provider settings are required when order fetching is enabled.");
+
         await context.SaveChangesAsync();
 
-        return Ok(new TenantResponseDto()
+        return Ok(Map(tenant));
+    }
+
+    private TenantResponseDto Map(Tenant tenant)
+    {
+        var source = _orderSources.ForProvider(tenant.OrderProvider);
+        return new TenantResponseDto
         {
             Id = tenant.Id,
             Name = tenant.Name,
             Type = tenant.Type,
-            LitiumBaseUrl = tenant.LitiumBaseUrl,
             OrderProvider = tenant.OrderProvider,
+            OrderProviderSettings = source.GetPublicSettings(tenant.OrderProviderSettings),
+            OrderProviderConfiguredSecretKeys = source.GetConfiguredSecretKeys(tenant.OrderProviderSettings),
             ImageUrl = tenant.ImageUrl,
             CurrentlyFetching = tenant.CurrentlyFetching,
             FetchedFrom = tenant.FetchedFrom,
             FetchedUntil = tenant.FetchedUntil,
             LastPolled = tenant.LastPolled,
             OrderFetchingEnabled = tenant.OrderFetchingEnabled,
+            MonitorCount = tenant.Monitors.Count,
             LastSyncError = tenant.LastSyncError,
-            HasServiceAccountToken = !string.IsNullOrWhiteSpace(tenant.ServiceAccountToken) && tenant.ServiceAccountToken != "N/A" && !tenant.ServiceAccountToken.StartsWith("mock-token-")
-        });
+            HasOrderProviderSettings = source.IsConfigured(tenant.OrderProviderSettings)
+        };
     }
 }

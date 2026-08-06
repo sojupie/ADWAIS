@@ -19,7 +19,8 @@ namespace Adwais.Api.Controllers;
 [Authorize(Policy = "AdminOnly")]
 public class IngestionController(
     IApplicationDbContext dbContext,
-    IBackgroundJobClient backgroundJobClient)
+    IBackgroundJobClient backgroundJobClient,
+    IEnumerable<IOrderSource> orderSources)
     : ControllerBase
 {
     private readonly IApplicationDbContext _dbContext = dbContext;
@@ -48,8 +49,8 @@ public class IngestionController(
         var tenant = await context.Tenants.SingleOrDefaultAsync(t => t.Id == request.TenantId, ct);
         
         if (tenant == null) return NotFound("Tenant not found.");
-        if (string.IsNullOrWhiteSpace(tenant.LitiumBaseUrl) || string.IsNullOrWhiteSpace(tenant.ServiceAccountToken))
-            return BadRequest("Tenant is missing Litium integration credentials.");
+        if (!orderSources.ForProvider(tenant.OrderProvider).IsConfigured(tenant.OrderProviderSettings))
+            return BadRequest("Tenant is missing valid order provider settings.");
         if (tenant.CurrentlyFetching) return Conflict(new { message = $"Tenant {request.TenantId} is currently fetching. Wait for the active job to complete." });
 
         tenant.CurrentlyFetching = true;
@@ -58,7 +59,7 @@ public class IngestionController(
         var startDate = request.StartDate ?? DateTimeOffset.UtcNow.AddYears(request.DefaultLookBackPeriodYears);
         var endDate = request.EndDate ?? DateTimeOffset.UtcNow;
 
-        var jobId = _backgroundJobClient.Enqueue<ILitiumIngestionService>(
+        var jobId = _backgroundJobClient.Enqueue<IOrderIngestionService>(
             service => service.ExecuteIngestionAsync(tenant.Id, startDate, endDate, CancellationToken.None));
 
         return Accepted(new { JobId = jobId });

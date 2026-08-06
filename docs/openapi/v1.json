@@ -10,7 +10,7 @@
         "tags": [
           "BackgroundJob"
         ],
-        "summary": "Triggers the UptimeRobot monitor synchronization job immediately.",
+        "summary": "Triggers the monitoring-provider synchronization job immediately.",
         "responses": {
           "200": {
             "description": "OK"
@@ -23,7 +23,7 @@
         "tags": [
           "BackgroundJob"
         ],
-        "summary": "Triggers the UptimeRobot uptime metrics collection job immediately.",
+        "summary": "Triggers the monitoring uptime metrics collection job immediately.",
         "responses": {
           "200": {
             "description": "OK"
@@ -36,7 +36,7 @@
         "tags": [
           "BackgroundJob"
         ],
-        "summary": "Triggers the UptimeRobot latency metrics collection job immediately.",
+        "summary": "Triggers the monitoring latency metrics collection job immediately.",
         "responses": {
           "200": {
             "description": "OK"
@@ -49,7 +49,7 @@
         "tags": [
           "BackgroundJob"
         ],
-        "summary": "Triggers the UptimeRobot account statistics synchronization job immediately.",
+        "summary": "Triggers the monitoring account statistics synchronization job immediately.",
         "responses": {
           "200": {
             "description": "OK"
@@ -57,12 +57,12 @@
         }
       }
     },
-    "/api/job/trigger/litium-sync": {
+    "/api/job/trigger/order-sync": {
       "post": {
         "tags": [
           "BackgroundJob"
         ],
-        "summary": "Triggers the Litium order data ingestion job immediately.",
+        "summary": "Triggers the order ingestion job immediately.",
         "responses": {
           "200": {
             "description": "OK"
@@ -3750,6 +3750,9 @@
         "additionalProperties": false
       },
       "CreateTenantRequestDto": {
+        "required": [
+          "orderProvider"
+        ],
         "type": "object",
         "properties": {
           "name": {
@@ -3759,19 +3762,19 @@
           "type": {
             "$ref": "#/components/schemas/TenantType"
           },
-          "litiumBaseUrl": {
-            "type": "string",
-            "nullable": true
-          },
           "orderProvider": {
             "type": "string",
             "nullable": true
           },
-          "imageUrl": {
-            "type": "string",
+          "orderProviderSettings": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "nullable": true
+            },
             "nullable": true
           },
-          "serviceAccountToken": {
+          "imageUrl": {
             "type": "string",
             "nullable": true
           },
@@ -3885,7 +3888,7 @@
             "type": "integer",
             "format": "int32"
           },
-          "litiumBaseUrl": {
+          "orderProviderEndpoint": {
             "type": "string",
             "nullable": true
           }
@@ -4046,7 +4049,7 @@
             "type": "integer",
             "format": "int32"
           },
-          "litiumFetchIntervalMinutes": {
+          "orderFetchIntervalMinutes": {
             "type": "integer",
             "format": "int32"
           },
@@ -4073,18 +4076,29 @@
             "format": "date-time",
             "nullable": true
           },
-          "litiumFetchEnabled": {
+          "orderFetchEnabled": {
             "type": "boolean"
           },
-          "uptimeRobotFetchEnabled": {
+          "monitoringFetchEnabled": {
             "type": "boolean"
           },
-          "litiumFetchIntervalMinutes": {
+          "orderFetchIntervalMinutes": {
             "type": "integer",
             "format": "int32"
           },
-          "uptimeRobotApiKey": {
-            "type": "string",
+          "monitoringProviderSettings": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "nullable": true
+            },
+            "nullable": true
+          },
+          "monitoringProviderConfiguredSecretKeys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
             "nullable": true
           },
           "uptimeFetchIntervalMinutes": {
@@ -4841,7 +4855,7 @@
             "type": "number",
             "format": "double"
           },
-          "litiumBaseUrl": {
+          "orderProviderEndpoint": {
             "type": "string",
             "nullable": true
           }
@@ -4962,7 +4976,7 @@
             "type": "number",
             "format": "double"
           },
-          "litiumBaseUrl": {
+          "orderProviderEndpoint": {
             "type": "string",
             "nullable": true
           }
@@ -5103,19 +5117,15 @@
           "type": {
             "$ref": "#/components/schemas/TenantType"
           },
-          "litiumBaseUrl": {
-            "type": "string",
-            "nullable": true
-          },
           "orderProvider": {
             "type": "string",
             "nullable": true
           },
-          "imageUrl": {
+          "orderProviderSettings": {
             "type": "string",
             "nullable": true
           },
-          "serviceAccountToken": {
+          "imageUrl": {
             "type": "string",
             "nullable": true
           },
@@ -5175,12 +5185,23 @@
           "type": {
             "$ref": "#/components/schemas/TenantType"
           },
-          "litiumBaseUrl": {
+          "orderProvider": {
             "type": "string",
             "nullable": true
           },
-          "orderProvider": {
-            "type": "string",
+          "orderProviderSettings": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "nullable": true
+            },
+            "nullable": true
+          },
+          "orderProviderConfiguredSecretKeys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
             "nullable": true
           },
           "imageUrl": {
@@ -5216,7 +5237,7 @@
             "type": "string",
             "nullable": true
           },
-          "hasServiceAccountToken": {
+          "hasOrderProviderSettings": {
             "type": "boolean"
           }
         },
@@ -5370,7 +5391,7 @@
       "UpdateFetchIntervalsRequestDto": {
         "type": "object",
         "properties": {
-          "litiumFetchIntervalMinutes": {
+          "orderFetchIntervalMinutes": {
             "type": "integer",
             "format": "int32",
             "nullable": true
@@ -5401,16 +5422,20 @@
       "UpdateGlobalConfigRequestDto": {
         "type": "object",
         "properties": {
-          "litiumFetchEnabled": {
+          "orderFetchEnabled": {
             "type": "boolean",
             "nullable": true
           },
-          "uptimeRobotFetchEnabled": {
+          "monitoringFetchEnabled": {
             "type": "boolean",
             "nullable": true
           },
-          "uptimeRobotApiKey": {
-            "type": "string",
+          "monitoringProviderSettings": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "nullable": true
+            },
             "nullable": true
           },
           "systemEventRetentionDays": {
@@ -5547,19 +5572,19 @@
           "type": {
             "$ref": "#/components/schemas/TenantType"
           },
-          "litiumBaseUrl": {
-            "type": "string",
-            "nullable": true
-          },
           "orderProvider": {
             "type": "string",
             "nullable": true
           },
-          "imageUrl": {
-            "type": "string",
+          "orderProviderSettings": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "nullable": true
+            },
             "nullable": true
           },
-          "serviceAccountToken": {
+          "imageUrl": {
             "type": "string",
             "nullable": true
           },

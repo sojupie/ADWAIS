@@ -37,8 +37,7 @@ public class GlobalConfigController(IGlobalConfigService globalConfigService) : 
     [Authorize(Policy = "AdminOnly")]
     public async Task<ActionResult<GlobalConfigResponseDto>> UpdateConfig([FromBody] UpdateGlobalConfigRequestDto request)
     {
-        var updated = await _globalConfigService.UpdateConfigAsync(request);
-        return Ok(updated);
+        return Ok(await _globalConfigService.UpdateConfigAsync(request));
     }
 
     /// <summary>

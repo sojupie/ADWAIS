@@ -20,57 +20,57 @@ namespace Adwais.Api.Controllers;
 public class BackgroundJobController : ControllerBase
 {
     /// <summary>
-    /// Triggers the UptimeRobot monitor synchronization job immediately.
+    /// Triggers the monitoring-provider synchronization job immediately.
     /// </summary>
     [HttpPost("trigger/monitor-sync")]
     [Authorize(Policy = "AdminOnly")]
     public ActionResult TriggerMonitorSync()
     {
-        RecurringJob.TriggerJob("sync-uptimerobot-fleet");
+        RecurringJob.TriggerJob("sync-monitoring-fleet");
         return Ok();
     }
     
     /// <summary>
-    /// Triggers the UptimeRobot uptime metrics collection job immediately.
+    /// Triggers the monitoring uptime metrics collection job immediately.
     /// </summary>
     [HttpPost("trigger/uptime-sync")]
     [Authorize(Policy = "AdminOnly")]
     public ActionResult TriggerUptimeSync()
     {
-        RecurringJob.TriggerJob("dispatch-uptimerobot-uptime");
+        RecurringJob.TriggerJob("dispatch-monitoring-uptime");
         return Ok();
     }
 
     /// <summary>
-    /// Triggers the UptimeRobot latency metrics collection job immediately.
+    /// Triggers the monitoring latency metrics collection job immediately.
     /// </summary>
     [HttpPost("trigger/latency-sync")]
     [Authorize(Policy = "AdminOnly")]
     public ActionResult TriggerLatencySync()
     {
-        RecurringJob.TriggerJob("dispatch-uptimerobot-latency");
+        RecurringJob.TriggerJob("dispatch-monitoring-latency");
         return Ok();
     }
 
     /// <summary>
-    /// Triggers the UptimeRobot account statistics synchronization job immediately.
+    /// Triggers the monitoring account statistics synchronization job immediately.
     /// </summary>
     [HttpPost("trigger/user-stats-sync")]
     [Authorize(Policy = "AdminOnly")]
     public ActionResult TriggerUserStatsSync()
     {
-        RecurringJob.TriggerJob("sync-uptimerobot-account-stats");
+        RecurringJob.TriggerJob("sync-monitoring-account-stats");
         return Ok();
     }
 
     /// <summary>
-    /// Triggers the Litium order data ingestion job immediately.
+    /// Triggers the order ingestion job immediately.
     /// </summary>
-    [HttpPost("trigger/litium-sync")]
+    [HttpPost("trigger/order-sync")]
     [Authorize(Policy = "AdminOnly")]
-    public ActionResult TriggerLitiumSync()
+    public ActionResult TriggerOrderSync()
     {
-        RecurringJob.TriggerJob("dispatch-litium-orders");
+        RecurringJob.TriggerJob("dispatch-order-fetch");
         return Ok();
     }
 

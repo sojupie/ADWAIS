@@ -7,10 +7,10 @@ public class UpdateFetchIntervalsRequestDtoValidator : AbstractValidator<UpdateF
 {
     public UpdateFetchIntervalsRequestDtoValidator()
     {
-        RuleFor(x => x.LitiumFetchIntervalMinutes)
+        RuleFor(x => x.OrderFetchIntervalMinutes)
             .GreaterThan(0)
-            .When(x => x.LitiumFetchIntervalMinutes.HasValue)
-            .WithMessage("Litium fetch interval must be at least 1 minute.");
+            .When(x => x.OrderFetchIntervalMinutes.HasValue)
+            .WithMessage("Order fetch interval must be at least 1 minute.");
 
         RuleFor(x => x.UptimeFetchIntervalMinutes)
             .GreaterThan(0)

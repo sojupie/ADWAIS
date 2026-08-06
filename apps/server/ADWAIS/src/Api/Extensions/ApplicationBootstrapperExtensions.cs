@@ -91,11 +91,16 @@ public static class ApplicationBootstrapperExtensions
             var recurringJobManager = app.Services.GetRequiredService<IRecurringJobManager>();
             
             recurringJobManager.AddOrUpdate<MonitorSynchronizationJob>(
-                "sync-uptimerobot-fleet", 
+                "sync-monitoring-fleet",
                 newJob => newJob.ExecuteAsync(), 
                 Cron.MinuteInterval(5));
             
             recurringJobManager.RemoveIfExists("dispatch-uptimerobot-metrics");
+            recurringJobManager.RemoveIfExists("sync-uptimerobot-fleet");
+            recurringJobManager.RemoveIfExists("dispatch-uptimerobot-uptime");
+            recurringJobManager.RemoveIfExists("dispatch-uptimerobot-latency");
+            recurringJobManager.RemoveIfExists("dispatch-litium-orders");
+            recurringJobManager.RemoveIfExists("sync-uptimerobot-account-stats");
 
             using (var scope = app.Services.CreateScope())
             {
@@ -105,27 +110,27 @@ public static class ApplicationBootstrapperExtensions
                 
                 var uptimeInterval = config?.UptimeFetchIntervalMinutes ?? 60;
                 var latencyInterval = config?.LatencyFetchIntervalMinutes ?? 10;
-                var litiumFetchInterval = Math.Max(1, config?.LitiumFetchIntervalMinutes ?? 10);
+                var orderFetchInterval = Math.Max(1, config?.OrderFetchIntervalMinutes ?? 10);
                 var userStatsInterval = config?.UserStatsFetchIntervalMinutes ?? 60;
                 var feedInterval = Math.Max(1, config?.FeedFetchIntervalHours ?? 2);
                 
                 recurringJobManager.AddOrUpdate<UptimeDispatcherJob>(
-                        "dispatch-uptimerobot-uptime",
+                        "dispatch-monitoring-uptime",
                         newJob => newJob.ExecuteAsync(),
                         CronHelper.FromMinutes(uptimeInterval));
 
                 recurringJobManager.AddOrUpdate<LatencyDispatcherJob>(
-                    "dispatch-uptimerobot-latency",
+                    "dispatch-monitoring-latency",
                     newJob => newJob.ExecuteAsync(),
                     CronHelper.FromMinutes(latencyInterval));
 
-                recurringJobManager.AddOrUpdate<LitiumOrderFetchJob>(
-                    "dispatch-litium-orders",
+                recurringJobManager.AddOrUpdate<OrderFetchDispatcherJob>(
+                    "dispatch-order-fetch",
                     newJob => newJob.ExecuteAsync(),
-                    CronHelper.FromMinutes(litiumFetchInterval));
+                    CronHelper.FromMinutes(orderFetchInterval));
 
-                recurringJobManager.AddOrUpdate<UpdateGlobalUptimeRobotUserStatsJob>(
-                    "sync-uptimerobot-account-stats",
+                recurringJobManager.AddOrUpdate<UpdateGlobalMonitoringStatsJob>(
+                    "sync-monitoring-account-stats",
                     newJob => newJob.ExecuteAsync(),
                     CronHelper.FromMinutes(userStatsInterval));
 

@@ -23,16 +23,21 @@ namespace Adwais.Api.Controllers;
 public class MonitorController(
     IApplicationDbContext dbContext,
     IMonitorOrchestrationService monitorService,
-    IReportingCalendar reportingCalendar) : ControllerBase
+    IReportingCalendar reportingCalendar,
+    IEnumerable<IMonitoringProvider> monitoringProviders,
+    IEnumerable<IOrderSource> orderSources) : ControllerBase
 {
     private readonly IApplicationDbContext _dbContext = dbContext;
     private readonly IMonitorOrchestrationService _monitorService = monitorService;
+    private readonly IEnumerable<IMonitoringProvider> _monitoringProviders = monitoringProviders;
+    private readonly IEnumerable<IOrderSource> _orderSources = orderSources;
 
-    private async Task<bool> IsUptimeRobotConfiguredAsync(CancellationToken ct)
+    private async Task<bool> IsMonitoringProviderConfiguredAsync(CancellationToken ct)
     {
         var db = _dbContext;
         var config = await db.GlobalConfigs.AsNoTracking().SingleOrDefaultAsync(ct);
-        return config != null && !string.IsNullOrWhiteSpace(config.UptimeRobotApiKey);
+        return config != null
+            && _monitoringProviders.ForProvider(config.MonitoringProvider).IsConfigured(config.MonitoringProviderSettings);
     }
 
     /// <summary>
@@ -208,7 +213,7 @@ public class MonitorController(
         [FromBody] CreateMonitorRequestDto request,
         CancellationToken ct = default)
     {
-        if (!await IsUptimeRobotConfiguredAsync(ct)) return BadRequest("UptimeRobot API key is not configured.");
+        if (!await IsMonitoringProviderConfiguredAsync(ct)) return BadRequest("Monitoring provider settings are not configured.");
         var m = await _monitorService.CreateMonitorAsync(tenantId, request.Name, request.Url, request.Type, request.UptimeSla, ct, request.LatencyDegradedFloor);
         return CreatedAtAction(nameof(GetMonitors), new { id = m.Id }, ToDto(m));
     }
@@ -242,7 +247,7 @@ public class MonitorController(
     [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> PauseMonitor(int id, CancellationToken ct = default)
     {
-        if (!await IsUptimeRobotConfiguredAsync(ct)) return BadRequest("UptimeRobot API key is not configured.");
+        if (!await IsMonitoringProviderConfiguredAsync(ct)) return BadRequest("Monitoring provider settings are not configured.");
         await _monitorService.PauseMonitorAsync(id, ct);
         return Ok();
     }
@@ -254,7 +259,7 @@ public class MonitorController(
     [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> StartMonitor(int id, CancellationToken ct = default)
     {
-        if (!await IsUptimeRobotConfiguredAsync(ct)) return BadRequest("UptimeRobot API key is not configured.");
+        if (!await IsMonitoringProviderConfiguredAsync(ct)) return BadRequest("Monitoring provider settings are not configured.");
         await _monitorService.StartMonitorAsync(id, ct);
         return Ok();
     }
@@ -266,7 +271,7 @@ public class MonitorController(
     [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> DeleteMonitor(int id, [FromQuery] Guid? tenantId, CancellationToken ct = default)
     {
-        if (!await IsUptimeRobotConfiguredAsync(ct)) return BadRequest("UptimeRobot API key is not configured.");
+        if (!await IsMonitoringProviderConfiguredAsync(ct)) return BadRequest("Monitoring provider settings are not configured.");
 
         if (!tenantId.HasValue)
         {
@@ -311,7 +316,7 @@ public class MonitorController(
     [Authorize(Policy = "AdminOnly")]
     public async Task<ActionResult<UptimeMonitorDto>> UpdateMonitor(int id, [FromBody] UpdateMonitorRequestDto request, CancellationToken ct = default)
     {
-        if (!await IsUptimeRobotConfiguredAsync(ct)) return BadRequest("UptimeRobot API key is not configured.");
+        if (!await IsMonitoringProviderConfiguredAsync(ct)) return BadRequest("Monitoring provider settings are not configured.");
         await _monitorService.UpdateMonitorAsync(id, request.Name, request.Url, request.Type, request.Sla, request.Tags, ct, request.LatencyDegradedFloor);
         
         var db = _dbContext;
@@ -323,7 +328,7 @@ public class MonitorController(
         return Ok(ToDto(m));
     }
 
-    private static UptimeMonitorDto ToDto(UptimeMonitor m)
+    private UptimeMonitorDto ToDto(UptimeMonitor m)
     {
         return new UptimeMonitorDto(
             Id: m.Id,
@@ -345,7 +350,9 @@ public class MonitorController(
             CreatedDate: m.CreatedDate,
             LastSyncError: m.LastSyncError,
             Tags: m.Tags,
-            TenantBaseUrl: m.Tenant?.LitiumBaseUrl,
+            TenantBaseUrl: m.Tenant is null
+                ? null
+                : _orderSources.ForProvider(m.Tenant.OrderProvider).GetPublicSettings(m.Tenant.OrderProviderSettings).GetValueOrDefault("endpointUrl"),
             TenantImageUrl: m.Tenant?.ImageUrl,
             HttpMethod: m.HttpMethod,
             TimeoutSeconds: m.TimeoutSeconds,

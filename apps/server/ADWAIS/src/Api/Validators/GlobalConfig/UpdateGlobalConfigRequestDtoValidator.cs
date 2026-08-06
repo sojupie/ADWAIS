@@ -1,11 +1,12 @@
 using Adwais.Application.DTOs.GlobalConfig;
+using Adwais.Application.Interfaces;
 using FluentValidation;
 
 namespace Adwais.Api.Validators.GlobalConfig;
 
 public class UpdateGlobalConfigRequestDtoValidator : AbstractValidator<UpdateGlobalConfigRequestDto>
 {
-    public UpdateGlobalConfigRequestDtoValidator()
+    public UpdateGlobalConfigRequestDtoValidator(IEnumerable<IMonitoringProvider> monitoringProviders)
     {
         RuleFor(x => x.SystemEventRetentionDays)
             .GreaterThan(0)
@@ -21,6 +22,8 @@ public class UpdateGlobalConfigRequestDtoValidator : AbstractValidator<UpdateGlo
             .NotEmpty()
             .MaximumLength(100)
             .Matches("^[a-z0-9-]+$")
+            .Must(provider => monitoringProviders.Any(candidate => candidate.Provider.Equals(provider, StringComparison.OrdinalIgnoreCase)))
+            .WithMessage("Monitoring provider is not registered.")
             .When(x => x.MonitoringProvider is not null);
 
         RuleFor(x => x.ReportingTimeZoneId)

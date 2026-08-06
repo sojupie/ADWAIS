@@ -81,7 +81,7 @@ public class FinancialController(
                 r.OrderVolume,
                 r.PortfolioSharePercentage,
                 r.GrowthVelocity,
-                r.LitiumBaseUrl
+                r.OrderProviderEndpoint
             )).ToList()
         ));
     }
@@ -114,7 +114,7 @@ public class FinancialController(
                 t.AovPercentileRank,
                 t.VolumePercentileRank,
                 t.RevenuePercentileRank,
-                t.LitiumBaseUrl
+                t.OrderProviderEndpoint
             )).ToList()
         ));
     }
@@ -142,7 +142,7 @@ public class FinancialController(
                 t.OrderVolume,
                 t.VolumeGrowthPercentage,
                 t.PortfolioSharePercentage,
-                t.LitiumBaseUrl)).ToList()));
+                t.OrderProviderEndpoint)).ToList()));
     }
 
     /// <summary>

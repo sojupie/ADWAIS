@@ -4,7 +4,9 @@ using System.Threading.Tasks;
 using Adwais.Application.DTOs.Financial.Upstream;
 using Adwais.Application.DTOs.Intranet;
 using Adwais.Application.Interfaces;
+using Adwais.Domain;
 using Adwais.Infrastructure.Persistence;
+using Adwais.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
@@ -16,7 +18,7 @@ namespace Adwais.Api.Controllers;
 [Route("api/webhooks")]
 [AllowAnonymous]
 public class WebhooksController(
-    ILitiumIngestionService ingestionService,
+    IOrderIngestionService ingestionService,
     IConfiguration configuration,
     ILogger<WebhooksController> logger,
     ICommunityPostService postService)
@@ -41,7 +43,7 @@ public class WebhooksController(
 
         try
         {
-            await ingestionService.IngestSingleOrderAsync(tenantId, payload, ct);
+            await ingestionService.IngestSingleOrderAsync(tenantId, IntegrationProviders.Litium, LitiumOrderSource.Normalize(payload), ct);
             return Ok();
         }
         catch (Exception ex)

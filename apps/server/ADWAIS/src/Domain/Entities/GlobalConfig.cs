@@ -6,11 +6,11 @@ public class GlobalConfig
 {
     public int Id { get; set; }
     public DateTimeOffset? LastPolled { get; set; }
-    public bool LitiumFetchEnabled { get; set; }
-    public bool UptimeRobotFetchEnabled { get; set; }
-    public required int LitiumFetchIntervalMinutes { get; set; }
-    public string? UptimeRobotApiKey { get; set; }
+    public bool OrderFetchEnabled { get; set; }
+    public bool MonitoringFetchEnabled { get; set; }
+    public required int OrderFetchIntervalMinutes { get; set; }
     public string MonitoringProvider { get; set; } = IntegrationProviders.UptimeRobot;
+    public string? MonitoringProviderSettings { get; set; }
     public int UptimeFetchIntervalMinutes { get; set; }
     public int LatencyFetchIntervalMinutes { get; set; }
     public int UserStatsFetchIntervalMinutes { get; set; }

@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
 using Adwais.Api.Controllers;
+using Adwais.Api.Controllers.Analytics;
 using Adwais.Api.DTOs.Monitoring;
 using Adwais.Application.DTOs.Monitoring;
 using Adwais.Application.Interfaces;

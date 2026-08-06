@@ -1,5 +1,6 @@
 using System.Reflection;
 using Adwais.Api.Controllers;
+using Adwais.Api.Controllers.Administration;
 using Microsoft.AspNetCore.Authorization;
 
 namespace Adwais.Tests.Controllers;

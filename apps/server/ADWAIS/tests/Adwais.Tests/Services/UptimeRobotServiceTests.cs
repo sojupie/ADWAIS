@@ -46,8 +46,8 @@ public class UptimeRobotServiceTests
         db.GlobalConfigs.Add(new GlobalConfig
         {
             Id = 1,
-            UptimeRobotApiKey = "test-api-key",
-            LitiumFetchIntervalMinutes = 30
+            MonitoringProviderSettings = "{\"apiKey\":\"test-api-key\"}",
+            OrderFetchIntervalMinutes = 30
         });
         db.SaveChanges();
     }
@@ -471,5 +471,17 @@ public class UptimeRobotServiceTests
             Times.Never(),
             ItExpr.IsAny<HttpRequestMessage>(),
             ItExpr.IsAny<CancellationToken>());
+    }
+
+    [Fact]
+    public void MergeSettings_WithRedactedApiKey_RejectsDisplayValue()
+    {
+        const string settings = "{\"apiKey\":\"actual-key\"}";
+
+        Assert.Empty(_service.GetPublicSettings(settings));
+        Assert.Contains("apiKey", _service.GetConfiguredSecretKeys(settings));
+        Assert.Throws<ArgumentException>(() => _service.MergeSettings(
+            settings,
+            new Dictionary<string, string?> { ["apiKey"] = "configured" }));
     }
 }

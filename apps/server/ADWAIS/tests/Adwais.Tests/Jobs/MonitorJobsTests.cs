@@ -46,9 +46,9 @@ public class MonitorJobsTests
         db.GlobalConfigs.Add(new GlobalConfig
         {
             Id = 1,
-            UptimeRobotApiKey = "api-key",
-            LitiumFetchIntervalMinutes = 30,
-            UptimeRobotFetchEnabled = true,
+            MonitoringProviderSettings = "{\"apiKey\":\"api-key\"}",
+            OrderFetchIntervalMinutes = 30,
+            MonitoringFetchEnabled = true,
             LatencyFetchIntervalMinutes = 10
         });
         db.SaveChanges();

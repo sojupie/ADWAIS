@@ -26,6 +26,8 @@ public class MonitorControllerTests
     private readonly AnalyticsDbContext _dbContext;
     private readonly Mock<IMonitorOrchestrationService> _monitorServiceMock;
     private readonly Mock<IReportingCalendar> _reportingCalendarMock;
+    private readonly Mock<IMonitoringProvider> _monitoringProviderMock;
+    private readonly Mock<IOrderSource> _orderSourceMock;
     private readonly MonitorController _controller;
 
     public MonitorControllerTests()
@@ -37,6 +39,12 @@ public class MonitorControllerTests
         _dbContext = new AnalyticsDbContext(_dbOptions);
         _monitorServiceMock = new Mock<IMonitorOrchestrationService>();
         _reportingCalendarMock = new Mock<IReportingCalendar>();
+        _monitoringProviderMock = new Mock<IMonitoringProvider>();
+        _monitoringProviderMock.SetupGet(provider => provider.Provider).Returns("uptimerobot");
+        _monitoringProviderMock.Setup(provider => provider.IsConfigured(It.IsAny<string?>())).Returns(true);
+        _orderSourceMock = new Mock<IOrderSource>();
+        _orderSourceMock.SetupGet(source => source.Provider).Returns("litium");
+        _orderSourceMock.Setup(source => source.GetPublicSettings(It.IsAny<string?>())).Returns(new Dictionary<string, string?>());
         _reportingCalendarMock
             .Setup(calendar => calendar.ResolvePeriodAsync(
                 It.IsAny<Timeframe>(),
@@ -48,15 +56,17 @@ public class MonitorControllerTests
         _controller = new MonitorController(
             _dbContext,
             _monitorServiceMock.Object,
-            _reportingCalendarMock.Object);
+            _reportingCalendarMock.Object,
+            new[] { _monitoringProviderMock.Object },
+            new[] { _orderSourceMock.Object });
 
         // Seed global config for IsUptimeRobotConfiguredAsync
         using var db = new AnalyticsDbContext(_dbOptions);
         db.GlobalConfigs.Add(new GlobalConfig
         {
             Id = 1,
-            UptimeRobotApiKey = "valid-api-key",
-            LitiumFetchIntervalMinutes = 30
+            MonitoringProviderSettings = "{\"apiKey\":\"valid-api-key\"}",
+            OrderFetchIntervalMinutes = 30
         });
         db.SaveChanges();
     }

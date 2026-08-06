@@ -28,10 +28,11 @@ public class GlobalConfigControllerTests
         var responseDto = new GlobalConfigResponseDto(
             Id: 1,
             LastPolled: null,
-            LitiumFetchEnabled: true,
-            UptimeRobotFetchEnabled: true,
-            LitiumFetchIntervalMinutes: 60,
-            UptimeRobotApiKey: null,
+            OrderFetchEnabled: true,
+            MonitoringFetchEnabled: true,
+            OrderFetchIntervalMinutes: 60,
+            MonitoringProviderSettings: new Dictionary<string, string?>(),
+            MonitoringProviderConfiguredSecretKeys: [],
             UptimeFetchIntervalMinutes: 60,
             LatencyFetchIntervalMinutes: 10,
             UserStatsFetchIntervalMinutes: 60,
@@ -66,10 +67,11 @@ public class GlobalConfigControllerTests
         var responseDto = new GlobalConfigResponseDto(
             Id: 1,
             LastPolled: null,
-            LitiumFetchEnabled: true,
-            UptimeRobotFetchEnabled: true,
-            LitiumFetchIntervalMinutes: 60,
-            UptimeRobotApiKey: null,
+            OrderFetchEnabled: true,
+            MonitoringFetchEnabled: true,
+            OrderFetchIntervalMinutes: 60,
+            MonitoringProviderSettings: new Dictionary<string, string?>(),
+            MonitoringProviderConfiguredSecretKeys: [],
             UptimeFetchIntervalMinutes: 60,
             LatencyFetchIntervalMinutes: 10,
             UserStatsFetchIntervalMinutes: 60,
@@ -116,7 +118,7 @@ public class GlobalConfigControllerTests
             LatencyFetchIntervalMinutes = 10,
             UptimeFetchIntervalMinutes = 60,
             StatusFetchIntervalMinutes = 5,
-            LitiumFetchIntervalMinutes = 60,
+            OrderFetchIntervalMinutes = 60,
             UserStatsFetchIntervalMinutes = 60,
             FeedFetchIntervalHours = 2
         };
@@ -144,7 +146,7 @@ public class GlobalConfigControllerTests
             LatencyFetchIntervalMinutes = 10,
             UptimeFetchIntervalMinutes = 60,
             StatusFetchIntervalMinutes = 5,
-            LitiumFetchIntervalMinutes = 60,
+            OrderFetchIntervalMinutes = 60,
             UserStatsFetchIntervalMinutes = 60,
             FeedFetchIntervalHours = 4
         };

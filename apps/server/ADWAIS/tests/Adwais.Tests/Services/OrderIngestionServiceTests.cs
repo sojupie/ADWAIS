@@ -14,9 +14,9 @@ using Microsoft.Extensions.Logging;
 
 namespace Adwais.Tests.Services;
 
-public class LitiumIngestionServiceTests
+public class OrderIngestionServiceTests
 {
-    private (LitiumIngestionService Service, Mock<HttpMessageHandler> HttpMock, AnalyticsDbContext DbContext) SetupTestEnvironment(string dbName)
+    private (OrderIngestionService Service, Mock<HttpMessageHandler> HttpMock, AnalyticsDbContext DbContext) SetupTestEnvironment(string dbName)
     {
         var options = new DbContextOptionsBuilder<AnalyticsDbContext>()
             .UseInMemoryDatabase(dbName)
@@ -30,10 +30,10 @@ public class LitiumIngestionServiceTests
         var httpHandlerMock = new Mock<HttpMessageHandler>(MockBehavior.Strict);
         var httpClient = new HttpClient(httpHandlerMock.Object);
         var orderSource = new LitiumOrderSource(httpClient);
-        var loggerMock = new Mock<ILogger<LitiumIngestionService>>();
+        var loggerMock = new Mock<ILogger<OrderIngestionService>>();
         var eventServiceMock = new Mock<ISystemEventService>();
 
-        var service = new LitiumIngestionService(
+        var service = new OrderIngestionService(
             dbContextFactoryMock.Object,
             new[] { orderSource },
             loggerMock.Object,
@@ -56,10 +56,10 @@ public class LitiumIngestionServiceTests
 
         var orderSource = new Mock<IOrderSource>();
         orderSource.SetupGet(source => source.Provider).Returns("litium");
-        var loggerMock = new Mock<ILogger<LitiumIngestionService>>();
+        var loggerMock = new Mock<ILogger<OrderIngestionService>>();
         var eventServiceMock = new Mock<ISystemEventService>();
 
-        ILitiumIngestionService service = new LitiumIngestionService(
+        IOrderIngestionService service = new OrderIngestionService(
             dbContextFactoryMock.Object,
             new[] { orderSource.Object },
             loggerMock.Object,
@@ -81,7 +81,7 @@ public class LitiumIngestionServiceTests
         };
 
         // Act
-        var exception = await Record.ExceptionAsync(() => service.IngestSingleOrderAsync(tenantId, orderDto));
+        var exception = await Record.ExceptionAsync(() => service.IngestSingleOrderAsync(tenantId, "litium", LitiumOrderSource.Normalize(orderDto)));
 
         // Assert
         Assert.Null(exception);
@@ -125,8 +125,7 @@ public class LitiumIngestionServiceTests
         {
             Id = tenantId,
             Name = "Test Tenant",
-            LitiumBaseUrl = "https://example.com/litium/",
-            ServiceAccountToken = "ServiceAccount TW90YXN0aWNBZGFwdGVyOk1vdGFzdGljQWRhcHRlcg==",
+            OrderProviderSettings = "{\"endpointUrl\":\"https://example.com/litium/\",\"authorization\":\"ServiceAccount TW90YXN0aWNBZGFwdGVyOk1vdGFzdGljQWRhcHRlcg==\"}",
             CurrentlyFetching = true,
             LastSyncError = "Old Error"
         };
@@ -189,8 +188,7 @@ public class LitiumIngestionServiceTests
         {
             Id = tenantId,
             Name = "Test Tenant",
-            LitiumBaseUrl = "https://example.com/litium/",
-            ServiceAccountToken = "ServiceAccount TW90YXN0aWNBZGFwdGVyOk1vdGFzdGljQWRhcHRlcg==",
+            OrderProviderSettings = "{\"endpointUrl\":\"https://example.com/litium/\",\"authorization\":\"ServiceAccount TW90YXN0aWNBZGFwdGVyOk1vdGFzdGljQWRhcHRlcg==\"}",
             CurrentlyFetching = true
         };
         dbContext.Tenants.Add(tenant);
@@ -216,5 +214,22 @@ public class LitiumIngestionServiceTests
         Assert.False(updatedTenant.CurrentlyFetching);
         Assert.NotNull(updatedTenant.LastSyncError);
         Assert.Contains("Failed to fetch chunk. Status: InternalServerError", updatedTenant.LastSyncError);
+    }
+
+    [Fact]
+    public void ProviderSettings_MasksAuthorizationAndPreservesItDuringEndpointUpdate()
+    {
+        var source = new LitiumOrderSource(new HttpClient());
+        const string settings = "{\"endpointUrl\":\"https://example.com\",\"authorization\":\"ServiceAccount secret\"}";
+
+        var publicSettings = source.GetPublicSettings(settings);
+        var merged = source.MergeSettings(settings, new Dictionary<string, string?> { ["endpointUrl"] = "https://next.example.com" });
+
+        Assert.Equal("https://example.com", publicSettings["endpointUrl"]);
+        Assert.DoesNotContain("authorization", publicSettings.Keys);
+        Assert.Contains("authorization", source.GetConfiguredSecretKeys(settings));
+        Assert.True(source.IsConfigured(merged));
+        Assert.Contains("ServiceAccount secret", merged);
+        Assert.Throws<ArgumentException>(() => source.MergeSettings(settings, new Dictionary<string, string?> { ["authorization"] = "configured" }));
     }
 }

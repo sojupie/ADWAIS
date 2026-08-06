@@ -90,7 +90,7 @@ public class IntranetControllerTests
             .ReturnsAsync(createdPost);
 
         var controller = new WebhooksController(
-            new Mock<ILitiumIngestionService>().Object,
+            new Mock<IOrderIngestionService>().Object,
             configMock.Object,
             new Mock<ILogger<WebhooksController>>().Object,
             postServiceMock.Object);
@@ -120,7 +120,7 @@ public class IntranetControllerTests
 
         var postServiceMock = new Mock<ICommunityPostService>();
         var controller = new WebhooksController(
-            new Mock<ILitiumIngestionService>().Object,
+            new Mock<IOrderIngestionService>().Object,
             configMock.Object,
             new Mock<ILogger<WebhooksController>>().Object,
             postServiceMock.Object);

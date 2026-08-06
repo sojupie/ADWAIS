@@ -19,6 +19,7 @@ public class GlobalConfigServiceTests
     private readonly DbContextOptions<AnalyticsDbContext> _options;
     private readonly Mock<ISystemEventService> _eventServiceMock;
     private readonly Mock<IReportingRollupRefresher> _reportingRollupRefresherMock;
+    private readonly Mock<IMonitoringProvider> _monitoringProviderMock;
 
     public GlobalConfigServiceTests()
     {
@@ -26,6 +27,14 @@ public class GlobalConfigServiceTests
         _options = new DbContextOptionsBuilder<AnalyticsDbContext>().UseInMemoryDatabase(dbName).Options;
         _eventServiceMock = new Mock<ISystemEventService>();
         _reportingRollupRefresherMock = new Mock<IReportingRollupRefresher>();
+        _monitoringProviderMock = new Mock<IMonitoringProvider>();
+        _monitoringProviderMock.SetupGet(provider => provider.Provider).Returns("uptimerobot");
+        _monitoringProviderMock
+            .Setup(provider => provider.GetPublicSettings(It.IsAny<string?>()))
+            .Returns(new Dictionary<string, string?>());
+        _monitoringProviderMock
+            .Setup(provider => provider.GetConfiguredSecretKeys(It.IsAny<string?>()))
+            .Returns(Array.Empty<string>());
 
         // Setup mock Hangfire JobStorage to avoid "JobStorage.Current has not been initialized" exception
         var jobStorageMock = new Mock<JobStorage>();
@@ -44,7 +53,7 @@ public class GlobalConfigServiceTests
         var config = new GlobalConfig
         {
             Id = 1,
-            LitiumFetchIntervalMinutes = 60,
+            OrderFetchIntervalMinutes = 60,
             UptimeFetchIntervalMinutes = 60,
             LatencyFetchIntervalMinutes = 10,
             UserStatsFetchIntervalMinutes = 60,
@@ -53,7 +62,7 @@ public class GlobalConfigServiceTests
         dbContext.GlobalConfigs.Add(config);
         await dbContext.SaveChangesAsync();
 
-        var service = new GlobalConfigService(dbContext, _eventServiceMock.Object, _reportingRollupRefresherMock.Object);
+        var service = CreateService(dbContext);
 
         // Act
         var result = await service.GetConfigAsync();
@@ -72,7 +81,7 @@ public class GlobalConfigServiceTests
         var config = new GlobalConfig
         {
             Id = 1,
-            LitiumFetchIntervalMinutes = 60,
+            OrderFetchIntervalMinutes = 60,
             UptimeFetchIntervalMinutes = 60,
             LatencyFetchIntervalMinutes = 10,
             UserStatsFetchIntervalMinutes = 60,
@@ -81,21 +90,21 @@ public class GlobalConfigServiceTests
         dbContext.GlobalConfigs.Add(config);
         await dbContext.SaveChangesAsync();
 
-        var service = new GlobalConfigService(dbContext, _eventServiceMock.Object, _reportingRollupRefresherMock.Object);
-        var request = new UpdateGlobalConfigRequestDto(FeedFetchIntervalHours: 4, LitiumFetchEnabled: false);
+        var service = CreateService(dbContext);
+        var request = new UpdateGlobalConfigRequestDto(FeedFetchIntervalHours: 4, OrderFetchEnabled: false);
 
         // Act
         var result = await service.UpdateConfigAsync(request);
 
         // Assert
         Assert.Equal(4, result.FeedFetchIntervalHours);
-        Assert.False(result.LitiumFetchEnabled);
+        Assert.False(result.OrderFetchEnabled);
 
         var dbCheck = new AnalyticsDbContext(_options);
         var configDb = await dbCheck.GlobalConfigs.FindAsync(1);
         Assert.NotNull(configDb);
         Assert.Equal(4, configDb.FeedFetchIntervalHours);
-        Assert.False(configDb.LitiumFetchEnabled);
+        Assert.False(configDb.OrderFetchEnabled);
     }
 
     [Fact]
@@ -106,17 +115,14 @@ public class GlobalConfigServiceTests
         {
             Id = 1,
             ReportingTimeZoneId = "Europe/Stockholm",
-            LitiumFetchIntervalMinutes = 60,
+            OrderFetchIntervalMinutes = 60,
             UptimeFetchIntervalMinutes = 60,
             LatencyFetchIntervalMinutes = 10,
             UserStatsFetchIntervalMinutes = 60
         });
         await dbContext.SaveChangesAsync();
 
-        var service = new GlobalConfigService(
-            dbContext,
-            _eventServiceMock.Object,
-            _reportingRollupRefresherMock.Object);
+        var service = CreateService(dbContext);
 
         var result = await service.UpdateConfigAsync(
             new UpdateGlobalConfigRequestDto(ReportingTimeZoneId: "UTC"));
@@ -128,6 +134,29 @@ public class GlobalConfigServiceTests
     }
 
     [Fact]
+    public async Task UpdateConfigAsync_WithUnknownMonitoringProvider_DoesNotPersistIt()
+    {
+        var dbContext = new AnalyticsDbContext(_options);
+        dbContext.GlobalConfigs.Add(new GlobalConfig
+        {
+            Id = 1,
+            OrderFetchIntervalMinutes = 60,
+            UptimeFetchIntervalMinutes = 60,
+            LatencyFetchIntervalMinutes = 10,
+            UserStatsFetchIntervalMinutes = 60
+        });
+        await dbContext.SaveChangesAsync();
+
+        var service = CreateService(dbContext);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => service.UpdateConfigAsync(
+            new UpdateGlobalConfigRequestDto(MonitoringProvider: "unsupported")));
+
+        await using var check = new AnalyticsDbContext(_options);
+        Assert.Equal("uptimerobot", (await check.GlobalConfigs.SingleAsync()).MonitoringProvider);
+    }
+
+    [Fact]
     public async Task UpdateFeedIntervalAsync_ShouldPersistInterval()
     {
         // Arrange
@@ -135,7 +164,7 @@ public class GlobalConfigServiceTests
         var config = new GlobalConfig
         {
             Id = 1,
-            LitiumFetchIntervalMinutes = 60,
+            OrderFetchIntervalMinutes = 60,
             UptimeFetchIntervalMinutes = 60,
             LatencyFetchIntervalMinutes = 10,
             UserStatsFetchIntervalMinutes = 60,
@@ -144,7 +173,7 @@ public class GlobalConfigServiceTests
         dbContext.GlobalConfigs.Add(config);
         await dbContext.SaveChangesAsync();
 
-        var service = new GlobalConfigService(dbContext, _eventServiceMock.Object, _reportingRollupRefresherMock.Object);
+        var service = CreateService(dbContext);
 
         // Act
         await service.UpdateFeedIntervalAsync(12);
@@ -164,7 +193,7 @@ public class GlobalConfigServiceTests
         var config = new GlobalConfig
         {
             Id = 1,
-            LitiumFetchIntervalMinutes = 60,
+            OrderFetchIntervalMinutes = 60,
             UptimeFetchIntervalMinutes = 50,
             LatencyFetchIntervalMinutes = 10,
             UserStatsFetchIntervalMinutes = 40,
@@ -173,14 +202,14 @@ public class GlobalConfigServiceTests
         dbContext.GlobalConfigs.Add(config);
         await dbContext.SaveChangesAsync();
 
-        var service = new GlobalConfigService(dbContext, _eventServiceMock.Object, _reportingRollupRefresherMock.Object);
+        var service = CreateService(dbContext);
 
         // Act
         var result = await service.GetFetchIntervalsAsync();
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(60, result.LitiumFetchIntervalMinutes);
+        Assert.Equal(60, result.OrderFetchIntervalMinutes);
         Assert.Equal(50, result.UptimeFetchIntervalMinutes);
         Assert.Equal(10, result.LatencyFetchIntervalMinutes);
         Assert.Equal(40, result.UserStatsFetchIntervalMinutes);
@@ -195,7 +224,7 @@ public class GlobalConfigServiceTests
         var config = new GlobalConfig
         {
             Id = 1,
-            LitiumFetchIntervalMinutes = 60,
+            OrderFetchIntervalMinutes = 60,
             UptimeFetchIntervalMinutes = 60,
             LatencyFetchIntervalMinutes = 10,
             UserStatsFetchIntervalMinutes = 60,
@@ -204,9 +233,10 @@ public class GlobalConfigServiceTests
         dbContext.GlobalConfigs.Add(config);
         await dbContext.SaveChangesAsync();
 
-        var service = new GlobalConfigService(dbContext, _eventServiceMock.Object, _reportingRollupRefresherMock.Object);
+        var service = CreateService(dbContext);
+
         var request = new UpdateFetchIntervalsRequestDto(
-            LitiumFetchIntervalMinutes: 120,
+            OrderFetchIntervalMinutes: 120,
             UptimeFetchIntervalMinutes: 30,
             FeedFetchIntervalHours: 5
         );
@@ -215,15 +245,18 @@ public class GlobalConfigServiceTests
         var result = await service.UpdateFetchIntervalsAsync(request);
 
         // Assert
-        Assert.Equal(120, result.LitiumFetchIntervalMinutes);
+        Assert.Equal(120, result.OrderFetchIntervalMinutes);
         Assert.Equal(30, result.UptimeFetchIntervalMinutes);
         Assert.Equal(5, result.FeedFetchIntervalHours);
 
         var dbCheck = new AnalyticsDbContext(_options);
         var configDb = await dbCheck.GlobalConfigs.FindAsync(1);
         Assert.NotNull(configDb);
-        Assert.Equal(120, configDb.LitiumFetchIntervalMinutes);
+        Assert.Equal(120, configDb.OrderFetchIntervalMinutes);
         Assert.Equal(30, configDb.UptimeFetchIntervalMinutes);
         Assert.Equal(5, configDb.FeedFetchIntervalHours);
     }
+
+    private GlobalConfigService CreateService(AnalyticsDbContext dbContext)
+        => new(dbContext, _eventServiceMock.Object, _reportingRollupRefresherMock.Object, new[] { _monitoringProviderMock.Object });
 }

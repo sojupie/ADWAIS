@@ -36,7 +36,7 @@ public class MonitorOrchestrationServiceTests
         _uptimeRobotServiceMock = new Mock<IMonitoringProvider>();
         _uptimeRobotServiceMock.SetupGet(provider => provider.Provider).Returns("uptimerobot");
         _cacheServiceMock = new Mock<ICacheService>();
-        _dbContext.GlobalConfigs.Add(new GlobalConfig { Id = 1, LitiumFetchIntervalMinutes = 60 });
+        _dbContext.GlobalConfigs.Add(new GlobalConfig { Id = 1, OrderFetchIntervalMinutes = 60 });
         _dbContext.SaveChanges();
 
         _service = new MonitorOrchestrationService(
@@ -51,7 +51,7 @@ public class MonitorOrchestrationServiceTests
     {
         // Arrange
         var tenantId = Guid.NewGuid();
-        var tenant = new Tenant { Id = tenantId, Name = "Test Tenant", Type = TenantType.B2C, LitiumBaseUrl = "test.com" };
+        var tenant = new Tenant { Id = tenantId, Name = "Test Tenant", Type = TenantType.B2C };
         var monitor = new UptimeMonitor { Id = 1, TenantId = tenantId, Name = "Test Monitor", Url = "https://test.com", UptimeMonitorEnabled = true };
         
         _dbContext.Tenants.Add(tenant);
@@ -109,8 +109,7 @@ public class MonitorOrchestrationServiceTests
         {
             Id = tenantId,
             Name = "Binning Tenant",
-            Type = TenantType.B2C,
-            LitiumBaseUrl = "binning.test"
+            Type = TenantType.B2C
         });
         _dbContext.Monitors.Add(new UptimeMonitor
         {
@@ -155,7 +154,7 @@ public class MonitorOrchestrationServiceTests
     {
         // Arrange
         var tenantId = Guid.NewGuid();
-        var tenant = new Tenant { Id = tenantId, Name = "Test Tenant", Type = TenantType.B2C, LitiumBaseUrl = "test.com" };
+        var tenant = new Tenant { Id = tenantId, Name = "Test Tenant", Type = TenantType.B2C };
         var monitor = new UptimeMonitor { Id = 1, TenantId = tenantId, Name = "Test Monitor", Url = "https://test.com", UptimeMonitorEnabled = true };
         
         _dbContext.Tenants.Add(tenant);
@@ -202,8 +201,7 @@ public class MonitorOrchestrationServiceTests
         {
             Id = tenantId,
             Name = "Tag Filter Tenant",
-            Type = TenantType.B2C,
-            LitiumBaseUrl = "tags.test"
+            Type = TenantType.B2C
         });
         _dbContext.Monitors.AddRange(
             new UptimeMonitor
@@ -275,8 +273,8 @@ public class MonitorOrchestrationServiceTests
         var tenantId = Guid.NewGuid();
         var otherTenantId = Guid.NewGuid();
         _dbContext.Tenants.AddRange(
-            new Tenant { Id = tenantId, Name = "Tenant A", Type = TenantType.B2C, LitiumBaseUrl = "a.test" },
-            new Tenant { Id = otherTenantId, Name = "Tenant B", Type = TenantType.B2C, LitiumBaseUrl = "b.test" });
+            new Tenant { Id = tenantId, Name = "Tenant A", Type = TenantType.B2C },
+            new Tenant { Id = otherTenantId, Name = "Tenant B", Type = TenantType.B2C });
         _dbContext.Monitors.AddRange(
             new UptimeMonitor { Id = 11, TenantId = tenantId, Name = "A", Url = "https://a.test" },
             new UptimeMonitor { Id = 12, TenantId = otherTenantId, Name = "B", Url = "https://b.test" });
@@ -468,7 +466,7 @@ public class MonitorOrchestrationServiceTests
     {
         // Arrange
         var tenantId = Guid.NewGuid();
-        var tenant = new Tenant { Id = tenantId, Name = "Test Tenant", Type = TenantType.B2C, LitiumBaseUrl = "test.com" };
+        var tenant = new Tenant { Id = tenantId, Name = "Test Tenant", Type = TenantType.B2C };
         var monitor = new UptimeMonitor { Id = 50, TenantId = Guid.NewGuid(), Name = "Monitor", Url = "https://url.com" };
         
         _dbContext.Tenants.Add(tenant);

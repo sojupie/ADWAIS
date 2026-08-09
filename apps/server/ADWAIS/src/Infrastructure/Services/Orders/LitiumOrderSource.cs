@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Adwais.Application.DTOs.Financial.Upstream;
+using Adwais.Application.DTOs.Integrations;
 using Adwais.Application.Interfaces;
 using Adwais.Domain.Enums;
 
@@ -10,6 +11,13 @@ public sealed class LitiumOrderSource(HttpClient httpClient) : IOrderSource
     private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
 
     public string Provider => "litium";
+    public ProviderDescriptor Configuration { get; } = new(
+        "litium",
+        "Litium",
+        [
+            new("endpointUrl", "Endpoint URL", "url", true, "https://example.com"),
+            new("authorization", "Authorization", "password", true, "ServiceAccount …")
+        ]);
 
     public bool IsConfigured(string? settings)
     {

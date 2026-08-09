@@ -9,20 +9,19 @@ import { FormField, CheckboxField } from '../../components/common/ui/FormField';
 import { Button } from '../../components/common/ui/Button';
 import { TenantMonitorsPanel } from '../../components/settings/tenants/TenantMonitorsPanel';
 import { getTenantFaviconUrl } from '../../utils/tenantHelper';
-import type { TenantResponseDto } from '@types';
+import { useOrderProviderDescriptorsQuery } from '../../hooks/useIntegrationQueries';
+import type { ProviderDescriptor, TenantResponseDto, UpdateTenantRequestDto } from '@types';
 
-function TenantDetailForm({ tenant, isAdmin, onBack }: { tenant: TenantResponseDto, isAdmin: boolean, onBack: () => void }) {
+function TenantDetailForm({ tenant, providers, isAdmin, onBack }: { tenant: TenantResponseDto, providers: ProviderDescriptor[], isAdmin: boolean, onBack: () => void }) {
   const navigate = useNavigate();
   const updateTenant = useUpdateTenantMutation();
   const deleteTenant = useDeleteTenantMutation();
-  const hasAuthorization = tenant.orderProviderConfiguredSecretKeys.includes('authorization');
-  
   const getInitialDraft = (t: TenantResponseDto) => ({
     name: t.name || '',
-    endpointUrl: t.orderProviderSettings?.endpointUrl || '',
+    orderProvider: t.orderProvider,
+    settings: { ...(t.orderProviderSettings || {}) } as Record<string, string | null>,
+    clearedSecretKeys: [] as string[],
     imageUrl: t.imageUrl || '',
-    authorization: '',
-    clearAuthorization: false,
     orderFetchingEnabled: t.orderFetchingEnabled ?? false,
   });
 
@@ -31,7 +30,11 @@ function TenantDetailForm({ tenant, isAdmin, onBack }: { tenant: TenantResponseD
   const [prevTenant, setPrevTenant] = useState(tenant);
   const [imgError, setImgError] = useState(false);
 
-  const faviconUrl = draft.imageUrl || getTenantFaviconUrl(draft.endpointUrl);
+  const selectedProvider = providers.find(provider => provider.id === draft.orderProvider);
+  const settings = selectedProvider?.settings?.filter(setting => setting.key) ?? [];
+  const providerSettingsComplete = !draft.orderFetchingEnabled || settings.every(setting =>
+    !setting.required || Boolean(draft.settings[setting.key!]));
+  const faviconUrl = draft.imageUrl || getTenantFaviconUrl(draft.settings.endpointUrl || undefined);
   const showIcon = !faviconUrl || imgError;
 
   // When background data refreshes, only update the draft if the user isn't actively editing
@@ -44,24 +47,37 @@ function TenantDetailForm({ tenant, isAdmin, onBack }: { tenant: TenantResponseD
 
   const isDirty =
     draft.name !== (tenant.name || '') ||
-    draft.endpointUrl !== (tenant.orderProviderSettings?.endpointUrl || '') ||
+    draft.orderProvider !== tenant.orderProvider ||
+    settings.some(setting => {
+      const key = setting.key!;
+      return setting.inputType === 'password'
+        ? draft.clearedSecretKeys.includes(key) || draft.settings[key] !== undefined
+        : draft.settings[key] !== (tenant.orderProviderSettings?.[key] || '');
+    }) ||
     draft.imageUrl !== (tenant.imageUrl || '') ||
-    draft.authorization !== '' ||
-    draft.clearAuthorization ||
     draft.orderFetchingEnabled !== (tenant.orderFetchingEnabled ?? false);
 
   const handleSave = () => {
-    const payload: Partial<TenantResponseDto> = {};
+    const payload: UpdateTenantRequestDto = {};
     if (draft.name !== tenant.name) payload.name = draft.name;
-    if (draft.endpointUrl !== (tenant.orderProviderSettings?.endpointUrl || '')) payload.orderProviderSettings = { endpointUrl: draft.endpointUrl };
+    const providerChanged = draft.orderProvider !== tenant.orderProvider;
+    if (providerChanged) payload.orderProvider = draft.orderProvider;
+    const settingUpdates: Record<string, string | null> = {};
+    for (const setting of settings) {
+      const key = setting.key!;
+      const value = draft.settings[key];
+      if (providerChanged) {
+        settingUpdates[key] = value || null;
+      } else if (setting.inputType === 'password') {
+        if (draft.clearedSecretKeys.includes(key)) settingUpdates[key] = null;
+        else if (value !== undefined) settingUpdates[key] = value;
+      } else if (value !== (tenant.orderProviderSettings?.[key] || '')) {
+        settingUpdates[key] = value || null;
+      }
+    }
+    if (Object.keys(settingUpdates).length > 0) payload.orderProviderSettings = settingUpdates;
     if (draft.imageUrl !== (tenant.imageUrl || '')) payload.imageUrl = draft.imageUrl;
     
-    if (draft.clearAuthorization) {
-      payload.orderProviderSettings = { ...payload.orderProviderSettings, authorization: null };
-    } else if (draft.authorization !== '') {
-      payload.orderProviderSettings = { ...payload.orderProviderSettings, authorization: draft.authorization };
-    }
-
     if (draft.orderFetchingEnabled !== (tenant.orderFetchingEnabled ?? false)) payload.orderFetchingEnabled = draft.orderFetchingEnabled;
 
     updateTenant.mutate(
@@ -69,7 +85,7 @@ function TenantDetailForm({ tenant, isAdmin, onBack }: { tenant: TenantResponseD
       {
         onSuccess: () => {
           setIsUserEditing(false);
-          setDraft(d => ({ ...d, authorization: '', clearAuthorization: false }));
+          setDraft(getInitialDraft(tenant));
           setTimeout(() => {
             updateTenant.reset();
           }, 3000);
@@ -120,7 +136,7 @@ function TenantDetailForm({ tenant, isAdmin, onBack }: { tenant: TenantResponseD
               </Button>
               <Button
                 onClick={handleCancel}
-                disabled={!isAdmin || !isDirty || updateTenant.isPending}
+                disabled={!isAdmin || !isDirty || !providerSettingsComplete || updateTenant.isPending}
                 variant="text"
                 color="surface"
                 icon={<X size={16} />}
@@ -153,13 +169,41 @@ function TenantDetailForm({ tenant, isAdmin, onBack }: { tenant: TenantResponseD
             />
 
             <FormField
-              id="tenant-provider-endpoint"
-              label="Order Provider Endpoint"
-              type="url"
-              value={draft.endpointUrl}
-              onChange={(e) => updateDraft({ endpointUrl: e.target.value })}
+              as="select"
+              id="tenant-provider"
+              label="Order Provider"
+              value={draft.orderProvider}
+              onChange={e => updateDraft({ orderProvider: e.target.value, settings: {}, clearedSecretKeys: [] })}
               disabled={!isAdmin}
-            />
+            >
+              {providers.map(provider => provider.id && <option key={provider.id} value={provider.id}>{provider.displayName || provider.id}</option>)}
+            </FormField>
+
+            {settings.map(setting => {
+              const key = setting.key!;
+              const isSecret = setting.inputType === 'password';
+              const configured = tenant.orderProviderConfiguredSecretKeys.includes(key);
+              const cleared = draft.clearedSecretKeys.includes(key);
+              return (
+                <FormField
+                  key={key}
+                  id={`tenant-provider-${key}`}
+                  label={setting.label || key}
+                  type={setting.inputType || 'text'}
+                  value={draft.settings[key] || ''}
+                  disabled={!isAdmin || cleared}
+                  required={setting.required}
+                  placeholder={isSecret ? (cleared ? 'Cleared' : configured ? '•••••••••••• (Type to change)' : 'Type to set') : setting.placeholder || undefined}
+                  onChange={e => updateDraft({ settings: { ...draft.settings, [key]: e.target.value }, clearedSecretKeys: draft.clearedSecretKeys.filter(item => item !== key) })}
+                  meta={isSecret ? (
+                    <span className="flex items-center gap-3">
+                      {configured && !cleared && <button type="button" onClick={() => updateDraft({ settings: { ...draft.settings, [key]: null }, clearedSecretKeys: [...draft.clearedSecretKeys, key] })} disabled={!isAdmin} className="cursor-pointer rounded-full px-3 py-1 text-sm font-bold text-error transition-colors hover:bg-error-container">Clear {setting.label || key}</button>}
+                      <span className="text-xs italic text-on-surface-variant">{cleared ? 'Pending clear' : configured ? 'Configured' : 'Not configured'}</span>
+                    </span>
+                  ) : undefined}
+                />
+              );
+            })}
 
             <FormField
               id="tenant-image-url"
@@ -168,33 +212,6 @@ function TenantDetailForm({ tenant, isAdmin, onBack }: { tenant: TenantResponseD
               value={draft.imageUrl}
               onChange={(e) => updateDraft({ imageUrl: e.target.value })}
               disabled={!isAdmin}
-            />
-
-            <FormField
-              id="tenant-token"
-              label="Order Provider Authorization"
-              type="password"
-              value={draft.authorization}
-              disabled={!isAdmin || draft.clearAuthorization}
-              onChange={(e) => updateDraft({ authorization: e.target.value, clearAuthorization: false })}
-              placeholder={draft.clearAuthorization ? 'Cleared' : (hasAuthorization ? '•••••••••••• (Type to change)' : 'Type to set')}
-              meta={(
-                <span className="flex items-center gap-3">
-                  {hasAuthorization && !draft.clearAuthorization && (
-                    <button
-                      type="button"
-                      onClick={() => updateDraft({ clearAuthorization: true, authorization: '' })}
-                      disabled={!isAdmin}
-                      className="cursor-pointer rounded-full px-3 py-1 text-sm font-bold text-error transition-colors hover:bg-error-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-error disabled:cursor-not-allowed disabled:text-on-surface/[0.38] disabled:hover:bg-transparent disabled:hover:text-on-surface/[0.38]"
-                    >
-                      Clear Authorization
-                    </button>
-                  )}
-                  <span className="text-xs italic text-on-surface-variant">
-                    {draft.clearAuthorization ? 'Pending clear' : hasAuthorization ? 'Configured' : 'Not configured'}
-                  </span>
-                </span>
-              )}
             />
 
             <CheckboxField
@@ -217,6 +234,7 @@ export function TenantDetailView() {
   const navigate = useNavigate();
   const { tenantId } = useParams({ strict: false }) as { tenantId: string };
   const { tenants, isAdmin } = useTenantsViewModel();
+  const { data: providers = [] } = useOrderProviderDescriptorsQuery();
   
   const tenant = tenants?.find(t => t.id === tenantId);
 
@@ -231,7 +249,7 @@ export function TenantDetailView() {
                 onBack={() => void navigate({ to: '/settings/tenants' })}
             />
         ) : (
-            <TenantDetailForm key={tenant.id} tenant={tenant} isAdmin={isAdmin} onBack={() => void navigate({ to: '/settings/tenants' })} />
+            <TenantDetailForm key={tenant.id} tenant={tenant} providers={providers} isAdmin={isAdmin} onBack={() => void navigate({ to: '/settings/tenants' })} />
         )}
       </SettingsPanel>
     </div>

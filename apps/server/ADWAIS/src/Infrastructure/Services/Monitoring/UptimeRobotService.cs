@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Adwais.Application.DTOs.Monitoring.Upstream;
+using Adwais.Application.DTOs.Integrations;
 using Adwais.Application.Interfaces;
 using Adwais.Domain.Entities.Monitoring;
 using Adwais.Infrastructure.Persistence;
@@ -16,6 +17,10 @@ public class UptimeRobotService(
     ISystemEventService eventService) : IMonitoringProvider
 {
     public string Provider => "uptimerobot";
+    public ProviderDescriptor Configuration { get; } = new(
+        "uptimerobot",
+        "UptimeRobot",
+        [new("apiKey", "API Key", "password", true)]);
 
     public bool IsConfigured(string? settings)
     {

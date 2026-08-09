@@ -3,12 +3,14 @@ import { useCurrentUser } from '../../hooks/useCurrentUser';
 import { GlobalConfigurationForm } from '../../components/settings/configuration/GlobalConfigurationForm';
 import { FetchIntervalsForm } from '../../components/settings/configuration/FetchIntervalsForm';
 import { CalendarSubscriptionsPanel } from '../../components/settings/configuration/CalendarSubscriptionsPanel';
+import { useMonitoringProviderDescriptorsQuery } from '../../hooks/useIntegrationQueries';
 
 export function ConfigurationView() {
     const { data: config } = useGlobalConfigQuery();
     const { data: intervals } = useFetchIntervalsQuery();
     const updateConfig = useUpdateConfigMutation();
     const updateIntervals = useUpdateFetchIntervalsMutation();
+    const { data: monitoringProviders = [] } = useMonitoringProviderDescriptorsQuery();
     const { role } = useCurrentUser();
     const disabled = role !== 'Admin';
 
@@ -19,7 +21,7 @@ export function ConfigurationView() {
                 <CalendarSubscriptionsPanel disabled={disabled} />
             </div>
             <div className="flex flex-col gap-4 min-h-0 h-full">
-                <GlobalConfigurationForm config={config} updateConfig={updateConfig} disabled={disabled} />
+                <GlobalConfigurationForm config={config} updateConfig={updateConfig} providers={monitoringProviders} disabled={disabled} />
             </div>
         </div>
     );

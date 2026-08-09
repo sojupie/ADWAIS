@@ -75,7 +75,12 @@ describe('background job access', () => {
         render(<BackgroundJobsView />);
 
         expect(getJobButton('Monitor Sync')).toBeEnabled();
+        const orderSync = getJobButton('Order Sync');
+        expect(orderSync).toBeEnabled();
         expect(getJobButton('Refresh Historic Orders')).toBeEnabled();
         expect(getJobButton('Refresh Monitoring')).toBeEnabled();
+
+        fireEvent.click(orderSync);
+        expect(testState.triggerJob).toHaveBeenCalledWith('/api/job/trigger/order-sync');
     });
 });

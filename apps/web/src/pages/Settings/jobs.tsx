@@ -24,7 +24,7 @@ const manualJobs = [
     { id: 'uptime-sync', name: 'Uptime Sync', desc: 'Fetches latest uptime ping data.', access: 'admin', url: '/api/job/trigger/uptime-sync' },
     { id: 'latency-sync', name: 'Latency Sync', desc: 'Fetches latency metrics for all monitors.', access: 'admin', url: '/api/job/trigger/latency-sync' },
     { id: 'user-stats-sync', name: 'UptimeRobot User Stats', desc: 'Calculates active UptimeRobot user statistics.', access: 'admin', url: '/api/job/trigger/user-stats-sync' },
-    { id: 'litium-sync', name: 'Litium Sync', desc: 'Synchronizes order data from Litium.', access: 'admin', url: '/api/job/trigger/litium-sync' },
+    { id: 'order-sync', name: 'Order Sync', desc: 'Synchronizes order data from external providers.', access: 'admin', url: '/api/job/trigger/order-sync' },
     { id: 'feed-fetch', name: 'Feed Fetch', desc: 'Triggers aggregation of RSS, blogs, and newsrooms immediately.', access: 'admin', url: '/api/global-config/feeds/fetch' },
     { id: 'refresh-historic-order-data', name: 'Refresh Historic Orders', desc: 'Rebuilds materialized views for old orders.', access: 'staff', url: '/api/job/trigger/refresh-historic-order-data' },
     { id: 'refresh-monitoring-data', name: 'Refresh Monitoring', desc: 'Rebuilds monitoring materialized views.', access: 'staff', url: '/api/job/trigger/refresh-monitoring-data' },
@@ -64,7 +64,7 @@ export function BackgroundJobsView() {
                                         onClick={() => !isRestricted && triggerJob.mutate(job.url)}
                                         disabled={isRestricted}
                                         className={`group relative flex min-h-14 flex-col overflow-hidden rounded-xl px-4 py-3 text-left transition-colors ${isRestricted
-                                            ? 'cursor-not-allowed bg-on-surface/[0.1] text-on-surface/[0.38] opacity-50'
+                                            ? 'cursor-not-allowed bg-on-surface/[0.12] text-on-surface/[0.38]'
                                             : 'cursor-pointer bg-primary-container text-on-surface hover:m3-elevation-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary'
                                             }`}
                                     >

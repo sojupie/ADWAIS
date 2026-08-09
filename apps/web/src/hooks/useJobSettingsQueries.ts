@@ -9,7 +9,7 @@ import {
   usePostApiIngestionBackfill
 } from '../api/generated/endpoints';
 import { customClient } from '../apiClient';
-import type { GlobalConfigDto, RecurringJobDto, BackgroundJobStatusDto } from '@types';
+import type { GlobalConfigDto, RecurringJobDto, BackgroundJobStatusDto, UpdateGlobalConfigRequestDto } from '@types';
 import { toast } from 'sonner';
 
 export function useGlobalConfigQuery() {
@@ -104,9 +104,9 @@ export function useUpdateConfigMutation() {
 
   return {
     ...mutation,
-    mutate: (payload: Partial<GlobalConfigDto>) =>
+    mutate: (payload: UpdateGlobalConfigRequestDto) =>
       mutation.mutate({ data: payload }),
-    mutateAsync: async (payload: Partial<GlobalConfigDto>) => {
+    mutateAsync: async (payload: UpdateGlobalConfigRequestDto) => {
       await mutation.mutateAsync({ data: payload });
     },
   };

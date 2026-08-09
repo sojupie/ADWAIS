@@ -1,26 +1,41 @@
 import { useState } from 'react';
 import { Building2, X } from 'lucide-react';
+import type { CreateTenantRequestDto } from '@types';
 import { FormField } from '../../common/ui/FormField';
+import { useOrderProviderDescriptorsQuery } from '../../../hooks/useIntegrationQueries';
 
 interface CreateTenantModalProps {
   isOpen: boolean;
   onClose: () => void;
   createTenant: {
-    mutate: (tenant: { name: string; endpointUrl: string; imageUrl: string; authorization: string; }, options?: { onSuccess?: () => void }) => void;
+    mutate: (tenant: CreateTenantRequestDto, options?: { onSuccess?: () => void }) => void;
     isPending: boolean;
   };
 }
 
 export function CreateTenantModal({ isOpen, onClose, createTenant }: CreateTenantModalProps) {
-  const [draft, setDraft] = useState({ name: '', endpointUrl: '', imageUrl: '', authorization: '' });
+  const { data: providers = [] } = useOrderProviderDescriptorsQuery();
+  const [draft, setDraft] = useState({ name: '', imageUrl: '', orderProvider: '', settings: {} as Record<string, string> });
 
   if (!isOpen) return null;
 
+  const orderProvider = draft.orderProvider || providers[0]?.id || '';
+  const selectedProvider = providers.find(provider => provider.id === orderProvider);
+  const settings = selectedProvider?.settings?.filter(setting => setting.key) ?? [];
+  const requiredSettingsComplete = settings.every(setting => !setting.required || Boolean(draft.settings[setting.key!]));
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    createTenant.mutate(draft, {
+    createTenant.mutate({
+      name: draft.name,
+      imageUrl: draft.imageUrl || null,
+      orderProvider,
+      orderProviderSettings: draft.settings,
+      type: 'B2B',
+      orderFetchingEnabled: false,
+    }, {
       onSuccess: () => {
-        setDraft({ name: '', endpointUrl: '', imageUrl: '', authorization: '' });
+        setDraft({ name: '', imageUrl: '', orderProvider: '', settings: {} });
         onClose();
       }
     });
@@ -65,14 +80,31 @@ export function CreateTenantModal({ isOpen, onClose, createTenant }: CreateTenan
           />
 
           <FormField
-            id="tenant-url"
-            label="Order Provider Endpoint"
-            type="url"
-            placeholder="https://example.com"
-            value={draft.endpointUrl}
-            onChange={e => setDraft({ ...draft, endpointUrl: e.target.value })}
+            as="select"
+            id="tenant-provider"
+            label="Order Provider"
+            value={orderProvider}
+            onChange={e => setDraft({ ...draft, orderProvider: e.target.value, settings: {} })}
             required
-          />
+          >
+            {providers.map(provider => provider.id && (
+              <option key={provider.id} value={provider.id}>{provider.displayName || provider.id}</option>
+            ))}
+          </FormField>
+
+          {settings.map(setting => (
+            <FormField
+              key={setting.key}
+              id={`tenant-provider-${setting.key}`}
+              label={setting.label || setting.key!}
+              type={setting.inputType || 'text'}
+              placeholder={setting.placeholder || undefined}
+              value={draft.settings[setting.key!] || ''}
+              onChange={e => setDraft({ ...draft, settings: { ...draft.settings, [setting.key!]: e.target.value } })}
+              required={setting.required}
+              className={setting.inputType === 'password' ? 'font-mono' : undefined}
+            />
+          ))}
 
           <FormField
             id="tenant-image"
@@ -83,22 +115,13 @@ export function CreateTenantModal({ isOpen, onClose, createTenant }: CreateTenan
             onChange={e => setDraft({ ...draft, imageUrl: e.target.value })}
           />
 
-          <FormField
-            id="tenant-token"
-            label="Order Provider Authorization"
-            type="password"
-            placeholder="Secret Token"
-            value={draft.authorization}
-            onChange={e => setDraft({ ...draft, authorization: e.target.value })}
-            className="font-mono"
-          />
         </div>
 
         <div className="flex justify-end gap-3 bg-surface px-6 py-4">
           <button type="button" onClick={onClose} disabled={createTenant.isPending} className="inline-flex min-h-11 items-center justify-center rounded-full px-4 text-base font-bold transition-colors hover:bg-surface-container-high focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary disabled:cursor-not-allowed disabled:text-on-surface/[0.38] disabled:hover:bg-transparent">
             Cancel
           </button>
-          <button type="submit" disabled={!draft.name || !draft.endpointUrl || createTenant.isPending} className="inline-flex min-h-11 items-center justify-center rounded-full bg-on-primary-container px-5 text-base font-bold text-primary-container transition-colors hover:bg-brand-btn-quaternary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary disabled:cursor-not-allowed disabled:bg-on-surface/[0.1] disabled:text-on-surface/[0.38] disabled:hover:bg-on-surface/[0.1] disabled:hover:text-on-surface/[0.38]">
+          <button type="submit" disabled={!draft.name || !orderProvider || !requiredSettingsComplete || createTenant.isPending} className="inline-flex min-h-11 items-center justify-center rounded-full bg-on-primary-container px-5 text-base font-bold text-primary-container transition-colors hover:bg-brand-btn-quaternary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary disabled:cursor-not-allowed disabled:bg-on-surface/[0.1] disabled:text-on-surface/[0.38] disabled:hover:bg-on-surface/[0.1] disabled:text-on-surface/[0.38] disabled:hover:bg-on-surface/[0.1] disabled:hover:text-on-surface/[0.38]">
             {createTenant.isPending ? 'Creating...' : 'Create tenant'}
           </button>
         </div>

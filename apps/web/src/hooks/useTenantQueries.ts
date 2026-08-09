@@ -6,7 +6,7 @@ import {
   useDeleteApiTenantsId, 
   usePatchApiTenantsId 
 } from '../api/generated/endpoints';
-import type { TenantResponseDto } from '@types';
+import type { CreateTenantRequestDto, TenantResponseDto, UpdateTenantRequestDto } from '@types';
 import { toast } from 'sonner';
 
 export function useTenantsQuery() {
@@ -38,19 +38,9 @@ export function useCreateTenantMutation(onSuccessCallback?: () => void) {
   const { mutate: mutateRequest } = mutation;
 
   const mutate = useCallback((
-      payload: { name: string; endpointUrl: string; imageUrl: string; authorization: string },
+      data: CreateTenantRequestDto,
       options?: Parameters<typeof mutateRequest>[1]
-    ) => 
-      mutateRequest({ 
-        data: {
-          name: payload.name,
-          imageUrl: payload.imageUrl,
-          orderProvider: 'litium',
-          orderProviderSettings: { endpointUrl: payload.endpointUrl, authorization: payload.authorization },
-          type: 'B2B',
-          orderFetchingEnabled: false
-        }
-      }, options),
+    ) => mutateRequest({ data }, options),
     [mutateRequest]);
 
   return {
@@ -110,7 +100,7 @@ export function useUpdateTenantMutation() {
   const { mutate: mutateRequest } = mutation;
 
   const mutate = useCallback((
-      variables: { id: string; payload: Partial<TenantResponseDto> },
+      variables: { id: string; payload: UpdateTenantRequestDto },
       options?: Parameters<typeof mutateRequest>[1]
     ) => 
       mutateRequest({ id: variables.id, data: variables.payload }, options),

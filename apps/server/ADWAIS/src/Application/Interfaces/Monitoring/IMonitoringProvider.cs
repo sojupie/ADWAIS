@@ -1,10 +1,12 @@
 using Adwais.Application.DTOs.Monitoring.Upstream;
+using Adwais.Application.DTOs.Integrations;
 
 namespace Adwais.Application.Interfaces;
 
 public interface IMonitoringProvider
 {
     string Provider { get; }
+    ProviderDescriptor Configuration { get; }
     bool IsConfigured(string? settings);
     IReadOnlyDictionary<string, string?> GetPublicSettings(string? settings);
     IReadOnlyCollection<string> GetConfiguredSecretKeys(string? settings);

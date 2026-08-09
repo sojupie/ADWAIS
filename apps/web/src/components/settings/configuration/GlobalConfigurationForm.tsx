@@ -3,17 +3,21 @@ import { SettingsPanel } from '../../common/layout/SettingsPanel';
 import { InlineEditField } from '../../common/ui/InlineEditField';
 import { FormSkeleton } from '../../common/ui/FormSkeleton';
 import { ReadOnlyBanner } from '../../common/ui/ReadOnlyBanner';
-import type { GlobalConfigDto } from '@types';
+import type { GlobalConfigDto, ProviderDescriptor, UpdateGlobalConfigRequestDto } from '@types';
 
 interface GlobalConfigurationFormProps {
   config: GlobalConfigDto | undefined;
   updateConfig: {
-    mutateAsync: (variables: Partial<GlobalConfigDto>) => Promise<void>;
+    mutateAsync: (variables: UpdateGlobalConfigRequestDto) => Promise<void>;
   };
+  providers: ProviderDescriptor[];
   disabled?: boolean;
 }
 
-export function GlobalConfigurationForm({ config, updateConfig, disabled }: GlobalConfigurationFormProps) {
+export function GlobalConfigurationForm({ config, updateConfig, providers, disabled }: GlobalConfigurationFormProps) {
+  const selectedProvider = providers.find(provider => provider.id === config?.monitoringProvider);
+  const providerSettings = selectedProvider?.settings?.filter(setting => setting.key) ?? [];
+
   return (
     <SettingsPanel
       title="Global Configuration"
@@ -27,17 +31,41 @@ export function GlobalConfigurationForm({ config, updateConfig, disabled }: Glob
 
         {config ? (
           <div className="flex flex-col gap-2">
-            <InlineEditField
-              label="Monitoring Provider API Key"
-              value={config.monitoringProviderConfiguredSecretKeys?.includes('apiKey') ? 'configured' : ''}
-              kind="password"
-              required
-              requirement="When enabled"
-              canClear
-              disabled={disabled}
-              onCommit={(val) => updateConfig.mutateAsync({ monitoringProviderSettings: { apiKey: val } })}
-              onClear={() => updateConfig.mutateAsync({ monitoringProviderSettings: { apiKey: null } })}
-            />
+            {providers.length > 0 && (
+              <InlineEditField
+                label="Monitoring Provider"
+                value={config.monitoringProvider || ''}
+                kind="select"
+                options={providers.flatMap(provider => provider.id
+                  ? [{ label: provider.displayName || provider.id, value: provider.id }]
+                  : [])}
+                required
+                disabled={disabled}
+                onCommit={monitoringProvider => updateConfig.mutateAsync({ monitoringProvider })}
+              />
+            )}
+            {providerSettings.map(setting => {
+              const key = setting.key!;
+              const isSecret = setting.inputType === 'password';
+              const value = isSecret
+                ? config.monitoringProviderConfiguredSecretKeys?.includes(key) ? 'configured' : ''
+                : config.monitoringProviderSettings?.[key] || '';
+
+              return (
+                <InlineEditField
+                  key={key}
+                  label={setting.label || key}
+                  value={value}
+                  kind={isSecret ? 'password' : 'text'}
+                  required={setting.required}
+                  placeholder={setting.placeholder || undefined}
+                  canClear
+                  disabled={disabled}
+                  onCommit={nextValue => updateConfig.mutateAsync({ monitoringProviderSettings: { [key]: nextValue } })}
+                  onClear={() => updateConfig.mutateAsync({ monitoringProviderSettings: { [key]: null } })}
+                />
+              );
+            })}
             <InlineEditField
               label="Order Fetch Enabled"
               value={config.orderFetchEnabled ?? false}

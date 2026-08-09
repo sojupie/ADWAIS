@@ -5,7 +5,7 @@ import {NotificationToggleWidget} from '../dashboard/NotificationToggleWidget';
 import {NavLink} from './NavLink';
 import {ConnectivityStatus} from './ConnectivityStatus';
 import {UserAccountLink} from './UserAccountLink';
-import {MotilloLogoLink} from './MotilloLogoLink';
+import {BrandLogoLink} from './BrandLogoLink';
 import {useMediaQuery} from '../../../hooks/useMediaQuery';
 
 type SiteHeaderProps = {
@@ -35,7 +35,7 @@ export function SiteHeader({
     <header className="relative z-10 shrink-0 bg-brand-bg-secondary px-6 py-3">
       {isMobileView ? (
         <div className="flex w-full items-center justify-between" data-header="mobile-bar">
-          <MotilloLogoLink
+          <BrandLogoLink
             timeframe={financialTimeframe}
             className="h-8 object-contain object-left brightness-0 invert"
             height={28}
@@ -56,7 +56,7 @@ export function SiteHeader({
       ) : (
         <div className="flex w-full flex-wrap items-center justify-end gap-x-8 gap-y-4">
           <div className="flex flex-1 min-w-[100px] shrink-0" data-header="logo">
-            <MotilloLogoLink
+            <BrandLogoLink
               timeframe={financialTimeframe}
               className="h-8 w-auto shrink-0 object-contain object-left brightness-0 invert"
               height={32}

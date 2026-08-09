@@ -156,12 +156,12 @@ export function Financial() {
         <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
           <Button
             variant="filled"
-            color="secondary"
+            color="surface"
             icon={<Settings size={18} />}
             aria-label="Open tenant settings"
             title="Open tenant settings"
             onClick={() => void navigate({ to: '/settings/tenants' })}
-            className="!min-h-14 !text-base"
+            className="!min-h-14 !text-base m3-elevation-1"
           >
             Tenant settings
           </Button>

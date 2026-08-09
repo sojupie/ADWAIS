@@ -27,8 +27,9 @@ function LoginComponent() {
     setDemoError(null);
     try {
       const { data } = await getApiDemoToken();
-      if (!data.token) throw new Error('Demo token response did not contain a token.');
-      setKioskToken(data.token);
+      const token = (data as { token?: string }).token;
+      if (!token) throw new Error('Demo token response did not contain a token.');
+      setKioskToken(token);
       await navigate({ to: '/fleet-status' });
     } catch (error) {
       console.error('Demo login error:', error);

@@ -110,7 +110,7 @@ public class CalendarSubscriptionService(
 
                 incomingUids.Add(externalUid);
 
-                var existingEvent = await _dbContext.OfficeEvents
+                var existingEvent = await _dbContext.CalendarEvents
                     .FirstOrDefaultAsync(oe => oe.CalendarSubscriptionId == sub.Id && oe.ExternalUid == externalUid, ct);
 
                 var startTimeVal = calendarEvent.Start.Value;
@@ -134,7 +134,7 @@ public class CalendarSubscriptionService(
                 }
                 else
                 {
-                    var newEvent = new OfficeEvent
+                    var newEvent = new CalendarEvent
                     {
                         Id = Guid.NewGuid(),
                         Title = calendarEvent.Summary ?? "Untitled Event",
@@ -148,16 +148,16 @@ public class CalendarSubscriptionService(
                         ExternalUid = externalUid,
                         CalendarSubscriptionId = sub.Id
                     };
-                    _dbContext.OfficeEvents.Add(newEvent);
+                    _dbContext.CalendarEvents.Add(newEvent);
                 }
             }
 
             // Remove events that are no longer in the external feed
-            var eventsToRemove = await _dbContext.OfficeEvents
+            var eventsToRemove = await _dbContext.CalendarEvents
                 .Where(oe => oe.CalendarSubscriptionId == sub.Id && oe.ExternalUid != null && !incomingUids.Contains(oe.ExternalUid))
                 .ToListAsync(ct);
 
-            _dbContext.OfficeEvents.RemoveRange(eventsToRemove);
+            _dbContext.CalendarEvents.RemoveRange(eventsToRemove);
 
             sub.LastSuccessAt = DateTime.UtcNow;
             sub.LastSyncError = null;

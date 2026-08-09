@@ -1,11 +1,11 @@
 import { Repeat2 } from 'lucide-react';
-import type { OfficeEventDto } from '@types';
+import type { CalendarEventDto } from '@types';
 import { formatDateTime } from '../../../utils/dateTime';
 import { getEventBadgeClass, getEventEmoji } from './calendarPresentation';
 
 interface ScheduleCalendarViewProps {
-  events: OfficeEventDto[];
-  onEventClick: (event: OfficeEventDto) => void;
+  events: CalendarEventDto[];
+  onEventClick: (event: CalendarEventDto) => void;
 }
 
 export function ScheduleCalendarView({ events, onEventClick }: ScheduleCalendarViewProps) {

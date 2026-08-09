@@ -194,12 +194,12 @@ export function TenantDiagnostics({
         <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
           <Button
             variant="filled"
-            color="secondary"
+            color="surface"
             icon={<Settings size={18} />}
             aria-label={`Open settings for ${tenantName}`}
             title={`Open settings for ${tenantName}`}
             onClick={() => void navigate({ to: '/settings/tenants/$tenantId', params: { tenantId } })}
-            className="!min-h-14"
+            className="!min-h-14 m3-elevation-1"
           >
             Edit tenant
           </Button>

@@ -55,27 +55,27 @@ public class CalendarFeedService(IApplicationDbContext dbContext) : ICalendarFee
         }
 
         // Fetch all events for the feed
-        var events = await _dbContext.OfficeEvents.OrderBy(oe => oe.StartTime).ToListAsync(ct);
+        var events = await _dbContext.CalendarEvents.OrderBy(oe => oe.StartTime).ToListAsync(ct);
 
         var calendar = new Calendar();
         calendar.ProductId = "-//ADWAIS//Intranet Calendar//EN";
 
-        foreach (var officeEvent in events)
+        foreach (var domainEvent in events)
         {
-            var calendarEvent = new CalendarEvent
+            var icalEvent = new Ical.Net.CalendarComponents.CalendarEvent
             {
-                Uid = officeEvent.ExternalUid ?? officeEvent.Id.ToString(),
-                Summary = officeEvent.Title,
-                Description = officeEvent.Description,
-                Location = officeEvent.Location,
-                Start = new CalDateTime(officeEvent.StartTime.UtcDateTime),
-                End = new CalDateTime(officeEvent.EndTime.UtcDateTime)
+                Uid = domainEvent.ExternalUid ?? domainEvent.Id.ToString(),
+                Summary = domainEvent.Title,
+                Description = domainEvent.Description,
+                Location = domainEvent.Location,
+                Start = new CalDateTime(domainEvent.StartTime.UtcDateTime),
+                End = new CalDateTime(domainEvent.EndTime.UtcDateTime)
             };
 
             // Set categories/types
-            calendarEvent.Categories.Add(officeEvent.EventType.ToString());
+            icalEvent.Categories.Add(domainEvent.EventType.ToString());
 
-            calendar.Events.Add(calendarEvent);
+            calendar.Events.Add(icalEvent);
         }
 
         var serializer = new CalendarSerializer();

@@ -1,4 +1,4 @@
-import type { OfficeEventDto } from '@types';
+import type { CalendarEventDto } from '@types';
 import { formatDateTime } from '../../../utils/dateTime';
 
 const EVENT_STYLES: Record<string, { badge: string; circle: string }> = {
@@ -38,7 +38,7 @@ const isSameDay = (a: Date, b: Date) =>
   && a.getMonth() === b.getMonth()
   && a.getDate() === b.getDate();
 
-const eventDates = (event: OfficeEventDto) => {
+const eventDates = (event: CalendarEventDto) => {
   const start = new Date(event.startTime ?? '');
   const end = new Date(event.endTime ?? '');
   return Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) ? null : { start, end };
@@ -46,7 +46,7 @@ const eventDates = (event: OfficeEventDto) => {
 
 const formatTime = (date: Date) => formatDateTime(date, { hour: '2-digit', minute: '2-digit' });
 
-export const getEventDayTimingLabel = (event: OfficeEventDto, day: Date) => {
+export const getEventDayTimingLabel = (event: CalendarEventDto, day: Date) => {
   const dates = eventDates(event);
   if (!dates) return 'Time unavailable';
   if (isSameDay(dates.start, dates.end)) return formatTime(dates.start);
@@ -55,7 +55,7 @@ export const getEventDayTimingLabel = (event: OfficeEventDto, day: Date) => {
   return '← Continues →';
 };
 
-export const getEventRangeLabel = (event: OfficeEventDto) => {
+export const getEventRangeLabel = (event: CalendarEventDto) => {
   const dates = eventDates(event);
   if (!dates) return 'Time unavailable';
 

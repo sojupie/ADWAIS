@@ -21,7 +21,7 @@ public class WebhooksController(
     IOrderIngestionService ingestionService,
     IConfiguration configuration,
     ILogger<WebhooksController> logger,
-    ICommunityPostService postService)
+    IBulletinPostService postService)
     : ControllerBase
 {
     [HttpPost("motastic/{tenantId}")]
@@ -53,13 +53,13 @@ public class WebhooksController(
         }
     }
 
-    [HttpPost("newsletter")]
-    public async Task<IActionResult> ReceiveNewsletter(
-        [FromBody] CreateNewsletterDto? payload,
+    [HttpPost("bulletin-posts")]
+    public async Task<IActionResult> ReceiveBulletinPost(
+        [FromBody] CreateBulletinPostWebhookRequest? payload,
         CancellationToken ct)
     {
         var apiKey = Request.Headers["X-Api-Key"].ToString();
-        if (string.IsNullOrEmpty(apiKey) || apiKey != configuration["Webhooks:NewsletterApiKey"])
+        if (string.IsNullOrEmpty(apiKey) || apiKey != configuration["Webhooks:BulletinPostApiKey"])
         {
             return Unauthorized();
         }

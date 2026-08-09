@@ -1,6 +1,6 @@
 import type { RefObject } from 'react';
 import { Repeat2 } from 'lucide-react';
-import type { OfficeEventDto } from '@types';
+import type { CalendarEventDto } from '@types';
 import { formatDateTime } from '../../../utils/dateTime';
 import { getEventBadgeClass, getEventDayTimingLabel, getEventEmoji } from './calendarPresentation';
 
@@ -8,9 +8,9 @@ interface WeekCalendarViewProps {
   days: Date[];
   isWriter: boolean;
   todayRef: RefObject<HTMLDivElement | null>;
-  getEventsForDay: (date: Date) => OfficeEventDto[];
+  getEventsForDay: (date: Date) => CalendarEventDto[];
   onDayClick: (date: Date) => void;
-  onEventClick: (event: OfficeEventDto) => void;
+  onEventClick: (event: CalendarEventDto) => void;
 }
 
 export function WeekCalendarView({ days, isWriter, todayRef, getEventsForDay, onDayClick, onEventClick }: WeekCalendarViewProps) {

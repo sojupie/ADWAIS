@@ -73,13 +73,13 @@ public class IntranetControllerTests
     }
 
     [Fact]
-    public async Task Webhooks_ReceiveNewsletter_ShouldReturnOk_AndSaveToDb_WhenApiKeyIsValid()
+    public async Task Webhooks_ReceiveBulletinPost_ShouldReturnOk_AndSaveToDb_WhenApiKeyIsValid()
     {
         // Arrange
         var configMock = new Mock<IConfiguration>();
-        configMock.Setup(c => c["Webhooks:NewsletterApiKey"]).Returns("valid-secret-key");
+        configMock.Setup(c => c["Webhooks:BulletinPostApiKey"]).Returns("valid-secret-key");
 
-        var createdPost = new CommunityPost
+        var createdPost = new BulletinPost
         {
             Id = Guid.NewGuid(),
             UserId = AnalyticsDbContext.SystemUserGuid,
@@ -87,7 +87,7 @@ public class IntranetControllerTests
             Body = "Content",
             CreatedAt = DateTime.UtcNow
         };
-        var postServiceMock = new Mock<ICommunityPostService>();
+        var postServiceMock = new Mock<IBulletinPostService>();
         postServiceMock.Setup(s => s.CreatePostAsync(AnalyticsDbContext.SystemUserGuid, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(createdPost);
 
@@ -97,14 +97,14 @@ public class IntranetControllerTests
             new Mock<ILogger<WebhooksController>>().Object,
             postServiceMock.Object);
 
-        var payload = new CreateNewsletterDto { Title = "Weekly News", Body = "Content", Category = "General" };
+        var payload = new CreateBulletinPostWebhookRequest { Title = "Weekly News", Body = "Content" };
 
         var httpContext = new DefaultHttpContext();
         httpContext.Request.Headers["X-Api-Key"] = "valid-secret-key";
         controller.ControllerContext = new ControllerContext { HttpContext = httpContext };
 
         // Act
-        var result = await controller.ReceiveNewsletter(payload, CancellationToken.None);
+        var result = await controller.ReceiveBulletinPost(payload, CancellationToken.None);
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);
@@ -114,26 +114,26 @@ public class IntranetControllerTests
     }
 
     [Fact]
-    public async Task Webhooks_ReceiveNewsletter_ShouldReturnUnauthorized_WhenApiKeyIsInvalid()
+    public async Task Webhooks_ReceiveBulletinPost_ShouldReturnUnauthorized_WhenApiKeyIsInvalid()
     {
         // Arrange
         var configMock = new Mock<IConfiguration>();
-        configMock.Setup(c => c["Webhooks:NewsletterApiKey"]).Returns("valid-secret-key");
+        configMock.Setup(c => c["Webhooks:BulletinPostApiKey"]).Returns("valid-secret-key");
 
-        var postServiceMock = new Mock<ICommunityPostService>();
+        var postServiceMock = new Mock<IBulletinPostService>();
         var controller = new WebhooksController(
             new Mock<IOrderIngestionService>().Object,
             configMock.Object,
             new Mock<ILogger<WebhooksController>>().Object,
             postServiceMock.Object);
 
-        var payload = new CreateNewsletterDto { Title = "Weekly News", Body = "Content", Category = "General" };
+        var payload = new CreateBulletinPostWebhookRequest { Title = "Weekly News", Body = "Content" };
         var httpContext = new DefaultHttpContext();
         httpContext.Request.Headers["X-Api-Key"] = "wrong-key";
         controller.ControllerContext = new ControllerContext { HttpContext = httpContext };
 
         // Act
-        var result = await controller.ReceiveNewsletter(payload, CancellationToken.None);
+        var result = await controller.ReceiveBulletinPost(payload, CancellationToken.None);
 
         // Assert
         Assert.IsType<UnauthorizedResult>(result);
@@ -144,7 +144,7 @@ public class IntranetControllerTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var post = new CommunityPost
+        var post = new BulletinPost
         {
             Id = Guid.NewGuid(),
             UserId = userId,
@@ -153,24 +153,24 @@ public class IntranetControllerTests
             CreatedAt = DateTime.UtcNow
         };
 
-        var postServiceMock = new Mock<ICommunityPostService>();
+        var postServiceMock = new Mock<IBulletinPostService>();
         postServiceMock.Setup(s => s.CreatePostAsync(userId, "Announcing Intranet", "Exciting news!", It.IsAny<CancellationToken>()))
             .ReturnsAsync(post);
 
-        var controller = new CommunityPostController(postServiceMock.Object);
+        var controller = new BulletinPostController(postServiceMock.Object);
         
         var claims = new List<Claim> { new(ClaimTypes.NameIdentifier, userId.ToString()) };
         var identity = new ClaimsIdentity(claims, "TestAuth");
         controller.ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal(identity) } };
 
-        var dto = new CreatePostDto { Title = "Announcing Intranet", Body = "Exciting news!" };
+        var dto = new CreateBulletinPostDto { Title = "Announcing Intranet", Body = "Exciting news!" };
 
         // Act
         var result = await controller.CreatePost(dto, CancellationToken.None);
 
         // Assert
         var createdResult = Assert.IsType<CreatedAtActionResult>(result.Result);
-        var returned = Assert.IsType<CommunityPostResponseDto>(createdResult.Value);
+        var returned = Assert.IsType<BulletinPostResponseDto>(createdResult.Value);
         Assert.Equal(post.Id, returned.Id);
         Assert.Equal("Announcing Intranet", returned.Title);
         postServiceMock.Verify(s => s.CreatePostAsync(userId, "Announcing Intranet", "Exciting news!", It.IsAny<CancellationToken>()), Times.Once);
@@ -180,14 +180,14 @@ public class IntranetControllerTests
     public async Task Posts_CreatePost_ShouldReturnUnauthorized_WhenUserContextIsInvalid()
     {
         // Arrange
-        var postServiceMock = new Mock<ICommunityPostService>();
-        var controller = new CommunityPostController(postServiceMock.Object);
+        var postServiceMock = new Mock<IBulletinPostService>();
+        var controller = new BulletinPostController(postServiceMock.Object);
         
         var claims = new List<Claim>(); // No claims
         var identity = new ClaimsIdentity(claims, "TestAuth");
         controller.ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal(identity) } };
 
-        var dto = new CreatePostDto { Title = "Announcing Intranet", Body = "Exciting news!" };
+        var dto = new CreateBulletinPostDto { Title = "Announcing Intranet", Body = "Exciting news!" };
 
         // Act
         var result = await controller.CreatePost(dto, CancellationToken.None);
@@ -200,22 +200,22 @@ public class IntranetControllerTests
     public async Task Posts_GetPosts_ShouldReturnOkWithList()
     {
         // Arrange
-        var posts = new List<CommunityPost>
+        var posts = new List<BulletinPost>
         {
             new() { Id = Guid.NewGuid(), Title = "Post 1", Body = "Body 1", CreatedAt = DateTime.UtcNow }
         };
-        var postServiceMock = new Mock<ICommunityPostService>();
+        var postServiceMock = new Mock<IBulletinPostService>();
         postServiceMock.Setup(s => s.GetPostsAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(posts);
 
-        var controller = new CommunityPostController(postServiceMock.Object);
+        var controller = new BulletinPostController(postServiceMock.Object);
 
         // Act
         var result = await controller.GetPosts(CancellationToken.None);
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result.Result);
-        var returned = Assert.IsType<List<CommunityPostResponseDto>>(okResult.Value);
+        var returned = Assert.IsType<List<BulletinPostResponseDto>>(okResult.Value);
         Assert.Single(returned);
         Assert.Equal("Post 1", returned[0].Title);
         postServiceMock.Verify(s => s.GetPostsAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -225,7 +225,7 @@ public class IntranetControllerTests
     public async Task Posts_UpdatePost_ShouldAllowAuthorToEditOwnPost()
     {
         var authorId = Guid.NewGuid();
-        var post = new CommunityPost
+        var post = new BulletinPost
         {
             Id = Guid.NewGuid(),
             UserId = authorId,
@@ -233,7 +233,7 @@ public class IntranetControllerTests
             Body = "Original body",
             CreatedAt = DateTime.UtcNow
         };
-        var updated = new CommunityPost
+        var updated = new BulletinPost
         {
             Id = post.Id,
             UserId = authorId,
@@ -242,18 +242,18 @@ public class IntranetControllerTests
             CreatedAt = post.CreatedAt,
             UpdatedAt = DateTime.UtcNow
         };
-        var postServiceMock = new Mock<ICommunityPostService>();
+        var postServiceMock = new Mock<IBulletinPostService>();
         postServiceMock.Setup(s => s.GetPostByIdAsync(post.Id, It.IsAny<CancellationToken>())).ReturnsAsync(post);
         postServiceMock.Setup(s => s.UpdatePostAsync(post.Id, "Updated", "Updated body", It.IsAny<CancellationToken>())).ReturnsAsync(updated);
         var controller = CreatePostsController(postServiceMock, authorId, "Employee");
 
         var result = await controller.UpdatePost(
             post.Id,
-            new UpdatePostDto { Title = "Updated", Body = "Updated body" },
+            new UpdateBulletinPostDto { Title = "Updated", Body = "Updated body" },
             CancellationToken.None);
 
         var okResult = Assert.IsType<OkObjectResult>(result.Result);
-        var response = Assert.IsType<CommunityPostResponseDto>(okResult.Value);
+        var response = Assert.IsType<BulletinPostResponseDto>(okResult.Value);
         Assert.Equal("Updated", response.Title);
         postServiceMock.Verify(s => s.UpdatePostAsync(post.Id, "Updated", "Updated body", It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -261,7 +261,7 @@ public class IntranetControllerTests
     [Fact]
     public async Task Posts_UpdatePost_ShouldForbidOtherStaffMember()
     {
-        var post = new CommunityPost
+        var post = new BulletinPost
         {
             Id = Guid.NewGuid(),
             UserId = Guid.NewGuid(),
@@ -269,13 +269,13 @@ public class IntranetControllerTests
             Body = "Original body",
             CreatedAt = DateTime.UtcNow
         };
-        var postServiceMock = new Mock<ICommunityPostService>();
+        var postServiceMock = new Mock<IBulletinPostService>();
         postServiceMock.Setup(s => s.GetPostByIdAsync(post.Id, It.IsAny<CancellationToken>())).ReturnsAsync(post);
         var controller = CreatePostsController(postServiceMock, Guid.NewGuid(), "Employee");
 
         var result = await controller.UpdatePost(
             post.Id,
-            new UpdatePostDto { Title = "Updated" },
+            new UpdateBulletinPostDto { Title = "Updated" },
             CancellationToken.None);
 
         Assert.IsType<ForbidResult>(result.Result);
@@ -287,7 +287,7 @@ public class IntranetControllerTests
     {
         var authorId = Guid.NewGuid();
         var adminId = Guid.NewGuid();
-        var post = new CommunityPost
+        var post = new BulletinPost
         {
             Id = Guid.NewGuid(),
             UserId = authorId,
@@ -295,7 +295,7 @@ public class IntranetControllerTests
             Body = "Body",
             CreatedAt = DateTime.UtcNow
         };
-        var postServiceMock = new Mock<ICommunityPostService>();
+        var postServiceMock = new Mock<IBulletinPostService>();
         postServiceMock.Setup(s => s.GetPostByIdAsync(post.Id, It.IsAny<CancellationToken>())).ReturnsAsync(post);
         postServiceMock.Setup(s => s.DeletePostAsync(post.Id, It.IsAny<CancellationToken>())).ReturnsAsync(true);
         var controller = CreatePostsController(postServiceMock, adminId, "Admin");
@@ -310,7 +310,7 @@ public class IntranetControllerTests
     public async Task Posts_DeletePost_ShouldAllowAuthorToDeleteOwnPost()
     {
         var authorId = Guid.NewGuid();
-        var post = new CommunityPost
+        var post = new BulletinPost
         {
             Id = Guid.NewGuid(),
             UserId = authorId,
@@ -318,7 +318,7 @@ public class IntranetControllerTests
             Body = "Body",
             CreatedAt = DateTime.UtcNow
         };
-        var postServiceMock = new Mock<ICommunityPostService>();
+        var postServiceMock = new Mock<IBulletinPostService>();
         postServiceMock.Setup(s => s.GetPostByIdAsync(post.Id, It.IsAny<CancellationToken>())).ReturnsAsync(post);
         postServiceMock.Setup(s => s.DeletePostAsync(post.Id, It.IsAny<CancellationToken>())).ReturnsAsync(true);
         var controller = CreatePostsController(postServiceMock, authorId, "Employee");
@@ -334,7 +334,7 @@ public class IntranetControllerTests
     {
         var authorId = Guid.NewGuid();
         var otherUserId = Guid.NewGuid();
-        var post = new CommunityPost
+        var post = new BulletinPost
         {
             Id = Guid.NewGuid(),
             UserId = authorId,
@@ -342,7 +342,7 @@ public class IntranetControllerTests
             Body = "Body",
             CreatedAt = DateTime.UtcNow
         };
-        var postServiceMock = new Mock<ICommunityPostService>();
+        var postServiceMock = new Mock<IBulletinPostService>();
         postServiceMock.Setup(s => s.GetPostByIdAsync(post.Id, It.IsAny<CancellationToken>())).ReturnsAsync(post);
         var controller = CreatePostsController(postServiceMock, otherUserId, "Employee");
 
@@ -352,12 +352,12 @@ public class IntranetControllerTests
         postServiceMock.Verify(s => s.DeletePostAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
-    private static CommunityPostController CreatePostsController(
-        Mock<ICommunityPostService> postServiceMock,
+    private static BulletinPostController CreatePostsController(
+        Mock<IBulletinPostService> postServiceMock,
         Guid userId,
         string role)
     {
-        var controller = new CommunityPostController(postServiceMock.Object);
+        var controller = new BulletinPostController(postServiceMock.Object);
         var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, userId.ToString()),

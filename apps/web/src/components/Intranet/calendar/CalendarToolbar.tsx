@@ -1,4 +1,5 @@
 import { CalendarDays, CalendarRange, ListTodo, Plus, Settings } from 'lucide-react';
+import { Button } from '../../common/ui/Button';
 
 export type CalendarViewMode = 'month' | 'week' | 'schedule';
 
@@ -32,15 +33,17 @@ export function CalendarToolbar({ viewMode, isWriter, onViewModeChange, onAddEve
           </button>
         ))}
       </div>
-      <button
+      <Button
         onClick={onAddEvent}
-        className={isWriter
-          ? 'whitespace-nowrap inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 font-bold bg-secondary-container text-on-secondary-container hover:m3-elevation-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary'
-          : 'whitespace-nowrap inline-flex min-h-11 cursor-not-allowed items-center justify-center gap-2 rounded-full border border-outline px-5 bg-surface-dim font-bold text-slate-500'}
+        disabled={!isWriter}
+        variant="tonal"
+        color="secondary"
+        icon={<Plus size={16} />}
+        className="whitespace-nowrap"
         title={isWriter ? undefined : 'Add Event (requires Employee/Admin permissions)'}
       >
-        <Plus size={16} /> Add Event
-      </button>
+        Add Event
+      </Button>
       <button
         onClick={onOpenSettings}
         className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary"

@@ -1,5 +1,5 @@
 import { Plus, Repeat2 } from 'lucide-react';
-import type { OfficeEventDto } from '@types';
+import type { CalendarEventDto } from '@types';
 import { formatDateTime } from '../../../utils/dateTime';
 import { getEventCircleColor } from './calendarPresentation';
 
@@ -11,9 +11,9 @@ export interface CalendarCell {
 interface MonthCalendarViewProps {
   cells: CalendarCell[];
   isWriter: boolean;
-  getEventsForDay: (date: Date) => OfficeEventDto[];
+  getEventsForDay: (date: Date) => CalendarEventDto[];
   onDayClick: (date: Date) => void;
-  onEventClick: (event: OfficeEventDto) => void;
+  onEventClick: (event: CalendarEventDto) => void;
 }
 
 export function MonthCalendarView({ cells, isWriter, getEventsForDay, onDayClick, onEventClick }: MonthCalendarViewProps) {

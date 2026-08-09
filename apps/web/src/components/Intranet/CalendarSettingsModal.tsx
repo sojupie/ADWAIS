@@ -1,5 +1,6 @@
 import { X, Settings, Link, RefreshCw, ShieldAlert } from 'lucide-react';
 import { FormField } from '../common/ui/FormField';
+import { Button } from '../common/ui/Button';
 
 interface CalendarSettingsModalProps {
   isOpen: boolean;
@@ -64,12 +65,9 @@ export function CalendarSettingsModal({
                     containerClassName="min-w-0 flex-1"
                     className="text-sm text-on-surface-variant"
                   />
-                  <button 
-                    onClick={onCopyFeedLink}
-                    className="inline-flex min-h-11 items-center justify-center whitespace-nowrap rounded-full bg-secondary-container px-5 text-base font-bold text-on-secondary-container hover:m3-elevation-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary"
-                  >
+                  <Button onClick={onCopyFeedLink} variant="tonal" color="secondary" className="whitespace-nowrap !text-base">
                     Copy Link
-                  </button>
+                  </Button>
                   <button 
                     onClick={onRegenerateToken}
                     className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary"
@@ -93,12 +91,9 @@ export function CalendarSettingsModal({
               )
             ) : (
               <div className="flex flex-col gap-8 mt-2">
-                <button
-                  disabled
-                  className="inline-flex min-h-11 w-full items-center justify-center rounded-full bg-on-surface px-5 font-bold text-on-surface opacity-30 cursor-not-allowed"
-                >
+                <Button disabled variant="tonal" color="surface" className="w-full !text-base">
                   Generate Feed Link (Access Restricted)
-                </button>
+                </Button>
                 <div className="flex gap-6 p-4 rounded-2xl border border-red-200 bg-red-50 text-red-800 text-sm leading-normal font-medium">
                   <ShieldAlert size={20} className="text-red-650 shrink-0 mt-0.5" />
                   <div>

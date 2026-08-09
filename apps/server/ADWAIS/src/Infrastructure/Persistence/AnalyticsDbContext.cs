@@ -37,8 +37,8 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
     public DbSet<DailyAvailabilityGlobalRollup> DailyAvailabilityGlobalRollups => Set<DailyAvailabilityGlobalRollup>();
 
     public DbSet<SystemEvent> SystemEvents => Set<SystemEvent>();
-    public DbSet<CommunityPost> CommunityPosts => Set<CommunityPost>();
-    public DbSet<OfficeEvent> OfficeEvents => Set<OfficeEvent>();
+    public DbSet<BulletinPost> BulletinPosts => Set<BulletinPost>();
+    public DbSet<CalendarEvent> CalendarEvents => Set<CalendarEvent>();
     public DbSet<CalendarSubscription> CalendarSubscriptions => Set<CalendarSubscription>();
     public DbSet<FeedSource> FeedSources => Set<FeedSource>();
     public DbSet<FeedItem> FeedItems => Set<FeedItem>();
@@ -413,10 +413,10 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
             
         // intranät
         
-        // CommunityPost
-        modelBuilder.Entity<CommunityPost>(entity =>
+        // BulletinPost
+        modelBuilder.Entity<BulletinPost>(entity =>
         {
-            entity.ToTable("community_post");
+            entity.ToTable("bulletin_post");
             entity.HasKey(cp => cp.Id);
             entity.Property(cp => cp.Id).HasDefaultValueSql("uuid_generate_v4()");
             entity.Property(cp => cp.Title).HasMaxLength(255).IsRequired();
@@ -429,16 +429,16 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options, ID
             entity.HasIndex(cp => cp.CreatedAt);
         });
 
-        // OfficeEvent
-        modelBuilder.Entity<OfficeEvent>(entity =>
+        // CalendarEvent
+        modelBuilder.Entity<CalendarEvent>(entity =>
         {
-            entity.ToTable("office_event", table =>
+            entity.ToTable("calendar_event", table =>
             {
                 table.HasCheckConstraint(
-                    "ck_office_event_event_type",
+                    "ck_calendar_event_event_type",
                     "\"event_type\" IN ('General', 'Meeting', 'Fika', 'Social', 'Birthday', 'GoLive', 'ExternalSync')");
                 table.HasCheckConstraint(
-                    "ck_office_event_recurrence",
+                    "ck_calendar_event_recurrence",
                     "\"recurrence\" IN ('None', 'Daily', 'Weekly', 'Monthly', 'Yearly')");
             });
             entity.HasKey(oe => oe.Id);

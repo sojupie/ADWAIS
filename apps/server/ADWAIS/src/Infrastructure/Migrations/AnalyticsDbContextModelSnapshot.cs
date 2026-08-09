@@ -157,6 +157,139 @@ namespace Adwais.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Adwais.Domain.Entities.Intranet.BulletinPost", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("uuid_generate_v4()");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("body");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("title");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_bulletin_post");
+
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("ix_bulletin_post_created_at");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_bulletin_post_user_id");
+
+                    b.ToTable("bulletin_post", (string)null);
+                });
+
+            modelBuilder.Entity("Adwais.Domain.Entities.Intranet.CalendarEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("uuid_generate_v4()");
+
+                    b.Property<Guid?>("CalendarSubscriptionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("calendar_subscription_id");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<DateTimeOffset>("EndTime")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("end_time");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("General")
+                        .HasColumnName("event_type");
+
+                    b.Property<string>("ExternalUid")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("external_uid");
+
+                    b.Property<bool>("IsRecurring")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_recurring");
+
+                    b.Property<string>("Location")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("location");
+
+                    b.Property<string>("Recurrence")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("None")
+                        .HasColumnName("recurrence");
+
+                    b.Property<DateTimeOffset>("StartTime")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("start_time");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("title");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_calendar_event");
+
+                    b.HasIndex("CalendarSubscriptionId")
+                        .HasDatabaseName("ix_calendar_event_calendar_subscription_id");
+
+                    b.HasIndex("EndTime")
+                        .HasDatabaseName("ix_calendar_event_end_time");
+
+                    b.HasIndex("ExternalUid")
+                        .HasDatabaseName("ix_calendar_event_external_uid");
+
+                    b.HasIndex("StartTime")
+                        .HasDatabaseName("ix_calendar_event_start_time");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_calendar_event_user_id");
+
+                    b.ToTable("calendar_event", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_calendar_event_event_type", "\"event_type\" IN ('General', 'Meeting', 'Fika', 'Social', 'Birthday', 'GoLive', 'ExternalSync')");
+
+                            t.HasCheckConstraint("ck_calendar_event_recurrence", "\"recurrence\" IN ('None', 'Daily', 'Weekly', 'Monthly', 'Yearly')");
+                        });
+                });
+
             modelBuilder.Entity("Adwais.Domain.Entities.Intranet.CalendarSubscription", b =>
                 {
                     b.Property<Guid>("Id")
@@ -200,49 +333,6 @@ namespace Adwais.Infrastructure.Migrations
                         .HasName("pk_calendar_subscription");
 
                     b.ToTable("calendar_subscription", (string)null);
-                });
-
-            modelBuilder.Entity("Adwais.Domain.Entities.Intranet.CommunityPost", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id")
-                        .HasDefaultValueSql("uuid_generate_v4()");
-
-                    b.Property<string>("Body")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("body");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("title");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("Id")
-                        .HasName("pk_community_post");
-
-                    b.HasIndex("CreatedAt")
-                        .HasDatabaseName("ix_community_post_created_at");
-
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("ix_community_post_user_id");
-
-                    b.ToTable("community_post", (string)null);
                 });
 
             modelBuilder.Entity("Adwais.Domain.Entities.Intranet.FeedItem", b =>
@@ -348,96 +438,6 @@ namespace Adwais.Infrastructure.Migrations
                         .HasDatabaseName("ix_feed_source_url");
 
                     b.ToTable("feed_source", (string)null);
-                });
-
-            modelBuilder.Entity("Adwais.Domain.Entities.Intranet.OfficeEvent", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id")
-                        .HasDefaultValueSql("uuid_generate_v4()");
-
-                    b.Property<Guid?>("CalendarSubscriptionId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("calendar_subscription_id");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("text")
-                        .HasColumnName("description");
-
-                    b.Property<DateTimeOffset>("EndTime")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("end_time");
-
-                    b.Property<string>("EventType")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
-                        .HasDefaultValue("General")
-                        .HasColumnName("event_type");
-
-                    b.Property<string>("ExternalUid")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("external_uid");
-
-                    b.Property<bool>("IsRecurring")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_recurring");
-
-                    b.Property<string>("Location")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("location");
-
-                    b.Property<string>("Recurrence")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
-                        .HasDefaultValue("None")
-                        .HasColumnName("recurrence");
-
-                    b.Property<DateTimeOffset>("StartTime")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("start_time");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("title");
-
-                    b.Property<Guid?>("UserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("Id")
-                        .HasName("pk_office_event");
-
-                    b.HasIndex("CalendarSubscriptionId")
-                        .HasDatabaseName("ix_office_event_calendar_subscription_id");
-
-                    b.HasIndex("EndTime")
-                        .HasDatabaseName("ix_office_event_end_time");
-
-                    b.HasIndex("ExternalUid")
-                        .HasDatabaseName("ix_office_event_external_uid");
-
-                    b.HasIndex("StartTime")
-                        .HasDatabaseName("ix_office_event_start_time");
-
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("ix_office_event_user_id");
-
-                    b.ToTable("office_event", null, t =>
-                        {
-                            t.HasCheckConstraint("ck_office_event_event_type", "\"event_type\" IN ('General', 'Meeting', 'Fika', 'Social', 'Birthday', 'GoLive', 'ExternalSync')");
-
-                            t.HasCheckConstraint("ck_office_event_recurrence", "\"recurrence\" IN ('None', 'Daily', 'Weekly', 'Monthly', 'Yearly')");
-                        });
                 });
 
             modelBuilder.Entity("Adwais.Domain.Entities.KioskDevice", b =>
@@ -1194,14 +1194,33 @@ namespace Adwais.Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Adwais.Domain.Entities.Intranet.CommunityPost", b =>
+            modelBuilder.Entity("Adwais.Domain.Entities.Intranet.BulletinPost", b =>
                 {
                     b.HasOne("Adwais.Domain.Entities.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_community_post_users_user_id");
+                        .HasConstraintName("fk_bulletin_post_users_user_id");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Adwais.Domain.Entities.Intranet.CalendarEvent", b =>
+                {
+                    b.HasOne("Adwais.Domain.Entities.Intranet.CalendarSubscription", "CalendarSubscription")
+                        .WithMany("Events")
+                        .HasForeignKey("CalendarSubscriptionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasConstraintName("fk_calendar_event_calendar_subscriptions_calendar_subscription");
+
+                    b.HasOne("Adwais.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_calendar_event_users_user_id");
+
+                    b.Navigation("CalendarSubscription");
 
                     b.Navigation("User");
                 });
@@ -1215,25 +1234,6 @@ namespace Adwais.Infrastructure.Migrations
                         .HasConstraintName("fk_feed_item_feed_source_feed_source_id");
 
                     b.Navigation("FeedSource");
-                });
-
-            modelBuilder.Entity("Adwais.Domain.Entities.Intranet.OfficeEvent", b =>
-                {
-                    b.HasOne("Adwais.Domain.Entities.Intranet.CalendarSubscription", "CalendarSubscription")
-                        .WithMany("Events")
-                        .HasForeignKey("CalendarSubscriptionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .HasConstraintName("fk_office_event_calendar_subscriptions_calendar_subscription_id");
-
-                    b.HasOne("Adwais.Domain.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .HasConstraintName("fk_office_event_users_user_id");
-
-                    b.Navigation("CalendarSubscription");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Adwais.Domain.Entities.Monitoring.DailyAvailabilityMonitorRollup", b =>

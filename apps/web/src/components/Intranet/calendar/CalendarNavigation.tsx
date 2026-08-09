@@ -1,4 +1,5 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Button } from '../../common/ui/Button';
 
 interface CalendarNavigationProps {
   label: string;
@@ -8,14 +9,14 @@ interface CalendarNavigationProps {
 }
 
 export function CalendarNavigation({ label, onPrevious, onToday, onNext }: CalendarNavigationProps) {
-  const buttonClass = 'flex h-9 w-9 items-center justify-center rounded-full text-on-surface-variant transition-colors border border-surface-container-highest hover:bg-surface-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary';
+  const iconButtonClass = '!h-9 !min-h-9 !w-9 !px-0 !border-surface-container-highest !text-on-surface-variant enabled:hover:!bg-surface-container focus-visible:!outline-tertiary';
   return (
     <div className="flex flex-wrap gap-2 items-center justify-end bg-surface px-5 pb-2">
       <h3 className="text-sm flex flex-1 whitespace-nowrap font-black uppercase tracking-wider text-on-surface">{label}</h3>
       <div className="flex items-center gap-1">
-        <button onClick={onPrevious} className={buttonClass} aria-label="Previous period"><ChevronLeft size={20} /></button>
-        <button onClick={onToday} className="border border-surface-container-highest hover:bg-surface-container inline-flex min-h-9 items-center justify-center rounded-full px-4 text-base font-bold uppercase tracking-wider text-on-surface transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary">Today</button>
-        <button onClick={onNext} className={buttonClass} aria-label="Next period"><ChevronRight size={20} /></button>
+        <Button onClick={onPrevious} variant="outlined" color="surface" icon={<ChevronLeft size={20} />} className={iconButtonClass} aria-label="Previous period" />
+        <Button onClick={onToday} variant="outlined" color="surface">Today</Button>
+        <Button onClick={onNext} variant="outlined" color="surface" icon={<ChevronRight size={20} />} className={iconButtonClass} aria-label="Next period" />
       </div>
     </div>
   );

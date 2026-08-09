@@ -13,11 +13,11 @@ import {
 } from '../../hooks/useCalendarQueries';
 import { toast } from 'sonner';
 import { EventType, RecurrenceType } from '@types';
-import type { OfficeEventDto } from '@types';
+import type { CalendarEventDto } from '@types';
 
 // Sub-components
-import { EventDetailModal } from './EventDetailModal';
-import { EventFormModal } from './EventFormModal';
+import { CalendarEventDetailModal } from './CalendarEventDetailModal';
+import { CalendarEventFormModal } from './CalendarEventFormModal';
 import { CalendarSettingsModal } from './CalendarSettingsModal';
 import { CalendarToolbar, type CalendarViewMode } from './calendar/CalendarToolbar';
 import { CalendarNavigation } from './calendar/CalendarNavigation';
@@ -44,7 +44,7 @@ export function Calendar() {
   }, [viewMode, currentDate]);
   
   // Modals/panels visibility
-  const [selectedEvent, setSelectedEvent] = useState<OfficeEventDto | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEventDto | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -255,7 +255,7 @@ export function Calendar() {
     });
   };
 
-  const openEditModal = async (event: OfficeEventDto) => {
+  const openEditModal = async (event: CalendarEventDto) => {
     setSelectedEvent(null);
     let editableEvent = event;
     if (event.isRecurring && event.id) {
@@ -386,7 +386,7 @@ export function Calendar() {
 
       {/* Detail / View Modal */}
       {selectedEvent && (
-        <EventDetailModal
+        <CalendarEventDetailModal
           event={selectedEvent}
           isOpen={!!selectedEvent}
           onClose={() => setSelectedEvent(null)}
@@ -404,7 +404,7 @@ export function Calendar() {
       )}
 
       {/* Create Modal */}
-      <EventFormModal
+      <CalendarEventFormModal
         mode="create"
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
@@ -414,7 +414,7 @@ export function Calendar() {
       />
 
       {/* Edit Modal */}
-      <EventFormModal
+      <CalendarEventFormModal
         mode="edit"
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}

@@ -58,10 +58,10 @@ public static class DependencyInjection
         services.AddTransient<IFeedParser, Services.Parsers.LitiumNyhetsrumParser>();
         services.AddTransient<IFeedParser, Services.Parsers.MotilloAktuelltParser>();
         services.AddTransient<ISystemHealthService, SystemHealthService>();
-        services.AddTransient<ICommunityPostService, CommunityPostService>();
+        services.AddTransient<IBulletinPostService, BulletinPostService>();
         services.AddTransient<IFeedService, FeedService>();
 
-        services.AddScoped<IOfficeEventService, OfficeEventService>();
+        services.AddScoped<ICalendarEventService, CalendarEventService>();
         services.AddScoped<ICalendarFeedService, CalendarFeedService>();
         services.AddHttpClient<ICalendarSubscriptionService, CalendarSubscriptionService>()
             .AddStandardResilienceHandler();

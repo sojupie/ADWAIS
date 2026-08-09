@@ -12,5 +12,5 @@ public class CalendarSubscription
     public DateTimeOffset? LastPolledAt { get; set; }
     public DateTimeOffset? LastSuccessAt { get; set; }
     public string? LastSyncError { get; set; }
-    public ICollection<OfficeEvent> Events { get; set; } = new List<OfficeEvent>();
+    public ICollection<CalendarEvent> Events { get; set; } = new List<CalendarEvent>();
 }

@@ -5,9 +5,8 @@
  * OpenAPI spec version: 1.0
  */
 
-export interface CreatePostDto {
+export interface BulletinPostAuthorDto {
+  id?: string;
   /** @nullable */
-  title: string | null;
-  /** @nullable */
-  body: string | null;
+  name?: string | null;
 }

@@ -7,7 +7,7 @@
 import type { EventType } from './eventType';
 import type { RecurrenceType } from './recurrenceType';
 
-export interface UpdateOfficeEventDto {
+export interface UpdateCalendarEventDto {
   /** @nullable */
   title?: string | null;
   /** @nullable */

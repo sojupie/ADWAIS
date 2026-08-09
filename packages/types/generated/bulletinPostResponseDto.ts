@@ -4,9 +4,9 @@
  * Adwais.Api
  * OpenAPI spec version: 1.0
  */
-import type { CommunityPostAuthorDto } from './communityPostAuthorDto';
+import type { BulletinPostAuthorDto } from './bulletinPostAuthorDto';
 
-export interface CommunityPostResponseDto {
+export interface BulletinPostResponseDto {
   id?: string;
   /** @nullable */
   title?: string | null;
@@ -15,5 +15,5 @@ export interface CommunityPostResponseDto {
   createdAt?: string;
   /** @nullable */
   updatedAt?: string | null;
-  author?: CommunityPostAuthorDto;
+  author?: BulletinPostAuthorDto;
 }

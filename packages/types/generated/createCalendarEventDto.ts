@@ -7,8 +7,7 @@
 import type { EventType } from './eventType';
 import type { RecurrenceType } from './recurrenceType';
 
-export interface OfficeEventDto {
-  id?: string;
+export interface CreateCalendarEventDto {
   /** @nullable */
   title?: string | null;
   /** @nullable */
@@ -20,12 +19,4 @@ export interface OfficeEventDto {
   eventType?: EventType;
   isRecurring?: boolean;
   recurrence?: RecurrenceType;
-  /** @nullable */
-  userId?: string | null;
-  /** @nullable */
-  userName?: string | null;
-  /** @nullable */
-  externalUid?: string | null;
-  /** @nullable */
-  calendarSubscriptionId?: string | null;
 }

@@ -5,7 +5,7 @@
  * OpenAPI spec version: 1.0
  */
 
-export interface UpdatePostDto {
+export interface UpdateBulletinPostDto {
   /** @nullable */
   title?: string | null;
   /** @nullable */

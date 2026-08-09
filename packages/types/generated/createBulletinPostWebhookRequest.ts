@@ -5,11 +5,9 @@
  * OpenAPI spec version: 1.0
  */
 
-export interface CreateNewsletterDto {
+export interface CreateBulletinPostWebhookRequest {
   /** @nullable */
   title: string | null;
   /** @nullable */
   body: string | null;
-  /** @nullable */
-  category: string | null;
 }

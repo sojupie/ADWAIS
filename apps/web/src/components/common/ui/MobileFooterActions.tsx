@@ -46,7 +46,7 @@ export function MobileFooterActions({
               onClick={settingsAction.onClick}
               aria-label={settingsAction.label}
               title={settingsAction.label}
-              className="flex h-14 w-14 cursor-pointer items-center justify-center rounded-[8px] bg-secondary text-on-secondary outline-none transition-colors m3-elevation-2 hover:brightness-95 hover:m3-elevation-3 focus-visible:ring-2 focus-visible:ring-secondary"
+              className="flex h-14 w-14 cursor-pointer items-center justify-center rounded-[8px] bg-surface text-on-surface outline-none transition-colors m3-elevation-2 hover:bg-surface-container hover:m3-elevation-3 focus-visible:ring-2 focus-visible:ring-secondary"
             >
               <Settings aria-hidden="true" size={20} strokeWidth={2.5} />
             </button>

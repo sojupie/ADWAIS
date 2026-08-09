@@ -364,8 +364,8 @@ export function DatePickerField({ id, value, label, onChange, size = 'compact', 
   return (
     <div className="flex min-w-0 flex-col gap-2">
       <span id={`${id}-label`} className="pl-1 text-sm font-bold text-on-surface-variant">{label}</span>
-      <button type="button" onClick={() => setOpen(true)} disabled={disabled} className={`flex w-full min-w-0 items-center gap-3 rounded-xl border border-outline bg-surface text-left font-medium text-on-surface transition-colors hover:border-secondary hover:bg-secondary-container disabled:cursor-not-allowed disabled:opacity-50 ${fieldSizeClasses[size]}`} aria-labelledby={`${id}-label`}>
-        <CalendarDays size={18} className="shrink-0 text-on-surface-variant" aria-hidden="true" />
+      <button type="button" onClick={() => setOpen(true)} disabled={disabled} className={`group flex w-full min-w-0 items-center gap-3 rounded-xl border border-outline bg-surface text-left font-medium text-on-surface transition-colors hover:border-secondary hover:bg-secondary-container disabled:cursor-not-allowed disabled:border-transparent disabled:bg-on-surface/[0.12] disabled:text-on-surface/[0.38] ${fieldSizeClasses[size]}`} aria-labelledby={`${id}-label`}>
+        <CalendarDays size={18} className="shrink-0 text-on-surface-variant group-disabled:text-on-surface/[0.38]" aria-hidden="true" />
         <span className="truncate">{display}</span>
       </button>
       {open && <Md3DatePickerDialog open value={value} onClose={() => setOpen(false)} onConfirm={onChange} />}
@@ -385,8 +385,8 @@ export function TimePickerField({ id, value, label, onChange, size = 'compact', 
   return (
     <div className="flex min-w-0 flex-col gap-2">
       <span id={`${id}-label`} className="pl-1 text-sm font-bold text-on-surface-variant">{label}</span>
-      <button type="button" onClick={() => setOpen(true)} disabled={disabled} className={`flex w-full min-w-0 items-center gap-3 rounded-xl border border-outline bg-surface text-left font-bold tabular-nums text-on-surface transition-colors hover:border-secondary hover:bg-secondary-container disabled:cursor-not-allowed disabled:opacity-50 ${fieldSizeClasses[size]}`} aria-labelledby={`${id}-label`}>
-        <Clock size={18} className="shrink-0 text-on-surface-variant" aria-hidden="true" />
+      <button type="button" onClick={() => setOpen(true)} disabled={disabled} className={`group flex w-full min-w-0 items-center gap-3 rounded-xl border border-outline bg-surface text-left font-bold tabular-nums text-on-surface transition-colors hover:border-secondary hover:bg-secondary-container disabled:cursor-not-allowed disabled:border-transparent disabled:bg-on-surface/[0.12] disabled:text-on-surface/[0.38] ${fieldSizeClasses[size]}`} aria-labelledby={`${id}-label`}>
+        <Clock size={18} className="shrink-0 text-on-surface-variant group-disabled:text-on-surface/[0.38]" aria-hidden="true" />
         <span>{value || '--:--'}</span>
       </button>
       {open && <Md3TimePickerDialog open value={value} onClose={() => setOpen(false)} onConfirm={onChange} />}

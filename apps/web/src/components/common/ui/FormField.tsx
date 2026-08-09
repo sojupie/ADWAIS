@@ -129,7 +129,7 @@ export function FormField(props: FormFieldProps) {
     : props.helperText
       ? `${id}-help`
       : props['aria-describedby'];
-  const controlClassName = `w-full rounded-xl font-medium text-on-surface outline-none transition-[background-color,border-color,color,box-shadow] placeholder:text-on-surface-variant focus:border-secondary focus:bg-primary-container focus:text-on-primary-container focus:ring-2 focus:ring-secondary/40 disabled:cursor-not-allowed disabled:border-transparent disabled:bg-on-surface/[0.1] disabled:text-on-surface/[0.38] ${variantClasses[variant]} ${densityClasses[density]} ${props.className || ''}`;
+  const controlClassName = `w-full rounded-xl font-medium text-on-surface outline-none transition-[background-color,border-color,color,box-shadow] placeholder:text-on-surface-variant focus:border-secondary focus:bg-primary-container focus:text-on-primary-container focus:ring-2 focus:ring-secondary/40 disabled:cursor-not-allowed disabled:border-transparent disabled:bg-on-surface/[0.12] disabled:text-on-surface/[0.38] ${variantClasses[variant]} ${densityClasses[density]} ${props.className || ''}`;
   const frameProps = {
     id,
     label: props.label,
@@ -146,7 +146,7 @@ export function FormField(props: FormFieldProps) {
     } w-full rounded-xl font-medium text-on-surface transition-[background-color,border-color,color,box-shadow] focus-within:border-secondary focus-within:bg-primary-container focus-within:text-on-primary-container focus-within:ring-2 focus-within:ring-secondary/40 ${variantClasses[variant]} ${densityClasses[density]} ${props.className || ''}`;
     
     if (props.disabled) {
-      return `${base} cursor-not-allowed border-transparent bg-on-surface/[0.1] text-on-surface/[0.38]`;
+      return `${base} cursor-not-allowed !border-transparent !bg-on-surface/[0.12] !text-on-surface/[0.38]`;
     }
     return `${base} cursor-text`;
   };
@@ -239,7 +239,7 @@ export function CheckboxField({
         htmlFor={id}
         className={`flex min-h-12 items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition-colors ${
           disabled
-            ? 'cursor-not-allowed bg-on-surface/[0.1] text-on-surface/[0.38]'
+            ? 'cursor-not-allowed bg-on-surface/[0.12] text-on-surface/[0.38]'
             : 'cursor-pointer bg-surface-container text-on-surface hover:bg-surface-container-high'
         }`}
       >

@@ -30,12 +30,13 @@ export function Settings() {
                 return (
                     <Link
                         key={tab.id}
+                        data-md3-ripple
                         to={tab.path}
                         aria-current={isActive ? 'page' : undefined}
                         className={`flex min-h-12 items-center rounded-full px-5 text-sm font-bold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary ${
                             isActive
                                 ? 'bg-surface-container-highest text-on-primary-container'
-                                : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
+                                : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
                         }`}
                     >
                         {tab.label}

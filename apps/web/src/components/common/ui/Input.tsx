@@ -30,7 +30,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
               icon ? 'pl-9' : ''
             } ${
               disabled
-                ? 'cursor-not-allowed bg-on-surface/[0.1] text-on-surface/[0.38]'
+                ? 'cursor-not-allowed bg-on-surface/[0.12] text-on-surface/[0.38]'
                 : ''
             } ${
               error ? 'ring-2 ring-error/40 focus:bg-error-container focus:text-on-error-container focus:ring-error/40' : ''

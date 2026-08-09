@@ -12,9 +12,9 @@ import {
   usePostApiIntranetCalendarSubscriptionsIdSync
 } from '../api/generated/endpoints';
 import type { 
-  OfficeEventDto, 
-  CreateOfficeEventDto, 
-  UpdateOfficeEventDto,
+  CalendarEventDto,
+  CreateCalendarEventDto,
+  UpdateCalendarEventDto,
   CalendarSubscriptionDto,
   CreateCalendarSubscriptionDto,
   CalendarTokenDto
@@ -23,10 +23,10 @@ import { toast } from 'sonner';
 
 export function useCalendarEventsQuery(start?: string, end?: string) {
   const params = start && end ? { start, end } : undefined;
-  return useGetApiIntranetEvents<OfficeEventDto[], Error>(params, {
+  return useGetApiIntranetEvents<CalendarEventDto[], Error>(params, {
     query: {
       queryKey: ['calendar-events', start, end],
-      select: (res) => res.data as OfficeEventDto[]
+      select: (res) => res.data as CalendarEventDto[]
     }
   });
 }
@@ -52,7 +52,7 @@ export function useCreateCalendarEventMutation(onSuccessCallback?: () => void) {
 
   return {
     ...mutation,
-    mutate: (dto: CreateOfficeEventDto) => 
+    mutate: (dto: CreateCalendarEventDto) =>
       mutation.mutate({ data: dto })
   };
 }
@@ -78,7 +78,7 @@ export function useUpdateCalendarEventMutation(onSuccessCallback?: () => void) {
 
   return {
     ...mutation,
-    mutate: (variables: { id: string; dto: UpdateOfficeEventDto }) => 
+    mutate: (variables: { id: string; dto: UpdateCalendarEventDto }) =>
       mutation.mutate({ id: variables.id, data: variables.dto })
   };
 }

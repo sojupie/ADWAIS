@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from '@tanstack/react-router';
-import { ArrowLeft, ChevronRight, Settings } from 'lucide-react';
+import { ChevronDown, Settings } from 'lucide-react';
 import type { Timeframe } from '../../../schemas';
 import { NotificationToggleWidget } from '../dashboard/NotificationToggleWidget';
 
@@ -13,16 +13,21 @@ type MobileNavigationMenuProps = {
 };
 
 const mobileLinkClass = (isActive: boolean, extra = '') =>
-  `flex min-h-12 w-full items-center rounded-full px-5 text-left text-base font-bold tracking-wide transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent ${extra} ${
+  `flex min-h-12 w-full items-center rounded-full px-5 text-left text-sm font-bold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary ${extra} ${
     isActive
-      ? 'bg-brand-accent text-brand-text'
-      : 'text-white/80 hover:bg-white/10 hover:text-white'
+      ? 'bg-surface-container-highest text-on-primary-container'
+      : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
   }`;
 
 export function MobileNavigationMenu({ isOpen, pathname, financialTimeframe, fleetTimeframe, onClose }: MobileNavigationMenuProps) {
-  const [view, setView] = useState<'main' | 'settings'>(() =>
-    pathname.startsWith('/settings') ? 'settings' : 'main',
-  );
+  const isSettingsRoute = pathname.startsWith('/settings');
+  const [wasOnSettingsRoute, setWasOnSettingsRoute] = useState(isSettingsRoute);
+  const [isSettingsExpanded, setIsSettingsExpanded] = useState(isSettingsRoute);
+
+  if (isSettingsRoute !== wasOnSettingsRoute) {
+    setWasOnSettingsRoute(isSettingsRoute);
+    setIsSettingsExpanded(isSettingsRoute);
+  }
 
   useEffect(() => {
     if (!isOpen) return;
@@ -40,7 +45,7 @@ export function MobileNavigationMenu({ isOpen, pathname, financialTimeframe, fle
       role="dialog"
       aria-modal={isOpen ? true : undefined}
       aria-hidden={!isOpen}
-      aria-label={view === 'settings' ? 'Settings navigation' : 'Main navigation'}
+      aria-label="Main navigation"
     >
       <button
           data-md3-ripple="off"
@@ -53,46 +58,38 @@ export function MobileNavigationMenu({ isOpen, pathname, financialTimeframe, fle
 
       <aside
         inert={!isOpen}
-        className={`m3-elevation-3 relative ml-auto flex h-full w-[320px] max-w-[calc(100vw-24px)] flex-col overflow-hidden bg-brand-bg-secondary text-white transition-transform ${isOpen ? 'translate-x-0 duration-[400ms] ease-[cubic-bezier(0.05,0.7,0.1,1)]' : 'translate-x-full duration-200 ease-[cubic-bezier(0.3,0,0.8,0.15)]'}`}
+        className={`m3-elevation-3 relative ml-auto flex h-full w-[320px] max-w-[calc(100vw-24px)] flex-col overflow-hidden bg-surface-container text-on-surface transition-transform ${isOpen ? 'translate-x-0 duration-[400ms] ease-[cubic-bezier(0.05,0.7,0.1,1)]' : 'translate-x-full duration-200 ease-[cubic-bezier(0.3,0,0.8,0.15)]'}`}
       >
-        {view === 'settings' && (
-          <div className="px-3 pb-2 pt-2">
+        <div className="custom-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto p-2">
+          <nav className="flex flex-col gap-1" aria-label="Main navigation links">
+            <Link data-md3-ripple to="/financial" search={{ timeframe: financialTimeframe }} onClick={onClose} className={mobileLinkClass(pathname === '/financial')} aria-current={pathname === '/financial' ? 'page' : undefined}>Financial</Link>
+            <Link data-md3-ripple to="/fleet-status" search={{ timeframe: fleetTimeframe }} onClick={onClose} className={mobileLinkClass(pathname.startsWith('/fleet-status'))} aria-current={pathname.startsWith('/fleet-status') ? 'page' : undefined}>Fleet Status</Link>
+            <Link data-md3-ripple to="/intranet" onClick={onClose} className={mobileLinkClass(pathname === '/intranet')} aria-current={pathname === '/intranet' ? 'page' : undefined}>Intranet</Link>
             <button
               type="button"
-              onClick={() => setView('main')}
-              className="flex min-h-12 w-full items-center gap-4 rounded-full bg-white/10 px-4 text-left text-base font-black transition-colors hover:bg-white/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent"
+              onClick={() => setIsSettingsExpanded(current => !current)}
+              className={mobileLinkClass(pathname.startsWith('/settings'), 'justify-between gap-3')}
+              aria-expanded={isSettingsExpanded}
+              aria-controls="mobile-settings-navigation"
             >
-              <ArrowLeft size={22} aria-hidden="true" />
-              Main menu
+              <span className="flex items-center gap-4"><Settings size={19} aria-hidden="true" />Settings</span>
+              <ChevronDown size={20} aria-hidden="true" className={`transition-transform ${isSettingsExpanded ? 'rotate-180' : ''}`} />
             </button>
-          </div>
-        )}
+            {isSettingsExpanded && (
+              <div id="mobile-settings-navigation" role="group" aria-label="Settings navigation links" className="ml-4 flex flex-col gap-1 border-l border-outline-variant pl-2">
+                <Link data-md3-ripple to="/settings/jobs" onClick={onClose} className={mobileLinkClass(pathname.startsWith('/settings/jobs'), 'gap-3')} aria-current={pathname.startsWith('/settings/jobs') ? 'page' : undefined}>Background Jobs</Link>
+                <Link data-md3-ripple to="/settings/configuration" onClick={onClose} className={mobileLinkClass(pathname.startsWith('/settings/configuration'))}>Configuration</Link>
+                <Link data-md3-ripple to="/settings/tenants" onClick={onClose} className={mobileLinkClass(pathname.startsWith('/settings/tenants'))}>Tenants</Link>
+                <Link data-md3-ripple to="/settings/monitors" onClick={onClose} className={mobileLinkClass(pathname.startsWith('/settings/monitors'))}>Monitors</Link>
+                <Link data-md3-ripple to="/settings/events" onClick={onClose} className={mobileLinkClass(pathname.startsWith('/settings/events'))}>Events &amp; Health</Link>
+                <Link data-md3-ripple to="/settings/users" onClick={onClose} className={mobileLinkClass(pathname.startsWith('/settings/users'))}>Users</Link>
+                <Link data-md3-ripple to="/settings/authentication" onClick={onClose} className={mobileLinkClass(pathname.startsWith('/settings/authentication'))}>Authentication</Link>
+              </div>
+            )}
+          </nav>
 
-        <div className={`flex min-h-0 flex-1 flex-col overflow-y-auto px-3 pb-4 custom-scrollbar ${view === 'main' ? 'pt-3' : ''}`}>
-          {view === 'main' ? (
-            <nav className="flex flex-col gap-2" aria-label="Main navigation links">
-              <Link to="/financial" search={{ timeframe: financialTimeframe }} onClick={onClose} className={mobileLinkClass(pathname === '/financial')} aria-current={pathname === '/financial' ? 'page' : undefined}>Financial</Link>
-              <Link to="/fleet-status" search={{ timeframe: fleetTimeframe }} onClick={onClose} className={mobileLinkClass(pathname.startsWith('/fleet-status'))} aria-current={pathname.startsWith('/fleet-status') ? 'page' : undefined}>Fleet Status</Link>
-              <Link to="/intranet" onClick={onClose} className={mobileLinkClass(pathname === '/intranet')} aria-current={pathname === '/intranet' ? 'page' : undefined}>Intranet</Link>
-              <button type="button" onClick={() => setView('settings')} className={mobileLinkClass(pathname.startsWith('/settings'), 'justify-between gap-3')}>
-                <span className="flex items-center gap-4"><Settings size={19} aria-hidden="true" />Settings</span>
-                <ChevronRight size={20} aria-hidden="true" />
-              </button>
-            </nav>
-          ) : (
-            <nav className="flex flex-col gap-2" aria-label="Settings navigation links">
-              <Link to="/settings/jobs" onClick={onClose} className={mobileLinkClass(pathname === '/settings/jobs', 'gap-3')} aria-current={pathname === '/settings/jobs' ? 'page' : undefined}>Background Jobs</Link>
-              <Link to="/settings/configuration" onClick={onClose} className={mobileLinkClass(pathname === '/settings/configuration')}>Configuration</Link>
-              <Link to="/settings/tenants" onClick={onClose} className={mobileLinkClass(pathname === '/settings/tenants')}>Tenants</Link>
-              <Link to="/settings/monitors" onClick={onClose} className={mobileLinkClass(pathname === '/settings/monitors')}>Monitors</Link>
-              <Link to="/settings/events" onClick={onClose} className={mobileLinkClass(pathname === '/settings/events')}>Events &amp; Health</Link>
-              <Link to="/settings/users" onClick={onClose} className={mobileLinkClass(pathname === '/settings/users')}>Users</Link>
-              <Link to="/settings/authentication" onClick={onClose} className={mobileLinkClass(pathname === '/settings/authentication')}>Authentication</Link>
-            </nav>
-          )}
-
-          <div className="mt-auto border-t border-white/15 px-2 pt-4">
-            <span className="mb-3 block px-2 text-xs font-black uppercase tracking-widest text-white/50">Controls</span>
+          <div className="mt-auto border-t border-outline-variant px-2 pt-4">
+            <span className="mb-3 block px-2 text-xs font-black uppercase tracking-widest text-on-surface-variant">Controls</span>
             <NotificationToggleWidget />
           </div>
         </div>

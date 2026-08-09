@@ -260,7 +260,7 @@ export function FloatingFilterMenu({
         onClick={toggleMenu}
         aria-expanded={isOpen}
         aria-label={activeCount > 0 ? `Filters, ${activeCount} active` : 'Filters'}
-        className="flex h-14 cursor-pointer items-center justify-center gap-2 rounded-l-[28px] rounded-r-[8px] bg-surface px-5 py-2 text-base font-bold outline-none transition-shadow m3-elevation-1 hover:m3-elevation-2 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-secondary"
+        className="flex h-14 cursor-pointer items-center justify-center gap-2 rounded-l-[28px] rounded-r-[8px] bg-secondary px-5 py-2 text-base font-bold text-on-secondary outline-none transition-colors m3-elevation-1 hover:bg-secondary/90 hover:m3-elevation-2 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-secondary"
       >
         <Filter aria-hidden="true" size={18}/>
         Filters

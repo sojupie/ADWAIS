@@ -154,7 +154,7 @@ export function FleetSelectionPanel({
             </span>
           )}
           <Button
-            variant="filled"
+            variant="tonal"
             color="secondary"
             icon={<Settings size={18} />}
             aria-label={settingsLabel}

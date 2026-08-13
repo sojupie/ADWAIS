@@ -20,7 +20,7 @@ export function KioskProvider({ children }: { children: ReactNode }) {
   const [mode, setMode] = useState<KioskMode>('paused');
   const [kioskTimer, setKioskTimer] = useState(KIOSK_ROTATION_SECONDS);
   const [idleTimer, setIdleTimer] = useState(0);
-  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   
   const currentRoute = matches[matches.length - 1]?.routeId;
   const isKioskEligibleRoute = KIOSK_ROUTES.includes(currentRoute as KioskRoute);

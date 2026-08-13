@@ -38,7 +38,6 @@ export function SiteHeader({
           <BrandLogoLink
             timeframe={financialTimeframe}
             className="h-8 object-contain object-left brightness-0 invert"
-            height={28}
           />
           <div className="flex items-center gap-4">
             <ConnectivityStatus isOnline={isOnline} isBackendOnline={isBackendOnline} variant="mobile" />
@@ -59,7 +58,6 @@ export function SiteHeader({
             <BrandLogoLink
               timeframe={financialTimeframe}
               className="h-8 w-auto shrink-0 object-contain object-left brightness-0 invert"
-              height={32}
             />
           </div>
 

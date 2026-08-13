@@ -5,7 +5,6 @@ import { AccumulatedRevenueChart } from '../../financial/AccumulatedRevenueChart
 import { TransactionDensityChart } from '../../financial/TransactionDensityChart';
 import { RevenueEfficiencyChart } from '../../financial/RevenueEfficiencyChart';
 import { PortfolioImpactMatrixChart } from '../../financial/PortfolioImpactMatrixChart';
-import brandLogo from '../../../assets/brand-logo.svg';
 import { MOCK_ACCUMULATED_REVENUE, MOCK_TRANSACTION_DENSITY_RESPONSE, MOCK_EFFICIENCY, MOCK_PORTFOLIO_IMPACT } from '../../../utils/mockKioskData';
 
 interface AuthLayoutProps {
@@ -24,7 +23,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
             style={{ borderBottomColor: 'var(--color-brand-bg-secondary-20)' }}
           >
             <div className="flex justify-center md:justify-start min-w-0">
-              <img className="h-8 w-auto object-contain object-left brightness-0 invert" src={brandLogo} alt="Organization logo" height="32" />
+              <span className="text-white whitespace-nowrap font-black uppercase tracking-widest text-xl">ADWAIS</span>
             </div>
             <nav className="flex justify-center items-center gap-6 md:gap-16 font-black uppercase tracking-widest text-xs md:text-sm min-w-0 max-w-full overflow-hidden">
               <span className="text-brand-accent border-b-2 border-brand-accent pb-1">Financial</span>

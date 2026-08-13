@@ -60,13 +60,13 @@ function RootComponent() {
   const userLabel = user?.name || auth?.user?.profile?.name || (kioskToken ? 'Kiosk' : null);
   const isAuthRoute = location.pathname === '/login' || location.pathname.startsWith('/kiosk');
 
-  const authSettled = auth === undefined || !auth.isLoading;
+  const callbackPending = hasAuthParams() && (auth?.isLoading || auth?.error != null);
 
   return (
     <RootProviders>
       {isAuthRoute ? (
         <AuthRouteShell routeKey={location.pathname} />
-      ) : !authSettled ? (
+      ) : callbackPending ? (
         <div className="flex h-full w-full items-center justify-center bg-surface text-on-surface font-bold">
           Signing in…
         </div>

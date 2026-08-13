@@ -14,6 +14,7 @@ import { useCurrentUser } from '../../hooks/useCurrentUser';
 import { CollectionPanel } from '../common/dashboard/CollectionPanel';
 import { Button } from '../common/ui/Button';
 import { ErrorAlert } from '../common/ui/ErrorAlert';
+import { EmptyState } from '../common/ui/EmptyState';
 import { BulletinPostCard } from './bulletin-board/BulletinPostCard';
 import { BulletinPostCarousel } from './bulletin-board/BulletinPostCarousel';
 import { BulletinPostDetail } from './bulletin-board/BulletinPostDetail';
@@ -160,11 +161,11 @@ export function BulletinBoard() {
               <div className="h-3 w-4/5 rounded bg-surface-container-high" /></div>)}
           </div>
         ) : postsQuery.isError ? (
-          <div className="p-4"><ErrorAlert title="Unable to load bulletin posts" message="The bulletin post board is temporarily unavailable." /></div>
+          <div className="p-4"><ErrorAlert title="Bulletin board unavailable" message="The bulletin board is temporarily unavailable." /></div>
         ) : mutationError ? (
           <div className="p-4 pb-0"><ErrorAlert message={mutationError} onDismiss={() => setMutationError(null)} /></div>
         ) : posts.length === 0 ? (
-          <div className="flex flex-1 items-center justify-center p-6 text-center text-sm font-semibold text-on-surface-variant">No bulletin posts available.</div>
+          <EmptyState message="No bulletin posts yet." variant="minimal" className="flex-1" />
         ) : isExpandedView ? (
           <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2">{posts.map(renderPost)}</div>
         ) : (

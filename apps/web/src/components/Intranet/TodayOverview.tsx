@@ -131,7 +131,7 @@ export function TodayOverview() {
   }, [time]);
 
   // Fetch today's events from the backend
-  const { data: rawEvents = [], isLoading } = useCalendarEventsQuery(todayRange.start, todayRange.end);
+  const { data: rawEvents = [], isLoading, isError: isEventsError } = useCalendarEventsQuery(todayRange.start, todayRange.end);
   const events = useMemo(
     () => [...rawEvents, ...mockEvents].sort((a, b) => new Date(a.startTime ?? 0).getTime() - new Date(b.startTime ?? 0).getTime()),
     [rawEvents, mockEvents],
@@ -173,6 +173,11 @@ export function TodayOverview() {
         <div className="flex flex-col overflow-y-auto flex-1 divide-y divide-slate-50/30 custom-scrollbar w-full min-w-0">
           {isLoading ? (
             <div className="text-sm md:text-base text-primary-container italic text-center py-2">Loading today's schedule...</div>
+          ) : isEventsError ? (
+            <div role="alert" className="py-2 text-center">
+              <span className="block text-sm md:text-base font-bold text-error-container">Schedule unavailable</span>
+              <span className="block text-sm md:text-base text-primary-container">Calendar request failed</span>
+            </div>
           ) : events.length === 0 ? (
             <div className="text-sm md:text-base text-primary-container italic text-center py-2">No events scheduled for today.</div>
           ) : (

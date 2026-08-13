@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { CollectionPanel } from '../common/dashboard/CollectionPanel';
+import { ErrorAlert } from '../common/ui/ErrorAlert';
 import { getApiIntranetEventsId, useGetApiUsersMe } from '../../api/generated/endpoints';
 import { getKioskToken } from '../../utils/auth';
 import { formatDateTime } from '../../utils/dateTime';
@@ -99,7 +100,7 @@ export function Calendar() {
   }, [currentDate]);
 
   // Load events
-  const { data: rawEvents = [], isLoading } = useCalendarEventsQuery(rangeBoundaries.start, rangeBoundaries.end);
+  const { data: rawEvents = [], isLoading, isError } = useCalendarEventsQuery(rangeBoundaries.start, rangeBoundaries.end);
   const events = useMemo(() => [...rawEvents], [rawEvents]);
   const { data: tokenData } = useCalendarTokenQuery(isWriter && isTokenRequested);
 
@@ -342,6 +343,9 @@ export function Calendar() {
         />
       }
     >
+      {isError ? (
+        <div className="p-4"><ErrorAlert title="Calendar unavailable" message="The company calendar is temporarily unavailable." /></div>
+      ) : (
       <div className="flex flex-col h-full min-h-[350px] bg-surface-container">
         
         {/* Month/Week Navigation */}
@@ -383,6 +387,7 @@ export function Calendar() {
         )}
 
       </div>
+      )}
 
       {/* Detail / View Modal */}
       {selectedEvent && (

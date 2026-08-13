@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { ExternalLink } from 'lucide-react';
 import { CollectionPanel } from '../common/dashboard/CollectionPanel';
+import { EmptyState } from '../common/ui/EmptyState';
+import { ErrorAlert } from '../common/ui/ErrorAlert';
 import { useGetApiIntranetFeeds } from '../../api/generated/endpoints';
 import { formatDateTime } from '../../utils/dateTime';
 
@@ -10,7 +12,7 @@ type OrganizationNewsProps = {
 };
 
 export function OrganizationNews({ authorName, title = 'Organization news' }: OrganizationNewsProps) {
-  const { data: response, isLoading } = useGetApiIntranetFeeds({ PageSize: 20, AuthorName: authorName });
+  const { data: response, isLoading, isError } = useGetApiIntranetFeeds({ PageSize: 20, AuthorName: authorName });
   const feedItems = response?.data || [];
 
   const [selectedPostId, setSelectedPostId] = useState<string | undefined>(undefined);
@@ -39,10 +41,10 @@ export function OrganizationNews({ authorName, title = 'Organization news' }: Or
             <div className="w-full flex-1 min-h-[150px] bg-surface-container-high rounded-lg" />
           </div>
         </div>
+      ) : isError ? (
+        <div className="p-4"><ErrorAlert title={`${title} unavailable`} message={`${title} is temporarily unavailable.`} /></div>
       ) : feedItems.length === 0 ? (
-        <div className="p-8 text-center text-on-surface-variant font-semibold py-12">
-          No news available.
-        </div>
+        <EmptyState message="No news available." variant="minimal" className="min-h-32" />
       ) : (
         <div className="flex gap-2 p-4 pt-0 flex-col md:flex-row h-full overflow-hidden">
           {/* Sidebar List (Surface Container Low) */}

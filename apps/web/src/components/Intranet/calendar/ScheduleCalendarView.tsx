@@ -1,5 +1,6 @@
 import { Repeat2 } from 'lucide-react';
 import type { CalendarEventDto } from '@types';
+import { EmptyState } from '../../common/ui/EmptyState';
 import { formatDateTime } from '../../../utils/dateTime';
 import { getEventBadgeClass, getEventEmoji } from './calendarPresentation';
 
@@ -12,7 +13,7 @@ export function ScheduleCalendarView({ events, onEventClick }: ScheduleCalendarV
   return (
     <div className="flex max-h-[500px] flex-1 flex-col overflow-y-auto border-t border-outline-variant bg-surface custom-scrollbar">
       {events.length === 0 ? (
-        <div className="py-8 text-center text-base italic text-on-surface-variant">No upcoming events scheduled.</div>
+        <EmptyState message="No upcoming events." variant="minimal" className="min-h-32" />
       ) : (
         <div className="flex flex-col gap-2 p-3">
           {events.map(event => (

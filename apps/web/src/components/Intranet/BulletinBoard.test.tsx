@@ -69,6 +69,7 @@ describe('BulletinBoard', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     queryState.data = { data: [post] };
+    queryState.isError = false;
     createMutation.isPending = false;
     deleteMutation.isPending = false;
     deleteMutation.variables = undefined;
@@ -81,6 +82,16 @@ describe('BulletinBoard', () => {
     render(<BulletinBoard />);
 
     expect(screen.getByRole('button', { name: 'New' })).toBeDisabled();
+  });
+
+  it('distinguishes an unavailable bulletin board from an empty one', () => {
+    queryState.data = { data: [] };
+    const { rerender } = render(<BulletinBoard />);
+    expect(screen.getByText('No bulletin posts yet.')).toBeInTheDocument();
+
+    queryState.isError = true;
+    rerender(<BulletinBoard />);
+    expect(screen.getByRole('alert')).toHaveTextContent('Bulletin board unavailable');
   });
 
   it('opens the edit modal with the existing values and patches the bulletin post', () => {

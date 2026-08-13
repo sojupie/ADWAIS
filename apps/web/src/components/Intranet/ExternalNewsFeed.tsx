@@ -1,4 +1,6 @@
 import { CollectionPanel } from '../common/dashboard/CollectionPanel';
+import { EmptyState } from '../common/ui/EmptyState';
+import { ErrorAlert } from '../common/ui/ErrorAlert';
 import { useGetApiIntranetFeeds } from '../../api/generated/endpoints';
 import {ExternalLink} from "lucide-react";
 import { formatDateTime } from '../../utils/dateTime';
@@ -9,7 +11,7 @@ type ExternalNewsFeedProps = {
 };
 
 export function ExternalNewsFeed({ authorName, title = 'Industry news' }: ExternalNewsFeedProps) {
-  const { data: response, isLoading } = useGetApiIntranetFeeds({ PageSize: 10, AuthorName: authorName });
+  const { data: response, isLoading, isError } = useGetApiIntranetFeeds({ PageSize: 10, AuthorName: authorName });
   const feedItems = response?.data || [];
 
   return (
@@ -23,10 +25,10 @@ export function ExternalNewsFeed({ authorName, title = 'Industry news' }: Extern
             </div>
           ))}
         </div>
+      ) : isError ? (
+        <div className="p-4"><ErrorAlert title={`${title} unavailable`} message={`${title} is temporarily unavailable.`} /></div>
       ) : feedItems.length === 0 ? (
-        <div className="p-4 text-center text-on-surface-variant text-base font-semibold py-8">
-          No feeds available.
-        </div>
+        <EmptyState message="No news available." variant="minimal" className="min-h-32" />
       ) : (
         <div className="flex flex-col p-4 pt-0 flex-1 gap-4 min-h-0 overflow-y-auto custom-scrollbar px-4">
           {feedItems.map(item => (

@@ -10,7 +10,7 @@ import { queryClient } from './queryClient';
 import { routeTree } from './routeTree.gen';
 import './index.css';
 
-import { AuthProvider } from 'react-oidc-context';
+import { AuthProvider, hasAuthParams } from 'react-oidc-context';
 import { isOidcConfigured, userManager } from './utils/oidcConfig';
 import { applyFlexGapFallbackClass } from './utils/flexGapSupport';
 import { Md3RippleProvider } from './components/common/ui/Md3RippleProvider';
@@ -31,6 +31,19 @@ declare module '@tanstack/react-router' {
 }
 
 async function bootstrap() {
+  // Complete the OIDC redirect callback before the router or AuthProvider mount,
+  // so the router's beforeLoad guard never races an in-flight token exchange.
+  if (isOidcConfigured && hasAuthParams()) {
+    try {
+      await userManager!.signinRedirectCallback();
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } catch (error) {
+      console.error('OIDC signin callback failed:', error);
+      window.location.replace('/login');
+      return;
+    }
+  }
+
   const app = (
     <QueryClientProvider client={queryClient}>
       <Md3RippleProvider>
@@ -43,10 +56,7 @@ async function bootstrap() {
     <StrictMode>
       {isOidcConfigured
         ? (
-          <AuthProvider
-            userManager={userManager!}
-            onSigninCallback={() => window.history.replaceState({}, document.title, window.location.pathname)}
-          >
+          <AuthProvider userManager={userManager!}>
             {app}
           </AuthProvider>
         )

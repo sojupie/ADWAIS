@@ -2,9 +2,9 @@
 // See /LICENSE for license information.
 // SPDX-License-Identifier: BUSL-1.1
 
-import {createRootRoute, redirect, useNavigate, useRouterState, useSearch} from '@tanstack/react-router';
-import {useContext, useEffect} from 'react';
-import {AuthContext, hasAuthParams} from 'react-oidc-context';
+import {createRootRoute, redirect, useRouterState, useSearch} from '@tanstack/react-router';
+import {useContext} from 'react';
+import {AuthContext} from 'react-oidc-context';
 import {userManager} from '../utils/oidcConfig';
 import {getKioskToken} from '../utils/auth';
 import {getSavedTimeframe, type PersistentDomain} from '../utils/timeframeStorage';
@@ -21,7 +21,6 @@ export const Route = createRootRoute({
     const isKioskRoute = location.pathname.startsWith('/kiosk');
 
     if (isLoginRoute || isKioskRoute) return;
-    if (hasAuthParams()) return;
 
     const user = await userManager?.getUser();
     if (user && !user.expired) return;
@@ -38,17 +37,10 @@ function RootComponent() {
   useSearch({strict: false});
 
   const auth = useContext(AuthContext);
-  const navigate = useNavigate();
   const {user} = useCurrentUser();
   const {isOnline, isBackendOnline} = useConnectivityStatus();
   const location = useRouterState({select: (state) => state.location});
   const mobileMenu = useMobileMenu(location.pathname);
-
-  useEffect(() => {
-    if (auth?.error) {
-      void navigate({to: '/login'});
-    }
-  }, [auth?.error, navigate]);
 
   const financialTimeframe = getSavedTimeframe('/financial');
   const fleetTimeframe = getSavedTimeframe('/fleet-status');
@@ -60,16 +52,10 @@ function RootComponent() {
   const userLabel = user?.name || auth?.user?.profile?.name || (kioskToken ? 'Kiosk' : null);
   const isAuthRoute = location.pathname === '/login' || location.pathname.startsWith('/kiosk');
 
-  const callbackPending = hasAuthParams() && (auth?.isLoading || auth?.error != null);
-
   return (
     <RootProviders>
       {isAuthRoute ? (
         <AuthRouteShell routeKey={location.pathname} />
-      ) : callbackPending ? (
-        <div className="flex h-full w-full items-center justify-center bg-surface text-on-surface font-bold">
-          Signing in…
-        </div>
       ) : (
         <AppShell
           pathname={location.pathname}

@@ -70,6 +70,7 @@ export function Financial() {
           label={revenueLabel}
           value={vm.kpiQuery.data ? formatCurrency(vm.kpiQuery.data.currentRevenue) : '\u2014'}
           isLoading={vm.kpiQuery.isLoading}
+          isError={vm.kpiQuery.isError}
           extra={vm.kpiQuery.data?.revenueGrowthPercentage !== undefined
             ? { type: 'PoP', value: vm.kpiQuery.data.revenueGrowthPercentage }
             : undefined}
@@ -79,6 +80,7 @@ export function Financial() {
           label="Transaction Volume"
           value={vm.kpiQuery.data ? formatNumber(vm.kpiQuery.data.transactionVolume) : '\u2014'}
           isLoading={vm.kpiQuery.isLoading}
+          isError={vm.kpiQuery.isError}
           extra={vm.kpiQuery.data?.volumeGrowthPercentage !== undefined
             ? { type: 'PoP', value: vm.kpiQuery.data.volumeGrowthPercentage }
             : undefined}
@@ -88,6 +90,7 @@ export function Financial() {
           label="Portfolio AOV"
           value={vm.kpiQuery.data ? `${formatCompact(vm.kpiQuery.data.averageOrderValue)} SEK` : '\u2014'}
           isLoading={vm.kpiQuery.isLoading}
+          isError={vm.kpiQuery.isError}
           extra={vm.kpiQuery.data?.aovGrowthPercentage !== undefined
             ? { type: 'PoP', value: vm.kpiQuery.data.aovGrowthPercentage }
             : undefined}
@@ -97,6 +100,7 @@ export function Financial() {
           label="Active Tenants"
           value={vm.kpiQuery.data?.activeTenants !== undefined ? vm.kpiQuery.data.activeTenants.toString() : '\u2014'}
           isLoading={vm.kpiQuery.isLoading}
+          isError={vm.kpiQuery.isError}
           extra={vm.kpiQuery.data?.activeTenantsGrowthPercentage !== undefined
             ? { type: 'PoP', value: vm.kpiQuery.data.activeTenantsGrowthPercentage }
             : undefined}
@@ -106,6 +110,7 @@ export function Financial() {
           label="Avg Revenue Per Tenant"
           value={vm.kpiQuery.data?.averageRevenuePerTenant !== undefined ? formatCompact(vm.kpiQuery.data.averageRevenuePerTenant) : '\u2014'}
           isLoading={vm.kpiQuery.isLoading}
+          isError={vm.kpiQuery.isError}
           extra={vm.kpiQuery.data?.arptGrowthPercentage !== undefined
             ? { type: 'PoP', value: vm.kpiQuery.data.arptGrowthPercentage }
             : undefined}
@@ -118,6 +123,7 @@ export function Financial() {
         <AccumulatedRevenueChart 
           points={vm.velocityQuery.data || EMPTY_VELOCITY}
           isLoading={vm.velocityQuery.isLoading} 
+          isError={vm.velocityQuery.isError}
           isStale={vm.velocityQuery.isPlaceholderData}
           comparison="YearOverYear"
           className="h-full min-h-[350px] contained:min-h-0"
@@ -128,6 +134,7 @@ export function Financial() {
           selectedPeriod={vm.densityPeriod}
           onPeriodChange={vm.setDensityPeriod}
           isLoading={vm.densityQuery.isLoading} 
+          isError={vm.densityQuery.isError}
           isStale={vm.densityQuery.isPlaceholderData}
           className="h-full min-h-[350px] contained:min-h-0"
         />
@@ -136,6 +143,7 @@ export function Financial() {
           response={vm.crossSegmentDistributionData || EMPTY_CROSS_SEGMENT_DISTRIBUTION}
           onTenantSelect={vm.handleTenantSelect} 
           isLoading={vm.crossSegmentDistributionQuery.isLoading} 
+          isError={vm.crossSegmentDistributionQuery.isError}
           isStale={vm.crossSegmentDistributionQuery.isPlaceholderData}
           className="h-full min-h-[350px] contained:min-h-0"
         />
@@ -145,6 +153,7 @@ export function Financial() {
           comparison="YearOverYear"
           onTenantSelect={vm.handleTenantSelect} 
           isLoading={vm.portfolioImpactQuery.isLoading} 
+          isError={vm.portfolioImpactQuery.isError}
           isStale={vm.portfolioImpactQuery.isPlaceholderData}
           className="h-full min-h-[350px] contained:min-h-0"
         />

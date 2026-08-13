@@ -122,6 +122,7 @@ export function TenantDiagnostics({
           label={`Revenue (${timeframe})`}
           value={kpis ? formatCurrency(kpis.currentRevenue) : '\u2014'}
           isLoading={kpiQuery.isLoading}
+          isError={kpiQuery.isError}
           extra={kpis?.revenueGrowthPercentage !== undefined
             ? { type: 'PoP', value: kpis.revenueGrowthPercentage }
             : undefined}
@@ -131,6 +132,7 @@ export function TenantDiagnostics({
           label="Share of Revenue"
           value={shareOfRevenue !== undefined ? `${shareOfRevenue.toFixed(1)}%` : '\u2014'}
           isLoading={kpiQuery.isLoading || globalKpiQuery.isLoading}
+          isError={kpiQuery.isError || globalKpiQuery.isError}
           extra={{ type: 'Desc', value: shareOfRevenueDesc }}
           hasExtra={true}
         />
@@ -138,6 +140,7 @@ export function TenantDiagnostics({
           label="Transaction Volume"
           value={kpis ? formatNumber(kpis.transactionVolume) : '\u2014'}
           isLoading={kpiQuery.isLoading}
+          isError={kpiQuery.isError}
           extra={kpis?.volumeGrowthPercentage !== undefined
             ? { type: 'PoP', value: kpis.volumeGrowthPercentage }
             : undefined}
@@ -147,6 +150,7 @@ export function TenantDiagnostics({
           label="Average Order Value"
           value={kpis ? formatCurrency(kpis.averageOrderValue) : '\u2014'}
           isLoading={kpiQuery.isLoading}
+          isError={kpiQuery.isError}
           extra={kpis?.aovGrowthPercentage !== undefined
             ? { type: 'PoP', value: kpis.aovGrowthPercentage }
             : undefined}
@@ -158,6 +162,7 @@ export function TenantDiagnostics({
         <AccumulatedRevenueChart 
           points={accumulatedQuery.data || EMPTY_ACCUMULATED} 
           isLoading={accumulatedQuery.isLoading} 
+          isError={accumulatedQuery.isError}
           isStale={accumulatedQuery.isPlaceholderData}
           comparison="YearOverYear"
           className="h-full min-h-[350px] contained:min-h-0"
@@ -168,6 +173,7 @@ export function TenantDiagnostics({
           selectedPeriod={densityPeriod}
           onPeriodChange={setDensityPeriod}
           isLoading={densityQuery.isLoading}
+          isError={densityQuery.isError}
           isStale={densityQuery.isPlaceholderData}
           className="h-full min-h-[350px] contained:min-h-0"
         />
@@ -175,6 +181,7 @@ export function TenantDiagnostics({
         <CumulativeGrowthDeltaChart
           points={deltaQuery.data || EMPTY_DELTA}
           isLoading={deltaQuery.isLoading}
+          isError={deltaQuery.isError}
           isStale={deltaQuery.isPlaceholderData}
           comparison="YearOverYear"
           className="h-full min-h-[350px] contained:min-h-0"
@@ -183,6 +190,7 @@ export function TenantDiagnostics({
         <OrderValueDistributionChart 
           bins={orderQuery.data || EMPTY_BINS} 
           isLoading={orderQuery.isLoading} 
+          isError={orderQuery.isError}
           isStale={orderQuery.isPlaceholderData}
           className="h-full min-h-[350px] contained:min-h-0"
         />

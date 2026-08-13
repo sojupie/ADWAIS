@@ -11,6 +11,7 @@ interface FactPanelProps {
     label: string;
     value?: string;
     isLoading?: boolean;
+    isError?: boolean;
     valueColor?: "green" | "red" | "yellow"; 
     extra?: Extra;
     hasExtra?: boolean;
@@ -18,7 +19,7 @@ interface FactPanelProps {
     children?: ReactNode;
 }
 
-export function FactPanel({ label, value = '', isLoading, valueColor, extra, hasExtra, inverseTrend, children }: FactPanelProps) {
+export function FactPanel({ label, value = '', isLoading, isError, valueColor, extra, hasExtra, inverseTrend, children }: FactPanelProps) {
     let valueColorClass = 'text-on-surface';
     let extraColor = '';
     let extraText = '';
@@ -54,6 +55,11 @@ export function FactPanel({ label, value = '', isLoading, valueColor, extra, has
                 <div className="flex flex-col mt-auto">
                     <Skeleton className="h-8 lg:h-9 xl:h-8 2xl:h-10 w-28 bg-surface-container-high" />
                     {showExtra && <Skeleton className="h-5 2xl:h-6 w-20 bg-surface-container" />}
+                </div>
+            ) : isError ? (
+                <div className="flex flex-col mt-auto">
+                    <span className="text-xl font-extrabold tracking-tight text-error">Unavailable</span>
+                    <span className="text-sm font-bold tracking-wider text-on-surface-variant">Data request failed</span>
                 </div>
             ) : children ? (
                 <div className="flex flex-col mt-auto">

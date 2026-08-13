@@ -14,4 +14,11 @@ describe('FactPanel', () => {
 
     expect(screen.getByText('▲ 1.50% PoP')).toBeInTheDocument();
   });
+
+  it('shows unavailable instead of an empty metric when the request fails', () => {
+    render(<FactPanel label="Uptime" isError />);
+
+    expect(screen.getByText('Unavailable')).toBeInTheDocument();
+    expect(screen.getByText('Data request failed')).toBeInTheDocument();
+  });
 });

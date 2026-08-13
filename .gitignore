@@ -70,3 +70,7 @@ infrastructure/HOMELAB.md
 
 # Private legal checklist (do not commit)
 LEGAL-TODO.md
+
+# Test coverage reports
+TestResults/
+coverage.cobertura.xml

@@ -46,7 +46,7 @@ function LoginComponent() {
   return (
     <>
       <div className="flex flex-col items-center animate-stagger delay-100">
-        <h1 className="font-display text-7xl font-extrabold text-brand-text tracking-tight relative z-10"><i>ADWAIS</i></h1>
+        <h1 className="font-display text-7xl font-extrabold text-brand-text tracking-tight relative z-10">ADWAIS</h1>
         <h2 className="font-mono text-2xl font-semibold mb-3 text-on-tertiary-container tracking-widest relative z-10"><i>/ədˈvaɪs/</i></h2>
       </div>
 

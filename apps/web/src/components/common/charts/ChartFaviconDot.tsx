@@ -62,7 +62,7 @@ export function ChartFaviconDot(props: ChartFaviconDotProps) {
           fontWeight={800}
           fill="white"
           fillOpacity={1}
-          style={{ pointerEvents: 'none', userSelect: 'none', fontFamily: 'IBM Plex Sans, sans-serif', mixBlendMode: 'difference' }}
+          style={{ pointerEvents: 'none', userSelect: 'none', fontFamily: 'Noto Sans, sans-serif', mixBlendMode: 'difference' }}
         >
           {tenantName.charAt(0).toUpperCase()}
         </text>

@@ -213,7 +213,7 @@ export const TransactionDensityChart = memo(function TransactionDensityChart({
             <div className="grid grid-cols-[40px_repeat(24,_minmax(0,_1fr))]">
               <div />
               {Array.from({ length: 24 }).map((_, hour) => (
-                <div key={hour} className="pb-1 text-center text-[14px] font-[600] font-['IBM_Plex_Sans',_sans-serif] text-[color:var(--color-chart-tick)]">
+                <div key={hour} className="pb-1 text-center text-[14px] font-[600] font-['Noto_Sans',_sans-serif] text-[color:var(--color-chart-tick)]">
                   {hour % HOUR_LABEL_INTERVAL === 0 ? formatHour(hour) : null}
                 </div>
               ))}
@@ -222,7 +222,7 @@ export const TransactionDensityChart = memo(function TransactionDensityChart({
             <div className="h-full grid min-h-[140px] flex-1 grid-cols-[40px_minmax(0,_1fr)]">
               <div className="grid grid-rows-[repeat(7,_minmax(0,_1fr))]">
                 {DAYS.map(day => (
-                  <div key={day} className="flex items-center justify-end pr-2 text-[14px] font-[600] font-['IBM_Plex_Sans',_sans-serif] text-[color:var(--color-chart-tick)]">
+                  <div key={day} className="flex items-center justify-end pr-2 text-[14px] font-[600] font-['Noto_Sans',_sans-serif] text-[color:var(--color-chart-tick)]">
                     {day}
                   </div>
                 ))}
@@ -276,7 +276,7 @@ export const TransactionDensityChart = memo(function TransactionDensityChart({
           {hoverInfo && createPortal(
             <div 
               className={`fixed z-50 min-w-[230px] max-w-[min(300px,calc(100vw-16px))] -translate-y-1/2 rounded-[10px] border border-outline-variant bg-surface px-4 py-3 text-[14px] leading-[1.35] text-on-surface pointer-events-none ${hoverInfo.placement === 'left' ? '-translate-x-full' : hoverInfo.placement === 'center' ? '-translate-x-1/2' : ''}`}
-              style={{ left: hoverInfo.x, top: hoverInfo.y, boxShadow: '0 8px 20px rgba(15, 23, 42, 0.13)', fontFamily: 'IBM Plex Sans, sans-serif' }}
+              style={{ left: hoverInfo.x, top: hoverInfo.y, boxShadow: '0 8px 20px rgba(15, 23, 42, 0.13)', fontFamily: 'Noto Sans, sans-serif' }}
             >
               <div className="flex items-center gap-[10px] pb-1">
                 <strong className="flex-1 min-w-0 font-[800]">

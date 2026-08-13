@@ -7,7 +7,7 @@
 export const CHART_AXIS_TICK = {
   fill: 'var(--color-chart-tick)',
   fontWeight: 700,
-  fontFamily: 'IBM Plex Sans, sans-serif',
+  fontFamily: 'Noto Sans, sans-serif',
 } as const;
 
 export const CHART_AXIS_TICK_SM = {

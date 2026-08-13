@@ -67,3 +67,6 @@ docker-compose.override.yml
 .agents/
 infrastructure/HOMELAB.md
 /.agents/
+
+# Private legal checklist (do not commit)
+LEGAL-TODO.md

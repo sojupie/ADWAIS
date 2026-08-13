@@ -28,7 +28,7 @@ The analytics and monitoring server that aggregates data from external resources
     *   No external dependencies or direct dependency on outer layers.
 4.  **Infrastructure (Implementation Layer)**:
     *   EF Core `AnalyticsDbContext` implementing `IApplicationDbContext` and migrations.
-    *   Implementations of cache services, Hangfire jobs, and external API clients (UptimeRobot, Litium).
+    *   Implementations of cache services, Hangfire jobs, and external API clients (UptimeRobot, Litium, Shopify).
 
 ---
 
@@ -46,7 +46,7 @@ The analytics and monitoring server that aggregates data from external resources
 *   **Database Mapper**: Entity Framework Core (`Npgsql.EntityFrameworkCore.PostgreSQL`).
 *   **Job Scheduler**: `Hangfire.AspNetCore` + `Hangfire.PostgreSql`.
 *   **API Verification**: `FluentValidation.DependencyInjectionExtensions`.
-*   **HTTP Clients & Resilience**: `Polly` for automated API retries and backoff strategies.
+*   **HTTP Clients & Resilience**: `Microsoft.Extensions.Http.Resilience` (Polly-based) for automated API retries and backoff strategies.
 *   **Configuration**: `DotNetEnv` for runtime mapping of `.env` configurations.
 
 ---
@@ -116,7 +116,8 @@ All commands run from the **repository root** via pnpm shortcuts:
 
 | Command | What it does |
 |---|---|
-| `pnpm dev:api` | Start the backend API (hot-reload via dotnet watch not included) |
+| `pnpm dev:api` | Start the backend API |
+| `pnpm dev:api:watch` | Start the backend API with hot-reload (`dotnet watch`) |
 | `pnpm migration:add <Name>` | Create a new EF Core migration |
 | `pnpm migration:update` | Apply pending migrations to the local database |
 | `pnpm migration:remove` | Remove the last unapplied migration |

@@ -6,7 +6,7 @@ A unified multi-tenant platform integrating e-commerce analytics, endpoint monit
 
 ## Licensing & Commercial Terms
 
-This repository is source-available and governed by the **Business Source License 1.1 (BSL 1.1)**. See [LICENSE](./LICENSE) for the full terms.
+This repository is source-available and governed by the **Business Source License 1.1 (BUSL 1.1)**. See [LICENSE](./LICENSE) for the full terms.
 
 ### Free Usage
 
@@ -27,7 +27,7 @@ For commercial licensing requests, white-label permissions, or custom terms, con
 
 ## Branding & Trademarks
 
-The code is available under BSL 1.1, but trademark rights are explicitly reserved. See [TRADEMARK.md](./TRADEMARK.md) for full usage guidelines.
+The code is available under BUSL 1.1, but trademark rights are explicitly reserved. See [TRADEMARK.md](./TRADEMARK.md) for full usage guidelines.
 
 ## Contributing
 

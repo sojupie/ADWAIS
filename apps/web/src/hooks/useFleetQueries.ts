@@ -1,3 +1,7 @@
+// Part of the ADWAIS project, under the Business Source License 1.1.
+// See /LICENSE for license information.
+// SPDX-License-Identifier: BUSL-1.1
+
 import { keepPreviousData } from '@tanstack/react-query';
 import { useGetApiMonitors, useGetApiMonitorsAnalytics, useGetApiMonitorsAvailability } from '../api/generated/endpoints';
 import type { UptimeMonitorDto, MonitorAnalyticsDto, MonitorAvailabilitySeriesResponseDto, ComparisonPeriod, Timeframe, ComparisonType } from '@types';

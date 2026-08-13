@@ -1,3 +1,7 @@
+// Part of the ADWAIS project, under the Business Source License 1.1.
+// See /LICENSE for license information.
+// SPDX-License-Identifier: BUSL-1.1
+
 export type MetricType = 'aov' | 'volume' | 'revenue';
 
 export const METRIC_OPTIONS: Array<{ value: MetricType; label: string }> = [

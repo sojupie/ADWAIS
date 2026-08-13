@@ -1,3 +1,7 @@
+// Part of the ADWAIS project, under the Business Source License 1.1.
+// See /LICENSE for license information.
+// SPDX-License-Identifier: BUSL-1.1
+
 export type DateTimeValue = Date | string | number | null | undefined;
 
 /** Formats a date/time value, returning an empty string when it is missing or invalid. */

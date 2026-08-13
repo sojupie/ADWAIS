@@ -1,3 +1,7 @@
+// Part of the ADWAIS project, under the Business Source License 1.1.
+// See /LICENSE for license information.
+// SPDX-License-Identifier: BUSL-1.1
+
 import { isDemoMode, userManager } from './utils/oidcConfig';
 import { removeKioskToken } from './utils/auth';
 

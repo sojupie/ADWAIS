@@ -1,3 +1,7 @@
+// Part of the ADWAIS project, under the Business Source License 1.1.
+// See /LICENSE for license information.
+// SPDX-License-Identifier: BUSL-1.1
+
 import { memo, useEffect, useRef } from 'react';
 import { TRANSACTION_DENSITY_PALETTE } from './transactionDensityPalette';
 import { TRANSACTION_DENSITY_HEATMAP_TUNING } from './transactionDensityHeatmapTuning';

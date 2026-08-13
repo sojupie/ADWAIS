@@ -1,3 +1,7 @@
+// Part of the ADWAIS project, under the Business Source License 1.1.
+// See /LICENSE for license information.
+// SPDX-License-Identifier: BUSL-1.1
+
 export const TRANSACTION_DENSITY_PALETTE = [
   '#000004', '#1b0c42', '#4b0c6b', '#781c6d',
   '#a52c60', '#cf4446', '#ed6925', '#fb9b06',

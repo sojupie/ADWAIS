@@ -1,3 +1,7 @@
+// Part of the ADWAIS project, under the Business Source License 1.1.
+// See /LICENSE for license information.
+// SPDX-License-Identifier: BUSL-1.1
+
 import { createLazyFileRoute, Navigate, Link } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, KeyRound, LoaderCircle, MonitorUp, ServerCrash } from 'lucide-react';

@@ -1,3 +1,7 @@
+// Part of the ADWAIS project, under the Business Source License 1.1.
+// See /LICENSE for license information.
+// SPDX-License-Identifier: BUSL-1.1
+
 import { ShieldAlert } from 'lucide-react';
 
 export function AccessDeniedCard({ message = "You don't have permission to view this component." }: { message?: string }) {

@@ -1,3 +1,7 @@
+// Part of the ADWAIS project, under the Business Source License 1.1.
+// See /LICENSE for license information.
+// SPDX-License-Identifier: BUSL-1.1
+
 import { useState } from 'react';
 import { useNavigate, useParams } from '@tanstack/react-router';
 import { User as UserIcon, Trash2, Save, X } from 'lucide-react';

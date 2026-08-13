@@ -1,3 +1,7 @@
+// Part of the ADWAIS project, under the Business Source License 1.1.
+// See /LICENSE for license information.
+// SPDX-License-Identifier: BUSL-1.1
+
 import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import { tanstackRouter } from '@tanstack/router-vite-plugin'

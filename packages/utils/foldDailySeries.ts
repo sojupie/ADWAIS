@@ -1,3 +1,7 @@
+// Part of the ADWAIS project, under the Business Source License 1.1.
+// See /LICENSE for license information.
+// SPDX-License-Identifier: BUSL-1.1
+
 const MIN_DAILY_GAP_MS = 20 * 60 * 60 * 1000;
 const MAX_DAILY_GAP_MS = 2 * 24 * 60 * 60 * 1000;
 

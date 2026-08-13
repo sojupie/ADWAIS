@@ -1,3 +1,7 @@
+// Part of the ADWAIS project, under the Business Source License 1.1.
+// See /LICENSE for license information.
+// SPDX-License-Identifier: BUSL-1.1
+
 export const getTagColor = (tag: string): string => {
   const parts = tag.split(':');
   if (parts.length > 1 && parts[1]) {

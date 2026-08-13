@@ -1,3 +1,7 @@
+// Part of the ADWAIS project, under the Business Source License 1.1.
+// See /LICENSE for license information.
+// SPDX-License-Identifier: BUSL-1.1
+
 export const KIOSK_DEVICE_ID_KEY = 'kiosk_device_id';
 export const KIOSK_TOKEN_KEY = 'kiosk_token';
 

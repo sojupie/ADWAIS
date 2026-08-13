@@ -1,3 +1,7 @@
+// Part of the ADWAIS project, under the Business Source License 1.1.
+// See /LICENSE for license information.
+// SPDX-License-Identifier: BUSL-1.1
+
 import { useSearch, useNavigate } from '@tanstack/react-router';
 import { useMemo, useCallback, useState } from 'react';
 import { 

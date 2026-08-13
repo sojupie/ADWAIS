@@ -1,3 +1,7 @@
+// Part of the ADWAIS project, under the Business Source License 1.1.
+// See /LICENSE for license information.
+// SPDX-License-Identifier: BUSL-1.1
+
 import { useEffect, useRef, type ReactNode } from 'react';
 // import {TanStackRouterDevtools} from '@tanstack/react-router-devtools';
 // import {ReactQueryDevtools} from '@tanstack/react-query-devtools';

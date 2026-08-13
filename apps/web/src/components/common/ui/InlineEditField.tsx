@@ -1,3 +1,7 @@
+// Part of the ADWAIS project, under the Business Source License 1.1.
+// See /LICENSE for license information.
+// SPDX-License-Identifier: BUSL-1.1
+
 import { useState, type InputHTMLAttributes, type Key, type ReactNode } from 'react';
 import { Check, Edit3, Loader2, Lock, X } from 'lucide-react';
 import { CheckboxField, FormField, type FieldDensity, type FieldVariant } from './FormField';

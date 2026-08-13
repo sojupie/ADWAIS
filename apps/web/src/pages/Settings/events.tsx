@@ -1,3 +1,7 @@
+// Part of the ADWAIS project, under the Business Source License 1.1.
+// See /LICENSE for license information.
+// SPDX-License-Identifier: BUSL-1.1
+
 import { useState } from 'react';
 import { HeartPulse, TerminalSquare, AlertCircle, CheckCircle2, AlertTriangle, Info, Check, Copy } from 'lucide-react';
 import { SettingsPanel } from '../../components/common/layout/SettingsPanel';

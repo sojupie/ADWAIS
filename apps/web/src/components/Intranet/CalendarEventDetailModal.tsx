@@ -1,3 +1,7 @@
+// Part of the ADWAIS project, under the Business Source License 1.1.
+// See /LICENSE for license information.
+// SPDX-License-Identifier: BUSL-1.1
+
 import { X, Clock, MapPin, User as UserIcon, Globe, Repeat2 } from 'lucide-react';
 import type { CalendarEventDto } from '@types';
 import { getEventRangeLabel } from './calendar/calendarPresentation';

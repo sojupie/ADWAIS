@@ -1,6 +1,43 @@
-# Motillo ADWAIS
+# ADWAIS
 
-A monorepo containing the Motillo ADWAIS project, structured with a React frontend and a .NET Core API backend.
+A unified multi-tenant platform integrating e-commerce analytics, endpoint monitoring, and internal team communication tools.
+
+---
+
+## Licensing & Commercial Terms
+
+This repository is source-available and governed by the **Business Source License 1.1 (BSL 1.1)**. See [LICENSE](./LICENSE) for the full terms.
+
+### Free Usage
+
+You are free to inspect, host, modify, and run this software for **free** under the following conditions:
+* **Internal Business Use:** Free for companies running the platform for internal team management and analytics.
+* **Client Deployments:** Free for agencies and consultants deploying instances on behalf of clients, provided no direct fee is charged for the software itself.
+* **UI Attribution Retained:** All deployments must retain the intact visible copyright credit (`© MARMENLIND`) on the user interface (including the login screen).
+
+### Paid / Commercial Licensing
+
+A paid commercial agreement is required if you wish to:
+1. **White-Label:** Remove or modify the `© MARMENLIND` visual footer/attribution from the user interface.
+2. **Monetize as SaaS:** Offer the software as a paid managed service, resold cloud subscription, or bundled commercial offering.
+
+For commercial licensing requests, white-label permissions, or custom terms, contact: ollemarmenlind02@gmail.com
+
+---
+
+## Branding & Trademarks
+
+The code is available under BSL 1.1, but trademark rights are explicitly reserved. See [TRADEMARK.md](./TRADEMARK.md) for full usage guidelines.
+
+## Contributing
+
+We welcome community pull requests and bug fixes. By contributing, you agree to assign rights according to our [CONTRIBUTING.md](./CONTRIBUTING.md) terms.
+
+## Acknowledgements
+
+Originally developed as a university project with contributions from David Vilselius, Francisco Vigo Flores, Erik Falk, and Christoffer Bohm.
+
+---
 
 ## Architecture
 
@@ -18,13 +55,13 @@ graph TD
 ### Directory Structure
 
 *   `/apps` - User-facing applications.
-    *   [`/apps/web`](file:///c:/Users/ollem/Git/motillo%20project/dashboard/apps/web) - React + TypeScript + Vite + Tailwind CSS v4 frontend.
-    *   [`/apps/server`](file:///c:/Users/ollem/Git/motillo%20project/dashboard/apps/server) - Backend container runner configuration.
-    *   [`/apps/server/Adwais`](file:///c:/Users/ollem/Git/motillo%20project/dashboard/apps/server/Adwais) - ASP.NET Core Web API backend.
+    *   [`/apps/web`](/apps/web) - React + TypeScript + Vite + Tailwind CSS v4 frontend.
+    *   [`/apps/server`](/apps/server) - Backend container runner configuration.
+    *   [`/apps/server/Adwais`](/apps/server/Adwais) - ASP.NET Core Web API backend.
 *   `/packages` - Shared modules and libraries.
-    *   [`/packages/types`](file:///c:/Users/ollem/Git/motillo%20project/dashboard/packages/types) - Shared TypeScript types.
-    *   [`/packages/ui`](file:///c:/Users/ollem/Git/motillo%20project/dashboard/packages/ui) - Reusable frontend UI components.
-    *   [`/packages/utils`](file:///c:/Users/ollem/Git/motillo%20project/dashboard/packages/utils) - Common helper utilities.
+    *   [`/packages/types`](/packages/types) - Shared TypeScript types.
+    *   [`/packages/ui`](/packages/ui) - Reusable frontend UI components.
+    *   [`/packages/utils`](/packages/utils) - Common helper utilities.
 
 ---
 

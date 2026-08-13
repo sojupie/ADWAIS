@@ -16,11 +16,11 @@ The user-facing dashboard displaying daily order rollups, financial stats, site 
 
 ## Directory Structure
 
-*   [`/src/routes`](file:///c:/Users/ollem/Git/motillo%20project/dashboard/apps/web/src/routes) - File-based routes (compiled by TanStack Router).
+*   [`/src/routes`](/apps/web/src/routes) - File-based routes (compiled by TanStack Router).
     *   `/settings` - User configuration, tenant settings, and background jobs dashboard.
-*   [`/src/components`](file:///c:/Users/ollem/Git/motillo%20project/dashboard/apps/web/src/components) - Reusable components (e.g., Layouts, Charts, Status Cards).
-*   [`/src/hooks`](file:///c:/Users/ollem/Git/motillo%20project/dashboard/apps/web/src/hooks) - React hooks for state and queries.
-*   [`/src/apiClient.ts`](file:///c:/Users/ollem/Git/motillo%20project/dashboard/apps/web/src/apiClient.ts) - Global fetch wrapper communicating with the .NET backend.
+*   [`/src/components`](/apps/web/src/components) - Reusable components (e.g., Layouts, Charts, Status Cards).
+*   [`/src/hooks`](/apps/web/src/hooks) - React hooks for state and queries.
+*   [`/src/apiClient.ts`](/apps/web/src/apiClient.ts) - Global fetch wrapper communicating with the .NET backend.
 
 ---
 

@@ -4,16 +4,16 @@ This directory contains shared libraries and modules reused across applications 
 
 ## Package List
 
-### 1. [`/packages/types`](file:///c:/Users/ollem/Git/motillo%20project/dashboard/packages/types)
+### 1. [`/packages/types`](/packages/types)
 Defines TypeScript models and data structures shared between workspaces.
 *   Enforces structure mappings for responses from the .NET Web API.
 *   Contains schemas utilized by Zod.
 
-### 2. [`/packages/ui`](file:///c:/Users/ollem/Git/motillo%20project/dashboard/packages/ui)
+### 2. [`/packages/ui`](/packages/ui)
 Houses common design components and visual elements.
 *   Ensures design system consistency across separate user-facing components.
 
-### 3. [`/packages/utils`](file:///c:/Users/ollem/Git/motillo%20project/dashboard/packages/utils)
+### 3. [`/packages/utils`](/packages/utils)
 Contains generic utility modules.
 *   Provides helper utilities such as formatting tools, common date functions, and math operations.
 

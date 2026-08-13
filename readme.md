@@ -68,8 +68,7 @@ graph TD
     *   [`/docs/shopify-integration.md`](/docs/shopify-integration.md) - Shopify order source implementation notes.
     *   [`/docs/openapi`](/docs/openapi) - Generated OpenAPI specification (`v1.json`).
 *   `/infrastructure` - Deployment support files.
-    *   [`/infrastructure/nginx`](/infrastructure/nginx) - Production nginx configuration.
-    *   [`/infrastructure/HOMELAB.md`](/infrastructure/HOMELAB.md) - Homelab deployment notes.
+    *   [`/infrastructure/nginx`](/infrastructure/nginx) - Production nginx configuration, baked into the frontend image.
 *   `/scripts` - Repository helper scripts (EF Core migrations).
 
 Other root-level files of note: `docker-compose.prod.yml` (production stack), `pnpm-workspace.yaml`, `.env.example`.
@@ -193,35 +192,46 @@ pnpm codegen
 
 ## Production Deployment
 
-Production deployment is manual and component-selective. In GitHub, open **Actions → Deploy production → Run workflow**, select the `main` branch, and choose one target:
+Production deployment is manual and component-selective, and runs on a
+**self-hosted GitHub Actions runner** (label `adwais-prod`) on the production
+host. In GitHub, open **Actions → Deploy production → Run workflow**, select the
+`main` branch, and choose one target:
 
 - `frontend`, `backend`, or `infrastructure`
 - `restart-api`, `restart-stack`, or `reload-nginx`
 - `all`
 
-The `production` GitHub environment must define the deployment credentials
-(`SERVER_IP`, `SSH_PRIVATE_KEY`, `SSH_KNOWN_HOSTS`, `GHCR_PULL_USERNAME`, and
-`GHCR_PULL_TOKEN`) plus the runtime secrets (`DB_PASSWORD`, `MOTASTIC_API_KEY`,
-`NEWSLETTER_API_KEY`, `KIOSK_JWT_SECRET`, and `CLOUDFLARE_TUNNEL_TOKEN`). The
-GHCR pull token only needs `read:packages`.
+Application images are **built locally on the runner** (no container registry):
+`web` is an `nginx:alpine` image serving the SPA with
+`infrastructure/nginx/default.conf` baked in (it proxies `/api`, `/swagger`,
+`/openapi`, and `/hangfire` to the API container); `api` is the ASP.NET Core
+image. Only `db` and `cloudflared` are pulled from Docker Hub. No SSH is used —
+the runner has local Docker access — and no application ports are published on
+the host: Cloudflare Tunnel is the only public entry point. The one-time server
+preparation (runner install, `/opt/adwais`, tunnel setup) is performed manually
+on the host.
 
-The workflow reads these GitHub Actions variables for OIDC and frontend
-configuration: `OIDC_AUTHORITY`, `OIDC_AUDIENCE`, `OIDC_CLIENT_ID`, optional
-`OIDC_SCOPE`, optional `SSO_BUTTON_LABEL`, optional `SSO_BUTTON_LOGO_URL`, and
-`DEMO_MODE` (default `false`). OIDC authority, audience, and client ID are
-required unless `DEMO_MODE=true`.
+The `production` GitHub environment must define these runtime secrets:
+`DB_PASSWORD`, `MOTASTIC_API_KEY`, `NEWSLETTER_API_KEY`, `KIOSK_JWT_SECRET`, and
+`CLOUDFLARE_TUNNEL_TOKEN`.
 
-The workflow writes the resulting Compose environment to
-`/opt/adwais/.env`. That file is the production source of truth; no
-`.env.production` file is used by the GitHub deployment. Compose maps the
-unprefixed values into frontend `VITE_*` build arguments and API
-`Authentication__*` runtime variables.
+The workflow reads these GitHub Actions variables: `OIDC_AUTHORITY`,
+`OIDC_AUDIENCE`, `OIDC_CLIENT_ID` (all three required unless `DEMO_MODE=true`),
+optional `OIDC_SCOPE`, optional `SSO_BUTTON_LABEL`, optional `SSO_BUTTON_LOGO_URL`,
+`DEMO_MODE` (default `false`), `ENABLE_RUNTIME_DATA_SEEDING` (default `true`), and
+`CLOUDFLARED_IMAGE_TAG` (default `latest`).
+
+The workflow writes the resulting Compose environment to `/opt/adwais/.env`
+(mode `0600`). That file is the production source of truth; no `.env.production`
+file is used by the GitHub deployment. Compose maps the unprefixed values into
+frontend `VITE_*` build arguments and API `Authentication__*` runtime variables.
 
 `Frontend` and `Backend` targets reuse the existing `/opt/adwais/.env`; run
 `Infrastructure` or `All` first when that file has not been created yet or when
-GitHub configuration variables have changed. Use `All` when changing
-`DEMO_MODE`, because the API must restart and the frontend must be rebuilt with
-the new `VITE_DEMO_MODE` value. Local backend publishing requires an existing
-`docker login ghcr.io`; remote pulls use `GHCR_PULL_USERNAME` and
-`GHCR_PULL_TOKEN` when those environment variables are set.
+GitHub configuration variables have changed. Use `All` when changing `DEMO_MODE`,
+because the API must restart and the frontend must be rebuilt with the new
+`VITE_DEMO_MODE` value. Because the nginx configuration is baked into the web
+image, changes to `infrastructure/nginx/default.conf` require a `frontend`
+deployment; `reload-nginx` only validates and reloads the configuration already
+inside the running container.
 

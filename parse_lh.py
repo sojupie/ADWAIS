@@ -1,7 +1,7 @@
 import re
 import json
 
-path = r'c:\Users\ollem\Git\motillo project\dashboard\127.0.0.1_4173-20260528T031753.html'
+path = r'c:\Users\ollem\Git\motillo project\ADWAIS\127.0.0.1_4173-20260528T031753.html'
 with open(path, 'r', encoding='utf-8') as f:
     content = f.read()
 

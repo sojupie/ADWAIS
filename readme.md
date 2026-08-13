@@ -13,12 +13,12 @@ This repository is source-available and governed by the **Business Source Licens
 You are free to inspect, host, modify, and run this software for **free** under the following conditions:
 * **Internal Business Use:** Free for companies running the platform for internal team management and analytics.
 * **Client Deployments:** Free for agencies and consultants deploying instances on behalf of clients, provided no direct fee is charged for the software itself.
-* **UI Attribution Retained:** All deployments must retain the intact visible copyright credit (`© MARMENLIND`) on the user interface (including the login screen).
+* **UI Attribution Retained:** All deployments must retain the intact visible copyright credit (`© Marmenlind`) on the user interface (including the login screen).
 
 ### Paid / Commercial Licensing
 
 A paid commercial agreement is required if you wish to:
-1. **White-Label:** Remove or modify the `© MARMENLIND` visual footer/attribution from the user interface.
+1. **White-Label:** Remove or modify the `© Marmenlind` visual footer/attribution from the user interface.
 2. **Monetize as SaaS:** Offer the software as a paid managed service, resold cloud subscription, or bundled commercial offering.
 
 For commercial licensing requests, white-label permissions, or custom terms, contact: ollemarmenlind02@gmail.com

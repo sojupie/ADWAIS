@@ -48,6 +48,11 @@ public static class DependencyInjection
             {
                 options.Retry.MaxRetryAttempts = 5;
             });
+        services.AddHttpClient<IOrderSource, ShopifyOrderSource>()
+            .AddStandardResilienceHandler(options =>
+            {
+                options.Retry.MaxRetryAttempts = 5;
+            });
         services.AddScoped<IOrderIngestionService, OrderIngestionService>();
 
         services.AddHttpClient<IFeedAggregationService, FeedAggregationService>()

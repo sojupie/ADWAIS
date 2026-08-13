@@ -75,7 +75,7 @@ ChartJS.register(
   htmlTooltipPlugin,
 );
 
-export const CHART_FONT = 'Manrope, sans-serif';
+export const CHART_FONT = 'IBM Plex Sans, sans-serif';
 
 export function chartColor(variable: string, fallback: string): string {
   if (typeof document === 'undefined') return fallback;

@@ -2,12 +2,12 @@
 // See /LICENSE for license information.
 // SPDX-License-Identifier: BUSL-1.1
 
-/** Shared Recharts configuration constants */
+/** Shared Chart.js configuration constants */
 
 export const CHART_AXIS_TICK = {
   fill: 'var(--color-chart-tick)',
   fontWeight: 700,
-  fontFamily: 'Manrope, sans-serif',
+  fontFamily: 'IBM Plex Sans, sans-serif',
 } as const;
 
 export const CHART_AXIS_TICK_SM = {

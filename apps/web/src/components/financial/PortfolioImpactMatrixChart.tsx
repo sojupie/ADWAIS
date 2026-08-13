@@ -1,4 +1,4 @@
-// Part of the ADWAIS project, under the Business Source License 1.1.
+﻿// Part of the ADWAIS project, under the Business Source License 1.1.
 // See /LICENSE for license information.
 // SPDX-License-Identifier: BUSL-1.1
 
@@ -219,13 +219,13 @@ export const PortfolioImpactMatrixChart = memo(function PortfolioImpactMatrixCha
       x: { 
         border: { display: false }, 
         grid: horizontalGrid, 
-        title: { display: true, text: 'Portfolio revenue share (%) →', color: chartColor('--color-chart-label', '#475569'), font: { family: 'Manrope, sans-serif', size: 14, weight: 800 } }, 
+        title: { display: true, text: 'Portfolio revenue share (%) →', color: chartColor('--color-chart-label', '#475569'), font: { family: 'IBM Plex Sans, sans-serif', size: 14, weight: 800 } }, 
         ticks: { ...chartTick(14), callback: value => `${Number(value).toFixed(1)}%` } 
       },
       y: { 
         border: { display: false }, 
         grid: horizontalGrid, 
-        title: { display: true, text: 'Revenue growth (%) →', color: chartColor('--color-chart-label', '#475569'), font: { family: 'Manrope, sans-serif', size: 14, weight: 800 } }, 
+        title: { display: true, text: 'Revenue growth (%) →', color: chartColor('--color-chart-label', '#475569'), font: { family: 'IBM Plex Sans, sans-serif', size: 14, weight: 800 } }, 
         afterBuildTicks: generateSymlogTicks,
         ticks: { ...chartTick(14), callback: value => `${symlogInverse(Number(value)).toFixed(0)}%` } 
       },

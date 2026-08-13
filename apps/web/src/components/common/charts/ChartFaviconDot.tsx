@@ -1,4 +1,4 @@
-// Part of the ADWAIS project, under the Business Source License 1.1.
+﻿// Part of the ADWAIS project, under the Business Source License 1.1.
 // See /LICENSE for license information.
 // SPDX-License-Identifier: BUSL-1.1
 
@@ -62,7 +62,7 @@ export function ChartFaviconDot(props: ChartFaviconDotProps) {
           fontWeight={800}
           fill="white"
           fillOpacity={1}
-          style={{ pointerEvents: 'none', userSelect: 'none', fontFamily: 'Manrope, sans-serif', mixBlendMode: 'difference' }}
+          style={{ pointerEvents: 'none', userSelect: 'none', fontFamily: 'IBM Plex Sans, sans-serif', mixBlendMode: 'difference' }}
         >
           {tenantName.charAt(0).toUpperCase()}
         </text>

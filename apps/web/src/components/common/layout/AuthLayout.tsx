@@ -27,7 +27,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
             style={{ borderBottomColor: 'var(--color-brand-bg-secondary-20)' }}
           >
             <div className="flex justify-center md:justify-start min-w-0">
-              <span className="text-white whitespace-nowrap font-black uppercase tracking-widest text-xl">ADWAIS</span>
+              <span className="font-display text-white whitespace-nowrap font-black uppercase tracking-tight text-xl">ADWAIS</span>
             </div>
             <nav className="flex justify-center items-center gap-6 md:gap-16 font-black uppercase tracking-widest text-xs md:text-sm min-w-0 max-w-full overflow-hidden">
               <span className="text-brand-accent border-b-2 border-brand-accent pb-1">Financial</span>

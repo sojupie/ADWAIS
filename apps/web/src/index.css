@@ -235,7 +235,9 @@
   --color-console-error-bg-rgb: 251, 229, 223;
   --color-console-error-text-rgb: 181, 47, 44;
 
-  --font-sans: "Manrope", system-ui, sans-serif;
+  --font-sans: "IBM Plex Sans", system-ui, sans-serif;
+  --font-display: "Space Grotesk", "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
   --app-viewport-width: 100vw;
   --app-viewport-height: 100vh;
 }

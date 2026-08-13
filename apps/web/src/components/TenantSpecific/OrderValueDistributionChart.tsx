@@ -3,6 +3,7 @@ import type { ChartData, ChartOptions, Plugin } from 'chart.js';
 import type { OrderBin } from '@types';
 import { formatNumber } from '@utils';
 import { ChartPanel } from '../common/charts/ChartPanel';
+import { EmptyState } from '../common/ui/EmptyState';
 import { ChartJsCanvas } from '../common/charts/ChartJsCanvas';
 import { chartColor, chartLegendLabels, chartTick, createHtmlTooltip, horizontalGrid } from '../common/charts/chartJs';
 
@@ -25,8 +26,8 @@ const thresholdLines: Plugin<MixedChart> = {
   },
 };
 
-export const OrderValueDistributionChart = memo(function OrderValueDistributionChart({ isLoading, isStale, bins, className }: {
-  isLoading?: boolean; isStale?: boolean; bins: OrderBin[]; className?: string;
+export const OrderValueDistributionChart = memo(function OrderValueDistributionChart({ isLoading, isError, isStale, bins, className }: {
+  isLoading?: boolean; isError?: boolean; isStale?: boolean; bins: OrderBin[]; className?: string;
 }) {
   const data: ChartData<MixedChart, number[], string> = {
     labels: bins.map(bin => bin.binLabel),
@@ -66,8 +67,8 @@ export const OrderValueDistributionChart = memo(function OrderValueDistributionC
     },
   };
   return (
-    <ChartPanel isLoading={isLoading} isStale={isStale} title="Order Distribution & Shipping Threshold" className={className || ''}>
-      <div className="absolute inset-0"><ChartJsCanvas type="bar" data={data} options={options} plugins={[thresholdLines]} /></div>
+    <ChartPanel isLoading={isLoading} isError={isError} isStale={isStale} title="Order Distribution & Shipping Threshold" className={className || ''} bodyClassName={!bins.length ? 'flex items-center justify-center' : ''}>
+      {!bins.length ? <EmptyState message="No order distribution data available." variant="minimal" /> : <div className="absolute inset-0"><ChartJsCanvas type="bar" data={data} options={options} plugins={[thresholdLines]} /></div>}
     </ChartPanel>
   );
 });

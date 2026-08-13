@@ -74,8 +74,8 @@ function latencyGapPlugin(points: LatencyChartPoint[]): Plugin<'line'> {
   };
 }
 
-export const NetworkLatencyChart = memo(function NetworkLatencyChart({ isLoading, isStale, points, title = 'Network Latency', className, comparison = 'Preceding' }: {
-  isLoading?: boolean; isStale?: boolean; points: LatencyPoint[]; title?: string; className?: string; comparison?: ComparisonPeriod;
+export const NetworkLatencyChart = memo(function NetworkLatencyChart({ isLoading, isError, isStale, points, title = 'Network Latency', className, comparison = 'Preceding' }: {
+  isLoading?: boolean; isError?: boolean; isStale?: boolean; points: LatencyPoint[]; title?: string; className?: string; comparison?: ComparisonPeriod;
 }) {
   const chartData = useMemo(() => {
     if (!points.length) return [];
@@ -212,7 +212,7 @@ export const NetworkLatencyChart = memo(function NetworkLatencyChart({ isLoading
   );
 
   return (
-    <ChartPanel isLoading={isLoading} isStale={isStale} title={title} comparison={comparison} legend={legend} className={className} bodyClassName={!hasAnyLatencyData ? 'flex items-center justify-center' : ''}>
+    <ChartPanel isLoading={isLoading} isError={isError} isStale={isStale} title={title} comparison={comparison} legend={legend} className={className} bodyClassName={!hasAnyLatencyData ? 'flex items-center justify-center' : ''}>
       {!hasAnyLatencyData ? <EmptyState message="No latency samples in the selected period" variant="minimal" /> : <div className="absolute inset-0"><ChartJsCanvas type="line" data={data} options={options} plugins={[latencyGapPlugin(chartData)]} /></div>}
     </ChartPanel>
   );

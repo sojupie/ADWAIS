@@ -69,8 +69,8 @@ function calculateMedian(values: number[]): number {
   return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
 }
 
-export const PortfolioImpactMatrixChart = memo(function PortfolioImpactMatrixChart({ isLoading, isStale, portfolioImpact, comparison, onTenantSelect, className }: {
-  isLoading?: boolean; isStale?: boolean; portfolioImpact: PortfolioImpactResponse; comparison?: ComparisonPeriod;
+export const PortfolioImpactMatrixChart = memo(function PortfolioImpactMatrixChart({ isLoading, isError, isStale, portfolioImpact, comparison, onTenantSelect, className }: {
+  isLoading?: boolean; isError?: boolean; isStale?: boolean; portfolioImpact: PortfolioImpactResponse; comparison?: ComparisonPeriod;
   onTenantSelect?: (tenantId: string) => void; className?: string;
 }) {
   const points = portfolioImpact.tenants;
@@ -241,7 +241,7 @@ export const PortfolioImpactMatrixChart = memo(function PortfolioImpactMatrixCha
   ], [splitX, splitY, cohortMedianLinesPlugin]);
 
   return (
-    <ChartPanel isLoading={isLoading} isStale={isStale} title="Portfolio Impact Matrix" comparison={comparison}
+    <ChartPanel isLoading={isLoading} isError={isError} isStale={isStale} title="Portfolio Impact Matrix" comparison={comparison}
       className={className || 'h-full'} bodyClassName={isEmpty ? 'flex items-center justify-center' : 'flex-1 min-h-0 flex flex-col'}
     >
       {isEmpty ? <EmptyState message="No previous-period baseline data" variant="minimal" /> : (

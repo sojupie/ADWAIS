@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import type { ComparisonPeriod } from '@types';
 import { ChartSkeleton } from './ChartSkeleton';
 import { Loader2 } from 'lucide-react';
+import { ErrorAlert } from '../ui/ErrorAlert';
 
 interface ChartPanelProps {
   title: string;
@@ -11,11 +12,12 @@ interface ChartPanelProps {
   bodyClassName?: string;
   className?: string;
   isLoading?: boolean;
+  isError?: boolean;
   isStale?: boolean;
   children: ReactNode;
 }
 
-export function ChartPanel({ title, subtitle, comparison, legend, bodyClassName = '', className = '', isLoading = false, isStale = false, children }: ChartPanelProps) {
+export function ChartPanel({ title, subtitle, comparison, legend, bodyClassName = '', className = '', isLoading = false, isError = false, isStale = false, children }: ChartPanelProps) {
     const displaySubtitle = subtitle || (comparison ? (comparison === 'YearOverYear' ? 'vs. same period last year' : 'vs. preceding period') : undefined);
     return (
         <div className={`bg-surface border border-outline rounded-2xl sm:p-4 p-2 flex flex-col min-h-[600px] contained:min-h-0 relative overflow-hidden ${className}`}>
@@ -39,7 +41,9 @@ export function ChartPanel({ title, subtitle, comparison, legend, bodyClassName 
                 {legend}
             </div>
             <div className={`flex-1 min-h-[280px] contained:min-h-0 w-full flex flex-col z-10 relative ${bodyClassName}`}>
-                {isLoading ? <ChartSkeleton /> : children}
+                {isLoading ? <ChartSkeleton /> : isError ? (
+                  <div className="p-4"><ErrorAlert title={`${title} unavailable`} message={`${title} is temporarily unavailable.`} /></div>
+                ) : children}
             </div>
         </div>
     );

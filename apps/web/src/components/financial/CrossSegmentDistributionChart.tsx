@@ -15,9 +15,9 @@ import { useCrossSegmentPlugins } from './crossSegment/crossSegmentPlugins';
 import { useCrossSegmentBeeswarm } from './crossSegment/useCrossSegmentBeeswarm';
 
 export const CrossSegmentDistributionChart = memo(function CrossSegmentDistributionChart({
-  isLoading, isStale, response, onTenantSelect, className,
+  isLoading, isError, isStale, response, onTenantSelect, className,
 }: {
-  isLoading?: boolean; isStale?: boolean; response: CrossSegmentDistributionResponse;
+  isLoading?: boolean; isError?: boolean; isStale?: boolean; response: CrossSegmentDistributionResponse;
   onTenantSelect?: (tenantId: string) => void; className?: string;
 }) {
   const [selectedMetric, setSelectedMetric] = useState<MetricType>('aov');
@@ -130,6 +130,7 @@ export const CrossSegmentDistributionChart = memo(function CrossSegmentDistribut
   return (
     <ChartPanel
       isLoading={isLoading}
+      isError={isError}
       isStale={isStale}
       title="Cross-Segment Cohort Distribution"
       className={className || 'h-full'}

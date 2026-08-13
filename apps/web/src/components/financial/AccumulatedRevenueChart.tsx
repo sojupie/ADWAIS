@@ -10,6 +10,7 @@ import { ChartJsCanvas } from '../common/charts/ChartJsCanvas';
 
 interface AccumulatedRevenueChartProps {
   isLoading?: boolean;
+  isError?: boolean;
   isStale?: boolean;
   points: AccumulatedRevenuePointDto[];
   comparison?: ComparisonPeriod;
@@ -18,7 +19,7 @@ interface AccumulatedRevenueChartProps {
 
 type MixedChart = 'bar' | 'line';
 
-export const AccumulatedRevenueChart = memo(function AccumulatedRevenueChart({ isLoading, isStale, points, comparison, className }: AccumulatedRevenueChartProps) {
+export const AccumulatedRevenueChart = memo(function AccumulatedRevenueChart({ isLoading, isError, isStale, points, comparison, className }: AccumulatedRevenueChartProps) {
   const { chartData, isSubDaily } = useMemo(() => {
     if (!points.length) return { chartData: [], isSubDaily: false };
 
@@ -228,7 +229,7 @@ export const AccumulatedRevenueChart = memo(function AccumulatedRevenueChart({ i
   };
 
   return (
-    <ChartPanel isLoading={isLoading} isStale={isStale}
+    <ChartPanel isLoading={isLoading} isError={isError} isStale={isStale}
       title="Revenue Performance"
       comparison={comparison}
       className={className}

@@ -29,8 +29,8 @@ function formatHour(hour: number) {
 }
 
 export const TransactionDensityChart = memo(function TransactionDensityChart({
-  isLoading, isStale, response, selectedPeriod, onPeriodChange,
-  className }: { isLoading?: boolean; isStale?: boolean;
+  isLoading, isError, isStale, response, selectedPeriod, onPeriodChange,
+  className }: { isLoading?: boolean; isError?: boolean; isStale?: boolean;
   response: TransactionDensityResponseDto;
   selectedPeriod?: TransactionDensityPeriod;
   onPeriodChange?: (period: TransactionDensityPeriod) => void;
@@ -146,7 +146,7 @@ export const TransactionDensityChart = memo(function TransactionDensityChart({
   };
 
   return (
-    <ChartPanel isLoading={isLoading} isStale={isStale}
+    <ChartPanel isLoading={isLoading} isError={isError} isStale={isStale}
       title="Transaction Density Matrix"
       subtitle={periodLabel}
       className={className || "h-full relative"}

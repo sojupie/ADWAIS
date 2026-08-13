@@ -3,11 +3,12 @@ import type { ChartData, ChartOptions } from 'chart.js';
 import type { CumulativeGrowthDeltaPoint, ComparisonPeriod } from '@types';
 import { formatChartLabel, inferBinSize, formatCompact } from '@utils';
 import { ChartPanel } from '../common/charts/ChartPanel';
+import { EmptyState } from '../common/ui/EmptyState';
 import { ChartJsCanvas } from '../common/charts/ChartJsCanvas';
 import { chartColor, chartTick, createHtmlTooltip, horizontalGrid } from '../common/charts/chartJs';
 
-export const CumulativeGrowthDeltaChart = memo(function CumulativeGrowthDeltaChart({ isLoading, isStale, points, comparison, className }: {
-  isLoading?: boolean; isStale?: boolean; points: CumulativeGrowthDeltaPoint[]; comparison?: ComparisonPeriod; className?: string;
+export const CumulativeGrowthDeltaChart = memo(function CumulativeGrowthDeltaChart({ isLoading, isError, isStale, points, comparison, className }: {
+  isLoading?: boolean; isError?: boolean; isStale?: boolean; points: CumulativeGrowthDeltaPoint[]; comparison?: ComparisonPeriod; className?: string;
 }) {
   const chartData = useMemo(() => {
     const binSize = inferBinSize(points.map(point => point.timestamp), points.length > 0 && points.length <= 24);
@@ -72,8 +73,8 @@ export const CumulativeGrowthDeltaChart = memo(function CumulativeGrowthDeltaCha
     },
   };
   return (
-    <ChartPanel isLoading={isLoading} isStale={isStale} title="Cumulative Growth Delta (Absolute)" comparison={comparison} className={className || ''}>
-      <div className="absolute inset-0"><ChartJsCanvas type="line" data={data} options={options} /></div>
+    <ChartPanel isLoading={isLoading} isError={isError} isStale={isStale} title="Cumulative Growth Delta (Absolute)" comparison={comparison} className={className || ''} bodyClassName={!points.length ? 'flex items-center justify-center' : ''}>
+      {!points.length ? <EmptyState message="No growth data available." variant="minimal" /> : <div className="absolute inset-0"><ChartJsCanvas type="line" data={data} options={options} /></div>}
     </ChartPanel>
   );
 });

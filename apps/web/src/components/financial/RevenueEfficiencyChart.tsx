@@ -86,8 +86,8 @@ export const RevenueEfficiencyChart = memo(function RevenueEfficiencyChart({
       },
     },
     scales: {
-      x: { border: { display: false }, grid: horizontalGrid, title: { display: true, text: 'Order Volume (Transactions) →', color: chartColor('--color-chart-label', '#475569'), font: { family: 'Noto Sans, sans-serif', size: 14, weight: 800 } }, ticks: { ...chartTick(14), callback: value => formatCompact(Number(value)) } },
-      y: { type: 'logarithmic', border: { display: false }, grid: horizontalGrid, title: { display: true, text: 'AOV (SEK, log scale) →', color: chartColor('--color-chart-label', '#475569'), font: { family: 'Noto Sans, sans-serif', size: 14, weight: 800 } }, ticks: { ...chartTick(14), callback: value => formatCompact(Number(value)) } },
+      x: { border: { display: false }, grid: horizontalGrid, title: { display: true, text: 'Order Volume (Transactions) →', color: chartColor('--color-chart-label', '#475569'), font: { family: 'Manrope, sans-serif', size: 14, weight: 800 } }, ticks: { ...chartTick(14), callback: value => formatCompact(Number(value)) } },
+      y: { type: 'logarithmic', border: { display: false }, grid: horizontalGrid, title: { display: true, text: 'AOV (SEK, log scale) →', color: chartColor('--color-chart-label', '#475569'), font: { family: 'Manrope, sans-serif', size: 14, weight: 800 } }, ticks: { ...chartTick(14), callback: value => formatCompact(Number(value)) } },
     },
   };
 

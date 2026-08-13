@@ -235,8 +235,8 @@
   --color-console-error-bg-rgb: 251, 229, 223;
   --color-console-error-text-rgb: 181, 47, 44;
 
-  --font-sans: "Noto Sans", system-ui, sans-serif;
-  --font-display: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-sans: "Manrope", system-ui, sans-serif;
+  --font-display: "Manrope", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
   --app-viewport-width: 100vw;
   --app-viewport-height: 100vh;

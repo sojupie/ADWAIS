@@ -1,4 +1,4 @@
-// Part of the ADWAIS project, under the Business Source License 1.1.
+﻿// Part of the ADWAIS project, under the Business Source License 1.1.
 // See /LICENSE for license information.
 // SPDX-License-Identifier: BUSL-1.1
 
@@ -75,7 +75,7 @@ ChartJS.register(
   htmlTooltipPlugin,
 );
 
-export const CHART_FONT = 'Noto Sans, sans-serif';
+export const CHART_FONT = 'Manrope, sans-serif';
 
 export function chartColor(variable: string, fallback: string): string {
   if (typeof document === 'undefined') return fallback;

@@ -1,4 +1,4 @@
-// Part of the ADWAIS project, under the Business Source License 1.1.
+﻿// Part of the ADWAIS project, under the Business Source License 1.1.
 // See /LICENSE for license information.
 // SPDX-License-Identifier: BUSL-1.1
 
@@ -7,7 +7,7 @@
 export const CHART_AXIS_TICK = {
   fill: 'var(--color-chart-tick)',
   fontWeight: 700,
-  fontFamily: 'Noto Sans, sans-serif',
+  fontFamily: 'Manrope, sans-serif',
 } as const;
 
 export const CHART_AXIS_TICK_SM = {

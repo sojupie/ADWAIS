@@ -151,8 +151,8 @@ export default {
         'console-error-text': withOpacity('--color-console-error-text-rgb'),
       },
       fontFamily: {
-        sans: ['Noto Sans', 'system-ui', 'sans-serif'],
-        display: ['Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
+        sans: ['Manrope', 'system-ui', 'sans-serif'],
+        display: ['Manrope', 'system-ui', 'sans-serif'],
         mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
       boxShadow: {

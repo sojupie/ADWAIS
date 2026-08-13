@@ -64,13 +64,13 @@ public class FinancialService(
             }
 
             var rows = await query
-                .Select(o => new { o.CreatedDate, o.TenantId, o.TotalValueIncVat })
+                .Select(o => new { o.CreatedDate, o.TenantId, o.TotalValueExcVat })
                 .ToListAsync(ct);
 
             return rows.Select(x => new DataRow(
                 x.CreatedDate,
                 x.TenantId,
-                x.TotalValueIncVat,
+                x.TotalValueExcVat,
                 1
             )).ToList();
         }
@@ -126,7 +126,7 @@ public class FinancialService(
                     g.Key.Month,
                     g.Key.Day,
                     g.Key.TenantId,
-                    Revenue = g.Sum(o => o.TotalValueIncVat),
+                    Revenue = g.Sum(o => o.TotalValueExcVat),
                     Volume = g.Count()
                 })
                 .ToListAsync(ct);
@@ -152,13 +152,13 @@ public class FinancialService(
                 .Where(o => o.OrderState != OrderState.Cancelled)
                 .Where(o => o.CreatedDate >= start && o.CreatedDate < end)
                 .Where(o => o.TenantId != IApplicationDbContext.SystemTenantGuid)
-                .Select(o => new { o.CreatedDate, o.TotalValueIncVat })
+                .Select(o => new { o.CreatedDate, o.TotalValueExcVat })
                 .ToListAsync(ct);
 
             return rows.Select(x => new DataRow(
                 x.CreatedDate,
                 null,
-                x.TotalValueIncVat,
+                x.TotalValueExcVat,
                 1
             )).ToList();
         }
@@ -187,7 +187,7 @@ public class FinancialService(
                     g.Key.Year,
                     g.Key.Month,
                     g.Key.Day,
-                    Revenue = g.Sum(o => o.TotalValueIncVat),
+                    Revenue = g.Sum(o => o.TotalValueExcVat),
                     Volume = g.Count()
                 })
                 .ToListAsync(ct);
@@ -638,7 +638,7 @@ public class FinancialService(
             .AsNoTracking()
             .Where(o => o.TenantId == tenantId)
             .Where(o => o.CreatedDate >= currentStart && o.CreatedDate < currentEnd)
-            .Select(o => o.TotalValueIncVat)
+            .Select(o => o.TotalValueExcVat)
             .ToListAsync(ct);
 
         if (orderValues.Count == 0)
@@ -798,7 +798,7 @@ public class FinancialService(
                 g.Key.Day,
                 g.Key.Hour,
                 Count = g.Count(),
-                TotalRevenue = g.Sum(o => o.TotalValueIncVat)
+                TotalRevenue = g.Sum(o => o.TotalValueExcVat)
             })
             .ToListAsync(ct);
 
@@ -934,7 +934,7 @@ public class FinancialService(
             .Where(o => o.CreatedDate >= dateSince
                         && o.CreatedDate <= dateUntil
                         && o.OrderState != OrderState.Cancelled
-                        && o.TotalValueIncVat > 0m)
+                        && o.TotalValueExcVat > 0m)
             .OrderByDescending(o => o.CreatedDate)
             .Take(ceilingCount)
             .Select(p => new OrderDto(

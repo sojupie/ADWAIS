@@ -51,7 +51,7 @@ public static class MaterializedViewOrchestrator
                        ) AT TIME ZONE reporting.time_zone_id AS created_date,
                        orders.tenant_id,
                        count(orders.id)                AS volume,
-                       sum(orders.total_value_inc_vat) AS revenue
+                       sum(orders.total_value_exc_vat) AS revenue
                 FROM orders
                 CROSS JOIN reporting
                 WHERE orders.created_date >= reporting.retention_start

@@ -37,8 +37,8 @@ export function useOrderNotifier() {
                 queryClient.invalidateQueries({ queryKey: ['system-health'] });
 
                 newOrders.forEach((order) => {
-                  const displayValue = order.totalValueIncVat 
-                    ? `${order.totalValueIncVat.toLocaleString()} ${order.currency || 'SEK'}`
+                  const displayValue = order.totalValueExcVat 
+                    ? `${order.totalValueExcVat.toLocaleString()} ${order.currency || 'SEK'}`
                     : 'N/A';
 
                   const tenantsRes = queryClient.getQueryData<{ data: TenantResponseDto[] }>(['tenants']);

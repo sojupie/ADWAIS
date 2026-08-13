@@ -44,9 +44,6 @@ function LoginComponent() {
       <div className="flex flex-col items-center animate-stagger delay-100">
         <h1 className="text-7xl font-extrabold text-brand-text tracking-tight relative z-10"><i>ADWAIS</i></h1>
         <h2 className="text-4xl font-bold mb-3 text-on-tertiary-container tracking-tight relative z-10"><i>/ədˈvaɪs/</i></h2>
-        <p className="text-brand-text text-xl mb-0 font-semibold tracking-wide uppercase relative z-10">
-          A Dashboard Without AI Summaries
-        </p>
       </div>
 
       <div className="w-full relative z-10 flex flex-col items-center divide-y divide-outline animate-stagger delay-200">
@@ -94,7 +91,7 @@ function LoginComponent() {
 
       <div className="pt-4 flex justify-between items-center text-sm text-on-surface-variant tracking-widest uppercase relative z-10 w-full animate-stagger delay-300">
         <span><a href={"https://marmenlind.com?utm_source=adwais"} target="_blank" rel="noopener noreferrer">© Marmenlind</a></span>
-        <span className="text-on-surface-variant">v1.1.0</span>
+        <span className="text-on-surface-variant">v1.0.0</span>
       </div>
     </>
   );

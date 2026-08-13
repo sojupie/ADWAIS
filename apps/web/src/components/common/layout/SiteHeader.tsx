@@ -41,7 +41,7 @@ export function SiteHeader({
         <div className="flex w-full items-center justify-between" data-header="mobile-bar">
           <BrandLogoLink
             timeframe={financialTimeframe}
-            className="text-xl text-white"
+            className="text-2xl leading-none text-white"
           />
           <div className="flex items-center gap-4">
             <ConnectivityStatus isOnline={isOnline} isBackendOnline={isBackendOnline} variant="mobile" />
@@ -61,7 +61,7 @@ export function SiteHeader({
           <div className="flex flex-1 min-w-[100px] shrink-0" data-header="logo">
             <BrandLogoLink
               timeframe={financialTimeframe}
-              className="text-2xl text-white"
+              className="text-4xl leading-none text-white"
             />
           </div>
 

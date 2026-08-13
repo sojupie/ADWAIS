@@ -1,0 +1,38 @@
+# Business Source License 1.1
+
+Parameters:
+
+Licensor: Olle Marmenlind
+Licensed Work: ADWAIS (including all source code, assets, and UI components)
+Change Date: 2027-08-13
+Change License: Apache License, Version 2.0
+
+## 1. Grant of Rights
+
+Licensor hereby grants you a non-exclusive, royalty-free, worldwide license to use, copy, modify, and distribute the Licensed Work, subject to the conditions and limitations set forth herein.
+
+## 2. Additional Use Grant
+
+You are granted the right to use, run, and deploy the Licensed Work free of charge for internal business operations and client deployments, provided that:
+
+a. **UI Attribution:** Any deployment, instance, copy, or modification of the Licensed Work MUST retain intact and unaltered the original user interface copyright notices, author attributions, and branding marks (including, without limitation, the "© MARMENLIND" footer display on login and authentication views) as rendered by the unmodified source code.
+
+b. **No Paid Managed Services or Reselling:** You may NOT offer the Licensed Work as a paid managed service, commercial cloud hosting service, or white-labeled resold product, nor may you charge a dedicated software license or subscription fee to third parties for access to the Licensed Work, without obtaining a separate Commercial License from the Licensor.
+
+## 3. License Exceptions & Commercial Licensing
+
+Removing or modifying the UI attribution notices ("© MARMENLIND"), offering the Licensed Work as a paid managed service, or distributing white-labeled builds requires a separate, paid Commercial License issued directly by the Licensor.
+
+To inquire about commercial licensing or white-label exemptions, contact: ollemarmenlind02@gmail.com
+
+## 4. Change License
+
+On the Change Date specified above, or on such earlier date as determined by the Licensor, Licensor hereby grants you a license to the Licensed Work under the terms of the Change License specified above.
+
+## 5. Trademarks
+
+This license does not grant you rights under trademark, service mark, or trade name law to use the trade names, trademarks, service marks, or product names of the Licensor, except as reasonable and necessary for describing the origin of the Licensed Work.
+
+## 6. Disclaimer of Warranty & Limitation of Liability
+
+THE LICENSED WORK IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. IN NO EVENT SHALL THE LICENSOR BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY ARISING FROM, OUT OF, OR IN CONNECTION WITH THE LICENSED WORK.

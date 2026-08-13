@@ -1,11 +1,11 @@
 # Server Runner Environment
 
-This directory manages the local development runtime environment for the backend database container.
+This directory contains the ADWAIS backend solution (`/apps/server/ADWAIS`) and the local development runtime for the PostgreSQL database container.
 
 ## Local Services
 
 ### 1. PostgreSQL Database
-The backend API requires a running PostgreSQL database. A local development container is configured via the [`docker-compose.yml`](/apps/server/development-db/docker-compose.yml) file.
+The backend API requires a running PostgreSQL database. A local development container is configured via the [`docker-compose.yml`](/apps/server/docker-compose.yml) file.
 
 *   **Database Engine**: PostgreSQL 15 (Alpine)
 *   **Default Connection Details** (defined in Compose):

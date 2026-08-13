@@ -54,14 +54,25 @@ graph TD
 
 ### Directory Structure
 
-*   `/apps` - User-facing applications.
-    *   [`/apps/web`](/apps/web) - React + TypeScript + Vite + Tailwind CSS v4 frontend.
-    *   [`/apps/server`](/apps/server) - Backend container runner configuration.
-    *   [`/apps/server/Adwais`](/apps/server/Adwais) - ASP.NET Core Web API backend.
+*   `/apps` - Applications and server infrastructure.
+    *   [`/apps/web`](/apps/web) - React 19 + TypeScript + Vite + Tailwind CSS v3 frontend.
+    *   [`/apps/server`](/apps/server) - .NET solution and local development PostgreSQL Compose configuration.
+    *   [`/apps/server/ADWAIS`](/apps/server/ADWAIS) - ASP.NET Core solution (`src/Api`, `src/Application`, `src/Domain`, `src/Infrastructure`, `tests`).
 *   `/packages` - Shared modules and libraries.
-    *   [`/packages/types`](/packages/types) - Shared TypeScript types.
-    *   [`/packages/ui`](/packages/ui) - Reusable frontend UI components.
+    *   [`/packages/types`](/packages/types) - Shared TypeScript types, generated from the backend OpenAPI spec.
     *   [`/packages/utils`](/packages/utils) - Common helper utilities.
+    *   [`/packages/ui`](/packages/ui) - Reserved for reusable UI components (placeholder).
+    *   [`/packages/shared`](/packages/shared) - Reserved for shared logic (placeholder).
+*   `/docs` - Documentation and the generated OpenAPI specification.
+    *   [`/docs/authentication.md`](/docs/authentication.md) - Authentication flow reference.
+    *   [`/docs/shopify-integration.md`](/docs/shopify-integration.md) - Shopify order source implementation notes.
+    *   [`/docs/openapi`](/docs/openapi) - Generated OpenAPI specification (`v1.json`).
+*   `/infrastructure` - Deployment support files.
+    *   [`/infrastructure/nginx`](/infrastructure/nginx) - Production nginx configuration.
+    *   [`/infrastructure/HOMELAB.md`](/infrastructure/HOMELAB.md) - Homelab deployment notes.
+*   `/scripts` - Repository helper scripts (EF Core migrations).
+
+Other root-level files of note: `docker-compose.prod.yml` (production stack), `pnpm-workspace.yaml`, `.env.example`.
 
 ---
 

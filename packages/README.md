@@ -6,16 +6,19 @@ This directory contains shared libraries and modules reused across applications 
 
 ### 1. [`/packages/types`](/packages/types)
 Defines TypeScript models and data structures shared between workspaces.
-*   Enforces structure mappings for responses from the .NET Web API.
-*   Contains schemas utilized by Zod.
+*   Hand-curated exports in `index.ts` on top of the DTO types generated from the backend OpenAPI spec (`generated/`).
 
-### 2. [`/packages/ui`](/packages/ui)
-Houses common design components and visual elements.
-*   Ensures design system consistency across separate user-facing components.
-
-### 3. [`/packages/utils`](/packages/utils)
+### 2. [`/packages/utils`](/packages/utils)
 Contains generic utility modules.
 *   Provides helper utilities such as formatting tools, common date functions, and math operations.
+
+### 3. [`/packages/ui`](/packages/ui)
+Reserved for common design components and visual elements.
+*   Placeholder — currently empty, pending extraction of reusable components.
+
+### 4. [`/packages/shared`](/packages/shared)
+Reserved for shared logic.
+*   Placeholder — currently empty.
 
 ---
 

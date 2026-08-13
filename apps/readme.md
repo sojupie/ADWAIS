@@ -6,14 +6,14 @@ This directory houses the primary application codebases for the KPI Dashboard.
 
 ### 1. [`/apps/web`](/apps/web)
 The frontend web dashboard.
-* **Stack**: React 19, TypeScript, Vite, Tailwind CSS v4, TanStack Router (file-based routing), TanStack Query, Recharts.
+* **Stack**: React 19, TypeScript, Vite, Tailwind CSS v3, TanStack Router (file-based routing), TanStack Query, Chart.js.
 * **Purpose**: User interface displaying Daily KPI rollups, financial graphs, UptimeRobot monitoring statistics, and internal office events.
 
 ### 2. [`/apps/server`](/apps/server)
 The API backend runtime.
 * **Stack**: .NET 10 Web API, Entity Framework Core, PostgreSQL, Hangfire.
 * **Purpose**: Data ingestion pipelines (syncing order statistics and uptime latency status) and client endpoints serving the web dashboard.
-* **Source Location**: [`/apps/server/Adwais`](/apps/server/Adwais)
+* **Source Location**: [`/apps/server/ADWAIS`](/apps/server/ADWAIS)
 
 ---
 

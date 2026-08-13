@@ -8,8 +8,8 @@ The user-facing dashboard displaying daily order rollups, financial stats, site 
 *   **UI Framework**: React 19.
 *   **Routing**: `@tanstack/react-router` (File-based, type-safe routing).
 *   **Data Fetching**: `@tanstack/react-query` (Caching, auto-refreshing).
-*   **Styling**: Tailwind CSS v4.
-*   **Visualizations**: Recharts.
+*   **Styling**: Tailwind CSS v3.
+*   **Visualizations**: Chart.js.
 *   **Schemas**: Zod.
 
 ---

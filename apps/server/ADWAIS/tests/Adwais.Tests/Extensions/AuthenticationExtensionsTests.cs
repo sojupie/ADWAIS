@@ -61,7 +61,7 @@ public class AuthenticationExtensionsTests
         Assert.Equal(AuthenticationExtensions.DashboardCookieName, cookieOptions.Cookie.Name);
         Assert.Equal("/hangfire", cookieOptions.Cookie.Path);
         Assert.True(cookieOptions.Cookie.HttpOnly);
-        Assert.Equal(CookieSecurePolicy.Always, cookieOptions.Cookie.SecurePolicy);
+        Assert.Equal(CookieSecurePolicy.SameAsRequest, cookieOptions.Cookie.SecurePolicy);
         Assert.Equal(TimeSpan.FromMinutes(5), cookieOptions.ExpireTimeSpan);
 
         var authorization = provider.GetRequiredService<IAuthorizationPolicyProvider>();
@@ -104,5 +104,23 @@ public class AuthenticationExtensionsTests
         kioskExternalMessage.HttpContext.Request.Headers.Authorization = $"Bearer {externalToken}";
         await kioskOptions.Events.MessageReceived(kioskExternalMessage);
         Assert.NotNull(kioskExternalMessage.Result);
+    }
+
+    [Fact]
+    public void UsesAlwaysSecureDashboardCookieOutsideDevelopment()
+    {
+        var services = new ServiceCollection();
+        services.AddAppAuthentication(new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["ASPNETCORE_ENVIRONMENT"] = "Production"
+            })
+            .Build());
+
+        using var provider = services.BuildServiceProvider();
+        var cookieOptions = provider.GetRequiredService<IOptionsMonitor<CookieAuthenticationOptions>>()
+            .Get(AuthenticationExtensions.DashboardCookieScheme);
+
+        Assert.Equal(CookieSecurePolicy.Always, cookieOptions.Cookie.SecurePolicy);
     }
 }

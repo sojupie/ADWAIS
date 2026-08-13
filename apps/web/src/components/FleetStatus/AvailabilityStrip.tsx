@@ -44,13 +44,21 @@ export function AvailabilityStrip({
   sla?: number | null;
   aggregate?: boolean;
 }) {
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [pinnedKey, setPinnedKey] = useState<string | null>(null);
   const stripRef = useRef<HTMLDivElement>(null);
+
+  const pinnedIndex = useMemo(() => {
+    if (pinnedKey == null) return null;
+    const index = points.findIndex(point => `${point.date}-${point.endDate}` === pinnedKey);
+    return index >= 0 ? index : null;
+  }, [points, pinnedKey]);
 
   useEffect(() => {
     const resetWhenClickingOutside = (event: PointerEvent) => {
       if (!stripRef.current?.contains(event.target as Node)) {
-        setSelectedIndex(null);
+        setHoveredIndex(null);
+        setPinnedKey(null);
       }
     };
 
@@ -63,7 +71,7 @@ export function AvailabilityStrip({
     }
     return null;
   }, [points]);
-  const activeIndex = selectedIndex ?? latestPopulatedIndex;
+  const activeIndex = hoveredIndex ?? pinnedIndex ?? latestPopulatedIndex;
   const activePoint = activeIndex == null ? null : points[activeIndex];
   const gapClass = points.length > 45 ? 'gap-0.5' : 'gap-1';
   const radiusClass = points.length > 45 ? 'rounded-sm' : 'rounded-md';
@@ -76,10 +84,10 @@ export function AvailabilityStrip({
     <div
       ref={stripRef}
       className="flex flex-col gap-3 min-w-0"
-      onMouseLeave={() => setSelectedIndex(null)}
+      onMouseLeave={() => setHoveredIndex(null)}
       onBlur={event => {
         if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
-          setSelectedIndex(null);
+          setHoveredIndex(null);
         }
       }}
     >
@@ -92,16 +100,18 @@ export function AvailabilityStrip({
         >
           {points.map((point, index) => {
             const label = `${formatRange(point)}: ${formatUptime(point.uptimePercentage)}${point.isPartial ? ', partial period' : ''}`;
+            const isActive = activeIndex === index;
+            const isPinned = pinnedIndex === index;
             return (
               <button
                 key={`${point.date}-${point.endDate}`}
                 type="button"
                 aria-label={label}
-                aria-pressed={activeIndex === index}
-                onMouseEnter={() => setSelectedIndex(index)}
-                onFocus={() => setSelectedIndex(index)}
-                onClick={() => setSelectedIndex(index)}
-              className={`h-8 min-w-0 w-full ${radiusClass} border transition-all focus:outline-none focus:ring-2 focus:ring-brand-btn-primary focus:ring-offset-2 ${pointColor(point.uptimePercentage, sla)} ${point.isPartial ? 'opacity-70 border-dashed' : ''} ${activeIndex === index ? 'm3-elevation-2 -translate-y-0.5' : 'hover:-translate-y-0.5'}`}
+                aria-pressed={isPinned}
+                onMouseEnter={() => setHoveredIndex(index)}
+                onFocus={() => setHoveredIndex(index)}
+                onClick={() => setPinnedKey(`${point.date}-${point.endDate}`)}
+              className={`h-8 min-w-0 w-full ${radiusClass} border transition-all focus:outline-none focus:ring-2 focus:ring-brand-btn-primary focus:ring-offset-2 ${pointColor(point.uptimePercentage, sla)} ${point.isPartial ? 'opacity-70 border-dashed' : ''} ${isActive ? 'm3-elevation-2 -translate-y-0.5' : 'hover:-translate-y-0.5'} ${isPinned ? 'ring-2 ring-brand-btn-primary ring-offset-1' : ''}`}
               />
             );
           })}

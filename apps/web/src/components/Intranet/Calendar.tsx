@@ -19,6 +19,7 @@ import {
 import { toast } from 'sonner';
 import { EventType, RecurrenceType } from '@types';
 import type { CalendarEventDto } from '@types';
+import { getMockCalendarEvents } from './calendar/mockEvents';
 
 // Sub-components
 import { CalendarEventDetailModal } from './CalendarEventDetailModal';
@@ -105,7 +106,10 @@ export function Calendar() {
 
   // Load events
   const { data: rawEvents = [], isLoading, isError } = useCalendarEventsQuery(rangeBoundaries.start, rangeBoundaries.end);
-  const events = useMemo(() => [...rawEvents], [rawEvents]);
+  const events = useMemo(
+    () => [...rawEvents, ...getMockCalendarEvents(currentDate)],
+    [rawEvents, currentDate],
+  );
   const { data: tokenData } = useCalendarTokenQuery(isWriter && isTokenRequested);
 
   // Mutations

@@ -6,10 +6,11 @@ import { useMemo } from 'react';
 import { Repeat2 } from 'lucide-react';
 import { useGetApiWeather } from '../../api/generated/endpoints';
 import { useCalendarEventsQuery } from '../../hooks/useCalendarQueries';
-import type { CalendarEventDto, WeatherDto } from '@types';
+import type { WeatherDto } from '@types';
 import { useClock } from '../../hooks/useClock';
 import { formatDateTime } from '../../utils/dateTime';
 import { getEventDayTimingLabel, getEventEmoji } from './calendar/calendarPresentation';
+import { getMockCalendarEvents } from './calendar/mockEvents';
 
 const getWeatherEmoji = (code?: number | null) => {
   if (code === undefined || code === null) return '🌤️';
@@ -104,35 +105,7 @@ export function TodayOverview() {
   }, [time]);
 
   // Generate mock events for design verification
-  const mockEvents = useMemo(() => {
-    const today = new Date(time);
-    
-    const event1: CalendarEventDto = {
-      id: 'mock-today-meeting',
-      title: 'Project Status Sync',
-      description: 'Duis sit amet lectus finibus, sollicitudin nunc ac, hendrerit urna. Vivamus gravida nisi a venenatis elementum. Vivamus elementum sapien vitae nunc eleifend imperdiet. Nunc eu turpis lectus.',
-      location: 'Meeting Room A',
-      startTime: new Date(new Date(today).setHours(10, 0, 0, 0)).toISOString(),
-      endTime: new Date(new Date(today).setHours(11, 0, 0, 0)).toISOString(),
-      eventType: 'Meeting',
-      isRecurring: false,
-      recurrence: 'None'
-    };
-
-    const event2: CalendarEventDto = {
-      id: 'mock-today-fika',
-      title: 'Afternoon Fika',
-      description: 'Join the team for afternoon coffee and snacks.',
-      location: 'Kitchen',
-      startTime: new Date(new Date(today).setHours(14, 30, 0, 0)).toISOString(),
-      endTime: new Date(new Date(today).setHours(15, 0, 0, 0)).toISOString(),
-      eventType: 'Fika',
-      isRecurring: false,
-      recurrence: 'None'
-    };
-
-    return [event1, event2];
-  }, [time]);
+  const mockEvents = useMemo(() => getMockCalendarEvents(time), [time]);
 
   // Fetch today's events from the backend
   const { data: rawEvents = [], isLoading, isError: isEventsError } = useCalendarEventsQuery(todayRange.start, todayRange.end);

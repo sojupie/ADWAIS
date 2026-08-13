@@ -84,6 +84,7 @@ jobs:
           NEWSLETTER_API_KEY: ${{ secrets.NEWSLETTER_API_KEY }}
           KIOSK_JWT_SECRET: ${{ secrets.KIOSK_JWT_SECRET }}
           ENABLE_RUNTIME_DATA_SEEDING: ${{ vars.ENABLE_RUNTIME_DATA_SEEDING || 'true' }}
+          RESEED: ${{ vars.RESEED || 'false' }}
           CLOUDFLARED_IMAGE_TAG: ${{ vars.CLOUDFLARED_IMAGE_TAG || 'latest' }}
           CLOUDFLARE_TUNNEL_TOKEN: ${{ secrets.CLOUDFLARE_TUNNEL_TOKEN }}
         run: |
@@ -131,6 +132,7 @@ jobs:
             write_dotenv NEWSLETTER_API_KEY "$NEWSLETTER_API_KEY"
             write_dotenv KIOSK_JWT_SECRET "$KIOSK_JWT_SECRET"
             write_dotenv ENABLE_RUNTIME_DATA_SEEDING "$ENABLE_RUNTIME_DATA_SEEDING"
+            write_dotenv RESEED "$RESEED"
             write_dotenv CLOUDFLARED_IMAGE_TAG "$CLOUDFLARED_IMAGE_TAG"
             write_dotenv CLOUDFLARE_TUNNEL_TOKEN "$CLOUDFLARE_TUNNEL_TOKEN"
           } > "$ADWAIS_ENV_FILE"

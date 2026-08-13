@@ -43,6 +43,7 @@ services:
       Authentication__KioskJwtSecret: ${KIOSK_JWT_SECRET}
       ASPNETCORE_ENVIRONMENT: Production
       FeatureToggles__EnableRuntimeDataSeeding: ${ENABLE_RUNTIME_DATA_SEEDING:-true}
+      RESEED: ${RESEED:-false}
     volumes:
       - dp-keys-prod:/app/dp-keys
     networks:

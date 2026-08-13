@@ -21,7 +21,7 @@ A paid commercial agreement is required if you wish to:
 1. **White-Label:** Remove or modify the `© Marmenlind` visual footer/attribution from the user interface.
 2. **Monetize as SaaS:** Offer the software as a paid managed service, resold cloud subscription, or bundled commercial offering.
 
-For commercial licensing requests, white-label permissions, or custom terms, contact: ollemarmenlind02@gmail.com
+For commercial licensing requests, white-label permissions, or custom terms, contact: olle@marmenlind.com
 
 ---
 

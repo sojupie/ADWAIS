@@ -111,7 +111,7 @@ export function AvailabilityStrip({
                 onMouseEnter={() => setHoveredIndex(index)}
                 onFocus={() => setHoveredIndex(index)}
                 onClick={() => setPinnedKey(prev => prev === `${point.date}-${point.endDate}` ? null : `${point.date}-${point.endDate}`)}
-              className={`h-8 min-w-0 w-full ${radiusClass} border transition-all focus:outline-none focus:ring-2 focus:ring-brand-btn-primary focus:ring-offset-2 ${pointColor(point.uptimePercentage, sla)} ${point.isPartial ? 'opacity-70 border-dashed' : ''} ${isActive ? 'm3-elevation-2 -translate-y-0.5' : 'hover:-translate-y-0.5'} ${isPinned ? 'ring-2 ring-brand-btn-primary ring-offset-1' : ''}`}
+              className={`h-8 min-w-0 w-full ${radiusClass} border transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-btn-primary focus-visible:ring-offset-2 ${pointColor(point.uptimePercentage, sla)} ${point.isPartial ? 'opacity-70 border-dashed' : ''} ${isActive ? 'm3-elevation-2 -translate-y-0.5' : 'hover:-translate-y-0.5'} ${isPinned ? 'ring-2 ring-brand-btn-primary ring-offset-1' : ''}`}
               />
             );
           })}

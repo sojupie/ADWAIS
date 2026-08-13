@@ -7,7 +7,7 @@ Parameters
 
 Licensor: Olle Marmenlind
 Licensed Work: ADWAIS (including all source code, assets, and UI components)
-Additional Use Grant: You may make production use of the Licensed Work for internal business operations and for deploying instances on behalf of clients free of charge, provided that such use does not include offering the Licensed Work, or a modified version thereof, to third parties on a hosted, managed, or embedded basis for compensation, nor as a white-labeled or rebranded product, without a separate Commercial License from the Licensor.
+Additional Use Grant: You may make production use of the Licensed Work for internal business operations and for deploying instances on behalf of clients free of charge, provided that: (1) any production deployment retains intact and unaltered the visible UI attribution ("© Marmenlind") on authentication and login views; and (2) such use does not include offering the Licensed Work, or a modified version thereof, to third parties on a hosted, managed, or embedded basis for compensation, nor as a white-labeled or rebranded product, without a separate Commercial License from the Licensor.
 Change Date: 2027-08-13
 Change License: Apache License, Version 2.0
 

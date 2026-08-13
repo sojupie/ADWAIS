@@ -28,12 +28,12 @@ export function ChartPanel({ title, subtitle, comparison, legend, bodyClassName 
             {isStale && !isLoading && (
                 <div className="absolute inset-0 bg-surface/50 backdrop-blur-[1px] z-20 flex flex-col flex-wrap items-center justify-center animate-in fade-in duration-200">
                     <Loader2 size={32} className="text-on-surface-variant animate-spin opacity-80" />
-                    <span className="text-sm md:text-base text-on-surface-variant font-bold uppercase tracking-widest mt-2 bg-surface/80 px-2 py-1 rounded">Updating...</span>
+                    <span className="text-sm md:text-base text-on-surface-variant font-bold uppercase tracking-wide mt-2 bg-surface/80 px-2 py-1 rounded">Updating...</span>
                 </div>
             )}
             <div className="flex justify-between items-start my-1 z-10">
                 <div className="min-w-[35%] flex flex-col pl-1 sm:p-0 gap-1">
-                    <span className="text-sm md:text-base font-bold text-on-surface-variant uppercase tracking-widest">
+                    <span className="text-sm md:text-base font-bold text-on-surface-variant uppercase tracking-wide">
                         {title}
                     </span>
                     {displaySubtitle && (

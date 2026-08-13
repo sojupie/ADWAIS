@@ -199,7 +199,7 @@ export function SystemEventsView() {
                     {/* Sync Dates Section */}
                     {health && (
                         <div className="flex shrink-0 flex-col overflow-hidden rounded-xl bg-surface-container">
-                            <div className="border-b border-outline-variant p-4 text-sm font-black uppercase tracking-widest text-on-surface-variant">
+                            <div className="border-b border-outline-variant p-4 text-sm font-black uppercase tracking-wide text-on-surface-variant">
                                 Last Successful Syncs
                             </div>
                             <div className="flex flex-col divide-y overflow-y-auto divide-slate-100 text-sm">

@@ -45,7 +45,7 @@ function formatMetadataDate(value: string | null | undefined, includeTime = fals
 function MetadataItem({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="min-w-0">
-      <dt className="text-sm font-bold uppercase tracking-widest text-on-surface-variant">{label}</dt>
+      <dt className="text-sm font-bold uppercase tracking-wide text-on-surface-variant">{label}</dt>
       <dd className="mt-0.5 text-sm font-bold text-on-surface break-words">{value}</dd>
     </div>
   );
@@ -54,7 +54,7 @@ function MetadataItem({ label, value }: { label: string; value: ReactNode }) {
 function Fact({ label, value, detail }: { label: string; value: ReactNode; detail?: ReactNode }) {
   return (
     <div className="flex flex-col gap-0.5 rounded-xl bg-surface-container p-3 min-w-0">
-      <span className="text-sm font-bold uppercase tracking-widest text-on-surface-variant">{label}</span>
+      <span className="text-sm font-bold uppercase tracking-wide text-on-surface-variant">{label}</span>
       <span className="text-xl font-black text-on-surface break-words">{value}</span>
       {detail && <div className="text-base font-bold text-on-surface-variant break-words">{detail}</div>}
     </div>
@@ -156,7 +156,7 @@ export function FleetSelectionPanel({
       actions={(
         <div className="flex items-center gap-2">
           {statusLabel && (
-            <span className={`rounded-md px-2 py-1 text-sm font-black tracking-widest ${statusClass}`}>
+            <span className={`rounded-md px-2 py-1 text-sm font-black tracking-wide ${statusClass}`}>
               {statusLabel}
             </span>
           )}
@@ -204,7 +204,7 @@ export function FleetSelectionPanel({
 
         <div className="flex flex-col gap-2 min-w-0">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h3 className="text-base font-bold uppercase tracking-widest text-on-surface-variant">Availability over time</h3>
+            <h3 className="text-base font-bold uppercase tracking-wide text-on-surface-variant">Availability over time</h3>
             <span className="text-sm font-bold text-on-surface-variant">Selected period</span>
           </div>
           <AvailabilityStrip
@@ -271,7 +271,7 @@ export function FleetSelectionPanel({
             </dl>
 
             <div className="border-t border-outline-variant pt-3">
-              <p className="text-sm font-bold uppercase tracking-widest text-on-surface-variant">Latest incident</p>
+              <p className="text-sm font-bold uppercase tracking-wide text-on-surface-variant">Latest incident</p>
               {selectedMonitor.latestIncident ? (
                 <div className="mt-1 flex flex-col gap-0.5">
                   <p className="text-sm font-black text-on-surface break-words">

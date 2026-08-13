@@ -23,7 +23,7 @@ interface MonthCalendarViewProps {
 export function MonthCalendarView({ cells, isWriter, getEventsForDay, onDayClick, onEventClick }: MonthCalendarViewProps) {
   return (
     <div className="flex min-h-0 flex-1 flex-col bg-surface px-4 py-2">
-      <div className="mb-1 grid grid-cols-7 gap-1 text-center text-sm font-black uppercase tracking-widest text-on-surface-variant">
+      <div className="mb-1 grid grid-cols-7 gap-1 text-center text-sm font-black uppercase tracking-wide text-on-surface-variant">
         {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => <div key={day}>{day}</div>)}
       </div>
       <div className="grid min-h-[350px] flex-1 grid-cols-7 gap-px overflow-hidden rounded-2xl border border-outline-variant bg-surface-container shadow-sm">

@@ -18,7 +18,7 @@ export function CollectionPanel({ title, actions, className = '', titleClassName
   return (
     <section className={`bg-surface border border-outline rounded-2xl p-0 flex flex-col min-h-0 overflow-hidden max-h-[600px] xl:max-h-none contained:max-h-none landscape-lg:max-h-none ${className}`}>
       <div className="gap-1 flex flex-wrap justify-between items-center p-4">
-        <h2 className={`text-base md:text-lg font-bold text-on-surface-variant uppercase tracking-widest m-0 ${titleClassName}`}>
+        <h2 className={`text-base md:text-lg font-bold text-on-surface-variant uppercase tracking-wide m-0 ${titleClassName}`}>
           {title}
         </h2>
         {actions && (

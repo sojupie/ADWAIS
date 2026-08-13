@@ -47,7 +47,7 @@ function LoginComponent() {
     <>
       <div className="flex flex-col items-center animate-stagger delay-100">
         <h1 className="font-display text-7xl font-extrabold text-brand-text tracking-tight relative z-10">ADWAIS</h1>
-        <h2 className="font-mono text-2xl font-semibold mb-3 text-on-tertiary-container tracking-widest relative z-10"><i>/ədˈvaɪs/</i></h2>
+        <h2 className="font-mono text-2xl font-semibold mb-3 text-on-tertiary-container tracking-wide relative z-10"><i>/ədˈvaɪs/</i></h2>
       </div>
 
       <div className="w-full relative z-10 flex flex-col items-center divide-y divide-outline animate-stagger delay-200">
@@ -56,7 +56,7 @@ function LoginComponent() {
             {isOidcConfigured && (
               <button
                 onClick={handleLogin}
-                className="py-4 px-6 bg-surface-container-highest hover:bg-brand-btn-primary-hover font-extrabold rounded-full transition-all duration-300 m3-elevation-1 hover:m3-elevation-2 cursor-pointer inline-flex items-center justify-center gap-3 group text-base tracking-widest uppercase whitespace-nowrap"
+                className="py-4 px-6 bg-surface-container-highest hover:bg-brand-btn-primary-hover font-extrabold rounded-full transition-all duration-300 m3-elevation-1 hover:m3-elevation-2 cursor-pointer inline-flex items-center justify-center gap-3 group text-base tracking-wide uppercase whitespace-nowrap"
               >
                 {ssoButtonLogoUrl && (
                   <img
@@ -74,7 +74,7 @@ function LoginComponent() {
               <button
                 onClick={handleDemoLogin}
                 disabled={isDemoSigningIn}
-                className="py-4 px-6 bg-primary-container hover:bg-primary-container/80 font-extrabold rounded-full transition-all duration-300 m3-elevation-1 hover:m3-elevation-2 cursor-pointer disabled:cursor-wait disabled:opacity-60 inline-flex items-center justify-center gap-3 text-base tracking-widest uppercase whitespace-nowrap"
+                className="py-4 px-6 bg-primary-container hover:bg-primary-container/80 font-extrabold rounded-full transition-all duration-300 m3-elevation-1 hover:m3-elevation-2 cursor-pointer disabled:cursor-wait disabled:opacity-60 inline-flex items-center justify-center gap-3 text-base tracking-wide uppercase whitespace-nowrap"
               >
                 {isDemoSigningIn ? 'Starting demo…' : 'Continue as demo user'}
               </button>
@@ -86,14 +86,14 @@ function LoginComponent() {
         <div className="flex w-full justify-center pt-6">
           <Link
             to="/kiosk"
-            className="inline-flex min-h-12 items-center justify-center rounded-full border border-on-surface-variant px-6 py-3 text-base font-bold uppercase tracking-widest transition-colors hover:bg-white/50"
+            className="inline-flex min-h-12 items-center justify-center rounded-full border border-on-surface-variant px-6 py-3 text-base font-bold uppercase tracking-wide transition-colors hover:bg-white/50"
           >
             Activate kiosk
           </Link>
         </div>
       </div>
 
-      <div className="pt-4 flex justify-between items-center text-sm text-on-surface-variant tracking-widest uppercase relative z-10 w-full animate-stagger delay-300">
+      <div className="pt-4 flex justify-between items-center text-sm text-on-surface-variant tracking-wide uppercase relative z-10 w-full animate-stagger delay-300">
         <span><a href={"https://marmenlind.com?utm_source=adwais"} target="_blank" rel="noopener noreferrer">© Marmenlind</a></span>
         <span className="text-on-surface-variant">v1.0.0</span>
       </div>

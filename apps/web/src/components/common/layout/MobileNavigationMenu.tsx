@@ -93,7 +93,7 @@ export function MobileNavigationMenu({ isOpen, pathname, financialTimeframe, fle
           </nav>
 
           <div className="mt-auto border-t border-outline-variant px-2 pt-4">
-            <span className="mb-3 block px-2 text-xs font-black uppercase tracking-widest text-on-surface-variant">Controls</span>
+            <span className="mb-3 block px-2 text-xs font-black uppercase tracking-wide text-on-surface-variant">Controls</span>
             <NotificationToggleWidget />
           </div>
         </div>

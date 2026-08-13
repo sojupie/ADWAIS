@@ -56,7 +56,7 @@ export function Settings() {
                 <section className="flex shrink-0 flex-col gap-3 mb-4">
                     <div className="flex flex-wrap items-center justify-between gap-4 px-2">
                         <div className="min-w-0">
-                            <h1 className="m-0 text-xl font-black uppercase tracking-widest text-on-surface sm:text-2xl">
+                            <h1 className="m-0 text-xl font-black uppercase tracking-wide text-on-surface sm:text-2xl">
                                 Settings
                             </h1>
                             <p className="m-0 mt-1 text-sm font-medium text-on-surface-variant sm:text-base">

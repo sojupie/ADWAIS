@@ -44,7 +44,7 @@ export function FilterSectionHeader({ label, active, onClear }: {
 }) {
   return (
     <div className="flex min-h-9 items-center justify-between gap-3">
-      <span className="text-sm font-black uppercase tracking-widest text-on-surface-variant md:text-base">{label}</span>
+      <span className="text-sm font-black uppercase tracking-wide text-on-surface-variant md:text-base">{label}</span>
       <button
         type="button"
         disabled={!active}

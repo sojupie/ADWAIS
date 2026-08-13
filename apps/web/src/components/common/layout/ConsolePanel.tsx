@@ -21,7 +21,7 @@ export function ConsolePanel({ icon, title, subtitle, children, className = '' }
                         {icon}
                     </div>
                     <div className="min-w-0 flex flex-col">
-                        <h2 className="m-0 text-base font-black uppercase tracking-widest text-on-surface-variant sm:text-lg">{title}</h2>
+                        <h2 className="m-0 text-base font-black uppercase tracking-wide text-on-surface-variant sm:text-lg">{title}</h2>
                         <p className="m-0 text-sm font-bold leading-5 text-on-surface-variant">{subtitle}</p>
                     </div>
                 </div>

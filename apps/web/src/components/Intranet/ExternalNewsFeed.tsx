@@ -38,7 +38,7 @@ export function ExternalNewsFeed({ authorName, title = 'Industry news' }: Extern
           {feedItems.map(item => (
             <div key={item.id} className="flex rounded-xl flex-col gap-2 p-4 bg-surface-container hover:bg-surface-container-high hover:m3-elevation-1 transition-colors">
               <div className="flex justify-between items-center mb-0.5">
-                <a href={item.feedSource?.url || undefined} target="_blank" rel="noopener noreferrer" className="text-sm hover:underline underline-offset-2 font-black text-brand-btn-primary uppercase tracking-widest">
+                <a href={item.feedSource?.url || undefined} target="_blank" rel="noopener noreferrer" className="text-sm hover:underline underline-offset-2 font-black text-brand-btn-primary uppercase tracking-wide">
                   {item.feedSource?.name || 'Feed'}
                 </a>
                 <span className="text-sm text-on-surface-variant font-bold shrink-0">

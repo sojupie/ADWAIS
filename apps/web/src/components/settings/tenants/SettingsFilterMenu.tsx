@@ -119,7 +119,7 @@ function TenantFilterPanel({
 
       <div>
         <div className="flex min-h-9 items-center">
-          <span className="text-sm font-black uppercase tracking-widest text-on-surface-variant md:text-base">Sort</span>
+          <span className="text-sm font-black uppercase tracking-wide text-on-surface-variant md:text-base">Sort</span>
         </div>
         <SortToggle value={sort} onChange={setSort} />
       </div>
@@ -232,7 +232,7 @@ function MonitorFilterPanel({
 
       <div>
         <div className="flex min-h-9 items-center">
-          <span className="text-sm font-black uppercase tracking-widest text-on-surface-variant md:text-base">Sort</span>
+          <span className="text-sm font-black uppercase tracking-wide text-on-surface-variant md:text-base">Sort</span>
         </div>
         <SortToggle value={sort} onChange={setSort} />
       </div>

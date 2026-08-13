@@ -47,7 +47,7 @@ export function PeriodSelector({ from, embedded = false }: PeriodSelectorProps) 
             key={opt.value}
             id={`period-${opt.value}`}
             onClick={() => handleSelect(opt.value)}
-            className={`px-3 py-2 md:px-5 md:py-2 rounded-full text-xs md:text-sm min-h-14 min-w-[100px] font-black transition-all duration-200 tracking-widest uppercase cursor-pointer text-center ${buttonCls}`}
+            className={`px-3 py-2 md:px-5 md:py-2 rounded-full text-xs md:text-sm min-h-14 min-w-[100px] font-black transition-all duration-200 tracking-wide uppercase cursor-pointer text-center ${buttonCls}`}
           >
             {opt.label}
           </button>

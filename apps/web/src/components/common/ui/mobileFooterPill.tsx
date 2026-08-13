@@ -49,14 +49,14 @@ export function MobileFooterPill({
             )}
 
             <section className="flex flex-col gap-3 p-4">
-              <h2 className="m-0 text-sm font-black uppercase tracking-widest text-on-surface-variant">Timeframe</h2>
+              <h2 className="m-0 text-sm font-black uppercase tracking-wide text-on-surface-variant">Timeframe</h2>
               <PeriodSelector from={domain} embedded />
             </section>
 
             <div className="mx-4 h-px bg-outline-variant" />
 
             <section className="flex flex-col gap-3 p-4">
-              <h2 className="m-0 text-sm font-black uppercase tracking-widest text-on-surface-variant">Sync status</h2>
+              <h2 className="m-0 text-sm font-black uppercase tracking-wide text-on-surface-variant">Sync status</h2>
               <SyncStatusWidget embedded />
             </section>
           </div>

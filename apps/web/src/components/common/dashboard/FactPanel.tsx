@@ -54,7 +54,7 @@ export function FactPanel({ label, value = '', isLoading, isError, valueColor, e
 
     return (
         <div className="snap-start border border-outline bg-surface rounded-2xl px-4 py-3 md:px-5 md:py-4 flex flex-col justify-between min-h-[80px] md:min-h-[100px] min-w-[40vw] md:min-w-0 md:w-full transition-all overflow-hidden shrink-0">
-            <h2 className="text-xs md:text-sm font-bold text-on-surface-variant uppercase tracking-widest mb-2 truncate">{label}</h2>
+            <h2 className="text-xs md:text-sm font-bold text-on-surface-variant uppercase tracking-wide mb-2 truncate">{label}</h2>
             {isLoading ? (
                 <div className="flex flex-col mt-auto">
                     <Skeleton className="h-8 lg:h-9 xl:h-8 2xl:h-10 w-28 bg-surface-container-high" />

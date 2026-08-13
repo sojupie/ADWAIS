@@ -55,7 +55,7 @@ function KioskLanding() {
 
         <div className="flex w-full flex-col items-center gap-5 animate-stagger delay-200">
           <div className="w-full rounded-3xl border border-outline-variant bg-surface-container px-5 py-6 sm:px-8">
-            <div className="mb-4 flex items-center justify-center gap-2 text-sm font-black uppercase tracking-widest text-on-surface-variant">
+            <div className="mb-4 flex items-center justify-center gap-2 text-sm font-black uppercase tracking-wide text-on-surface-variant">
               <KeyRound size={18} aria-hidden="true" /> Activation code
             </div>
             <div className="select-all overflow-hidden text-ellipsis whitespace-nowrap font-mono text-4xl font-black tracking-[0.16em] text-brand-link sm:text-6xl">
@@ -74,7 +74,7 @@ function KioskLanding() {
 
         <Link
           to="/login"
-          className="inline-flex min-h-12 items-center gap-3 rounded-full border border-outline px-6 font-bold uppercase tracking-widest text-on-surface transition-colors hover:bg-surface-container"
+          className="inline-flex min-h-12 items-center gap-3 rounded-full border border-outline px-6 font-bold uppercase tracking-wide text-on-surface transition-colors hover:bg-surface-container"
         >
           <ArrowLeft size={18} aria-hidden="true" /> Staff login
         </Link>
@@ -97,7 +97,7 @@ function KioskLanding() {
         <div className="inline-flex min-h-11 items-center gap-3 rounded-full bg-surface-container px-5 text-sm font-bold text-on-surface-variant">
           <LoaderCircle size={18} className="animate-spin" aria-hidden="true" /> Retrying automatically
         </div>
-        <Link to="/login" className="inline-flex min-h-12 items-center gap-3 rounded-full border border-outline px-6 font-bold uppercase tracking-widest text-on-surface transition-colors hover:bg-surface-container">
+        <Link to="/login" className="inline-flex min-h-12 items-center gap-3 rounded-full border border-outline px-6 font-bold uppercase tracking-wide text-on-surface transition-colors hover:bg-surface-container">
           <ArrowLeft size={18} aria-hidden="true" /> Staff login
         </Link>
       </div>

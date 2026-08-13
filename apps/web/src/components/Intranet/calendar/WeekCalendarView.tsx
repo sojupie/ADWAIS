@@ -27,7 +27,7 @@ export function WeekCalendarView({ days, isWriter, todayRef, getEventsForDay, on
           <div data-md3-ripple key={day.toISOString()} ref={isToday ? todayRef : undefined} onClick={() => onDayClick(day)} className={`flex text-on-surface-variant h-full w-[200px] shrink-0 flex-col bg-surface p-2 transition-colors hover:bg-surface-container-low ${isWriter ? 'cursor-pointer' : ''}`}>
             <div className="mb-2 flex items-start justify-between gap-3 border-b border-outline-variant pb-2">
               <div className="flex min-w-0 flex-col">
-                <span className="truncate text-sm font-black uppercase leading-tight tracking-widest text-on-surface-variant">{formatDateTime(day, { weekday: 'short' }, 'en-SE')}</span>
+                <span className="truncate text-sm font-black uppercase leading-tight tracking-wide text-on-surface-variant">{formatDateTime(day, { weekday: 'short' }, 'en-SE')}</span>
                 <span className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-base font-black leading-none ${isToday ? 'bg-brand-accent text-brand-text' : 'text-on-surface'}`}>{day.getDate()}</span>
               </div>
               <span className="mt-0.5 shrink-0 whitespace-nowrap text-sm font-bold text-on-surface-variant">{dayEvents.length} {dayEvents.length === 1 ? 'Event' : 'Events'}</span>

@@ -37,7 +37,7 @@ export function OrderToast({ order, t, faviconUrl, displayValue }: OrderToastPro
       </div>
       {/* Order Info */}
       <div className="flex-grow min-w-0 text-left">
-        <div className="text-sm uppercase font-black tracking-widest font-mono">
+        <div className="text-sm uppercase font-black tracking-wide font-mono">
           New Order Placed
         </div>
         <div className="lg:text-xl font-black truncate mt-0.5 lg:mt-1">

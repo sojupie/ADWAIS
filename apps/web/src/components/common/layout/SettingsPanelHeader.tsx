@@ -43,7 +43,7 @@ export function SettingsPanelHeader({
           </div>
         )}
         <div className="min-w-0">
-          <h2 className="m-0 text-base font-black uppercase tracking-widest text-on-surface-variant sm:text-lg">
+          <h2 className="m-0 text-base font-black uppercase tracking-wide text-on-surface-variant sm:text-lg">
             {title}
           </h2>
           {subtitle && (

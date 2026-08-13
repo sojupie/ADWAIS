@@ -107,7 +107,7 @@ export function TenantDiagnostics({
           <div className="flex items-center gap-6 mb-1">
             <h1 className="text-2xl font-extrabold text-brand-text tracking-tight m-0">{tenantName} Diagnostics</h1>
             <span 
-              className={`inline-flex items-center px-4 py-1 rounded-2xl text-base font-black uppercase tracking-widest shadow-sm shrink-0 ${
+              className={`inline-flex items-center px-4 py-1 rounded-2xl text-base font-black uppercase tracking-wide shadow-sm shrink-0 ${
                 tenantType === 'B2C' ? 'bg-chart-1 text-white' : 
                 tenantType === 'Mixed' ? 'bg-chart-2 text-white' :
                 tenantType === 'B2B' ? 'bg-chart-3 text-white' :    

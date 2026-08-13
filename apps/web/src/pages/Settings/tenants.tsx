@@ -121,10 +121,10 @@ export function TenantsMonitorsView() {
                             <thead className="sticky top-0 z-10 border-b border-outline-variant bg-surface-container-high text-on-surface-variant">
                                 <tr>
                                     <th className="w-12 px-4 py-4 sm:px-5"></th>
-                                    <th className="px-4 py-4 text-sm font-black uppercase tracking-widest sm:px-5">Tenant</th>
-                                    <th className="px-4 py-4 text-sm font-black uppercase tracking-widest sm:px-5">Litium URL</th>
-                                    <th className="w-32 px-4 py-4 text-sm font-black uppercase tracking-widest sm:px-5">Status</th>
-                                    <th className="w-32 px-4 py-4 text-sm font-black uppercase tracking-widest sm:px-5">Service Token</th>
+                                    <th className="px-4 py-4 text-sm font-black uppercase tracking-wide sm:px-5">Tenant</th>
+                                    <th className="px-4 py-4 text-sm font-black uppercase tracking-wide sm:px-5">Litium URL</th>
+                                    <th className="w-32 px-4 py-4 text-sm font-black uppercase tracking-wide sm:px-5">Status</th>
+                                    <th className="w-32 px-4 py-4 text-sm font-black uppercase tracking-wide sm:px-5">Service Token</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-outline-variant" aria-busy={isTenantsLoading} aria-label={isTenantsLoading ? 'Loading tenants' : undefined}>

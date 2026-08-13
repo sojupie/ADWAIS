@@ -94,7 +94,7 @@ export const RevenueEfficiencyChart = memo(function RevenueEfficiencyChart({
   return (
     <ChartPanel isLoading={isLoading} isStale={isStale} title="Revenue Efficiency Matrix" comparison={comparison}
       className={className || 'h-full'} bodyClassName={isEmpty ? 'flex items-center justify-center' : 'flex-1 min-h-0'}
-      legend={<span className="text-sm font-bold text-on-surface-variant uppercase tracking-widest bg-surface-container-low px-3 py-1.5 rounded">Size = % of Portfolio Revenue</span>}
+      legend={<span className="text-sm font-bold text-on-surface-variant uppercase tracking-wide bg-surface-container-low px-3 py-1.5 rounded">Size = % of Portfolio Revenue</span>}
     >
       {isEmpty ? <EmptyState message="No data available" variant="minimal" /> : (
         <div className="absolute inset-0"><ChartJsCanvas type="bubble" data={data} options={options} plugins={[matrixQuadrantsPlugin(response.medianOrderVolume, response.globalAverageOrderValue), referenceLinesPlugin(response.medianOrderVolume, response.globalAverageOrderValue), tenantMarkerPlugin]} /></div>

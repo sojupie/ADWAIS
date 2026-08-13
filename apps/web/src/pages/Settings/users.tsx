@@ -96,9 +96,9 @@ export function UsersView() {
                             <thead className="sticky top-0 z-10 border-b border-outline-variant bg-surface-container-high text-on-surface-variant">
                                 <tr>
                                     <th className="w-12 px-4 py-4 sm:px-5"></th>
-                                    <th className="px-4 py-4 text-sm font-black uppercase tracking-widest sm:px-5">User</th>
-                                    <th className="px-4 py-4 text-sm font-black uppercase tracking-widest sm:px-5">Email</th>
-                                    <th className="w-44 px-4 py-4 text-sm font-black uppercase tracking-widest sm:px-5">Role</th>
+                                    <th className="px-4 py-4 text-sm font-black uppercase tracking-wide sm:px-5">User</th>
+                                    <th className="px-4 py-4 text-sm font-black uppercase tracking-wide sm:px-5">Email</th>
+                                    <th className="w-44 px-4 py-4 text-sm font-black uppercase tracking-wide sm:px-5">Role</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-outline-variant" aria-busy={isLoading} aria-label={isLoading ? 'Loading users' : undefined}>

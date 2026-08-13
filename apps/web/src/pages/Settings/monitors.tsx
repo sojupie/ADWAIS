@@ -125,11 +125,11 @@ export function MonitorsView() {
                             <thead className="sticky top-0 z-10 border-b border-outline-variant bg-surface-container-high text-on-surface-variant">
                                 <tr>
                                     <th className="w-12 px-4 py-4 sm:px-5"></th>
-                                    <th className="px-4 py-4 text-sm font-black uppercase tracking-widest sm:px-5">Monitor</th>
-                                    <th className="px-4 py-4 text-sm font-black uppercase tracking-widest sm:px-5">URL</th>
-                                    <th className="w-32 px-4 py-4 text-sm font-black uppercase tracking-widest sm:px-5">Type</th>
-                                    <th className="w-32 px-4 py-4 text-sm font-black uppercase tracking-widest sm:px-5">Assignment</th>
-                                    <th className="w-32 px-4 py-4 text-sm font-black uppercase tracking-widest sm:px-5">Status</th>
+                                    <th className="px-4 py-4 text-sm font-black uppercase tracking-wide sm:px-5">Monitor</th>
+                                    <th className="px-4 py-4 text-sm font-black uppercase tracking-wide sm:px-5">URL</th>
+                                    <th className="w-32 px-4 py-4 text-sm font-black uppercase tracking-wide sm:px-5">Type</th>
+                                    <th className="w-32 px-4 py-4 text-sm font-black uppercase tracking-wide sm:px-5">Assignment</th>
+                                    <th className="w-32 px-4 py-4 text-sm font-black uppercase tracking-wide sm:px-5">Status</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-outline-variant" aria-busy={isMonitorsLoading} aria-label={isMonitorsLoading ? 'Loading monitors' : undefined}>

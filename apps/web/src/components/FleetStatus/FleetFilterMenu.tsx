@@ -206,7 +206,7 @@ export function FleetFilterPanel({
       </div>
 
       <div className="border-t border-outline-variant pt-4">
-        <h3 className="text-sm font-black uppercase tracking-widest text-on-surface-variant md:text-base">
+        <h3 className="text-sm font-black uppercase tracking-wide text-on-surface-variant md:text-base">
           Saved defaults
         </h3>
         <p className="mt-1 text-sm text-on-surface-variant md:text-base">

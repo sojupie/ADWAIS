@@ -78,7 +78,7 @@ function WeatherContent({ isLoading, isError, weather }: WeatherContentProps) {
       <span className="text-2xl md:text-3xl font-bold mt-1">
         {Math.round(weather.temperature)}°C
       </span>
-      <span className="text-base md:text-lg font-bold uppercase tracking-widest">
+      <span className="text-base md:text-lg font-bold uppercase tracking-wide">
         {weather.location}
       </span>
       <span className="text-base md:text-lg font-medium text-primary-container">
@@ -152,7 +152,7 @@ export function TodayOverview() {
     <section className="gap-6 md:gap-8 rounded-2xl border-0 overflow-hidden bg-brand-bg-secondary text-primary-container h-[400px] max-h-[400px] md:max-h-none md:h-full relative flex flex-col w-full min-w-0 p-6">
       <div className="relative z-10 flex flex-wrap justify-between items-start gap-6 shrink-0">
         <div className="flex flex-col min-w-[150px]">
-          <span className="text-base md:text-lg font-black text-brand-accent uppercase tracking-widest mb-1">{dateString}</span>
+          <span className="text-base md:text-lg font-black text-brand-accent uppercase tracking-wide mb-1">{dateString}</span>
           <span className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter leading-none">{timeString}</span>
         </div>
         

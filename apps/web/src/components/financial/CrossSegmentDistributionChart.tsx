@@ -154,7 +154,7 @@ export const CrossSegmentDistributionChart = memo(function CrossSegmentDistribut
               <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
           </Select>
-          <span className="text-sm font-bold text-on-surface-variant uppercase tracking-widest bg-surface-container-low px-3 py-1.5 rounded">Size = Current Revenue</span>
+          <span className="text-sm font-bold text-on-surface-variant uppercase tracking-wide bg-surface-container-low px-3 py-1.5 rounded">Size = Current Revenue</span>
         </div>
       }
     >

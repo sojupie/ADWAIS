@@ -29,7 +29,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
             <div className="flex justify-center md:justify-start min-w-0">
               <span className="font-display text-white whitespace-nowrap font-black uppercase tracking-tight text-xl">ADWAIS</span>
             </div>
-            <nav className="flex justify-center items-center gap-6 md:gap-16 font-black uppercase tracking-widest text-xs md:text-sm min-w-0 max-w-full overflow-hidden">
+            <nav className="flex justify-center items-center gap-6 md:gap-16 font-black uppercase tracking-wide text-xs md:text-sm min-w-0 max-w-full overflow-hidden">
               <span className="text-brand-accent border-b-2 border-brand-accent pb-1">Financial</span>
               <span className="text-white/55 whitespace-nowrap">Fleet status</span>
               <span className="text-white/55">Intranet</span>
@@ -40,7 +40,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
                 <span className="relative flex h-2.5 w-2.5">
                   <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
                 </span>
-                <span className="text-xs md:text-sm font-black uppercase tracking-widest truncate">Interactive</span>
+                <span className="text-xs md:text-sm font-black uppercase tracking-wide truncate">Interactive</span>
               </div>
             </div>
           </header>

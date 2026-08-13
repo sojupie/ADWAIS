@@ -193,7 +193,7 @@ export const NetworkLatencyChart = memo(function NetworkLatencyChart({ isLoading
   };
   
   const legend = (
-    <div className="flex flex-wrap justify-end gap-x-5 gap-y-1.5 text-sm font-bold text-on-surface-variant uppercase tracking-widest bg-surface-container-low px-3 py-1.5 rounded-xl border border-outline-variant">
+    <div className="flex flex-wrap justify-end gap-x-5 gap-y-1.5 text-sm font-bold text-on-surface-variant uppercase tracking-wide bg-surface-container-low px-3 py-1.5 rounded-xl border border-outline-variant">
       <div className="flex items-center gap-2">
         <div className="w-3 h-3 rounded-full bg-brand-btn-primary" />
         <span>Current</span>

@@ -89,7 +89,7 @@ export function OrganizationNews({ authorName, title = 'Organization news' }: Or
                   >
                     {selectedPost.title}
                   </a>
-                  <div className="text-base text-on-surface-variant font-bold uppercase tracking-widest">
+                  <div className="text-base text-on-surface-variant font-bold uppercase tracking-wide">
                     {formatDateTime(selectedPost.publishDate)}
                     {selectedPost.author ? ` • ${selectedPost.author}` : ''}
                     {selectedPost.feedSource?.name && (

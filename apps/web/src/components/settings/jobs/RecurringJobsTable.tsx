@@ -17,7 +17,7 @@ interface RecurringJobsTableProps {
 export function RecurringJobsTable({ recurring, isLoading = recurring === undefined, isError = false }: RecurringJobsTableProps) {
   return (
     <div className="custom-scrollbar h-full w-full overflow-auto text-left text-sm">
-      <table className="w-full min-w-[720px]">
+      <table className="w-full min-w-[720px] font-mono">
         <thead className="sticky top-0 z-10 bg-surface shadow-[0_1px_0_0_var(--md-sys-color-outline)] text-xs font-bold uppercase tracking-wider text-on-surface-variant">
           <tr>
             <th className="px-3 py-2">Job ID</th>
@@ -43,7 +43,7 @@ export function RecurringJobsTable({ recurring, isLoading = recurring === undefi
               <tr key={job.id} className="transition-colors bg-surface-container-low hover:bg-surface-container">
                 <td className="px-3 py-2 font-bold text-on-surface break-words max-w-[150px]">{job.id}</td>
                 <td className="whitespace-nowrap px-3 py-2">
-                  <span className="px-1 py-0.5 bg-brand-accent/10 text-brand-text rounded text-xs font-mono font-bold tracking-wide break-words max-w-[100px] inline-block">
+                  <span className="px-1 py-0.5 bg-brand-accent/10 text-brand-text rounded text-xs font-bold tracking-wide break-words max-w-[100px] inline-block">
                     {job.cron}
                   </span>
                 </td>

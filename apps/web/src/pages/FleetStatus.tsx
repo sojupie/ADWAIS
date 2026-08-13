@@ -9,6 +9,7 @@ import { SyncStatusWidget } from '../components/common/dashboard/SyncStatusWidge
 import { PeriodSelector } from '../components/common/charts/PeriodSelector';
 import { useFleetStatusViewModel } from "../hooks/useFleetStatusViewModel.ts";
 import { EmptyState } from "../components/common/ui/EmptyState.tsx";
+import { ErrorAlert } from '../components/common/ui/ErrorAlert';
 import {
   FleetFilterMenu,
   FleetFilterPanel,
@@ -60,7 +61,9 @@ export function FleetStatus() {
     </div>
   );
 
-  const matrixContent = vm.tenantMonitors.length === 0 ? (
+  const matrixContent = vm.globalMonitorsQuery.isError ? (
+    <div className="p-4"><ErrorAlert title="Fleet status unavailable" message="Fleet status is temporarily unavailable." /></div>
+  ) : vm.tenantMonitors.length === 0 ? (
     <div className="flex-1 flex items-center justify-center min-h-[200px]">
       <EmptyState
         variant="minimal"
@@ -93,6 +96,7 @@ export function FleetStatus() {
             scopedMonitors={vm.scopedMonitors}
             availability={vm.availabilityQuery.data}
             isLoading={vm.availabilityQuery.isLoading}
+            isError={vm.availabilityQuery.isError}
             isStale={vm.availabilityQuery.isPlaceholderData}
             averageLatency={vm.fleetStats.avgLatency}
             p10Latency={vm.fleetStats.lowestLatency}
@@ -110,6 +114,7 @@ export function FleetStatus() {
             points={vm.analyticsQuery.data?.latencyPoints || EMPTY_LATENCY}
             title={`Latency: ${vm.activeScopeName}`}
             isLoading={vm.analyticsQuery.isLoading}
+            isError={vm.analyticsQuery.isError}
             isStale={vm.analyticsQuery.isPlaceholderData}
             comparison="Preceding"
             className="flex-1 min-h-[350px] contained:min-h-0"

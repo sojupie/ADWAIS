@@ -6,6 +6,7 @@ import { getMonitorStatus, normalizeStatus } from '../../utils/monitorStatusHelp
 import { getMonitorType } from '../../utils/monitorTypeHelper';
 import { CollectionPanel } from '../common/dashboard/CollectionPanel';
 import { Button } from '../common/ui/Button';
+import { ErrorAlert } from '../common/ui/ErrorAlert';
 import { AvailabilityStrip } from './AvailabilityStrip';
 import { formatDateTime } from '../../utils/dateTime';
 
@@ -77,6 +78,7 @@ export function FleetSelectionPanel({
   scopedMonitors,
   availability,
   isLoading,
+  isError,
   isStale,
   averageLatency,
   p10Latency,
@@ -95,6 +97,7 @@ export function FleetSelectionPanel({
   scopedMonitors: UptimeMonitorDto[];
   availability?: MonitorAvailabilitySeriesResponseDto;
   isLoading?: boolean;
+  isError?: boolean;
   isStale?: boolean;
   averageLatency?: number | null;
   p10Latency?: number | null;
@@ -166,6 +169,9 @@ export function FleetSelectionPanel({
         </div>
       )}
     >
+      {isError ? (
+        <div className="p-4"><ErrorAlert title={`${title} unavailable`} message={`${title} is temporarily unavailable.`} /></div>
+      ) : (
       <div className={`flex flex-col gap-4 px-4 pb-4 ${isStale ? 'opacity-70' : ''}`}>
         <div className="min-w-0">
           {selectedMonitor ? (
@@ -280,6 +286,7 @@ export function FleetSelectionPanel({
           </div>
         )}
       </div>
+      )}
     </CollectionPanel>
   );
 }

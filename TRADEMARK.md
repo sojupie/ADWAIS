@@ -4,7 +4,7 @@ This policy outlines the rules for using the name, logos, and branding associate
 
 ## 1. Ownership
 
-All rights, titles, and interests in the brand names, product titles, logos, and UI visual assets (including but not limited to the brand marks "Marmenlind", "LINESTRUCT", and "ADWAIS" and associated visual designs) are owned exclusively by the project owner.
+All rights, titles, and interests in the brand names, product titles, logos, and UI visual assets (including but not limited to the brand marks "Marmenlind", and "ADWAIS" and associated visual designs) are owned exclusively by the project owner.
 
 ## 2. Permitted Use
 

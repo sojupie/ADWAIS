@@ -2,35 +2,6 @@
 
 A multi-tenant platform for e-commerce analytics, endpoint monitoring, and team communication.
 
-## License
-
-This repository is source-available under the Business Source License 1.1 (BUSL 1.1). See [LICENSE](./LICENSE) for the full terms.
-
-Free use:
-
-- Internal business use.
-- Client deployments without a fee for the software itself.
-- Deployments must keep the `© Marmenlind` credit visible in the UI.
-
-Paid use needs a commercial agreement:
-
-- Remove or change the `© Marmenlind` credit.
-- Offer the software as a paid managed service.
-
-Contact: olle@marmenlind.com
-
-## Branding
-
-The code is licensed. The trademarks are not. See [TRADEMARK.md](./TRADEMARK.md).
-
-## Contributing
-
-By contributing, you agree to the terms in [CONTRIBUTING.md](./CONTRIBUTING.md).
-
-## Acknowledgements
-
-Started as a university project. Contributions from David Vilselius, Francisco Vigo Flores, Erik Falk, and Christoffer Bohm.
-
 ## Architecture
 
 A monorepo managed with pnpm workspaces.
@@ -160,3 +131,32 @@ Run after API changes:
 ```bash
 pnpm codegen
 ```
+
+## License
+
+This repository is source-available under the Business Source License 1.1 (BUSL 1.1). See [LICENSE](./LICENSE) for the full terms.
+
+Free use:
+
+- Internal business use.
+- Client deployments without a fee for the software itself.
+- Deployments must keep the `© Marmenlind` credit visible in the UI.
+
+Paid use needs a commercial agreement:
+
+- Remove or change the `© Marmenlind` credit.
+- Offer the software as a paid managed service.
+
+Contact: olle@marmenlind.com
+
+## Branding
+
+The code is licensed. The trademarks are not. See [TRADEMARK.md](./TRADEMARK.md).
+
+## Contributing
+
+By contributing, you agree to the terms in [CONTRIBUTING.md](./CONTRIBUTING.md).
+
+## Acknowledgements
+
+Started as a university project. Contributions from David Vilselius, Francisco Vigo Flores, Erik Falk, and Christoffer Bohm.

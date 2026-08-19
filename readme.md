@@ -139,10 +139,6 @@ This repository is licensed under the MIT License. See [LICENSE](./LICENSE) for 
 The MIT copyright and permission notices must remain in source distributions
 and substantial portions of the software.
 
-## Branding
-
-The code is licensed under MIT.
-
 ## Contributing
 
 By contributing, you agree to the terms in [CONTRIBUTING.md](./CONTRIBUTING.md).

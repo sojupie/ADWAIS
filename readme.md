@@ -141,7 +141,7 @@ and substantial portions of the software.
 
 ## Branding
 
-The code is licensed under MIT. The trademarks are not. See [TRADEMARK.md](./TRADEMARK.md).
+The code is licensed under MIT.
 
 ## Contributing
 

@@ -2,6 +2,8 @@
 
 A multi-tenant platform for e-commerce analytics, endpoint monitoring, and team communication.
 
+[Live interactive demo](https://adwais.marmenlind.com)
+
 ## Architecture
 
 A monorepo managed with pnpm workspaces.

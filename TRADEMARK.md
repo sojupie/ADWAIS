@@ -15,7 +15,6 @@ You **may**:
 ## 3. Restricted Use
 
 You **may NOT**:
-* Remove, obscure, or alter the `© Marmenlind` copyright and attribution text displayed in the user interface without an explicit Commercial License.
 * Rename, rebrand, or market a deployed instance of this software as your own proprietary product to third-party clients.
 * Use the project name or owner's name in a manner that implies formal endorsement, sponsorship, or direct partnership without prior written approval.
 * Register domain names, social media handles, or business entities containing the brand name or confusingly similar variations.

@@ -134,24 +134,14 @@ pnpm codegen
 
 ## License
 
-This repository is source-available under the Business Source License 1.1 (BUSL 1.1). See [LICENSE](./LICENSE) for the full terms.
+This repository is licensed under the MIT License. See [LICENSE](./LICENSE) for the full terms.
 
-Free use:
-
-- Internal business use.
-- Client deployments without a fee for the software itself.
-- Deployments must keep the `© Marmenlind` credit visible in the UI.
-
-Paid use needs a commercial agreement:
-
-- Remove or change the `© Marmenlind` credit.
-- Offer the software as a paid managed service.
-
-Contact: olle@marmenlind.com
+The MIT copyright and permission notices must remain in source distributions
+and substantial portions of the software.
 
 ## Branding
 
-The code is licensed. The trademarks are not. See [TRADEMARK.md](./TRADEMARK.md).
+The code is licensed under MIT. The trademarks are not. See [TRADEMARK.md](./TRADEMARK.md).
 
 ## Contributing
 

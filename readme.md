@@ -25,9 +25,6 @@ graph TD
   - `/apps/server/ADWAIS` - ASP.NET Core solution (`src/Api`, `src/Application`, `src/Domain`, `src/Infrastructure`, `tests`).
 - `/packages`
   - `/packages/types` - TypeScript types generated from the OpenAPI spec.
-  - `/packages/utils` - Helper utilities.
-  - `/packages/ui` - Placeholder for shared UI components.
-  - `/packages/shared` - Placeholder for shared logic.
 - `/docs` - Documentation and the generated OpenAPI spec.
 - `/infrastructure` - nginx config baked into the frontend image.
 - `/scripts` - Helper scripts.

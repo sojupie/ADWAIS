@@ -56,7 +56,7 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         '@types': resolve(__dirname, '../../packages/types/index.ts'),
-        '@utils': resolve(__dirname, '../../packages/utils/index.ts'),
+        '@utils': resolve(__dirname, './src/utils/index.ts'),
       },
     },
     server: {

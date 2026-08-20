@@ -3,7 +3,7 @@
 // See /LICENSE for license information.
 // SPDX-License-Identifier: MIT
 
-// Pure helper functions for the ADWAIS project
+// Web-only helper functions for the ADWAIS frontend.
 
 /** Format a revenue value (whole SEK) into a locale currency string */
 export function formatCurrency(value: number, currency = 'SEK'): string {

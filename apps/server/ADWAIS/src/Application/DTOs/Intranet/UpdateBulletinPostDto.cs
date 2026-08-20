@@ -5,8 +5,18 @@
 
 namespace Adwais.Application.DTOs.Intranet;
 
+/// <summary>
+/// Request data for updating a bulletin board post.
+/// </summary>
 public record UpdateBulletinPostDto
 {
+    /// <summary>
+    /// The replacement title, or <see langword="null"/> to keep the current title.
+    /// </summary>
     public string? Title { get; set; }
+
+    /// <summary>
+    /// The replacement body, or <see langword="null"/> to keep the current body.
+    /// </summary>
     public string? Body { get; set; }
 }

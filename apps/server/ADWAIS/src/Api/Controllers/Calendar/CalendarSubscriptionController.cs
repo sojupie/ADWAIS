@@ -10,12 +10,20 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Adwais.Api.Controllers.Calendar;
 
+/// <summary>
+/// Manages external calendar subscriptions used to import calendar events.
+/// </summary>
 [ApiController]
 [Route("api/intranet/calendar/subscriptions")]
 public class CalendarSubscriptionController(ICalendarSubscriptionService subscriptionService) : ControllerBase
 {
     private readonly ICalendarSubscriptionService _subscriptionService = subscriptionService;
 
+    /// <summary>
+    /// Lists all configured calendar subscriptions.
+    /// </summary>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>The configured calendar subscriptions and their synchronization state.</returns>
     [HttpGet]
     [Authorize(Policy = "KioskOrStaffAccess")]
     public async Task<ActionResult<IEnumerable<CalendarSubscriptionDto>>> GetSubscriptions(CancellationToken ct)
@@ -24,6 +32,12 @@ public class CalendarSubscriptionController(ICalendarSubscriptionService subscri
         return Ok(subs);
     }
 
+    /// <summary>
+    /// Retrieves a calendar subscription by ID.
+    /// </summary>
+    /// <param name="id">The unique identifier of the subscription.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>The requested subscription, or <see cref="NotFoundResult"/> when no subscription matches the ID.</returns>
     [HttpGet("{id:guid}")]
     [Authorize(Policy = "KioskOrStaffAccess")]
     public async Task<ActionResult<CalendarSubscriptionDto>> GetSubscription(Guid id, CancellationToken ct)
@@ -33,6 +47,12 @@ public class CalendarSubscriptionController(ICalendarSubscriptionService subscri
         return Ok(sub);
     }
 
+    /// <summary>
+    /// Creates a calendar subscription.
+    /// </summary>
+    /// <param name="dto">The display name, iCalendar URL, and active state for the subscription.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>The created subscription.</returns>
     [HttpPost]
     [Authorize(Policy = "AdminOnly")]
     public async Task<ActionResult<CalendarSubscriptionDto>> CreateSubscription([FromBody] CreateCalendarSubscriptionDto dto, CancellationToken ct)
@@ -41,6 +61,13 @@ public class CalendarSubscriptionController(ICalendarSubscriptionService subscri
         return CreatedAtAction(nameof(GetSubscription), new { id = sub.Id }, sub);
     }
 
+    /// <summary>
+    /// Updates a calendar subscription.
+    /// </summary>
+    /// <param name="id">The unique identifier of the subscription.</param>
+    /// <param name="dto">The subscription fields to update. Omitted fields keep their current values.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>The updated subscription, or <see cref="NotFoundResult"/> when no subscription matches the ID.</returns>
     [HttpPatch("{id:guid}")]
     [Authorize(Policy = "AdminOnly")]
     public async Task<ActionResult<CalendarSubscriptionDto>> UpdateSubscription(Guid id, [FromBody] UpdateCalendarSubscriptionDto dto, CancellationToken ct)
@@ -50,6 +77,12 @@ public class CalendarSubscriptionController(ICalendarSubscriptionService subscri
         return Ok(sub);
     }
 
+    /// <summary>
+    /// Deletes a calendar subscription.
+    /// </summary>
+    /// <param name="id">The unique identifier of the subscription.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>No content when the subscription is deleted, or <see cref="NotFoundResult"/> when no subscription matches the ID.</returns>
     [HttpDelete("{id:guid}")]
     [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> DeleteSubscription(Guid id, CancellationToken ct)
@@ -59,6 +92,12 @@ public class CalendarSubscriptionController(ICalendarSubscriptionService subscri
         return NoContent();
     }
 
+    /// <summary>
+    /// Starts an immediate synchronization for a calendar subscription.
+    /// </summary>
+    /// <param name="id">The unique identifier of the subscription.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>An empty successful response after the synchronization has been queued.</returns>
     [HttpPost("{id:guid}/sync")]
     [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> SyncSubscription(Guid id, CancellationToken ct)

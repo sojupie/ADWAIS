@@ -7,6 +7,11 @@ using Adwais.Domain.Enums;
 
 namespace Adwais.Api.DTOs.Users;
 
+/// <summary>
+/// Request data for partially updating an application user.
+/// </summary>
+/// <param name="Name">The replacement display name, or <see langword="null"/> to keep the current name.</param>
+/// <param name="Role">The replacement application role, or <see langword="null"/> to keep the current role.</param>
 public record UpdateUserRequestDto(
     string? Name = null,
     UserRole? Role = null

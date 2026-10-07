@@ -117,9 +117,7 @@ var app = builder.Build();
 
 app.UseExceptionHandler();
 
-var enableSwagger = !isBuildTime
-    && (app.Environment.IsDevelopment()
-        || builder.Configuration.GetValue<bool>("Swagger:Enabled"));
+var enableSwagger = SwaggerConfiguration.IsEnabled(isBuildTime, app.Environment, builder.Configuration);
 if (enableSwagger)
 {
     app.MapOpenApi();
